@@ -17,6 +17,9 @@ RUN bun --bun run build
 FROM oven/bun:1 AS production
 WORKDIR /app
 
+# Copy node_modules for runtime dependencies
+COPY --from=build /app/node_modules /app/node_modules
+
 # Only `.output` folder is needed from the build stage
 COPY --from=build /app/.output /app
 
