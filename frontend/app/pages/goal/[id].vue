@@ -1,12 +1,15 @@
 <script setup lang="ts">
-// Make this page client-only to ensure GraphQL requests work properly
+// Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
   ssr: false
-});
+ });
 
-const route = useRoute();
+
+
+ const route = useRoute();
 const goalId = parseInt(route.params.id as string);
 const { user } = useUserSession();
+const config = useRuntimeConfig();
 
 interface Goal {
   id: number;
@@ -51,7 +54,7 @@ const fetchGoalData = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-hasura-admin-secret': 'dev-admin-secret'
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
       },
       body: JSON.stringify({
         query: `
@@ -138,11 +141,12 @@ const progress = computed(() => {
 const goalsStore = useGoalsStore();
 
 // Ladda goals om de inte är laddade
-onMounted(async () => {
-  if (!goalsStore.isLoaded) {
-    await goalsStore.loadGoals();
-  }
-});
+// Temporarily disabled to debug
+// onMounted(async () => {
+//   if (!goalsStore.isLoaded) {
+//     await goalsStore.loadGoals();
+//   }
+// });
 
 // Visa/dölj avklarade mål
 const showCompleted = ref(true);
@@ -189,7 +193,7 @@ async function addExistingParent(parentId: number) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-hasura-admin-secret': 'dev-admin-secret'
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
       },
       body: JSON.stringify({
         query: `
@@ -237,35 +241,86 @@ async function createNewParent() {
 
   try {
     // Skapa nytt mål
-    const { data: goalData, error: goalError } = await useAsyncGql('CreateGoal', {
-      title: parentSearchQuery.value.trim()
+    const createGoalQuery = `
+      mutation CreateGoal($title: String!) {
+        insert_goals_one(object: { title: $title }) {
+          id
+          title
+          created
+          finished
+        }
+      }
+    `;
+
+    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: createGoalQuery,
+        variables: { title: parentSearchQuery.value.trim() }
+      })
     });
 
-    if (goalError.value) {
-      throw new Error(goalError.value.message);
+    if (goalResponse.errors) {
+      throw new Error(goalResponse.errors[0].message);
     }
 
-    if (goalData.value?.insert_goals_one?.id) {
-      const newGoal = goalData.value.insert_goals_one;
+    if (goalResponse.data?.insert_goals_one?.id) {
+      const newGoal = goalResponse.data.insert_goals_one;
 
       // Skapa user_goals relation
-      const { data: userGoalData, error: userGoalError } = await useAsyncGql('CreateUserGoal', {
-        userId,
-        goalId: newGoal.id
+      const createUserGoalQuery = `
+        mutation CreateUserGoal($userId: Int!, $goalId: Int!) {
+          insert_user_goals_one(object: { user_id: $userId, goal_id: $goalId }) {
+            user_id
+            goal_id
+          }
+        }
+      `;
+
+      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: createUserGoalQuery,
+          variables: { userId, goalId: newGoal.id }
+        })
       });
 
-      if (userGoalError.value) {
-        throw new Error(userGoalError.value.message);
+      if (userGoalResponse.errors) {
+        throw new Error(userGoalResponse.errors[0].message);
       }
 
       // Skapa relationen i databasen
-      const { data: relationData, error: relationError } = await useAsyncGql('AddParentRelation', {
-        childId: goalId,
-        parentId: newGoal.id
+      const addParentRelationQuery = `
+        mutation AddParentRelation($childId: Int!, $parentId: Int!) {
+          insert_goal_relations_one(object: { child_id: $childId, parent_id: $parentId }) {
+            child_id
+            parent_id
+          }
+        }
+      `;
+
+      const relationResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: addParentRelationQuery,
+          variables: { childId: goalId, parentId: newGoal.id }
+        })
       });
 
-      if (relationError.value) {
-        throw new Error(relationError.value.message);
+      if (relationResponse.errors) {
+        throw new Error(relationResponse.errors[0].message);
       }
 
       // Uppdatera lokal state
@@ -334,7 +389,7 @@ async function addExistingChild(childId: number) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-hasura-admin-secret': 'dev-admin-secret'
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
       },
       body: JSON.stringify({
         query: `
@@ -387,16 +442,35 @@ async function createNewChild() {
     );
 
     // Skapa nytt mål
-    const { data: goalData, error: goalError } = await useAsyncGql('CreateGoal', {
-      title: childSearchQuery.value.trim()
+    const createGoalQuery = `
+      mutation CreateGoal($title: String!) {
+        insert_goals_one(object: { title: $title }) {
+          id
+          title
+          created
+          finished
+        }
+      }
+    `;
+
+    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: createGoalQuery,
+        variables: { title: childSearchQuery.value.trim() }
+      })
     });
 
-    if (goalError.value) {
-      throw new Error(goalError.value.message);
+    if (goalResponse.errors) {
+      throw new Error(goalResponse.errors[0].message);
     }
 
-    if (goalData.value?.insert_goals_one?.id) {
-      const newGoal = goalData.value.insert_goals_one;
+    if (goalResponse.data?.insert_goals_one?.id) {
+      const newGoal = goalResponse.data.insert_goals_one;
 
       console.log(
         "Adding relation - childId:",
@@ -406,23 +480,55 @@ async function createNewChild() {
       );
 
       // Skapa user_goals relation
-      const { data: userGoalData, error: userGoalError } = await useAsyncGql('CreateUserGoal', {
-        userId,
-        goalId: newGoal.id
+      const createUserGoalQuery = `
+        mutation CreateUserGoal($userId: Int!, $goalId: Int!) {
+          insert_user_goals_one(object: { user_id: $userId, goal_id: $goalId }) {
+            user_id
+            goal_id
+          }
+        }
+      `;
+
+      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: createUserGoalQuery,
+          variables: { userId, goalId: newGoal.id }
+        })
       });
 
-      if (userGoalError.value) {
-        throw new Error(userGoalError.value.message);
+      if (userGoalResponse.errors) {
+        throw new Error(userGoalResponse.errors[0].message);
       }
 
       // Skapa relationen i databasen
-      const { data: relationData, error: relationError } = await useAsyncGql('AddParentRelation', {
-        childId: newGoal.id,
-        parentId: goalId
+      const addParentRelationQuery = `
+        mutation AddParentRelation($childId: Int!, $parentId: Int!) {
+          insert_goal_relations_one(object: { child_id: $childId, parent_id: $parentId }) {
+            child_id
+            parent_id
+          }
+        }
+      `;
+
+      const relationResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: addParentRelationQuery,
+          variables: { childId: newGoal.id, parentId: goalId }
+        })
       });
 
-      if (relationError.value) {
-        throw new Error(relationError.value.message);
+      if (relationResponse.errors) {
+        throw new Error(relationResponse.errors[0].message);
       }
 
       // Uppdatera lokal state
@@ -489,7 +595,7 @@ async function confirmRemoveParent() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-hasura-admin-secret': 'dev-admin-secret'
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
       },
       body: JSON.stringify({
         query: `
@@ -574,7 +680,7 @@ async function handleTouchEnd(child: Goal) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-hasura-admin-secret': 'dev-admin-secret'
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
         },
         body: JSON.stringify({
           query: `

@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { NavigationMenuItem } from "@nuxt/ui";
+  <script setup lang="ts">
+   import type { NavigationMenuItem } from "@nuxt/ui";
 
 const route = useRoute();
 
@@ -34,7 +34,39 @@ const links = [
   ],
 ] satisfies NavigationMenuItem[][];
 
-const { data: goalsData } = await useAsyncGql("GetAllGoals");
+// Load goals data on client-side only to avoid SSR issues
+const goalsData = ref(null);
+
+// Load goals data after component is mounted (client-side only)
+onMounted(async () => {
+  try {
+    const query = `
+      query GetAllGoals {
+        goals(order_by: { created: desc }) {
+          id
+          title
+          created
+          finished
+        }
+      }
+    `;
+
+    const response = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({ query })
+    });
+
+    if (response.data) {
+      goalsData.value = response.data;
+    }
+  } catch (error) {
+    console.warn("Failed to load goals for navigation:", error);
+  }
+});
 
 const groups = computed(() => {
   const goalItems =

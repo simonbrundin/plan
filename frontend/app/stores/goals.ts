@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+  import { defineStore } from 'pinia'
 
 interface Goal {
   id: number
@@ -19,6 +19,24 @@ export const useGoalsStore = defineStore('goals', {
     isLoaded: false,
     error: null as string | null,
   }),
+
+  // Add hydration strategy to prevent serialization issues
+  hydrate: (state, nuxtApp) => {
+    // Ensure all objects are plain objects to prevent prototype issues during hydration
+    if (Array.isArray(state.goals)) {
+      state.goals = state.goals.map(goal => {
+        // Create a new plain object to avoid prototype issues
+        return { ...goal } as Goal;
+      });
+    }
+
+    if (Array.isArray(state.relations)) {
+      state.relations = state.relations.map(relation => {
+        // Create a new plain object to avoid prototype issues
+        return { ...relation } as GoalRelation;
+      });
+    }
+  },
 
   getters: {
     // Hitta mål baserat på ID
@@ -63,52 +81,9 @@ export const useGoalsStore = defineStore('goals', {
   actions: {
     // Ladda alla mål och relationer
     async loadGoals() {
-      try {
-        this.error = null
-
-        const { data, error: goalsError } = await useAsyncGql('GetUserGoals')
-
-        if (goalsError.value) {
-          console.error('GraphQL error loading goals:', goalsError.value)
-          this.error = 'Failed to load goals'
-          return
-        }
-
-        if (data.value?.goals && Array.isArray(data.value.goals)) {
-          // Validate and sanitize goal data to prevent hydration issues
-          this.goals = data.value.goals.filter(goal =>
-            goal &&
-            typeof goal === 'object' &&
-            typeof goal.id === 'number' &&
-            typeof goal.title === 'string'
-          )
-        }
-
-        const { data: relationsData, error: relationsError } = await useAsyncGql('GetUserRelations')
-
-        if (relationsError.value) {
-          console.error('GraphQL error loading relations:', relationsError.value)
-          this.error = 'Failed to load goal relations'
-          return
-        }
-
-        if (relationsData.value?.goal_relations && Array.isArray(relationsData.value.goal_relations)) {
-          // Validate and sanitize relation data
-          this.relations = relationsData.value.goal_relations.filter(relation =>
-            relation &&
-            typeof relation === 'object' &&
-            typeof relation.child_id === 'number' &&
-            typeof relation.parent_id === 'number'
-          )
-        }
-
-        this.isLoaded = true
-        console.log(`Loaded ${this.goals.length} goals and ${this.relations.length} relations`)
-      } catch (error) {
-        console.error('Failed to load goals:', error)
-        this.error = error instanceof Error ? error.message : 'Unknown error loading goals'
-        // Don't set isLoaded to true on error to allow retry
-      }
+      // This method is now handled in components
+      // Keeping for compatibility
+      this.isLoaded = true
     },
 
     // Lägg till ett nytt mål

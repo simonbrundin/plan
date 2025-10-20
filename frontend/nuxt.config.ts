@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { defineNuxtConfig } from 'nuxt/config'
+import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
   // extends: [
@@ -43,6 +43,7 @@ export default defineNuxtConfig({
     public: {
       authBaseUrl: process.env.BETTER_AUTH_URL || "http://localhost:3000",
       GQL_HOST: "http://localhost:8080/v1/graphql", // overwritten by NUXT_PUBLIC_GQL_HOST
+      hasuraAdminSecret: process.env.HASURA_GRAPHQL_ADMIN_SECRET || 'dev-admin-secret',
     },
     // oauth: {
     //   // provider in lowercase (github, google, etc.)
@@ -63,28 +64,30 @@ export default defineNuxtConfig({
      */
     componentDir: "./app/components/ui",
   },
-  nitro: {
-    preset: "bun",
+  // nitro: {
+  //   preset: "bun",
+  // },
+  
+  // Configure payload to handle potential serialization issues
+  experimental: {
+    payloadExtraction: true,
   },
   "graphql-client": {
-    codegen: {
-      // Disable code generation during build since Hasura endpoint is not accessible during Docker build
-      disableOnBuild: true,
-    },
+    codegen: false,
     clients: {
       default: {
-        // Host is automatically read from runtimeConfig.public.GQL_HOST at runtime
-        // No need to specify it here - nuxt-graphql-client will use runtimeConfig.public.GQL_HOST
-        // which is overridden by NUXT_PUBLIC_GQL_HOST environment variable
+        host: process.env.NUXT_PUBLIC_GQL_HOST || "http://localhost:8080/v1/graphql",
         token: {
-          type: 'Bearer',
-          name: 'Authorization',
+          type: "Bearer",
+          name: "Authorization",
         },
         // Admin secret is used for schema introspection during codegen
         // The graphql-auth.ts plugin will override this with JWT tokens at runtime
-        headers: process.env.HASURA_GRAPHQL_ADMIN_SECRET ? {
-          'x-hasura-admin-secret': process.env.HASURA_GRAPHQL_ADMIN_SECRET
-        } : {},
+        headers: process.env.HASURA_GRAPHQL_ADMIN_SECRET
+          ? {
+              "x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET,
+            }
+          : {},
       },
     },
   },

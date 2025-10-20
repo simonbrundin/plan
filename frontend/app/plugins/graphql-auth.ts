@@ -1,9 +1,10 @@
 export default defineNuxtPlugin((nuxtApp) => {
+  const config = useRuntimeConfig()
   nuxtApp.hook('gql:auth:init', async ({ client, token }) => {
     // Always use admin secret in development for easier testing
     if (process.dev) {
       client.setHeaders({
-        'x-hasura-admin-secret': 'dev-admin-secret'
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
       })
       return
     }
