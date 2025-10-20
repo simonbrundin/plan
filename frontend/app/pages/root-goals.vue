@@ -435,14 +435,11 @@ function handleSearchKeydown(event: KeyboardEvent) {
             </span>
           </div>
 
-          <div class="flex items-center gap-4 text-sm text-gray-500">
-            <span>
-              Skapad: {{ new Date(goal.created).toLocaleDateString("sv-SE") }}
-            </span>
-            <span v-if="getProgress(goal)">
-              {{ getProgress(goal) }} undermål
-            </span>
-          </div>
+           <div class="flex items-center gap-4 text-sm text-gray-500">
+             <span v-if="getProgress(goal)">
+               {{ getProgress(goal) }} undermål
+             </span>
+           </div>
         </NuxtLink>
       </li>
     </ul>
