@@ -1,0 +1,3 @@
+workspace:
+  devContainer:
+    shell: /bin/bash
