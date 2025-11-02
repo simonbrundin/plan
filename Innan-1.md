@@ -1,6 +1,10 @@
 ## Laptop
 
-- [ ] Installera om allt för att få Walker att fungera
+- [ ] Installera om Omarchy för att få Walker att fungera
+
+## Utvecklingsmiljö
+
+- [ ] `dev` fungerar och jag ser appen på min mobil
 
 ## Höstmixen
 
@@ -10,9 +14,7 @@
 ### Hemfix
 
 - [ ] Renault igång
-- [ ] Renault igång
 
 ### Talos Cluster
 
-- [ ] Installera Orange Pi:s
 - [ ] Installera Orange Pi:s
