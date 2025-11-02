@@ -1,6 +1,9 @@
 ## Laptop
 
 - [ ] Installera om Omarchy för att få Walker att fungera
+- [ ] Lägg till steg jag behöver i Bootstrap.sh för att det ska fungera på en
+      helt ny dator
+- [ ] Kanata körs igång korrekt vid omstart
 
 ## Utvecklingsmiljö
 
