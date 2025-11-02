@@ -15,10 +15,17 @@
 - [ ] Få in Emma och Backlund
 - [ ] Ring Häggman
 
+### Badrum
+
 ### Hemfix
 
 - [ ] Renault igång
+- [ ] Dockhus klart
 
 ### Talos Cluster
 
 - [ ] Installera Orange Pi:s
+
+#### Senare
+
+- [ ] Robotdammsugare fungerar
