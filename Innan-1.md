@@ -12,6 +12,7 @@
 ## Höstmixen
 
 - [ ] Fixa tjej till Viktor
+- [ ] Få in Emma och Backlund
 - [ ] Ring Häggman
 
 ### Hemfix
