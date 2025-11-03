@@ -112,7 +112,6 @@ For secure, isolated development environments using vCluster and Authentik OIDC:
 For traditional local development:
 
 1. **Prerequisites**:
-
    - Node.js LTS
    - Bun (recommended)
    - Docker and Docker Compose
