@@ -3,6 +3,7 @@
 - [ ] `dev` fungerar och jag ser appen på min mobil
   - [ ] NeoVim används i DevContainer
     - [ ] Förstå hur det fungerar när man använder NeoVim
+    - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att man ansluter med NeoVim
   - [ ] DevContainer kör Tilt
   - Installera Kubernetes provider
 
