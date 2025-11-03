@@ -1,38 +1,3 @@
 {
-  "name": "Plan Development Environment",
-  "image": "mcr.microsoft.com/devcontainers/base:alpine",
-  "features": {
-    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    }
-  },
-  "postCreateCommand": "echo 'DevContainer ready. Use \"simon dev\" to start development environment.'",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-vscode.vscode-typescript-next",
-        "bradlc.vscode-tailwindcss",
-        "vue.volar",
-        "ms-vscode.vscode-json",
-        "esbenp.prettier-vscode"
-      ]
-    }
-  },
-  "portsAttributes": {
-    "3000": {
-      "label": "Frontend",
-      "onAutoForward": "notify"
-    },
-    "8080": {
-      "label": "Hasura Console",
-      "onAutoForward": "notify"
-    },
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "silent"
-    }
-  }
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:0-18"
 }
