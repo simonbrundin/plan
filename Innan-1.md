@@ -40,3 +40,5 @@
   - [ ] 1Password
   - [ ] Video Speed Controller
   - [ ] Video Speed Controller
+- [ ] Linkding för att hantera bokmärken i min Homelab så jag kan byta browser
+      utan att all mina bokmärken försvinner
