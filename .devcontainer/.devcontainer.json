@@ -1,7 +1,9 @@
-{
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:0-18",
+{w  "image": "mcr.microsoft.com/devcontainers/base:alpine",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
   "features": {
-    "ghcr.io/dlouwers/devcontainer-features/devbox:1": []
+    "ghcr.io/dlouwers/devcontainer-features/devbox:1": {}
   },
   "postCreateCommand": "devbox install"
 }

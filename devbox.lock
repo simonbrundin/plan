@@ -1,0 +1,209 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "last_modified": "2025-11-03T07:53:02Z",
+      "resolved": "github:NixOS/nixpkgs/7241bcbb4f099a66aafca120d37c65e8dda32717?lastModified=1762156382&narHash=sha256-Yg7Ag7ov5%2B36jEFC1DaZh%2F12SEXo6OO3%2F8rqADRxiqs%3D"
+    },
+    "neovim-unwrapped@latest": {
+      "last_modified": "2025-11-01T04:38:15Z",
+      "resolved": "github:NixOS/nixpkgs/f1e8ae508a9a467a9f51d29b8639e96db2b52c30#neovim-unwrapped",
+      "source": "devbox-search",
+      "version": "0.11.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4fv8lam3s8pn94jamchygg9g2vab6y7w-neovim-unwrapped-0.11.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4fv8lam3s8pn94jamchygg9g2vab6y7w-neovim-unwrapped-0.11.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/y0x006hzy8ffsrldwzhhcagpbhnwplwv-neovim-unwrapped-0.11.4",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/cwvli3r21czl4jxjs996pvanaxanj3lq-neovim-unwrapped-0.11.4-debug"
+            }
+          ],
+          "store_path": "/nix/store/y0x006hzy8ffsrldwzhhcagpbhnwplwv-neovim-unwrapped-0.11.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/yjwvqrhkjp6q4ix17kl60w61d090wssr-neovim-unwrapped-0.11.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/yjwvqrhkjp6q4ix17kl60w61d090wssr-neovim-unwrapped-0.11.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hfkb9ra95dxapix5pdzs8zs70ggkrlxr-neovim-unwrapped-0.11.4",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/1vb29xprx3f6q1ijnki0qmfdvrl0cj6n-neovim-unwrapped-0.11.4-debug"
+            }
+          ],
+          "store_path": "/nix/store/hfkb9ra95dxapix5pdzs8zs70ggkrlxr-neovim-unwrapped-0.11.4"
+        }
+      }
+    },
+    "neovim@latest": {
+      "last_modified": "2025-11-01T04:38:15Z",
+      "resolved": "github:NixOS/nixpkgs/f1e8ae508a9a467a9f51d29b8639e96db2b52c30#neovim",
+      "source": "devbox-search",
+      "version": "0.11.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hil0w5zsg8iwba7j1wcyq05ayj15ms54-neovim-0.11.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/hil0w5zsg8iwba7j1wcyq05ayj15ms54-neovim-0.11.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/86js51a0wdzf0083z54qrd2p1nl9544c-neovim-0.11.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/86js51a0wdzf0083z54qrd2p1nl9544c-neovim-0.11.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zq4ila023wialis6f3df3sf2spf5xv93-neovim-0.11.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zq4ila023wialis6f3df3sf2spf5xv93-neovim-0.11.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2w2l42j77lss79va5y23pnw477ly9dw4-neovim-0.11.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/2w2l42j77lss79va5y23pnw477ly9dw4-neovim-0.11.4"
+        }
+      }
+    },
+    "ripgrep@latest": {
+      "last_modified": "2025-10-23T16:27:14Z",
+      "resolved": "github:NixOS/nixpkgs/d5faa84122bc0a1fd5d378492efce4e289f8eac1#ripgrep",
+      "source": "devbox-search",
+      "version": "15.1.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jcwmx5x3ka5f7hpndgnlzjcp6qk51xn1-ripgrep-15.1.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jcwmx5x3ka5f7hpndgnlzjcp6qk51xn1-ripgrep-15.1.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/gn32hnvx3mlr4r17rvcp4hawfbldid8w-ripgrep-15.1.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/gn32hnvx3mlr4r17rvcp4hawfbldid8w-ripgrep-15.1.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/gjbppcg5iy089aqhr72b94wfqx3la47x-ripgrep-15.1.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/gjbppcg5iy089aqhr72b94wfqx3la47x-ripgrep-15.1.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/3gn1hlciymm7yw3kvkvss2ixvczms3w6-ripgrep-15.1.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/3gn1hlciymm7yw3kvkvss2ixvczms3w6-ripgrep-15.1.0"
+        }
+      }
+    },
+    "vimPlugins.LazyVim@latest": {
+      "last_modified": "2025-11-01T04:38:15Z",
+      "resolved": "github:NixOS/nixpkgs/f1e8ae508a9a467a9f51d29b8639e96db2b52c30#vimPlugins.LazyVim",
+      "source": "devbox-search",
+      "version": "2025-10-28",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4pjj8xqqx2yqxii6w3j49bqld40zj2v7-vimplugin-LazyVim-2025-10-28",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4pjj8xqqx2yqxii6w3j49bqld40zj2v7-vimplugin-LazyVim-2025-10-28"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/vkkckl562mnczdryc8484nbb69kdfanj-vimplugin-LazyVim-2025-10-28",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/vkkckl562mnczdryc8484nbb69kdfanj-vimplugin-LazyVim-2025-10-28"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/gaaqvw8405byycd716mngjhg5f6z8g1r-vimplugin-LazyVim-2025-10-28",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/gaaqvw8405byycd716mngjhg5f6z8g1r-vimplugin-LazyVim-2025-10-28"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8ykzayxin92415r43498y97lwlmynrjm-vimplugin-LazyVim-2025-10-28",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8ykzayxin92415r43498y97lwlmynrjm-vimplugin-LazyVim-2025-10-28"
+        }
+      }
+    }
+  }
+}

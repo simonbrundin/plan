@@ -1,0 +1,8 @@
+{
+  "packages": [
+    "ripgrep@latest",
+    "neovim-unwrapped@latest",
+    "neovim@latest",
+    "vimPlugins.LazyVim@latest"
+  ]
+}
