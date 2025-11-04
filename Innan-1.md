@@ -7,6 +7,7 @@
   - [x] Skapa appikon för bla PWA
   - [x] Prod-ikon
   - [ ] Ikon på iPhone där jag kan se hur det ser ut just nu i dev
+    - [ ] Hur får jag urlen?
     - [ ] Startsätt?
       - [ ] devpod up github.com/simonbrundin/plan
       - [ ] devpod up github.com/ditt-användarnamn/ditt-repo@min-coola-branch
