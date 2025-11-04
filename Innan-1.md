@@ -2,6 +2,25 @@
 
 ## Utvecklingsmiljö
 
+- [ ] Välj verktyg och rita en överblick
+- [ ] Mobilikoner för dev och prod fungerar
+  - [x] Skapa appikon för bla PWA
+  - [x] Prod-ikon
+  - [ ] Ikon på iPhone där jag kan se hur det ser ut just nu i dev
+    - [ ] Startsätt?
+      - [ ] devpod up github.com/simonbrundin/plan
+      - [ ] devpod up github.com/ditt-användarnamn/ditt-repo@min-coola-branch
+    - [x] Hur laddar jag ner den?
+      - [x] Enklast kanske är att skapa en länk som jag kan lägga till som en
+            PWA
+    - [ ] Hur löser jag branching?
+    - [ ] NeoVim används i DevContainer
+      - [ ] Förstå hur det fungerar när man använder NeoVim
+      - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att
+            man ansluter med NeoVim
+    - [ ] DevContainer kör Tilt
+    - [ ] Installera Kubernetes provider i Devpod
+
 ### Vad är jag ute efter?
 
 - Mobilikon med Hot-Reload
@@ -12,31 +31,28 @@
   - Vilken url vill jag kunna se applikationen ifrån?
     - dev-simonbrundin.appdomain.com?
     - Ska den vara publik?
+    - Hur skapas den?
 - Avlasta min laptop
   - Måste något köras lokalt? Vad är problemen med att ha allt remote alltså i
     mitt Taloskluster?
 - Miljöerna lika varandra
 - Nyckelhantering - så inga hemlisar läcker ut
-  - Hur ansluter jag till mitt kluster utan att behöva kopiera min kubectl
+  - Git Credentials Manager
+    - https://www.vcluster.com/blog/using-devpod-with-private-git-repositories
+  * Hur ansluter jag till mitt kluster utan att behöva kopiera min kubectl
     config överallt?
     - vCluster?
 - Utvecklingsverktyg och IDE projektanpassat
   - Hur får jag det att fungera med NeoVim eller andra IDE än VS Code?
   - Hur installerar jag paket i en DevContainer enklast?
     - DevBox?
-- Enkelt för framtida utvecklare att komma igång
-
-- [ ] `dev` fungerar och jag ser appen på min mobil
-  - [ ] Välj verktyg och rita en överblick
-  - [ ] Hur löser jag branching?
-  - [ ] Ikon på iPhone där jag kan se hur det ser ut just nu i dev
-  - [ ] Ikon på iPhone där jag kan se hur det ser ut just nu i prod
-  - [ ] NeoVim används i DevContainer
-    - [ ] Förstå hur det fungerar när man använder NeoVim
-    - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att
-          man ansluter med NeoVim
-  - [ ] DevContainer kör Tilt
-  - [ ] Installera Kubernetes provider i Devpod
+- Enkelt för framtida utvecklare att börja utveckla
+  - Installationskommando
+    - curl -sL cli.simonbrundin.com | bash
+  - dev commando
+    - dev up - lista där jag kan välja projekt
+- Enkelt Git-workflow
+  - PR skapar ny testmiljö med länk
 
 ## Övrigt
 
@@ -56,16 +72,11 @@
 
 - [x] Få kopiera och klista in att fungera
 
-## Dennis
-
-- [ ] Gör löner
-- [ ] Betala ut friskvård
-
 ## Höstmixen
 
 - [ ] Fixa tjej till Viktor
-- [ ] Få in Emma och Backlund
-- [ ] Ring Häggman
+- [x] Få in Emma och Backlund
+- [x] Ring Häggman
 
 ### Badrum
 
@@ -89,3 +100,22 @@
 - [ ] Linkding för att hantera bokmärken i min Homelab så jag kan byta browser
       utan att all mina bokmärken försvinner utan att all mina bokmärken
       försvinner
+
+#### Senare -----------------------------------------------------------------
+
+- [ ] Robotdammsugare fungerar
+- [ ] Standard extensions i Chromium
+  - [ ] Vimium
+  - [ ] 1Password
+  - [ ] Video Speed Controller
+  - [ ] Video Speed Controller
+- [ ] Linkding för att hantera bokmärken i min Homelab så jag kan byta browser
+      utan att all mina bokmärken försvinner utan att all mina bokmärken
+      försvinner
+
+## Klart --------------------------------------------------------------------
+
+## Dennis
+
+- [x] Gör löner
+- [x] Betala ut friskvård
