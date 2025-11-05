@@ -1,33 +1,38 @@
-# Tiltfile for Plan project
+# Tiltfile – funkar 2025-11-05 09:00
+k8s_yaml(kustomize('../kubernetes/overlays/dev'))
+k8s_resource('postgres', labels=['database'], port_forwards=['5432:5432'])
+k8s_resource('hasura',
+            labels=['backend'],
+            links=['http://localhost:8080/console'],
+            resource_deps=['postgres'],
+            port_forwards=['8080:8080'])
 
-# PostgreSQL development database and Hasura with Docker Compose
-docker_compose('docker-compose.yml')
-dc_resource('postgres', labels=['database'])
-dc_resource('hasura', labels=['backend'], links=['http://localhost:8080/console'])
-
-
-# Frontend development server
+# ═══ BUN – GRÖNT PÅ 12 SEKUNDER ═══
 local_resource(
-  'bun dev',
-  serve_cmd='cd ../../frontend && bun run dev',
-  serve_env={
-    'PORT': '3000',
-  },
-  links=['http://localhost:3000'],
-  labels=['frontend'],
+    'bun dev',
+    serve_cmd='docker run --rm --network host -v "$PWD/../..:/app" -w /app/frontend oven/bun:1 sh -c "bun run dev --host 0.0.0.0"',
+    deps=['../../frontend'],
+    resource_deps=['postgres'],
+    labels=['frontend'],
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True
 )
+port_forward(3000, name='bun dev')
 
-# Frontend tests in watch mode
-local_resource(
-  'tests',
-  serve_cmd='cd ../../frontend && bun run test:watch',
-  labels=['frontend'],
-)
+# Temporarily disabled - causing restart loops
+# local_resource(
+#     'bun tests',
+#     serve_cmd='docker run --rm -v "$PWD/../..:/app" -w /app/frontend oven/bun:1 sh -c "bun run test:watch"',
+#     deps=['../../frontend'],
+#     labels=['frontend']
+# )
 
-# Drizzle Studio
 local_resource(
-  'drizzle-studio',
-  serve_cmd='cd ../../frontend && bun run db:studio',
-  links=['https://local.drizzle.studio'],
-  labels=['database'],
+    'drizzle-studio',
+    serve_cmd='docker run --rm --network host -v "$PWD/../..:/app" -w /app/frontend -e DATABASE_URL=postgresql://plan:plan@localhost:5432/plan oven/bun:1 sh -c "bun run db:studio --host 0.0.0.0 --port 4984"',
+    deps=['../../frontend'],
+    resource_deps=['postgres'],
+    labels=['frontend'],
+    readiness_probe=probe(http_get=http_get_action(port=4984, path="/"))
 )
+port_forward(4984, name='drizzle-studio')

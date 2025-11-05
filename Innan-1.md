@@ -1,8 +1,23 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [ ] auth.simonbrundin.com fungerar
+  - [ ] Få alla mina noder att fungera
+
 ## Utvecklingsmiljö
 
+- [ ] Tilt startar på min dator
+  - [ ] Testa `tilt up`
+    - [ ] Göra så Tilt använder kubernetes istället för docker-compose.
+    - [ ] Göra om från docker-compose till manifests
+  - [ ] I vilket namespace körs tilt-manifests?
 - [ ] Välj verktyg och rita en överblick
+  - [ ] Tilt
+  - [ ]
+  - [ ] DevContainer
+  - [ ] Git Credentials Manager
+- [ ] Tiltfile
+  - [ ] Konvertera docker-compose till manifests
+  - [ ] Skapar en http-route
 - [ ] Mobilikoner för dev och prod fungerar
   - [x] Skapa appikon för bla PWA
   - [x] Prod-ikon
@@ -55,20 +70,6 @@
 - Enkelt Git-workflow
   - PR skapar ny testmiljö med länk
 
-## Övrigt
-
-- [ ] Balders - ta med
-  - [ ] Sparkcykel
-  - [ ] Välling
-  - [ ] USB-C laddare
-  - [ ] USB-C hub
-  - [ ] HDMI-kabel
-  - [ ] Laddocka i sovrummet
-  - [ ] Matlådor
-  - [ ] Tennisgrejer till Noomi
-  - [ ] Tennisgrejer till mig
-- [ ] Blåsa rent öron
-
 ## Laptop
 
 - [x] Få kopiera och klista in att fungera
@@ -115,6 +116,18 @@
       försvinner
 
 ## Klart --------------------------------------------------------------------
+
+- [x] Balders - ta med
+  - [x] Sparkcykel
+  - [x] Välling
+  - [x] USB-C laddare
+  - [x] USB-C hub
+  - [x] HDMI-kabel
+  - [x] Laddocka i sovrummet
+  - [x] Matlådor
+  - [x] Tennisgrejer till Noomi
+  - [x] Tennisgrejer till mig
+- [x] Blåsa rent öron
 
 ## Dennis
 
