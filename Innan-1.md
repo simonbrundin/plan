@@ -1,22 +1,19 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] auth.simonbrundin.com fungerar
-  - [ ] Få alla mina noder att fungera
-
 ## Utvecklingsmiljö
 
-- [ ] Tilt startar på min dator
-  - [ ] Testa `tilt up`
-    - [ ] Göra så Tilt använder kubernetes istället för docker-compose.
-    - [ ] Göra om från docker-compose till manifests
-  - [ ] I vilket namespace körs tilt-manifests?
+- [ ] Tilt startar i mitt kluster
+  - [ ] Hur ansluter jag mot mitt kluster hemma?
+    - [ ] Twingate fungerar i mitt kluster och jag kan ansluta mot det från min
+          dator och min iPhone
+      - [ ] Youtubea videor hur Twingate fungerar och specifikt om kubernetes
+            operator för Twingate
 - [ ] Välj verktyg och rita en överblick
   - [ ] Tilt
   - [ ]
   - [ ] DevContainer
   - [ ] Git Credentials Manager
 - [ ] Tiltfile
-  - [ ] Konvertera docker-compose till manifests
   - [ ] Skapar en http-route
 - [ ] Mobilikoner för dev och prod fungerar
   - [x] Skapa appikon för bla PWA
@@ -73,6 +70,9 @@
 ## Laptop
 
 - [x] Få kopiera och klista in att fungera
+- [ ] Fundera igen om det inte är bättre att köra chezmoi iställer för stow.
+      Fördelen jag ser är att jag med ett kommando kan installera allt jag
+      behöver på datorn utan att den har något installlerat på sig.
 
 ## Höstmixen
 
@@ -89,6 +89,8 @@
 
 ### Talos Cluster
 
+- [ ] auth.simonbrundin.com fungerar
+  - [ ] Få alla mina noder att fungera
 - [ ] Installera Orange Pi:s
 
 #### Senare
@@ -128,6 +130,12 @@
   - [x] Tennisgrejer till Noomi
   - [x] Tennisgrejer till mig
 - [x] Blåsa rent öron
+
+- [x] Tilt startar på min dator
+  - [x] Testa `tilt up`
+    - [x] Göra så Tilt använder kubernetes istället för docker-compose.
+    - [x] Göra om från docker-compose till manifests
+  - [x] I vilket namespace körs tilt-manifests?
 
 ## Dennis
 
