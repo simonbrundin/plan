@@ -4,10 +4,8 @@
 
 - [ ] `dev`
   - [ ] Kör utvecklingsmiljö i kubernetes
-    - [ ] Kan logga in på kubernetes via Teleport
-      - [ ] Använda Claude för setup
     - [ ] DevContainer körs i kubernetes
-      - [ ] Installera Kubernetes provider i Devpod
+      - [x] Installera Kubernetes provider i Devpod
       - [ ] devpod up github.com/simonbrundin/plan
       - [ ] devpod up github.com/ditt-användarnamn/ditt-repo@min-coola-branch
     - [ ] Notis i telefonen som öppnar en länk där jag kan se min applikation i
@@ -146,3 +144,5 @@
 - [x] Gör löner
 - [x] Betala ut friskvård
 - [x] Beställ genomskinligt rör från Temu
+- [x] Kan logga in på kubernetes via Teleport
+  - [x] Använda Claude för setup
