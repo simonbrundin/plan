@@ -7,4 +7,3 @@
   "postCreateCommand": "curl -fsSL https://get.jetpack.io/devbox | bash -s -- -f && devbox global install && echo 'eval \"$(devbox global shellenv)\"' >> /home/node/.bashrc",
   "postAttachCommand": "devbox shell"
 }
-}
