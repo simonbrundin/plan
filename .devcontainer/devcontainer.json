@@ -1,0 +1,8 @@
+{
+  "name": "dev-plan",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/mise:1": {}
+  },
+  "postCreateCommand": "bash -c 'eval \"$(mise activate bash)\" && mise trust && mise install && echo \"eval \\\"\\$(mise activate bash)\\\"\" >> ~/.bashrc'"
+}

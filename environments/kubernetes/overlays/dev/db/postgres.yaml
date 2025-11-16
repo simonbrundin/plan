@@ -15,37 +15,37 @@ spec:
         app: postgres
     spec:
       containers:
-      - name: postgres
-        image: postgres:16-alpine
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_USER
-          value: "plan"
-        - name: POSTGRES_PASSWORD
-          value: "plan"
-        - name: POSTGRES_DB
-          value: "plan"
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-        - name: init-scripts
-          mountPath: /docker-entrypoint-initdb.d
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - plan
-          initialDelaySeconds: 5
-          periodSeconds: 2
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "plan"
+            - name: POSTGRES_PASSWORD
+              value: "plan"
+            - name: POSTGRES_DB
+              value: "plan"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - plan
+            initialDelaySeconds: 5
+            periodSeconds: 2
       volumes:
-      - name: postgres-data
-        persistentVolumeClaim:
-          claimName: postgres-pvc
-      - name: init-scripts
-        configMap:
-          name: postgres-init-scripts
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+        - name: init-scripts
+          configMap:
+            name: postgres-init-scripts
 ---
 apiVersion: v1
 kind: Service
@@ -55,8 +55,8 @@ metadata:
     app: postgres
 spec:
   ports:
-  - port: 5432
-    targetPort: 5432
+    - port: 5432
+      targetPort: 5432
   selector:
     app: postgres
 ---

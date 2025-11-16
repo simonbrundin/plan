@@ -1,9 +1,0 @@
-{
-  "name": "Node.js + Devbox",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:latest",
-  "features": {
-    "ghcr.io/devcontainers/features/nix:1": {}
-  },
-  "postCreateCommand": "curl -fsSL https://get.jetpack.io/devbox | bash -s -- -f && devbox global install && echo 'eval \"$(devbox global shellenv)\"' >> /home/node/.bashrc",
-  "postAttachCommand": "devbox shell"
-}

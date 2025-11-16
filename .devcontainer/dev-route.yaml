@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dev-route
+spec:
+  parentRefs:
+    - name: simons-gateway
+      namespace: envoy
+  hostnames:
+    - "{HOSTNAME}"
+  rules:
+    - backendRefs:
+        - group: ""
+          kind: Service
+          name: frontend
+          port: 443
+          namespace: "{NAMESPACE}"
+      matches:
+        - path:
+            type: PathPrefix
+            value: /

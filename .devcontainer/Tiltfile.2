@@ -1,0 +1,37 @@
+allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
+load('ext://namespace', 'namespace_create')
+namespace_create(k8s_namespace())
+
+namespace = k8s_namespace()
+URL = namespace + '.simonbrundin.com'
+
+# Använd ttl.sh - ett anonymt, ephemeral registry som automatiskt raderar images
+# Images raderas efter 1 timme (default). Perfekt för dev - ingen auth behövs
+# Varje namespace får sin egen unique path så images kolliderar inte mellan devs
+local('echo "Namespace: ' + namespace + '"')
+default_registry('ttl.sh/' + namespace)
+
+# Build Docker image
+docker_build(
+  'frontend',
+  '../frontend',
+  dockerfile='../frontend/Dockerfile',
+)
+
+# Load Kubernetes manifests
+k8s_yaml([
+  './frontend-deployment.yaml',
+  './frontend-service.yaml',
+])
+
+# Load och applicera dev-route med substitution
+yaml_content = str(read_file('./dev-route.yaml'))
+yaml_content = yaml_content.replace('{HOSTNAME}', URL)
+yaml_content = yaml_content.replace('{NAMESPACE}', namespace)
+k8s_yaml(blob(yaml_content))
+
+# Configure resource
+k8s_resource('frontend',
+  port_forwards='3000:3000',
+  labels=['app']
+)

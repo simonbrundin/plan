@@ -1,0 +1,65 @@
+username = "simonbrundin"
+namespaceName = "dev-" + username
+allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
+load('ext://namespace', 'namespace_create')
+namespace_create('plan-test')
+k8s_yaml(kustomize('../environments/kubernetes/overlays/dev'))
+k8s_resource('postgres', labels=['database'], port_forwards=[port_forward(5432, 5432)])
+k8s_resource('hasura',
+            labels=['backend'],
+            links=['http://localhost:8080/console'],
+            resource_deps=['postgres'],
+            port_forwards=[port_forward(8080, 8080)])
+
+# ═══ BUN – GRÖNT PÅ 12 SEKUNDER ═══
+local_resource(
+    'bun dev',
+    serve_cmd='docker run --rm --network host -v "$PWD/../..:/app" -w /app/frontend oven/bun:1 sh -c "bun run dev --host 0.0.0.0"',
+    deps=['../../frontend'],
+    resource_deps=['postgres'],
+    labels=['frontend'],
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True
+)
+port_forward(3000, 3000, name='bun dev')
+
+# Temporarily disabled - causing restart loops
+# local_resource(
+#     'bun tests',
+#     serve_cmd='docker run --rm -v "$PWD/../..:/app" -w /app/frontend oven/bun:1 sh -c "bun run test:watch"',
+#     deps=['../../frontend'],
+#     labels=['frontend']
+# )
+
+local_resource(
+    'drizzle-studio',
+    serve_cmd='docker run --rm --network host -v "$PWD/../..:/app" -w /app/frontend -e DATABASE_URL=postgresql://plan:plan@localhost:5432/plan oven/bun:1 sh -c "bun run db:studio --host 0.0.0.0 --port 4984"',
+    deps=['../../frontend'],
+    resource_deps=['postgres'],
+    labels=['frontend']
+)
+port_forward(4984, 4984, name='drizzle-studio')
+
+
+# Read and manipulate HTTPRoute YAML
+objects = read_yaml_stream('./dev-route.yaml')
+for o in objects:
+  if 'spec' in o and 'hostnames' in o['spec']:
+    o['spec']['hostnames'] = [URL]
+  if 'spec' in o and 'rules' in o['spec']:
+    for rule in o['spec']['rules']:
+      if 'backendRefs' in rule:
+        for ref in rule['backendRefs']:
+          ref['namespace'] = namespace
+
+k8s_yaml(encode_yaml_stream(objects))
+
+# Read and manipulate Frontend Deployment and Service
+frontend_objects = read_yaml_stream('./frontend-deployment.yaml')
+frontend_objects.extend(read_yaml_stream('./frontend-service.yaml'))
+for o in frontend_objects:
+  if 'metadata' in o:
+    o['metadata']['namespace'] = namespace
+
+k8s_yaml(encode_yaml_stream(frontend_objects))
+

@@ -15,33 +15,38 @@ spec:
         app: hasura
     spec:
       containers:
-      - name: hasura
-        image: hasura/graphql-engine:v2.41.0
-        ports:
-        - containerPort: 8080
-        env:
-        - name: HASURA_GRAPHQL_DATABASE_URL
-          value: "postgres://plan:plan@postgres:5432/plan"
-        - name: HASURA_GRAPHQL_ADMIN_SECRET
-          value: "dev-admin-secret"
-        - name: HASURA_GRAPHQL_ENABLE_CONSOLE
-          value: "true"
-        - name: HASURA_GRAPHQL_DEV_MODE
-          value: "true"
-        - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES
-          value: "startup,http-log,webhook-log,websocket-log,query-log"
-        - name: HASURA_GRAPHQL_ENABLE_TELEMETRY
-          value: "false"
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - name: hasura
+          image: hasura/graphql-engine:v2.41.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: HASURA_GRAPHQL_DATABASE_URL
+              value: "postgres://plan:plan@postgres:5432/plan"
+            - name: HASURA_GRAPHQL_ADMIN_SECRET
+              value: "dev-admin-secret"
+            - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+              value: "true"
+            - name: HASURA_GRAPHQL_DEV_MODE
+              value: "true"
+            - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES
+              value: "startup,http-log,webhook-log,websocket-log,query-log"
+            - name: HASURA_GRAPHQL_ENABLE_TELEMETRY
+              value: "false"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
       initContainers:
-      - name: wait-for-postgres
-        image: postgres:16-alpine
-        command: ['sh', '-c', 'until pg_isready -h postgres -p 5432 -U plan; do echo waiting for postgres; sleep 2; done;']
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command:
+            [
+              "sh",
+              "-c",
+              "until pg_isready -h postgres -p 5432 -U plan; do echo waiting for postgres; sleep 2; done;",
+            ]
 ---
 apiVersion: v1
 kind: Service
@@ -51,7 +56,8 @@ metadata:
     app: hasura
 spec:
   ports:
-  - port: 8080
-    targetPort: 8080
+    - port: 8080
+      targetPort: 8080
   selector:
     app: hasura
+

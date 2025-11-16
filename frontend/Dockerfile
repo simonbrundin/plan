@@ -1,29 +1,26 @@
-# use the official Bun image
-# see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 AS build
+# ==============================
+# Build Stage
+# ==============================
+FROM --platform=$BUILDPLATFORM oven/bun:1-debian AS build
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile --production
 
-# use ignore-scripts and no-optional to avoid building native modules like better-sqlite3
-RUN bun install --frozen-lockfile --ignore-scripts --no-optional
-
-# Copy the entire project
 COPY . .
+RUN bun run build
 
-RUN bun --bun run build
-
-# copy production dependencies and source code into final image
-FROM oven/bun:1 AS production
+# ==============================
+# Production Stage
+# ==============================
+FROM oven/bun:1-debian AS production
 WORKDIR /app
 
-# Copy node_modules for runtime dependencies
-COPY --from=build /app/node_modules /app/node_modules
+# Använd inbyggd non-root 'bun'-användare
+USER bun
 
-# Only `.output` folder is needed from the build stage
-COPY --from=build /app/.output /app
+COPY --from=build --chown=bun:bun /app/node_modules /app/node_modules
+COPY --from=build --chown=bun:bun /app/.output /app
 
-# run the app
-EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "--bun", "run", "/app/server/index.mjs" ]
-
+EXPOSE 3000
+CMD ["bun", "run", "server/index.mjs"]

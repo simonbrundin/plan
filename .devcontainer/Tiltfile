@@ -1,0 +1,20 @@
+
+# ------------------------------------------------------------------
+# Bygg image för frontend
+# ------------------------------------------------------------------
+
+
+# Använd ttl.sh - ett anonymt, ephemeral registry som automatiskt raderar images
+# Images raderas efter 1 timme (default). Perfekt för dev - ingen auth behövs
+namespace = k8s_namespace()
+local('echo "Namespace: ' + namespace + '"')
+default_registry('ttl.sh/' + namespace)
+
+docker_build('frontend', '../frontend')
+
+# ------------------------------------------------------------------
+# Deploy frontend i kluster
+# ------------------------------------------------------------------
+
+allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
+k8s_yaml('frontend-deployment.yaml')

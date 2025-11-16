@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Structure
 
 This is a full-stack goal management application with hierarchical goal tracking:
+
 - **Frontend**: Nuxt 4 (Vue 3) app in `frontend/` directory with TypeScript, Tailwind CSS, and Nuxt UI
 - **Backend**: Hasura GraphQL backend with Authentik OAuth integration for authentication
 - **Database**: PostgreSQL with Drizzle ORM schema management
@@ -14,6 +15,7 @@ This is a full-stack goal management application with hierarchical goal tracking
 ## Key Commands
 
 ### Development
+
 ```bash
 # Frontend development (from frontend/ directory)
 cd frontend
@@ -34,6 +36,7 @@ bun run db:studio    # Open Drizzle Studio
 ```
 
 ### Testing Architecture
+
 - **Cucumber.js** for BDD tests (primary test framework)
 - Test files in `frontend/test/` and `frontend/features/`
 - Watch mode available via `bun run test:watch`
@@ -41,6 +44,7 @@ bun run db:studio    # Open Drizzle Studio
 ## Frontend Architecture (Nuxt 4)
 
 ### Key Technologies
+
 - **Nuxt 4** with Vue 3 Composition API
 - **TypeScript** (strict mode)
 - **Tailwind CSS 4** + **Nuxt UI** components
@@ -50,6 +54,7 @@ bun run db:studio    # Open Drizzle Studio
 - **Bun** runtime (Nitro preset)
 
 ### Directory Structure
+
 ```
 frontend/
 ├── app/
@@ -72,6 +77,7 @@ frontend/
 ```
 
 ### Code Conventions (from CRUSH.md)
+
 - Use **Composition API** with `<script setup>` syntax
 - **TypeScript**: Explicit types for function parameters and return values, avoid `any`
 - **Naming**: PascalCase for Vue components, camelCase for variables, kebab-case for files
@@ -79,6 +85,7 @@ frontend/
 - **Error Handling**: Try-catch blocks for async operations, descriptive Error objects
 
 ### UI Components
+
 - **Shadcn/UI** components in `components/ui/` (no prefix)
 - **Nuxt UI** components available globally
 - **Lucide Vue** icons available
@@ -86,6 +93,7 @@ frontend/
 ## GraphQL & Data Architecture
 
 ### Hasura Integration
+
 - GraphQL endpoint: `http://localhost:8080/v1/graphql` (local dev)
 - Production: `https://plan-hasura.simonbrundin.com/v1/graphql`
 - Authentication handled via `app/plugins/graphql-auth.ts`:
@@ -95,6 +103,7 @@ frontend/
 - Code generation via `nuxt-graphql-client` (disabled during build)
 
 ### State Management
+
 - **Pinia store** (`app/stores/goals.ts`) for client-side state
 - Key entities:
   - `goals`: All goal objects with id, title, created, finished
@@ -103,6 +112,7 @@ frontend/
 - Actions: loadGoals, addGoal, updateGoal, removeGoal, addRelation, removeRelation
 
 ### Database Schema
+
 - **Goals**: Hierarchical goal system with parent-child relationships
 - **User Goals**: Many-to-many relationship (user_goals junction table)
 - **Authentication**: Users table with `sub` column for IdP integration (Authentik)
@@ -111,6 +121,7 @@ frontend/
 ## Environment Configuration
 
 Environment variables in `frontend/.env`:
+
 - `GQL_HOST`: Hasura GraphQL endpoint
 - `HASURA_GRAPHQL_ADMIN_SECRET`: Admin secret for development
 - `BETTER_AUTH_URL`: Authentication base URL
@@ -124,3 +135,4 @@ Environment variables in `frontend/.env`:
 - **CI/CD**: GitHub Actions with semantic-release for versioning
 - **Hasura**: Deployed as separate service, handles GraphQL backend
 - Bun används istället för npm i frontend/
+

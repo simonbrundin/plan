@@ -1,20 +1,21 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [ ] Hämta mammas bil
+- [ ] Hämta paket åt mamma
+
 ## Utvecklingsmiljö
 
-- [ ] `dev`
-  - [ ] Kör utvecklingsmiljö i kubernetes
-    - [ ] DevContainer körs i kubernetes
-      - [x] Installera Kubernetes provider i Devpod
-      - [ ] devpod up github.com/simonbrundin/plan
-      - [ ] devpod up github.com/ditt-användarnamn/ditt-repo@min-coola-branch
-    - [ ] Notis i telefonen som öppnar en länk där jag kan se min applikation i
-          Utvecklingsmiljön.
-    - [ ] NeoVim används i DevContainer
-      - [ ] Förstå hur det fungerar när man använder NeoVim
-      - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att
-            man ansluter med NeoVim
-    - [ ] DevContainer kör Tilt
+- [ ] `dev` fungerar i plan och ger mig notis i telefonen
+  - [ ] Få Tiltfile att använda lsp i neovim
+  - [ ] Hur ska länken skapas?
+  - [ ] Simon CLI finns tillgängligt i min DevContainer
+  - [ ] Tilt fungerar
+  - [ ] Notis i telefonen som öppnar en länk där jag kan se min applikation i
+        Utvecklingsmiljön.
+  - [ ] NeoVim används i DevContainer
+    - [ ] Förstå hur det fungerar när man använder NeoVim
+    - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att
+          man ansluter med NeoVim
 - [ ] Skriv om cli så min update talos config inte sparar generated som en fil
       för i den finns känslig data
 
@@ -55,10 +56,14 @@
 ### Hemfix
 
 - [ ] Farstulycktan lyser
-  - [ ] Lycktan moterad
-    - [ ] Kilen passar
-    - [ ] Rör nedkortat
-    - [ ] Kablarna på utsidan skalade
+  - [x] Lycktan moterad
+    - [x] Kilen passar
+    - [x] Rör nedkortat
+    - [x] Kablarna på utsidan skalade
+  - [ ] Köp
+    - [ ] Lock
+    - [ ] Brun sladd
+    - [ ] 4 längre skruvar
   - [ ] Lampknappar monterade
   - [ ] Eluttag monterat
   - [ ] Inkopplat i central
@@ -146,3 +151,9 @@
 - [x] Beställ genomskinligt rör från Temu
 - [x] Kan logga in på kubernetes via Teleport
   - [x] Använda Claude för setup
+- [x] DevContainer körs i kubernetes
+  - [x] Installera Kubernetes provider i Devpod
+  - [x] devpod up github.com/simonbrundin/plan
+  - [x] devpod up github.com/ditt-användarnamn/ditt-repo@min-coola-branch
+- [x] Köp zigbee repeater ute
+- [x] Köp zigbee termoemeter till badet
