@@ -1,26 +1,48 @@
 # ==============================
 # Build Stage
 # ==============================
-FROM --platform=$BUILDPLATFORM oven/bun:1-debian AS build
+FROM node:lts-alpine AS build
 WORKDIR /app
 
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile --production
+RUN apk add --no-cache python3 make g++ gcc
+# RUN apk add openssh g++ make python3 git
 
+
+# Kopiera bara det som behövs för install
+COPY package.json bun.lock* ./
+
+# Installera Bun (globalt)
+RUN npm install -g bun
+
+# Installera beroenden (cache-vänligt)
+RUN bun install --frozen-lockfile
+
+# Kopiera källkod (efter install för bättre cache)
 COPY . .
+
+# Bygg applikationen
 RUN bun run build
 
 # ==============================
-# Production Stage
+# Runtime Stage (minimal, säker)
 # ==============================
-FROM oven/bun:1-debian AS production
+FROM oven/bun:1-slim AS production
+
 WORKDIR /app
 
 # Använd inbyggd non-root 'bun'-användare
 USER bun
 
-COPY --from=build --chown=bun:bun /app/node_modules /app/node_modules
-COPY --from=build --chown=bun:bun /app/.output /app
+# Kopiera bara det som behövs för runtime
+COPY --from=build --chown=bun:bun /app/.output .
+# Kopiera fullständiga node_modules från build (mer tillförlitligt än .output/server/node_modules)
+# COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
 
+# Exponera port
 EXPOSE 3000
-CMD ["bun", "run", "server/index.mjs"]
+
+# Sätt NODE_PATH så att Bun hittar node_modules från root
+ENV NODE_PATH=/app/node_modules
+
+# Startkommando
+CMD ["bun", "server/index.mjs"]

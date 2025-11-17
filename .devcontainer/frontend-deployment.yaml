@@ -15,30 +15,47 @@ spec:
       containers:
         - name: frontend
           image: frontend
+          command: ["bun", "run", "dev"] # <-- viktig: override command
           ports:
             - containerPort: 3000
               name: http
           env:
+            - name: DATABASE_URL
+              value: "postgresql://plan:plan@postgres:5432/plan"
             - name: GQL_HOST
               value: "http://hasura:8080/v1/graphql"
             - name: HASURA_GRAPHQL_ADMIN_SECRET
               value: "dev-admin-secret"
+            - name: NUXT_OAUTH_AUTHENTIK_CLIENT_ID
+              value: "zUuawAyCzj9RJqOYx85hSAQpMYzbVI2iAh3us7P0"
+            - name: NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET
+              value: "dummy-secret-for-public-client"
+            - name: NUXT_OAUTH_AUTHENTIK_DOMAIN
+              value: "auth.simonbrundin.com"
+            - name: NUXT_SESSION_PASSWORD
+              value: "5c3ddb48cdb04a05aed90cdb9330cbc2"
           resources:
             requests:
               cpu: 100m
-              memory: 128Mi
+              memory: 256Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
+          # Liveness probe - ge Nuxt mycket mer tid att starta
           livenessProbe:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          # Readiness probe - mer generös för dev
           readinessProbe:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

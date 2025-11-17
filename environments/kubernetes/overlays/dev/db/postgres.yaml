@@ -41,8 +41,7 @@ spec:
             periodSeconds: 2
       volumes:
         - name: postgres-data
-          persistentVolumeClaim:
-            claimName: postgres-pvc
+          emptyDir: {}  # För dev - data försvinner vid restart men laddas om från init scripts
         - name: init-scripts
           configMap:
             name: postgres-init-scripts
@@ -59,14 +58,3 @@ spec:
       targetPort: 5432
   selector:
     app: postgres
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi

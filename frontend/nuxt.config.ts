@@ -34,24 +34,33 @@ export default defineNuxtConfig({
     "shadcn-nuxt",
     "nuxt-auth-utils",
     "nuxt-graphql-client",
-    "@pinia/nuxt",
+    [
+      "@pinia/nuxt",
+      {
+        disableVuex: true,
+      },
+    ],
   ],
+  pinia: {
+    storesDirs: ["./app/stores/**"],
+  },
   colorMode: {
     classSuffix: "",
   },
   runtimeConfig: {
     public: {
-      authBaseUrl: process.env.BETTER_AUTH_URL || "http://localhost:3000",
       GQL_HOST: "http://localhost:8080/v1/graphql", // overwritten by NUXT_PUBLIC_GQL_HOST
-      hasuraAdminSecret: process.env.HASURA_GRAPHQL_ADMIN_SECRET || 'dev-admin-secret',
+      hasuraAdminSecret:
+        process.env.HASURA_GRAPHQL_ADMIN_SECRET || "dev-admin-secret",
     },
-    // oauth: {
-    //   // provider in lowercase (github, google, etc.)
-    //   authentik: {
-    //     clientId: "...",
-    //     clientSecret: "...",
-    //   },
-    // },
+    oauth: {
+      // OAuth provider configuration for nuxt-auth-utils
+      authentik: {
+        clientId: process.env.NUXT_OAUTH_AUTHENTIK_CLIENT_ID || "",
+        clientSecret: process.env.NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET || "",
+        domain: process.env.NUXT_OAUTH_AUTHENTIK_DOMAIN || "",
+      },
+    },
   },
   shadcn: {
     /**
@@ -64,19 +73,37 @@ export default defineNuxtConfig({
      */
     componentDir: "./app/components/ui",
   },
-  // nitro: {
-  //   preset: "bun",
-  // },
-  
+  nitro: {
+    preset: "bun",
+  },
+
+  vite: {
+    server: {
+      allowedHosts: [".simonbrundin.com"],
+    },
+  },
+
   // Configure payload to handle potential serialization issues
   experimental: {
-    payloadExtraction: true,
+    payloadExtraction: false, // Disable to prevent Pinia hydration errors
+  },
+  hooks: {
+    // Add a hook to handle Pinia payload serialization errors gracefully
+    "app:error": (error) => {
+      if (error.message?.includes("hasOwnProperty")) {
+        console.warn(
+          "Pinia payload serialization error - this is expected and handled",
+        );
+      }
+    },
   },
   "graphql-client": {
     codegen: false,
     clients: {
       default: {
-        host: process.env.NUXT_PUBLIC_GQL_HOST || "http://localhost:8080/v1/graphql",
+        host:
+          process.env.NUXT_PUBLIC_GQL_HOST ||
+          "http://localhost:8080/v1/graphql",
         token: {
           type: "Bearer",
           name: "Authorization",

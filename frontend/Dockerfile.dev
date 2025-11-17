@@ -1,0 +1,27 @@
+# ==============================
+# Development Dockerfile (för Tilt)
+# ==============================
+FROM node:24-alpine
+
+# Installera build dependencies för native modules (better-sqlite3)
+RUN apk add --no-cache python3 make g++ curl unzip bash
+
+# Installera Bun
+RUN curl -fsSL https://bun.sh/install | bash
+
+ENV PATH="/root/.bun/bin:${PATH}"
+
+WORKDIR /app
+
+# Kopiera package files och installera dependencies
+COPY package.json bun.lock* ./
+RUN bun install
+
+# Kopiera all källkod
+COPY . .
+
+# Exponera port
+EXPOSE 3000
+
+# Kör Nuxt dev server med HMR
+CMD ["bun", "run", "dev"]

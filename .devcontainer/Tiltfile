@@ -1,20 +1,95 @@
+# ------------------------------------------------------------------
+# Tillåt remote cluter
+# ------------------------------------------------------------------
+
+allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
+
+# ------------------------------------------------------------------
+# Sätt namespace
+# ------------------------------------------------------------------
+
+namespace = k8s_namespace()
+
+# ------------------------------------------------------------------
+# Setup docker registry
+# ------------------------------------------------------------------
+
+# Använd ttl.sh - ett anonymt, ephemeral registry som automatiskt raderar images
+# Images raderas efter 1 timme (default). Perfekt för dev - ingen auth behövs
+local('echo "Namespace: ' + namespace + '"')
+default_registry('ttl.sh/' + namespace)
 
 # ------------------------------------------------------------------
 # Bygg image för frontend
 # ------------------------------------------------------------------
 
+docker_build(
+    'frontend',
+    '../frontend',
+    dockerfile='../frontend/Dockerfile.dev',  # Använd development Dockerfile
+#    platform='linux/arm64',
+    # Visa mer output från Docker build
+    extra_tag='frontend:dev',
+    live_update=[
+        # Om package.json eller bun.lock ändras -> full rebuild
+        fall_back_on(['../frontend/package.json', '../frontend/bun.lock']),
 
-# Använd ttl.sh - ett anonymt, ephemeral registry som automatiskt raderar images
-# Images raderas efter 1 timme (default). Perfekt för dev - ingen auth behövs
-namespace = k8s_namespace()
-local('echo "Namespace: ' + namespace + '"')
-default_registry('ttl.sh/' + namespace)
+        # Synca source code in i containern
+        sync('../frontend/app', '/app/app'),
+        sync('../frontend/server', '/app/server'),
+        sync('../frontend/nuxt.config.ts', '/app/nuxt.config.ts'),
+        sync('../frontend/drizzle', '/app/drizzle'),
 
-docker_build('frontend', '../frontend')
+        # Nuxt dev server har inbyggd HMR, inget restart behövs
+    ],
+)
 
 # ------------------------------------------------------------------
 # Deploy frontend i kluster
 # ------------------------------------------------------------------
 
-allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
 k8s_yaml('frontend-deployment.yaml')
+k8s_yaml('frontend-service.yaml')
+
+# Frontend Route
+URL = namespace + '.simonbrundin.com'
+yaml_content = str(read_file('./frontend-route.yaml'))
+yaml_content = yaml_content.replace('{HOSTNAME}', URL)
+yaml_content = yaml_content.replace('{NAMESPACE}', namespace)
+k8s_yaml(blob(yaml_content))
+
+
+# ------------------------------------------------------------------
+# PostgreSQL Database
+# ------------------------------------------------------------------
+
+# Använd Kustomize för att generera ConfigMap från init-script filer
+k8s_yaml(kustomize('../environments/kubernetes/overlays/dev/db'))
+
+k8s_resource(
+  workload='postgres',
+  new_name='PostgreSQL',
+  port_forwards='5432:5432',  # Forward PostgreSQL port
+  labels=['Database'],
+)
+
+# ------------------------------------------------------------------
+# Resurser i Tilt UI
+# ------------------------------------------------------------------
+
+k8s_resource(
+  workload='frontend',  # Referera till deployment namnet
+  new_name='Nuxt Dev Server',  # Nytt namn för resursen
+  port_forwards=3000,
+  links=['https://' + URL],  # Länk till HTTPRoute
+  labels=['Frontend'],             # Lägg till etikett för gruppering i UI
+  # resource_deps=['PostgreSQL'],  # Vänta på PostgreSQL
+)
+k8s_resource(
+  new_name='Frontend Route',  # Nytt namn för resursen
+  links=['https://' + URL],  # Länk till HTTPRoute
+  objects=[
+    'frontend-route:httproute'
+  ],
+  labels=['Frontend'],             # Lägg till etikett för gruppering i UI
+)

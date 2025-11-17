@@ -8,6 +8,13 @@
       "when": 1759416282125,
       "tag": "0000_legal_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1763384064422,
+      "tag": "0001_easy_lyja",
+      "breakpoints": true
     }
   ]
 }

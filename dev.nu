@@ -25,13 +25,33 @@ def get-teleport-username [] {
     $username
 }
 
+def get-local-ip [] {
+    try {
+        # Hämta den primära lokala IP-adressen som används för internet-trafik
+        let ip_output = (ip route get 1.1.1.1 | complete)
+        if $ip_output.exit_code == 0 {
+            let ip = ($ip_output.stdout | str trim | parse -r 'src\s+(\S+)' | get capture0.0)
+            $ip
+        } else {
+            # Fallback: använd hostname -I och ta första IP-adressen
+            let ips = (hostname -I | str trim | split row ' ')
+            $ips.0
+        }
+    } catch {
+        # Om allt annat misslyckas, returnera localhost
+        "127.0.0.1"
+    }
+}
+
 # -----------------------------------------------
 # Variables
 # -----------------------------------------------
 
 let teleport_user = (get-teleport-username)
+let local_ip = (get-local-ip)
 let namespace = $"plan-dev-($teleport_user)" 
 let link = $"https://($namespace).simonbrundin.com"
+# let link = $"http://($local_ip):3000"
 
 # -----------------------------------------------
 # Skicka notis till telefon
@@ -46,9 +66,9 @@ curl -d $link ntfy.sh/simonbrundin-dev-notification
 cd .devcontainer/
 
 # Kontrollera om kubectl fungerar, annars logga in via teleport
-try {
-  kubectl cluster-info | ignore
-} catch {
+let kubectl_check = (kubectl cluster-info | complete)
+if $kubectl_check.exit_code != 0 {
+  print "Kan inte nå Kubernetes, loggar in via Teleport..."
   simon kubernetes login teleport
 }
 

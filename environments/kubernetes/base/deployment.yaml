@@ -3,14 +3,10 @@ kind: Deployment
 metadata:
   name: plan-app
 spec:
-  replicas: 2 # Starta med 2 poddar
   selector:
     matchLabels:
       app: plan-app
   template:
-    metadata:
-      labels:
-        app: plan-app
     spec:
       imagePullSecrets:
         - name: ghcr-secret
