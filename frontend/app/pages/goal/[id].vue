@@ -1,12 +1,10 @@
 <script setup lang="ts">
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
-  ssr: false
- });
+  ssr: false,
+});
 
-
-
- const route = useRoute();
+const route = useRoute();
 const router = useRouter();
 const goalId = parseInt(route.params.id as string);
 const { user } = useUserSession();
@@ -51,11 +49,11 @@ const fetchGoalData = async () => {
   error.value = null;
 
   try {
-    const response = await fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: `
@@ -89,12 +87,12 @@ const fetchGoalData = async () => {
             }
           }
         `,
-        variables: { id: goalId }
-      })
+        variables: { id: goalId },
+      }),
     });
 
     const result = await response.json();
-    console.log('GetGoal result:', result);
+    console.log("GetGoal result:", result);
 
     if (result.errors) {
       throw new Error(result.errors[0].message);
@@ -102,8 +100,8 @@ const fetchGoalData = async () => {
 
     goalData.value = result.data;
   } catch (err) {
-    console.error('Fetch goal error:', err);
-    error.value = err instanceof Error ? err.message : 'Unknown error';
+    console.error("Fetch goal error:", err);
+    error.value = err instanceof Error ? err.message : "Unknown error";
   } finally {
     isLoading.value = false;
   }
@@ -120,7 +118,7 @@ const goal = computed(() => goalData.value?.goal);
 
 // Extrahera alla föräldrar
 const parents = computed(
-  () => goal.value?.parentRelations?.map((r) => r.goalByParentId) || [],
+  () => goal.value?.parentRelations?.map((r) => r.goalByParentId) || []
 );
 
 // Matcha barn-ID:n med faktiska goal-objekt
@@ -183,18 +181,18 @@ const searchResults = computed(() => {
   // Filtrera bort nuvarande målet och befintliga föräldrar
   const currentParentIds = parents.value.map((p) => p.id);
   return results.filter(
-    (g) => g.id !== goalId && !currentParentIds.includes(g.id),
+    (g) => g.id !== goalId && !currentParentIds.includes(g.id)
   );
 });
 
 // Lägg till befintligt mål som förälder
 async function addExistingParent(parentId: number) {
   try {
-    const response = await fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: `
@@ -207,8 +205,8 @@ async function addExistingParent(parentId: number) {
             }
           }
         `,
-        variables: { childId: goalId, parentId }
-      })
+        variables: { childId: goalId, parentId },
+      }),
     });
 
     const result = await response.json();
@@ -253,16 +251,16 @@ async function createNewParent() {
       }
     `;
 
-    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const goalResponse = await $fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: createGoalQuery,
-        variables: { title: parentSearchQuery.value.trim() }
-      })
+        variables: { title: parentSearchQuery.value.trim() },
+      }),
     });
 
     if (goalResponse.errors) {
@@ -282,17 +280,20 @@ async function createNewParent() {
         }
       `;
 
-      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({
-          query: createUserGoalQuery,
-          variables: { userId, goalId: newGoal.id }
-        })
-      });
+      const userGoalResponse = await $fetch(
+        "http://localhost:8080/v1/graphql",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+          },
+          body: JSON.stringify({
+            query: createUserGoalQuery,
+            variables: { userId, goalId: newGoal.id },
+          }),
+        }
+      );
 
       if (userGoalResponse.errors) {
         throw new Error(userGoalResponse.errors[0].message);
@@ -308,17 +309,20 @@ async function createNewParent() {
         }
       `;
 
-      const relationResponse = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({
-          query: addParentRelationQuery,
-          variables: { childId: goalId, parentId: newGoal.id }
-        })
-      });
+      const relationResponse = await $fetch(
+        "http://localhost:8080/v1/graphql",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+          },
+          body: JSON.stringify({
+            query: addParentRelationQuery,
+            variables: { childId: goalId, parentId: newGoal.id },
+          }),
+        }
+      );
 
       if (relationResponse.errors) {
         throw new Error(relationResponse.errors[0].message);
@@ -379,18 +383,18 @@ const childSearchResults = computed(() => {
   // Filtrera bort nuvarande målet och befintliga barn
   const currentChildIds = children.value.map((c) => c.id);
   return results.filter(
-    (g) => g.id !== goalId && !currentChildIds.includes(g.id),
+    (g) => g.id !== goalId && !currentChildIds.includes(g.id)
   );
 });
 
 // Lägg till befintligt mål som barn
 async function addExistingChild(childId: number) {
   try {
-    const response = await fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: `
@@ -403,8 +407,8 @@ async function addExistingChild(childId: number) {
             }
           }
         `,
-        variables: { childId, parentId: goalId }
-      })
+        variables: { childId, parentId: goalId },
+      }),
     });
 
     const result = await response.json();
@@ -439,7 +443,7 @@ async function createNewChild() {
   try {
     console.log(
       "Creating new child with title:",
-      childSearchQuery.value.trim(),
+      childSearchQuery.value.trim()
     );
 
     // Skapa nytt mål
@@ -454,16 +458,16 @@ async function createNewChild() {
       }
     `;
 
-    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const goalResponse = await $fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: createGoalQuery,
-        variables: { title: childSearchQuery.value.trim() }
-      })
+        variables: { title: childSearchQuery.value.trim() },
+      }),
     });
 
     if (goalResponse.errors) {
@@ -477,7 +481,7 @@ async function createNewChild() {
         "Adding relation - childId:",
         newGoal.id,
         "parentId:",
-        goalId,
+        goalId
       );
 
       // Skapa user_goals relation
@@ -490,17 +494,20 @@ async function createNewChild() {
         }
       `;
 
-      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({
-          query: createUserGoalQuery,
-          variables: { userId, goalId: newGoal.id }
-        })
-      });
+      const userGoalResponse = await $fetch(
+        "http://localhost:8080/v1/graphql",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+          },
+          body: JSON.stringify({
+            query: createUserGoalQuery,
+            variables: { userId, goalId: newGoal.id },
+          }),
+        }
+      );
 
       if (userGoalResponse.errors) {
         throw new Error(userGoalResponse.errors[0].message);
@@ -516,17 +523,20 @@ async function createNewChild() {
         }
       `;
 
-      const relationResponse = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({
-          query: addParentRelationQuery,
-          variables: { childId: newGoal.id, parentId: goalId }
-        })
-      });
+      const relationResponse = await $fetch(
+        "http://localhost:8080/v1/graphql",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+          },
+          body: JSON.stringify({
+            query: addParentRelationQuery,
+            variables: { childId: newGoal.id, parentId: goalId },
+          }),
+        }
+      );
 
       if (relationResponse.errors) {
         throw new Error(relationResponse.errors[0].message);
@@ -592,11 +602,11 @@ async function confirmRemoveParent() {
   if (!parentToRemove.value) return;
 
   try {
-    const response = await fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: `
@@ -611,8 +621,8 @@ async function confirmRemoveParent() {
             }
           }
         `,
-        variables: { childId: goalId, parentId: parentToRemove.value }
-      })
+        variables: { childId: goalId, parentId: parentToRemove.value },
+      }),
     });
 
     const result = await response.json();
@@ -677,11 +687,11 @@ async function handleTouchEnd(child: Goal) {
     try {
       const newFinishedValue = child.finished ? null : new Date().toISOString();
 
-      const response = await fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/v1/graphql", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
         },
         body: JSON.stringify({
           query: `
@@ -694,8 +704,8 @@ async function handleTouchEnd(child: Goal) {
               }
             }
           `,
-          variables: { id: child.id, finished: newFinishedValue }
-        })
+          variables: { id: child.id, finished: newFinishedValue },
+        }),
       });
 
       const result = await response.json();
@@ -709,7 +719,7 @@ async function handleTouchEnd(child: Goal) {
       // Uppdatera lokal state i component
       if (goalData.value?.allGoals) {
         const goalIndex = goalData.value.allGoals.findIndex(
-          (g) => g.id === child.id,
+          (g) => g.id === child.id
         );
         if (goalIndex !== -1) {
           goalData.value.allGoals[goalIndex].finished = newFinishedValue;
@@ -747,23 +757,27 @@ const selectedParentIndex = ref(0);
 const isParentMode = ref(false);
 
 // Vim modes
-const mode = ref<'normal' | 'insert'>('normal');
+const mode = ref<"normal" | "insert">("normal");
 const editingGoalId = ref<number | null>(null);
-const editTitle = ref('');
+const editTitle = ref("");
 const editInputRef = ref<HTMLInputElement | null>(null);
 
 // Delete confirmation
 const showDeleteConfirmation = ref(false);
 const goalToDelete = ref<{ id: number; title: string } | null>(null);
-const deleteDialogSelection = ref<'cancel' | 'confirm'>('cancel');
+const deleteDialogSelection = ref<"cancel" | "confirm">("cancel");
 
 // Leader key state
 const isLeaderMode = ref(false);
 let leaderTimeout: NodeJS.Timeout | null = null;
 
 // Gå in i insert mode för att redigera ett mål
-async function enterInsertMode(goalId: number, title: string, atBeginning: boolean = false) {
-  mode.value = 'insert';
+async function enterInsertMode(
+  goalId: number,
+  title: string,
+  atBeginning: boolean = false
+) {
+  mode.value = "insert";
   editingGoalId.value = goalId;
   editTitle.value = title;
 
@@ -772,7 +786,9 @@ async function enterInsertMode(goalId: number, title: string, atBeginning: boole
   await nextTick();
 
   // Hitta input-elementet som nu är synligt
-  const input = document.querySelector('input[type="text"]:focus, input[type="text"]:not([style*="display: none"])') as HTMLInputElement;
+  const input = document.querySelector(
+    'input[type="text"]:focus, input[type="text"]:not([style*="display: none"])'
+  ) as HTMLInputElement;
   if (input) {
     input.focus();
     if (atBeginning) {
@@ -785,7 +801,9 @@ async function enterInsertMode(goalId: number, title: string, atBeginning: boole
   } else {
     // Fallback: försök hitta vilket input-element som helst
     setTimeout(() => {
-      const fallbackInput = document.querySelector('input.border-blue-500') as HTMLInputElement;
+      const fallbackInput = document.querySelector(
+        "input.border-blue-500"
+      ) as HTMLInputElement;
       if (fallbackInput) {
         fallbackInput.focus();
         if (atBeginning) {
@@ -801,24 +819,24 @@ async function enterInsertMode(goalId: number, title: string, atBeginning: boole
 // Spara ändringar och gå tillbaka till normal mode
 async function saveEdit() {
   if (!editingGoalId.value) {
-    mode.value = 'normal';
+    mode.value = "normal";
     return;
   }
 
   // Om titeln är tom, ta bort målet
   if (!editTitle.value.trim()) {
     await deleteGoal(editingGoalId.value);
-    mode.value = 'normal';
+    mode.value = "normal";
     editingGoalId.value = null;
     return;
   }
 
   try {
-    const response = await fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: `
@@ -829,8 +847,8 @@ async function saveEdit() {
             }
           }
         `,
-        variables: { id: editingGoalId.value, title: editTitle.value.trim() }
-      })
+        variables: { id: editingGoalId.value, title: editTitle.value.trim() },
+      }),
     });
 
     const result = await response.json();
@@ -839,31 +857,33 @@ async function saveEdit() {
     }
 
     // Uppdatera lokal state
-    goalsStore.updateGoal(editingGoalId.value, { title: editTitle.value.trim() });
+    goalsStore.updateGoal(editingGoalId.value, {
+      title: editTitle.value.trim(),
+    });
     await refresh();
   } catch (error) {
     console.error("Failed to update goal title:", error);
   }
 
-  mode.value = 'normal';
+  mode.value = "normal";
   editingGoalId.value = null;
 }
 
 // Avbryt redigering
 async function cancelEdit() {
   // Om vi avbryter ett nytt mål med tom titel, ta bort det
-  if (editingGoalId.value && editTitle.value === '') {
+  if (editingGoalId.value && editTitle.value === "") {
     await deleteGoal(editingGoalId.value);
   }
-  mode.value = 'normal';
+  mode.value = "normal";
   editingGoalId.value = null;
-  editTitle.value = '';
+  editTitle.value = "";
 }
 
 // Visa bekräftelse för borttagning
 function confirmDeleteGoal(goalId: number, title: string) {
   goalToDelete.value = { id: goalId, title };
-  deleteDialogSelection.value = 'confirm'; // Starta med "Ta bort mål" valt
+  deleteDialogSelection.value = "confirm"; // Starta med "Ta bort mål" valt
   showDeleteConfirmation.value = true;
 }
 
@@ -871,51 +891,56 @@ function confirmDeleteGoal(goalId: number, title: string) {
 function cancelDelete() {
   showDeleteConfirmation.value = false;
   goalToDelete.value = null;
-  deleteDialogSelection.value = 'cancel';
+  deleteDialogSelection.value = "cancel";
 }
 
 // Bekräfta och ta bort målet
 async function executeDelete() {
-  console.log('executeDelete called, goalToDelete:', goalToDelete.value);
+  console.log("executeDelete called, goalToDelete:", goalToDelete.value);
   if (!goalToDelete.value) {
-    console.log('No goal to delete');
+    console.log("No goal to delete");
     return;
   }
 
-  console.log('Calling deleteGoal with id:', goalToDelete.value.id);
+  console.log("Calling deleteGoal with id:", goalToDelete.value.id);
   await deleteGoal(goalToDelete.value.id);
-  console.log('Delete completed');
+  console.log("Delete completed");
   showDeleteConfirmation.value = false;
   goalToDelete.value = null;
-  deleteDialogSelection.value = 'cancel';
+  deleteDialogSelection.value = "cancel";
 }
 
 // Hantera navigering i delete-dialog
 function handleDeleteDialogKey(event: KeyboardEvent) {
   if (!showDeleteConfirmation.value) return;
 
-  console.log('Delete dialog key:', event.key, 'Selection:', deleteDialogSelection.value);
+  console.log(
+    "Delete dialog key:",
+    event.key,
+    "Selection:",
+    deleteDialogSelection.value
+  );
 
-  if (event.key === 'h') {
+  if (event.key === "h") {
     event.preventDefault();
     event.stopPropagation();
-    deleteDialogSelection.value = 'cancel';
-  } else if (event.key === 'l') {
+    deleteDialogSelection.value = "cancel";
+  } else if (event.key === "l") {
     event.preventDefault();
     event.stopPropagation();
-    deleteDialogSelection.value = 'confirm';
-  } else if (event.key === 'Enter') {
+    deleteDialogSelection.value = "confirm";
+  } else if (event.key === "Enter") {
     event.preventDefault();
     event.stopPropagation();
-    console.log('Enter pressed, selection:', deleteDialogSelection.value);
-    if (deleteDialogSelection.value === 'cancel') {
-      console.log('Canceling delete');
+    console.log("Enter pressed, selection:", deleteDialogSelection.value);
+    if (deleteDialogSelection.value === "cancel") {
+      console.log("Canceling delete");
       cancelDelete();
     } else {
-      console.log('Executing delete');
+      console.log("Executing delete");
       executeDelete();
     }
-  } else if (event.key === 'Escape') {
+  } else if (event.key === "Escape") {
     event.preventDefault();
     event.stopPropagation();
     cancelDelete();
@@ -940,16 +965,16 @@ async function deleteGoal(goalId: number) {
       }
     `;
 
-    const response = await $fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const response = await $fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: deleteGoalQuery,
-        variables: { id: goalId }
-      })
+        variables: { id: goalId },
+      }),
     });
 
     if (response.errors) {
@@ -985,16 +1010,16 @@ async function createSiblingGoal() {
       }
     `;
 
-    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
-      method: 'POST',
+    const goalResponse = await $fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
       body: JSON.stringify({
         query: createGoalQuery,
-        variables: { title: '' }
-      })
+        variables: { title: "" },
+      }),
     });
 
     if (goalResponse.errors) {
@@ -1014,17 +1039,20 @@ async function createSiblingGoal() {
         }
       `;
 
-      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({
-          query: createUserGoalQuery,
-          variables: { userId, goalId: newGoal.id }
-        })
-      });
+      const userGoalResponse = await $fetch(
+        "http://localhost:8080/v1/graphql",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+          },
+          body: JSON.stringify({
+            query: createUserGoalQuery,
+            variables: { userId, goalId: newGoal.id },
+          }),
+        }
+      );
 
       if (userGoalResponse.errors) {
         throw new Error(userGoalResponse.errors[0].message);
@@ -1040,17 +1068,20 @@ async function createSiblingGoal() {
         }
       `;
 
-      const relationResponse = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({
-          query: addParentRelationQuery,
-          variables: { childId: newGoal.id, parentId: goalId }
-        })
-      });
+      const relationResponse = await $fetch(
+        "http://localhost:8080/v1/graphql",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+          },
+          body: JSON.stringify({
+            query: addParentRelationQuery,
+            variables: { childId: newGoal.id, parentId: goalId },
+          }),
+        }
+      );
 
       if (relationResponse.errors) {
         throw new Error(relationResponse.errors[0].message);
@@ -1064,7 +1095,7 @@ async function createSiblingGoal() {
       await refresh();
 
       // Gå in i insert mode för det nya målet
-      await enterInsertMode(newGoal.id, '', false);
+      await enterInsertMode(newGoal.id, "", false);
     }
   } catch (error) {
     console.error("Failed to create sibling goal:", error);
@@ -1083,13 +1114,13 @@ function handleKeydown(event: KeyboardEvent) {
   if (showParentSearch.value || showChildSearch.value) return;
 
   // Insert mode - ignorera alla tangenter (hanteras direkt på input-elementet)
-  if (mode.value === 'insert') {
+  if (mode.value === "insert") {
     return;
   }
 
   // Normal mode - hantera alla kommandon
   // Hantera 'x' för att ta bort mål
-  if (event.key === 'x') {
+  if (event.key === "x") {
     event.preventDefault();
     if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
@@ -1102,9 +1133,9 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   // Hantera 'i' och 'a' för att gå in i insert mode
-  if (event.key === 'i' || event.key === 'a') {
+  if (event.key === "i" || event.key === "a") {
     event.preventDefault();
-    const atBeginning = event.key === 'a'; // 'a' = början, 'i' = slutet
+    const atBeginning = event.key === "a"; // 'a' = början, 'i' = slutet
 
     if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
@@ -1149,7 +1180,10 @@ function handleKeydown(event: KeyboardEvent) {
     } else if (event.key === "l") {
       event.preventDefault();
       const parentsCount = parents.value.length;
-      selectedParentIndex.value = Math.min(selectedParentIndex.value + 1, parentsCount - 1);
+      selectedParentIndex.value = Math.min(
+        selectedParentIndex.value + 1,
+        parentsCount - 1
+      );
     } else if (event.key === "k") {
       event.preventDefault();
       // Navigera till markerad förälder
@@ -1169,7 +1203,10 @@ function handleKeydown(event: KeyboardEvent) {
       event.preventDefault();
       const childrenCount = filteredChildren.value.length;
       if (childrenCount > 0) {
-        selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
+        selectedChildIndex.value = Math.min(
+          selectedChildIndex.value + 1,
+          childrenCount - 1
+        );
       }
     } else if (event.key === "k") {
       event.preventDefault();
@@ -1202,7 +1239,7 @@ function handleKeydown(event: KeyboardEvent) {
       if (parents.value.length > 0) {
         router.push(`/goal/${parents.value[0].id}`);
       } else {
-        router.push('/root-goals');
+        router.push("/root-goals");
       }
     }
   }
@@ -1226,11 +1263,14 @@ watch(filteredChildren, () => {
 });
 
 // Återställ parent mode när målet ändras
-watch(() => route.params.id, () => {
-  isParentMode.value = false;
-  selectedChildIndex.value = 0;
-  selectedParentIndex.value = 0;
-});
+watch(
+  () => route.params.id,
+  () => {
+    isParentMode.value = false;
+    selectedChildIndex.value = 0;
+    selectedParentIndex.value = 0;
+  }
+);
 </script>
 
 <template>
@@ -1252,11 +1292,11 @@ watch(() => route.params.id, () => {
           </NuxtLink>
 
           <!-- Insert mode för förälder -->
-          <div
-            v-for="(parent, index) in parents"
-            :key="parent.id"
-          >
-            <div v-if="mode === 'insert' && editingGoalId === parent.id" class="inline-block">
+          <div v-for="(parent, index) in parents" :key="parent.id">
+            <div
+              v-if="mode === 'insert' && editingGoalId === parent.id"
+              class="inline-block"
+            >
               <input
                 ref="editInputRef"
                 v-model="editTitle"
@@ -1272,9 +1312,11 @@ watch(() => route.params.id, () => {
               v-else
               :to="`/goal/${parent.id}`"
               class="px-2 py-1 rounded transition-all select-none inline-block"
-              :class="isParentMode && selectedParentIndex === index
-                ? 'text-gray-100 bg-blue-500 font-medium'
-                : 'text-gray-500 hover:text-gray-300'"
+              :class="
+                isParentMode && selectedParentIndex === index
+                  ? 'text-gray-100 bg-blue-500 font-medium'
+                  : 'text-gray-500 hover:text-gray-300'
+              "
               @mousedown="handleParentMouseDown(parent.id)"
               @mouseup="handleParentMouseUp"
               @mouseleave="handleParentMouseUp"
@@ -1484,7 +1526,11 @@ watch(() => route.params.id, () => {
             <!-- Huvudinnehåll -->
             <div
               class="relative border rounded-lg transition-all bg-gray-900"
-              :class="selectedChildIndex === index ? 'border-blue-500 bg-blue-900/20' : 'border-gray-700'"
+              :class="
+                selectedChildIndex === index
+                  ? 'border-blue-500 bg-blue-900/20'
+                  : 'border-gray-700'
+              "
               :style="{
                 transform: `translateX(${getSwipeOffset(child.id)}px)`,
                 transition: swipeState.isSwiping
@@ -1496,7 +1542,10 @@ watch(() => route.params.id, () => {
               @touchend="handleTouchEnd(child)"
             >
               <!-- Insert mode - visa input -->
-              <div v-if="mode === 'insert' && editingGoalId === child.id" class="p-4">
+              <div
+                v-if="mode === 'insert' && editingGoalId === child.id"
+                class="p-4"
+              >
                 <input
                   ref="editInputRef"
                   v-model="editTitle"
@@ -1573,45 +1622,41 @@ watch(() => route.params.id, () => {
     </UModal>
 
     <!-- Modal för att bekräfta borttagning av mål -->
-    <UModal
-      v-model:open="showDeleteConfirmation"
-      title="Ta bort mål?"
-    >
-      <p v-if="goalToDelete" class="text-gray-400">
-        Vill du verkligen ta bort målet
-        <strong>"{{ goalToDelete.title }}"</strong>?
-        <br><br>
-        <span class="text-red-400">Varning: Detta tar även bort alla undermål och relationer. Detta går inte att ångra.</span>
-      </p>
-
+    <UModal v-model:open="showDeleteConfirmation" title="Ta bort mål?">
       <template #footer="{ close }">
         <div class="flex justify-end gap-2">
           <UButton
             color="gray"
             variant="ghost"
             @click="cancelDelete"
-            :class="deleteDialogSelection === 'cancel' ? 'ring-2 ring-blue-500' : ''"
+            :class="
+              deleteDialogSelection === 'cancel' ? 'ring-2 ring-blue-500' : ''
+            "
           >
             Avbryt
           </UButton>
           <UButton
             color="red"
             @click="executeDelete"
-            :class="deleteDialogSelection === 'confirm' ? 'ring-2 ring-blue-400' : ''"
+            :class="
+              deleteDialogSelection === 'confirm' ? 'ring-2 ring-blue-400' : ''
+            "
           >
-            Ta bort mål
+            Ta bort
           </UButton>
         </div>
-        <div class="text-xs text-gray-500 mt-3 text-center">
-          h/l för att navigera, Enter för att bekräfta, Escape för att avbryta
-        </div>
+        <!-- <div class="text-xs text-gray-500 mt-3 text-center"> -->
+        <!--   h/l = navigera, Enter = Bekräfta, Escape = Avbryt -->
+        <!-- </div> -->
       </template>
     </UModal>
   </div>
   <div v-else class="max-w-4xl mx-auto p-6">
     <div class="text-center">
       <h1 class="text-3xl font-bold text-gray-300 mb-4">Du måste logga in</h1>
-      <p class="text-gray-600 mb-6">För att se dina mål måste du vara inloggad.</p>
+      <p class="text-gray-600 mb-6">
+        För att se dina mål måste du vara inloggad.
+      </p>
       <NuxtLink to="/login">
         <UButton>Logga in</UButton>
       </NuxtLink>

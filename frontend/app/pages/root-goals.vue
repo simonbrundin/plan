@@ -344,10 +344,213 @@ function handleSearchKeydown(event: KeyboardEvent) {
 const selectedIndex = ref(0);
 const router = useRouter();
 
+// Vim modes
+const mode = ref<'normal' | 'insert'>('normal');
+const editingGoalId = ref<number | null>(null);
+const editTitle = ref('');
+
+// Skapa nytt grundmål
+async function createNewRootGoal() {
+  const userId = user.value?.id;
+  if (!userId) {
+    console.error("No user logged in");
+    return;
+  }
+
+  try {
+    // Skapa nytt mål med tom titel
+    const createGoalQuery = `
+      mutation CreateGoal($title: String!) {
+        insert_goals_one(object: { title: $title }) {
+          id
+          title
+          created
+          finished
+        }
+      }
+    `;
+
+    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: createGoalQuery,
+        variables: { title: '' }
+      })
+    });
+
+    if (goalResponse.errors) {
+      throw new Error(goalResponse.errors[0].message);
+    }
+
+    if (goalResponse.data?.insert_goals_one?.id) {
+      const newGoal = goalResponse.data.insert_goals_one;
+
+      // Skapa user_goals relation
+      const createUserGoalQuery = `
+        mutation CreateUserGoal($userId: Int!, $goalId: Int!) {
+          insert_user_goals_one(object: { user_id: $userId, goal_id: $goalId }) {
+            user_id
+            goal_id
+          }
+        }
+      `;
+
+      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: createUserGoalQuery,
+          variables: { userId, goalId: newGoal.id }
+        })
+      });
+
+      if (userGoalResponse.errors) {
+        throw new Error(userGoalResponse.errors[0].message);
+      }
+
+      // Uppdatera lokal state
+      goalsStore.addGoal(newGoal);
+      await fetchGoals();
+
+      // Gå in i insert mode för det nya målet
+      await enterInsertMode(newGoal.id, '');
+    }
+  } catch (error) {
+    console.error("Failed to create root goal:", error);
+  }
+}
+
+// Gå in i insert mode för att redigera ett mål
+async function enterInsertMode(goalId: number, title: string) {
+  mode.value = 'insert';
+  editingGoalId.value = goalId;
+  editTitle.value = title;
+
+  await nextTick();
+  await nextTick();
+
+  const input = document.querySelector('input.border-blue-500') as HTMLInputElement;
+  if (input) {
+    input.focus();
+    input.setSelectionRange(title.length, title.length);
+  }
+}
+
+// Spara ändringar
+async function saveEdit() {
+  if (!editingGoalId.value) {
+    mode.value = 'normal';
+    return;
+  }
+
+  // Om titeln är tom, ta bort målet
+  if (!editTitle.value.trim()) {
+    await deleteGoal(editingGoalId.value);
+    mode.value = 'normal';
+    editingGoalId.value = null;
+    return;
+  }
+
+  try {
+    const response = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UpdateGoalTitle($id: Int!, $title: String!) {
+            update_goals_by_pk(pk_columns: { id: $id }, _set: { title: $title }) {
+              id
+              title
+            }
+          }
+        `,
+        variables: { id: editingGoalId.value, title: editTitle.value.trim() }
+      })
+    });
+
+    if (response.errors) {
+      throw new Error(response.errors[0].message);
+    }
+
+    goalsStore.updateGoal(editingGoalId.value, { title: editTitle.value.trim() });
+    await fetchGoals();
+  } catch (error) {
+    console.error("Failed to update goal title:", error);
+  }
+
+  mode.value = 'normal';
+  editingGoalId.value = null;
+}
+
+// Avbryt redigering
+async function cancelEdit() {
+  if (editingGoalId.value && editTitle.value === '') {
+    await deleteGoal(editingGoalId.value);
+  }
+  mode.value = 'normal';
+  editingGoalId.value = null;
+  editTitle.value = '';
+}
+
+// Ta bort ett mål
+async function deleteGoal(goalId: number) {
+  try {
+    const deleteGoalQuery = `
+      mutation DeleteGoal($id: Int!) {
+        delete_goal_relations(where: { _or: [{ child_id: { _eq: $id } }, { parent_id: { _eq: $id } }] }) {
+          affected_rows
+        }
+        delete_user_goals(where: { goal_id: { _eq: $id } }) {
+          affected_rows
+        }
+        delete_goals_by_pk(id: $id) {
+          id
+        }
+      }
+    `;
+
+    const response = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: deleteGoalQuery,
+        variables: { id: goalId }
+      })
+    });
+
+    if (response.errors) {
+      throw new Error(response.errors[0].message);
+    }
+
+    goalsStore.removeGoal(goalId);
+    await fetchGoals();
+  } catch (error) {
+    console.error("Failed to delete goal:", error);
+  }
+}
+
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Ignorera om sökfältet är aktivt
   if (showSearch.value) return;
+
+  // Insert mode - ignorera alla tangenter (hanteras direkt på input-elementet)
+  if (mode.value === 'insert') {
+    return;
+  }
 
   const goalsCount = goals.value.length;
   if (goalsCount === 0) return;
@@ -358,7 +561,11 @@ function handleKeydown(event: KeyboardEvent) {
   } else if (event.key === "k") {
     event.preventDefault();
     selectedIndex.value = Math.max(selectedIndex.value - 1, 0);
-  } else if (event.key === "Enter" || event.key === "l") {
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    // Skapa nytt grundmål
+    createNewRootGoal();
+  } else if (event.key === "l") {
     event.preventDefault();
     const selectedGoal = goals.value[selectedIndex.value];
     if (selectedGoal) {
@@ -457,12 +664,25 @@ watch(goals, () => {
       <li
         v-for="(goal, index) in goals"
         :key="goal.id"
-        class="border rounded-lg hover:border-gray-600 transition-colors"
+        class="border rounded-lg transition-colors"
         :class="selectedIndex === index ? 'border-blue-500 bg-blue-900/20' : 'border-gray-700'"
       >
+        <!-- Insert mode - visa input -->
+        <div v-if="mode === 'insert' && editingGoalId === goal.id" class="p-4">
+          <input
+            v-model="editTitle"
+            type="text"
+            class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            @keydown.enter.prevent="saveEdit"
+            @keydown.esc.prevent="cancelEdit"
+          />
+        </div>
+
+        <!-- Normal mode - visa länk -->
         <NuxtLink
+          v-else
           :to="`/goal/${goal.id}`"
-          class="p-4 block"
+          class="p-4 block hover:bg-gray-800/50"
         >
           <div class="flex items-start justify-between mb-2">
             <h3
