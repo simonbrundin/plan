@@ -150,7 +150,7 @@ const goalsStore = useGoalsStore();
 // });
 
 // Visa/dölj avklarade mål
-const showCompleted = ref(true);
+const showCompleted = ref(false);
 
 // Filtrerade undermål baserat på showCompleted
 const filteredChildren = computed(() => {
@@ -746,14 +746,129 @@ const selectedChildIndex = ref(0);
 const selectedParentIndex = ref(0);
 const isParentMode = ref(false);
 
+// Vim modes
+const mode = ref<'normal' | 'insert'>('normal');
+const editingGoalId = ref<number | null>(null);
+const editTitle = ref('');
+const editInputRef = ref<HTMLInputElement | null>(null);
+
 // Leader key state
 const isLeaderMode = ref(false);
 let leaderTimeout: NodeJS.Timeout | null = null;
+
+// Gå in i insert mode för att redigera ett mål
+async function enterInsertMode(goalId: number, title: string, atBeginning: boolean = false) {
+  mode.value = 'insert';
+  editingGoalId.value = goalId;
+  editTitle.value = title;
+
+  // Vänta tills DOM uppdateras
+  await nextTick();
+  await nextTick();
+
+  // Hitta input-elementet som nu är synligt
+  const input = document.querySelector('input[type="text"]:focus, input[type="text"]:not([style*="display: none"])') as HTMLInputElement;
+  if (input) {
+    input.focus();
+    if (atBeginning) {
+      // 'a' sätter cursor i början
+      input.setSelectionRange(0, 0);
+    } else {
+      // 'i' sätter cursor i slutet
+      input.setSelectionRange(title.length, title.length);
+    }
+  } else {
+    // Fallback: försök hitta vilket input-element som helst
+    setTimeout(() => {
+      const fallbackInput = document.querySelector('input.border-blue-500') as HTMLInputElement;
+      if (fallbackInput) {
+        fallbackInput.focus();
+        if (atBeginning) {
+          fallbackInput.setSelectionRange(0, 0);
+        } else {
+          fallbackInput.setSelectionRange(title.length, title.length);
+        }
+      }
+    }, 50);
+  }
+}
+
+// Spara ändringar och gå tillbaka till normal mode
+async function saveEdit() {
+  if (!editingGoalId.value || !editTitle.value.trim()) {
+    mode.value = 'normal';
+    editingGoalId.value = null;
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UpdateGoalTitle($id: Int!, $title: String!) {
+            update_goals_by_pk(pk_columns: { id: $id }, _set: { title: $title }) {
+              id
+              title
+            }
+          }
+        `,
+        variables: { id: editingGoalId.value, title: editTitle.value.trim() }
+      })
+    });
+
+    const result = await response.json();
+    if (result.errors) {
+      throw new Error(result.errors[0].message);
+    }
+
+    // Uppdatera lokal state
+    goalsStore.updateGoal(editingGoalId.value, { title: editTitle.value.trim() });
+    await refresh();
+  } catch (error) {
+    console.error("Failed to update goal title:", error);
+  }
+
+  mode.value = 'normal';
+  editingGoalId.value = null;
+}
+
+// Avbryt redigering
+function cancelEdit() {
+  mode.value = 'normal';
+  editingGoalId.value = null;
+  editTitle.value = '';
+}
 
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Ignorera om sökfält är aktiva
   if (showParentSearch.value || showChildSearch.value) return;
+
+  // Insert mode - ignorera alla tangenter (hanteras direkt på input-elementet)
+  if (mode.value === 'insert') {
+    return;
+  }
+
+  // Normal mode - hantera alla kommandon
+  // Hantera 'i' och 'a' för att gå in i insert mode
+  if (event.key === 'i' || event.key === 'a') {
+    event.preventDefault();
+    const atBeginning = event.key === 'a'; // 'a' = början, 'i' = slutet
+
+    if (isParentMode.value && parents.value.length > 0) {
+      const parent = parents.value[selectedParentIndex.value];
+      enterInsertMode(parent.id, parent.title, atBeginning);
+    } else if (filteredChildren.value.length > 0) {
+      const child = filteredChildren.value[selectedChildIndex.value];
+      enterInsertMode(child.id, child.title, atBeginning);
+    }
+    return;
+  }
 
   // Hantera leader key (space)
   if (event.key === " " && !isLeaderMode.value) {
@@ -885,23 +1000,41 @@ watch(() => route.params.id, () => {
           >
             Grundmål
           </NuxtLink>
-          <NuxtLink
+
+          <!-- Insert mode för förälder -->
+          <div
             v-for="(parent, index) in parents"
             :key="parent.id"
-            :to="`/goal/${parent.id}`"
-            class="px-2 py-1 rounded transition-all select-none"
-            :class="isParentMode && selectedParentIndex === index
-              ? 'text-gray-100 bg-blue-500 font-medium'
-              : 'text-gray-500 hover:text-gray-300'"
-            @mousedown="handleParentMouseDown(parent.id)"
-            @mouseup="handleParentMouseUp"
-            @mouseleave="handleParentMouseUp"
-            @touchstart="handleParentMouseDown(parent.id)"
-            @touchend="handleParentMouseUp"
-            @touchcancel="handleParentMouseUp"
           >
-            {{ parent.title }}
-          </NuxtLink>
+            <div v-if="mode === 'insert' && editingGoalId === parent.id" class="inline-block">
+              <input
+                ref="editInputRef"
+                v-model="editTitle"
+                type="text"
+                class="px-3 py-1 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                @keydown.enter.prevent="saveEdit"
+                @keydown.esc.prevent="cancelEdit"
+              />
+            </div>
+
+            <!-- Normal mode för förälder -->
+            <NuxtLink
+              v-else
+              :to="`/goal/${parent.id}`"
+              class="px-2 py-1 rounded transition-all select-none inline-block"
+              :class="isParentMode && selectedParentIndex === index
+                ? 'text-gray-100 bg-blue-500 font-medium'
+                : 'text-gray-500 hover:text-gray-300'"
+              @mousedown="handleParentMouseDown(parent.id)"
+              @mouseup="handleParentMouseUp"
+              @mouseleave="handleParentMouseUp"
+              @touchstart="handleParentMouseDown(parent.id)"
+              @touchend="handleParentMouseUp"
+              @touchcancel="handleParentMouseUp"
+            >
+              {{ parent.title }}
+            </NuxtLink>
+          </div>
         </div>
 
         <!-- + knapp för att lägga till förälder -->
@@ -1100,7 +1233,7 @@ watch(() => route.params.id, () => {
 
             <!-- Huvudinnehåll -->
             <div
-              class="relative border rounded-lg hover:border-gray-600 transition-all bg-gray-900"
+              class="relative border rounded-lg transition-all bg-gray-900"
               :class="selectedChildIndex === index ? 'border-blue-500 bg-blue-900/20' : 'border-gray-700'"
               :style="{
                 transform: `translateX(${getSwipeOffset(child.id)}px)`,
@@ -1112,9 +1245,26 @@ watch(() => route.params.id, () => {
               @touchmove="handleTouchMove($event)"
               @touchend="handleTouchEnd(child)"
             >
+              <!-- Insert mode - visa input -->
+              <div v-if="mode === 'insert' && editingGoalId === child.id" class="p-4">
+                <input
+                  ref="editInputRef"
+                  v-model="editTitle"
+                  type="text"
+                  class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  @keydown.enter.prevent="saveEdit"
+                  @keydown.esc.prevent="cancelEdit"
+                />
+                <div class="text-xs text-gray-500 mt-2">
+                  Enter för att spara, Escape för att avbryta
+                </div>
+              </div>
+
+              <!-- Normal mode - visa länk -->
               <NuxtLink
+                v-else
                 :to="`/goal/${child.id}`"
-                class="p-4 flex items-start justify-between block"
+                class="p-4 flex items-start justify-between block hover:bg-gray-800/50"
               >
                 <div class="flex-1">
                   <h3
@@ -1137,6 +1287,14 @@ watch(() => route.params.id, () => {
           delar.
         </div>
       </div>
+    </div>
+
+    <!-- Vim mode indikator -->
+    <div
+      v-if="mode === 'insert'"
+      class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-500 text-white font-mono text-sm rounded shadow-lg"
+    >
+      -- INSERT --
     </div>
 
     <!-- Modal för att bekräfta borttagning av föräldrarelation -->
