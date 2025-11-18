@@ -7,6 +7,7 @@ definePageMeta({
 
 
  const route = useRoute();
+const router = useRouter();
 const goalId = parseInt(route.params.id as string);
 const { user } = useUserSession();
 const config = useRuntimeConfig();
@@ -739,6 +740,48 @@ function getSwipeOffset(childId: number): number {
   }
   return 0;
 }
+
+// Vim-style navigering för undermål
+const selectedChildIndex = ref(0);
+
+// Hantera Vim-kommandon
+function handleKeydown(event: KeyboardEvent) {
+  // Ignorera om sökfält är aktiva
+  if (showParentSearch.value || showChildSearch.value) return;
+
+  const childrenCount = filteredChildren.value.length;
+  if (childrenCount === 0) return;
+
+  if (event.key === "j") {
+    event.preventDefault();
+    selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
+  } else if (event.key === "k") {
+    event.preventDefault();
+    selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    const selectedChild = filteredChildren.value[selectedChildIndex.value];
+    if (selectedChild) {
+      router.push(`/goal/${selectedChild.id}`);
+    }
+  }
+}
+
+// Lägg till och ta bort event listener
+onMounted(() => {
+  window.addEventListener("keydown", handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeydown);
+});
+
+// Återställ selectedChildIndex när children ändras
+watch(filteredChildren, () => {
+  if (selectedChildIndex.value >= filteredChildren.value.length) {
+    selectedChildIndex.value = Math.max(0, filteredChildren.value.length - 1);
+  }
+});
 </script>
 
 <template>
@@ -956,7 +999,7 @@ function getSwipeOffset(childId: number): number {
 
         <ul v-if="filteredChildren.length > 0" class="space-y-3">
           <li
-            v-for="child in filteredChildren"
+            v-for="(child, index) in filteredChildren"
             :key="child.id"
             class="relative overflow-hidden rounded-lg"
           >
@@ -970,7 +1013,8 @@ function getSwipeOffset(childId: number): number {
 
             <!-- Huvudinnehåll -->
             <div
-              class="relative border border-gray-700 rounded-lg hover:border-gray-600 transition-all bg-gray-900"
+              class="relative border rounded-lg hover:border-gray-600 transition-all bg-gray-900"
+              :class="selectedChildIndex === index ? 'border-blue-500 bg-blue-900/20' : 'border-gray-700'"
               :style="{
                 transform: `translateX(${getSwipeOffset(child.id)}px)`,
                 transition: swipeState.isSwiping

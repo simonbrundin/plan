@@ -339,6 +339,49 @@ function handleSearchKeydown(event: KeyboardEvent) {
     searchQuery.value = "";
   }
 }
+
+// Vim-style navigering
+const selectedIndex = ref(0);
+const router = useRouter();
+
+// Hantera Vim-kommandon
+function handleKeydown(event: KeyboardEvent) {
+  // Ignorera om sökfältet är aktivt
+  if (showSearch.value) return;
+
+  const goalsCount = goals.value.length;
+  if (goalsCount === 0) return;
+
+  if (event.key === "j") {
+    event.preventDefault();
+    selectedIndex.value = Math.min(selectedIndex.value + 1, goalsCount - 1);
+  } else if (event.key === "k") {
+    event.preventDefault();
+    selectedIndex.value = Math.max(selectedIndex.value - 1, 0);
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    const selectedGoal = goals.value[selectedIndex.value];
+    if (selectedGoal) {
+      router.push(`/goal/${selectedGoal.id}`);
+    }
+  }
+}
+
+// Lägg till och ta bort event listener
+onMounted(() => {
+  window.addEventListener("keydown", handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeydown);
+});
+
+// Återställ selectedIndex när goals ändras
+watch(goals, () => {
+  if (selectedIndex.value >= goals.value.length) {
+    selectedIndex.value = Math.max(0, goals.value.length - 1);
+  }
+});
 </script>
 
 <template>
@@ -412,9 +455,10 @@ function handleSearchKeydown(event: KeyboardEvent) {
 
     <ul v-else class="space-y-3">
       <li
-        v-for="goal in goals"
+        v-for="(goal, index) in goals"
         :key="goal.id"
-        class="border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
+        class="border rounded-lg hover:border-gray-600 transition-colors"
+        :class="selectedIndex === index ? 'border-blue-500 bg-blue-900/20' : 'border-gray-700'"
       >
         <NuxtLink
           :to="`/goal/${goal.id}`"
