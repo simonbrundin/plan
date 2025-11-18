@@ -2,14 +2,8 @@
 
 ## Utvecklingsmiljö
 
-- [ ] `dev` fungerar i plan och ger mig notis i telefonen
-  - [ ] Auth fungerar
-  - [ ] DevContainer
-    - [ ] Simon CLI finns tillgängligt i min DevContainer
-    - [ ] NeoVim används i DevContainer
-      - [ ] Förstå hur det fungerar när man använder NeoVim
-      - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att
-            man ansluter med NeoVim
+- [x] `dev` fungerar i plan och ger mig notis i telefonen
+  - [x] Auth fungerar
 
 ### Badrum
 
@@ -35,6 +29,12 @@
 
 #### Senare
 
+- [ ] DevContainer
+  - [ ] Simon CLI finns tillgängligt i min DevContainer
+  - [ ] NeoVim används i DevContainer
+    - [ ] Förstå hur det fungerar när man använder NeoVim
+    - [ ] Använd AI för att förså hur officiella dokumentationen föreslår att
+          man ansluter med NeoVim
 - [ ] Mend Revonate Bot installerat för att uppdatera depencencies
 - [x] Prod-ikon
 - [ ] Skapa appikon för bla PWA

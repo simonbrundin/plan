@@ -35,7 +35,7 @@ dc_resource(
 
 local_resource(
   'Nuxt Dev Server',
-  serve_cmd='cd ../frontend && bun run dev',
+  serve_cmd='cd ../frontend && bun run dev --host',
   links=['http://localhost:3000'],
   labels=['Frontend'],
   resource_deps=['postgres', 'hasura'],  # Vänta på backend
