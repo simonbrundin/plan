@@ -33,7 +33,7 @@ const { loggedIn, user, session, fetch, clear, openInPopup } = useUserSession();
   </div>
   <div v-else>
     <h1>Not logged in</h1>
-    <a href="/auth/authentik">
+    <a href="/api/auth/authentik">
       <UButton>Logga in</UButton>
     </a>
   </div>

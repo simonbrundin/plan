@@ -50,8 +50,8 @@ def get-local-ip [] {
 let teleport_user = (get-teleport-username)
 let local_ip = (get-local-ip)
 let namespace = $"plan-dev-($teleport_user)" 
-let link = $"https://($namespace).simonbrundin.com"
-# let link = $"http://($local_ip):3000"
+# let link = $"https://($namespace).simonbrundin.com"
+let link = $"http://($local_ip):3000"
 
 # -----------------------------------------------
 # Skicka notis till telefon

@@ -1,14 +1,14 @@
 # ------------------------------------------------------------------
 # Local Development Mode
-# Runs all services locally via Docker Compose
+# Runs database and backend in Docker, frontend locally
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
 # Docker Compose Setup
 # ------------------------------------------------------------------
 
-# Ladda Docker Compose setup
-docker_compose('./docker-compose.yml')
+# Ladda backend services (postgres + hasura) från dedikerad compose-fil
+docker_compose('./docker-compose.backend.yml')
 
 # ------------------------------------------------------------------
 # PostgreSQL Database
@@ -30,13 +30,15 @@ dc_resource(
 )
 
 # ------------------------------------------------------------------
-# Frontend (Nuxt Dev Server)
+# Frontend (Nuxt Dev Server) - körs lokalt
 # ------------------------------------------------------------------
 
-dc_resource(
-  'frontend',
-  labels=['Frontend'],
+local_resource(
+  'Nuxt Dev Server',
+  serve_cmd='cd ../frontend && bun run dev',
   links=['http://localhost:3000'],
+  labels=['Frontend'],
+  resource_deps=['postgres', 'hasura'],  # Vänta på backend
 )
 
 # ------------------------------------------------------------------

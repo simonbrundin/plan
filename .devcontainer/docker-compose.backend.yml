@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: plan-dev-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: plan
+      POSTGRES_PASSWORD: plan
+      POSTGRES_DB: plan
+    volumes:
+      # Mount init scripts från Kubernetes overlay
+      - ../environments/kubernetes/overlays/dev/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../environments/kubernetes/overlays/dev/db/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql:ro
+      - plan-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plan -d plan"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  hasura:
+    image: hasura/graphql-engine:v2.41.0
+    container_name: plan-dev-hasura
+    ports:
+      - "8080:8080"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://plan:plan@postgres:5432/plan
+      HASURA_GRAPHQL_ADMIN_SECRET: dev-admin-secret
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  plan-postgres-data:

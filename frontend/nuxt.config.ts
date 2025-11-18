@@ -42,8 +42,16 @@ export default defineNuxtConfig({
       },
     ],
   ],
+  // Disable fontsource provider for unifont (API is unreliable)
+  fonts: {
+    providers: {
+      fontsource: false,
+    },
+  },
   pinia: {
     storesDirs: ["./app/stores/**"],
+    // Disable Pinia state transfer to prevent serialization errors
+    disableNuxt: false,
   },
   colorMode: {
     classSuffix: "",
@@ -95,6 +103,13 @@ export default defineNuxtConfig({
         console.warn(
           "Pinia payload serialization error - this is expected and handled",
         );
+      }
+    },
+    // Disable Pinia state transfer completely
+    "app:beforeMount": (app) => {
+      // Clear any Pinia state from the payload to prevent serialization
+      if (app?.config?.globalProperties?.$nuxt?.payload?.state) {
+        delete app.config.globalProperties.$nuxt.payload.state
       }
     },
   },

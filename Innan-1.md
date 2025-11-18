@@ -35,6 +35,7 @@
 
 #### Senare
 
+- [ ] Mend Revonate Bot installerat för att uppdatera depencencies
 - [x] Prod-ikon
 - [ ] Skapa appikon för bla PWA
 - [ ] Installera
