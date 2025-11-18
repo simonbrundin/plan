@@ -358,7 +358,7 @@ function handleKeydown(event: KeyboardEvent) {
   } else if (event.key === "k") {
     event.preventDefault();
     selectedIndex.value = Math.max(selectedIndex.value - 1, 0);
-  } else if (event.key === "Enter") {
+  } else if (event.key === "Enter" || event.key === "l") {
     event.preventDefault();
     const selectedGoal = goals.value[selectedIndex.value];
     if (selectedGoal) {

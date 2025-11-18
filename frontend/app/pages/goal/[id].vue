@@ -749,20 +749,46 @@ function handleKeydown(event: KeyboardEvent) {
   // Ignorera om sökfält är aktiva
   if (showParentSearch.value || showChildSearch.value) return;
 
-  const childrenCount = filteredChildren.value.length;
-  if (childrenCount === 0) return;
-
   if (event.key === "j") {
     event.preventDefault();
-    selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
+    const childrenCount = filteredChildren.value.length;
+    if (childrenCount > 0) {
+      selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
+    }
   } else if (event.key === "k") {
     event.preventDefault();
-    selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
-  } else if (event.key === "Enter") {
+    const childrenCount = filteredChildren.value.length;
+    if (childrenCount > 0) {
+      selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
+    }
+  } else if (event.key === "Enter" || event.key === "l") {
     event.preventDefault();
-    const selectedChild = filteredChildren.value[selectedChildIndex.value];
-    if (selectedChild) {
-      router.push(`/goal/${selectedChild.id}`);
+    const childrenCount = filteredChildren.value.length;
+    if (childrenCount > 0) {
+      const selectedChild = filteredChildren.value[selectedChildIndex.value];
+      if (selectedChild) {
+        router.push(`/goal/${selectedChild.id}`);
+      }
+    }
+  } else if (event.key === "h") {
+    event.preventDefault();
+    // Kolla om föregående sida var en förälder
+    const referrer = document.referrer;
+    const parentIds = parents.value.map(p => p.id);
+
+    // Parse goal ID från referrer (om det finns)
+    const referrerMatch = referrer.match(/\/goal\/(\d+)/);
+    const referrerId = referrerMatch ? parseInt(referrerMatch[1]) : null;
+
+    if (referrerId && parentIds.includes(referrerId)) {
+      // Föregående sida var en förälder - gå tillbaka
+      router.back();
+    } else if (parents.value.length > 0) {
+      // Navigera till första föräldern
+      router.push(`/goal/${parents.value[0].id}`);
+    } else {
+      // Inga föräldrar - gå till root-goals
+      router.push('/root-goals');
     }
   }
 }
