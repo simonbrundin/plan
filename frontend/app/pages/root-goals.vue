@@ -589,6 +589,18 @@ watch(goals, () => {
     selectedIndex.value = Math.max(0, goals.value.length - 1);
   }
 });
+
+// Scrolla till markerat mål när selectedIndex ändras
+watch(selectedIndex, async () => {
+  await nextTick();
+  const selectedElement = document.querySelector(`[data-goal-index="${selectedIndex.value}"]`) as HTMLElement;
+  if (selectedElement) {
+    selectedElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    });
+  }
+});
 </script>
 
 <template>
@@ -664,6 +676,7 @@ watch(goals, () => {
       <li
         v-for="(goal, index) in goals"
         :key="goal.id"
+        :data-goal-index="index"
         class="border rounded-lg transition-colors"
         :class="selectedIndex === index ? 'border-blue-500 bg-blue-900/20' : 'border-gray-700'"
       >

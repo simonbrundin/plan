@@ -1271,112 +1271,91 @@ watch(
     selectedParentIndex.value = 0;
   }
 );
+
+// Scrolla till markerat child när selectedChildIndex ändras
+watch(selectedChildIndex, async () => {
+  await nextTick();
+  const selectedElement = document.querySelector(`[data-child-index="${selectedChildIndex.value}"]`) as HTMLElement;
+  if (selectedElement) {
+    selectedElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    });
+  }
+});
+
+// Scrolla till markerad parent när selectedParentIndex ändras
+watch(selectedParentIndex, async () => {
+  await nextTick();
+  const selectedElement = document.querySelector(`[data-parent-index="${selectedParentIndex.value}"]`) as HTMLElement;
+  if (selectedElement) {
+    selectedElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    });
+  }
+});
 </script>
 
 <template>
-  <div v-if="user" class="max-w-4xl mx-auto p-6">
+  <div v-if="user" class="max-w-4xl mx-auto p-6 h-screen flex flex-col overflow-hidden">
     <div v-if="!goal" class="text-center py-12">
       <p class="text-gray-500">Laddar mål...</p>
     </div>
 
-    <div v-else class="space-y-8">
+    <div v-else class="flex flex-col h-full gap-6">
       <!-- Breadcrumb / Föräldrar -->
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2 text-sm flex-wrap">
-          <NuxtLink
-            v-if="parents.length === 0"
-            to="/root-goals"
-            class="text-blue-400 hover:text-blue-300 transition-colors font-medium"
-          >
+          <NuxtLink v-if="parents.length === 0" to="/root-goals"
+            class="text-blue-400 hover:text-blue-300 transition-colors font-medium">
             Grundmål
           </NuxtLink>
 
           <!-- Insert mode för förälder -->
           <div v-for="(parent, index) in parents" :key="parent.id">
-            <div
-              v-if="mode === 'insert' && editingGoalId === parent.id"
-              class="inline-block"
-            >
-              <input
-                ref="editInputRef"
-                v-model="editTitle"
-                type="text"
+            <div v-if="mode === 'insert' && editingGoalId === parent.id" class="inline-block">
+              <input ref="editInputRef" v-model="editTitle" type="text"
                 class="px-3 py-1 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                @keydown.enter.prevent="saveEdit"
-                @keydown.esc.prevent="cancelEdit"
-              />
+                @keydown.enter.prevent="saveEdit" @keydown.esc.prevent="cancelEdit" />
             </div>
 
             <!-- Normal mode för förälder -->
-            <NuxtLink
-              v-else
-              :to="`/goal/${parent.id}`"
-              class="px-2 py-1 rounded transition-all select-none inline-block"
-              :class="
-                isParentMode && selectedParentIndex === index
-                  ? 'text-gray-100 bg-blue-500 font-medium'
-                  : 'text-gray-500 hover:text-gray-300'
-              "
-              @mousedown="handleParentMouseDown(parent.id)"
-              @mouseup="handleParentMouseUp"
-              @mouseleave="handleParentMouseUp"
-              @touchstart="handleParentMouseDown(parent.id)"
-              @touchend="handleParentMouseUp"
-              @touchcancel="handleParentMouseUp"
-            >
+            <NuxtLink v-else :to="`/goal/${parent.id}`" :data-parent-index="index"
+              class="px-2 py-1 rounded transition-all select-none inline-block" :class="isParentMode && selectedParentIndex === index
+                ? 'text-gray-100 bg-blue-500 font-medium'
+                : 'text-gray-500 hover:text-gray-300'
+                " @mousedown="handleParentMouseDown(parent.id)" @mouseup="handleParentMouseUp"
+              @mouseleave="handleParentMouseUp" @touchstart="handleParentMouseDown(parent.id)"
+              @touchend="handleParentMouseUp" @touchcancel="handleParentMouseUp">
               {{ parent.title }}
             </NuxtLink>
           </div>
         </div>
 
         <!-- + knapp för att lägga till förälder -->
-        <button
-          @click="toggleParentSearch"
+        <button @click="toggleParentSearch"
           class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-          title="Lägg till förälder"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
-            />
+          title="Lägg till förälder">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
         </button>
       </div>
 
       <!-- Sökfält för föräldrar -->
-      <div
-        v-if="showParentSearch"
-        class="border border-gray-700 rounded-lg p-4 bg-gray-800"
-      >
+      <div v-if="showParentSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 flex-shrink-0">
         <div class="mb-2">
-          <input
-            ref="parentSearchInput"
-            v-model="parentSearchQuery"
-            @keydown="handleSearchKeydown"
-            type="text"
+          <input ref="parentSearchInput" v-model="parentSearchQuery" @keydown="handleSearchKeydown" type="text"
             placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
             class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autofocus
-          />
+            autofocus />
         </div>
 
         <!-- Sökresultat -->
         <div v-if="searchResults.length > 0" class="space-y-1 mt-2">
-          <button
-            v-for="result in searchResults"
-            :key="result.id"
-            @click="addExistingParent(result.id)"
-            class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors"
-          >
+          <button v-for="result in searchResults" :key="result.id" @click="addExistingParent(result.id)"
+            class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors">
             <div class="font-medium text-gray-200">{{ result.title }}</div>
             <div class="text-xs text-gray-500">
               {{ new Date(result.created).toLocaleDateString("sv-SE") }}
@@ -1385,114 +1364,59 @@ watch(
         </div>
 
         <!-- Meddelande när inga resultat -->
-        <div
-          v-else-if="parentSearchQuery.trim()"
-          class="text-sm text-gray-500 px-4 py-2"
-        >
+        <div v-else-if="parentSearchQuery.trim()" class="text-sm text-gray-500 px-4 py-2">
           Tryck Enter för att skapa "{{ parentSearchQuery }}" som nytt mål
         </div>
       </div>
 
       <!-- Huvudmål -->
-      <h1 class="text-4xl font-bold text-gray-100">{{ goal.title }}</h1>
+      <h1 class="text-4xl font-bold text-gray-100 flex-shrink-0">{{ goal.title }}</h1>
 
-      <!-- Undermål -->
-      <div>
+      <!-- Undermål - scrollbar container -->
+      <div class="flex-1 overflow-y-auto min-h-0">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-2xl font-semibold text-gray-300"></h2>
           <div class="flex items-center gap-2">
-            <button
-              @click="showCompleted = !showCompleted"
-              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-              :title="
-                showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'
-              "
-            >
-              <svg
-                v-if="showCompleted"
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
+            <button @click="showCompleted = !showCompleted"
+              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800" :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'
+                ">
+              <svg v-if="showCompleted" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              <svg
-                v-else
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                />
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
               </svg>
             </button>
-            <button
-              @click="toggleChildSearch"
+            <button @click="toggleChildSearch"
               class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-              title="Lägg till undermål"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                />
+              title="Lägg till undermål">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
             </button>
           </div>
         </div>
 
         <!-- Sökfält för undermål -->
-        <div
-          v-if="showChildSearch"
-          class="border border-gray-700 rounded-lg p-4 bg-gray-800 mb-4"
-        >
+        <div v-if="showChildSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 mb-4">
           <div class="mb-2">
-            <input
-              ref="childSearchInput"
-              v-model="childSearchQuery"
-              @keydown="handleChildSearchKeydown"
-              type="text"
+            <input ref="childSearchInput" v-model="childSearchQuery" @keydown="handleChildSearchKeydown" type="text"
               placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
               class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autofocus
-            />
+              autofocus />
           </div>
 
           <!-- Sökresultat -->
           <div v-if="childSearchResults.length > 0" class="space-y-1 mt-2">
-            <button
-              v-for="result in childSearchResults"
-              :key="result.id"
-              @click="addExistingChild(result.id)"
-              class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors"
-            >
+            <button v-for="result in childSearchResults" :key="result.id" @click="addExistingChild(result.id)"
+              class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors">
               <div class="font-medium text-gray-200">{{ result.title }}</div>
               <div class="text-xs text-gray-500">
                 {{ new Date(result.created).toLocaleDateString("sv-SE") }}
@@ -1501,75 +1425,46 @@ watch(
           </div>
 
           <!-- Meddelande när inga resultat -->
-          <div
-            v-else-if="childSearchQuery.trim()"
-            class="text-sm text-gray-500 px-4 py-2"
-          >
+          <div v-else-if="childSearchQuery.trim()" class="text-sm text-gray-500 px-4 py-2">
             Tryck Enter för att skapa "{{ childSearchQuery }}" som nytt undermål
           </div>
         </div>
 
         <ul v-if="filteredChildren.length > 0" class="space-y-3">
-          <li
-            v-for="(child, index) in filteredChildren"
-            :key="child.id"
-            class="relative overflow-hidden rounded-lg"
-          >
+          <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index"
+            class="relative overflow-hidden rounded-lg">
             <!-- Swipe bakgrund -->
-            <div
-              class="absolute inset-0 flex items-center justify-start px-6"
-              :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'"
-            >
+            <div class="absolute inset-0 flex items-center justify-start px-6"
+              :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'">
               <span class="text-2xl">{{ child.finished ? "↩️" : "✓" }}</span>
             </div>
 
             <!-- Huvudinnehåll -->
-            <div
-              class="relative border rounded-lg transition-all bg-gray-900"
-              :class="
-                selectedChildIndex === index
-                  ? 'border-blue-500 bg-blue-900/20'
-                  : 'border-gray-700'
-              "
-              :style="{
+            <div class="relative border rounded-lg transition-all bg-gray-900" :class="selectedChildIndex === index
+              ? 'border-blue-500 bg-blue-900/20'
+              : 'border-gray-700'
+              " :style="{
                 transform: `translateX(${getSwipeOffset(child.id)}px)`,
                 transition: swipeState.isSwiping
                   ? 'none'
                   : 'transform 0.3s ease',
-              }"
-              @touchstart="handleTouchStart($event, child.id)"
-              @touchmove="handleTouchMove($event)"
-              @touchend="handleTouchEnd(child)"
-            >
+              }" @touchstart="handleTouchStart($event, child.id)" @touchmove="handleTouchMove($event)"
+              @touchend="handleTouchEnd(child)">
               <!-- Insert mode - visa input -->
-              <div
-                v-if="mode === 'insert' && editingGoalId === child.id"
-                class="p-4"
-              >
-                <input
-                  ref="editInputRef"
-                  v-model="editTitle"
-                  type="text"
+              <div v-if="mode === 'insert' && editingGoalId === child.id" class="p-4">
+                <input ref="editInputRef" v-model="editTitle" type="text"
                   class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  @keydown.enter.prevent="saveEdit"
-                  @keydown.esc.prevent="cancelEdit"
-                />
+                  @keydown.enter.prevent="saveEdit" @keydown.esc.prevent="cancelEdit" />
                 <div class="text-xs text-gray-500 mt-2">
                   Enter för att spara, Escape för att avbryta
                 </div>
               </div>
 
               <!-- Normal mode - visa länk -->
-              <NuxtLink
-                v-else
-                :to="`/goal/${child.id}`"
-                class="p-4 flex items-start justify-between block hover:bg-gray-800/50"
-              >
+              <NuxtLink v-else :to="`/goal/${child.id}`"
+                class="p-4 flex items-start justify-between block hover:bg-gray-800/50">
                 <div class="flex-1">
-                  <h3
-                    class="text-lg font-medium"
-                    :class="child.finished ? 'text-gray-500' : 'text-gray-200'"
-                  >
+                  <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
                     {{ child.title }}
                   </h3>
                 </div>
@@ -1578,10 +1473,7 @@ watch(
           </li>
         </ul>
 
-        <div
-          v-else
-          class="text-gray-500 p-6 border border-gray-700 rounded-lg text-center"
-        >
+        <div v-else class="text-gray-500 p-6 border border-gray-700 rounded-lg text-center">
           Inga undermål ännu. Skapa ett för att dela upp detta mål i mindre
           delar.
         </div>
@@ -1589,24 +1481,18 @@ watch(
     </div>
 
     <!-- Vim mode indikator -->
-    <div
-      v-if="mode === 'insert'"
-      class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-500 text-white font-mono text-sm rounded shadow-lg"
-    >
+    <div v-if="mode === 'insert'"
+      class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-500 text-white font-mono text-sm rounded shadow-lg">
       -- INSERT --
     </div>
 
     <!-- Modal för att bekräfta borttagning av föräldrarelation -->
-    <UModal
-      v-model:open="showRemoveConfirmation"
-      title="Ta bort föräldrarelation?"
-    >
+    <UModal v-model:open="showRemoveConfirmation" title="Ta bort föräldrarelation?">
       <p v-if="parentToRemove" class="text-gray-400">
         Vill du ta bort relationen till
         <strong>{{
           parents.find((p) => p.id === parentToRemove)?.title
-        }}</strong
-        >? Själva målet kommer inte tas bort.
+        }}</strong>? Själva målet kommer inte tas bort.
       </p>
 
       <template #footer="{ close }">
@@ -1625,23 +1511,12 @@ watch(
     <UModal v-model:open="showDeleteConfirmation" title="Ta bort mål?">
       <template #footer="{ close }">
         <div class="flex justify-end gap-2">
-          <UButton
-            color="gray"
-            variant="ghost"
-            @click="cancelDelete"
-            :class="
-              deleteDialogSelection === 'cancel' ? 'ring-2 ring-blue-500' : ''
-            "
-          >
+          <UButton color="gray" variant="ghost" @click="cancelDelete" :class="deleteDialogSelection === 'cancel' ? 'ring-2 ring-blue-500' : ''
+            ">
             Avbryt
           </UButton>
-          <UButton
-            color="red"
-            @click="executeDelete"
-            :class="
-              deleteDialogSelection === 'confirm' ? 'ring-2 ring-blue-400' : ''
-            "
-          >
+          <UButton color="red" @click="executeDelete" :class="deleteDialogSelection === 'confirm' ? 'ring-2 ring-blue-400' : ''
+            ">
             Ta bort
           </UButton>
         </div>
