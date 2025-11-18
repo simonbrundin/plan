@@ -684,53 +684,7 @@ async function handleTouchEnd(child: Goal) {
 
   if (Math.abs(deltaX) > threshold && deltaX > 0) {
     // Swipade åt höger - toggla finished status
-    try {
-      const newFinishedValue = child.finished ? null : new Date().toISOString();
-
-      const response = await fetch("http://localhost:8080/v1/graphql", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateGoalFinished($id: Int!, $finished: timestamptz) {
-              update_goals_by_pk(pk_columns: { id: $id }, _set: { finished: $finished }) {
-                id
-                title
-                created
-                finished
-              }
-            }
-          `,
-          variables: { id: child.id, finished: newFinishedValue },
-        }),
-      });
-
-      const result = await response.json();
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      // Uppdatera lokal state i store
-      goalsStore.updateGoal(child.id, { finished: newFinishedValue });
-
-      // Uppdatera lokal state i component
-      if (goalData.value?.allGoals) {
-        const goalIndex = goalData.value.allGoals.findIndex(
-          (g) => g.id === child.id
-        );
-        if (goalIndex !== -1) {
-          goalData.value.allGoals[goalIndex].finished = newFinishedValue;
-        }
-      }
-
-      // Uppdatera data från server
-      await refresh();
-    } catch (error) {
-      console.error("Failed to update goal finished status:", error);
-    }
+    await toggleFinished(child);
   }
 
   // Reset swipe state
@@ -1102,6 +1056,57 @@ async function createSiblingGoal() {
   }
 }
 
+// Toggla finished status på ett mål
+async function toggleFinished(goalToToggle: Goal) {
+  try {
+    const newFinishedValue = goalToToggle.finished ? null : new Date().toISOString();
+
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UpdateGoalFinished($id: Int!, $finished: timestamptz) {
+            update_goals_by_pk(pk_columns: { id: $id }, _set: { finished: $finished }) {
+              id
+              title
+              created
+              finished
+            }
+          }
+        `,
+        variables: { id: goalToToggle.id, finished: newFinishedValue },
+      }),
+    });
+
+    const result = await response.json();
+    if (result.errors) {
+      throw new Error(result.errors[0].message);
+    }
+
+    // Uppdatera lokal state i store
+    goalsStore.updateGoal(goalToToggle.id, { finished: newFinishedValue });
+
+    // Uppdatera lokal state i component
+    if (goalData.value?.allGoals) {
+      const goalIndex = goalData.value.allGoals.findIndex(
+        (g) => g.id === goalToToggle.id
+      );
+      if (goalIndex !== -1) {
+        goalData.value.allGoals[goalIndex].finished = newFinishedValue;
+      }
+    }
+
+    // Uppdatera data från server
+    await refresh();
+  } catch (error) {
+    console.error("Failed to toggle goal finished status:", error);
+  }
+}
+
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Hantera delete-dialog navigering först
@@ -1119,6 +1124,19 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   // Normal mode - hantera alla kommandon
+  // Hantera 'd' för att toggla finished status
+  if (event.key === "d") {
+    event.preventDefault();
+    if (isParentMode.value && parents.value.length > 0) {
+      const parent = parents.value[selectedParentIndex.value];
+      toggleFinished(parent);
+    } else if (filteredChildren.value.length > 0) {
+      const child = filteredChildren.value[selectedChildIndex.value];
+      toggleFinished(child);
+    }
+    return;
+  }
+
   // Hantera 'x' för att ta bort mål
   if (event.key === "x") {
     event.preventDefault();

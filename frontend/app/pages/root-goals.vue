@@ -542,6 +542,44 @@ async function deleteGoal(goalId: number) {
   }
 }
 
+// Toggla finished status på ett mål
+async function toggleFinished(goalToToggle: Goal) {
+  try {
+    const newFinishedValue = goalToToggle.finished ? null : new Date().toISOString();
+
+    const response = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UpdateGoalFinished($id: Int!, $finished: timestamptz) {
+            update_goals_by_pk(pk_columns: { id: $id }, _set: { finished: $finished }) {
+              id
+              title
+              created
+              finished
+            }
+          }
+        `,
+        variables: { id: goalToToggle.id, finished: newFinishedValue }
+      })
+    });
+
+    if (response.errors) {
+      throw new Error(response.errors[0].message);
+    }
+
+    // Uppdatera lokal state
+    goalsStore.updateGoal(goalToToggle.id, { finished: newFinishedValue });
+    await fetchGoals();
+  } catch (error) {
+    console.error("Failed to toggle goal finished status:", error);
+  }
+}
+
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Ignorera om sökfältet är aktivt
@@ -561,6 +599,12 @@ function handleKeydown(event: KeyboardEvent) {
   } else if (event.key === "k") {
     event.preventDefault();
     selectedIndex.value = Math.max(selectedIndex.value - 1, 0);
+  } else if (event.key === "d") {
+    event.preventDefault();
+    const selectedGoal = goals.value[selectedIndex.value];
+    if (selectedGoal) {
+      toggleFinished(selectedGoal);
+    }
   } else if (event.key === "Enter") {
     event.preventDefault();
     // Skapa nytt grundmål
