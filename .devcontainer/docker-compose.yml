@@ -9,12 +9,13 @@ services:
       POSTGRES_PASSWORD: plan
       POSTGRES_DB: plan
     volumes:
-      - ../kubernetes/overlays/prod/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ../kubernetes/overlays/dev/db/seed-data.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      # Mount init scripts från Kubernetes overlay
+      - ../environments/kubernetes/overlays/dev/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../environments/kubernetes/overlays/dev/db/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql:ro
       - plan-postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U plan"]
-      interval: 2s
+      test: ["CMD-SHELL", "pg_isready -U plan -d plan"]
+      interval: 5s
       timeout: 5s
       retries: 5
 
@@ -33,11 +34,47 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 5
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.dev
+    container_name: plan-dev-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Session
+      - NUXT_SESSION_PASSWORD=5c3ddb48cdb04a05aed90cdb9330cbc2
+      # Database - använd service namn som hostname
+      - DATABASE_URL=postgresql://plan:plan@postgres:5432/plan
+      # Hasura - använd service namn
+      - GQL_HOST=http://hasura:8080/v1/graphql
+      - HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret
+      # Authentik OAuth
+      - NUXT_OAUTH_AUTHENTIK_CLIENT_ID=zUuawAyCzj9RJqOYx85hSAQpMYzbVI2iAh3us7P0
+      - NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET=dummy-secret-for-public-client
+      - NUXT_OAUTH_AUTHENTIK_DOMAIN=auth.simonbrundin.com
+    volumes:
+      # Live reload - synka källkod
+      - ../frontend/app:/app/app
+      - ../frontend/server:/app/server
+      - ../frontend/nuxt.config.ts:/app/nuxt.config.ts
+      - ../frontend/drizzle:/app/drizzle
+      # Bevara node_modules från image (inte från host)
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      hasura:
+        condition: service_healthy
+    command: ["bun", "run", "dev", "--host", "0.0.0.0"]
 
 volumes:
   plan-postgres-data:

@@ -9,3 +9,5 @@ configMapGenerator:
     files:
       - 01-schema.sql=schema.sql
       - 02-seed-data.sql=seed-data.sql
+    options:
+      disableNameSuffixHash: true

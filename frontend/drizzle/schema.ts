@@ -56,7 +56,9 @@ export const goalRelations = pgTable("goal_relations", {
 	primaryKey({ columns: [table.parentId, table.childId], name: "goal_relations_pkey"}),
 ]);
 
-// Better Auth tables
+// Better Auth tables - commented out as they don't exist in the database yet
+// Using nuxt-auth-utils instead for session management
+/*
 export const session = pgTable("session", {
 	id: text().primaryKey(),
 	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
@@ -94,3 +96,4 @@ export const verification = pgTable("verification", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
 });
+*/

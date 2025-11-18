@@ -39,6 +39,8 @@ spec:
                 - plan
             initialDelaySeconds: 5
             periodSeconds: 2
+            timeoutSeconds: 3
+            failureThreshold: 3
       volumes:
         - name: postgres-data
           emptyDir: {}  # För dev - data försvinner vid restart men laddas om från init scripts

@@ -15,10 +15,10 @@ const { loggedIn, user, session, fetch, clear, openInPopup } = useUserSession();
       Sub: <span class="font-mono text-sm">{{ user.sub }}</span>
     </p>
 
-    <p>
+    <p v-if="session?.loggedInAt">
       Inloggad sedan
       {{
-        new Date(session.session.loginTime).toLocaleString("en-US", {
+        new Date(session.loggedInAt).toLocaleString("en-US", {
           month: "short",
           day: "2-digit",
           year: "numeric",

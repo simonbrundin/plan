@@ -4,9 +4,6 @@
 
 - [ ] `dev` fungerar i plan och ger mig notis i telefonen
   - [ ] Auth fungerar
-    - [ ] Kan ansluta mot databas
-  - [ ] Tilt Resources
-    - [ ] Postgres-databas
   - [ ] DevContainer
     - [ ] Simon CLI finns tillgängligt i min DevContainer
     - [ ] NeoVim används i DevContainer
@@ -18,19 +15,14 @@
 
 ### Hemfix
 
-- [ ] Farstulycktan lyser
-  - [x] Lycktan moterad
-    - [x] Kilen passar
-    - [x] Rör nedkortat
-    - [x] Kablarna på utsidan skalade
-  - [ ] Köp
-    - [ ] Lock
-    - [ ] Brun sladd
-    - [ ] 4 längre skruvar
-  - [ ] Lampknappar monterade
-  - [ ] Eluttag monterat
-  - [ ] Inkopplat i central
-  - [ ] Lock på plats
+- [ ] Köp
+  - [ ] Lock
+  - [ ] Brun sladd
+  - [ ] 4 längre skruvar
+- [ ] Lampknappar monterade
+- [ ] Eluttag monterat
+- [ ] Inkopplat i central
+- [ ] Lock på plats
 - [ ] Renault igång
 - [ ] Dockhus klart
 
@@ -288,3 +280,13 @@
 - [x] Skriv om cli så min update talos config inte sparar generated som en fil
       för i den finns känslig data
 - [x] Hämta mammas bil
+- [x] Tilt fungerar igen
+- [x] Kan ansluta mot databas
+  - [x] Få igång Drizzle Studio så jag ser att databasen fungerar
+- [x] Tilt Resources
+  - [x] Postgres-databas
+- [x] Farstulycktan lyser
+  - [x] Lycktan moterad
+    - [x] Kilen passar
+    - [x] Rör nedkortat
+    - [x] Kablarna på utsidan skalade

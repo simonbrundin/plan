@@ -38,6 +38,7 @@ export default defineNuxtConfig({
       "@pinia/nuxt",
       {
         disableVuex: true,
+        autoImports: ['defineStore', 'storeToRefs'],
       },
     ],
   ],

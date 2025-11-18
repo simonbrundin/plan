@@ -37,17 +37,17 @@ export default defineOAuthAuthentikEventHandler({
       }
 
       // Set user session with validated data
-      await setUserSession(event, {
+      // Create plain objects with proper prototypes to prevent serialization errors
+      const sessionData = JSON.parse(JSON.stringify({
         user: {
-          id: dbUser.id,
-          sub: dbUser.sub,
-          email: dbUser.email,
+          id: Number(dbUser.id),
+          sub: String(dbUser.sub),
+          email: String(dbUser.email),
         },
-        session: {
-          loginTime: Date.now(),
-          accessToken: tokens.access_token,
-        },
-      });
+        loggedInAt: Number(Date.now()),
+      }));
+
+      await setUserSession(event, sessionData);
 
       console.log(`Authentik OAuth: Successfully authenticated user ${dbUser.email}`);
       return sendRedirect(event, "/");

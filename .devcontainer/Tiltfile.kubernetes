@@ -1,0 +1,117 @@
+# ------------------------------------------------------------------
+# Kubernetes Development Mode
+# Runs all services in remote Kubernetes cluster
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+# Tillåt remote cluter
+# ------------------------------------------------------------------
+
+allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
+
+# ------------------------------------------------------------------
+# Sätt namespace
+# ------------------------------------------------------------------
+
+namespace = k8s_namespace()
+
+# ------------------------------------------------------------------
+# Setup docker registry
+# ------------------------------------------------------------------
+
+# Använd ttl.sh - ett anonymt, ephemeral registry som automatiskt raderar images
+# Images raderas efter 1 timme (default). Perfekt för dev - ingen auth behövs
+print('Namespace: ' + namespace)
+default_registry('ttl.sh/' + namespace)
+
+# ------------------------------------------------------------------
+# Bygg image för frontend
+# ------------------------------------------------------------------
+
+# Enable buildx for multi-platform builds
+docker_build(
+    'frontend',
+    '../frontend',
+    dockerfile='../frontend/Dockerfile.dev',  # Använd development Dockerfile
+    # Visa mer output från Docker build
+    extra_tag='frontend:dev',
+    platform='linux/arm64',  # Target platform for arm64 Kubernetes cluster
+    build_args={'BUILDKIT_MULTI_PLATFORM': '1'},  # Enable multi-platform build
+    live_update=[
+        # Om package.json eller bun.lock ändras -> full rebuild
+        fall_back_on(['../frontend/package.json', '../frontend/bun.lock']),
+        sync('../frontend/app', '/app/app'),
+        sync('../frontend/server', '/app/server'),
+        sync('../frontend/nuxt.config.ts', '/app/nuxt.config.ts'),
+        sync('../frontend/drizzle', '/app/drizzle'),
+    ],
+)
+
+# ------------------------------------------------------------------
+# Deploy frontend i kluster
+# ------------------------------------------------------------------
+
+k8s_yaml('frontend-deployment.yaml')
+k8s_yaml('frontend-service.yaml')
+
+# Frontend Route
+URL = namespace + '.simonbrundin.com'
+yaml_content = str(read_file('./frontend-route.yaml'))
+yaml_content = yaml_content.replace('{HOSTNAME}', URL)
+yaml_content = yaml_content.replace('{NAMESPACE}', namespace)
+k8s_yaml(blob(yaml_content))
+
+
+# ------------------------------------------------------------------
+# PostgreSQL Database
+# ------------------------------------------------------------------
+
+# Använd Kustomize för att generera ConfigMap från init-script filer
+k8s_yaml(kustomize('../environments/kubernetes/overlays/dev/db'))
+
+# PostgreSQL Init Scripts som separat resource
+k8s_resource(
+  new_name='PostgreSQL Init Scripts',
+  objects=['postgres-init-scripts:configmap'],
+  labels=['Database'],
+)
+
+k8s_resource(
+  workload='postgres',
+  new_name='PostgreSQL',
+  port_forwards='5432:5432',  # Forward PostgreSQL port
+  labels=['Database'],
+)
+
+# ------------------------------------------------------------------
+# Drizzle Studio
+# ------------------------------------------------------------------
+
+local_resource(
+  'Drizzle Studio',
+  serve_cmd='cd ../frontend && bun run db:studio',
+  links=['https://local.drizzle.studio'],
+  labels=['Database'],
+  resource_deps=['PostgreSQL'],  # Vänta på PostgreSQL
+)
+
+# ------------------------------------------------------------------
+# Resurser i Tilt UI
+# ------------------------------------------------------------------
+
+k8s_resource(
+  workload='frontend',  # Referera till deployment namnet
+  new_name='Nuxt Dev Server',  # Nytt namn för resursen
+  port_forwards=3000,
+  links=['https://' + URL],  # Länk till HTTPRoute
+  labels=['Frontend'],             # Lägg till etikett för gruppering i UI
+  # resource_deps=['PostgreSQL'],  # Vänta på PostgreSQL
+)
+k8s_resource(
+  new_name='Frontend Route',  # Nytt namn för resursen
+  links=['https://' + URL],  # Länk till HTTPRoute
+  objects=[
+    'frontend-route:httproute'
+  ],
+  labels=['Frontend'],             # Lägg till etikett för gruppering i UI
+)

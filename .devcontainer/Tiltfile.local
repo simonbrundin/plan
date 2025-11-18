@@ -1,0 +1,52 @@
+# ------------------------------------------------------------------
+# Local Development Mode
+# Runs all services locally via Docker Compose
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+# Docker Compose Setup
+# ------------------------------------------------------------------
+
+# Ladda Docker Compose setup
+docker_compose('./docker-compose.yml')
+
+# ------------------------------------------------------------------
+# PostgreSQL Database
+# ------------------------------------------------------------------
+
+dc_resource(
+  'postgres',
+  labels=['Database'],
+)
+
+# ------------------------------------------------------------------
+# Hasura GraphQL Engine
+# ------------------------------------------------------------------
+
+dc_resource(
+  'hasura',
+  labels=['Backend'],
+  links=['http://localhost:8080/console'],
+)
+
+# ------------------------------------------------------------------
+# Frontend (Nuxt Dev Server)
+# ------------------------------------------------------------------
+
+dc_resource(
+  'frontend',
+  labels=['Frontend'],
+  links=['http://localhost:3000'],
+)
+
+# ------------------------------------------------------------------
+# Drizzle Studio
+# ------------------------------------------------------------------
+
+local_resource(
+  'Drizzle Studio',
+  serve_cmd='cd ../frontend && bun run db:studio',
+  links=['https://local.drizzle.studio'],
+  labels=['Database'],
+  resource_deps=['postgres'],  # Vänta på PostgreSQL
+)

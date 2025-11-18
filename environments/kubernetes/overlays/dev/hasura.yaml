@@ -29,7 +29,7 @@ spec:
             - name: HASURA_GRAPHQL_DEV_MODE
               value: "true"
             - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES
-              value: "startup,http-log,webhook-log,websocket-log,query-log"
+              value: "startup,webhook-log,websocket-log,query-log"
             - name: HASURA_GRAPHQL_ENABLE_TELEMETRY
               value: "false"
           readinessProbe:

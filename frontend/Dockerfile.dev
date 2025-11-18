@@ -1,7 +1,8 @@
 # ==============================
 # Development Dockerfile (för Tilt)
 # ==============================
-FROM node:24-alpine
+# Use TARGETPLATFORM to match the target architecture (arm64 for K8s cluster)
+FROM --platform=$TARGETPLATFORM node:24-alpine
 
 # Installera build dependencies för native modules (better-sqlite3)
 RUN apk add --no-cache python3 make g++ curl unzip bash
@@ -25,3 +26,20 @@ EXPOSE 3000
 
 # Kör Nuxt dev server med HMR
 CMD ["bun", "run", "dev"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

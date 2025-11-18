@@ -12,16 +12,16 @@ export default defineNuxtPlugin((nuxtApp) => {
      // In production, use JWT token from Authentik with user-specific headers
      // The JWT includes x-hasura-user-sub, x-hasura-default-role, etc
      try {
-       const { session } = useUserSession()
+       const { user } = useUserSession()
 
        // Validate session structure to prevent hydration errors
-       if (session.value && typeof session.value === 'object' && session.value.user?.id) {
+       if (user.value && typeof user.value === 'object' && user.value.id) {
          // Set user-specific headers for Hasura RLS
          client.setHeaders({
-           'x-hasura-user-id': session.value.user.id.toString(),
+           'x-hasura-user-id': user.value.id.toString(),
            'x-hasura-role': 'user'
          })
-         console.log('GraphQL auth: Using session for user', session.value.user.id)
+         console.log('GraphQL auth: Using session for user', user.value.id)
        } else {
          console.warn('GraphQL auth: No valid session found - user must authenticate to access goals')
        }

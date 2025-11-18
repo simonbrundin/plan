@@ -13,30 +13,16 @@ interface GoalRelation {
 }
 
 export const useGoalsStore = defineStore('goals', {
+  // Skip hydration to prevent serialization issues during SSR
+  // Goals are loaded client-side via GraphQL queries
+  skipHydrate: true,
+
   state: () => ({
     goals: [] as Goal[],
     relations: [] as GoalRelation[],
     isLoaded: false,
     error: null as string | null,
   }),
-
-  // Add hydration strategy to prevent serialization issues
-  hydrate: (state, nuxtApp) => {
-    // Ensure all objects are plain objects to prevent prototype issues during hydration
-    if (Array.isArray(state.goals)) {
-      state.goals = state.goals.map(goal => {
-        // Create a new plain object to avoid prototype issues
-        return { ...goal } as Goal;
-      });
-    }
-
-    if (Array.isArray(state.relations)) {
-      state.relations = state.relations.map(relation => {
-        // Create a new plain object to avoid prototype issues
-        return { ...relation } as GoalRelation;
-      });
-    }
-  },
 
   getters: {
     // Hitta mål baserat på ID
