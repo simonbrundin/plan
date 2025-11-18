@@ -752,6 +752,11 @@ const editingGoalId = ref<number | null>(null);
 const editTitle = ref('');
 const editInputRef = ref<HTMLInputElement | null>(null);
 
+// Delete confirmation
+const showDeleteConfirmation = ref(false);
+const goalToDelete = ref<{ id: number; title: string } | null>(null);
+const deleteDialogSelection = ref<'cancel' | 'confirm'>('cancel');
+
 // Leader key state
 const isLeaderMode = ref(false);
 let leaderTimeout: NodeJS.Timeout | null = null;
@@ -795,7 +800,14 @@ async function enterInsertMode(goalId: number, title: string, atBeginning: boole
 
 // Spara ändringar och gå tillbaka till normal mode
 async function saveEdit() {
-  if (!editingGoalId.value || !editTitle.value.trim()) {
+  if (!editingGoalId.value) {
+    mode.value = 'normal';
+    return;
+  }
+
+  // Om titeln är tom, ta bort målet
+  if (!editTitle.value.trim()) {
+    await deleteGoal(editingGoalId.value);
     mode.value = 'normal';
     editingGoalId.value = null;
     return;
@@ -838,14 +850,235 @@ async function saveEdit() {
 }
 
 // Avbryt redigering
-function cancelEdit() {
+async function cancelEdit() {
+  // Om vi avbryter ett nytt mål med tom titel, ta bort det
+  if (editingGoalId.value && editTitle.value === '') {
+    await deleteGoal(editingGoalId.value);
+  }
   mode.value = 'normal';
   editingGoalId.value = null;
   editTitle.value = '';
 }
 
+// Visa bekräftelse för borttagning
+function confirmDeleteGoal(goalId: number, title: string) {
+  goalToDelete.value = { id: goalId, title };
+  deleteDialogSelection.value = 'confirm'; // Starta med "Ta bort mål" valt
+  showDeleteConfirmation.value = true;
+}
+
+// Avbryt borttagning
+function cancelDelete() {
+  showDeleteConfirmation.value = false;
+  goalToDelete.value = null;
+  deleteDialogSelection.value = 'cancel';
+}
+
+// Bekräfta och ta bort målet
+async function executeDelete() {
+  console.log('executeDelete called, goalToDelete:', goalToDelete.value);
+  if (!goalToDelete.value) {
+    console.log('No goal to delete');
+    return;
+  }
+
+  console.log('Calling deleteGoal with id:', goalToDelete.value.id);
+  await deleteGoal(goalToDelete.value.id);
+  console.log('Delete completed');
+  showDeleteConfirmation.value = false;
+  goalToDelete.value = null;
+  deleteDialogSelection.value = 'cancel';
+}
+
+// Hantera navigering i delete-dialog
+function handleDeleteDialogKey(event: KeyboardEvent) {
+  if (!showDeleteConfirmation.value) return;
+
+  console.log('Delete dialog key:', event.key, 'Selection:', deleteDialogSelection.value);
+
+  if (event.key === 'h') {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteDialogSelection.value = 'cancel';
+  } else if (event.key === 'l') {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteDialogSelection.value = 'confirm';
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log('Enter pressed, selection:', deleteDialogSelection.value);
+    if (deleteDialogSelection.value === 'cancel') {
+      console.log('Canceling delete');
+      cancelDelete();
+    } else {
+      console.log('Executing delete');
+      executeDelete();
+    }
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    event.stopPropagation();
+    cancelDelete();
+  }
+}
+
+// Ta bort ett mål
+async function deleteGoal(goalId: number) {
+  try {
+    // Ta bort målet från databasen
+    const deleteGoalQuery = `
+      mutation DeleteGoal($id: Int!) {
+        delete_goal_relations(where: { _or: [{ child_id: { _eq: $id } }, { parent_id: { _eq: $id } }] }) {
+          affected_rows
+        }
+        delete_user_goals(where: { goal_id: { _eq: $id } }) {
+          affected_rows
+        }
+        delete_goals_by_pk(id: $id) {
+          id
+        }
+      }
+    `;
+
+    const response = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: deleteGoalQuery,
+        variables: { id: goalId }
+      })
+    });
+
+    if (response.errors) {
+      throw new Error(response.errors[0].message);
+    }
+
+    // Uppdatera lokal state
+    goalsStore.removeGoal(goalId);
+    await refresh();
+  } catch (error) {
+    console.error("Failed to delete goal:", error);
+  }
+}
+
+// Skapa nytt mål på samma nivå som markerat mål
+async function createSiblingGoal() {
+  const userId = user.value?.id;
+  if (!userId) {
+    console.error("No user logged in");
+    return;
+  }
+
+  try {
+    // Skapa nytt mål med tom titel
+    const createGoalQuery = `
+      mutation CreateGoal($title: String!) {
+        insert_goals_one(object: { title: $title }) {
+          id
+          title
+          created
+          finished
+        }
+      }
+    `;
+
+    const goalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-hasura-admin-secret': config.public.hasuraAdminSecret
+      },
+      body: JSON.stringify({
+        query: createGoalQuery,
+        variables: { title: '' }
+      })
+    });
+
+    if (goalResponse.errors) {
+      throw new Error(goalResponse.errors[0].message);
+    }
+
+    if (goalResponse.data?.insert_goals_one?.id) {
+      const newGoal = goalResponse.data.insert_goals_one;
+
+      // Skapa user_goals relation
+      const createUserGoalQuery = `
+        mutation CreateUserGoal($userId: Int!, $goalId: Int!) {
+          insert_user_goals_one(object: { user_id: $userId, goal_id: $goalId }) {
+            user_id
+            goal_id
+          }
+        }
+      `;
+
+      const userGoalResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: createUserGoalQuery,
+          variables: { userId, goalId: newGoal.id }
+        })
+      });
+
+      if (userGoalResponse.errors) {
+        throw new Error(userGoalResponse.errors[0].message);
+      }
+
+      // Skapa relation till samma förälder (nuvarande mål)
+      const addParentRelationQuery = `
+        mutation AddParentRelation($childId: Int!, $parentId: Int!) {
+          insert_goal_relations_one(object: { child_id: $childId, parent_id: $parentId }) {
+            child_id
+            parent_id
+          }
+        }
+      `;
+
+      const relationResponse = await $fetch('http://localhost:8080/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-hasura-admin-secret': config.public.hasuraAdminSecret
+        },
+        body: JSON.stringify({
+          query: addParentRelationQuery,
+          variables: { childId: newGoal.id, parentId: goalId }
+        })
+      });
+
+      if (relationResponse.errors) {
+        throw new Error(relationResponse.errors[0].message);
+      }
+
+      // Uppdatera lokal state
+      goalsStore.addGoal(newGoal);
+      goalsStore.addRelation(newGoal.id, goalId);
+
+      // Uppdatera data från server
+      await refresh();
+
+      // Gå in i insert mode för det nya målet
+      await enterInsertMode(newGoal.id, '', false);
+    }
+  } catch (error) {
+    console.error("Failed to create sibling goal:", error);
+  }
+}
+
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
+  // Hantera delete-dialog navigering först
+  if (showDeleteConfirmation.value) {
+    handleDeleteDialogKey(event);
+    return;
+  }
+
   // Ignorera om sökfält är aktiva
   if (showParentSearch.value || showChildSearch.value) return;
 
@@ -855,6 +1088,19 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   // Normal mode - hantera alla kommandon
+  // Hantera 'x' för att ta bort mål
+  if (event.key === 'x') {
+    event.preventDefault();
+    if (isParentMode.value && parents.value.length > 0) {
+      const parent = parents.value[selectedParentIndex.value];
+      confirmDeleteGoal(parent.id, parent.title);
+    } else if (filteredChildren.value.length > 0) {
+      const child = filteredChildren.value[selectedChildIndex.value];
+      confirmDeleteGoal(child.id, child.title);
+    }
+    return;
+  }
+
   // Hantera 'i' och 'a' för att gå in i insert mode
   if (event.key === 'i' || event.key === 'a') {
     event.preventDefault();
@@ -937,7 +1183,11 @@ function handleKeydown(event: KeyboardEvent) {
           selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
         }
       }
-    } else if (event.key === "Enter" || event.key === "l") {
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      // Skapa nytt mål på samma nivå
+      createSiblingGoal();
+    } else if (event.key === "l") {
       event.preventDefault();
       const childrenCount = filteredChildren.value.length;
       if (childrenCount > 0) {
@@ -1318,6 +1568,42 @@ watch(() => route.params.id, () => {
           <UButton color="red" @click="confirmRemoveParent">
             Ta bort relation
           </UButton>
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Modal för att bekräfta borttagning av mål -->
+    <UModal
+      v-model:open="showDeleteConfirmation"
+      title="Ta bort mål?"
+    >
+      <p v-if="goalToDelete" class="text-gray-400">
+        Vill du verkligen ta bort målet
+        <strong>"{{ goalToDelete.title }}"</strong>?
+        <br><br>
+        <span class="text-red-400">Varning: Detta tar även bort alla undermål och relationer. Detta går inte att ångra.</span>
+      </p>
+
+      <template #footer="{ close }">
+        <div class="flex justify-end gap-2">
+          <UButton
+            color="gray"
+            variant="ghost"
+            @click="cancelDelete"
+            :class="deleteDialogSelection === 'cancel' ? 'ring-2 ring-blue-500' : ''"
+          >
+            Avbryt
+          </UButton>
+          <UButton
+            color="red"
+            @click="executeDelete"
+            :class="deleteDialogSelection === 'confirm' ? 'ring-2 ring-blue-400' : ''"
+          >
+            Ta bort mål
+          </UButton>
+        </div>
+        <div class="text-xs text-gray-500 mt-3 text-center">
+          h/l för att navigera, Enter för att bekräfta, Escape för att avbryta
         </div>
       </template>
     </UModal>
