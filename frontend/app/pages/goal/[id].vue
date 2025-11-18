@@ -743,52 +743,102 @@ function getSwipeOffset(childId: number): number {
 
 // Vim-style navigering för undermål
 const selectedChildIndex = ref(0);
+const selectedParentIndex = ref(0);
+const isParentMode = ref(false);
+
+// Leader key state
+const isLeaderMode = ref(false);
+let leaderTimeout: NodeJS.Timeout | null = null;
 
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Ignorera om sökfält är aktiva
   if (showParentSearch.value || showChildSearch.value) return;
 
-  if (event.key === "j") {
+  // Hantera leader key (space)
+  if (event.key === " " && !isLeaderMode.value) {
     event.preventDefault();
-    const childrenCount = filteredChildren.value.length;
-    if (childrenCount > 0) {
-      selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
+    isLeaderMode.value = true;
+    // Återställ leader mode efter 1 sekund om ingen command följer
+    if (leaderTimeout) clearTimeout(leaderTimeout);
+    leaderTimeout = setTimeout(() => {
+      isLeaderMode.value = false;
+    }, 1000);
+    return;
+  }
+
+  // Hantera leader commands
+  if (isLeaderMode.value) {
+    event.preventDefault();
+    if (leaderTimeout) clearTimeout(leaderTimeout);
+    isLeaderMode.value = false;
+
+    if (event.key === "d") {
+      // Toggla visa/dölj avklarade mål
+      showCompleted.value = !showCompleted.value;
     }
-  } else if (event.key === "k") {
-    event.preventDefault();
-    const childrenCount = filteredChildren.value.length;
-    if (childrenCount > 0) {
-      selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
-    }
-  } else if (event.key === "Enter" || event.key === "l") {
-    event.preventDefault();
-    const childrenCount = filteredChildren.value.length;
-    if (childrenCount > 0) {
-      const selectedChild = filteredChildren.value[selectedChildIndex.value];
-      if (selectedChild) {
-        router.push(`/goal/${selectedChild.id}`);
+    return;
+  }
+
+  if (isParentMode.value) {
+    // Parent mode - navigera mellan föräldrar
+    if (event.key === "h") {
+      event.preventDefault();
+      selectedParentIndex.value = Math.max(selectedParentIndex.value - 1, 0);
+    } else if (event.key === "l") {
+      event.preventDefault();
+      const parentsCount = parents.value.length;
+      selectedParentIndex.value = Math.min(selectedParentIndex.value + 1, parentsCount - 1);
+    } else if (event.key === "k") {
+      event.preventDefault();
+      // Navigera till markerad förälder
+      const selectedParent = parents.value[selectedParentIndex.value];
+      if (selectedParent) {
+        router.push(`/goal/${selectedParent.id}`);
       }
+    } else if (event.key === "j") {
+      event.preventDefault();
+      // Gå tillbaka till child mode
+      isParentMode.value = false;
+      selectedChildIndex.value = 0;
     }
-  } else if (event.key === "h") {
-    event.preventDefault();
-    // Kolla om föregående sida var en förälder
-    const referrer = document.referrer;
-    const parentIds = parents.value.map(p => p.id);
-
-    // Parse goal ID från referrer (om det finns)
-    const referrerMatch = referrer.match(/\/goal\/(\d+)/);
-    const referrerId = referrerMatch ? parseInt(referrerMatch[1]) : null;
-
-    if (referrerId && parentIds.includes(referrerId)) {
-      // Föregående sida var en förälder - gå tillbaka
-      router.back();
-    } else if (parents.value.length > 0) {
-      // Navigera till första föräldern
-      router.push(`/goal/${parents.value[0].id}`);
-    } else {
-      // Inga föräldrar - gå till root-goals
-      router.push('/root-goals');
+  } else {
+    // Child mode - navigera mellan undermål
+    if (event.key === "j") {
+      event.preventDefault();
+      const childrenCount = filteredChildren.value.length;
+      if (childrenCount > 0) {
+        selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
+      }
+    } else if (event.key === "k") {
+      event.preventDefault();
+      if (selectedChildIndex.value === 0 && parents.value.length > 0) {
+        // Växla till parent mode
+        isParentMode.value = true;
+        selectedParentIndex.value = 0;
+      } else {
+        const childrenCount = filteredChildren.value.length;
+        if (childrenCount > 0) {
+          selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
+        }
+      }
+    } else if (event.key === "Enter" || event.key === "l") {
+      event.preventDefault();
+      const childrenCount = filteredChildren.value.length;
+      if (childrenCount > 0) {
+        const selectedChild = filteredChildren.value[selectedChildIndex.value];
+        if (selectedChild) {
+          router.push(`/goal/${selectedChild.id}`);
+        }
+      }
+    } else if (event.key === "h") {
+      event.preventDefault();
+      // Gå till root-goals eller första föräldern
+      if (parents.value.length > 0) {
+        router.push(`/goal/${parents.value[0].id}`);
+      } else {
+        router.push('/root-goals');
+      }
     }
   }
 }
@@ -800,6 +850,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
+  if (leaderTimeout) clearTimeout(leaderTimeout);
 });
 
 // Återställ selectedChildIndex när children ändras
@@ -807,6 +858,13 @@ watch(filteredChildren, () => {
   if (selectedChildIndex.value >= filteredChildren.value.length) {
     selectedChildIndex.value = Math.max(0, filteredChildren.value.length - 1);
   }
+});
+
+// Återställ parent mode när målet ändras
+watch(() => route.params.id, () => {
+  isParentMode.value = false;
+  selectedChildIndex.value = 0;
+  selectedParentIndex.value = 0;
 });
 </script>
 
@@ -828,10 +886,13 @@ watch(filteredChildren, () => {
             Grundmål
           </NuxtLink>
           <NuxtLink
-            v-for="parent in parents"
+            v-for="(parent, index) in parents"
             :key="parent.id"
             :to="`/goal/${parent.id}`"
-            class="text-gray-500 hover:text-gray-300 transition-colors select-none"
+            class="px-2 py-1 rounded transition-all select-none"
+            :class="isParentMode && selectedParentIndex === index
+              ? 'text-gray-100 bg-blue-500 font-medium'
+              : 'text-gray-500 hover:text-gray-300'"
             @mousedown="handleParentMouseDown(parent.id)"
             @mouseup="handleParentMouseUp"
             @mouseleave="handleParentMouseUp"
