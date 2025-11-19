@@ -1489,8 +1489,8 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
-  // Ignorera om sökfält är aktiva
-  if (showParentSearch.value || showChildSearch.value) return;
+  // Ignorera om sökfält eller ikonväljare är aktiva
+  if (showParentSearch.value || showChildSearch.value || showIconPicker.value) return;
 
   // Insert mode - ignorera alla tangenter (hanteras direkt på input-elementet)
   if (mode.value === "insert") {
