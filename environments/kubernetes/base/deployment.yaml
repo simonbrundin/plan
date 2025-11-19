@@ -7,6 +7,9 @@ spec:
     matchLabels:
       app: plan-app
   template:
+    metadata:
+      labels:
+        app: plan-app
     spec:
       imagePullSecrets:
         - name: ghcr-secret
