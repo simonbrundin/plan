@@ -1908,19 +1908,19 @@ watch(selectedParentIndex, async () => {
               </div>
 
               <!-- Normal mode - visa länk -->
-              <NuxtLink v-else :to="`/goal/${child.id}`"
-                class="p-4 flex items-start justify-between block hover:bg-gray-800/50">
-                <div class="flex-1 flex items-center gap-3">
-                  <button @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                    class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
-                    title="Ändra ikon">
-                    <Icon :name="child.icon || 'material-symbols:circle'" class="w-6 h-6" />
-                  </button>
+              <div class="flex items-center gap-2">
+                <button @click.stop="editingIconGoalId = child.id; showIconPicker = true"
+                  class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
+                  title="Ändra ikon">
+                  <Icon :name="child.icon || 'material-symbols:circle'" class="w-6 h-6" />
+                </button>
+                <NuxtLink :to="`/goal/${child.id}`"
+                  class="flex-1 p-4 block hover:bg-gray-800/50">
                   <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
                     {{ child.title }}
                   </h3>
-                </div>
-              </NuxtLink>
+                </NuxtLink>
+              </div>
             </div>
           </li>
         </ul>

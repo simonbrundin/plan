@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 interface Props {
   modelValue: string
@@ -16,9 +16,18 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
+const searchInput = ref<HTMLInputElement | null>(null)
+
 const displayOpen = computed({
   get: () => props.open,
   set: (value) => emit('update:open', value)
+})
+
+watch(displayOpen, async (newValue) => {
+  if (newValue) {
+    await nextTick()
+    searchInput.value?.focus()
+  }
 })
 
 // Lista över vanligt använda Material Symbols-ikoner
@@ -157,8 +166,8 @@ function close() {
         </div>
 
         <!-- Sökfält -->
-        <input v-model="searchQuery" type="text" placeholder="Sök ikoner..."
-          class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" autofocus />
+        <input ref="searchInput" v-model="searchQuery" type="text" placeholder="Sök ikoner..."
+          class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" />
 
         <!-- Ikon grid -->
         <div class="grid grid-cols-6 gap-2 max-h-96 overflow-y-auto">
