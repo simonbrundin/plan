@@ -42,6 +42,7 @@ export const userGoals = pgTable("user_goals", {
 export const goalRelations = pgTable("goal_relations", {
 	parentId: integer("parent_id").notNull(),
 	childId: integer("child_id").notNull(),
+	order: integer().default(0).notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.parentId],

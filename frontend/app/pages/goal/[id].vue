@@ -19,6 +19,7 @@ interface Goal {
 
 interface ChildRelation {
   child_id: number;
+  order: number;
 }
 
 interface ParentRelation {
@@ -65,8 +66,9 @@ const fetchGoalData = async () => {
               finished
 
               # Barn - relationer där detta mål är parent
-              childRelations: goalRelationsByParentId {
+              childRelations: goalRelationsByParentId(order_by: { order: asc }) {
                 child_id
+                order
               }
 
               # Förälder - relationer där detta mål är child
@@ -121,12 +123,16 @@ const parents = computed(
   () => goal.value?.parentRelations?.map((r) => r.goalByParentId) || []
 );
 
-// Matcha barn-ID:n med faktiska goal-objekt
+// Matcha barn-ID:n med faktiska goal-objekt och behåll ordningen från childRelations
 const children = computed(() => {
   if (!goal.value?.childRelations || !goalData.value?.allGoals) return [];
 
-  const childIds = goal.value.childRelations.map((r) => r.child_id);
-  return goalData.value.allGoals.filter((g) => childIds.includes(g.id));
+  // Behåll ordningen från childRelations genom att mappa dem direkt
+  return goal.value.childRelations
+    .map((relation) =>
+      goalData.value!.allGoals.find((g) => g.id === relation.child_id)
+    )
+    .filter((g) => g !== undefined) as Goal[];
 });
 
 // Beräkna progress baserat på färdiga undermål
@@ -390,6 +396,9 @@ const childSearchResults = computed(() => {
 // Lägg till befintligt mål som barn
 async function addExistingChild(childId: number) {
   try {
+    // Räkna nuvarande barn för att få rätt ordning
+    const nextOrder = goal.value?.childRelations?.length || 0;
+
     const response = await fetch("http://localhost:8080/v1/graphql", {
       method: "POST",
       headers: {
@@ -398,16 +407,17 @@ async function addExistingChild(childId: number) {
       },
       body: JSON.stringify({
         query: `
-          mutation AddParentRelation($childId: Int!, $parentId: Int!) {
+          mutation AddParentRelation($childId: Int!, $parentId: Int!, $order: Int!) {
             insert_goal_relations_one(
-              object: { child_id: $childId, parent_id: $parentId }
+              object: { child_id: $childId, parent_id: $parentId, order: $order }
             ) {
               child_id
               parent_id
+              order
             }
           }
         `,
-        variables: { childId, parentId: goalId },
+        variables: { childId, parentId: goalId, order: nextOrder },
       }),
     });
 
@@ -513,12 +523,16 @@ async function createNewChild() {
         throw new Error(userGoalResponse.errors[0].message);
       }
 
+      // Räkna nuvarande barn för att få rätt ordning
+      const nextOrder = goal.value?.childRelations?.length || 0;
+
       // Skapa relationen i databasen
       const addParentRelationQuery = `
-        mutation AddParentRelation($childId: Int!, $parentId: Int!) {
-          insert_goal_relations_one(object: { child_id: $childId, parent_id: $parentId }) {
+        mutation AddParentRelation($childId: Int!, $parentId: Int!, $order: Int!) {
+          insert_goal_relations_one(object: { child_id: $childId, parent_id: $parentId, order: $order }) {
             child_id
             parent_id
+            order
           }
         }
       `;
@@ -533,7 +547,7 @@ async function createNewChild() {
           },
           body: JSON.stringify({
             query: addParentRelationQuery,
-            variables: { childId: newGoal.id, parentId: goalId },
+            variables: { childId: newGoal.id, parentId: goalId, order: nextOrder },
           }),
         }
       );
@@ -703,6 +717,297 @@ function getSwipeOffset(childId: number): number {
     return Math.max(0, Math.min(delta, 100)); // Begränsa till 0-100px
   }
   return 0;
+}
+
+// Drag-and-drop state för sortering av barn
+const draggedChildIndex = ref<number | null>(null);
+const dragOverChildIndex = ref<number | null>(null);
+
+function handleDragStart(event: DragEvent, index: number) {
+  draggedChildIndex.value = index;
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+  }
+}
+
+function handleDragOver(event: DragEvent, index: number) {
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = "move";
+  }
+  dragOverChildIndex.value = index;
+}
+
+function handleDragLeave() {
+  dragOverChildIndex.value = null;
+}
+
+async function handleDrop(event: DragEvent, dropIndex: number) {
+  event.preventDefault();
+  dragOverChildIndex.value = null;
+
+  if (draggedChildIndex.value === null || draggedChildIndex.value === dropIndex) {
+    draggedChildIndex.value = null;
+    return;
+  }
+
+  const dragIndex = draggedChildIndex.value;
+  const actualChildren = children.value;
+
+  // Sortera barnen lokalt
+  const sortedChildren = [...actualChildren];
+  const draggedChild = sortedChildren[dragIndex];
+  sortedChildren.splice(dragIndex, 1);
+  sortedChildren.splice(dropIndex, 0, draggedChild);
+
+  // Uppdatera ordning i databasen
+  try {
+    for (let i = 0; i < sortedChildren.length; i++) {
+      const child = sortedChildren[i];
+
+      await fetch("http://localhost:8080/v1/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
+              update_goal_relations_by_pk(
+                pk_columns: { parent_id: $parent_id, child_id: $child_id }
+                _set: { order: $order }
+              ) {
+                parent_id
+                child_id
+                order
+              }
+            }
+          `,
+          variables: {
+            parent_id: goalId,
+            child_id: child.id,
+            order: i,
+          },
+        }),
+      });
+    }
+
+    // Uppdatera data från server
+    await refresh();
+  } catch (error) {
+    console.error("Failed to update child order:", error);
+    // Uppdatera ändå från server för att synkronisera
+    await refresh();
+  }
+
+  draggedChildIndex.value = null;
+}
+
+// Flytta markerat barn upp i listan
+async function moveChildUp() {
+  if (
+    selectedChildIndex.value <= 0 ||
+    isParentMode.value ||
+    isGoalSelected.value
+  ) {
+    return;
+  }
+
+  const currentIndex = selectedChildIndex.value;
+  const displayedChildren = filteredChildren.value;
+  const allChildren = children.value;
+
+  if (currentIndex >= displayedChildren.length) {
+    return;
+  }
+
+  // Hämta de två målen som ska bytas
+  const movingChild = displayedChildren[currentIndex];
+  const aboveChild = displayedChildren[currentIndex - 1];
+
+  // Hitta deras ordningspositioner i full lista
+  const movingChildFullIndex = allChildren.findIndex((c) => c.id === movingChild.id);
+  const aboveChildFullIndex = allChildren.findIndex((c) => c.id === aboveChild.id);
+
+  if (movingChildFullIndex === -1 || aboveChildFullIndex === -1) {
+    return;
+  }
+
+  // Uppdatera ordningen för dessa två mål i databasen
+  try {
+    // Byt ordningen mellan de två målen
+    const movingChildOrder = goal.value?.childRelations?.[movingChildFullIndex]?.order ?? movingChildFullIndex;
+    const aboveChildOrder = goal.value?.childRelations?.[aboveChildFullIndex]?.order ?? aboveChildFullIndex;
+
+    await Promise.all([
+      fetch("http://localhost:8080/v1/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
+              update_goal_relations_by_pk(
+                pk_columns: { parent_id: $parent_id, child_id: $child_id }
+                _set: { order: $order }
+              ) {
+                parent_id
+                child_id
+                order
+              }
+            }
+          `,
+          variables: {
+            parent_id: goalId,
+            child_id: movingChild.id,
+            order: aboveChildOrder,
+          },
+        }),
+      }),
+      fetch("http://localhost:8080/v1/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
+              update_goal_relations_by_pk(
+                pk_columns: { parent_id: $parent_id, child_id: $child_id }
+                _set: { order: $order }
+              ) {
+                parent_id
+                child_id
+                order
+              }
+            }
+          `,
+          variables: {
+            parent_id: goalId,
+            child_id: aboveChild.id,
+            order: movingChildOrder,
+          },
+        }),
+      }),
+    ]);
+
+    // Uppdatera markerad index
+    selectedChildIndex.value = currentIndex - 1;
+
+    // Uppdatera data från server
+    await refresh();
+  } catch (error) {
+    console.error("Failed to move child up:", error);
+    // Uppdatera ändå från server för att synkronisera
+    await refresh();
+  }
+}
+
+// Flytta markerat barn ner i listan
+async function moveChildDown() {
+  if (
+    selectedChildIndex.value < 0 ||
+    isParentMode.value ||
+    isGoalSelected.value
+  ) {
+    return;
+  }
+
+  const currentIndex = selectedChildIndex.value;
+  const displayedChildren = filteredChildren.value;
+  const allChildren = children.value;
+
+  if (currentIndex >= displayedChildren.length - 1) {
+    return;
+  }
+
+  // Hämta de två målen som ska bytas
+  const movingChild = displayedChildren[currentIndex];
+  const belowChild = displayedChildren[currentIndex + 1];
+
+  // Hitta deras ordningspositioner i full lista
+  const movingChildFullIndex = allChildren.findIndex((c) => c.id === movingChild.id);
+  const belowChildFullIndex = allChildren.findIndex((c) => c.id === belowChild.id);
+
+  if (movingChildFullIndex === -1 || belowChildFullIndex === -1) {
+    return;
+  }
+
+  // Uppdatera ordningen för dessa två mål i databasen
+  try {
+    // Byt ordningen mellan de två målen
+    const movingChildOrder = goal.value?.childRelations?.[movingChildFullIndex]?.order ?? movingChildFullIndex;
+    const belowChildOrder = goal.value?.childRelations?.[belowChildFullIndex]?.order ?? belowChildFullIndex;
+
+    await Promise.all([
+      fetch("http://localhost:8080/v1/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
+              update_goal_relations_by_pk(
+                pk_columns: { parent_id: $parent_id, child_id: $child_id }
+                _set: { order: $order }
+              ) {
+                parent_id
+                child_id
+                order
+              }
+            }
+          `,
+          variables: {
+            parent_id: goalId,
+            child_id: movingChild.id,
+            order: belowChildOrder,
+          },
+        }),
+      }),
+      fetch("http://localhost:8080/v1/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
+              update_goal_relations_by_pk(
+                pk_columns: { parent_id: $parent_id, child_id: $child_id }
+                _set: { order: $order }
+              ) {
+                parent_id
+                child_id
+                order
+              }
+            }
+          `,
+          variables: {
+            parent_id: goalId,
+            child_id: belowChild.id,
+            order: movingChildOrder,
+          },
+        }),
+      }),
+    ]);
+
+    // Uppdatera markerad index
+    selectedChildIndex.value = currentIndex + 1;
+
+    // Uppdatera data från server
+    await refresh();
+  } catch (error) {
+    console.error("Failed to move child down:", error);
+    // Uppdatera ändå från server för att synkronisera
+    await refresh();
+  }
 }
 
 // Vim-style navigering för undermål
@@ -1290,6 +1595,14 @@ function handleKeydown(event: KeyboardEvent) {
       if (parents.value.length > 0) {
         router.push(`/goal/${parents.value[0].id}`);
       }
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      // Flytta markerat barn upp i listan
+      moveChildUp();
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      // Flytta markerat barn ner i listan
+      moveChildDown();
     }
   }
 }
@@ -1492,7 +1805,8 @@ watch(selectedParentIndex, async () => {
 
         <ul v-if="filteredChildren.length > 0" class="space-y-3">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index"
-            class="relative overflow-hidden rounded-lg">
+            draggable="true" @dragstart="handleDragStart($event, index)" @dragover="handleDragOver($event, index)" @dragleave="handleDragLeave" @drop="handleDrop($event, index)"
+            class="relative overflow-hidden rounded-lg transition-opacity" :class="dragOverChildIndex === index ? 'opacity-50' : 'opacity-100'">
             <!-- Swipe bakgrund -->
             <div class="absolute inset-0 flex items-center justify-start px-6"
               :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'">

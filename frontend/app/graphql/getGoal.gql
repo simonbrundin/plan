@@ -6,8 +6,9 @@ query GetGoal($id: Int!) {
     finished
 
     # Barn - relationer där detta mål är parent
-    childRelations: goalRelationsByParentId {
+    childRelations: goalRelationsByParentId(order_by: { order: asc }) {
       child_id
+      order
     }
 
     # Förälder - relationer där detta mål är child
