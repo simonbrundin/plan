@@ -146,12 +146,13 @@ const progress = computed(() => {
 const goalsStore = useGoalsStore();
 
 // Ladda goals om de inte är laddade
-// Temporarily disabled to debug
-// onMounted(async () => {
-//   if (!goalsStore.isLoaded) {
-//     await goalsStore.loadGoals();
-//   }
-// });
+onMounted(async () => {
+  // Populate store with goals from the allGoals data we already fetched
+  if (goalData.value?.allGoals && goalsStore.goals.length === 0) {
+    goalData.value.allGoals.forEach(g => goalsStore.addGoal(g));
+    goalsStore.isLoaded = true;
+  }
+});
 
 // Visa/dölj avklarade mål
 const showCompleted = ref(false);
