@@ -1224,6 +1224,10 @@ function handleKeydown(event: KeyboardEvent) {
       isParentMode.value = false;
       isGoalSelected.value = true;
       selectedChildIndex.value = -1;
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      // Öppna föräldersök (samma som + knappen)
+      toggleParentSearch();
     }
   } else {
     // Child mode - navigera mellan undermål
@@ -1548,7 +1552,7 @@ watch(selectedParentIndex, async () => {
         Vill du ta bort relationen till
         <strong>{{
           parents.find((p) => p.id === parentToRemove)?.title
-          }}</strong>? Själva målet kommer inte tas bort.
+        }}</strong>? Själva målet kommer inte tas bort.
       </p>
 
       <template #footer="{ close }">
