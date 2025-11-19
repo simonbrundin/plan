@@ -18,7 +18,7 @@
       {
         label: "Goals",
         icon: "i-lucide-target",
-        to: "/root-goals",
+        to: "/goal/1",
         onSelect: () => {
           open.value = false;
         },

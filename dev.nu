@@ -91,6 +91,31 @@ try {
   # Ingen process på porten
 }
 
-tilt up --namespace $namespace
+# -----------------------------------------------
+# Välj Tilt mode
+# -----------------------------------------------
+
+print "\n🚀 Välj utvecklingsmiljö:\n"
+
+let modes = [
+  "local - Docker Compose (standard)",
+  "kubernetes - Full cluster miljö"
+]
+
+let selection = ($modes | str join "\n" | fzf --prompt="Mode: " --height=40% --reverse | str trim)
+
+let mode = if ($selection | str contains "kubernetes") {
+  "kubernetes"
+} else {
+  "local"
+}
+
+print $"\n✓ Startar Tilt i ($mode) mode...\n"
+
+if $mode == "kubernetes" {
+  tilt up --namespace $namespace -- mode=kubernetes
+} else {
+  tilt up --namespace $namespace -- mode=local
+}
 
 

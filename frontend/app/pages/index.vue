@@ -7,9 +7,9 @@ const { loggedIn } = useUserSession();
     <div class="flex items-center justify-center min-h-[50vh]">
       <div v-if="loggedIn" class="text-center">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen tillbaka!</h1>
-        <NuxtLink to="/root-goals">
+        <NuxtLink to="/goal/1">
           <UButton size="lg" icon="material-symbols:arrow-forward-rounded">
-            Gå till Root Goals
+            Gå till mål
           </UButton>
         </NuxtLink>
       </div>

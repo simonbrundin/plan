@@ -1253,11 +1253,9 @@ function handleKeydown(event: KeyboardEvent) {
       }
     } else if (event.key === "h") {
       event.preventDefault();
-      // Gå till root-goals eller första föräldern
+      // Gå till första föräldern
       if (parents.value.length > 0) {
         router.push(`/goal/${parents.value[0].id}`);
-      } else {
-        router.push("/root-goals");
       }
     }
   }
@@ -1325,9 +1323,9 @@ watch(selectedParentIndex, async () => {
       <!-- Breadcrumb / Föräldrar -->
       <div class="flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2 text-sm flex-wrap">
-          <NuxtLink v-if="parents.length === 0" to="/root-goals"
+          <NuxtLink v-if="parents.length === 0" to="/goal/1"
             class="text-blue-400 hover:text-blue-300 transition-colors font-medium">
-            Grundmål
+            Root
           </NuxtLink>
 
           <!-- Insert mode för förälder -->

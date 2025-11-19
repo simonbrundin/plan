@@ -1,9 +1,10 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-## Utvecklingsmiljö
+## Sophies önskemål
 
-- [x] `dev` fungerar i plan och ger mig notis i telefonen
-  - [x] Auth fungerar
+- [ ] Dashboard
+
+## Utvecklingsmiljö
 
 ### Badrum
 
@@ -292,3 +293,5 @@
     - [x] Rör nedkortat
     - [x] Kablarna på utsidan skalade
 - [x] `s k login teleport` kan logga in med thetisnyckel
+- [x] `dev` fungerar i plan och ger mig notis i telefonen
+  - [x] Auth fungerar
