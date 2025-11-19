@@ -1156,7 +1156,8 @@ function handleKeydown(event: KeyboardEvent) {
   // Hantera 'i' och 'a' för att gå in i insert mode
   if (event.key === "i" || event.key === "a") {
     event.preventDefault();
-    const atBeginning = event.key === "a"; // 'a' = början, 'i' = slutet
+    // 'i' = början, 'a' = slutet
+    const atBeginning = event.key === "i";
 
     if (isGoalSelected.value) {
       // Redigera själva målets titel
@@ -1547,7 +1548,7 @@ watch(selectedParentIndex, async () => {
         Vill du ta bort relationen till
         <strong>{{
           parents.find((p) => p.id === parentToRemove)?.title
-        }}</strong>? Själva målet kommer inte tas bort.
+          }}</strong>? Själva målet kommer inte tas bort.
       </p>
 
       <template #footer="{ close }">
