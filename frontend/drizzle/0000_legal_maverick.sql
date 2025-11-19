@@ -31,6 +31,6 @@ CREATE TABLE "goal_relations" (
 --> statement-breakpoint
 ALTER TABLE "user_goals" ADD CONSTRAINT "user_goals_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_goals" ADD CONSTRAINT "user_goals_goal_id_fkey" FOREIGN KEY ("goal_id") REFERENCES "public"."goals"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "goal_relations" ADD CONSTRAINT "goal_relations_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "public"."goals"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "goal_relations" ADD CONSTRAINT "goal_relations_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "public"."goals"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "goal_relations" ADD CONSTRAINT "goal_relations_child_id_fkey" FOREIGN KEY ("child_id") REFERENCES "public"."goals"("id") ON DELETE no action ON UPDATE no action;
 */

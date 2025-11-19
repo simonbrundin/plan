@@ -3,6 +3,7 @@
 interface Goal {
   id: number
   title: string
+  icon: string
   created: string
   finished: string | null
 }

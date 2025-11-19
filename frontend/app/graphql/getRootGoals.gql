@@ -5,6 +5,7 @@ query GetRootGoals {
     goal {
       id
       title
+      icon
       created
       finished
       childRelations: goalRelationsByParentId(order_by: { order: asc }) {

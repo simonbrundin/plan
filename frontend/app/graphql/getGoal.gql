@@ -2,6 +2,7 @@ query GetGoal($id: Int!) {
   goal: goals_by_pk(id: $id) {
     id
     title
+    icon
     created
     finished
 
@@ -16,6 +17,7 @@ query GetGoal($id: Int!) {
       goalByParentId {
         id
         title
+        icon
       }
     }
   }
@@ -24,6 +26,7 @@ query GetGoal($id: Int!) {
   allGoals: goals {
     id
     title
+    icon
     finished
     created
   }

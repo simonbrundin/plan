@@ -13,6 +13,7 @@ const config = useRuntimeConfig();
 interface Goal {
   id: number;
   title: string;
+  icon: string;
   created: string;
   finished: string | null;
 }
@@ -62,6 +63,7 @@ const fetchGoalData = async () => {
             goal: goals_by_pk(id: $id) {
               id
               title
+              icon
               created
               finished
 
@@ -76,6 +78,7 @@ const fetchGoalData = async () => {
                 goalByParentId {
                   id
                   title
+                  icon
                 }
               }
             }
@@ -84,6 +87,7 @@ const fetchGoalData = async () => {
             allGoals: goals {
               id
               title
+              icon
               finished
               created
             }
@@ -156,6 +160,11 @@ onMounted(async () => {
 
 // Visa/dölj avklarade mål
 const showCompleted = ref(false);
+
+// Icon picker state
+const showIconPicker = ref(false);
+const editingIconGoalId = ref<number | null>(null);
+const editingIconGoalIcon = ref<string>('');
 
 // Filtrerade undermål baserat på showCompleted
 const filteredChildren = computed(() => {
@@ -249,9 +258,10 @@ async function createNewParent() {
     // Skapa nytt mål
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title }) {
+        insert_goals_one(object: { title: $title, icon: "material-symbols:circle" }) {
           id
           title
+          icon
           created
           finished
         }
@@ -460,9 +470,10 @@ async function createNewChild() {
     // Skapa nytt mål
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title }) {
+        insert_goals_one(object: { title: $title, icon: "material-symbols:circle" }) {
           id
           title
+          icon
           created
           finished
         }
@@ -1264,9 +1275,10 @@ async function createSiblingGoal() {
     // Skapa nytt mål med tom titel
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title }) {
+        insert_goals_one(object: { title: $title, icon: "material-symbols:circle" }) {
           id
           title
+          icon
           created
           finished
         }
@@ -1413,6 +1425,59 @@ async function toggleFinished(goalToToggle: Goal) {
     await refresh();
   } catch (error) {
     console.error("Failed to toggle goal finished status:", error);
+  }
+}
+
+// Uppdatera goal icon
+async function updateGoalIcon(newIcon: string) {
+  try {
+    // Bestäm vilket mål som ska uppdateras
+    const targetGoalId = editingIconGoalId.value || goalId;
+
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UpdateGoalIcon($id: Int!, $icon: String!) {
+            update_goals_by_pk(pk_columns: { id: $id }, _set: { icon: $icon }) {
+              id
+              icon
+            }
+          }
+        `,
+        variables: { id: targetGoalId, icon: newIcon },
+      }),
+    });
+
+    const result = await response.json();
+    if (result.errors) {
+      throw new Error(result.errors[0].message);
+    }
+
+    // Uppdatera lokal state i component
+    if (editingIconGoalId.value) {
+      // Uppdatera barn-mål
+      const childIndex = goalData.value?.allGoals?.findIndex(g => g.id === editingIconGoalId.value);
+      if (childIndex !== -1 && goalData.value?.allGoals) {
+        goalData.value.allGoals[childIndex].icon = newIcon;
+      }
+    } else if (goalData.value?.goal) {
+      // Uppdatera huvudmål
+      goalData.value.goal.icon = newIcon;
+    }
+
+    // Uppdatera data från server
+    await refresh();
+
+    // Stäng ikonväljaren
+    editingIconGoalId.value = null;
+    editingIconGoalIcon.value = '';
+  } catch (error) {
+    console.error("Failed to update goal icon:", error);
   }
 }
 
@@ -1742,9 +1807,16 @@ watch(selectedParentIndex, async () => {
           Enter för att spara, Escape för att avbryta
         </div>
       </div>
-      <h1 v-else :class="['text-4xl font-bold flex-shrink-0 transition-colors px-3 py-2 rounded',
-        isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
-      ]">{{ goal?.title }}</h1>
+      <div v-else class="flex items-center gap-4 flex-shrink-0">
+        <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
+          isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
+        ]">{{ goal?.title }}</h1>
+        <button v-if="goal" @click.stop="showIconPicker = true"
+          class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800"
+          title="Ändra ikon">
+          <Icon :name="goal.icon || 'material-symbols:circle'" class="w-8 h-8" />
+        </button>
+      </div>
 
       <!-- Undermål - scrollbar container -->
       <div class="flex-1 overflow-y-auto min-h-0">
@@ -1838,7 +1910,12 @@ watch(selectedParentIndex, async () => {
               <!-- Normal mode - visa länk -->
               <NuxtLink v-else :to="`/goal/${child.id}`"
                 class="p-4 flex items-start justify-between block hover:bg-gray-800/50">
-                <div class="flex-1">
+                <div class="flex-1 flex items-center gap-3">
+                  <button @click.stop="editingIconGoalId = child.id; showIconPicker = true"
+                    class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
+                    title="Ändra ikon">
+                    <Icon :name="child.icon || 'material-symbols:circle'" class="w-6 h-6" />
+                  </button>
                   <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
                     {{ child.title }}
                   </h3>
@@ -1900,6 +1977,20 @@ watch(selectedParentIndex, async () => {
         <!-- </div> -->
       </template>
     </UModal>
+
+    <!-- Icon Picker Component -->
+    <IconPicker
+      v-if="goal"
+      :modelValue="editingIconGoalId ? goalData?.allGoals?.find(g => g.id === editingIconGoalId)?.icon || '' : goal.icon"
+      :open="showIconPicker"
+      @update:open="(value) => {
+        showIconPicker = value;
+        if (!value) {
+          editingIconGoalId = null;
+        }
+      }"
+      @update:modelValue="updateGoalIcon"
+    />
   </div>
   <div v-else class="max-w-4xl mx-auto p-6">
     <div class="text-center">

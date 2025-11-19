@@ -18,6 +18,7 @@ export const users = pgTable("users", {
 export const goals = pgTable("goals", {
 	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "goals_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	title: varchar({ length: 64 }),
+	icon: varchar({ length: 100 }).default('material-symbols:circle'),
 	created: timestamp({ withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	finished: timestamp({ withTimezone: true, mode: 'string' }),
 });

@@ -13,7 +13,21 @@
       "idx": 1,
       "version": "7",
       "when": 1763384064422,
-      "tag": "0001_easy_lyja",
+      "tag": "0001_create_root_goal",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1763384064423,
+      "tag": "0002_add_goal_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1763384064424,
+      "tag": "0003_add_goal_icon",
       "breakpoints": true
     }
   ]

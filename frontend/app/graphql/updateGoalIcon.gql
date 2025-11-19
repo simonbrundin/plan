@@ -1,0 +1,6 @@
+mutation UpdateGoalIcon($id: Int!, $icon: String!) {
+  update_goals_by_pk(pk_columns: { id: $id }, _set: { icon: $icon }) {
+    id
+    icon
+  }
+}

@@ -2,6 +2,7 @@ query GetAllGoals {
   goals(order_by: { created: desc }) {
     id
     title
+    icon
     created
     finished
   }
