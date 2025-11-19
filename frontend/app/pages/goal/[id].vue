@@ -1887,9 +1887,9 @@ watch(selectedParentIndex, async () => {
             </div>
 
             <!-- Huvudinnehåll -->
-            <div class="relative border rounded-lg transition-all bg-gray-900" :class="selectedChildIndex === index
-              ? 'border-blue-500 bg-blue-900/20'
-              : 'border-gray-700'
+            <div class="relative rounded-lg transition-all bg-gray-900" :class="selectedChildIndex === index
+              ? 'border border-blue-500'
+              : ''
               " :style="{
                 transform: `translateX(${getSwipeOffset(child.id)}px)`,
                 transition: swipeState.isSwiping
@@ -1915,7 +1915,7 @@ watch(selectedParentIndex, async () => {
                   <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
                 </button>
                 <NuxtLink :to="`/goal/${child.id}`"
-                  class="flex-1 p-4 block hover:bg-gray-800/50">
+                  class="flex-1 p-4 block">
                   <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
                     {{ child.title }}
                   </h3>
