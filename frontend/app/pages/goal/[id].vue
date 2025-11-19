@@ -258,7 +258,7 @@ async function createNewParent() {
     // Skapa nytt mål
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title, icon: "material-symbols:circle" }) {
+        insert_goals_one(object: { title: $title, icon: "roentgen:default" }) {
           id
           title
           icon
@@ -470,7 +470,7 @@ async function createNewChild() {
     // Skapa nytt mål
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title, icon: "material-symbols:circle" }) {
+        insert_goals_one(object: { title: $title, icon: "roentgen:default" }) {
           id
           title
           icon
@@ -1275,7 +1275,7 @@ async function createSiblingGoal() {
     // Skapa nytt mål med tom titel
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title, icon: "material-symbols:circle" }) {
+        insert_goals_one(object: { title: $title, icon: "roentgen:default" }) {
           id
           title
           icon
@@ -1814,7 +1814,7 @@ watch(selectedParentIndex, async () => {
         <button v-if="goal" @click.stop="showIconPicker = true"
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800"
           title="Ändra ikon">
-          <Icon :name="goal.icon || 'material-symbols:circle'" class="w-8 h-8" />
+          <Icon :name="goal.icon || 'roentgen:default'" class="w-8 h-8 text-white" />
         </button>
       </div>
 
@@ -1912,7 +1912,7 @@ watch(selectedParentIndex, async () => {
                 <button @click.stop="editingIconGoalId = child.id; showIconPicker = true"
                   class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
                   title="Ändra ikon">
-                  <Icon :name="child.icon || 'material-symbols:circle'" class="w-6 h-6" />
+                  <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
                 </button>
                 <NuxtLink :to="`/goal/${child.id}`"
                   class="flex-1 p-4 block hover:bg-gray-800/50">

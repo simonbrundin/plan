@@ -127,7 +127,7 @@ function close() {
           <button v-for="icon in filteredIcons" :key="icon.full" @click="selectIcon(icon)"
             class="aspect-square flex flex-col items-center justify-center rounded-lg p-2 hover:bg-gray-700 transition-colors group relative"
             :class="modelValue === icon.full ? 'bg-blue-600' : 'bg-gray-700'">
-            <Icon :name="icon.full" class="w-8 h-8" />
+            <Icon :name="icon.full" class="w-8 h-8 text-white" />
             <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 rounded text-xs text-gray-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none max-w-xs">
               <div class="font-mono">{{ icon.full }}</div>
               <div class="text-gray-500 text-xs">{{ icon.collection }}</div>
