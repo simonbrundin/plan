@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 
+interface IconResult {
+  name: string
+  collection: string
+  full: string
+}
+
 interface Props {
   modelValue: string
   open?: boolean
@@ -17,6 +23,9 @@ const emit = defineEmits<{
 
 const searchQuery = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
+const searchResults = ref<IconResult[]>([])
+const isSearching = ref(false)
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 const displayOpen = computed({
   get: () => props.open,
@@ -27,116 +36,50 @@ watch(displayOpen, async (newValue) => {
   if (newValue) {
     await nextTick()
     searchInput.value?.focus()
+  } else {
+    // Clear search when closing
+    searchQuery.value = ''
+    searchResults.value = []
   }
 })
 
-// Lista över vanligt använda Material Symbols-ikoner
-const commonIcons = [
-  'material-symbols:circle',
-  'material-symbols:star',
-  'material-symbols:check-circle',
-  'material-symbols:close-circle',
-  'material-symbols:bookmark',
-  'material-symbols:flag',
-  'material-symbols:heart',
-  'material-symbols:lightbulb',
-  'material-symbols:rocket',
-  'material-symbols:target',
-  'material-symbols:trophy',
-  'material-symbols:trending-up',
-  'material-symbols:calendar-today',
-  'material-symbols:schedule',
-  'material-symbols:time-to-leave',
-  'material-symbols:alarm',
-  'material-symbols:shopping-cart',
-  'material-symbols:wallet',
-  'material-symbols:credit-card',
-  'material-symbols:home',
-  'material-symbols:apartment',
-  'material-symbols:work',
-  'material-symbols:school',
-  'material-symbols:library-books',
-  'material-symbols:sports-basketball',
-  'material-symbols:sports-soccer',
-  'material-symbols:sports-tennis',
-  'material-symbols:fitness-center',
-  'material-symbols:favorite',
-  'material-symbols:pets',
-  'material-symbols:local-dining',
-  'material-symbols:local-cafe',
-  'material-symbols:local-bar',
-  'material-symbols:restaurant',
-  'material-symbols:music-note',
-  'material-symbols:movie',
-  'material-symbols:camera',
-  'material-symbols:video-camera',
-  'material-symbols:photo',
-  'material-symbols:brush',
-  'material-symbols:palette',
-  'material-symbols:edit',
-  'material-symbols:note',
-  'material-symbols:newspaper',
-  'material-symbols:article',
-  'material-symbols:dashboard',
-  'material-symbols:build',
-  'material-symbols:settings',
-  'material-symbols:computer',
-  'material-symbols:smartphone',
-  'material-symbols:laptop',
-  'material-symbols:headphones',
-  'material-symbols:airplanes',
-  'material-symbols:train',
-  'material-symbols:directions-car',
-  'material-symbols:two-wheeler',
-  'material-symbols:directions-bike',
-  'material-symbols:directions-walk',
-  'material-symbols:directions-run',
-  'material-symbols:flight',
-  'material-symbols:hotel',
-  'material-symbols:beach-access',
-  'material-symbols:terrain',
-  'material-symbols:language',
-  'material-symbols:public',
-  'material-symbols:location-on',
-  'material-symbols:map',
-  'material-symbols:navigation',
-  'material-symbols:explore',
-  'material-symbols:info',
-  'material-symbols:help',
-  'material-symbols:warning',
-  'material-symbols:error',
-  'material-symbols:done',
-  'material-symbols:cloud',
-  'material-symbols:cloud-upload',
-  'material-symbols:cloud-download',
-  'material-symbols:backup',
-  'material-symbols:storage',
-  'material-symbols:delete',
-  'material-symbols:restore',
-  'material-symbols:copy',
-  'material-symbols:cut',
-  'material-symbols:menu',
-  'material-symbols:search',
-  'material-symbols:more-vert',
-  'material-symbols:add',
-  'material-symbols:remove',
-  'material-symbols:arrow-forward',
-  'material-symbols:arrow-back',
-  'material-symbols:arrow-upward',
-  'material-symbols:arrow-downward',
-]
+// Watch search query and debounce API calls
+watch(searchQuery, (newQuery) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
 
-const filteredIcons = computed(() => {
-  if (!searchQuery.value.trim()) return commonIcons
+  // Don't search with less than 2 characters
+  if (!newQuery || newQuery.trim().length < 2) {
+    searchResults.value = []
+    return
+  }
 
-  const query = searchQuery.value.toLowerCase()
-  return commonIcons.filter(icon =>
-    icon.toLowerCase().includes(query)
-  )
+  isSearching.value = true
+  searchTimeout = setTimeout(async () => {
+    await performSearch(newQuery)
+  }, 300) // Debounce for 300ms
 })
 
-function selectIcon(icon: string) {
-  emit('update:modelValue', icon)
+async function performSearch(query: string) {
+  try {
+    const response = await fetch(`/api/icons?q=${encodeURIComponent(query)}`)
+    const data = await response.json()
+    searchResults.value = data.results || []
+  } catch (error) {
+    console.error('Failed to search icons:', error)
+    searchResults.value = []
+  } finally {
+    isSearching.value = false
+  }
+}
+
+const filteredIcons = computed(() => {
+  return searchResults.value
+})
+
+function selectIcon(iconResult: IconResult) {
+  emit('update:modelValue', iconResult.full)
   displayOpen.value = false
   searchQuery.value = ''
 }
@@ -169,21 +112,37 @@ function close() {
         <input ref="searchInput" v-model="searchQuery" type="text" placeholder="Sök ikoner..."
           class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" />
 
+        <!-- Instruktioner när tomt -->
+        <div v-if="!searchQuery || searchQuery.trim().length < 2" class="text-center py-8 text-gray-400">
+          Skriv minst 2 tecken för att söka bland alla ikoner
+        </div>
+
+        <!-- Loading status -->
+        <div v-else-if="isSearching" class="text-center py-8 text-gray-400">
+          Söker ikoner...
+        </div>
+
         <!-- Ikon grid -->
-        <div class="grid grid-cols-6 gap-2 max-h-96 overflow-y-auto">
-          <button v-for="icon in filteredIcons" :key="icon" @click="selectIcon(icon)"
-            class="aspect-square flex items-center justify-center rounded-lg p-2 hover:bg-gray-700 transition-colors group relative"
-            :class="modelValue === icon ? 'bg-blue-600' : 'bg-gray-700'">
-            <Icon :name="icon" class="w-8 h-8" />
-            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 rounded text-xs text-gray-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              {{ icon }}
+        <div v-else-if="filteredIcons.length > 0" class="grid grid-cols-6 gap-2 max-h-96 overflow-y-auto">
+          <button v-for="icon in filteredIcons" :key="icon.full" @click="selectIcon(icon)"
+            class="aspect-square flex flex-col items-center justify-center rounded-lg p-2 hover:bg-gray-700 transition-colors group relative"
+            :class="modelValue === icon.full ? 'bg-blue-600' : 'bg-gray-700'">
+            <Icon :name="icon.full" class="w-8 h-8" />
+            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 rounded text-xs text-gray-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none max-w-xs">
+              <div class="font-mono">{{ icon.full }}</div>
+              <div class="text-gray-500 text-xs">{{ icon.collection }}</div>
             </div>
           </button>
         </div>
 
         <!-- Meddelande när inga resultat -->
-        <div v-if="filteredIcons.length === 0" class="text-center py-8 text-gray-400">
-          Ingen ikon matchade dina sökkriterier
+        <div v-else-if="searchQuery && searchQuery.trim().length >= 2" class="text-center py-8 text-gray-400">
+          Ingen ikon matchade "{{ searchQuery }}"
+        </div>
+
+        <!-- Results counter -->
+        <div v-if="filteredIcons.length > 0" class="text-center py-2 text-xs text-gray-500">
+          Visar {{ filteredIcons.length }} resultat
         </div>
       </div>
     </div>

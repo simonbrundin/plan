@@ -31,6 +31,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@nuxtjs/tailwindcss",
     "@nuxt/ui",
+    "@nuxt/icon",
     "shadcn-nuxt",
     "nuxt-auth-utils",
     "nuxt-graphql-client",
