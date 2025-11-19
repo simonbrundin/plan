@@ -1811,7 +1811,7 @@ watch(selectedParentIndex, async () => {
         <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
           isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
         ]">{{ goal?.title }}</h1>
-        <button v-if="goal" @click.stop="showIconPicker = true"
+        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800"
           title="Ändra ikon">
           <Icon :name="goal.icon || 'roentgen:default'" class="w-8 h-8 text-white" />
@@ -1908,8 +1908,8 @@ watch(selectedParentIndex, async () => {
               </div>
 
               <!-- Normal mode - visa länk -->
-              <div class="flex items-center gap-2">
-                <button @click.stop="editingIconGoalId = child.id; showIconPicker = true"
+              <div v-else class="flex items-center gap-2">
+                <button v-if="!(mode === 'insert' && editingGoalId === child.id)" @click.stop="editingIconGoalId = child.id; showIconPicker = true"
                   class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
                   title="Ändra ikon">
                   <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
