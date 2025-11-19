@@ -716,6 +716,9 @@ const editingGoalId = ref<number | null>(null);
 const editTitle = ref("");
 const editInputRef = ref<HTMLInputElement | null>(null);
 
+// Goal selection (själva målet är markerat, inte barn eller föräldrar)
+const isGoalSelected = ref(false);
+
 // Delete confirmation
 const showDeleteConfirmation = ref(false);
 const goalToDelete = ref<{ id: number; title: string } | null>(null);
@@ -1155,7 +1158,12 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault();
     const atBeginning = event.key === "a"; // 'a' = början, 'i' = slutet
 
-    if (isParentMode.value && parents.value.length > 0) {
+    if (isGoalSelected.value) {
+      // Redigera själva målets titel
+      if (goal.value) {
+        enterInsertMode(goal.value.id, goal.value.title, atBeginning);
+      }
+    } else if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
       enterInsertMode(parent.id, parent.title, atBeginning);
     } else if (filteredChildren.value.length > 0) {
@@ -1211,27 +1219,41 @@ function handleKeydown(event: KeyboardEvent) {
       }
     } else if (event.key === "j") {
       event.preventDefault();
-      // Gå tillbaka till child mode
+      // Gå till goal mode
       isParentMode.value = false;
-      selectedChildIndex.value = 0;
+      isGoalSelected.value = true;
+      selectedChildIndex.value = -1;
     }
   } else {
     // Child mode - navigera mellan undermål
     if (event.key === "j") {
       event.preventDefault();
-      const childrenCount = filteredChildren.value.length;
-      if (childrenCount > 0) {
-        selectedChildIndex.value = Math.min(
-          selectedChildIndex.value + 1,
-          childrenCount - 1
-        );
+      if (isGoalSelected.value) {
+        // Från goal mode: markera första barnet
+        isGoalSelected.value = false;
+        selectedChildIndex.value = 0;
+      } else {
+        const childrenCount = filteredChildren.value.length;
+        if (childrenCount > 0) {
+          selectedChildIndex.value = Math.min(
+            selectedChildIndex.value + 1,
+            childrenCount - 1
+          );
+        }
       }
     } else if (event.key === "k") {
       event.preventDefault();
-      if (selectedChildIndex.value === 0 && parents.value.length > 0) {
-        // Växla till parent mode
-        isParentMode.value = true;
-        selectedParentIndex.value = 0;
+      if (selectedChildIndex.value === 0 && !isGoalSelected.value) {
+        // Markera själva målet istället för att navigera vidare
+        isGoalSelected.value = true;
+        selectedChildIndex.value = -1; // Avmarkera barnen
+      } else if (isGoalSelected.value) {
+        // Från goal mode: gå in i parent mode
+        if (parents.value.length > 0) {
+          isGoalSelected.value = false;
+          isParentMode.value = true;
+          selectedParentIndex.value = 0;
+        }
       } else {
         const childrenCount = filteredChildren.value.length;
         if (childrenCount > 0) {
@@ -1244,11 +1266,17 @@ function handleKeydown(event: KeyboardEvent) {
       createSiblingGoal();
     } else if (event.key === "l") {
       event.preventDefault();
-      const childrenCount = filteredChildren.value.length;
-      if (childrenCount > 0) {
-        const selectedChild = filteredChildren.value[selectedChildIndex.value];
-        if (selectedChild) {
-          router.push(`/goal/${selectedChild.id}`);
+      if (isGoalSelected.value) {
+        // Från goal mode: markera första barnet
+        isGoalSelected.value = false;
+        selectedChildIndex.value = 0;
+      } else {
+        const childrenCount = filteredChildren.value.length;
+        if (childrenCount > 0) {
+          const selectedChild = filteredChildren.value[selectedChildIndex.value];
+          if (selectedChild) {
+            router.push(`/goal/${selectedChild.id}`);
+          }
         }
       }
     } else if (event.key === "h") {
@@ -1283,6 +1311,7 @@ watch(
   () => route.params.id,
   () => {
     isParentMode.value = false;
+    isGoalSelected.value = false;
     selectedChildIndex.value = 0;
     selectedParentIndex.value = 0;
   }
@@ -1386,7 +1415,17 @@ watch(selectedParentIndex, async () => {
       </div>
 
       <!-- Huvudmål -->
-      <h1 class="text-4xl font-bold text-gray-100 flex-shrink-0">{{ goal.title }}</h1>
+      <div v-if="mode === 'insert' && editingGoalId === goal?.id" class="mb-4">
+        <input ref="editInputRef" v-model="editTitle" type="text"
+          class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          @keydown.enter.prevent="saveEdit" @keydown.esc.prevent="cancelEdit" />
+        <div class="text-xs text-gray-500 mt-2">
+          Enter för att spara, Escape för att avbryta
+        </div>
+      </div>
+      <h1 v-else :class="['text-4xl font-bold flex-shrink-0 transition-colors px-3 py-2 rounded',
+        isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
+      ]">{{ goal?.title }}</h1>
 
       <!-- Undermål - scrollbar container -->
       <div class="flex-1 overflow-y-auto min-h-0">
