@@ -24,6 +24,7 @@ export function useGoalApi() {
               childRelations: goalRelationsByParentId(order_by: { order: asc }) {
                 child_id
                 order
+                weight
               }
 
               # Förälder - relationer där detta mål är child
@@ -288,6 +289,36 @@ export function useGoalApi() {
     }
   }
 
+  const updateGoalWeight = async (parentId: number, childId: number, weight: number): Promise<void> => {
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UpdateGoalWeight($parent_id: Int!, $child_id: Int!, $weight: Int!) {
+            update_goal_relations_by_pk(
+              pk_columns: { parent_id: $parent_id, child_id: $child_id }
+              _set: { weight: $weight }
+            ) {
+              parent_id
+              child_id
+              weight
+            }
+          }
+        `,
+        variables: { parent_id: parentId, child_id: childId, weight },
+      }),
+    })
+
+    const result = await response.json()
+    if (result.errors) {
+      throw new Error(result.errors[0].message)
+    }
+  }
+
   const createGoal = async (title: string, userId: number): Promise<Goal> => {
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
@@ -358,6 +389,7 @@ export function useGoalApi() {
     removeParentRelation,
     addChildRelation,
     updateGoalOrder,
+    updateGoalWeight,
     createGoal,
   }
 }

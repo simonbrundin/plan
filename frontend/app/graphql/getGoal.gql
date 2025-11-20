@@ -10,6 +10,7 @@ query GetGoal($id: Int!) {
     childRelations: goalRelationsByParentId(order_by: { order: asc }) {
       child_id
       order
+      weight
     }
 
     # Förälder - relationer där detta mål är child

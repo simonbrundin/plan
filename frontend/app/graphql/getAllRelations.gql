@@ -3,5 +3,6 @@ query GetAllRelations {
     child_id
     parent_id
     order
+    weight
   }
 }

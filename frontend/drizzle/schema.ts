@@ -1,4 +1,4 @@
-import { pgTable, unique, integer, varchar, timestamp, foreignKey, primaryKey, text, boolean } from "drizzle-orm/pg-core"
+import { pgTable, unique, integer, varchar, timestamp, foreignKey, primaryKey } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -18,9 +18,9 @@ export const users = pgTable("users", {
 export const goals = pgTable("goals", {
 	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "goals_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	title: varchar({ length: 64 }),
-	icon: varchar({ length: 100 }).default('roentgen:default'),
 	created: timestamp({ withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	finished: timestamp({ withTimezone: true, mode: 'string' }),
+	icon: varchar({ length: 100 }).default('roentgen:default'),
 });
 
 export const userGoals = pgTable("user_goals", {
@@ -44,6 +44,7 @@ export const goalRelations = pgTable("goal_relations", {
 	parentId: integer("parent_id").notNull(),
 	childId: integer("child_id").notNull(),
 	order: integer().default(0).notNull(),
+	weight: integer().default(10).notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.parentId],
@@ -57,45 +58,3 @@ export const goalRelations = pgTable("goal_relations", {
 		}),
 	primaryKey({ columns: [table.parentId, table.childId], name: "goal_relations_pkey"}),
 ]);
-
-// Better Auth tables - commented out as they don't exist in the database yet
-// Using nuxt-auth-utils instead for session management
-/*
-export const session = pgTable("session", {
-	id: text().primaryKey(),
-	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
-	token: text().notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).notNull(),
-	ipAddress: text("ip_address"),
-	userAgent: text("user_agent"),
-	userId: integer("user_id").notNull().references(() => users.id),
-}, (table) => [
-	unique("session_token_key").on(table.token),
-]);
-
-export const account = pgTable("account", {
-	id: text().primaryKey(),
-	accountId: text("account_id").notNull(),
-	providerId: text("provider_id").notNull(),
-	userId: integer("user_id").notNull().references(() => users.id),
-	accessToken: text("access_token"),
-	refreshToken: text("refresh_token"),
-	idToken: text("id_token"),
-	accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true, mode: 'string' }),
-	refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true, mode: 'string' }),
-	scope: text(),
-	password: text(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).notNull(),
-});
-
-export const verification = pgTable("verification", {
-	id: text().primaryKey(),
-	identifier: text().notNull(),
-	value: text().notNull(),
-	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
-});
-*/

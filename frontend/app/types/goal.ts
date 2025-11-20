@@ -9,6 +9,7 @@ export interface Goal {
 export interface ChildRelation {
   child_id: number
   order: number
+  weight: number
 }
 
 export interface ParentRelation {
@@ -18,6 +19,10 @@ export interface ParentRelation {
 export interface GoalWithRelations extends Goal {
   childRelations: ChildRelation[]
   parentRelations: ParentRelation[]
+}
+
+export interface GoalWithWeight extends Goal {
+  weight: number
 }
 
 export interface GetGoalResponse {

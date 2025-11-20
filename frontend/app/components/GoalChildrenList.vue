@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Goal } from '~/types/goal'
+import type { GoalWithWeight } from '~/types/goal'
 
 interface SwipeState {
   startX: number
@@ -8,8 +8,11 @@ interface SwipeState {
   childId: number | null
 }
 
+const weightEditingChildId = ref<number | null>(null)
+const tempWeight = ref(10)
+
 defineProps<{
-  filteredChildren: Goal[]
+  filteredChildren: GoalWithWeight[]
   selectedChildIndex: number
   mode: 'normal' | 'insert'
   editingGoalId: number | null
@@ -21,7 +24,7 @@ defineProps<{
 }>()
 
 defineEmits<{
-  'toggle-finished': [child: Goal]
+  'toggle-finished': [child: GoalWithWeight]
   'edit-goal': [childId: number, title: string, atBeginning: boolean]
   'save-edit': []
   'cancel-edit': []
@@ -33,10 +36,11 @@ defineEmits<{
   'drop': [event: DragEvent, index: number]
   'touchstart': [event: TouchEvent, childId: number]
   'touchmove': [event: TouchEvent]
-  'touchend': [child: Goal]
+  'touchend': [child: GoalWithWeight]
   'toggle-completed': []
   'open-child-search': []
   'open-icon-picker': [childId: number]
+  'update-weight': [childId: number, weight: number]
 }>()
 
 function getSwipeOffset(childId: number): number {
@@ -45,6 +49,38 @@ function getSwipeOffset(childId: number): number {
     return Math.max(0, Math.min(delta, 100))
   }
   return 0
+}
+
+function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
+  if (weight <= 2) {
+    return { color: '#888888', opacity: 0.3 }
+  } else if (weight <= 9) {
+    return { color: '#888888', opacity: 0.55 }
+  } else if (weight <= 14) {
+    return { color: '#333333', opacity: 1 }
+  } else if (weight <= 40) {
+    return { color: '#2E5AFF', opacity: 1 }
+  } else if (weight <= 100) {
+    return { color: '#9C27B0', opacity: 1 }
+  } else {
+    return { color: '#7B1FA2', opacity: 1, fontWeight: 'bold' }
+  }
+}
+
+function startWeightEdit(child: GoalWithWeight) {
+  weightEditingChildId.value = child.id
+  tempWeight.value = child.weight
+}
+
+function saveWeight() {
+  if (weightEditingChildId.value !== null) {
+    $emit('update-weight', weightEditingChildId.value, tempWeight.value)
+    weightEditingChildId.value = null
+  }
+}
+
+function cancelWeightEdit() {
+  weightEditingChildId.value = null
 }
 </script>
 
@@ -153,11 +189,19 @@ function getSwipeOffset(childId: number): number {
             >
               <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
             </button>
-            <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block">
-              <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
-                {{ child.title }}
-              </h3>
-            </NuxtLink>
+                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block">
+                  <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
+                    {{ child.title }}
+                  </h3>
+                </NuxtLink>
+                <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
+                  <div class="flex items-center gap-2">
+                    <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1" />
+                    <span class="text-sm text-gray-400 w-8">{{ tempWeight }}</span>
+                    <button @click="saveWeight" class="text-green-400 hover:text-green-300">✓</button>
+                    <button @click="cancelWeightEdit" class="text-red-400 hover:text-red-300">✗</button>
+                  </div>
+                </div>
           </div>
         </div>
       </li>

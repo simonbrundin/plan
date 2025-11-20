@@ -6,7 +6,7 @@ import GoalChildrenList from '~/components/GoalChildrenList.vue'
 import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
-import type { Goal, GoalWithRelations, GetGoalResponse } from '~/types/goal'
+import type { Goal, GoalWithRelations, GetGoalResponse, GoalWithWeight } from '~/types/goal'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -18,7 +18,7 @@ const router = useRouter();
 const goalId = parseInt(route.params.id as string);
 const { user } = useUserSession();
 const config = useRuntimeConfig();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, createGoal } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -55,10 +55,11 @@ const children = computed(() => {
 
   // Behåll ordningen från childRelations genom att mappa dem direkt
   return goal.value.childRelations
-    .map((relation) =>
-      goalData.value!.allGoals.find((g) => g.id === relation.child_id)
-    )
-    .filter((g) => g !== undefined) as Goal[];
+    .map((relation) => {
+      const goal = goalData.value!.allGoals.find((g) => g.id === relation.child_id);
+      return goal ? { ...goal, weight: relation.weight } : null;
+    })
+    .filter((g) => g !== null) as GoalWithWeight[];
 });
 
 // Beräkna progress baserat på färdiga undermål
@@ -87,6 +88,10 @@ const showCompleted = ref(false);
 const showIconPicker = ref(false);
 const editingIconGoalId = ref<number | null>(null);
 const editingIconGoalIcon = ref<string>('');
+
+// Weight editing state
+const weightEditingChildId = ref<number | null>(null);
+const tempWeight = ref(10);
 
 // Filtrerade undermål baserat på showCompleted
 const filteredChildren = computed(() => {
@@ -886,6 +891,40 @@ async function updateGoalIcon(newIcon: string) {
   }
 }
 
+// Weight editing functions
+function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
+  if (weight <= 2) {
+    return { color: '#888888', opacity: 0.3 }
+  } else if (weight <= 9) {
+    return { color: '#888888', opacity: 0.55 }
+  } else if (weight <= 14) {
+    return { color: '#6B7280', opacity: 1 }
+  } else {
+    return { color: '#3B82F6', opacity: 1, fontWeight: weight > 100 ? 'bold' : 'normal' }
+  }
+}
+
+function startWeightEdit(child: GoalWithWeight) {
+  weightEditingChildId.value = child.id
+  tempWeight.value = child.weight
+}
+
+async function saveWeight() {
+  if (weightEditingChildId.value !== null) {
+    try {
+      await updateGoalWeight(goalId, weightEditingChildId.value, tempWeight.value)
+      await refresh()
+    } catch (error) {
+      console.error("Failed to update weight:", error)
+    }
+    weightEditingChildId.value = null
+  }
+}
+
+function cancelWeightEdit() {
+  weightEditingChildId.value = null
+}
+
 // Exekvera leader key kommando
 // Returnerar true om vi ska avsluta leader mode, false om vi väntar på nästa tangent
 function executeLeaderCommand(key: string): boolean {
@@ -1379,17 +1418,25 @@ watch(selectedParentIndex, async () => {
 
               <!-- Normal mode - visa länk -->
               <div v-else class="flex items-center gap-2">
-                <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
-                  @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                  class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
-                  title="Ändra ikon">
-                  <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
-                </button>
-                <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block">
-                  <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
+                 <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
+                   @click.stop="editingIconGoalId = child.id; showIconPicker = true"
+                   class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
+                   title="Ändra ikon">
+                   <Icon :name="child.icon || 'roentgen:default'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                 </button>
+                 <div class="flex-1 p-4 block cursor-pointer" @click="$router.push(`/goal/${child.id}`)">
+                  <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
                     {{ child.title }}
                   </h3>
-                </NuxtLink>
+                </div>
+                <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
+                  <div class="flex items-center gap-2">
+                    <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1" />
+                    <span class="text-sm text-gray-400 w-8">{{ tempWeight }}</span>
+                    <button @click="saveWeight" class="text-green-400 hover:text-green-300">✓</button>
+                    <button @click="cancelWeightEdit" class="text-red-400 hover:text-red-300">✗</button>
+                  </div>
+                </div>
               </div>
             </div>
           </li>

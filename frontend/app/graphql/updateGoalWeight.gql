@@ -1,0 +1,10 @@
+mutation UpdateGoalWeight($parent_id: Int!, $child_id: Int!, $weight: Int!) {
+  update_goal_relations_by_pk(
+    pk_columns: { parent_id: $parent_id, child_id: $child_id }
+    _set: { weight: $weight }
+  ) {
+    parent_id
+    child_id
+    weight
+  }
+}

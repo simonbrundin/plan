@@ -204,7 +204,7 @@ call_metadata_api '{
     "table": "goal_relations",
     "role": "user",
     "permission": {
-      "columns": ["parent_id", "child_id"],
+      "columns": ["parent_id", "child_id", "order", "weight"],
       "filter": {
         "_and": [
           {
@@ -259,7 +259,40 @@ call_metadata_api '{
           }
         ]
       },
-      "columns": ["parent_id", "child_id"]
+      "columns": ["parent_id", "child_id", "order", "weight"]
+    }
+  }
+}'
+
+call_metadata_api '{
+  "type": "pg_create_update_permission",
+  "args": {
+    "table": "goal_relations",
+    "role": "user",
+    "permission": {
+      "columns": ["order", "weight"],
+      "filter": {
+        "_and": [
+          {
+            "goalByParentId": {
+              "user_goals": {
+                "user_id": {
+                  "_eq": "X-Hasura-User-Id"
+                }
+              }
+            }
+          },
+          {
+            "goal": {
+              "user_goals": {
+                "user_id": {
+                  "_eq": "X-Hasura-User-Id"
+                }
+              }
+            }
+          }
+        ]
+      }
     }
   }
 }'
