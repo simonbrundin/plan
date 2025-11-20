@@ -943,6 +943,23 @@ function executeLeaderCommand(key: string): boolean {
     showCompleted.value = !showCompleted.value;
     leaderFirstKey = "";
     return true; // Avsluta leader mode
+  } else if (key === "g") {
+    // Första tangenten i sekvensen 'g + i' eller 'g + g'
+    console.log('✓ LEADER: g pressed, waiting for next key (i or g)');
+    leaderFirstKey = "g";
+    return false; // Stanna kvar i leader mode
+  } else if (key === "i" && leaderFirstKey === "g") {
+    // Avsluta sekvensen 'g + i' - navigera till inbox
+    console.log('✓ LEADER: g + i executed - navigating to inbox');
+    router.push('/');
+    leaderFirstKey = "";
+    return true; // Avsluta leader mode
+  } else if (key === "g" && leaderFirstKey === "g") {
+    // Avsluta sekvensen 'g + g' - navigera till goal/1
+    console.log('✓ LEADER: g + g executed - navigating to goal/1');
+    router.push('/goal/1');
+    leaderFirstKey = "";
+    return true; // Avsluta leader mode
   } else if (key === "i") {
     // Öppna icon picker för markerat mål
     if (isGoalSelected.value && goal.value) {
