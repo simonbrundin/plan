@@ -1,55 +1,57 @@
 <script setup lang="ts">
-const isOpen = defineModel<boolean>('open', { default: false })
+interface Props {
+  open: boolean
+}
+
+defineProps<Props>()
 
 const emit = defineEmits<{
+  'update:open': [value: boolean]
   'execute-command': [key: string]
 }>()
 
 const handleCommand = (key: string) => {
-  console.log('Leader command executed:', key)
   emit('execute-command', key)
-  isOpen.value = false
+  emit('update:open', false)
+}
+
+const closeModal = () => {
+  emit('update:open', false)
 }
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" title="Leader Commands">
-    <!-- Leader Key Display -->
-    <div
-      style="display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgb(55, 65, 81); margin-bottom: 1rem;">
-      <span style="color: rgb(156, 163, 175); font-size: 0.875rem; font-family: monospace;">Leader Key:</span>
-      <kbd
-        style="padding: 0.25rem 0.75rem; background-color: rgb(17, 24, 39); border: 1px solid rgb(75, 85, 99); border-radius: 0.375rem; color: rgb(96, 165, 250); font-family: monospace; font-weight: bold;">SPACE</kbd>
-    </div>
+  <!-- Leader Key Modal - Custom Implementation -->
+  <div
+    v-if="open"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    @click.self="closeModal"
+    @keydown.esc="closeModal"
+  >
+    <div class="bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-6 w-96">
+      <h2 class="text-lg font-bold text-white mb-4">Leader Commands</h2>
 
-    <!-- Goals section header -->
-    <h3
-      style="font-size: 0.75rem; font-weight: 600; color: rgb(96, 165, 250); text-transform: uppercase; letter-spacing: 0.05em; margin: 1rem 0 0.5rem 0;">
-      Goals</h3>
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 pb-3 border-b border-gray-700">
+          <span class="text-gray-400 text-sm font-mono">Leader Key:</span>
+          <kbd class="px-3 py-1 bg-gray-800 border border-gray-600 rounded text-blue-400 font-mono font-bold">SPACE</kbd>
+        </div>
 
-    <!-- Toggle completed goals command button -->
-    <button @click="handleCommand('d')"
-      style="width: 100%; text-align: left; font-size: 0.875rem; background-color: rgb(55, 65, 81); padding: 0.75rem; border-radius: 0.375rem; color: rgb(243, 244, 246); border: 1px solid rgb(75, 85, 99); cursor: pointer; font-family: inherit; display: block; margin-bottom: 1rem;">
-      <span style="font-family: monospace; font-weight: bold; color: rgb(96, 165, 250);">D</span>
-      <span style="color: rgb(243, 244, 246); margin-left: 0.5rem;">Toggle show/hide completed goals</span>
-    </button>
-
-    <!-- Modal footer -->
-    <template #footer>
-      <div
-        style="text-align: center; font-size: 0.75rem; color: rgb(107, 114, 128); padding-top: 0.75rem; border-top: 1px solid rgb(55, 65, 81);">
-        Press
-        <kbd
-          style="padding: 0.125rem 0.25rem; background-color: rgb(17, 24, 39); border: 1px solid rgb(75, 85, 99); border-radius: 0.375rem; color: rgb(156, 163, 175); font-family: monospace; font-size: 0.75rem; display: inline-block; margin: 0 0.125rem;">ESC</kbd>
-        to close
+        <div class="space-y-2">
+          <h3 class="text-xs font-semibold text-blue-400 uppercase tracking-widest">Goals</h3>
+          <button
+            @click="handleCommand('d')"
+            class="w-full text-left text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded border border-gray-600 text-gray-100 cursor-pointer"
+          >
+            <span class="font-mono font-bold text-blue-400">D</span>
+            <span class="text-gray-100 ml-2">- Toggle show/hide completed goals</span>
+          </button>
+        </div>
       </div>
-    </template>
-  </UModal>
-</template>
 
-<style scoped>
-:deep(.modal-content) {
-  background-color: rgb(17, 24, 39) !important;
-  border: 1px solid rgb(55, 65, 81) !important;
-}
-</style>
+      <div class="text-center text-xs text-gray-500 pt-4 border-t border-gray-700 mt-4">
+        Press <kbd class="px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-gray-400 font-mono text-xs inline-block mx-0.5">ESC</kbd> to close
+      </div>
+    </div>
+  </div>
+</template>
