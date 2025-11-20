@@ -185,14 +185,14 @@ const showChildSearch = ref(false);
 const childSearchQuery = ref("");
 const childSearchInput = ref<HTMLInputElement | null>(null);
 
-// Fokusera input när plus-knappen klickas
-async function toggleChildSearch() {
-  showChildSearch.value = !showChildSearch.value;
-  if (showChildSearch.value) {
-    await nextTick();
-    childSearchInput.value?.focus();
+  // Fokusera input när plus-knappen klickas
+  async function toggleChildSearch() {
+    showChildSearch.value = !showChildSearch.value;
+    if (showChildSearch.value) {
+      await nextTick();
+      childSearchInput.value?.focus();
+    }
   }
-}
 
 // Sök för undermål
 const childSearchResults = computed(() => {
@@ -221,33 +221,41 @@ async function addExistingChild(childId: number) {
   }
 }
 
-// Skapa nytt mål som barn
-async function createNewChild() {
-  if (!childSearchQuery.value.trim()) return;
+  // Skapa nytt mål som barn
+  async function createNewChild() {
+    if (!childSearchQuery.value.trim()) return;
 
-  const userId = user.value?.id;
-  if (!userId) {
-    console.error("No user logged in");
-    return;
+    const userId = user.value?.id;
+    if (!userId) {
+      console.error("No user logged in");
+      return;
+    }
+
+    try {
+      const newGoal = await createGoal(childSearchQuery.value.trim(), userId);
+      const nextOrder = goal.value?.childRelations?.length || 0;
+      await addChildRelation(newGoal.id, goalId, nextOrder);
+      goalsStore.addGoal(newGoal);
+      goalsStore.addRelation(newGoal.id, goalId);
+      await goalsStore.loadGoals();
+      await refresh();
+      // Markera det nya målet direkt
+      await nextTick();
+      const newChildIndex = filteredChildren.value.findIndex(c => c.id === newGoal.id);
+      if (newChildIndex !== -1) {
+        selectedChildIndex.value = newChildIndex;
+        isGoalSelected.value = false;
+        isParentMode.value = false;
+      }
+      showChildSearch.value = false;
+      childSearchQuery.value = "";
+    } catch (error) {
+      console.error("Failed to create new child:", error);
+    }
   }
 
-  try {
-    const newGoal = await createGoal(childSearchQuery.value.trim(), userId);
-    const nextOrder = goal.value?.childRelations?.length || 0;
-    await addChildRelation(newGoal.id, goalId, nextOrder);
-    goalsStore.addGoal(newGoal);
-    goalsStore.addRelation(newGoal.id, goalId);
-    await goalsStore.loadGoals();
-    showChildSearch.value = false;
-    childSearchQuery.value = "";
-  } catch (error) {
-    console.error("Failed to create new child:", error);
-  }
-}
-
-// Hantera Enter-tangent för undermål
-function handleChildSearchKeydown(event: KeyboardEvent) {
-  if (event.key === "Enter") {
+  // Hantera Enter-tangent för undermål
+  function handleChildSearchKeydown(event: KeyboardEvent) {
     if (childSearchResults.value.length === 0) {
       // Skapa nytt mål om inga resultat
       createNewChild();
@@ -255,11 +263,7 @@ function handleChildSearchKeydown(event: KeyboardEvent) {
       // Välj första resultatet
       addExistingChild(childSearchResults.value[0].id);
     }
-  } else if (event.key === "Escape") {
-    showChildSearch.value = false;
-    childSearchQuery.value = "";
   }
-}
 
 // Long-press för att ta bort föräldrarelation
 const pressTimer = ref<NodeJS.Timeout | null>(null);
@@ -1127,32 +1131,32 @@ function handleKeydown(event: KeyboardEvent) {
           isParentMode.value = true;
           selectedParentIndex.value = 0;
         }
-      } else {
-        const childrenCount = filteredChildren.value.length;
-        if (childrenCount > 0) {
-          selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
-        }
-      }
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      // Skapa nytt mål på samma nivå
-      createSiblingGoal();
-    } else if (event.key === "l") {
-      event.preventDefault();
-      if (isGoalSelected.value) {
-        // Från goal mode: markera första barnet
-        isGoalSelected.value = false;
-        selectedChildIndex.value = 0;
-      } else {
-        const childrenCount = filteredChildren.value.length;
-        if (childrenCount > 0) {
-          const selectedChild = filteredChildren.value[selectedChildIndex.value];
-          if (selectedChild) {
-            router.push(`/goal/${selectedChild.id}`);
+        } else {
+          const childrenCount = filteredChildren.value.length;
+          if (childrenCount > 0) {
+            selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
           }
         }
-      }
-    } else if (event.key === "h") {
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        // Öppna child search istället för att skapa sibling
+        toggleChildSearch();
+      } else if (event.key === "l") {
+        event.preventDefault();
+        if (isGoalSelected.value) {
+          // Från goal mode: markera första barnet
+          isGoalSelected.value = false;
+          selectedChildIndex.value = 0;
+        } else {
+          const childrenCount = filteredChildren.value.length;
+          if (childrenCount > 0) {
+            const selectedChild = filteredChildren.value[selectedChildIndex.value];
+            if (selectedChild) {
+              router.push(`/goal/${selectedChild.id}`);
+            }
+          }
+        }
+      } else if (event.key === "h") {
       event.preventDefault();
       // Gå till första föräldern
       if (parents.value.length > 0) {
@@ -1360,7 +1364,7 @@ watch(selectedParentIndex, async () => {
         <!-- Sökfält för undermål -->
         <div v-if="showChildSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 mb-4">
           <div class="mb-2">
-            <input ref="childSearchInput" v-model="childSearchQuery" @keydown="handleChildSearchKeydown" type="text"
+             <input ref="childSearchInput" v-model="childSearchQuery" @keydown.enter.prevent="handleChildSearchKeydown" @keydown.escape.prevent="showChildSearch = false; childSearchQuery = ''" type="text"
               placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
               class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               autofocus />

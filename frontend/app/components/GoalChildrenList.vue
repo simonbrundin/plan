@@ -103,8 +103,7 @@ function getSwipeOffset(childId: number): number {
         <button @click="$emit('open-child-search')"
           class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
           title="Lägg till undermål">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
         </button>
@@ -157,7 +156,9 @@ function getSwipeOffset(childId: number): number {
             </NuxtLink>
             <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
               <div class="flex items-center gap-2">
-                <input :value="tempWeight" @input="$emit('update:tempWeight', ($event.target as HTMLInputElement).valueAsNumber)" type="range" min="1" max="200" step="1" class="flex-1" />
+                <input :value="tempWeight"
+                  @input="$emit('update:tempWeight', ($event.target as HTMLInputElement).valueAsNumber)" type="range"
+                  min="1" max="200" step="1" class="flex-1" />
                 <span class="text-sm text-gray-400 w-8">{{ tempWeight }}</span>
                 <button @click="saveWeight" class="text-green-400 hover:text-green-300">✓</button>
                 <button @click="cancelWeightEdit" class="text-red-400 hover:text-red-300">✗</button>
