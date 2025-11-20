@@ -17,6 +17,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = parseInt(route.params.id as string);
 const { user } = useUserSession();
+const config = useRuntimeConfig();
 const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, createGoal } = useGoalApi();
 
 // Hämta målet med dess relationer
