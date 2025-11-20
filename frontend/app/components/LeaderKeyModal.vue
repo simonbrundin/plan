@@ -36,8 +36,10 @@ const closeModal = () => {
 
         <div class="space-y-2">
           <h3 class="text-xs font-semibold text-blue-400 uppercase tracking-widest">Goals</h3>
-          <button @click="handleCommand('d')"
+          <button @click="handleCommand('f')"
             class="w-full text-left text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded border border-gray-600 text-gray-100 cursor-pointer">
+            <span class="font-mono font-bold text-blue-400">F</span>
+            <span class="font-mono font-bold text-blue-400 ml-1">+</span>
             <span class="font-mono font-bold text-blue-400">D</span>
             <span class="text-gray-100 ml-2">- Toggle show/hide completed goals</span>
           </button>

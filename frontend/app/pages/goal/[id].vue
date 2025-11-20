@@ -644,6 +644,7 @@ const isLeaderModalOpen = ref(false);
 let leaderTimeout: NodeJS.Timeout | null = null;
 let leaderModalJustOpened = false;
 let isInLeaderMode = false; // Direct flag, not reactive
+let leaderFirstKey = ""; // Track first key in leader sequence (e.g., 'f' in 'f + d')
 
 // Gå in i insert mode för att redigera ett mål
 async function enterInsertMode(
@@ -885,10 +886,19 @@ async function updateGoalIcon(newIcon: string) {
 }
 
 // Exekvera leader key kommando
-function executeLeaderCommand(key: string) {
-  if (key === "d") {
-    // Toggla visa/dölj avklarade mål
+// Returnerar true om vi ska avsluta leader mode, false om vi väntar på nästa tangent
+function executeLeaderCommand(key: string): boolean {
+  if (key === "f") {
+    // Första tangenten i sekvensen 'f + d'
+    console.log('✓ LEADER: f pressed, waiting for next key (d)');
+    leaderFirstKey = "f";
+    return false; // Stanna kvar i leader mode
+  } else if (key === "d" && leaderFirstKey === "f") {
+    // Avsluta sekvensen 'f + d' - toggla visa/dölj avklarade mål
+    console.log('✓ LEADER: f + d executed - toggling completed goals');
     showCompleted.value = !showCompleted.value;
+    leaderFirstKey = "";
+    return true; // Avsluta leader mode
   } else if (key === "i") {
     // Öppna icon picker för markerat mål
     if (isGoalSelected.value && goal.value) {
@@ -904,7 +914,12 @@ function executeLeaderCommand(key: string) {
       editingIconGoalId.value = filteredChildren.value[selectedChildIndex.value].id;
       showIconPicker.value = true;
     }
+    leaderFirstKey = "";
+    return true; // Avsluta leader mode
   }
+  // Okänd kommando - avsluta leader mode
+  leaderFirstKey = "";
+  return true;
 }
 
 // Hantera Vim-kommandon
@@ -941,10 +956,14 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault();
     const key = event.key.toLowerCase();
     console.log('✓ LEADER COMMAND: Key:', key);
-    executeLeaderCommand(key);
-    isInLeaderMode = false;
-    isLeaderModalOpen.value = false;
-    console.log('✓ Leader mode exited');
+    const exitLeaderMode = executeLeaderCommand(key);
+    if (exitLeaderMode) {
+      isInLeaderMode = false;
+      isLeaderModalOpen.value = false;
+      console.log('✓ Leader mode exited');
+    } else {
+      console.log('✓ Waiting for next leader command key');
+    }
     return;
   }
 
