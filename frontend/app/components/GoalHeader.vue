@@ -48,7 +48,7 @@ defineEmits<{
       class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800"
       title="Ändra ikon"
     >
-      <Icon :name="goal.icon || 'roentgen:default'" class="w-8 h-8 text-white" />
+      <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
     </button>
   </div>
 </template>

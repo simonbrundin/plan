@@ -1,5 +1,17 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [ ] Inkorg
+  - Inmatningsprocess
+    1. Skriv text
+    - Saker man vill ha in om varje mål
+      - Titel
+        - Tänk på att det är skillnad på det man ofiltrerat skriver ner så fort
+          man öppnar appen och vad som hade varit den optimala titeln
+        - Kina-AI ändrar titeln och vill man ändra så kan man göra det senare
+      - Ikon
+      - Anteckningar
+      - Tidsåtgång
+      - Föräldrar
 - [ ] Allt i ArgoCD är grönt
   - [ ]
 
@@ -295,4 +307,7 @@
     - [x] Kablarna på utsidan skalade
 - [x] `s k login teleport` kan logga in med thetisnyckel
 - [x] `dev` fungerar i plan och ger mig notis i telefonen
+  - [x] Auth fungerar
+  - [x] Auth fungerar
+  - [x] Auth fungerar
   - [x] Auth fungerar

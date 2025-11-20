@@ -4,6 +4,7 @@ export interface Goal {
   icon: string
   created: string
   finished: string | null
+  inbox: number
 }
 
 export interface ChildRelation {

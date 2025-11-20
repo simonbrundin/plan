@@ -1,0 +1,10 @@
+mutation MoveGoalFromInbox($id: Int!) {
+  update_goals_by_pk(pk_columns: { id: $id }, _set: { inbox: 0 }) {
+    id
+    title
+    icon
+    created
+    finished
+    inbox
+  }
+}

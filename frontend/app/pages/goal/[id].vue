@@ -1321,7 +1321,7 @@ watch(selectedParentIndex, async () => {
         ]">{{ goal?.title }}</h1>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
-          <Icon :name="goal.icon || 'roentgen:default'" class="w-8 h-8 text-white" />
+          <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
         </button>
       </div>
 
@@ -1422,7 +1422,7 @@ watch(selectedParentIndex, async () => {
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
                    class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
                    title="Ändra ikon">
-                   <Icon :name="child.icon || 'roentgen:default'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
                  <div class="flex-1 p-4 block cursor-pointer" @click="$router.push(`/goal/${child.id}`)">
                   <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">

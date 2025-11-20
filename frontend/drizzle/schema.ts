@@ -20,7 +20,8 @@ export const goals = pgTable("goals", {
 	title: varchar({ length: 64 }),
 	created: timestamp({ withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	finished: timestamp({ withTimezone: true, mode: 'string' }),
-	icon: varchar({ length: 100 }).default('roentgen:default'),
+	icon: varchar({ length: 100 }).default('heroicons:star'),
+	inbox: integer().default(1).notNull(),
 });
 
 export const userGoals = pgTable("user_goals", {

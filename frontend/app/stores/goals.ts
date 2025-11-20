@@ -6,6 +6,7 @@ interface Goal {
   icon: string
   created: string
   finished: string | null
+  inbox: number
 }
 
 interface GoalRelation {
@@ -63,6 +64,11 @@ export const useGoalsStore = defineStore('goals', {
       const childIds = new Set(state.relations.map(r => r.child_id))
       return state.goals.filter(g => !childIds.has(g.id))
     },
+
+    // Hämta inbox-mål
+    getInboxGoals: (state) => {
+      return state.goals.filter(g => g.inbox === 1)
+    },
   },
 
   actions: {
@@ -117,6 +123,14 @@ export const useGoalsStore = defineStore('goals', {
     // Clear error state
     clearError() {
       this.error = null
+    },
+
+    // Flytta mål från inbox till huvudstrukturen
+    moveGoalFromInbox(id: number) {
+      const goal = this.goals.find(g => g.id === id)
+      if (goal) {
+        goal.inbox = 0
+      }
     },
 
     // Reset store state (useful for error recovery)

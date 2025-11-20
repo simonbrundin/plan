@@ -1,0 +1,10 @@
+query GetInboxGoals {
+  goals(where: { inbox: { _eq: 1 } }, order_by: { created: desc }) {
+    id
+    title
+    icon
+    created
+    finished
+    inbox
+  }
+}

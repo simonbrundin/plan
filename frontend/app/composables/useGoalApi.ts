@@ -319,10 +319,42 @@ export function useGoalApi() {
     }
   }
 
+  const loadAllGoals = async (): Promise<Goal[]> => {
+    const response = await fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
+      },
+      body: JSON.stringify({
+        query: `
+          query GetAllGoals {
+            goals(order_by: { created: desc }) {
+              id
+              title
+              icon
+              created
+              finished
+              inbox
+            }
+          }
+        `,
+      }),
+    })
+
+    const result = await response.json()
+
+    if (result.errors) {
+      throw new Error(result.errors[0].message)
+    }
+
+    return result.data.goals
+  }
+
   const createGoal = async (title: string, userId: number): Promise<Goal> => {
     const createGoalQuery = `
       mutation CreateGoal($title: String!) {
-        insert_goals_one(object: { title: $title, icon: "roentgen:default" }) {
+        insert_goals_one(object: { title: $title, icon: "heroicons:star" }) {
           id
           title
           icon
@@ -391,5 +423,6 @@ export function useGoalApi() {
     updateGoalOrder,
     updateGoalWeight,
     createGoal,
+    loadAllGoals,
   }
 }

@@ -2,14 +2,15 @@
   import type { NavigationMenuItem } from "@nuxt/ui";
 
   const route = useRoute();
+  const { loggedIn } = useUserSession();
 
   const open = ref(false);
 
   const links = [
     [
       {
-        label: "Home",
-        icon: "i-lucide-house",
+        label: "Inbox",
+        icon: "i-lucide-inbox",
         to: "/",
         onSelect: () => {
           open.value = false;

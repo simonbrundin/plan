@@ -1,0 +1,1 @@
+ALTER TABLE "goals" ALTER COLUMN "icon" SET DEFAULT 'heroicons:star';

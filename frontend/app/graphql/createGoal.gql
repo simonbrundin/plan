@@ -1,12 +1,14 @@
-mutation CreateGoal($title: String!, $icon: String) {
+mutation CreateGoal($title: String!, $icon: String, $inbox: Int) {
   insert_goals_one(object: {
     title: $title
     icon: $icon
+    inbox: $inbox
   }) {
     id
     title
     icon
     created
     finished
+    inbox
   }
 }

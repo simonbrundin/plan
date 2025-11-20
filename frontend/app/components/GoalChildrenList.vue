@@ -187,7 +187,7 @@ function cancelWeightEdit() {
               class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
               title="Ändra ikon"
             >
-              <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
+              <Icon :name="child.icon || 'heroicons:star'" class="w-6 h-6 text-white" />
             </button>
                  <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block">
                   <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
