@@ -1043,7 +1043,10 @@ const deleteDialogSelection = ref<"cancel" | "confirm">("cancel");
 
 // Leader key state
 const isLeaderMode = ref(false);
+const isLeaderModalOpen = ref(false);
 let leaderTimeout: NodeJS.Timeout | null = null;
+let leaderModalJustOpened = false;
+let isInLeaderMode = false; // Direct flag, not reactive
 
 // Gå in i insert mode för att redigera ett mål
 async function enterInsertMode(
@@ -1481,6 +1484,14 @@ async function updateGoalIcon(newIcon: string) {
   }
 }
 
+// Exekvera leader key kommando
+function executeLeaderCommand(key: string) {
+  if (key === "d") {
+    // Toggla visa/dölj avklarade mål
+    showCompleted.value = !showCompleted.value;
+  }
+}
+
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Hantera delete-dialog navigering först
@@ -1497,7 +1508,44 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
-  // Normal mode - hantera alla kommandon
+  // ===============================================
+  // LEADER MODE CHECKS - PRIORITERA FÖRE ALLT ANNAT
+  // ===============================================
+
+  // Hantera ESC för att stänga leader mode
+  if (event.key === "Escape" && isInLeaderMode) {
+    event.preventDefault();
+    isInLeaderMode = false;
+    isLeaderModalOpen.value = false;
+    console.log('✓ Leader mode closed with ESC');
+    return;
+  }
+
+  // Hantera leader commands när i leader mode
+  if (isInLeaderMode) {
+    event.preventDefault();
+    const key = event.key.toLowerCase();
+    console.log('✓ LEADER COMMAND: Key:', key);
+    executeLeaderCommand(key);
+    isInLeaderMode = false;
+    isLeaderModalOpen.value = false;
+    console.log('✓ Leader mode exited');
+    return;
+  }
+
+  // Hantera leader key (space) - enter leader mode
+  if (event.key === " ") {
+    event.preventDefault();
+    console.log('✓ SPACE pressed - entering leader mode');
+    isInLeaderMode = true;
+    isLeaderModalOpen.value = true;
+    return;
+  }
+
+  // ===============================================
+  // NORMAL MODE KOMMANDON
+  // ===============================================
+
   // Hantera 'd' för att toggla finished status
   if (event.key === "d") {
     event.preventDefault();
@@ -1541,31 +1589,6 @@ function handleKeydown(event: KeyboardEvent) {
     } else if (filteredChildren.value.length > 0) {
       const child = filteredChildren.value[selectedChildIndex.value];
       enterInsertMode(child.id, child.title, atBeginning);
-    }
-    return;
-  }
-
-  // Hantera leader key (space)
-  if (event.key === " " && !isLeaderMode.value) {
-    event.preventDefault();
-    isLeaderMode.value = true;
-    // Återställ leader mode efter 1 sekund om ingen command följer
-    if (leaderTimeout) clearTimeout(leaderTimeout);
-    leaderTimeout = setTimeout(() => {
-      isLeaderMode.value = false;
-    }, 1000);
-    return;
-  }
-
-  // Hantera leader commands
-  if (isLeaderMode.value) {
-    event.preventDefault();
-    if (leaderTimeout) clearTimeout(leaderTimeout);
-    isLeaderMode.value = false;
-
-    if (event.key === "d") {
-      // Toggla visa/dölj avklarade mål
-      showCompleted.value = !showCompleted.value;
     }
     return;
   }
@@ -1690,6 +1713,17 @@ watch(filteredChildren, () => {
   }
 });
 
+// Debug: Log när isLeaderModalOpen ändras
+watch(
+  isLeaderModalOpen,
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      console.log('🔴 isLeaderModalOpen changed from', oldVal, 'to', newVal);
+      console.trace('Stack trace of who changed it:');
+    }
+  }
+);
+
 // Återställ parent mode när målet ändras
 watch(
   () => route.params.id,
@@ -1812,8 +1846,7 @@ watch(selectedParentIndex, async () => {
           isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
         ]">{{ goal?.title }}</h1>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
-          class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800"
-          title="Ändra ikon">
+          class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
           <Icon :name="goal.icon || 'roentgen:default'" class="w-8 h-8 text-white" />
         </button>
       </div>
@@ -1877,9 +1910,11 @@ watch(selectedParentIndex, async () => {
         </div>
 
         <ul v-if="filteredChildren.length > 0" class="space-y-3">
-          <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index"
-            draggable="true" @dragstart="handleDragStart($event, index)" @dragover="handleDragOver($event, index)" @dragleave="handleDragLeave" @drop="handleDrop($event, index)"
-            class="relative overflow-hidden rounded-lg transition-opacity" :class="dragOverChildIndex === index ? 'opacity-50' : 'opacity-100'">
+          <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
+            @dragstart="handleDragStart($event, index)" @dragover="handleDragOver($event, index)"
+            @dragleave="handleDragLeave" @drop="handleDrop($event, index)"
+            class="relative overflow-hidden rounded-lg transition-opacity"
+            :class="dragOverChildIndex === index ? 'opacity-50' : 'opacity-100'">
             <!-- Swipe bakgrund -->
             <div class="absolute inset-0 flex items-center justify-start px-6"
               :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'">
@@ -1909,13 +1944,13 @@ watch(selectedParentIndex, async () => {
 
               <!-- Normal mode - visa länk -->
               <div v-else class="flex items-center gap-2">
-                <button v-if="!(mode === 'insert' && editingGoalId === child.id)" @click.stop="editingIconGoalId = child.id; showIconPicker = true"
+                <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
+                  @click.stop="editingIconGoalId = child.id; showIconPicker = true"
                   class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
                   title="Ändra ikon">
                   <Icon :name="child.icon || 'roentgen:default'" class="w-6 h-6 text-white" />
                 </button>
-                <NuxtLink :to="`/goal/${child.id}`"
-                  class="flex-1 p-4 block">
+                <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block">
                   <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : 'text-gray-200'">
                     {{ child.title }}
                   </h3>
@@ -1979,18 +2014,43 @@ watch(selectedParentIndex, async () => {
     </UModal>
 
     <!-- Icon Picker Component -->
-    <IconPicker
-      v-if="goal"
+    <IconPicker v-if="goal"
       :modelValue="editingIconGoalId ? goalData?.allGoals?.find(g => g.id === editingIconGoalId)?.icon || '' : goal.icon"
-      :open="showIconPicker"
-      @update:open="(value) => {
+      :open="showIconPicker" @update:open="(value) => {
         showIconPicker = value;
         if (!value) {
           editingIconGoalId = null;
         }
-      }"
-      @update:modelValue="updateGoalIcon"
-    />
+      }" @update:modelValue="updateGoalIcon" />
+
+    <!-- Leader Key Modal - Custom Implementation -->
+    <div v-if="isLeaderModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" @click.self="isLeaderModalOpen = false" @keydown.esc="isLeaderModalOpen = false">
+      <div class="bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-6 w-96">
+        <h2 class="text-lg font-bold text-white mb-4">Leader Commands</h2>
+
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 pb-3 border-b border-gray-700">
+            <span class="text-gray-400 text-sm font-mono">Leader Key:</span>
+            <kbd class="px-3 py-1 bg-gray-800 border border-gray-600 rounded text-blue-400 font-mono font-bold">SPACE</kbd>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-xs font-semibold text-blue-400 uppercase tracking-widest">Goals</h3>
+            <button
+              @click="executeLeaderCommand('d'); isInLeaderMode = false; isLeaderModalOpen = false"
+              class="w-full text-left text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded border border-gray-600 text-gray-100 cursor-pointer"
+            >
+              <span class="font-mono font-bold text-blue-400">D</span>
+              <span class="text-gray-100 ml-2">- Toggle show/hide completed goals</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center text-xs text-gray-500 pt-4 border-t border-gray-700 mt-4">
+          Press <kbd class="px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-gray-400 font-mono text-xs inline-block mx-0.5">ESC</kbd> to close
+        </div>
+      </div>
+    </div>
   </div>
   <div v-else class="max-w-4xl mx-auto p-6">
     <div class="text-center">
@@ -2004,3 +2064,20 @@ watch(selectedParentIndex, async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.modal-body) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
+:deep(.modal-body p) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: white !important;
+}
+</style>

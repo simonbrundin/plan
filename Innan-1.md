@@ -1,10 +1,11 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [ ] Allt i ArgoCD är grönt
+  - [ ]
+
 ## Sophies önskemål
 
 - [ ] Dashboard
-
-## Utvecklingsmiljö
 
 ### Badrum
 
