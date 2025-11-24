@@ -23,14 +23,6 @@
 
 ### Hemfix
 
-- [ ] Köp
-  - [ ] Lock
-  - [ ] Brun sladd
-  - [ ] 4 längre skruvar
-- [ ] Lampknappar monterade
-- [ ] Eluttag monterat
-- [ ] Inkopplat i central
-- [ ] Lock på plats
 - [ ] Renault igång
 - [ ] Dockhus klart
 
@@ -311,3 +303,11 @@
   - [x] Auth fungerar
   - [x] Auth fungerar
   - [x] Auth fungerar
+- [x] Köp
+  - [x] Lock
+  - [x] Brun sladd
+  - [x] 4 längre skruvar
+- [x] Lampknappar monterade
+- [x] Eluttag monterat
+- [x] Inkopplat i central
+- [x] Lock på plats
