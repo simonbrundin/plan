@@ -15,6 +15,16 @@
 - [ ] Allt i ArgoCD är grönt
   - [ ]
 
+### Birstahandling
+
+- [ ] Clas Ohlsson
+  - [ ] Tofflor 79kr
+- [ ] Lager157
+  - [ ] Keps
+  - [ ] Tjocksockar
+- [ ] Intersport
+  - [ ] McKinley-känga 299kr
+
 ## Sophies önskemål
 
 - [ ] Dashboard
