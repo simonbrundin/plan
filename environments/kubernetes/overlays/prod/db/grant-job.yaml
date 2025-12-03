@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grant-create-permission
+spec:
+  template:
+    spec:
+      containers:
+      - name: psql
+        image: postgres:16-alpine
+        command:
+        - psql
+        - $(DATABASE_URL)
+        - -c
+        - GRANT CREATE ON DATABASE plan TO "user";
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: plan-db-user
+              key: uri
+      restartPolicy: Never

@@ -7,6 +7,7 @@ resources:
   - schema.yaml
   - admin-secret.yaml
   - user-secret.yaml
+  - grant-job.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

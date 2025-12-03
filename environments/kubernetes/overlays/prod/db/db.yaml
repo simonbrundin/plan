@@ -9,9 +9,12 @@ spec:
     initdb:
       database: plan
       owner: admin
+      postInitApplicationSQL:
+        - GRANT CREATE ON DATABASE plan TO "user";
 
   storage:
-    size: 1Gi
+    size: 10Gi
+    resizeInUseVolumes: true
   monitoring:
     enablePodMonitor: true
 
