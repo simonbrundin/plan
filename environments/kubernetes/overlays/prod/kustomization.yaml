@@ -11,6 +11,9 @@ resources:
   - auth-secret.yaml
 patches:
   - path: patches/deployment.yaml
+    target:
+      kind: Deployment
+      name: plan-app
 images:
   - name: ghcr.io/simonbrundin/plan
     newTag: "frontend-1.6.1"
