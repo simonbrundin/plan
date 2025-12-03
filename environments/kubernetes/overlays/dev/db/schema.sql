@@ -45,14 +45,12 @@ ADD FOREIGN KEY("child_id") REFERENCES "goals"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 -- Grant permissions for Hasura user
--- NOTE: These GRANT commands are commented out to avoid Atlas dev DB validation issues.
--- They should be run manually once during initial database setup.
--- GRANT CREATE ON DATABASE plan TO "user";
--- GRANT USAGE ON SCHEMA public TO "user";
--- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "user";
--- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "user";
--- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "user";
--- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "user";
+GRANT CREATE ON DATABASE plan TO "plan";
+GRANT USAGE ON SCHEMA public TO "plan";
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "plan";
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "plan";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "plan";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "plan";
 
 -- Row Level Security Policies moved to Hasura UI
 -- RLS policies are now managed through Hasura Console for easier maintenance
