@@ -85,6 +85,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: "bun",
+    host: '0.0.0.0',
   },
 
   vite: {
