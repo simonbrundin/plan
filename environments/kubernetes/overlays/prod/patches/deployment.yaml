@@ -1,50 +1,93 @@
-spec:
-  replicas: 1
-  template:
-    spec:
-      containers:
-        - name: plan-app
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "800m"
-          env:
-            - name: NODE_ENV
-              value: "production"
-            - name: HOST
-              value: "0.0.0.0"
-            - name: NUXT_PUBLIC_GQL_HOST
-              value: "https://plan-hasura.simonbrundin.com/v1/graphql"
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: plan-db-user
-                  key: uri
-            - name: NUXT_SESSION_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: auth
-                  key: NUXT_SESSION_PASSWORD
-            - name: NUXT_OAUTH_AUTHENTIK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_CLIENT_ID
-            - name: NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET
-            - name: NUXT_OAUTH_AUTHENTIK_DOMAIN
-              valueFrom:
-                secretKeyRef:
-                  name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_DOMAIN
-            - name: NUXT_OAUTH_AUTHENTIK_REDIRECT_URL
-              valueFrom:
-                secretKeyRef:
-                  name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_REDIRECT_URL
+[
+  {
+    "op": "add",
+    "path": "/spec/replicas",
+    "value": 1
+  },
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/0/resources",
+    "value": {
+      "requests": {
+        "memory": "256Mi",
+        "cpu": "250m"
+      },
+      "limits": {
+        "memory": "1Gi",
+        "cpu": "800m"
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/0/env",
+    "value": [
+      {
+        "name": "NODE_ENV",
+        "value": "production"
+      },
+      {
+        "name": "HOST",
+        "value": "0.0.0.0"
+      },
+      {
+        "name": "NUXT_PUBLIC_GQL_HOST",
+        "value": "https://plan-hasura.simonbrundin.com/v1/graphql"
+      },
+      {
+        "name": "DATABASE_URL",
+        "valueFrom": {
+          "secretKeyRef": {
+            "name": "plan-db-user",
+            "key": "uri"
+          }
+        }
+      },
+      {
+        "name": "NUXT_SESSION_PASSWORD",
+        "valueFrom": {
+          "secretKeyRef": {
+            "name": "auth",
+            "key": "NUXT_SESSION_PASSWORD"
+          }
+        }
+      },
+      {
+        "name": "NUXT_OAUTH_AUTHENTIK_CLIENT_ID",
+        "valueFrom": {
+          "secretKeyRef": {
+            "name": "auth",
+            "key": "NUXT_OAUTH_AUTHENTIK_CLIENT_ID"
+          }
+        }
+      },
+      {
+        "name": "NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET",
+        "valueFrom": {
+          "secretKeyRef": {
+            "name": "auth",
+            "key": "NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET"
+          }
+        }
+      },
+      {
+        "name": "NUXT_OAUTH_AUTHENTIK_DOMAIN",
+        "valueFrom": {
+          "secretKeyRef": {
+            "name": "auth",
+            "key": "NUXT_OAUTH_AUTHENTIK_DOMAIN"
+          }
+        }
+      },
+      {
+        "name": "NUXT_OAUTH_AUTHENTIK_REDIRECT_URL",
+        "valueFrom": {
+          "secretKeyRef": {
+            "name": "auth",
+            "key": "NUXT_OAUTH_AUTHENTIK_REDIRECT_URL"
+          }
+        }
+      }
+    ]
+  }
+]

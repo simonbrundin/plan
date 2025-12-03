@@ -9,8 +9,8 @@ resources:
   - hasura
   - kargo
   - auth-secret.yaml
-patchesStrategicMerge:
-  - patches/deployment.yaml
+patches:
+  - path: patches/deployment.yaml
 images:
   - name: ghcr.io/simonbrundin/plan
     newTag: "frontend-1.6.1"
