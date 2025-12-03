@@ -9,7 +9,7 @@ resources:
   - hasura
   - kargo
   - auth-secret.yaml
-patchStrategicMerge:
+patchesStrategicMerge:
   - patches/deployment.yaml
 images:
   - name: ghcr.io/simonbrundin/plan
