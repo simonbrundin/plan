@@ -17,6 +17,6 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: plan-db-user
+              name: plan-db-admin
               key: uri
       restartPolicy: Never
