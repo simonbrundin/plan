@@ -7,8 +7,8 @@ resources:
   - service.yaml
   - db
   - hasura
-   - kargo
-   - auth-secret.yaml
+  - kargo
+  - auth-secret.yaml
  images:
   - name: ghcr.io/simonbrundin/plan
     newTag: "frontend-1.6.2"
