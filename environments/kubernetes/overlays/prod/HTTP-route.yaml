@@ -13,7 +13,7 @@ spec:
     - backendRefs:
         - group: ""
           kind: Service
-          name: plan-service-dns
+          name: plan-service
           port: 80
           weight: 1
           namespace: plan
