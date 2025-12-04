@@ -1,6 +1,5 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Allt i ArgoCD är grönt
 - [ ] Longhorn är helt grönt
   - [ ] Koppla in och ur hårddisken i worker-3
   - [ ] Starta om worker-2
@@ -328,3 +327,4 @@
 - [x] Wayland visar målet jag jobbar på nu
 - [x] Kursplan för programmering klar
 - [x] Alla datorer har senaste Talos och Kubernetes
+- [x] Allt i ArgoCD är grönt
