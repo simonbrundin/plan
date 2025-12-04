@@ -1,5 +1,9 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [ ] Allt i ArgoCD är grönt
+- [ ] Longhorn är helt grönt
+  - [ ] Koppla in och ur hårddisken i worker-3
+  - [ ] Starta om worker-2
 - [ ] Inkorg
   - Inmatningsprocess
     1. Skriv text
@@ -12,16 +16,12 @@
       - Anteckningar
       - Tidsåtgång
       - Föräldrar
-- [ ] Allt i ArgoCD är grönt
-  - [ ]
+- [ ] https://domain-locker.com/about/self-hosting
 
 ### Birstahandling
 
 - [ ] Clas Ohlsson
   - [ ] Tofflor 79kr
-- [ ] Lager157
-  - [ ] Keps
-  - [ ] Tjocksockar
 - [ ] Intersport
   - [ ] McKinley-känga 299kr
 
@@ -45,7 +45,7 @@
 
 #### Senare
 
-- [ ] DevContainer
+- [ ] evContaine
   - [ ] Simon CLI finns tillgängligt i min DevContainer
   - [ ] NeoVim används i DevContainer
     - [ ] Förstå hur det fungerar när man använder NeoVim
@@ -321,3 +321,10 @@
 - [x] Eluttag monterat
 - [x] Inkopplat i central
 - [x] Lock på plats
+- [x] Lager157
+  - [x] Keps
+  - [x] Tjocksockar
+  - [x] Tjocksockar
+- [x] Wayland visar målet jag jobbar på nu
+- [x] Kursplan för programmering klar
+- [x] Alla datorer har senaste Talos och Kubernetes
