@@ -83,10 +83,11 @@ export default defineNuxtConfig({
      */
     componentDir: "./app/components/ui",
   },
-  nitro: {
-    preset: "bun",
-    // host: "0.0.0.0",
-  },
+   nitro: {
+     preset: "bun",
+     host: "0.0.0.0",
+     trustProxy: true,
+   },
 
   vite: {
     server: {
