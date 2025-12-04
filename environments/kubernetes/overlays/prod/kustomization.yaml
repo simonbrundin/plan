@@ -11,4 +11,4 @@ resources:
   - auth-secret.yaml
 images:
   - name: ghcr.io/simonbrundin/plan
-    newTag: "frontend-1.6.3"
+    newTag: "frontend-1.6.4"
