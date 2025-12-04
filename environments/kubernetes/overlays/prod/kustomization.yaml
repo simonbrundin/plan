@@ -8,12 +8,7 @@ resources:
   - db
   - hasura
   - kargo
-  - auth-secret.yaml
-patches:
-  - path: patches/deployment.yaml
-    target:
-      kind: Deployment
-      name: plan-app
-images:
+   - auth-secret.yaml
+ images:
   - name: ghcr.io/simonbrundin/plan
     newTag: "frontend-1.6.2"
