@@ -39,7 +39,7 @@ export default defineNuxtConfig({
       "@pinia/nuxt",
       {
         disableVuex: true,
-        autoImports: ['defineStore', 'storeToRefs'],
+        autoImports: ["defineStore", "storeToRefs"],
       },
     ],
   ],
@@ -85,7 +85,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: "bun",
-    host: '0.0.0.0',
+    // host: "0.0.0.0",
   },
 
   vite: {
@@ -103,7 +103,7 @@ export default defineNuxtConfig({
     "app:error": (error) => {
       if (error.message?.includes("hasOwnProperty")) {
         console.warn(
-          "Pinia payload serialization error - this is expected and handled",
+          "Pinia payload serialization error - this is expected and handled"
         );
       }
     },
@@ -111,7 +111,7 @@ export default defineNuxtConfig({
     "app:beforeMount": (app) => {
       // Clear any Pinia state from the payload to prevent serialization
       if (app?.config?.globalProperties?.$nuxt?.payload?.state) {
-        delete app.config.globalProperties.$nuxt.payload.state
+        delete app.config.globalProperties.$nuxt.payload.state;
       }
     },
   },
