@@ -5,7 +5,9 @@ metadata:
   namespace: plan
 spec:
   parentRefs:
-    - name: simons-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: simons-gateway
       namespace: envoy
   hostnames:
     - "plan.simonbrundin.com"
