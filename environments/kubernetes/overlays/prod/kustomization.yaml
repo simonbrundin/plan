@@ -5,7 +5,7 @@ resources:
   - HTTP-route.yaml
   - github-secret.yaml
   - service.yaml
-  # - db
+  - db
   - hasura
   - kargo
   - auth-secret.yaml
