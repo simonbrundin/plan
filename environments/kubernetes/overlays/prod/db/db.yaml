@@ -14,7 +14,7 @@ spec:
 
   storage:
     storageClass: cnpg
-    size: 1Gi
+    size: 2Gi
     resizeInUseVolumes: true
   monitoring:
     enablePodMonitor: true
