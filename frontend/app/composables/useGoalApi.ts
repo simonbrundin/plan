@@ -4,7 +4,7 @@ export function useGoalApi() {
   const config = useRuntimeConfig()
 
   const fetchGoalData = async (goalId: number): Promise<GetGoalResponse> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export function useGoalApi() {
   }
 
   const updateGoalTitle = async (goalId: number, title: string): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export function useGoalApi() {
   }
 
   const updateGoalIcon = async (goalId: number, icon: string): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +113,7 @@ export function useGoalApi() {
   }
 
   const toggleGoalFinished = async (goalId: number, finished: string | null): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -155,7 +155,7 @@ export function useGoalApi() {
       }
     `
 
-    const response = await $fetch("http://localhost:8080/v1/graphql", {
+    const response = await $fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -173,7 +173,7 @@ export function useGoalApi() {
   }
 
   const addParentRelation = async (childId: number, parentId: number): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -201,7 +201,7 @@ export function useGoalApi() {
   }
 
   const removeParentRelation = async (childId: number, parentId: number): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -231,7 +231,7 @@ export function useGoalApi() {
   }
 
   const addChildRelation = async (childId: number, parentId: number, order: number): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -260,7 +260,7 @@ export function useGoalApi() {
   }
 
   const updateGoalOrder = async (parentId: number, childId: number, order: number): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -289,8 +289,8 @@ export function useGoalApi() {
     }
   }
 
-  const updateGoalWeight = async (parentId: number, childId: number, weight: number): Promise<void> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+   const updateGoalWeight = async (parentId: number, childId: number, weight: number): Promise<void> => {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -320,7 +320,7 @@ export function useGoalApi() {
   }
 
   const loadAllGoals = async (): Promise<Goal[]> => {
-    const response = await fetch("http://localhost:8080/v1/graphql", {
+    const response = await fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -364,7 +364,7 @@ export function useGoalApi() {
       }
     `
 
-    const goalResponse = await $fetch("http://localhost:8080/v1/graphql", {
+    const goalResponse = await $fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -392,7 +392,7 @@ export function useGoalApi() {
       }
     `
 
-    const userGoalResponse = await $fetch("http://localhost:8080/v1/graphql", {
+    const userGoalResponse = await $fetch(`${config.public.GQL_HOST}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
