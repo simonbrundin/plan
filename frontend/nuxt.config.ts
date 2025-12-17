@@ -43,8 +43,6 @@ export default defineNuxtConfig({
       },
     ],
   ],
-  ],
-  ],
   // Disable fontsource provider for unifont (API is unreliable)
   fonts: {
     providers: {
