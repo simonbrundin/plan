@@ -1,6 +1,6 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Ändra storage class på plan för cnpg
+- [x] Ändra storage class på plan för cnpg
 - [ ] Installera Talos på mac mini
 - [ ] Hur uppdaterar jag Talos på ett enklare sätt?
   - [ ] https://github.com/home-operations/tuppr

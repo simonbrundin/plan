@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-sync-options
+  namespace: plan
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+data:
+  # Detta hindrar ArgoCD från att pruna resurser som inte finns i Git
+  # Specifikt förhindrar det pruning av dynamiskt skapade PVCs

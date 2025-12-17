@@ -2,6 +2,8 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: plan-db
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   instances: 3
 
