@@ -60,11 +60,15 @@ export default defineNuxtConfig({
     classSuffix: "",
   },
   icon: {
-    // Configure to use local icons only and disable remote fetching
+    // Disable client-side fetching to prevent timeouts
     provider: 'server',
     serverBundle: {
       collections: ['material-symbols', 'material-symbols-light', 'lucide']
-    }
+    },
+    // Disable client-side bundle to prevent runtime fetching
+    clientBundle: false,
+    // Set a very short timeout for any remaining requests
+    timeout: 100
   },
   runtimeConfig: {
     public: {
