@@ -1,7 +1,7 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [x] Ändra storage class på plan för cnpg
 - [ ] Installera Talos på mac mini
+  - [ ] Köpa tangentbord
 - [ ] Hur uppdaterar jag Talos på ett enklare sätt?
   - [ ] https://github.com/home-operations/tuppr
 - [ ] Inkorg
@@ -17,17 +17,13 @@
       - Tidsåtgång
       - Föräldrar
 
-- [ ] https://domain-locker.com/about/self-hosting
-
-## Badrum
-
 - [ ] Handfat uppsatt
 
 ### Hemfix
 
 - [ ] Inneverktyg
 - [ ] Elmätare på badet
-- [ ] Termoemeter på badet
+- [ ] Termometer på badet
 - [ ] Renault igång
 - [ ] Dockhus klart
 
@@ -343,3 +339,5 @@
   - [x] worker-2 fungerar
   - [x] worker-7 fungerar
 - [x] Två hårddiskar i worker-1 fungerar
+- [x] Ändra storage class på plan för cnpg
+- [x] https://domain-locker.com/about/self-hosting
