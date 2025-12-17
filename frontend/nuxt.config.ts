@@ -43,6 +43,8 @@ export default defineNuxtConfig({
       },
     ],
   ],
+  ],
+  ],
   // Disable fontsource provider for unifont (API is unreliable)
   fonts: {
     providers: {
@@ -56,6 +58,13 @@ export default defineNuxtConfig({
   },
   colorMode: {
     classSuffix: "",
+  },
+  icon: {
+    // Configure to use local icons only and disable remote fetching
+    provider: 'server',
+    serverBundle: {
+      collections: ['material-symbols', 'material-symbols-light', 'lucide']
+    }
   },
   runtimeConfig: {
     public: {
