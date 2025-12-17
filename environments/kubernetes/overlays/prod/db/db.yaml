@@ -12,22 +12,23 @@ spec:
       postInitApplicationSQL:
         - GRANT CREATE ON DATABASE plan TO "user";
 
-   storage:
-     size: 1Gi
-     resizeInUseVolumes: true
+  storage:
+    storageClass: cnpg
+    size: 1Gi
+    resizeInUseVolumes: true
   monitoring:
     enablePodMonitor: true
 
   managed:
     roles:
-    - name: admin
-      ensure: present
-      login: true
-      superuser: true
-      passwordSecret:
-        name: plan-db-admin
-    - name: user
-      ensure: present
-      login: true
-      passwordSecret:
-        name: plan-db-user
+      - name: admin
+        ensure: present
+        login: true
+        superuser: true
+        passwordSecret:
+          name: plan-db-admin
+      - name: user
+        ensure: present
+        login: true
+        passwordSecret:
+          name: plan-db-user

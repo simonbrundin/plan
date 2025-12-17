@@ -1,8 +1,9 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Longhorn är helt grönt
-  - [ ] Koppla in och ur hårddisken i worker-3
-  - [ ] Starta om worker-2
+- [ ] Ändra storage class på plan för cnpg
+- [ ] Installera Talos på mac mini
+- [ ] Hur uppdaterar jag Talos på ett enklare sätt?
+  - [ ] https://github.com/home-operations/tuppr
 - [ ] Inkorg
   - Inmatningsprocess
     1. Skriv text
@@ -15,7 +16,20 @@
       - Anteckningar
       - Tidsåtgång
       - Föräldrar
+
 - [ ] https://domain-locker.com/about/self-hosting
+
+## Badrum
+
+- [ ] Handfat uppsatt
+
+### Hemfix
+
+- [ ] Inneverktyg
+- [ ] Elmätare på badet
+- [ ] Termoemeter på badet
+- [ ] Renault igång
+- [ ] Dockhus klart
 
 ### Birstahandling
 
@@ -28,15 +42,6 @@
 
 - [ ] Dashboard
 
-### Badrum
-
-### Hemfix
-
-- [ ] Renault igång
-- [ ] Dockhus klart
-
-### Talos Cluster
-
 - [ ] auth.simonbrundin.com fungerar
   - [ ] Få alla mina noder att fungera
   - [ ] Uppgradera alla till senaste talos och Kubernetes
@@ -44,7 +49,7 @@
 
 #### Senare
 
-- [ ] evContaine
+- [ ] DevContainers
   - [ ] Simon CLI finns tillgängligt i min DevContainer
   - [ ] NeoVim används i DevContainer
     - [ ] Förstå hur det fungerar när man använder NeoVim
@@ -328,3 +333,13 @@
 - [x] Kursplan för programmering klar
 - [x] Alla datorer har senaste Talos och Kubernetes
 - [x] Allt i ArgoCD är grönt
+- [x] Allt i ArgoCD är grönt
+- [x] Allt i ArgoCD är grönt
+- [x] Allt i ArgoCD är grönt
+- [x] Longhorn är helt grönt
+  - [x] Koppla in och ur hårddisken i worker-3
+  - [x] worker-8 fungerar
+  - [x] worker-4 fungerar
+  - [x] worker-2 fungerar
+  - [x] worker-7 fungerar
+- [x] Två hårddiskar i worker-1 fungerar
