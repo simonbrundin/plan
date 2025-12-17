@@ -10,6 +10,7 @@ spec:
       database: plan
       owner: admin
       postInitApplicationSQL:
+        - CREATE ROLE "user" LOGIN;
         - GRANT CREATE ON DATABASE plan TO "user";
 
   storage:
