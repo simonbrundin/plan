@@ -1,9 +1,17 @@
+- [x] Få allt i ArgoCD grönt
+- [ ] Teleport fungerar
+
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Installera Talos på mac mini
+- [ ] Ssl godkänt
+- [ ] Lös extrem lång responstid
+- [ ] Prod fungerar
+- [ ] Installera Talos på datorer
   - [ ] Köpa tangentbord
+  - [ ] Mac Mini
+  - [ ] HP
 - [ ] Hur uppdaterar jag Talos på ett enklare sätt?
-  - [ ] https://github.com/home-operations/tuppr
+  - [ ] [Tuppr](https://github.com/home-operations/tuppr)
 - [ ] Inkorg
   - Inmatningsprocess
     1. Skriv text
@@ -18,6 +26,8 @@
       - Föräldrar
 
 - [ ] Handfat uppsatt
+  - [ ] Packningar täta
+    - [ ] Köp Packningar
 
 ### Hemfix
 
@@ -340,4 +350,5 @@
   - [x] worker-7 fungerar
 - [x] Två hårddiskar i worker-1 fungerar
 - [x] Ändra storage class på plan för cnpg
+- [x] https://domain-locker.com/about/self-hosting
 - [x] https://domain-locker.com/about/self-hosting

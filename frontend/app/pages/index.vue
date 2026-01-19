@@ -7,17 +7,18 @@ const goalsStore = useGoalsStore()
 const { loadAllGoals } = useGoalApi()
 
 // Load goals on mount
-onMounted(async () => {
-  if (loggedIn) {
-    try {
-      const goals = await loadAllGoals()
-      goalsStore.goals = goals
-      goalsStore.isLoaded = true
-    } catch (error) {
-      console.error('Failed to load goals:', error)
-    }
-  }
-})
+// Temporarily disabled to debug hanging issue
+// onMounted(async () => {
+//   if (loggedIn) {
+//     try {
+//       const goals = await loadAllGoals()
+//       goalsStore.goals = goals
+//       goalsStore.isLoaded = true
+//     } catch (error) {
+//       console.error('Failed to load goals:', error)
+//     }
+//   }
+// })
 
 const { createGoal: createGoalApi } = useGoalApi()
 
