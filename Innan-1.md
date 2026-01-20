@@ -1,7 +1,9 @@
-- [x] Få allt i ArgoCD grönt
-- [ ] Teleport fungerar
-
 # Mål att nå innan jag går över till Plan 1.0
+
+- [ ] Installera ArgoCD
+- [ ] Teleport fungerar
+- [ ] plan.simonbrundin.com fungerar
+- [x] Få allt i ArgoCD grönt
 
 - [ ] Ssl godkänt
 - [ ] Lös extrem lång responstid
