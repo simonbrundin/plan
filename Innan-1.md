@@ -1,6 +1,35 @@
+- [ ] Alla Talos noder fungerar och är inkopplade
+- [ ] Vaccintester
+  - [ ] Ta bort felmeddelande
+  - [ ] Logga
+    - [ ] Be Daniel skicka nuvarande logga
+    - [ ] Gör en enklare logga för Oavsett med en testikon
+  - [ ] Peka Oavsett till seiq.se
+  - [ ] Få Fortknox integration att fungera med Woocommerce
+    - [ ] Se om det går att få in produkterna från Fortknox
+  - [ ] Meny
+    - [ ] Butik
+    - [ ] Om oss
+    - [ ] Kontakt
+    - [ ] Dölj sociala medier tillsvidare
+  - [ ] Swish
+  - [ ] Dölj kontaktformulär och gör en annan kontaktruta
+  - [ ] Felsök network change
+  - [ ] Inloggning till wordpress.com
+  - [ ] Man behöver inte ha en inloggning för att handla
+  - [ ] SimplyBook behövs inte
+  - [ ] Få fraktalternativ att fungera
+    - [ ] Gör så att när man handlar över 500kr så blir det fri frakt
+  - [ ] Betalningsalternativ
+  - [ ] Produkter i ordning
+    - [ ] Daniel skickar mig lista på alla produkter som ska vara med
+      - [ ] Inkludera bilder
+- [ ] Installera ArgoCD
+  - [ ] Ta hjälp via Dot AI
+- [ ] Dot AI fungerar
+
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Installera ArgoCD
 - [ ] Teleport fungerar
 - [ ] plan.simonbrundin.com fungerar
 - [x] Få allt i ArgoCD grönt
@@ -352,5 +381,8 @@
   - [x] worker-7 fungerar
 - [x] Två hårddiskar i worker-1 fungerar
 - [x] Ändra storage class på plan för cnpg
+- [x] https://domain-locker.com/about/self-hosting
+- [x] https://domain-locker.com/about/self-hosting
+- [x] https://domain-locker.com/about/self-hosting
 - [x] https://domain-locker.com/about/self-hosting
 - [x] https://domain-locker.com/about/self-hosting
