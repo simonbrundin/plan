@@ -1,48 +1,112 @@
-- [ ] Alla Talos noder fungerar och är inkopplade
-- [ ] Vaccintester
-  - [ ] Ta bort felmeddelande
-  - [ ] Logga
-    - [ ] Be Daniel skicka nuvarande logga
-    - [ ] Gör en enklare logga för Oavsett med en testikon
-  - [ ] Peka Oavsett till seiq.se
-  - [ ] Få Fortknox integration att fungera med Woocommerce
-    - [ ] Se om det går att få in produkterna från Fortknox
-  - [ ] Meny
-    - [ ] Butik
-    - [ ] Om oss
-    - [ ] Kontakt
-    - [ ] Dölj sociala medier tillsvidare
-  - [ ] Swish
-  - [ ] Dölj kontaktformulär och gör en annan kontaktruta
-  - [ ] Felsök network change
-  - [ ] Inloggning till wordpress.com
-  - [ ] Man behöver inte ha en inloggning för att handla
-  - [ ] SimplyBook behövs inte
-  - [ ] Få fraktalternativ att fungera
-    - [ ] Gör så att när man handlar över 500kr så blir det fri frakt
-  - [ ] Betalningsalternativ
-  - [ ] Produkter i ordning
-    - [ ] Daniel skickar mig lista på alla produkter som ska vara med
-      - [ ] Inkludera bilder
-- [ ] Installera ArgoCD
-  - [ ] Ta hjälp via Dot AI
-- [ ] Dot AI fungerar
-
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Teleport fungerar
-- [ ] plan.simonbrundin.com fungerar
-- [x] Få allt i ArgoCD grönt
+- [ ] Komma igång med Sidecar och TD
 
-- [ ] Ssl godkänt
-- [ ] Lös extrem lång responstid
-- [ ] Prod fungerar
+## Back on Kubernetes-track
+
 - [ ] Installera Talos på datorer
-  - [ ] Köpa tangentbord
   - [ ] Mac Mini
   - [ ] HP
-- [ ] Hur uppdaterar jag Talos på ett enklare sätt?
-  - [ ] [Tuppr](https://github.com/home-operations/tuppr)
+- [ ] Alla Talos noder fungerar och är inkopplade
+  - [ ] Ping av pxe och talos noder fungerar
+- [ ] Ping av pxe och talos noder fungerar
+- [ ] ArgoCD fungerar
+- [ ] Teleport fungerar
+- [ ] Vault fungerar
+- [ ] auth.simonbrundin.com fungerar
+- [ ] Installera
+      [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
+- [ ] Installera Renovate i klustret så jag får PRs om uppdateringar
+
+## OpenClaw
+
+- [x] Installera OpenClaw på en Raspberry Pi 5
+
+## Begbot
+
+- [x] /work
+- [x] Dark Mode
+- [x] Uppdatera standard så att den kommer ihåg att all text som visas i x
+      frontend ska vara på svenska
+- [x] Svenska i Frontend
+- [x] Bara ett backend api
+- [x] Skriv det som standard att det enda backend api som ska byggas är Go och
+      inte in Nuxt.
+- [x] Scraping sidan fungerar
+- [x] Lägg till snurra som visas medan varje sida väntar på svar från api.
+- [x] Hittade annonser fungerar
+- [x] Annonser visar produktnamn, pris, fraktkostnad, värdering
+- [x] Okänd produkt
+- [x] Hämta pris, fraktkostnad
+- [x] Priser visas korrekt, nu visas 3800 sim 38.00
+- [x] Fraktkostnad hämtas korrekt
+- [x] Bästa gratis modellen?
+- [x] Ändra /work så den inte måste läsa varje fil. den borde kunna använda rg
+      för att hitta vilka specs som är färdiga och det borde gå mycket fortare
+      att att behöva använda read på varje spec. hittar den några specs som inte
+      är helt färdiga så kan den isf läsa bara dessa.
+- [x] Beskrivning i description istället för titel
+- [x] Rätt description sparas
+- [x] Fraktkostnad sparas i databasen med ören istället för kr. så ifall det
+      står 19,50 kr så sparas det som 1950
+- [x] Blocket anropas via API och hämtar inte HTML
+- [x] Värderingsfunktion
+- [x] Vinstuträkning
+- [x] Hämta nya annonser fungerar
+- [x] Visa delvärderingarna i /ads
+- [x] Dela upp product_valuations och listing_valuations. just nu är bara
+      delvärderingarna kopplade till en produkt
+- [x] Visa statusuppdateringar, samma sak som i loggarna när hämta annonser körs
+- [ ] Värderingsfunktionen fungerar och värderingen stämmer överens med
+      delvärderingarna
+- [ ] Skapa en separat sida för search terms och en för scrapings där man lista
+      alla gånger den försökt scrapa
+- [ ] Olika tabbar i /ads där en är Alla och en är Prisvärda
+- [ ] Avbryt scraping knapp och cli kommando
+- [ ] Produkter visar i /products
+- [ ] Ikoner bredvid alla meny-items från https://nuxt.com/modules/icon
+- [ ] Inloggning med Supabase Auth
+- [ ] Skicka mail ifall jag vinsten är över mina begränsningar i trading_rules
+- [ ] Lista skickade mail i frontend
+- [ ] Budfunktion
+- [ ] Skicka meddelande till säljare funktion
+- [ ] Scrapingkörningar - Visa en lista med alla gånger scraping funktionen körs
+      och visa information hur många nya annonser den hittat, hur många som var
+      köpvärda mm
+
+## Agent
+
+- [ ] Notifikationer från OpenCode när den är klar eller vill ha input
+- [ ] /free-model skapa ett kommando som kollar i
+      https://openrouter.ai/models?q=free och ser vilka som har aktiva
+      providers. sedan rekommenderar du en lista på topp tre baserat på de som
+      är bäst för kodning och driftning av infrastruktur
+- [ ] Kanban board för agentos specs
+- [ ] Karpathy i agents.md
+  - [ ] https://x.com/godofprompt/status/2018482335130296381
+- [ ] Fråga om push och commit när en spec är färdig
+
+### Infrastructure
+
+- Skapa en ett kommando som heter `simon kubernetes health` som kollar så alla
+  noder i mitt taloskluster ser hälsosamma ut. Och som visar att kubectl
+  fungerar. jag behöver kunna köra både talosctl och kubectl och kubectl
+  fungerar. jag behöver kunna köra både talosctl och kubectl och jag vill att
+  det ska säkerställas att det går i början på skripet.
+
+#### Kubernetes Frontend
+
+- [ ] Kunna se alla noder både från talos och kubectl
+  - [ ] Typ liknade Omni från Sidero
+  - [ ] Jag vill kunna se versioner för både talos och kubernetes på varje nod
+        och ha möjligheten att uppdatera dom med ett enkelt knappklick
+  - [ ] Hur uppdaterar jag Talos på ett enklare sätt?
+    - [ ] [Tuppr](https://github.com/home-operations/tuppr)
+- [ ] https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+
+## Plan 1.0
+
+- [ ] plan.simonbrundin.com fungerar
 - [ ] Inkorg
   - Inmatningsprocess
     1. Skriv text
@@ -55,27 +119,9 @@
       - Anteckningar
       - Tidsåtgång
       - Föräldrar
+- [ ] Skapa appikon för bla PWA
 
-- [ ] Handfat uppsatt
-  - [ ] Packningar täta
-    - [ ] Köp Packningar
-
-### Hemfix
-
-- [ ] Inneverktyg
-- [ ] Elmätare på badet
-- [ ] Termometer på badet
-- [ ] Renault igång
-- [ ] Dockhus klart
-
-### Birstahandling
-
-- [ ] Clas Ohlsson
-  - [ ] Tofflor 79kr
-- [ ] Intersport
-  - [ ] McKinley-känga 299kr
-
-## Sophies önskemål
+### Sophies önskemål
 
 - [ ] Dashboard
 
@@ -84,7 +130,21 @@
   - [ ] Uppgradera alla till senaste talos och Kubernetes
 - [ ] Installera Orange Pi:s
 
-#### Senare
+---
+
+### Hemfix
+
+- [ ] Städa
+- [ ] Handfat uppsatt
+  - [ ] Packningar täta
+    - [x] Köp Packningar
+- [x] Inneverktyg
+- [ ] Elmätare på badet
+- [ ] Termometer på badet
+- [ ] Renault igång
+- [ ] Dockhus klart
+
+---
 
 - [ ] DevContainers
   - [ ] Simon CLI finns tillgängligt i min DevContainer
@@ -94,22 +154,19 @@
           man ansluter med NeoVim
 - [ ] Mend Revonate Bot installerat för att uppdatera depencencies
 - [x] Prod-ikon
-- [ ] Skapa appikon för bla PWA
-- [ ] Installera
-      [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
-- [ ] Robotdammsugare fungerar
-- [ ] Standard extensions i Chromium
-  - [ ] Vimium
-  - [ ] 1Password
-  - [ ] Video Speed Controller
-  - [ ] Video Speed Controller
-- [ ] Linkding för att hantera bokmärken i min Homelab så jag kan byta browser
+- [x] Robotdammsugare fungerar
+- [x] Standard extensions i Chromium
+  - [x] Vimium
+  - [x] 1Password
+  - [x] Video Speed Controller
+  - [x] Video Speed Controller
+- [x] Linkding för att hantera bokmärken i min Homelab så jag kan byta browser
       utan att all mina bokmärken försvinner utan att all mina bokmärken
       försvinner
-- [ ] Kunna spara idéer länkar med mera i Notion i en inkorg, både från
+- [x] Kunna spara idéer länkar med mera i Notion i en inkorg, både från
       telefonen, datorn och automatiskt från min kindle för anteckningar och
       hightlights
-- [ ] Installera Renovate i klustret så jag får PRs om uppdateringar
+- [ ] Dot AI fungerar
 
 ## Klart --------------------------------------------------------------------
 
@@ -230,13 +287,6 @@
 - [ ] Dockhus klart
 
 ### Talos Cluster
-
-- [ ] auth.simonbrundin.com fungerar
-  - [ ] Få alla mina noder att fungera
-  - [ ] Uppgradera alla till senaste talos och Kubernetes
-- [ ] Installera Orange Pi:s
-
-#### Senare
 
 - [x] Prod-ikon
 - [ ] Skapa appikon för bla PWA
@@ -386,3 +436,33 @@
 - [x] https://domain-locker.com/about/self-hosting
 - [x] https://domain-locker.com/about/self-hosting
 - [x] https://domain-locker.com/about/self-hosting
+- [x] Vaccintester
+  - [x] Ta bort felmeddelande
+  - [x] Logga
+    - [x] Be Daniel skicka nuvarande logga
+    - [x] Gör en enklare logga för Oavsett med en testikon
+  - [x] Peka Oavsett till seiq.se
+  - [x] Få Fortknox integration att fungera med Woocommerce
+    - [x] Se om det går att få in produkterna från Fortknox
+  - [x] Meny
+    - [x] Butik
+    - [x] Om oss
+    - [x] Kontakt
+    - [x] Dölj sociala medier tillsvidare
+  - [x] Swish
+  - [x] Dölj kontaktformulär och gör en annan kontaktruta
+  - [x] Felsök network change
+  - [x] Inloggning till wordpress.com
+  - [x] Man behöver inte ha en inloggning för att handla
+  - [x] SimplyBook behövs inte
+  - [x] Få fraktalternativ att fungera
+    - [x] Gör så att när man handlar över 500kr så blir det fri frakt
+  - [x] Betalningsalternativ
+  - [x] Produkter i ordning
+    - [x] Daniel skickar mig lista på alla produkter som ska vara med
+      - [x] Inkludera bilder
+    - [x] Daniel skickar mig lista på alla produkter som ska vara med
+      - [x] Inkludera bilder
+      - [x] Inkludera bilder
+      - [x] Inkludera bilder
+      - [x] Inkludera bilder
