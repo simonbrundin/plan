@@ -1,6 +1,13 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Komma igång med Sidecar och TD
+## Övrigt
+
+- [ ] Komma igång med Farcic's ai workflow
+  - [ ] Hur fan vill jag att ett workflow ska se ut?
+    - [ ] Potentiella steg
+      - [ ] Definera problemet
+- [ ] Lägga in alla produktet till Daniel
+- [ ] Skriva till Kristian och tacka för förra helgen
 
 ## Back on Kubernetes-track
 
@@ -135,6 +142,7 @@
 ### Hemfix
 
 - [ ] Städa
+- [ ] Uttag och 18 v batteriladdare uppsatt i hörnskåpet
 - [ ] Handfat uppsatt
   - [ ] Packningar täta
     - [x] Köp Packningar
