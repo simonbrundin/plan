@@ -9,4 +9,3 @@ configMapGenerator:
     files:
       - db/schema.sql
       - db/seed-data.sql
-

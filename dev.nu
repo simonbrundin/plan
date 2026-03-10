@@ -1,29 +1,17 @@
+#!/usr/bin/env nu
 
 # -----------------------------------------------
 # Aktivera Mise-paket
 # -----------------------------------------------
 
 def activate-mise [] {
-  let hook_output = (^mise hook-env -s nu | lines | split column "," | rename op name value)
-  for line in $hook_output {
-    if ($line.op == "set" and $line.name == "PATH") {
-      $env.PATH = ($line.value | split row (char esep) | append $env.PATH)
-    }
-  }
+  let mise_path = (^mise env | parse -r 'export PATH=\'(.+)\'' | get capture0.0 | split row (char esep))
+  $env.PATH = ($mise_path | append $env.PATH)
 }
 
 activate-mise
 
-# -----------------------------------------------
-# Funktioner
-# -----------------------------------------------
 
-def get-teleport-username [] {
-    let status = (tsh status | lines)
-    let username_line = ($status | where $it =~ "Logged in as:" | first)
-    let username = ($username_line | split row ":" | last | str trim)
-    $username
-}
 
 def get-local-ip [] {
     try {
@@ -47,9 +35,8 @@ def get-local-ip [] {
 # Variables
 # -----------------------------------------------
 
-let teleport_user = (get-teleport-username)
 let local_ip = (get-local-ip)
-let namespace = $"plan-dev-($teleport_user)" 
+let namespace = "plan-dev" 
 # let link = $"https://($namespace).simonbrundin.com"
 let link = $"http://($local_ip):3000"
 
@@ -65,12 +52,8 @@ curl -d $link ntfy.sh/simonbrundin-dev-notification
 
 cd .devcontainer/
 
-# Kontrollera om kubectl fungerar, annars logga in via teleport
+# Kontrollera om kubectl fungerar
 let kubectl_check = (kubectl cluster-info | complete)
-if $kubectl_check.exit_code != 0 {
-  print "Kan inte nå Kubernetes, loggar in via Teleport..."
-  simon kubernetes login teleport
-}
 
 # Avsluta befintliga Tilt-processer och tjänster på port 10350
 try {
@@ -92,7 +75,7 @@ try {
 }
 
 # -----------------------------------------------
-# Välj Tilt mode
+# Välj Tilt mode med fzf
 # -----------------------------------------------
 
 print "\n🚀 Välj utvecklingsmiljö:\n"
@@ -102,13 +85,15 @@ let modes = [
   "kubernetes - Full cluster miljö"
 ]
 
-let selection = ($modes | str join "\n" | fzf --prompt="Mode: " --height=40% --reverse | str trim)
+let selection = ($modes | fzf --prompt="Mode: " --height=40% --reverse | str trim)
 
 let mode = if ($selection | str contains "kubernetes") {
   "kubernetes"
 } else {
   "local"
 }
+
+print $"\n✓ Startar Tilt i ($mode) mode...\n"
 
 print $"\n✓ Startar Tilt i ($mode) mode...\n"
 

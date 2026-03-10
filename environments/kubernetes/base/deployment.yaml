@@ -76,3 +76,4 @@ spec:
                 secretKeyRef:
                   name: auth
                   key: NUXT_OAUTH_AUTHENTIK_REDIRECT_URL
+
