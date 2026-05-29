@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: plan-dev-postgres
     ports:
-      - "5432:5432"
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: plan
       POSTGRES_PASSWORD: plan
@@ -23,7 +23,7 @@ services:
     image: hasura/graphql-engine:v2.41.0
     container_name: plan-dev-hasura
     ports:
-      - "8080:8080"
+      - "${HASURA_PORT:-8080}:8080"
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://plan:plan@postgres:5432/plan
       HASURA_GRAPHQL_ADMIN_SECRET: dev-admin-secret

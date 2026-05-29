@@ -5,6 +5,12 @@ resources:
   - postgres.yaml
 
 configMapGenerator:
+  - name: postgres-config
+    data:
+      POSTGRES_PORT: "5432"
+      POSTGRES_DATABASE_URL: "postgres://plan:plan@postgres:5432/plan"
+    options:
+      disableNameSuffixHash: true
   - name: postgres-init-scripts
     files:
       - 01-schema.sql=schema.sql
