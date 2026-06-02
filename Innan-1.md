@@ -1,5 +1,7 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [ ] Få urls att fungera till klustret. grafana.simonbrundin.com
+
 ---
 
 ### Meddelande till agent > PR med länk

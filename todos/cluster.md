@@ -1,10 +1,13 @@
 # Cluster
 
+- [x] Uppdatera Agents.md med information om hur min infrastucture fungerar
 - [ ] ´simon cluster health´ grönt
   - [x] Få igång worker-2
+  - [ ] Få alla Flux Komponenter att fungera
+  - [ ] Föra över de sista komponenterna från ArgoCD till Flux
   - [x] Få igång worker-9
   - [x] Alla ArgoCD-poddar körs
-  - [ ] skapa ett simon kommando som skapar en secret.yaml som är krypterad.
+  - [x] skapa ett simon kommando som skapar en secret.yaml som är krypterad.
         antingen med ett genegererat lösenord eller med ett jag väljer tex en
         api nyckel
   - [ ] Sätt upp webhook för flux
@@ -13,20 +16,24 @@
         [🚀 KRM-Native GitOps: Yes — Without Flux, No. (FluxCD or Nothing.)](https://www.linkedin.com/pulse/krm-native-gitops-yes-without-flux-fluxcd-nothing-mialon-wsmue/)
 - [x] Just nu känns det som upgrade körs varje gång jag kör simon talos update
       config. så ska det ju inte vara.
+- [ ] Lägga till en Kyverno-policy som gör det omöjligt att radera
+      longhorn-system namespacet
+  - [ ] Installera Kyverno
+- [ ] Köra kubescape eller liknande för att se säkerhetsproblem i mitt kluster
 - [ ] Jag vill kunna se en visuell graf av min databas schema som jag kan se i
       både prod och dev med tex tilt
   - [ ] Chardb
-- [ ] Longhorn rapporterar grönt
-  - [ ] 2 - Inte påslagen, troligtvis kör den igång från fel disk
-  - [ ] 3 - Disken full
-  - [ ] 5 - Disk 2 inte inkopplad
-  - [ ] 6 - Disken full
-  - [ ] 7 - Disken full
-  - [ ] 9 - Systemdisk måste sättas i patch
-  - [ ] ´simon kubernetes longhorn test´ för alla noder och se till att allt
+- [x] Longhorn rapporterar grönt
+  - [x] 2 - Inte påslagen, troligtvis kör den igång från fel disk
+  - [x] 3 - Disken full
+  - [x] 5 - Disk 2 inte inkopplad
+  - [x] 6 - Disken full
+  - [x] 7 - Disken full
+  - [x] 9 - Systemdisk måste sättas i patch
+  - [x] ´simon kubernetes longhorn test´ för alla noder och se till att allt
     - [x] Systemdisk blir grönt när konfiguerad serial är samma som installerad
           är grönt
-    - [ ] Extensions visar iscsi-tools och inte schematic
+    - [x] Extensions visar iscsi-tools och inte schematic
 - [ ] Uppdatera istallationsguide för en ny nod eller disk så rätt serial läggs
       till i patchen
 - [ ] Ändra installationsdisk för worker-2
@@ -44,6 +51,10 @@
       [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
 - [ ] Installera Renovate i klustret så jag får PRs om uppdateringar
 
+---
+
+---
+
 ## Back on Kubernetes-track
 
 - [x] Kubelet CSR Approver fungerar
@@ -53,10 +64,8 @@
 
 - [x] Få worker-5 stabil i csi-plugin och manager
 - [x] Förstå om det bara är dessa som fungerar egentligen. kubectl get
-      volumes.longhorn.io -n longhorn-system
-
----
-
----
-
----
+      volumes.longhorn.io -n longhorn-system volumes.longhorn.io -n
+      longhorn-system
+- [x] Förstå om det bara är dessa som fungerar egentligen. kubectl get
+      volumes.longhorn.io -n longhorn-system volumes.longhorn.io -n
+      longhorn-system
