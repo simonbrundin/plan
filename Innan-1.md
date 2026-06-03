@@ -1,7 +1,19 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Få urls att fungera till klustret. grafana.simonbrundin.com
-  - [ ] Vänta på svar från Körsbär - Annars byt internetleverantör
+- [x] Lägg till några Kyverno policies
+- [x] Longhorn fungerar
+- [x] Installera Kyverno
+- [x] Få urls att fungera till klustret. grafana.simonbrundin.com
+  - [x] Vänta på svar från Körsbär - Annars byt internetleverantör
+- [x] Inga fel i flux
+- [ ] Vissa routes säkra
+  - [ ] Authentik fungerar
+- [ ] Hårddisken i worker-2 fungerar
+- [ ] Installera KubeScape
+- [ ] Föra över de sista komponenterna från ArgoCD till Flux
+- [ ] Lägga till en Kyverno-policy som gör det omöjligt att radera
+      longhorn-system namespacet
+- [ ] auth.simonbrundin.com fungerar
 
 ---
 

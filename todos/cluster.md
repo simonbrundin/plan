@@ -19,7 +19,7 @@
 - [ ] Lägga till en Kyverno-policy som gör det omöjligt att radera
       longhorn-system namespacet
   - [ ] Installera Kyverno
-- [ ] Köra kubescape eller liknande för att se säkerhetsproblem i mitt kluster
+- [x] Köra kubescape eller liknande för att se säkerhetsproblem i mitt kluster
 - [ ] Jag vill kunna se en visuell graf av min databas schema som jag kan se i
       både prod och dev med tex tilt
   - [ ] Chardb
@@ -37,7 +37,7 @@
 - [ ] Uppdatera istallationsguide för en ny nod eller disk så rätt serial läggs
       till i patchen
 - [ ] Ändra installationsdisk för worker-2
-- [ ] Få igång Vault backup
+- [x] Få igång Vault backup
 - [ ] Koppla in bilbatteri
 - [x] Uppgradera Kubernetes
 - [ ] Installera Talos på datorer
