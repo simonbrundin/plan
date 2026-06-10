@@ -1,13 +1,16 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+## Cluster
+
 - [x] Lägg till några Kyverno policies
+- [x] Push triggar direktsynkronisering
 - [x] Longhorn fungerar
 - [x] Installera Kyverno
 - [x] Få urls att fungera till klustret. grafana.simonbrundin.com
   - [x] Vänta på svar från Körsbär - Annars byt internetleverantör
 - [x] Inga fel i flux
+- [ ] Authentik fungerar
 - [ ] Vissa routes säkra
-  - [ ] Authentik fungerar
 - [ ] Hårddisken i worker-2 fungerar
 - [ ] Installera KubeScape
 - [ ] Föra över de sista komponenterna från ArgoCD till Flux
