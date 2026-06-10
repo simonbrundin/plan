@@ -8,7 +8,8 @@ const { loggedIn } = useUserSession();
 const open = ref(false);
 const showHelpModal = ref(false);
 const showPriorityIndicator = ref(false);
-const searchOpen = ref(false);
+const { isSearchOpen, openSearch, closeSearch } = useSearchState();
+
 const searchButtonRef = ref<InstanceType<typeof UDashboardSearchButton> | null>(null);
 
 const {
@@ -142,6 +143,31 @@ function handleGlobalKeydown(event: KeyboardEvent) {
     target.tagName === "TEXTAREA" ||
     target.isContentEditable;
 
+  // Handle Escape FIRST - always let it propagate for Vim
+  if (event.key === "Escape") {
+    if (isSearchOpen.value) {
+      closeSearch();
+    }
+    // Don't return - let Escape propagate for Vim insert mode exit
+  }
+
+  if (isSearchOpen.value) {
+    // When search is open, block navigation keys but let Escape and Enter through
+    const navKeys = ["h", "j", "k", "l", "i", "a", "d", "x", " "];
+    
+    if (navKeys.includes(event.key)) {
+      event.stopPropagation();
+      return;
+    }
+    
+    // Let Escape and Enter pass through to Vim handlers
+    if (event.key === "Escape" || event.key === "Enter") {
+      // Don't stop propagation - let it reach Vim
+    } else {
+      return;
+    }
+  }
+
   if (event.key === "?" && !event.ctrlKey && !event.metaKey && !event.altKey && !isInInput) {
     event.preventDefault();
     showHelpModal.value = true;
@@ -150,12 +176,7 @@ function handleGlobalKeydown(event: KeyboardEvent) {
   // Open search on Ctrl+K or Cmd+K
   if ((event.ctrlKey || event.metaKey) && event.key === "k") {
     event.preventDefault();
-    searchOpen.value = true;
-  }
-
-  // Close search on Escape
-  if (event.key === "Escape" && searchOpen.value) {
-    searchOpen.value = false;
+    openSearch();
   }
 
   handlePriorityKeydown(event);
@@ -165,6 +186,14 @@ function handleGlobalKeydown(event: KeyboardEvent) {
 function handleGlobalKeyup(event: KeyboardEvent) {
   handlePriorityKeyup(event);
   handleNavigationKeyup(event);
+}
+
+function updateSearchOpen(open: boolean) {
+  if (open) {
+    openSearch();
+  } else {
+    closeSearch();
+  }
 }
 
 onMounted(() => {
@@ -212,7 +241,7 @@ onUnmounted(() => {
       </template>
     </UDashboardSidebar>
 
-    <UDashboardSearch v-model:open="searchOpen" :groups="groups" />
+    <UDashboardSearch :open="isSearchOpen" :groups="groups" @update:open="updateSearchOpen" />
 
     <HelpModal v-model:open="showHelpModal" />
 

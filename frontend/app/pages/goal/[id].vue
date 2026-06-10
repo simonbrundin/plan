@@ -1002,6 +1002,10 @@ function executeLeaderCommand(key: string): boolean {
 
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
+  // Don't handle keys when search is open
+  const { isSearchOpen } = useSearchState();
+  if (isSearchOpen.value) return;
+
   // Hantera delete-dialog navigering först
   if (showDeleteConfirmation.value) {
     handleDeleteDialogKey(event);

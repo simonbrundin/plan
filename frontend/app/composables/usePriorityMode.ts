@@ -5,6 +5,18 @@ interface PrioritizedGoal extends Goal {
 	parentTitle: string | null;
 }
 
+const { isSearchOpen } = useSearchState();
+
+function isSearchFieldFocused(): boolean {
+	if (isSearchOpen.value) return true;
+	const active = document.activeElement;
+	if (!active) return false;
+	const inModal =
+		active.closest('[class*="bg-elevated"]') ||
+		active.closest('[class*="fixed"]');
+	if (inModal && active.tagName === "INPUT") return true;
+	return false;
+}
 const heldKeys = ref<Set<string>>(new Set());
 const isPriorityMode = ref(false);
 const selectedGoalId = ref<number | null>(null);
@@ -160,7 +172,8 @@ export function usePriorityMode() {
 		if (
 			target.tagName === "INPUT" ||
 			target.tagName === "TEXTAREA" ||
-			target.isContentEditable
+			target.isContentEditable ||
+			isSearchFieldFocused()
 		) {
 			return;
 		}
