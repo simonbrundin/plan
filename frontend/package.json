@@ -18,6 +18,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.111",
     "@nuxt/image": "1.11.0",
     "@nuxt/ui": "^4.0.0",
     "@nuxtjs/color-mode": "^3.5.2",

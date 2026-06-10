@@ -39,11 +39,18 @@ const addGoalToInbox = async (goal) => {
     <div v-if="loggedIn" class="space-y-8">
       <div class="text-center">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen tillbaka!</h1>
-        <NuxtLink to="/goal/1">
-          <UButton size="lg" icon="material-symbols:arrow-forward-rounded" class="mr-4">
-            Gå till mål
-          </UButton>
-        </NuxtLink>
+        <div class="flex justify-center gap-4">
+          <NuxtLink to="/goal/1">
+            <UButton size="lg" icon="material-symbols:arrow-forward-rounded">
+              Gå till mål
+            </UButton>
+          </NuxtLink>
+          <NuxtLink to="/priority">
+            <UButton size="lg" icon="material-symbols:sort">
+              Prioriteringslista
+            </UButton>
+          </NuxtLink>
+        </div>
       </div>
 
       <div class="bg-gray-50 rounded-lg p-6">

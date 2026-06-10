@@ -665,12 +665,9 @@ const goalToDelete = ref<{ id: number; title: string } | null>(null);
 const deleteDialogSelection = ref<"cancel" | "confirm">("cancel");
 
 // Leader key state
-const isLeaderMode = ref(false);
 const isLeaderModalOpen = ref(false);
-let leaderTimeout: NodeJS.Timeout | null = null;
 let leaderModalJustOpened = false;
-let isInLeaderMode = false; // Direct flag, not reactive
-let leaderFirstKey = ""; // Track first key in leader sequence (e.g., 'f' in 'f + d')
+let leaderFirstKey = "";
 
 // Gå in i insert mode för att redigera ett mål
 async function enterInsertMode(
@@ -946,55 +943,59 @@ function cancelWeightEdit() {
 }
 
 // Exekvera leader key kommando
-// Returnerar true om vi ska avsluta leader mode, false om vi väntar på nästa tangent
 function executeLeaderCommand(key: string): boolean {
+  // Hantera kombinerade tangentsekvenser från modal (t.ex. "fd", "gi", "gg")
+  if (key === "fd") {
+    showCompleted.value = !showCompleted.value;
+    isLeaderModalOpen.value = false;
+    return true;
+  } else if (key === "gi") {
+    isLeaderModalOpen.value = false;
+    router.push('/');
+    return true;
+  } else if (key === "gg") {
+    isLeaderModalOpen.value = false;
+    router.push('/goal/1');
+    return true;
+  }
+
   if (key === "f") {
-    // Första tangenten i sekvensen 'f + d'
-    console.log('✓ LEADER: f pressed, waiting for next key (d)');
     leaderFirstKey = "f";
-    return false; // Stanna kvar i leader mode
+    return false;
   } else if (key === "d" && leaderFirstKey === "f") {
-    // Avsluta sekvensen 'f + d' - toggla visa/dölj avklarade mål
-    console.log('✓ LEADER: f + d executed - toggling completed goals');
     showCompleted.value = !showCompleted.value;
     leaderFirstKey = "";
-    return true; // Avsluta leader mode
+    isLeaderModalOpen.value = false;
+    return true;
   } else if (key === "g") {
-    // Första tangenten i sekvensen 'g + i' eller 'g + g'
-    console.log('✓ LEADER: g pressed, waiting for next key (i or g)');
     leaderFirstKey = "g";
-    return false; // Stanna kvar i leader mode
+    return false;
   } else if (key === "i" && leaderFirstKey === "g") {
-    // Avsluta sekvensen 'g + i' - navigera till inbox
-    console.log('✓ LEADER: g + i executed - navigating to inbox');
+    isLeaderModalOpen.value = false;
     router.push('/');
     leaderFirstKey = "";
-    return true; // Avsluta leader mode
+    return true;
   } else if (key === "g" && leaderFirstKey === "g") {
-    // Avsluta sekvensen 'g + g' - navigera till goal/1
-    console.log('✓ LEADER: g + g executed - navigating to goal/1');
+    isLeaderModalOpen.value = false;
     router.push('/goal/1');
     leaderFirstKey = "";
-    return true; // Avsluta leader mode
+    return true;
   } else if (key === "i") {
-    // Öppna icon picker för markerat mål
+    isLeaderModalOpen.value = false;
     if (isGoalSelected.value && goal.value) {
-      // Huvudmål är markerat
-      editingIconGoalId.value = null; // null betyder huvudmål
+      editingIconGoalId.value = null;
       showIconPicker.value = true;
     } else if (isParentMode.value && parents.value.length > 0) {
-      // Förälder är markerad
       editingIconGoalId.value = parents.value[selectedParentIndex.value].id;
       showIconPicker.value = true;
     } else if (filteredChildren.value.length > 0) {
-      // Barn är markerat
       editingIconGoalId.value = filteredChildren.value[selectedChildIndex.value].id;
       showIconPicker.value = true;
     }
     leaderFirstKey = "";
-    return true; // Avsluta leader mode
+    return true;
   }
-  // Okänd kommando - avsluta leader mode
+
   leaderFirstKey = "";
   return true;
 }
@@ -1020,35 +1021,23 @@ function handleKeydown(event: KeyboardEvent) {
   // ===============================================
 
   // Hantera ESC för att stänga leader mode
-  if (event.key === "Escape" && isInLeaderMode) {
+  if (event.key === "Escape" && isLeaderModalOpen.value) {
     event.preventDefault();
-    isInLeaderMode = false;
     isLeaderModalOpen.value = false;
-    console.log('✓ Leader mode closed with ESC');
     return;
   }
 
   // Hantera leader commands när i leader mode
-  if (isInLeaderMode) {
+  if (isLeaderModalOpen.value) {
     event.preventDefault();
     const key = event.key.toLowerCase();
-    console.log('✓ LEADER COMMAND: Key:', key);
-    const exitLeaderMode = executeLeaderCommand(key);
-    if (exitLeaderMode) {
-      isInLeaderMode = false;
-      isLeaderModalOpen.value = false;
-      console.log('✓ Leader mode exited');
-    } else {
-      console.log('✓ Waiting for next leader command key');
-    }
+    executeLeaderCommand(key);
     return;
   }
 
   // Hantera leader key (space) - enter leader mode
   if (event.key === " ") {
     event.preventDefault();
-    console.log('✓ SPACE pressed - entering leader mode');
-    isInLeaderMode = true;
     isLeaderModalOpen.value = true;
     return;
   }
@@ -1074,12 +1063,10 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key === "x") {
     event.preventDefault();
     if (isParentMode.value && parents.value.length > 0) {
-      // För föräldrar: ta bort bara relationen, inte hela målet
       const parent = parents.value[selectedParentIndex.value];
       parentToRemove.value = parent.id;
       showRemoveConfirmation.value = true;
     } else if (filteredChildren.value.length > 0) {
-      // För barn: ta bort hela målet
       const child = filteredChildren.value[selectedChildIndex.value];
       confirmDeleteGoal(child.id, child.title);
     }
@@ -1089,14 +1076,10 @@ function handleKeydown(event: KeyboardEvent) {
   // Hantera 'i' och 'a' för att gå in i insert mode
   if (event.key === "i" || event.key === "a") {
     event.preventDefault();
-    // 'i' = början, 'a' = slutet
     const atBeginning = event.key === "i";
 
-    if (isGoalSelected.value) {
-      // Redigera själva målets titel
-      if (goal.value) {
-        enterInsertMode(goal.value.id, goal.value.title, atBeginning);
-      }
+    if (isGoalSelected.value && goal.value) {
+      enterInsertMode(goal.value.id, goal.value.title, atBeginning);
     } else if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
       enterInsertMode(parent.id, parent.title, atBeginning);
@@ -1108,103 +1091,86 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   if (isParentMode.value) {
-    // Parent mode - navigera mellan föräldrar
     if (event.key === "h") {
       event.preventDefault();
       selectedParentIndex.value = Math.max(selectedParentIndex.value - 1, 0);
     } else if (event.key === "l") {
       event.preventDefault();
       const parentsCount = parents.value.length;
-      selectedParentIndex.value = Math.min(
-        selectedParentIndex.value + 1,
-        parentsCount - 1
-      );
+      selectedParentIndex.value = Math.min(selectedParentIndex.value + 1, parentsCount - 1);
     } else if (event.key === "k") {
       event.preventDefault();
-      // Navigera till markerad förälder
       const selectedParent = parents.value[selectedParentIndex.value];
       if (selectedParent) {
         router.push(`/goal/${selectedParent.id}`);
       }
     } else if (event.key === "j") {
       event.preventDefault();
-      // Gå till goal mode
       isParentMode.value = false;
       isGoalSelected.value = true;
       selectedChildIndex.value = -1;
     } else if (event.key === "Enter") {
       event.preventDefault();
-      // Öppna föräldersök (samma som + knappen)
       toggleParentSearch();
     }
   } else {
-    // Child mode - navigera mellan undermål
     if (event.key === "j") {
       event.preventDefault();
       if (isGoalSelected.value) {
-        // Från goal mode: markera första barnet
         isGoalSelected.value = false;
         selectedChildIndex.value = 0;
       } else {
         const childrenCount = filteredChildren.value.length;
         if (childrenCount > 0) {
-          selectedChildIndex.value = Math.min(
-            selectedChildIndex.value + 1,
-            childrenCount - 1
-          );
+          selectedChildIndex.value = Math.min(selectedChildIndex.value + 1, childrenCount - 1);
         }
       }
     } else if (event.key === "k") {
       event.preventDefault();
       if (selectedChildIndex.value === 0 && !isGoalSelected.value) {
-        // Markera själva målet istället för att navigera vidare
         isGoalSelected.value = true;
-        selectedChildIndex.value = -1; // Avmarkera barnen
+        selectedChildIndex.value = -1;
       } else if (isGoalSelected.value) {
-        // Från goal mode: gå in i parent mode
         if (parents.value.length > 0) {
           isGoalSelected.value = false;
           isParentMode.value = true;
           selectedParentIndex.value = 0;
         }
-        } else {
-          const childrenCount = filteredChildren.value.length;
-          if (childrenCount > 0) {
-            selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
-          }
+      } else {
+        const childrenCount = filteredChildren.value.length;
+        if (childrenCount > 0) {
+          selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
         }
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        // Öppna child search istället för att skapa sibling
-        toggleChildSearch();
-      } else if (event.key === "l") {
-        event.preventDefault();
-        if (isGoalSelected.value) {
-          // Från goal mode: markera första barnet
-          isGoalSelected.value = false;
-          selectedChildIndex.value = 0;
-        } else {
-          const childrenCount = filteredChildren.value.length;
-          if (childrenCount > 0) {
-            const selectedChild = filteredChildren.value[selectedChildIndex.value];
-            if (selectedChild) {
-              router.push(`/goal/${selectedChild.id}`);
-            }
-          }
-        }
-      } else if (event.key === "h") {
+      }
+    } else if (event.key === "Enter") {
       event.preventDefault();
-      // Gå till första föräldern
+      toggleChildSearch();
+    } else if (event.key === "l") {
+      event.preventDefault();
+      console.log('Navigation: l pressed, isGoalSelected:', isGoalSelected.value, 'selectedChildIndex:', selectedChildIndex.value);
+      if (isGoalSelected.value) {
+        isGoalSelected.value = false;
+        selectedChildIndex.value = 0;
+      } else {
+        const childrenCount = filteredChildren.value.length;
+        if (childrenCount > 0) {
+          const selectedChild = filteredChildren.value[selectedChildIndex.value];
+          if (selectedChild) {
+            router.push(`/goal/${selectedChild.id}`);
+          }
+        }
+      }
+    } else if (event.key === "h") {
+      event.preventDefault();
+      console.log('Navigation: h pressed, parents.length:', parents.value.length);
       if (parents.value.length > 0) {
         router.push(`/goal/${parents.value[0].id}`);
       }
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      // Flytta markerat barn upp i listan
       moveChildUp();
     } else if (event.key === "ArrowDown") {
       event.preventDefault();
-      // Flytta markerat barn ner i listan
       moveChildDown();
     }
   }
@@ -1217,7 +1183,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
-  if (leaderTimeout) clearTimeout(leaderTimeout);
 });
 
 // Återställ selectedChildIndex när children ändras
@@ -1564,8 +1529,7 @@ watch(selectedParentIndex, async () => {
     <!-- Leader Key Modal -->
     <LeaderKeyModal
       :open="isLeaderModalOpen"
-      @update:open="isLeaderModalOpen = $event"
-      @execute-command="executeLeaderCommand($event); isInLeaderMode = false"
+      @execute-command="executeLeaderCommand($event)"
     />
   </div>
   <div v-else class="max-w-4xl mx-auto p-6">

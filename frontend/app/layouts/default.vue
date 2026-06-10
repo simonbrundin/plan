@@ -1,48 +1,85 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
 
+const config = useRuntimeConfig();
 const route = useRoute();
 const { loggedIn } = useUserSession();
 
 const open = ref(false);
 const showHelpModal = ref(false);
+const showPriorityIndicator = ref(false);
+const searchOpen = ref(false);
+const searchButtonRef = ref<InstanceType<typeof UDashboardSearchButton> | null>(null);
 
-  const links = [
-    [
-      {
-        label: "Inbox",
-        icon: "i-lucide-inbox",
-        to: "/",
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-      {
-        label: "Goals",
-        icon: "i-lucide-target",
-        to: "/goal/1",
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-      {
-        label: "Login",
-        icon: "i-lucide-log-in",
-        to: "/login",
-        onSelect: () => {
-          open.value = false;
-        },
-      },
-    ],
-  ] satisfies NavigationMenuItem[][];
+const {
+  isPriorityMode,
+  selectedGoalId,
+  prioritizedGoals,
+  loadPrioritizedGoals,
+  handleKeydown: handlePriorityKeydown,
+  handleKeyup: handlePriorityKeyup,
+} = usePriorityMode();
 
-  // Load goals data on client-side only to avoid SSR issues
-  const goalsData = ref(null);
+const {
+  enableNavigation,
+  disableNavigation,
+  handleKeydown: handleNavigationKeydown,
+  handleKeyup: handleNavigationKeyup,
+} = useGlobalNavigation();
 
-  // Load goals data after component is mounted (client-side only)
-  onMounted(async () => {
-    try {
-      const query = `
+watch(isPriorityMode, (val) => {
+  showPriorityIndicator.value = val;
+});
+
+const links = [
+  [
+    {
+      label: "Inbox",
+      icon: "i-lucide-inbox",
+      to: "/",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: "Goals",
+      icon: "i-lucide-target",
+      to: "/goal/1",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: "Prioritet",
+      icon: "i-lucide-sort-desc",
+      to: "/priority",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: "Login",
+      icon: "i-lucide-log-in",
+      to: "/login",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+  ],
+] satisfies NavigationMenuItem[][];
+
+const goalsData = ref<{
+  goals: Array<{
+    id: number;
+    title: string;
+    created: string;
+    finished: boolean;
+  }>;
+} | null>(null);
+
+const fetchGoals = async () => {
+  try {
+    const query = `
       query GetAllGoals {
         goals(order_by: { created: desc }) {
           id
@@ -53,79 +90,121 @@ const showHelpModal = ref(false);
       }
     `;
 
-      const response = await $fetch('http://localhost:8080/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-hasura-admin-secret': config.public.hasuraAdminSecret
-        },
-        body: JSON.stringify({ query })
-      });
-
-      if (response.data) {
-        goalsData.value = response.data;
-      }
-    } catch (error) {
-      console.warn("Failed to load goals for navigation:", error);
-    }
-  });
-
-  const groups = computed(() => {
-    const goalItems =
-      goalsData.value?.goals?.map((goal) => ({
-        id: `goal-${goal.id}`,
-        label: goal.title,
-        icon: goal.finished ? "i-lucide-check-circle" : "i-lucide-circle",
-        to: `/goal/${goal.id}`,
-        suffix: goal.finished ? "Klar" : undefined,
-      })) || [];
-
-    return [
-      {
-        id: "goals",
-        label: "Mål",
-        items: goalItems,
+    const response = await $fetch("http://localhost:8080/v1/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
       },
-      {
-        id: "links",
-        label: "Navigering",
-        items: links.flat(),
-      },
-    ];
-  });
+      body: JSON.stringify({ query }),
+    });
 
-  // Global keyboard handler for ? to show help modal
-  function handleGlobalKeydown(event: KeyboardEvent) {
-    // Ignore if typing in an input field
-    const target = event.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-      return;
+    if (response.data) {
+      goalsData.value = response.data;
     }
+  } catch (error) {
+    console.warn("Failed to load goals for navigation:", error);
+  }
+};
 
-    // Show help modal on ? in normal mode
-    if (event.key === '?' && !event.ctrlKey && !event.metaKey && !event.altKey) {
-      event.preventDefault();
-      showHelpModal.value = true;
-    }
+onMounted(() => {
+  fetchGoals();
+});
+
+const groups = computed(() => {
+  const goalItems =
+    goalsData.value?.goals?.map((goal) => ({
+      id: `goal-${goal.id}`,
+      label: goal.title,
+      icon: goal.finished ? "i-lucide-check-circle" : "i-lucide-circle",
+      to: `/goal/${goal.id}`,
+      suffix: goal.finished ? "Klar" : undefined,
+    })) ?? [];
+
+  return [
+    {
+      id: "goals",
+      label: "Mål",
+      items: goalItems,
+    },
+    {
+      id: "links",
+      label: "Navigering",
+      items: links.flat(),
+    },
+  ];
+});
+
+function handleGlobalKeydown(event: KeyboardEvent) {
+  const target = event.target as HTMLElement;
+  const isInInput =
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.isContentEditable;
+
+  if (event.key === "?" && !event.ctrlKey && !event.metaKey && !event.altKey && !isInInput) {
+    event.preventDefault();
+    showHelpModal.value = true;
   }
 
-  onMounted(() => {
-    window.addEventListener('keydown', handleGlobalKeydown);
-  });
+  // Open search on Ctrl+K or Cmd+K
+  if ((event.ctrlKey || event.metaKey) && event.key === "k") {
+    event.preventDefault();
+    searchOpen.value = true;
+  }
 
-  onUnmounted(() => {
-    window.removeEventListener('keydown', handleGlobalKeydown);
-  });
+  // Close search on Escape
+  if (event.key === "Escape" && searchOpen.value) {
+    searchOpen.value = false;
+  }
+
+  handlePriorityKeydown(event);
+  handleNavigationKeydown(event);
+}
+
+function handleGlobalKeyup(event: KeyboardEvent) {
+  handlePriorityKeyup(event);
+  handleNavigationKeyup(event);
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", handleGlobalKeydown);
+  window.addEventListener("keyup", handleGlobalKeyup);
+  loadPrioritizedGoals();
+  enableNavigation();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleGlobalKeydown);
+  window.removeEventListener("keyup", handleGlobalKeyup);
+  disableNavigation();
+});
 </script>
 
 <template>
   <UDashboardGroup unit="rem">
-    <UDashboardSidebar id="default" v-model:open="open" collapsible resizable class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }">
+    <UDashboardSidebar
+      id="default"
+      v-model:open="open"
+      collapsible
+      resizable
+      class="bg-elevated/25"
+      :ui="{ footer: 'lg:border-t lg:border-default' }"
+    >
       <template #default="{ collapsed }">
-        <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
+        <UDashboardSearchButton
+          ref="searchButtonRef"
+          :collapsed="collapsed"
+          class="bg-transparent ring-default"
+        />
 
-        <UNavigationMenu :collapsed="collapsed" :items="links[0]" orientation="vertical" tooltip popover />
+        <UNavigationMenu
+          :collapsed="collapsed"
+          :items="links[0]"
+          orientation="vertical"
+          tooltip
+          popover
+        />
       </template>
 
       <template #footer="{ collapsed }">
@@ -133,9 +212,24 @@ const showHelpModal = ref(false);
       </template>
     </UDashboardSidebar>
 
-    <UDashboardSearch :groups="groups" />
+    <UDashboardSearch v-model:open="searchOpen" :groups="groups" />
 
     <HelpModal v-model:open="showHelpModal" />
+
+    <Transition name="fade">
+      <div
+        v-if="showPriorityIndicator && prioritizedGoals.length > 0"
+        class="fixed top-4 right-4 z-50 px-4 py-2 bg-purple-600/90 backdrop-blur-sm rounded-lg shadow-lg"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-purple-100 text-sm font-medium">Prioriteringsläge</span>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-purple-200">j/k: navigera</span>
+            <span class="text-purple-200">P+K/J: ändra vikt</span>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <UDashboardPanel class="!overflow-y-auto !h-screen">
       <UDashboardNavbar class="hidden lg:flex">
@@ -152,12 +246,24 @@ const showHelpModal = ref(false);
         <slot />
       </div>
 
-      <!-- Mobile bottom navigation -->
       <div
-        class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around gap-2 border-t border-default bg-elevated/95 backdrop-blur-sm p-4 lg:hidden">
+        class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around gap-2 border-t border-default bg-elevated/95 backdrop-blur-sm p-4 lg:hidden"
+      >
         <UDashboardSidebarToggle />
         <UDashboardSearchButton collapsed />
       </div>
     </UDashboardPanel>
   </UDashboardGroup>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

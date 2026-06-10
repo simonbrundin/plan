@@ -126,6 +126,11 @@ onUnmounted(() => {
           <h3 class="text-sm font-semibold text-purple-400 uppercase tracking-widest mb-3">General</h3>
           <div class="space-y-2">
             <div class="flex items-center gap-4">
+              <kbd class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-purple-400 font-mono font-bold min-w-[2rem] text-center">Ctrl</kbd>
+              <kbd class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-purple-400 font-mono font-bold min-w-[2rem] text-center">K</kbd>
+              <span class="text-gray-300">Sök bland mål</span>
+            </div>
+            <div class="flex items-center gap-4">
               <kbd class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-purple-400 font-mono font-bold min-w-[2rem] text-center">Esc</kbd>
               <span class="text-gray-300">Stäng modal / avbryt</span>
             </div>
