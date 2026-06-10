@@ -176,7 +176,10 @@ export function usePriorityMode() {
 				isPriorityMode.value = false;
 			}
 		} else {
-			if (key === "j") {
+			if (key === "l" && selectedGoalId.value !== null) {
+				event.preventDefault();
+				navigateTo(`/goal/${selectedGoalId.value}`);
+			} else if (key === "j") {
 				event.preventDefault();
 				const currentIndex = prioritizedGoals.value.findIndex(
 					(g) => g.id === selectedGoalId.value,

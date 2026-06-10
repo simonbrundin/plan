@@ -79,6 +79,7 @@ function getWeightBgColor(weight: number): string {
 
     <div class="text-sm text-gray-500 mb-4">
       <span class="text-gray-400">j/k</span> navigera &nbsp;|&nbsp;
+      <span class="text-gray-400">l</span> öppna mål &nbsp;|&nbsp;
       <span class="text-gray-400">Håll P</span> + <span class="text-gray-400">K/J</span> ändra vikt
     </div>
 
