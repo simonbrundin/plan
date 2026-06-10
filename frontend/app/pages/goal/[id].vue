@@ -365,62 +365,78 @@ function getSwipeOffset(childId: number): number {
 }
 
 // Drag-and-drop state för sortering av barn
-const draggedChildIndex = ref<number | null>(null);
-const dragOverChildIndex = ref<number | null>(null);
+const draggedChildId = ref<number | null>(null);
+const dragOverChildId = ref<number | null>(null);
+let dragLeaveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-function handleDragStart(event: DragEvent, index: number) {
-  draggedChildIndex.value = index;
+function handleDragStart(event: DragEvent, childId: number) {
+  draggedChildId.value = childId;
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = "move";
   }
 }
 
-function handleDragOver(event: DragEvent, index: number) {
+function handleDragOver(event: DragEvent, childId: number) {
   event.preventDefault();
   if (event.dataTransfer) {
     event.dataTransfer.dropEffect = "move";
   }
-  dragOverChildIndex.value = index;
+  // Avbryt tidigare leave-timeout för att undvika blinking
+  if (dragLeaveTimeout) {
+    clearTimeout(dragLeaveTimeout);
+    dragLeaveTimeout = null;
+  }
+  dragOverChildId.value = childId;
 }
 
 function handleDragLeave() {
-  dragOverChildIndex.value = null;
+  // Fördröj nollställningen för att undvika blinking vid snabb hover
+  dragLeaveTimeout = setTimeout(() => {
+    dragOverChildId.value = null;
+    dragLeaveTimeout = null;
+  }, 100);
 }
 
-async function handleDrop(event: DragEvent, dropIndex: number) {
+async function handleDrop(event: DragEvent, dropChildId: number) {
   event.preventDefault();
-  dragOverChildIndex.value = null;
+  // Rensa timeout och nollställ state
+  if (dragLeaveTimeout) {
+    clearTimeout(dragLeaveTimeout);
+    dragLeaveTimeout = null;
+  }
+  dragOverChildId.value = null;
 
-  if (draggedChildIndex.value === null || draggedChildIndex.value === dropIndex) {
-    draggedChildIndex.value = null;
+  if (draggedChildId.value === null || draggedChildId.value === dropChildId) {
+    draggedChildId.value = null;
     return;
   }
 
-  const dragIndex = draggedChildIndex.value;
-  const actualChildren = children.value;
+  const draggedId = draggedChildId.value;
 
-  // Sortera barnen lokalt
-  const sortedChildren = [...actualChildren];
-  const draggedChild = sortedChildren[dragIndex];
-  sortedChildren.splice(dragIndex, 1);
-  sortedChildren.splice(dropIndex, 0, draggedChild);
-
-  // Uppdatera ordning i databasen
+  // Reparent: ta bort från nuvarande förälder och lägg till som barn till dropChildId
   try {
-    for (let i = 0; i < sortedChildren.length; i++) {
-      const child = sortedChildren[i];
-      await updateGoalOrder(goalId, child.id, i);
-    }
-
-    // Uppdatera data från server
+    // Ta bort relation med nuvarande förälder
+    await removeParentRelation(draggedId, goalId);
+    goalsStore.removeRelation(draggedId, goalId);
+    
+    // Räkna befintliga barn till dropTargetChild för att bestämma ordning
+    const targetChildrenCount = children.value.filter(c => {
+      const hasRelation = goalData.value?.goal?.childRelations?.some(
+        r => r.child_id === c.id
+      );
+      return hasRelation;
+    }).length;
+    
+    await addChildRelation(draggedId, dropChildId, targetChildrenCount);
+    goalsStore.addRelation(draggedId, dropChildId);
+    
     await refresh();
   } catch (error) {
-    console.error("Failed to update child order:", error);
-    // Uppdatera ändå från server för att synkronisera
+    console.error("Failed to reparent goal:", error);
     await refresh();
   }
 
-  draggedChildIndex.value = null;
+  draggedChildId.value = null;
 }
 
 // Flytta markerat barn upp i listan
@@ -1058,9 +1074,12 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key === "x") {
     event.preventDefault();
     if (isParentMode.value && parents.value.length > 0) {
+      // För föräldrar: ta bort bara relationen, inte hela målet
       const parent = parents.value[selectedParentIndex.value];
-      confirmDeleteGoal(parent.id, parent.title);
+      parentToRemove.value = parent.id;
+      showRemoveConfirmation.value = true;
     } else if (filteredChildren.value.length > 0) {
+      // För barn: ta bort hela målet
       const child = filteredChildren.value[selectedChildIndex.value];
       confirmDeleteGoal(child.id, child.title);
     }
@@ -1406,10 +1425,20 @@ watch(selectedParentIndex, async () => {
 
         <ul v-if="filteredChildren.length > 0" class="space-y-3">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
-            @dragstart="handleDragStart($event, index)" @dragover="handleDragOver($event, index)"
-            @dragleave="handleDragLeave" @drop="handleDrop($event, index)"
+            @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
+            @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
             class="relative overflow-hidden rounded-lg transition-opacity"
-            :class="dragOverChildIndex === index ? 'opacity-50' : 'opacity-100'">
+            :class="[
+              dragOverChildId === child.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900' : 'opacity-100',
+              draggedChildId === child.id ? 'opacity-30' : ''
+            ]">
+            <!-- Reparent indicator -->
+            <div v-if="dragOverChildId === child.id && draggedChildId !== child.id" 
+              class="absolute inset-0 bg-purple-500/20 flex items-center justify-center z-10 rounded-lg">
+              <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                Flytta in i detta mål
+              </div>
+            </div>
             <!-- Swipe bakgrund -->
             <div class="absolute inset-0 flex items-center justify-start px-6"
               :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'">
@@ -1425,7 +1454,13 @@ watch(selectedParentIndex, async () => {
                 transition: swipeState.isSwiping
                   ? 'none'
                   : 'transform 0.3s ease',
-              }" @touchstart="handleTouchStart($event, child.id)" @touchmove="handleTouchMove($event)"
+              }" 
+              draggable="true"
+              @dragstart.stop="handleDragStart($event, child.id)" 
+              @dragover.stop="handleDragOver($event, child.id)"
+              @dragleave.stop="handleDragLeave" 
+              @drop.stop.prevent="handleDrop($event, child.id)"
+              @touchstart="handleTouchStart($event, child.id)" @touchmove="handleTouchMove($event)"
               @touchend="handleTouchEnd(child)">
               <!-- Insert mode - visa input -->
               <div v-if="mode === 'insert' && editingGoalId === child.id" class="p-4">
