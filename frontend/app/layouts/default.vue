@@ -1,10 +1,11 @@
-  <script setup lang="ts">
-  import type { NavigationMenuItem } from "@nuxt/ui";
+<script setup lang="ts">
+import type { NavigationMenuItem } from "@nuxt/ui";
 
-  const route = useRoute();
-  const { loggedIn } = useUserSession();
+const route = useRoute();
+const { loggedIn } = useUserSession();
 
-  const open = ref(false);
+const open = ref(false);
+const showHelpModal = ref(false);
 
   const links = [
     [
@@ -92,6 +93,29 @@
       },
     ];
   });
+
+  // Global keyboard handler for ? to show help modal
+  function handleGlobalKeydown(event: KeyboardEvent) {
+    // Ignore if typing in an input field
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return;
+    }
+
+    // Show help modal on ? in normal mode
+    if (event.key === '?' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      showHelpModal.value = true;
+    }
+  }
+
+  onMounted(() => {
+    window.addEventListener('keydown', handleGlobalKeydown);
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('keydown', handleGlobalKeydown);
+  });
 </script>
 
 <template>
@@ -110,6 +134,8 @@
     </UDashboardSidebar>
 
     <UDashboardSearch :groups="groups" />
+
+    <HelpModal v-model:open="showHelpModal" />
 
     <UDashboardPanel class="!overflow-y-auto !h-screen">
       <UDashboardNavbar class="hidden lg:flex">
