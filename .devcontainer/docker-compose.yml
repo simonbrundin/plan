@@ -58,7 +58,7 @@ services:
       - GQL_HOST=http://hasura:${HASURA_PORT:-8080}/v1/graphql
       - HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret
       # Authentik OAuth
-      - NUXT_OAUTH_AUTHENTIK_CLIENT_ID=zUuawAyCzj9RJqOYx85hSAQpMYzbVI2iAh3us7P0
+      - NUXT_OAUTH_AUTHENTIK_CLIENT_ID=hoQpxEbnUSth8STFjYjr04MikmhpHdXeU7GX6XZl
       - NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET=dummy-secret-for-public-client
       - NUXT_OAUTH_AUTHENTIK_DOMAIN=auth.simonbrundin.com
     volumes:
