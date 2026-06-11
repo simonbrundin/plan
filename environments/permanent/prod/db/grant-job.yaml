@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: psql
-          image: registry.k8s.io/postgres:16-alpine
+          image: postgres:16-alpine
           command:
             - psql
             - $(DATABASE_URL)
