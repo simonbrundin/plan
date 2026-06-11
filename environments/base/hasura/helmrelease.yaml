@@ -12,7 +12,6 @@ spec:
         kind: HelmRepository
         name: hasura-extra
         namespace: plan
-      sourceNamespace: plan
   install:
     createNamespace: true
   upgrade:
