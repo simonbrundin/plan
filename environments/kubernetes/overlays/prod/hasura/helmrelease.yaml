@@ -12,7 +12,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: hasura-extra
-        namespace: flux-system
+        namespace: plan
   install:
     createNamespace: true
   upgrade:
