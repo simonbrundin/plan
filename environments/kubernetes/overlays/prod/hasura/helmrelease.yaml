@@ -29,6 +29,7 @@ spec:
             - "user"
             - "admin"
           x-hasura-user-sub: "sub"
+      secretName: hasura-env
     config:
       enableConsole: true
       corsDomains: "*"
