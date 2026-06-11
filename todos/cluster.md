@@ -3,22 +3,22 @@
 - [x] Uppdatera Agents.md med information om hur min infrastucture fungerar
 - [ ] ´simon cluster health´ grönt
   - [x] Få igång worker-2
-  - [ ] Få alla Flux Komponenter att fungera
-  - [ ] Föra över de sista komponenterna från ArgoCD till Flux
+  - [x] Få alla Flux Komponenter att fungera
+  - [x] Föra över de sista komponenterna från ArgoCD till Flux
   - [x] Få igång worker-9
   - [x] Alla ArgoCD-poddar körs
   - [x] skapa ett simon kommando som skapar en secret.yaml som är krypterad.
         antingen med ett genegererat lösenord eller med ett jag väljer tex en
         api nyckel
-  - [ ] Sätt upp webhook för flux
+  - [x] Sätt upp webhook för flux
   - [ ] Köra Config Sync i klustret så det bara går att göra förändringar via
         Git.
         [🚀 KRM-Native GitOps: Yes — Without Flux, No. (FluxCD or Nothing.)](https://www.linkedin.com/pulse/krm-native-gitops-yes-without-flux-fluxcd-nothing-mialon-wsmue/)
 - [x] Just nu känns det som upgrade körs varje gång jag kör simon talos update
       config. så ska det ju inte vara.
-- [ ] Lägga till en Kyverno-policy som gör det omöjligt att radera
+- [x] Lägga till en Kyverno-policy som gör det omöjligt att radera
       longhorn-system namespacet
-  - [ ] Installera Kyverno
+  - [x] Installera Kyverno
 - [x] Köra kubescape eller liknande för att se säkerhetsproblem i mitt kluster
 - [ ] Jag vill kunna se en visuell graf av min databas schema som jag kan se i
       både prod och dev med tex tilt
@@ -36,20 +36,20 @@
     - [x] Extensions visar iscsi-tools och inte schematic
 - [ ] Uppdatera istallationsguide för en ny nod eller disk så rätt serial läggs
       till i patchen
-- [ ] Ändra installationsdisk för worker-2
+- [x] Ändra installationsdisk för worker-2
 - [x] Få igång Vault backup
-- [ ] Koppla in bilbatteri
+- [x] Koppla in bilbatteri
 - [x] Uppgradera Kubernetes
 - [ ] Installera Talos på datorer
   - [x] Mac Mini
   - [ ] HP
-- [ ] Dot AI
-- [ ] Teleport fungerar
-- [ ] Vault fungerar
-- [ ] auth.simonbrundin.com fungerar
-- [ ] Installera
+- [x] Dot AI
+- [x] Teleport fungerar
+- [x] Vault fungerar
+- [x] auth.simonbrundin.com fungerar
+- [x] Installera
       [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
-- [ ] Installera Renovate i klustret så jag får PRs om uppdateringar
+- [x] Installera Renovate i klustret så jag får PRs om uppdateringar
 
 ---
 

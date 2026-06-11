@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plan-app
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: plan-app
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          env:
+            - name: NODE_ENV
+              value: "preview"
+            - name: LOG_LEVEL
+              value: "debug"
