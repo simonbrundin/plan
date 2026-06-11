@@ -19,15 +19,6 @@ spec:
     remediation:
       retries: 3
     force: true
-  valuesFrom:
-    - kind: Secret
-      name: hasura-env
-      valuesKey: HASURA_GRAPHQL_DATABASE_URL
-      targetPath: dbUrl
-    - kind: Secret
-      name: hasura-env
-      valuesKey: HASURA_GRAPHQL_ADMIN_SECRET
-      targetPath: adminSecret
   values:
     secret:
       jwtSecret:
@@ -42,4 +33,4 @@ spec:
     config:
       enableConsole: true
       corsDomains: "*"
-    secretName: ""
+    extraEnvVarsSecret: hasura-env
