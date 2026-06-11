@@ -4,12 +4,11 @@ resources:
   - ../../base
   - namespace.yaml
   - HTTP-route.yaml
-  - github-secret.yaml
   - service.yaml
   - db
   - hasura
   - kargo
-  - auth-secret.yaml
+  - secrets
 images:
   - name: ghcr.io/simonbrundin/plan
     newTag: "frontend-1.6.4"
