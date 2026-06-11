@@ -33,4 +33,3 @@ spec:
     config:
       enableConsole: true
       corsDomains: "*"
-    extraEnvVarsSecret: hasura-env
