@@ -1,18 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
-helmCharts:
-  - name: hasura
-    repo: https://hasura-extra.github.io/hasura-extra
-    version: 3.0.0
-    releaseName: hasura
-    namespace: hasura
-    valuesFile: values.yaml
 resources:
+  - namespace.yaml
+  - helmrelease.yaml
   - HTTP-route.yaml
-
-patches:
-  - path: deployment-patch.yaml
-    target:
-      kind: Deployment
-      name: hasura
