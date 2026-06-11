@@ -14,7 +14,6 @@ spec:
         namespace: plan
   install:
     createNamespace: true
-    skipDiff: false
   upgrade:
     remediation:
       retries: 3
