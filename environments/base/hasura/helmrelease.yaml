@@ -20,16 +20,17 @@ spec:
       retries: 3
     force: true
   values:
-    secret:
-      jwtSecret:
-        type: "RS256"
-        jwk_url: "https://auth.simonbrundin.com/application/o/plan/.well-known/jwks.json"
-        claims_map:
-          x-hasura-default-role: "user"
-          x-hasura-allowed-roles:
-            - "user"
-            - "admin"
-          x-hasura-user-sub: "sub"
+    # Use existing secret for dbUrl and adminSecret
+    secretName: hasura-env
+    jwtSecret:
+      type: "RS256"
+      jwk_url: "https://auth.simonbrundin.com/application/o/plan/.well-known/jwks.json"
+      claims_map:
+        x-hasura-default-role: "user"
+        x-hasura-allowed-roles:
+          - "user"
+          - "admin"
+        x-hasura-user-sub: "sub"
     config:
       enableConsole: true
       corsDomains: "*"
