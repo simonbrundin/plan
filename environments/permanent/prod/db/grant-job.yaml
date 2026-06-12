@@ -1,24 +1,26 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: grant-create-permission
+  name: grant-user-permissions
 spec:
+  ttlSecondsAfterFinished: 300
   template:
     spec:
       containers:
         - name: psql
           image: postgres:16-alpine
           command:
-            - psql
-            - $(DATABASE_URL)
+            - sh
             - -c
-            - GRANT CREATE ON DATABASE plan TO "user";
-          env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: plan-db-admin
-                  key: uri
+            - |
+              PGPASSWORD=UU63Nk-nulSApfEnKspnJIgRVHjPOc5U psql -h plan-db-rw.plan.svc.cluster.local -U admin -d plan -c "
+                GRANT CREATE ON DATABASE plan TO \"user\";
+                GRANT USAGE ON SCHEMA public TO \"user\";
+                GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"user\";
+                GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"user\";
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"user\";
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"user\";
+              "
           resources:
             requests:
               cpu: 100m
@@ -33,4 +35,4 @@ spec:
                 - ALL
             seccompProfile:
               type: RuntimeDefault
-      restartPolicy: Never
+      restartPolicy: OnFailure
