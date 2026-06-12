@@ -6,11 +6,15 @@ metadata:
 spec:
   urlFrom:
     secretKeyRef:
-      name: plan-db-admin
       key: uri
-  dir:
-    path: /schema
+      name: plan-db-admin
   devURLFrom:
     secretKeyRef:
-      name: plan-db-admin
       key: uri
+      name: plan-db-admin
+  schema:
+    configMapKeyRef:
+      key: schema.sql
+      name: plan-db-schema
+  schemas:
+    - "public"
