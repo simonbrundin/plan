@@ -1,0 +1,17 @@
+apiVersion: db.atlasgo.io/v1alpha1
+kind: AtlasSchema
+metadata:
+  name: plan-db-schema
+  namespace: plan
+spec:
+  dir:
+    path: /schema
+  database:
+    basic:
+      username: admin
+      passwordSecret:
+        name: plan-db-admin
+        key: password
+      host: plan-db-rw.plan.svc.cluster.local
+      port: 5432
+      database: plan
