@@ -17,7 +17,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: plan-app
-          image: ghcr.io/simonbrundin/plan
+          image: ghcr.io/simonbrundin/plan:frontend-202606121357
           ports:
             - containerPort: 3000
           readinessProbe:
