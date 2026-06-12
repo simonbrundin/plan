@@ -11,9 +11,13 @@ spec:
     initdb:
       database: plan
       owner: admin
+      initdbScriptsPath: /pgconf/scripts
       postInitApplicationSQL:
         - CREATE ROLE "user" LOGIN;
         - GRANT CREATE ON DATABASE plan TO "user";
+    initdbScripts:
+      configMap:
+        name: plan-db-schema
 
   storage:
     storageClass: cnpg
