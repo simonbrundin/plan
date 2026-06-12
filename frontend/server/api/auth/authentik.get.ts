@@ -10,7 +10,10 @@ export default defineOAuthAuthentikEventHandler({
     try {
       // Validate input data
       if (!user?.sub || !user?.email || !tokens?.access_token) {
-        console.error("Authentik OAuth: Missing required user or token data", { user, hasTokens: !!tokens });
+        console.error("Authentik OAuth: Missing required user or token data", {
+          user,
+          hasTokens: !!tokens,
+        });
         return sendRedirect(event, "/?error=auth_data_missing");
       }
 
@@ -38,18 +41,22 @@ export default defineOAuthAuthentikEventHandler({
 
       // Set user session with validated data
       // Create plain objects with proper prototypes to prevent serialization errors
-      const sessionData = JSON.parse(JSON.stringify({
-        user: {
-          id: Number(dbUser.id),
-          sub: String(dbUser.sub),
-          email: String(dbUser.email),
-        },
-        loggedInAt: Number(Date.now()),
-      }));
+      const sessionData = JSON.parse(
+        JSON.stringify({
+          user: {
+            id: Number(dbUser.id),
+            sub: String(dbUser.sub),
+            email: String(dbUser.email),
+          },
+          loggedInAt: Number(Date.now()),
+        }),
+      );
 
       await setUserSession(event, sessionData);
 
-      console.log(`Authentik OAuth: Successfully authenticated user ${dbUser.email}`);
+      console.log(
+        `Authentik OAuth: Successfully authenticated user ${dbUser.email}`,
+      );
       return sendRedirect(event, "/");
     } catch (error) {
       console.error("Authentik OAuth success handler error:", error);
@@ -73,7 +80,7 @@ export default defineOAuthAuthentikEventHandler({
       // Last resort: return a basic response
       return {
         statusCode: 302,
-        headers: { Location: "/?error=auth_redirect_failed" }
+        headers: { Location: "/?error=auth_redirect_failed" },
       };
     }
   },
