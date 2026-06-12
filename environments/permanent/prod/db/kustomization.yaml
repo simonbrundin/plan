@@ -12,3 +12,4 @@ configMapGenerator:
 resources:
   - db.yaml
   - grant-job.yaml
+  - atlas-schema.yaml
