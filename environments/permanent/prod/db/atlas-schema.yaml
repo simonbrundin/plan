@@ -18,3 +18,5 @@ spec:
       name: plan-db-schema
   schemas:
     - "public"
+  exclude:
+    - "hdb_catalog"
