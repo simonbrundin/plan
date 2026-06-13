@@ -7,7 +7,7 @@ resources:
   - db
   - hasura
   - secrets
-  - plan-authentik-blueprint.yaml
+  - authentik-blueprint
 
 patches:
   - path: deployment-patch.yaml
