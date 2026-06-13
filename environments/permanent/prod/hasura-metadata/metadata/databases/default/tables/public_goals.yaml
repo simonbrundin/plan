@@ -1,0 +1,62 @@
+table:
+  name: goals
+  schema: public
+array_relationships:
+  - name: goalRelationsByParentId
+    using:
+      foreign_key_constraint_on:
+        column: parent_id
+        table:
+          name: goal_relations
+          schema: public
+  - name: goal_relations
+    using:
+      foreign_key_constraint_on:
+        column: child_id
+        table:
+          name: goal_relations
+          schema: public
+  - name: user_goals
+    using:
+      foreign_key_constraint_on:
+        column: goal_id
+        table:
+          name: user_goals
+          schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - title
+        - finished
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - title
+        - created
+        - finished
+      filter:
+        user_goals:
+          user_id:
+            _eq: X-Hasura-User-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - title
+        - finished
+      filter:
+        user_goals:
+          user_id:
+            _eq: X-Hasura-User-Id
+      check: null
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        user_goals:
+          user_id:
+            _eq: X-Hasura-User-Id

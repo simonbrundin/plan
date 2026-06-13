@@ -1,0 +1,4 @@
+version: 3
+endpoint: https://plan-hasura.simonbrundin.com
+admin_secret: prod-hasura-admin-secret-2024
+metadata_directory: metadata

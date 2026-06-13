@@ -1,0 +1,4 @@
+- "!include public_goal_relations.yaml"
+- "!include public_goals.yaml"
+- "!include public_user_goals.yaml"
+- "!include public_users.yaml"
