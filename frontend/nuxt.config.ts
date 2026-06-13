@@ -59,14 +59,14 @@ export default defineNuxtConfig({
   },
   icon: {
     // Disable client-side fetching to prevent timeouts
-    provider: 'server',
+    provider: "server",
     serverBundle: {
-      collections: ['material-symbols', 'material-symbols-light', 'lucide']
+      collections: ["material-symbols", "material-symbols-light", "lucide"],
     },
     // Disable client-side bundle to prevent runtime fetching
     clientBundle: false,
     // Set a very short timeout for any remaining requests
-    timeout: 100
+    timeout: 100,
   },
   runtimeConfig: {
     public: {
@@ -94,11 +94,11 @@ export default defineNuxtConfig({
      */
     componentDir: "./app/components/ui",
   },
-   nitro: {
-     preset: "bun",
-     host: "0.0.0.0",
-     trustProxy: true,
-   },
+  nitro: {
+    preset: "bun",
+    host: "0.0.0.0",
+    trustProxy: true,
+  },
 
   vite: {
     server: {
@@ -115,7 +115,7 @@ export default defineNuxtConfig({
     "app:error": (error) => {
       if (error.message?.includes("hasOwnProperty")) {
         console.warn(
-          "Pinia payload serialization error - this is expected and handled"
+          "Pinia payload serialization error - this is expected and handled",
         );
       }
     },
