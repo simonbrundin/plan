@@ -29,7 +29,7 @@ data:
           slug: plan
           client_type: public
           redirect_uris:
-            - "https://plan.simonbrundin.com/api/auth/callback/authentik"
+            - "https://plan.simonbrundin.com/api/auth/authentik"
           signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
           redirect_uris_with_allowed_domains: true
           include_claims_in_id_token: true
