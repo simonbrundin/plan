@@ -4,7 +4,10 @@ metadata:
   name: plan-db-schema
   namespace: plan
 spec:
-  url: "postgresql://admin@plan-db-rw.plan.svc.cluster.local:5432/plan?search_path=public"
+  urlFrom:
+    secretKeyRef:
+      key: uri
+      name: plan-db-admin
   schema:
     configMapKeyRef:
       key: schema.sql
