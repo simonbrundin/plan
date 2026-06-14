@@ -1,9 +1,9 @@
-name: CI
+name: Acceptance Phase
 
-on: push
+on: workflow_dispatch
 
 jobs:
-  ci:
+  acceptance-phase:
     runs-on: ubuntu-latest
     steps:
       - name: Hämta repository
@@ -17,11 +17,11 @@ jobs:
           repository: simonbrundin/deployment-pipeline
           path: pipeline
 
-      - name: Kör CI
+      - name: Kör Acceptance Phase
         uses: dagger/dagger-for-github@v8.3.0
         with:
           verb: call
           module: ./pipeline/dagger-modules/pipeline
-          args: ci --source-dir app/frontend --registry-address ${{ vars.REGISTRY_ADDRESS }} --image-name ${{ github.event.repository.name }} --username ${{ vars.REGISTRY_USERNAME }} --secret ${{ secrets.REGISTRY_PASSWORD }} --multiArch
+          args: acceptance-phase --source-dir app
         env:
           DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
