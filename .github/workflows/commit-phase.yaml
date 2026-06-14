@@ -4,6 +4,6 @@ on: [push, workflow_dispatch]
 
 jobs:
   commit:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@latest
+    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@main
     with:
       source-dir: .
