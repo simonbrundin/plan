@@ -3,25 +3,5 @@ name: Acceptance Phase
 on: workflow_dispatch
 
 jobs:
-  acceptance-phase:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Hämta repository
-        uses: actions/checkout@v4
-        with:
-          path: app
-
-      - name: Hämta Deployment Pipeline
-        uses: actions/checkout@v4
-        with:
-          repository: simonbrundin/deployment-pipeline
-          path: pipeline
-
-      - name: Kör Acceptance Phase
-        uses: dagger/dagger-for-github@v8.3.0
-        with:
-          verb: call
-          module: ./pipeline/dagger-modules/pipeline
-          args: acceptance-phase --source-dir app
-        env:
-          DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+  acceptance:
+    uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance-phase.yaml@v1
