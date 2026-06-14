@@ -4,4 +4,4 @@ on: push
 
 jobs:
   commit:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@v1.1
+    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@v1.2
