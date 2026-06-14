@@ -1,6 +1,6 @@
 name: Commit Phase
 
-on: push
+on: [push, workflow_dispatch]
 
 jobs:
   commit:
