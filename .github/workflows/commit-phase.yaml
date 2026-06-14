@@ -4,6 +4,6 @@ on: push
 
 jobs:
   commit:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@v1.5
+    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@v1.6
     with:
-      source-dir: frontend
+      source-dir: .
