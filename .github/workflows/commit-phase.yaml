@@ -3,9 +3,30 @@ name: Commit Phase
 on: [push, workflow_dispatch]
 
 jobs:
-  commit:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@main
-    with:
-      source-dir: frontend
-    secrets:
-      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+  commit-phase:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Hämta app
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Hämta Pipeline
+        uses: actions/checkout@v4
+        with:
+          repository: simonbrundin/deployment-pipeline
+          ref: refs/heads/main
+          path: pipeline
+
+      - name: Kör Commit Phase
+        uses: dagger/dagger-for-github@v8.3.0
+        with:
+          verb: call
+          module: ./dagger-modules/pipeline
+          workdir: ./pipeline
+          call: commit-phase --source-dir ../app/frontend --registry-address ${{ vars.REGISTRY_ADDRESS }} --image-name plan --username simonbrundin --multi-arch
+        env:
+          DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
