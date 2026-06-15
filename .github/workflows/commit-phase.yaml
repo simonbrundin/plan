@@ -8,5 +8,4 @@ jobs:
     with:
       source-dir: frontend
     secrets:
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
       DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
