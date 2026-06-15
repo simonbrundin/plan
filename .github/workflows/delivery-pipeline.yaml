@@ -1,0 +1,21 @@
+name: Delivery Pipeline
+
+on: [push, workflow_dispatch]
+
+jobs:
+  commit:
+    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@v1.8
+    with:
+      source-dir: frontend
+    secrets:
+      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+
+  acceptance:
+    needs: commit
+    uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance-phase.yaml@v1.8
+    with:
+      source-dir: frontend
+      image-digest: ${{ needs.commit.outputs.image-digest }}
+    secrets:
+      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
