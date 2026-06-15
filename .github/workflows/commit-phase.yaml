@@ -7,6 +7,7 @@ jobs:
     uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@main
     with:
       source-dir: frontend
+      registry-address: ghcr.io/simonbrundin
     secrets:
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
       DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
