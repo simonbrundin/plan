@@ -1,5 +1,22 @@
 # Mål att nå innan jag går över till Plan 1.0
 
+- [x] Testa secrets skill
+- [x] Installera zitadel i kluster
+- [x] Läsa in mig på skillnaden på oidc och idp. ifall jag kanske ska avnända
+- [ ] Skydda longhorn url
+- [ ] Säkerställ inte vem som helst kan skapa ett konto och logga in. Behövs något speciellt scope?
+- [ ] Uppdatera flux
+- [x] Skydda rutter
+- [ ] Kunna logga in med Zitadel på Plan
+- [ ] Hårddisken i worker-2 fungerar
+- [ ] Installera Orange Pi:s
+- [ ] Plan går att använda
+- [ ] Prod av Plan fungerar
+- [ ] Pipeline för Plan fungerar
+- [x] Få igång plan i prod något enklare än authentik. och hur användarhantering
+      egentligen fungerar i en modern webbapp
+- [x] skill - skapa encrypted secret
+
 ## Cluster
 
 - [x] Lägg till några Kyverno policies
@@ -9,14 +26,13 @@
 - [x] Få urls att fungera till klustret. grafana.simonbrundin.com
   - [x] Vänta på svar från Körsbär - Annars byt internetleverantör
 - [x] Inga fel i flux
-- [ ] Authentik fungerar
-- [ ] Vissa routes säkra
-- [ ] Hårddisken i worker-2 fungerar
-- [ ] Installera KubeScape
-- [ ] Föra över de sista komponenterna från ArgoCD till Flux
-- [ ] Lägga till en Kyverno-policy som gör det omöjligt att radera
+- [x] Authentik fungerar
+- [x] Vissa routes säkra
+- [x] Installera KubeScape
+- [x] Föra över de sista komponenterna från ArgoCD till Flux
+- [x] Lägga till en Kyverno-policy som gör det omöjligt att radera
       longhorn-system namespacet
-- [ ] auth.simonbrundin.com fungerar
+- [x] auth.simonbrundin.com fungerar
 
 ---
 
@@ -80,7 +96,7 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 - [ ] Skapa tabell för meddelanden
 - [ ] Skapa tabell för konversationer
 - [ ] Skapa tabell för planer
-- [ ] Jag vill använda AtlasOperator i produktion för att hantera min databas.
+- [x] Jag vill använda AtlasOperator i produktion för att hantera min databas.
       Hur ska schema förändringar ta sig till produktion? Jag älskar tanken med
       att ha en schema.sql för produktion, likt den här
       /home/simon/repos/plan/environments/kubernetes/overlays/prod/db/schema.sql.
@@ -139,11 +155,11 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 
 ### Infrastructure
 
-- Skapa en ett kommando som heter `simon kubernetes health` som kollar så alla
-  noder i mitt taloskluster ser hälsosamma ut. Och som visar att kubectl
-  fungerar. jag behöver kunna köra både talosctl och kubectl och kubectl
-  fungerar. jag behöver kunna köra både talosctl och kubectl och jag vill att
-  det ska säkerställas att det går i början på skripet.
+- [x] Skapa en ett kommando som heter `simon kubernetes health` som kollar så
+      alla noder i mitt taloskluster ser hälsosamma ut. Och som visar att
+      kubectl fungerar. jag behöver kunna köra både talosctl och kubectl och
+      kubectl fungerar. jag behöver kunna köra både talosctl och kubectl och jag
+      vill att det ska säkerställas att det går i början på skripet.
 
 #### Kubernetes Frontend
 
@@ -159,7 +175,7 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 
 ## Plan 1.0
 
-- [ ] plan.simonbrundin.com fungerar
+- [x] plan.simonbrundin.com fungerar
 - [ ] Inkorg
   - Inmatningsprocess
     1. Skriv text
@@ -180,10 +196,9 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 
 - [ ] Dashboard
 
-- [ ] auth.simonbrundin.com fungerar
-  - [ ] Få alla mina noder att fungera
-  - [ ] Uppgradera alla till senaste talos och Kubernetes
-- [ ] Installera Orange Pi:s
+- [x] auth.simonbrundin.com fungerar
+  - [x] Få alla mina noder att fungera
+  - [x] Uppgradera alla till senaste talos och Kubernetes
 
 ---
 
@@ -787,6 +802,7 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 - [x] Få Tailscale att fungera så jag kan komma åt alla mina enheter som är
       anslutna till min router när jag inte är inloggad på hemnätverket
 - [x] Se ett datum på värderingen
+- [x] Cron Jobs
 - [x] Cron Jobs
 - [x] Cron Jobs
 - [x] Cron Jobs
