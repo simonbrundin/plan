@@ -1,7 +1,6 @@
 # Mål att nå innan jag går över till Plan 1.0
 
 - [x] Testa secrets skill
-- [ ] 
 - [x] Installera zitadel i kluster
 - [x] Läsa in mig på skillnaden på oidc och idp. ifall jag kanske ska avnända
 - [x] Skydda longhorn url
