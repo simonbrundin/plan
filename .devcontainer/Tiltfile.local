@@ -37,15 +37,15 @@ local_resource(
   'Nuxt Dev Server',
   serve_cmd=[
     'bash', '-c',
-    '''cd ../frontend && \
-      NUXT_SESSION_PASSWORD=5c3ddb48cdb04a05aed90cdb9330cbc2 \
-      DATABASE_URL=postgresql://plan:plan@localhost:5432/plan \
-      GQL_HOST=http://localhost:8080/v1/graphql \
-      HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret \
-      NUXT_OAUTH_AUTHENTIK_CLIENT_ID=hoQpxEbnUSth8STFjYjr04MikmhpHdXeU7GX6XZl \
-      NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET=dummy-secret-for-public-client \
-      NUXT_OAUTH_AUTHENTIK_DOMAIN=auth.simonbrundin.com \
-      bun run dev --host'''
+    'cd ../frontend && ' +
+    'NUXT_SESSION_PASSWORD=5c3ddb48cdb04a05aed90cdb9330cbc2 ' +
+    'DATABASE_URL=postgresql://plan:plan@localhost:5432/plan ' +
+    'GQL_HOST=http://localhost:8080/v1/graphql ' +
+    'HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret ' +
+    'source .env && ' +
+    'NUXT_OAUTH_ZITADEL_CLIENT_ID=$NUXT_OAUTH_ZITADEL_CLIENT_ID ' +
+    'NUXT_OAUTH_ZITADEL_DOMAIN=$NUXT_OAUTH_ZITADEL_DOMAIN ' +
+    'bun run dev --host'
   ],
   links=['http://localhost:3000'],
   labels=['Frontend'],
