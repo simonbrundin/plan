@@ -9,4 +9,4 @@ jobs:
   commit:
     uses: simonbrundin/deployment-pipeline/.github/workflows/build.yaml@main
     with:
-      dockerfile-path: frontend
+      dockerfile: frontend/Dockerfile
