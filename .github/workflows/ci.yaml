@@ -11,7 +11,7 @@ jobs:
       package-json-path: frontend
   build-publish-image:
     needs: unit-tests
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase/build-publish-image.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/commit.build-publish-image.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
