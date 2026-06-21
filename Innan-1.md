@@ -20,8 +20,9 @@
 - [x] Få flux ui att bli skyddad av zitadel igen genom att lägga till security
 - [x] Säkerställ att webhook i flux fungerar och startar synkning policy i
       kustomization.yaml igen
-- [ ] Sätta upp så man inte kan pusha till main utan PR
-- [ ] Push kör CI
+- [x] Sätta upp så man inte kan pusha till main utan PR
+- [ ] Push till plan kör CI-workflow från Deployment Pipeline Repot
+- [ ] Göra så tester körs så fort en fil sars
 - [ ] Kunna logga in med Zitadel på Plan
 - [ ] iptv fungerar
 - [ ] development mode i zitadel. vad betyder det och ska jag ha två appar?
