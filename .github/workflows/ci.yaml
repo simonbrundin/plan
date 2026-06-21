@@ -1,6 +1,8 @@
 name: CI för Nuxt applikation
-on: [push]
-
+on:
+  push:
+    paths:
+      - frontend/**
 permissions:
   contents: read
   packages: write
