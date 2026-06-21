@@ -1,6 +1,5 @@
 # Plan - Goal Management Application
 
-test
 A goal management and planning application that helps users organize and track
 their objectives using a modern web interface with hierarchical goal structures.
 
