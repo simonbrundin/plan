@@ -5,13 +5,13 @@ permissions:
   contents: read
   packages: write
 jobs:
-  tests:
+  unit-tests:
     uses: simonbrundin/deployment-pipeline/.github/workflows/run-tests-bun.yaml@main
     with:
       package-json-path: frontend
-  ci:
+  build-push-image:
     needs: tests
-    uses: simonbrundin/deployment-pipeline/.github/workflows/ci.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/build-publish-image.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
