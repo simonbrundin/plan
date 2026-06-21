@@ -10,3 +10,4 @@ jobs:
     uses: simonbrundin/deployment-pipeline/.github/workflows/build.yaml@main
     with:
       dockerfile: frontend/Dockerfile
+      dockerfile-context: frontend
