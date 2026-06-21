@@ -2,7 +2,6 @@ name: CI
 on: [push]
 
 permissions:
-  id-token: write
   contents: read
   packages: write
 jobs:
@@ -11,3 +10,4 @@ jobs:
     with:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
+      registry-token: CI_PACKAGES_TOKEN
