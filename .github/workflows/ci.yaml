@@ -1,5 +1,10 @@
 name: CI
 on: [push]
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   commit:
     uses: simonbrundin/deployment-pipeline/.github/workflows/build.yaml@main
