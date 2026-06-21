@@ -10,6 +10,7 @@ jobs:
     with:
       package-json-path: frontend
   ci:
+    needs: tests
     uses: simonbrundin/deployment-pipeline/.github/workflows/ci.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
