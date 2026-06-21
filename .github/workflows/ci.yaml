@@ -11,3 +11,4 @@ jobs:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
       registry-token: REGISTRY_TOKEN
+      #
