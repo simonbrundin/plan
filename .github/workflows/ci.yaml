@@ -10,7 +10,7 @@ jobs:
     with:
       package-json-path: frontend
   build-push-image:
-    needs: tests
+    needs: unit-tests
     uses: simonbrundin/deployment-pipeline/.github/workflows/build-publish-image.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
