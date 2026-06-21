@@ -10,4 +10,4 @@ jobs:
     with:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
-      registry-token: CI_PACKAGES_TOKEN
+      registry-token: REGISTRY_TOKEN
