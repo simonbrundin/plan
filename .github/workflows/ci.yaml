@@ -7,8 +7,8 @@ permissions:
 jobs:
   commit:
     uses: simonbrundin/deployment-pipeline/.github/workflows/build.yaml@main
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
-      registry-token: REGISTRY_TOKEN
-      #
