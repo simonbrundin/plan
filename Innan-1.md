@@ -22,7 +22,7 @@
       kustomization.yaml igen
 - [x] Sätta upp så man inte kan pusha till main utan PR
 - [x] Push till plan kör CI-workflow från Deployment Pipeline Repot
-- [ ] Göra så tester körs så fort en fil sars
+- [x] Göra så tester körs så fort en fil sars
 - [ ] Fundera på hur jag bygger flera micro services med ett ci workflow
 - [ ] Kunna logga in med Zitadel på Plan
 - [ ] iptv fungerar
