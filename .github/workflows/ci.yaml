@@ -1,14 +1,19 @@
-name: CI
+name: CI för Nuxt applikation
 on: [push]
 
 permissions:
   contents: read
   packages: write
 jobs:
-  commit:
+  tests:
+    uses: simonbrundin/deployment-pipeline/.github/workflows/run-tests-bun.yaml@main
+    with:
+      package-json-path: frontend
+  ci:
     uses: simonbrundin/deployment-pipeline/.github/workflows/ci.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
+      test-command: "cd frontend && bun install"

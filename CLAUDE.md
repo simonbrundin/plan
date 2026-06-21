@@ -135,4 +135,3 @@ Environment variables in `frontend/.env`:
 - **CI/CD**: GitHub Actions with semantic-release for versioning
 - **Hasura**: Deployed as separate service, handles GraphQL backend
 - Bun används istället för npm i frontend/
-

@@ -1,7 +1,0 @@
-name: Acceptance Phase
-
-on: workflow_dispatch
-
-jobs:
-  acceptance:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance-phase.yaml@v1
