@@ -6,7 +6,7 @@ permissions:
   packages: write
 jobs:
   commit:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/build.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/ci.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
