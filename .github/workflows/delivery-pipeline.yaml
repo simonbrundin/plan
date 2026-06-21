@@ -1,6 +1,6 @@
 name: Delivery Pipeline
 
-on: [push, workflow_dispatch]
+on: [workflow_dispatch]
 
 jobs:
   commit:

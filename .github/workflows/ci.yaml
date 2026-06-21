@@ -1,10 +1,8 @@
-name: Commit Phase
-
-on: [workflow_dispatch]
-
+name: CI
+on: [push]
 jobs:
   commit:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit-phase.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/build.yaml@main
     with:
       source-dir: frontend
       registry-address: ghcr.io/simonbrundin
