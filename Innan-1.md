@@ -1,4 +1,5 @@
 # Mål att nå innan jag går över till Plan 1.0
+test
 
 - [x] Testa secrets skill dfdkf
 - [ ]
