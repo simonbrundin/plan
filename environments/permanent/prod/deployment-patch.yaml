@@ -30,23 +30,23 @@ spec:
                 secretKeyRef:
                   name: auth
                   key: NUXT_SESSION_PASSWORD
-            - name: NUXT_OAUTH_AUTHENTIK_CLIENT_ID
+            - name: NUXT_OAUTH_ZITADEL_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_CLIENT_ID
-            - name: NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET
+                  key: NUXT_OAUTH_ZITADEL_CLIENT_ID
+            - name: NUXT_OAUTH_ZITADEL_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET
-            - name: NUXT_OAUTH_AUTHENTIK_DOMAIN
+                  key: NUXT_OAUTH_ZITADEL_CLIENT_SECRET
+            - name: NUXT_OAUTH_ZITADEL_DOMAIN
               valueFrom:
                 secretKeyRef:
                   name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_DOMAIN
-            - name: NUXT_OAUTH_AUTHENTIK_REDIRECT_URL
+                  key: NUXT_OAUTH_ZITADEL_DOMAIN
+            - name: NUXT_OAUTH_ZITADEL_REDIRECT_URL
               valueFrom:
                 secretKeyRef:
                   name: auth
-                  key: NUXT_OAUTH_AUTHENTIK_REDIRECT_URL
+                  key: NUXT_OAUTH_ZITADEL_REDIRECT_URL
