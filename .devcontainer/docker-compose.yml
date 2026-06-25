@@ -29,7 +29,8 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: dev-admin-secret
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: >
+        startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
     depends_on:
       postgres:
@@ -49,18 +50,22 @@ services:
     container_name: plan-dev-frontend
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       # Session
       - NUXT_SESSION_PASSWORD=5c3ddb48cdb04a05aed90cdb9330cbc2
+      - NUXT_SESSION_COOKIE_SECURE=false
+      - NUXT_SESSION_COOKIE_SAMESITE=lax
       # Database - använd service namn som hostname
       - DATABASE_URL=postgresql://plan:plan@postgres:5432/plan
       # Hasura - använd service namn
       - GQL_HOST=http://hasura:${HASURA_PORT:-8080}/v1/graphql
       - HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret
-      # Authentik OAuth
-      - NUXT_OAUTH_AUTHENTIK_CLIENT_ID=hoQpxEbnUSth8STFjYjr04MikmhpHdXeU7GX6XZl
-      - NUXT_OAUTH_AUTHENTIK_CLIENT_SECRET=dummy-secret-for-public-client
-      - NUXT_OAUTH_AUTHENTIK_DOMAIN=auth.simonbrundin.com
+      # Zitadel OAuth
+      - NUXT_OAUTH_ZITADEL_CLIENT_ID=${NUXT_OAUTH_ZITADEL_CLIENT_ID}
+      - NUXT_OAUTH_ZITADEL_DOMAIN=${NUXT_OAUTH_ZITADEL_DOMAIN}
+      - NUXT_OAUTH_ZITADEL_REDIRECT_URL=${NUXT_OAUTH_ZITADEL_REDIRECT_URL}
     volumes:
       # Live reload - synka källkod
       - ../frontend/app:/app/app
