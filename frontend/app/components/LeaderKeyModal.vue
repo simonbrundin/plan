@@ -48,7 +48,7 @@ function handleCommand(cmd: string) {
             @click="handleCommand('gg')"
             class="w-full text-left px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 text-gray-100">
             <span class="font-mono font-bold text-blue-400">G+G</span>
-            <span class="ml-3">Go to goal/1</span>
+            <span class="ml-3">Go to goals list</span>
           </button>
         </div>
         

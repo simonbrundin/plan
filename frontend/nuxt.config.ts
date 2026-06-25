@@ -34,7 +34,6 @@ export default defineNuxtConfig({
 		"@nuxt/icon",
 		"shadcn-nuxt",
 		"nuxt-auth-utils",
-		"nuxt-graphql-client",
 		[
 			"@pinia/nuxt",
 			{
@@ -49,6 +48,7 @@ export default defineNuxtConfig({
 			fontsource: false,
 		},
 	},
+
 	pinia: {
 		storesDirs: ["./app/stores/**"],
 		// Disable Pinia state transfer to prevent serialization errors
@@ -70,9 +70,7 @@ export default defineNuxtConfig({
 	},
 	runtimeConfig: {
 		public: {
-			GQL_HOST: "http://localhost:8080/v1/graphql", // overwritten by NUXT_PUBLIC_GQL_HOST
-			hasuraAdminSecret:
-				process.env.HASURA_GRAPHQL_ADMIN_SECRET || "dev-admin-secret",
+			appUrl: process.env.NUXT_PUBLIC_APP_URL || "",
 		},
 		oauth: {
 			// Zitadel OAuth provider configuration (PKCE - no secret)
@@ -125,27 +123,6 @@ export default defineNuxtConfig({
 			if (app?.config?.globalProperties?.$nuxt?.payload?.state) {
 				delete app.config.globalProperties.$nuxt.payload.state;
 			}
-		},
-	},
-	"graphql-client": {
-		codegen: false,
-		clients: {
-			default: {
-				host:
-					process.env.NUXT_PUBLIC_GQL_HOST ||
-					"http://localhost:8080/v1/graphql",
-				token: {
-					type: "Bearer",
-					name: "Authorization",
-				},
-				// Admin secret is used for schema introspection during codegen
-				// The graphql-auth.ts plugin will override this with JWT tokens at runtime
-				headers: process.env.HASURA_GRAPHQL_ADMIN_SECRET
-					? {
-							"x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET,
-						}
-					: {},
-			},
 		},
 	},
 });

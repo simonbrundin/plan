@@ -1,9 +1,0 @@
-query GetUserGoals($userId: Int!) {
-  goals(where: {user_goals: {user_id: {_eq: $userId}}}) {
-    id
-    title
-    icon
-    created
-    finished
-  }
-}

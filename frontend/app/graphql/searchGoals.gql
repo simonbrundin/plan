@@ -1,9 +1,0 @@
-query SearchGoals($searchTerm: String!) {
-  goals(where: { title: { _ilike: $searchTerm } }, order_by: { created: desc }) {
-    id
-    title
-    icon
-    created
-    finished
-  }
-}

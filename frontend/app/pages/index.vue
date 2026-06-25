@@ -40,7 +40,7 @@ const addGoalToInbox = async (goal) => {
       <div class="text-center">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen tillbaka!</h1>
         <div class="flex justify-center gap-4">
-          <NuxtLink to="/goal/1">
+          <NuxtLink to="/goals">
             <UButton size="lg" icon="material-symbols:arrow-forward-rounded">
               Gå till mål
             </UButton>

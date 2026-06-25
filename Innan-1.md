@@ -25,8 +25,13 @@
 - [x] Göra så tester körs så fort en fil sars
 - [x] Fundera på hur jag bygger flera micro services med ett ci workflow
 - [x] Få spc.simonbrundin.com att fungera
-- [ ] Skapa pr workflow för plan
-- [ ] Kunna logga in med Zitadel på Plan
+- [x] Skapa pr workflow för plan
+- [x] Kunna logga in med Zitadel på Plan
+- [ ] Byt ut graphql mot rest
+- [ ] Mål syns i prod
+- [x] Postgraphile istället för hasura
+- [ ] Kolla så min app är upplagd efter
+      [länk](https://nuxt.com/docs/4.x/directory-structure)
 - [ ] Installera Immich i Homelab
 - [x] iptv fungerar
 - [ ] Dashboard för allt. En del ska vara dora metrics för mina olika projekt

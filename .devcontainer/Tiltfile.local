@@ -1,13 +1,13 @@
 # ------------------------------------------------------------------
 # Local Development Mode
-# Runs database and backend in Docker, frontend locally
+# Runs database in Docker, frontend locally
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
 # Docker Compose Setup
 # ------------------------------------------------------------------
 
-# Ladda backend services (postgres + hasura) från dedikerad compose-fil
+# Ladda backend services (postgres) från dedikerad compose-fil
 docker_compose('./docker-compose.backend.yml')
 
 # ------------------------------------------------------------------
@@ -20,16 +20,6 @@ dc_resource(
 )
 
 # ------------------------------------------------------------------
-# Hasura GraphQL Engine
-# ------------------------------------------------------------------
-
-dc_resource(
-  'hasura',
-  labels=['Backend'],
-  links=['http://localhost:8080/console'],
-)
-
-# ------------------------------------------------------------------
 # Frontend (Nuxt Dev Server) - körs lokalt
 # ------------------------------------------------------------------
 
@@ -38,28 +28,10 @@ local_resource(
   serve_cmd=[
     'bash', '-c',
     'cd ../frontend && ' +
-    'NUXT_SESSION_PASSWORD=5c3ddb48cdb04a05aed90cdb9330cbc2 ' +
-    'NUXT_SESSION_COOKIE_SECURE=false ' +
-    'NUXT_SESSION_COOKIE_SAMESITE=lax ' +
-    'DATABASE_URL=postgresql://plan:plan@localhost:5432/plan ' +
-    'GQL_HOST=http://localhost:8080/v1/graphql ' +
-    'HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret ' +
     'set -a && source .env && set +a && ' +
     'bun run dev --host'
   ],
   links=['http://localhost:3000'],
   labels=['Frontend'],
-  resource_deps=['postgres', 'hasura'],  # Vänta på backend
-)
-
-# ------------------------------------------------------------------
-# Drizzle Studio
-# ------------------------------------------------------------------
-
-local_resource(
-  'Drizzle Studio',
-  serve_cmd='cd ../frontend && bun run db:studio',
-  links=['https://local.drizzle.studio'],
-  labels=['Database'],
   resource_deps=['postgres'],  # Vänta på PostgreSQL
 )

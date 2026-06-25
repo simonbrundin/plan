@@ -1,4 +1,5 @@
 export default defineEventHandler(async (event) => {
+	const config = useRuntimeConfig();
 	const body = await readBody(event);
 
 	const { email, password, username, name } = body;
@@ -18,9 +19,7 @@ export default defineEventHandler(async (event) => {
 		});
 	}
 
-	// Hämta Zitadel-konfiguration från miljövariabler
-	const zitadelUrl =
-		process.env.NUXT_OAUTH_ZITADEL_DOMAIN || "auth.simonbrundin.com";
+	const zitadelDomain = config.oauth.zitadel.domain;
 	const zitadelToken = process.env.ZITADEL_API_TOKEN;
 
 	if (!zitadelToken) {
@@ -32,7 +31,7 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		// Skapa användare via Zitadel Admin API
-		const response = await $fetch(`https://${zitadelUrl}/admin/v1/users`, {
+		const response = await $fetch(`https://${zitadelDomain}/admin/v1/users`, {
 			method: "POST",
 			headers: {
 				Authorization: `Bearer ${zitadelToken}`,

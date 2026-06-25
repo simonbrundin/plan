@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import type { Goal } from "~/types/goal";
 
-const config = useRuntimeConfig();
 const route = useRoute();
 const { loggedIn } = useUserSession();
 
@@ -45,7 +45,7 @@ const links = [
     {
       label: "Goals",
       icon: "i-lucide-target",
-      to: "/goal/1",
+      to: "/goals",
       onSelect: () => {
         open.value = false;
       },
@@ -69,40 +69,11 @@ const links = [
   ],
 ] satisfies NavigationMenuItem[][];
 
-const goalsData = ref<{
-  goals: Array<{
-    id: number;
-    title: string;
-    created: string;
-    finished: boolean;
-  }>;
-} | null>(null);
+const goalsData = ref<Goal[] | null>(null);
 
 const fetchGoals = async () => {
   try {
-    const query = `
-      query GetAllGoals {
-        goals(order_by: { created: desc }) {
-          id
-          title
-          created
-          finished
-        }
-      }
-    `;
-
-    const response = await $fetch(config.public.GQL_HOST, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-hasura-admin-secret": config.public.hasuraAdminSecret,
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    if (response.data) {
-      goalsData.value = response.data;
-    }
+    goalsData.value = await $fetch<Goal[]>("/api/goals");
   } catch (error) {
     console.warn("Failed to load goals for navigation:", error);
   }
@@ -114,7 +85,7 @@ onMounted(() => {
 
 const groups = computed(() => {
   const goalItems =
-    goalsData.value?.goals?.map((goal) => ({
+    goalsData.value?.map((goal) => ({
       id: `goal-${goal.id}`,
       label: goal.title,
       icon: goal.finished ? "i-lucide-check-circle" : "i-lucide-circle",

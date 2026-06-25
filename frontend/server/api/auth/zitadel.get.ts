@@ -1,17 +1,7 @@
-import { db } from "../../utils/db";
-import { users, userGoals } from "../../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { sql } from "../../utils/db";
 import { eventHandler, getQuery, sendRedirect, setCookie, getCookie } from "h3";
 import { withQuery } from "ufo";
 import crypto from "node:crypto";
-
-const ZITADEL_DOMAIN =
-	process.env.NUXT_OAUTH_ZITADEL_DOMAIN || "auth.simonbrundin.com";
-const CLIENT_ID =
-	process.env.NUXT_OAUTH_ZITADEL_CLIENT_ID || "378094068590182893";
-const REDIRECT_URL =
-	process.env.NUXT_OAUTH_ZITADEL_REDIRECT_URL ||
-	"http://localhost:3000/api/auth/zitadel";
 
 function generateRandomString(length: number = 32): string {
 	return crypto.randomBytes(length).toString("base64url").slice(0, length);
@@ -25,7 +15,12 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 export default eventHandler(async (event) => {
+	const config = useRuntimeConfig();
 	const query = getQuery(event);
+
+	const ZITADEL_DOMAIN = config.oauth.zitadel.domain;
+	const CLIENT_ID = config.oauth.zitadel.clientId;
+	const REDIRECT_URL = config.public.appUrl + "/api/auth/zitadel";
 
 	console.log("=== ZITADEL HANDLER ===");
 
@@ -165,66 +160,63 @@ export default eventHandler(async (event) => {
 			return sendRedirect(event, "/?error=auth_data_missing");
 		}
 
-		// Find or create user in database
-		let dbUser = await db.query.users.findFirst({
-			where: eq(users.sub, user.sub),
-		});
+		// Find or create user in database using vanilla SQL
+		let dbUser = await sql<
+			any[]
+		>`SELECT id, sub, email FROM users WHERE sub = ${user.sub}`;
 
-		if (!dbUser) {
-			dbUser = await db.query.users.findFirst({
-				where: eq(users.email, user.email),
-			});
-			if (dbUser) {
-				console.log("Found user by email:", dbUser.email);
-				await db
-					.update(users)
-					.set({ sub: user.sub })
-					.where(eq(users.id, dbUser.id));
-				dbUser.sub = user.sub;
+		if (!dbUser[0]) {
+			// Try to find by email and update sub
+			const existingByEmail = await sql<
+				any[]
+			>`SELECT id, sub, email FROM users WHERE email = ${user.email}`;
+			if (existingByEmail[0]) {
+				console.log("Found user by email:", existingByEmail[0].email);
+				await sql`UPDATE users SET sub = ${user.sub} WHERE id = ${existingByEmail[0].id}`;
+				dbUser = [
+					{
+						id: existingByEmail[0].id,
+						sub: user.sub,
+						email: existingByEmail[0].email,
+					},
+				] as any;
 			}
 		}
 
-		if (!dbUser) {
+		if (!dbUser[0]) {
 			console.log("Creating new user:", user.email);
-			dbUser = await db
-				.insert(users)
-				.values({
-					sub: user.sub,
-					email: user.email,
-				})
-				.returning()
-				.then(([newUser]) => newUser);
-			if (!dbUser) {
+			const newUsers = await sql<
+				any[]
+			>`INSERT INTO users (sub, email) VALUES (${user.sub}, ${user.email}) RETURNING id, sub, email`;
+			if (!newUsers[0]) {
 				console.error("Failed to create user");
 				return sendRedirect(event, "/?error=user_creation_failed");
 			}
+			dbUser = newUsers;
 		}
 
+		const finalDbUser = dbUser[0];
+
 		// Ensure user has root goal (ID 1) - for both new and existing users
-		const existingRootGoal = await db.query.userGoals.findFirst({
-			where: eq(userGoals.userId, dbUser.id),
-		});
-		if (!existingRootGoal) {
-			console.log("Adding root goal to user:", dbUser.email);
-			await db
-				.insert(userGoals)
-				.values({
-					userId: dbUser.id,
-					goalId: 1,
-				})
-				.onConflictDoNothing();
+		const existingRootGoal = await sql<
+			any[]
+		>`SELECT 1 FROM user_goals WHERE user_id = ${finalDbUser.id} LIMIT 1`;
+		if (!existingRootGoal[0]) {
+			console.log("Adding root goal to user:", finalDbUser.email);
+			await sql`INSERT INTO user_goals (user_id, goal_id) VALUES (${finalDbUser.id}, 1) ON CONFLICT DO NOTHING`;
 		}
 
 		await setUserSession(event, {
 			user: {
-				id: Number(dbUser.id),
-				sub: String(dbUser.sub),
-				email: String(dbUser.email),
+				id: finalDbUser.id,
+				sub: String(finalDbUser.sub),
+				email: String(finalDbUser.email),
 			},
+			accessToken: accessToken,
 			loggedInAt: Number(Date.now()),
 		});
 
-		console.log(`Success: ${dbUser.email}`);
+		console.log(`Success: ${finalDbUser.email}`);
 		return sendRedirect(event, "/");
 	} catch (error: any) {
 		console.error("=== FATAL ERROR ===");

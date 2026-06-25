@@ -9,39 +9,13 @@ services:
       POSTGRES_PASSWORD: plan
       POSTGRES_DB: plan
     volumes:
-      # Mount init scripts från Kubernetes overlay
-      - ../environments/kubernetes/overlays/dev/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ../environments/kubernetes/overlays/dev/db/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql:ro
+      - ../environments/ephemeral/dev/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - plan-postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U plan -d plan"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  hasura:
-    image: hasura/graphql-engine:v2.41.0
-    container_name: plan-dev-hasura
-    ports:
-      - "${HASURA_PORT:-8080}:8080"
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://plan:plan@postgres:5432/plan
-      HASURA_GRAPHQL_ADMIN_SECRET: dev-admin-secret
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: >
-        startup, http-log, webhook-log, websocket-log, query-log
-      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: on-failure
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
 
   frontend:
     build:
@@ -53,31 +27,21 @@ services:
     env_file:
       - .env
     environment:
-      # Session
       - NUXT_SESSION_PASSWORD=5c3ddb48cdb04a05aed90cdb9330cbc2
       - NUXT_SESSION_COOKIE_SECURE=false
       - NUXT_SESSION_COOKIE_SAMESITE=lax
-      # Database - använd service namn som hostname
       - DATABASE_URL=postgresql://plan:plan@postgres:5432/plan
-      # Hasura - använd service namn
-      - GQL_HOST=http://hasura:${HASURA_PORT:-8080}/v1/graphql
-      - HASURA_GRAPHQL_ADMIN_SECRET=dev-admin-secret
-      # Zitadel OAuth
       - NUXT_OAUTH_ZITADEL_CLIENT_ID=${NUXT_OAUTH_ZITADEL_CLIENT_ID}
       - NUXT_OAUTH_ZITADEL_DOMAIN=${NUXT_OAUTH_ZITADEL_DOMAIN}
       - NUXT_OAUTH_ZITADEL_REDIRECT_URL=${NUXT_OAUTH_ZITADEL_REDIRECT_URL}
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-at-least-32-chars-long}
     volumes:
-      # Live reload - synka källkod
       - ../frontend/app:/app/app
       - ../frontend/server:/app/server
       - ../frontend/nuxt.config.ts:/app/nuxt.config.ts
-      - ../frontend/drizzle:/app/drizzle
-      # Bevara node_modules från image (inte från host)
       - /app/node_modules
     depends_on:
       postgres:
-        condition: service_healthy
-      hasura:
         condition: service_healthy
     command: ["bun", "run", "dev", "--host", "0.0.0.0"]
 

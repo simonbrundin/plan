@@ -1,8 +1,0 @@
-mutation AddParentRelation($childId: Int!, $parentId: Int!) {
-  insert_goal_relations_one(
-    object: { child_id: $childId, parent_id: $parentId }
-  ) {
-    child_id
-    parent_id
-  }
-}

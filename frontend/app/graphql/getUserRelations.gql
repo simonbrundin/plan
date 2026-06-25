@@ -1,6 +1,0 @@
-query GetUserRelations {
-  goal_relations {
-    parent_id
-    child_id
-  }
-}

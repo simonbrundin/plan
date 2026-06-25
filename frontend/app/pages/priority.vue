@@ -6,6 +6,8 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
+const { toggleGoalFinished } = useGoalApi()
+
 const {
   isPriorityMode,
   selectedGoalId,
@@ -19,29 +21,10 @@ onMounted(() => {
   loadPrioritizedGoals()
 })
 
-async function toggleFinished(goal: Goal& { weight: number; parentTitle: string | null }) {
+async function toggleFinished(goal: Goal & { weight: number; parentTitle: string | null }) {
   try {
     const newFinishedValue = goal.finished ? null : new Date().toISOString()
-
-    const response = await fetch(`${useRuntimeConfig().public.GQL_HOST}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-hasura-admin-secret': useRuntimeConfig().public.hasuraAdminSecret,
-      },
-      body: JSON.stringify({
-        query: `
-          mutation UpdateGoalFinished($id: Int!, $finished: timestamptz) {
-            update_goals_by_pk(pk_columns: { id: $id }, _set: { finished: $finished }) {
-              id
-              finished
-            }
-          }
-        `,
-        variables: { id: goal.id, finished: newFinishedValue },
-      }),
-    })
-
+    await toggleGoalFinished(goal.id, newFinishedValue)
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to toggle goal finished:', err)

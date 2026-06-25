@@ -1,8 +1,0 @@
-mutation UpdateGoalFinished($id: Int!, $finished: timestamptz) {
-  update_goals_by_pk(pk_columns: { id: $id }, _set: { finished: $finished }) {
-    id
-    title
-    created
-    finished
-  }
-}

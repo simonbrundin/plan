@@ -6,7 +6,7 @@ import GoalChildrenList from '~/components/GoalChildrenList.vue'
 import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
-import type { Goal, GoalWithRelations, GetGoalResponse, GoalWithWeight } from '~/types/goal'
+import type { Goal, GoalWithWeight } from '~/types/goal'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -17,7 +17,6 @@ const route = useRoute();
 const router = useRouter();
 const goalId = parseInt(route.params.id as string);
 const { user } = useUserSession();
-const config = useRuntimeConfig();
 const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
 
 // Hämta målet med dess relationer
@@ -44,22 +43,14 @@ await refresh();
 
 const goal = computed(() => goalData.value?.goal);
 
-// Extrahera alla föräldrar
+// Extrahera alla föräldrar (REST API format)
 const parents = computed(
-  () => goal.value?.parentRelations?.map((r) => r.goalByParentId) || []
+  () => goalData.value?.parents || []
 );
 
-// Matcha barn-ID:n med faktiska goal-objekt och behåll ordningen från childRelations
+// Barn med vikt och ordning (REST API returnerar detta direkt)
 const children = computed(() => {
-  if (!goal.value?.childRelations || !goalData.value?.allGoals) return [];
-
-  // Behåll ordningen från childRelations genom att mappa dem direkt
-  return goal.value.childRelations
-    .map((relation) => {
-      const goal = goalData.value!.allGoals.find((g) => g.id === relation.child_id);
-      return goal ? { ...goal, weight: relation.weight } : null;
-    })
-    .filter((g) => g !== null) as GoalWithWeight[];
+  return goalData.value?.children || [];
 });
 
 // Beräkna progress baserat på färdiga undermål
@@ -145,14 +136,8 @@ async function addExistingParent(parentId: number) {
 async function createNewParent() {
   if (!parentSearchQuery.value.trim()) return;
 
-  const userId = user.value?.id;
-  if (!userId) {
-    console.error("No user logged in");
-    return;
-  }
-
   try {
-    const newGoal = await createGoal(parentSearchQuery.value.trim(), userId);
+    const newGoal = await createGoal(parentSearchQuery.value.trim());
     await addParentRelation(goalId, newGoal.id);
     goalsStore.addGoal(newGoal);
     goalsStore.addRelation(goalId, newGoal.id);
@@ -225,15 +210,9 @@ async function addExistingChild(childId: number) {
   async function createNewChild() {
     if (!childSearchQuery.value.trim()) return;
 
-    const userId = user.value?.id;
-    if (!userId) {
-      console.error("No user logged in");
-      return;
-    }
-
     try {
-      const newGoal = await createGoal(childSearchQuery.value.trim(), userId);
-      const nextOrder = goal.value?.childRelations?.length || 0;
+      const newGoal = await createGoal(childSearchQuery.value.trim());
+      const nextOrder = children.value.length;
       await addChildRelation(newGoal.id, goalId, nextOrder);
       goalsStore.addGoal(newGoal);
       goalsStore.addRelation(newGoal.id, goalId);
@@ -451,7 +430,6 @@ async function moveChildUp() {
 
   const currentIndex = selectedChildIndex.value;
   const displayedChildren = filteredChildren.value;
-  const allChildren = children.value;
 
   if (currentIndex >= displayedChildren.length) {
     return;
@@ -461,73 +439,14 @@ async function moveChildUp() {
   const movingChild = displayedChildren[currentIndex];
   const aboveChild = displayedChildren[currentIndex - 1];
 
-  // Hitta deras ordningspositioner i full lista
-  const movingChildFullIndex = allChildren.findIndex((c) => c.id === movingChild.id);
-  const aboveChildFullIndex = allChildren.findIndex((c) => c.id === aboveChild.id);
-
-  if (movingChildFullIndex === -1 || aboveChildFullIndex === -1) {
-    return;
-  }
-
-  // Uppdatera ordningen för dessa två mål i databasen
   try {
     // Byt ordningen mellan de två målen
-    const movingChildOrder = goal.value?.childRelations?.[movingChildFullIndex]?.order ?? movingChildFullIndex;
-    const aboveChildOrder = goal.value?.childRelations?.[aboveChildFullIndex]?.order ?? aboveChildFullIndex;
+    const movingOrder = movingChild.order;
+    const aboveOrder = aboveChild.order;
 
     await Promise.all([
-      fetch(config.public.GQL_HOST, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
-              update_goal_relations_by_pk(
-                pk_columns: { parent_id: $parent_id, child_id: $child_id }
-                _set: { order: $order }
-              ) {
-                parent_id
-                child_id
-                order
-              }
-            }
-          `,
-          variables: {
-            parent_id: goalId,
-            child_id: movingChild.id,
-            order: aboveChildOrder,
-          },
-        }),
-      }),
-      fetch(config.public.GQL_HOST, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
-              update_goal_relations_by_pk(
-                pk_columns: { parent_id: $parent_id, child_id: $child_id }
-                _set: { order: $order }
-              ) {
-                parent_id
-                child_id
-                order
-              }
-            }
-          `,
-          variables: {
-            parent_id: goalId,
-            child_id: aboveChild.id,
-            order: movingChildOrder,
-          },
-        }),
-      }),
+      updateGoalOrder(goalId, movingChild.id, aboveOrder),
+      updateGoalOrder(goalId, aboveChild.id, movingOrder),
     ]);
 
     // Uppdatera markerad index
@@ -537,7 +456,6 @@ async function moveChildUp() {
     await refresh();
   } catch (error) {
     console.error("Failed to move child up:", error);
-    // Uppdatera ändå från server för att synkronisera
     await refresh();
   }
 }
@@ -554,7 +472,6 @@ async function moveChildDown() {
 
   const currentIndex = selectedChildIndex.value;
   const displayedChildren = filteredChildren.value;
-  const allChildren = children.value;
 
   if (currentIndex >= displayedChildren.length - 1) {
     return;
@@ -564,73 +481,14 @@ async function moveChildDown() {
   const movingChild = displayedChildren[currentIndex];
   const belowChild = displayedChildren[currentIndex + 1];
 
-  // Hitta deras ordningspositioner i full lista
-  const movingChildFullIndex = allChildren.findIndex((c) => c.id === movingChild.id);
-  const belowChildFullIndex = allChildren.findIndex((c) => c.id === belowChild.id);
-
-  if (movingChildFullIndex === -1 || belowChildFullIndex === -1) {
-    return;
-  }
-
-  // Uppdatera ordningen för dessa två mål i databasen
   try {
     // Byt ordningen mellan de två målen
-    const movingChildOrder = goal.value?.childRelations?.[movingChildFullIndex]?.order ?? movingChildFullIndex;
-    const belowChildOrder = goal.value?.childRelations?.[belowChildFullIndex]?.order ?? belowChildFullIndex;
+    const movingOrder = movingChild.order;
+    const belowOrder = belowChild.order;
 
     await Promise.all([
-      fetch(config.public.GQL_HOST, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
-              update_goal_relations_by_pk(
-                pk_columns: { parent_id: $parent_id, child_id: $child_id }
-                _set: { order: $order }
-              ) {
-                parent_id
-                child_id
-                order
-              }
-            }
-          `,
-          variables: {
-            parent_id: goalId,
-            child_id: movingChild.id,
-            order: belowChildOrder,
-          },
-        }),
-      }),
-      fetch(config.public.GQL_HOST, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-hasura-admin-secret": config.public.hasuraAdminSecret,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateGoalOrder($parent_id: Int!, $child_id: Int!, $order: Int!) {
-              update_goal_relations_by_pk(
-                pk_columns: { parent_id: $parent_id, child_id: $child_id }
-                _set: { order: $order }
-              ) {
-                parent_id
-                child_id
-                order
-              }
-            }
-          `,
-          variables: {
-            parent_id: goalId,
-            child_id: belowChild.id,
-            order: movingChildOrder,
-          },
-        }),
-      }),
+      updateGoalOrder(goalId, movingChild.id, belowOrder),
+      updateGoalOrder(goalId, belowChild.id, movingOrder),
     ]);
 
     // Uppdatera markerad index
@@ -640,7 +498,6 @@ async function moveChildDown() {
     await refresh();
   } catch (error) {
     console.error("Failed to move child down:", error);
-    // Uppdatera ändå från server för att synkronisera
     await refresh();
   }
 }
@@ -955,7 +812,7 @@ function executeLeaderCommand(key: string): boolean {
     return true;
   } else if (key === "gg") {
     isLeaderModalOpen.value = false;
-    router.push('/goal/1');
+    router.push('/goals');
     return true;
   }
 
@@ -977,7 +834,7 @@ function executeLeaderCommand(key: string): boolean {
     return true;
   } else if (key === "g" && leaderFirstKey === "g") {
     isLeaderModalOpen.value = false;
-    router.push('/goal/1');
+    router.push('/goals');
     leaderFirstKey = "";
     return true;
   } else if (key === "i") {
@@ -1253,7 +1110,7 @@ watch(selectedParentIndex, async () => {
       <!-- Breadcrumb / Föräldrar -->
       <div class="flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2 text-sm flex-wrap">
-          <NuxtLink v-if="parents.length === 0" to="/goal/1"
+          <NuxtLink v-if="parents.length === 0" to="/goals"
             class="text-blue-400 hover:text-blue-300 transition-colors font-medium">
             Root
           </NuxtLink>

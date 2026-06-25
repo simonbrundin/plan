@@ -1,9 +1,0 @@
-mutation CreateUserGoal($userId: Int!, $goalId: Int!) {
-  insert_user_goals_one(object: {
-    user_id: $userId
-    goal_id: $goalId
-  }) {
-    user_id
-    goal_id
-  }
-}

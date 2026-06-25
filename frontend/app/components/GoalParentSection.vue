@@ -37,7 +37,7 @@ const router = useRouter()
     <div class="flex items-center gap-2 text-sm flex-wrap">
       <NuxtLink
         v-if="parents.length === 0"
-        to="/goal/1"
+        to="/goals"
         class="text-blue-400 hover:text-blue-300 transition-colors font-medium"
       >
         Root

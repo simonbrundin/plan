@@ -1,1 +1,0 @@
-ALTER TABLE "goals" ADD COLUMN "inbox" integer DEFAULT 1 NOT NULL;

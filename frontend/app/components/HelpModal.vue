@@ -107,7 +107,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-4">
               <kbd class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-green-400 font-mono font-bold min-w-[2rem] text-center">g</kbd>
               <kbd class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-green-400 font-mono font-bold min-w-[2rem] text-center">g</kbd>
-              <span class="text-gray-300">Gå till goal/1</span>
+              <span class="text-gray-300">Gå till mål-lista</span>
             </div>
             <div class="flex items-center gap-4">
               <kbd class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-green-400 font-mono font-bold min-w-[2rem] text-center">f</kbd>
