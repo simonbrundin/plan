@@ -50,6 +50,13 @@
       "when": 1763637073051,
       "tag": "0006_right_the_santerians",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1750610625000,
+      "tag": "0007_add_root_goal_to_all_users",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { db } from "../../utils/db";
-import { users } from "../../../drizzle/schema";
+import { users, userGoals } from "../../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { eventHandler, getQuery, sendRedirect, setCookie, getCookie } from "h3";
 import { withQuery } from "ufo";
@@ -194,11 +194,25 @@ export default eventHandler(async (event) => {
 				})
 				.returning()
 				.then(([newUser]) => newUser);
+			if (!dbUser) {
+				console.error("Failed to create user");
+				return sendRedirect(event, "/?error=user_creation_failed");
+			}
 		}
 
-		if (!dbUser) {
-			console.error("Failed to find or create user");
-			return sendRedirect(event, "/?error=user_creation_failed");
+		// Ensure user has root goal (ID 1) - for both new and existing users
+		const existingRootGoal = await db.query.userGoals.findFirst({
+			where: eq(userGoals.userId, dbUser.id),
+		});
+		if (!existingRootGoal) {
+			console.log("Adding root goal to user:", dbUser.email);
+			await db
+				.insert(userGoals)
+				.values({
+					userId: dbUser.id,
+					goalId: 1,
+				})
+				.onConflictDoNothing();
 		}
 
 		await setUserSession(event, {
