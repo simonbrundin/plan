@@ -37,7 +37,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update image in deployment-patch.yaml
@@ -48,11 +47,19 @@ jobs:
             environments/permanent/prod/deployment-patch.yaml
           cat environments/permanent/prod/deployment-patch.yaml
 
-      - name: Create commit
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add environments/permanent/prod/deployment-patch.yaml
-          git diff --staged --quiet || \
-            git commit -m "chore: update plan-app image [skip ci]"
-          git push
+      - name: Create PR with image update
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update plan-app image [skip ci]"
+          branch: bot/update-plan-app-image
+          delete-branch: true
+          title: "chore: update plan-app image"
+          body: |
+            Automated image update from commit workflow
+            - Image: `${{ needs.build-publish-image.outputs.image }}`
+          labels: |
+            ci
+            skip-review
+          add-paths: |
+            environments/permanent/prod/deployment-patch.yaml
