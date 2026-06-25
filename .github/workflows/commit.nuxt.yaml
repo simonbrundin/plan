@@ -19,3 +19,4 @@ jobs:
     with:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
+      registry: ghcr.io/simonbrundin/plan

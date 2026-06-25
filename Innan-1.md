@@ -24,8 +24,10 @@
 - [x] Push till plan kör CI-workflow från Deployment Pipeline Repot
 - [x] Göra så tester körs så fort en fil sars
 - [x] Fundera på hur jag bygger flera micro services med ett ci workflow
-- [ ] Skapa pr workflow
+- [x] Få spc.simonbrundin.com att fungera
+- [ ] Skapa pr workflow för plan
 - [ ] Kunna logga in med Zitadel på Plan
+- [ ] Installera Immich i Homelab
 - [x] iptv fungerar
 - [ ] Dashboard för allt. En del ska vara dora metrics för mina olika projekt
 - [ ] development mode i zitadel. vad betyder det och ska jag ha ktvå appar?

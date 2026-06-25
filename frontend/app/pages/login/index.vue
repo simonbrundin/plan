@@ -1,5 +1,10 @@
 <script setup>
-const { loggedIn, user, session, fetch, clear, openInPopup } = useUserSession();
+const { loggedIn, user, session, clear } = useUserSession();
+
+const handleLogout = async () => {
+  await clear()
+  window.location.reload()
+}
 </script>
 
 <template>
@@ -29,7 +34,7 @@ const { loggedIn, user, session, fetch, clear, openInPopup } = useUserSession();
         })
       }}
     </p>
-    <UButton @click="clear" icon="solar:logout-2-line-duotone">Logout</UButton>
+    <UButton @click="handleLogout" icon="solar:logout-2-line-duotone">Logout</UButton>
   </div>
   <div v-else>
     <h1>Not logged in</h1>
