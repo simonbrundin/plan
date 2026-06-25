@@ -1,7 +1,6 @@
 # Nuxt Minimal Starter
 
-e
-Look at the
+e Look at the
 [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to
 learn more.
 
@@ -79,4 +78,5 @@ Check out the
 [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for
 more information.
 
+# trigger
 # trigger
