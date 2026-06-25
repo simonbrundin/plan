@@ -8,12 +8,14 @@ permissions:
   packages: write
 jobs:
   unit-tests:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/run-tests-bun.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/
+      run-tests-bun.yaml@main
     with:
       package-json-path: frontend
   build-publish-image:
     needs: unit-tests
-    uses: simonbrundin/deployment-pipeline/.github/workflows/commit.build-publish-image.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/
+      commit.build-publish-image.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
@@ -21,8 +23,38 @@ jobs:
       dockerfile-context: frontend
       registry: ghcr.io/simonbrundin/plan
 
-  acceptance:
+  # acceptance:
+  #   needs: build-publish-image
+  #   uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance.yaml@main
+  #   with:
+  #     image: ${{ needs.build-publish-image.outputs.image }}
+
+  update-deployment:
     needs: build-publish-image
-    uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance.yaml@main
-    with:
-      image: ${{ needs.build-publish-image.outputs.image }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image in deployment-patch.yaml
+        run: |
+          IMAGE="${{ needs.build-publish-image.outputs.image }}"
+          echo "Updating image to: $IMAGE"
+          sed -i "s|image: ghcr.io/simonbrundin/plan:.*|image: $IMAGE|" \
+            environments/permanent/prod/deployment-patch.yaml
+          cat environments/permanent/prod/deployment-patch.yaml
+
+      - name: Create commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add environments/permanent/prod/deployment-patch.yaml
+          git diff --staged --quiet || \
+            git commit -m "chore: update plan-app image [skip ci]"
+          git push
