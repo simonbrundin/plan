@@ -55,8 +55,8 @@ const handleSignup = async () => {
       },
     })
 
-    // Efter framgångsrik registrering, logga in användaren via Authentik OAuth
-    navigateTo('/auth/authentik')
+    // Efter framgångsrik registrering, logga in användaren via Zitadel OAuth
+    navigateTo('/auth/zitadel')
   } catch (err: any) {
     console.error('Signup error:', err)
     error.value = err.data?.message || 'Något gick fel vid registrering'
