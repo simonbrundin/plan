@@ -91,7 +91,7 @@ const fetchGoals = async () => {
       }
     `;
 
-    const response = await $fetch("http://localhost:8080/v1/graphql", {
+    const response = await $fetch(config.public.GQL_HOST, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

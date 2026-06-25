@@ -476,7 +476,7 @@ async function moveChildUp() {
     const aboveChildOrder = goal.value?.childRelations?.[aboveChildFullIndex]?.order ?? aboveChildFullIndex;
 
     await Promise.all([
-      fetch("http://localhost:8080/v1/graphql", {
+      fetch(config.public.GQL_HOST, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -502,7 +502,7 @@ async function moveChildUp() {
           },
         }),
       }),
-      fetch("http://localhost:8080/v1/graphql", {
+      fetch(config.public.GQL_HOST, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -579,7 +579,7 @@ async function moveChildDown() {
     const belowChildOrder = goal.value?.childRelations?.[belowChildFullIndex]?.order ?? belowChildFullIndex;
 
     await Promise.all([
-      fetch("http://localhost:8080/v1/graphql", {
+      fetch(config.public.GQL_HOST, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -605,7 +605,7 @@ async function moveChildDown() {
           },
         }),
       }),
-      fetch("http://localhost:8080/v1/graphql", {
+      fetch(config.public.GQL_HOST, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

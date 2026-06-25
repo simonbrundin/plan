@@ -21,6 +21,11 @@ spec:
               value: "production"
             - name: NUXT_PUBLIC_GQL_HOST
               value: "https://plan-hasura.simonbrundin.com/v1/graphql"
+            - name: HASURA_GRAPHQL_ADMIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hasura-env
+                  key: HASURA_GRAPHQL_ADMIN_SECRET
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
