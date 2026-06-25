@@ -2,13 +2,17 @@ name: Acceptance Phase
 on:
   workflow_call:
     inputs:
-      image:
+      image-digest:
         required: false
         default: ""
         type: string
+  push:
+    paths:
+      - frontend/**
 jobs:
   acceptance:
-    uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance.yaml@main
+    uses: simonbrundin/deployment-pipeline/.github/workflows/
+      acceptance.yaml@main
     secrets:
       DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
     with:
