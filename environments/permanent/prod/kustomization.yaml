@@ -10,7 +10,3 @@ resources:
 
 patches:
   - path: deployment-patch.yaml
-
-images:
-  - name: ghcr.io/simonbrundin/plan
-    newTag: "frontend-202606121357"
