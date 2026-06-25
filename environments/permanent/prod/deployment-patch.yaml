@@ -8,6 +8,7 @@ spec:
     spec:
       containers:
         - name: plan-app
+          image: ghcr.io/simonbrundin/plan:bfb4836535e586be3c6fca3d691c9fb074cbf402
           resources:
             requests:
               memory: "256Mi"

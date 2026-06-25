@@ -20,3 +20,9 @@ jobs:
       dockerfile: frontend/Dockerfile
       dockerfile-context: frontend
       registry: ghcr.io/simonbrundin/plan
+
+  acceptance:
+    needs: build-publish-image
+    uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance.yaml@main
+    with:
+      image: ${{ needs.build-publish-image.outputs.image }}
