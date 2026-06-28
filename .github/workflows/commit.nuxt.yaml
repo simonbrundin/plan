@@ -10,7 +10,7 @@ jobs:
     uses: >-
       simonbrundin/deployment-pipeline/.github/workflows/run-tests-bun.yaml@main
     with:
-      package-json-path: frontend
+      package-json-path: src/nuxt
   build-publish-image:
     needs: unit-tests
     permissions:
