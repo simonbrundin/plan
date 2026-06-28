@@ -1,35 +1,15 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [x] Testa secrets skill
-- [x] Installera zitadel i kluster
-- [x] Läsa in mig på skillnaden på oidc och idp. ifall jag kanske ska avnända
-- [x] Skydda longhorn url
-- [x] Säkerställ inte vem som helst kan skapa ett konto och logga in. Behövs
-      något speciellt scope?
-- [x] Uppdatera flux
-- [x] Skydda rutter
-- [x] Ta bort url skydd på flux tillfälligt tills zitadel är tillbaka
-- [x] auth.simonbrundin.com fungerar [ ] Dubbelkolla om någon ha arbete måste
-      göras i zitadel https://zitadel.com/docs/concepts/architecture/solution
-- [x] Flux Webhook fungerar
-- [x] Lös detta i Plan: Kustomization Failed 4m ago flux-system/plan health
-      check failed after 4m30.058886584s: timeout waiting for:
-      [Job/plan/grant-user-permissions status: 'InProgress']
-- [x] longhorn.simonbrundin.com använder oidc
-- [x] Uptime Kuma fungerade
-- [x] Få flux ui att bli skyddad av zitadel igen genom att lägga till security
-- [x] Säkerställ att webhook i flux fungerar och startar synkning policy i
-      kustomization.yaml igen
-- [x] Sätta upp så man inte kan pusha till main utan PR
-- [x] Push till plan kör CI-workflow från Deployment Pipeline Repot
-- [x] Göra så tester körs så fort en fil sars
-- [x] Fundera på hur jag bygger flera micro services med ett ci workflow
-- [x] Få spc.simonbrundin.com att fungera
-- [x] Skapa pr workflow för plan
-- [x] Kunna logga in med Zitadel på Plan
-- [ ] Byt ut graphql mot rest
-- [ ] Mål syns i prod
-- [x] Postgraphile istället för hasura
+- [ ] Pipeline för Plan fungerar igen
+- [ ] Devspace?
+- [ ] Devcontainer?
+- [ ] Plan går att använda
+  - [ ] Mål syns i prod
+  - [ ] Prod av Plan fungerar
+- [ ] Jag vill kunna se en visuell graf av min databas schema som jag kan se i
+      både prod och dev med tex tilt
+  - [ ] Chardb
+- [x] Byt ut graphql mot rest
 - [ ] Kolla så min app är upplagd efter
       [länk](https://nuxt.com/docs/4.x/directory-structure)
 - [ ] Installera Immich i Homelab
@@ -38,13 +18,10 @@
 - [ ] development mode i zitadel. vad betyder det och ska jag ha ktvå appar?
 - [ ] Installer Kyverno Chainsaw
 - [x] Zitadel nås via auth.simonbrundin.com
-- [ ] Jellyfin fungerande
+- [x] Jellyfin fungerande
 - [ ] Hårddisken i worker-2 fungerar
 - [ ] Installera sista datorn i klustret
 - [x] Installera Orange Pi:s
-- [ ] Plan går att använda
-- [ ] Prod av Plan fungerar
-- [ ] Pipeline för Plan fungerar
 - [x] Få igång plan i prod något enklare än authentik. och hur användarhantering
       egentligen fungerar i en modern webbapp
 - [x] skill - skapa encrypted secret
@@ -840,3 +817,99 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 - [x] Cron Jobs
 - [x] Cron Jobs
 - [x] Cron Jobs
+- [x] Testa secrets skill
+- [x] Installera zitadel i kluster
+- [x] Läsa in mig på skillnaden på oidc och idp. ifall jag kanske ska avnända
+- [x] Skydda longhorn url
+- [x] Säkerställ inte vem som helst kan skapa ett konto och logga in. Behövs
+      något speciellt scope?
+- [x] Uppdatera flux
+- [x] Skydda rutter
+- [x] Ta bort url skydd på flux tillfälligt tills zitadel är tillbaka
+- [x] auth.simonbrundin.com fungerar [ ] Dubbelkolla om någon ha arbete måste
+      göras i zitadel https://zitadel.com/docs/concepts/architecture/solution
+- [x] Flux Webhook fungerar
+- [x] Lös detta i Plan: Kustomization Failed 4m ago flux-system/plan health
+      check failed after 4m30.058886584s: timeout waiting for:
+      [Job/plan/grant-user-permissions status: 'InProgress']
+- [x] longhorn.simonbrundin.com använder oidc
+- [x] Uptime Kuma fungerade
+- [x] Få flux ui att bli skyddad av zitadel igen genom att lägga till security
+- [x] Säkerställ att webhook i flux fungerar och startar synkning policy i
+      kustomization.yaml igen
+- [x] Sätta upp så man inte kan pusha till main utan PR
+- [x] Push till plan kör CI-workflow från Deployment Pipeline Repot
+- [x] Göra så tester körs så fort en fil sars
+- [x] Fundera på hur jag bygger flera micro services med ett ci workflow
+- [x] Få spc.simonbrundin.com att fungera
+- [x] Skapa pr workflow för plan
+- [x] Kunna logga in med Zitadel på Plan
+
+# Cluster
+
+- [x] Uppdatera Agents.md med information om hur min infrastucture fungerar
+- [x] ´simon cluster health´ grönt
+  - [x] Få igång worker-2
+  - [x] Få alla Flux Komponenter att fungera
+  - [x] Föra över de sista komponenterna från ArgoCD till Flux
+  - [x] Få igång worker-9
+  - [x] Alla ArgoCD-poddar körs
+  - [x] skapa ett simon kommando som skapar en secret.yaml som är krypterad.
+        antingen med ett genegererat lösenord eller med ett jag väljer tex en
+        api nyckel
+  - [x] Sätt upp webhook för flux
+  - [x] Köra Config Sync i klustret så det bara går att göra förändringar via
+        Git.
+        [🚀 KRM-Native GitOps: Yes — Without Flux, No. (FluxCD or Nothing.)](https://www.linkedin.com/pulse/krm-native-gitops-yes-without-flux-fluxcd-nothing-mialon-wsmue/)
+- [x] Just nu känns det som upgrade körs varje gång jag kör simon talos update
+      config. så ska det ju inte vara.
+- [x] Lägga till en Kyverno-policy som gör det omöjligt att radera
+      longhorn-system namespacet
+  - [x] Installera Kyverno
+- [x] Köra kubescape eller liknande för att se säkerhetsproblem i mitt kluster
+- [x] Longhorn rapporterar grönt
+  - [x] 2 - Inte påslagen, troligtvis kör den igång från fel disk
+  - [x] 3 - Disken full
+  - [x] 5 - Disk 2 inte inkopplad
+  - [x] 6 - Disken full
+  - [x] 7 - Disken full
+  - [x] 9 - Systemdisk måste sättas i patch
+  - [x] ´simon kubernetes longhorn test´ för alla noder och se till att allt
+    - [x] Systemdisk blir grönt när konfiguerad serial är samma som installerad
+          är grönt
+    - [x] Extensions visar iscsi-tools och inte schematic
+- [ ] Uppdatera istallationsguide för en ny nod eller disk så rätt serial läggs
+      till i patchen
+- [x] Ändra installationsdisk för worker-2
+- [x] Få igång Vault backup
+- [x] Koppla in bilbatteri
+- [x] Uppgradera Kubernetes
+- [ ] Installera Talos på datorer
+  - [x] Mac Mini
+  - [ ] HP
+- [x] Dot AI
+- [x] Teleport fungerar
+- [x] Vault fungerar
+- [x] auth.simonbrundin.com fungerar
+- [x] Installera
+      [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
+- [x] Installera Renovate i klustret så jag får PRs om uppdateringar
+
+---
+
+---
+
+## Back on Kubernetes-track
+
+- [x] Kubelet CSR Approver fungerar
+- [x] ArgoCD fungerar
+
+### Longhord fungerar
+
+- [x] Få worker-5 stabil i csi-plugin och manager
+- [x] Förstå om det bara är dessa som fungerar egentligen. kubectl get
+      volumes.longhorn.io -n longhorn-system volumes.longhorn.io -n
+      longhorn-system
+- [x] Förstå om det bara är dessa som fungerar egentligen. kubectl get
+      volumes.longhorn.io -n longhorn-system volumes.longhorn.io -n
+      longhorn-system
