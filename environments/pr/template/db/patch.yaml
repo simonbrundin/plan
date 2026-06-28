@@ -1,0 +1,11 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: plan-db
+spec:
+  bootstrap:
+    initdb:
+      postInitApplicationSQLRefs:
+        configMapRefs:
+          - name: plan-db-seed
+            key: seed-data.sql

@@ -2,22 +2,18 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: plan-db
-  annotations:
-    argocd.argoproj.io/sync-options: Prune=false
+  namespace: plan
 spec:
-  instances: 3
+  instances: 1
 
   bootstrap:
     initdb:
       database: plan
       owner: admin
-      postInitApplicationSQL:
-        - CREATE ROLE "user" LOGIN;
-        - GRANT CREATE ON DATABASE plan TO "user";
 
   storage:
     storageClass: cnpg
-    size: 2Gi
+    size: 1Gi
     resizeInUseVolumes: true
   monitoring:
     enablePodMonitor: true
