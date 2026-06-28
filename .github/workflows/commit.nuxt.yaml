@@ -2,7 +2,7 @@ name: CI för Nuxt applikation
 on:
   push:
     paths:
-      - frontend/**
+      - src/nuxt/**
 jobs:
   unit-tests:
     permissions:
