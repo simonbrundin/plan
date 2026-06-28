@@ -21,8 +21,8 @@ jobs:
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
-      dockerfile: frontend/Dockerfile
-      dockerfile-context: frontend
+      dockerfile: src/nuxt/Dockerfile
+      dockerfile-context: src/nuxt
       registry: ghcr.io/simonbrundin/plan
 
   update-deployment:
