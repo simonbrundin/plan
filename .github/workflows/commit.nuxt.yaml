@@ -24,49 +24,16 @@ jobs:
       dockerfile: src/nuxt/Dockerfile
       dockerfile-context: src/nuxt
       registry: ghcr.io/simonbrundin/plan
-
-  # acceptance:
-  #   needs: build-publish-image
-  #   uses: simonbrundin/deployment-pipeline/.github/workflows/acceptance.yaml@main
-  #   with:
-  #     image: ${{ needs.build-publish-image.outputs.image }}
-
-  update-deployment:
+  store-image-tag:
     needs: build-publish-image
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: read
-      pull-requests: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
-
-      - name: Update image in deployment-patch.yaml
-        env:
-          IMAGE: ${{ needs.build-publish-image.outputs.image }}
+      - name: Store image tag
         run: |
-          echo "Updating image to: $IMAGE"
-          sed -i "s|image: ghcr.io/simonbrundin/plan:.*|image: $IMAGE|" \
-            environments/production/patches/deployment.yaml
-          cat environments/production/patches/deployment.yaml
-
-      - name: Create PR with image update
-        uses: peter-evans/create-pull-request@v7
+          echo "${{ needs.build-publish-image.outputs.image }}" > image-tag.txt
+      - name: Upload image tag
+        uses: actions/upload-artifact@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update plan-app image [skip ci]"
-          branch: bot/update-plan-app-image
-          delete-branch: true
-          title: "chore: update plan-app image"
-          body: |
-            Automated image update from commit workflow
-            - Image: `${{ needs.build-publish-image.outputs.image }}`
-          labels: |
-            ci
-            skip-review
-          add-paths: |
-            environments/production/patches/deployment.yaml
+          name: image-tag
+          path: image-tag.txt
+          retention-days: 1

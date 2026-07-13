@@ -1,0 +1,62 @@
+name: Update Deployment
+on:
+  workflow_run:
+    workflows: ["CI för Nuxt applikation"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  update-deployment:
+    if: >-
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+          ref: main
+
+      - name: Download image tag artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image-tag
+          path: /tmp
+
+      - name: Read image tag
+        id: image
+        run: |
+          IMAGE=$(cat /tmp/image-tag.txt)
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "Using image: $IMAGE"
+
+      - name: Update deployment-patch.yaml
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          echo "Updating image to: $IMAGE"
+          sed -i "s|image: ghcr.io/simonbrundin/plan:.*|image: $IMAGE|" \
+            environments/production/patches/deployment.yaml
+          cat environments/production/patches/deployment.yaml
+
+      - name: Create PR with image update
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update plan-app image [skip ci]"
+          branch: bot/update-plan-app-image
+          delete-branch: true
+          title: "chore: update plan-app image"
+          body: |
+            Automated image update from commit workflow
+            - Image: `${{ steps.image.outputs.image }}`
+          labels: |
+            ci
+            skip-review
+          add-paths: |
+            environments/production/patches/deployment.yaml
