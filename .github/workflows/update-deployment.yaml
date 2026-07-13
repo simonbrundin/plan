@@ -15,30 +15,33 @@ jobs:
       packages: read
       pull-requests: write
     steps:
-      - name: Checkout repository
+      - name: Checkout image tag from CI branch
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
-          ref: main
-
-      - name: Download image tag artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: image-tag
-          path: /tmp
+          repository: ${{ github.repository }}
+          ref: ci-latest
+          path: ci-tag
 
       - name: Read image tag
         id: image
         run: |
-          IMAGE=$(cat /tmp/image-tag.txt)
+          IMAGE=$(cat ci-tag/.image-tag)
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
           echo "Using image: $IMAGE"
+
+      - name: Checkout main for deployment update
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+          path: main
 
       - name: Update deployment-patch.yaml
         env:
           IMAGE: ${{ steps.image.outputs.image }}
         run: |
+          cd main
           echo "Updating image to: $IMAGE"
           sed -i "s|image: ghcr.io/simonbrundin/plan:.*|image: $IMAGE|" \
             environments/production/patches/deployment.yaml

@@ -27,13 +27,18 @@ jobs:
   store-image-tag:
     needs: build-publish-image
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Store image tag
+      - name: Push image tag to CI branch
         run: |
-          echo "${{ needs.build-publish-image.outputs.image }}" > image-tag.txt
-      - name: Upload image tag
-        uses: actions/upload-artifact@v4
-        with:
-          name: image-tag
-          path: image-tag.txt
-          retention-days: 1
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin ci-latest:ci-latest 2>/dev/null || \
+            git checkout --orphan ci-latest
+
+          echo "${{ needs.build-publish-image.outputs.image }}" > .image-tag
+          git add .image-tag
+          git commit -m "chore: update image tag" || echo "No changes"
+          git push -f origin ci-latest:ci-latest
