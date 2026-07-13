@@ -48,8 +48,9 @@ jobs:
             git init
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
+            git checkout -b ci-latest
             git commit --allow-empty -m "initial"
-            git push -u "$REPO_URL" HEAD:ci-latest
+            git push -u "$REPO_URL" ci-latest
             cd ..
           fi
 
