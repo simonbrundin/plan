@@ -24,39 +24,42 @@ jobs:
       dockerfile: src/nuxt/Dockerfile
       dockerfile-context: src/nuxt
       registry: ghcr.io/simonbrundin/plan
-  store-image-tag:
+  update-deployment:
     needs: build-publish-image
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
-      - name: Push image tag to CI branch
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+          ref: main
+
+      - name: Update deployment image
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_TAG: ${{ needs.build-publish-image.outputs.image }}
+          IMAGE: ${{ needs.build-publish-image.outputs.image }}
         run: |
-          REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          echo "Updating image to: $IMAGE"
+          sed -i "s|image: ghcr.io/simonbrundin/plan:.*|image: $IMAGE|" \
+            environments/production/patches/deployment.yaml
+          cat environments/production/patches/deployment.yaml
 
-          # Clone ci-latest branch or create empty one
-          if git clone --depth 1 --branch ci-latest \
-            "$REPO_URL" ci-branch 2>/dev/null; then
-            echo "Cloned existing ci-latest branch"
-          else
-            echo "Creating new ci-latest branch"
-            mkdir ci-branch
-            cd ci-branch
-            git init
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git checkout -b ci-latest
-            git commit --allow-empty -m "initial"
-            git push -u "$REPO_URL" ci-latest
-            cd ..
-          fi
-
-          # Update image tag
-          cd ci-branch
-          echo "$IMAGE_TAG" > .image-tag
-          git add .image-tag
-          git commit -m "chore: update image tag" || echo "No changes"
-          git push -f "$REPO_URL" ci-latest:ci-latest
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update plan-app image [skip ci]"
+          branch: bot/update-plan-app-image
+          delete-branch: true
+          title: "chore: update plan-app image"
+          body: |
+            Automated image update from commit workflow
+            - Image: `${{ needs.build-publish-image.outputs.image }}`
+          labels: |
+            ci
+            skip-review
+          add-paths: |
+            environments/production/patches/deployment.yaml
