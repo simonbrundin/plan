@@ -1,17 +1,36 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Pipeline för Plan fungerar igen
-- [ ] Devspace?
-- [ ] Devcontainer?
+- [ ] Prod av Plan fungerar
 - [ ] Plan går att använda
   - [ ] Mål syns i prod
-  - [ ] Prod av Plan fungerar
+
+- [ ] Bilservicelista
+- [ ] Beställ skenor till mamma
+- [ ] Köp plywood
+- [x] Köp båt
+- [ ] Konstruera plywoodlådor
+- [x] Ladda batterierna i vanen
+- [x] Boka besiktning för van
+- [x] Youtubea hur man byter spindelled
+- [x] Birsta
+  - [x] Mekonomen
+  - [x] Thansen
+    - [x] [Oljekanna](https://www.thansen.se/moped-mc/olja-rengoring-och-tvatt/tillbehor/oljedunk-med-maatt-och-flexibel-pip-5-liter./n-487136321/pn-233898265)
+  - [x] [Oljeplugg](https://www.mekonomen.se/oljepluggspackning-corteco-10105029)
+    - [x] Universalrengöring
+  - [x] Biltema - KÖP-lista
+- [ ] Pipeline för Plan fungerar igen
+- [ ] Sätt upp
+      [Action Runner Controller](https://github.com/actions/actions-runner-controller)
+- [ ] Daevspace?
+- [ ] Devcontainer?
 - [ ] Jag vill kunna se en visuell graf av min databas schema som jag kan se i
       både prod och dev med tex tilt
   - [ ] Chardb
 - [x] Byt ut graphql mot rest
 - [ ] Kolla så min app är upplagd efter
       [länk](https://nuxt.com/docs/4.x/directory-structure)
+- [ ] Installera Calibre i Homelab
 - [ ] Installera Immich i Homelab
 - [x] iptv fungerar
 - [ ] Dashboard för allt. En del ska vara dora metrics för mina olika projekt
@@ -912,4 +931,4 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
       longhorn-system
 - [x] Förstå om det bara är dessa som fungerar egentligen. kubectl get
       volumes.longhorn.io -n longhorn-system volumes.longhorn.io -n
-      longhorn-system
+      longhorn-system longhorn-system

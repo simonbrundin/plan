@@ -2,5 +2,6 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: plan-db
+  namespace: plan
 spec:
   instances: 3
