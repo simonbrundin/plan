@@ -83,6 +83,15 @@ export function usePriorityMode() {
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toLowerCase();
 
+		// Prioritetslägets tangenthantering ska ENDAST vara aktiv på
+		// prioritetssidan. På andra sidor (t.ex. goal-sidan) har sidan
+		// sin egen vim-hantering och den globala hanteraren ska inte
+		// fånga l/j/k och navigera till prioriterade mål.
+		const route = useRoute();
+		if (route.path !== "/priority") {
+			return;
+		}
+
 		heldKeys.value.add(key);
 		isPriorityMode.value = heldKeys.value.has("p");
 
@@ -137,6 +146,11 @@ export function usePriorityMode() {
 	}
 
 	function handleKeyup(event: KeyboardEvent) {
+		const route = useRoute();
+		if (route.path !== "/priority") {
+			return;
+		}
+
 		const key = event.key.toLowerCase();
 		heldKeys.value.delete(key);
 
