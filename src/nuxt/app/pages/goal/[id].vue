@@ -15,7 +15,7 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const goalId = parseInt(route.params.id as string);
+const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
 const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
 
@@ -29,7 +29,7 @@ const refresh = async () => {
   error.value = null;
 
   try {
-    goalData.value = await fetchGoalData(goalId);
+    goalData.value = await fetchGoalData(goalId.value);
   } catch (err) {
     console.error("Fetch goal error:", err);
     error.value = err instanceof Error ? err.message : "Unknown error";
@@ -40,6 +40,14 @@ const refresh = async () => {
 
 // Fetch initial data
 await refresh();
+
+// Re-fetch when navigating to a different goal
+watch(
+  () => route.params.id,
+  async () => {
+    await refresh();
+  }
+);
 
 const goal = computed(() => goalData.value?.goal);
 
@@ -115,15 +123,15 @@ const searchResults = computed(() => {
   // Filtrera bort nuvarande målet och befintliga föräldrar
   const currentParentIds = parents.value.map((p) => p.id);
   return results.filter(
-    (g) => g.id !== goalId && !currentParentIds.includes(g.id)
+    (g) => g.id !== goalId.value && !currentParentIds.includes(g.id)
   );
 });
 
 // Lägg till befintligt mål som förälder
 async function addExistingParent(parentId: number) {
   try {
-    await addParentRelation(goalId, parentId);
-    goalsStore.addRelation(goalId, parentId);
+    await addParentRelation(goalId.value, parentId);
+    goalsStore.addRelation(goalId.value, parentId);
     await refresh();
     showParentSearch.value = false;
     parentSearchQuery.value = "";
@@ -138,9 +146,9 @@ async function createNewParent() {
 
   try {
     const newGoal = await createGoal(parentSearchQuery.value.trim());
-    await addParentRelation(goalId, newGoal.id);
+    await addParentRelation(goalId.value, newGoal.id);
     goalsStore.addGoal(newGoal);
-    goalsStore.addRelation(goalId, newGoal.id);
+    goalsStore.addRelation(goalId.value, newGoal.id);
     await goalsStore.loadGoals();
     showParentSearch.value = false;
     parentSearchQuery.value = "";
@@ -188,7 +196,7 @@ const childSearchResults = computed(() => {
   // Filtrera bort nuvarande målet och befintliga barn
   const currentChildIds = children.value.map((c) => c.id);
   return results.filter(
-    (g) => g.id !== goalId && !currentChildIds.includes(g.id)
+    (g) => g.id !== goalId.value && !currentChildIds.includes(g.id)
   );
 });
 
@@ -196,8 +204,8 @@ const childSearchResults = computed(() => {
 async function addExistingChild(childId: number) {
   try {
     const nextOrder = goal.value?.childRelations?.length || 0;
-    await addChildRelation(childId, goalId, nextOrder);
-    goalsStore.addRelation(childId, goalId);
+    await addChildRelation(childId, goalId.value, nextOrder);
+    goalsStore.addRelation(childId, goalId.value);
     await refresh();
     showChildSearch.value = false;
     childSearchQuery.value = "";
@@ -213,9 +221,9 @@ async function addExistingChild(childId: number) {
     try {
       const newGoal = await createGoal(childSearchQuery.value.trim());
       const nextOrder = children.value.length;
-      await addChildRelation(newGoal.id, goalId, nextOrder);
+      await addChildRelation(newGoal.id, goalId.value, nextOrder);
       goalsStore.addGoal(newGoal);
-      goalsStore.addRelation(newGoal.id, goalId);
+      goalsStore.addRelation(newGoal.id, goalId.value);
       await goalsStore.loadGoals();
       await refresh();
       // Markera det nya målet direkt
@@ -272,8 +280,8 @@ async function confirmRemoveParent() {
   if (!parentToRemove.value) return;
 
   try {
-    await removeParentRelation(goalId, parentToRemove.value);
-    goalsStore.removeRelation(goalId, parentToRemove.value);
+    await removeParentRelation(goalId.value, parentToRemove.value);
+    goalsStore.removeRelation(goalId.value, parentToRemove.value);
     await refresh();
     showRemoveConfirmation.value = false;
     parentToRemove.value = null;
@@ -395,8 +403,8 @@ async function handleDrop(event: DragEvent, dropChildId: number) {
   // Reparent: ta bort från nuvarande förälder och lägg till som barn till dropChildId
   try {
     // Ta bort relation med nuvarande förälder
-    await removeParentRelation(draggedId, goalId);
-    goalsStore.removeRelation(draggedId, goalId);
+    await removeParentRelation(draggedId, goalId.value);
+    goalsStore.removeRelation(draggedId, goalId.value);
     
     // Räkna befintliga barn till dropTargetChild för att bestämma ordning
     const targetChildrenCount = children.value.filter(c => {
@@ -445,8 +453,8 @@ async function moveChildUp() {
     const aboveOrder = aboveChild.order;
 
     await Promise.all([
-      updateGoalOrder(goalId, movingChild.id, aboveOrder),
-      updateGoalOrder(goalId, aboveChild.id, movingOrder),
+      updateGoalOrder(goalId.value, movingChild.id, aboveOrder),
+      updateGoalOrder(goalId.value, aboveChild.id, movingOrder),
     ]);
 
     // Uppdatera markerad index
@@ -487,8 +495,8 @@ async function moveChildDown() {
     const belowOrder = belowChild.order;
 
     await Promise.all([
-      updateGoalOrder(goalId, movingChild.id, belowOrder),
-      updateGoalOrder(goalId, belowChild.id, movingOrder),
+      updateGoalOrder(goalId.value, movingChild.id, belowOrder),
+      updateGoalOrder(goalId.value, belowChild.id, movingOrder),
     ]);
 
     // Uppdatera markerad index
@@ -699,9 +707,9 @@ async function createSiblingGoal() {
 
   try {
     const newGoal = await createGoal("", userId);
-    await addParentRelation(newGoal.id, goalId);
+    await addParentRelation(newGoal.id, goalId.value);
     goalsStore.addGoal(newGoal);
-    goalsStore.addRelation(newGoal.id, goalId);
+    goalsStore.addRelation(newGoal.id, goalId.value);
     await refresh();
     await enterInsertMode(newGoal.id, "", false);
   } catch (error) {
@@ -738,7 +746,7 @@ async function toggleFinished(goalToToggle: Goal) {
 async function updateGoalIcon(newIcon: string) {
   try {
     // Bestäm vilket mål som ska uppdateras
-    const targetGoalId = editingIconGoalId.value || goalId;
+    const targetGoalId = editingIconGoalId.value || goalId.value;
 
     await updateGoalIconApi(targetGoalId, newIcon);
 
@@ -786,7 +794,7 @@ function startWeightEdit(child: GoalWithWeight) {
 async function saveWeight() {
   if (weightEditingChildId.value !== null) {
     try {
-      await updateGoalWeight(goalId, weightEditingChildId.value, tempWeight.value)
+      await updateGoalWeight(goalId.value, weightEditingChildId.value, tempWeight.value)
       await refresh()
     } catch (error) {
       console.error("Failed to update weight:", error)
