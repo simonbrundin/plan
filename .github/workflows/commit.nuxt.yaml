@@ -30,22 +30,32 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
-          fetch-depth: 0
-
       - name: Push image tag to CI branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.build-publish-image.outputs.image }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
-          git fetch origin ci-latest:ci-latest 2>/dev/null || \
-            git checkout --orphan ci-latest
+          # Clone ci-latest branch or create empty one
+          if git clone --depth 1 --branch ci-latest \
+            "$REPO_URL" ci-branch 2>/dev/null; then
+            echo "Cloned existing ci-latest branch"
+          else
+            echo "Creating new ci-latest branch"
+            mkdir ci-branch
+            cd ci-branch
+            git init
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "initial"
+            git push -u "$REPO_URL" HEAD:ci-latest
+            cd ..
+          fi
 
-          echo "${{ needs.build-publish-image.outputs.image }}" > .image-tag
+          # Update image tag
+          cd ci-branch
+          echo "$IMAGE_TAG" > .image-tag
           git add .image-tag
           git commit -m "chore: update image tag" || echo "No changes"
-          git push -f origin ci-latest:ci-latest
+          git push -f "$REPO_URL" ci-latest:ci-latest
