@@ -27,7 +27,7 @@ local_resource(
   'Nuxt Dev Server',
   serve_cmd=[
     'bash', '-c',
-    'cd ../frontend && ' +
+    'cd ../src/nuxt && ' +
     'set -a && source .env && set +a && ' +
     'bun run dev --host'
   ],
