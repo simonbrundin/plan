@@ -4,5 +4,13 @@ kind: Kustomization
 resources:
   - ../../common/db
 
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: plan-db-schema
+    files:
+      - schema.sql=schema.sql
+
 patches:
   - path: instances-patch.yaml
