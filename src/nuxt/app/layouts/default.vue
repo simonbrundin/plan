@@ -22,6 +22,10 @@ const {
 } = usePriorityMode();
 
 const {
+  handleKeydown: handlePriorityToggleKeydown,
+} = usePriorityToggle();
+
+const {
   enableNavigation,
   disableNavigation,
   handleKeydown: handleNavigationKeydown,
@@ -152,6 +156,7 @@ function handleGlobalKeydown(event: KeyboardEvent) {
 
   handlePriorityKeydown(event);
   handleNavigationKeydown(event);
+  handlePriorityToggleKeydown(event);
 }
 
 function handleGlobalKeyup(event: KeyboardEvent) {
