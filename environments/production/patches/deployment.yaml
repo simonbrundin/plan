@@ -7,10 +7,13 @@ spec:
     spec:
       containers:
         - name: plan-app
-          image: ghcr.io/simonbrundin/plan@sha256:0aaf4c1bbee00b4d3c14fe700d520831db6f73f5afe48081d3f1612a6ef421b3
+          # Updated by .github/workflows/commit.nuxt.yaml.
+          image: ghcr.io/simonbrundin/plan@sha256:0aaf4c1bbee00b4d3c14fe700d520831db6f73f5afe48081d3f1612a6ef421b3  # yamllint disable-line rule:line-length
           env:
             - name: NODE_ENV
               value: "production"
+            - name: NUXT_PUBLIC_APP_URL
+              value: "https://plan.simonbrundin.com"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
