@@ -8,7 +8,7 @@ spec:
       containers:
         - name: plan-app
           # Updated by .github/workflows/commit.nuxt.yaml.
-          image: ghcr.io/simonbrundin/plan@sha256:0aaf4c1bbee00b4d3c14fe700d520831db6f73f5afe48081d3f1612a6ef421b3  # yamllint disable-line rule:line-length
+          image: ghcr.io/simonbrundin/plan@sha256:0afa3fc5a481096f69be8b0af9959d25d494db8a1d4e887881b6d41aa1fbe7dd
           env:
             - name: NODE_ENV
               value: "production"
