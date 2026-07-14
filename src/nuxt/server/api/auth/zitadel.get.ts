@@ -20,7 +20,7 @@ export default eventHandler(async (event) => {
 
 	const ZITADEL_DOMAIN = config.oauth.zitadel.domain;
 	const CLIENT_ID = config.oauth.zitadel.clientId;
-	const REDIRECT_URL = config.public.appUrl + "/api/auth/zitadel";
+	const REDIRECT_URL = config.oauth.zitadel.redirectUrl;
 
 	console.log("=== ZITADEL HANDLER ===");
 
