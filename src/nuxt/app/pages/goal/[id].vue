@@ -1314,11 +1314,20 @@ watch(selectedParentIndex, async () => {
                    title="Ändra ikon">
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
-                 <div class="flex-1 p-4 block cursor-pointer" @click="$router.push(`/goal/${child.id}`)">
-                  <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
+                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
+                  <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
-                </div>
+                </NuxtLink>
+                <button
+                  v-if="weightEditingChildId !== child.id"
+                  @click.stop="startWeightEdit(child)"
+                  class="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors p-2 rounded hover:bg-gray-800"
+                  title="Ändra vikt">
+                  <span class="text-xs font-mono px-2 py-1 rounded bg-gray-800">
+                    {{ child.weight }}
+                  </span>
+                </button>
                 <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
                   <div class="flex items-center gap-2">
                     <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1" />
