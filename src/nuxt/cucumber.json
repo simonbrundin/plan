@@ -1,10 +1,6 @@
 {
 	"paths": ["features/**/*.feature"],
-	"import": [
-		"features/support/hooks.ts",
-		"features/step-definitions/*.ts"
-	],
-	"loader": ["tsx"],
+	"import": ["tsx", "features/step-definitions/priority.steps.ts"],
 	"world": {
 		"newId": "random"
 	},
