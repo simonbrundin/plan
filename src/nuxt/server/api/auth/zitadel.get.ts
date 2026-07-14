@@ -24,9 +24,14 @@ export default eventHandler(async (event) => {
 		config.oauth.zitadel.redirectUrl ||
 		config.public.appUrl + "/api/auth/zitadel";
 
-	if (!REDIRECT_URL.startsWith("http://") && !REDIRECT_URL.startsWith("https://")) {
+	try {
+		const parsed = new URL(REDIRECT_URL);
+		if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+			throw new Error("protocol not http/https");
+		}
+	} catch {
 		throw new Error(
-			`REDIRECT_URL must be an absolute URL (got: "${REDIRECT_URL}"). ` +
+			`REDIRECT_URL must be an absolute http(s) URL (got: "${REDIRECT_URL}"). ` +
 				"Set NUXT_OAUTH_ZITADEL_REDIRECT_URL or NUXT_PUBLIC_APP_URL.",
 		);
 	}
