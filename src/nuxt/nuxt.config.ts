@@ -80,11 +80,9 @@ export default defineNuxtConfig({
 				domain: process.env.NUXT_OAUTH_ZITADEL_DOMAIN || "",
 				// Full absolute callback URL registered with the Zitadel client
 				// (e.g. https://plan.simonbrundin.com/api/auth/zitadel).
-				// Falls back to `public.appUrl + path` when unset so dev / PR envs
+				// Falls back in the handler to `public.appUrl + path` when unset so dev / PR envs
 				// keep working without an extra secret.
-				redirectUrl:
-					process.env.NUXT_OAUTH_ZITADEL_REDIRECT_URL ||
-					`${process.env.NUXT_PUBLIC_APP_URL || ""}/api/auth/zitadel`,
+				redirectUrl: process.env.NUXT_OAUTH_ZITADEL_REDIRECT_URL || "",
 			},
 		},
 	},
