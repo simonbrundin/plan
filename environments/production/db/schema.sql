@@ -15,6 +15,7 @@ CREATE TABLE "goals" (
   "title" VARCHAR(64),
   "icon" VARCHAR(100) DEFAULT 'heroicons:star',
   "created" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "started" TIMESTAMPTZ,
   "finished" TIMESTAMPTZ,
   "inbox" INTEGER DEFAULT 1 NOT NULL,
   PRIMARY KEY("id")

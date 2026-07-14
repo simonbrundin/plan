@@ -1,0 +1,8 @@
+{
+	"paths": ["features/**/*.feature"],
+	"import": ["tsx", "features/step-definitions/priority.steps.ts"],
+	"world": {
+		"newId": "random"
+	},
+	"format": ["progress"]
+}

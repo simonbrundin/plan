@@ -31,6 +31,13 @@ export function useGoalApi() {
 		});
 	};
 
+	const toggleGoalStarted = async (goalId: number, started: string | null) => {
+		await $fetch(`/api/goals/${goalId}`, {
+			method: "PATCH",
+			body: { started },
+		});
+	};
+
 	const toggleGoalFinished = async (
 		goalId: number,
 		finished: string | null,
@@ -109,6 +116,7 @@ export function useGoalApi() {
 		fetchGoalData,
 		updateGoalTitle,
 		updateGoalIcon,
+		toggleGoalStarted,
 		toggleGoalFinished,
 		deleteGoal,
 		addParentRelation,

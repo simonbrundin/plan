@@ -17,7 +17,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -82,6 +82,7 @@ onMounted(async () => {
 
 // Visa/dölj avklarade mål
 const showCompleted = ref(false);
+const showStarted = ref(false);
 
 // Icon picker state
 const showIconPicker = ref(false);
@@ -92,12 +93,16 @@ const editingIconGoalIcon = ref<string>('');
 const weightEditingChildId = ref<number | null>(null);
 const tempWeight = ref(10);
 
-// Filtrerade undermål baserat på showCompleted
+// Filtrerade undermål baserat på showCompleted och showStarted
 const filteredChildren = computed(() => {
-  if (showCompleted.value) {
-    return children.value;
+  let result = children.value;
+  if (!showCompleted.value) {
+    result = result.filter((c) => !c.finished);
   }
-  return children.value.filter((c) => !c.finished);
+  if (showStarted.value) {
+    result = result.filter((c) => c.started !== null);
+  }
+  return result;
 });
 
 // Sökfunktion för att lägga till föräldrar
@@ -742,6 +747,24 @@ async function toggleFinished(goalToToggle: Goal) {
   }
 }
 
+// Toggla started status på ett mål
+async function toggleStarted(goalToToggle: Goal) {
+  try {
+    const newStartedValue = goalToToggle.started ? null : new Date().toISOString();
+    await toggleGoalStarted(goalToToggle.id, newStartedValue);
+    goalsStore.updateGoal(goalToToggle.id, { started: newStartedValue });
+    if (goalData.value?.allGoals) {
+      const goalIndex = goalData.value.allGoals.findIndex((g) => g.id === goalToToggle.id);
+      if (goalIndex !== -1) {
+        goalData.value.allGoals[goalIndex].started = newStartedValue;
+      }
+    }
+    await refresh();
+  } catch (error) {
+    console.error("Failed to toggle goal started status:", error);
+  }
+}
+
 // Uppdatera goal icon
 async function updateGoalIcon(newIcon: string) {
   try {
@@ -921,9 +944,31 @@ function handleKeydown(event: KeyboardEvent) {
     if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
       toggleFinished(parent);
-    } else if (filteredChildren.value.length > 0) {
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
       const child = filteredChildren.value[selectedChildIndex.value];
       toggleFinished(child);
+    }
+    return;
+  }
+
+  // Hantera 's' för att toggla started status
+  if (event.key === "s") {
+    event.preventDefault();
+    if (isParentMode.value && parents.value.length > 0) {
+      const parent = parents.value[selectedParentIndex.value];
+      toggleStarted(parent);
+    } else if (isGoalSelected.value && goal.value) {
+      toggleStarted(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      const child = filteredChildren.value[selectedChildIndex.value];
+      toggleStarted(child);
     }
     return;
   }
@@ -1148,9 +1193,7 @@ watch(selectedParentIndex, async () => {
         <button @click="toggleParentSearch"
           class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
           title="Lägg till förälder">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+          <Icon name="lucide:plus" class="h-5 w-5" />
         </button>
       </div>
 
@@ -1193,6 +1236,17 @@ watch(selectedParentIndex, async () => {
         <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
           isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
         ]">{{ goal?.title }}</h1>
+        <!-- Started-toggle (s) -->
+        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          @click.stop="toggleStarted(goal)"
+          class="p-2 rounded transition-colors"
+          :class="goal.started
+            ? 'text-yellow-400 hover:text-yellow-300'
+            : 'text-gray-600 hover:text-gray-400'"
+          title="Påbörja (s)">
+          <Icon name="lucide:circle-play" class="w-6 h-6"
+            :style="{ opacity: goal.started ? 1 : 0.25 }" />
+        </button>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
@@ -1207,26 +1261,20 @@ watch(selectedParentIndex, async () => {
             <button @click="showCompleted = !showCompleted"
               class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800" :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'
                 ">
-              <svg v-if="showCompleted" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-              </svg>
+              <Icon :name="showCompleted ? 'lucide:eye' : 'lucide:eye-off'" class="h-5 w-5" />
+            </button>
+            <!-- Visa endast påbörjade -->
+            <button @click="showStarted = !showStarted"
+              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
+              :class="showStarted ? 'text-yellow-400' : ''"
+              :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'">
+              <Icon name="lucide:circle-play" class="h-5 w-5"
+                :style="{ opacity: showStarted ? 1 : 0.3 }" />
             </button>
             <button @click="toggleChildSearch"
               class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
               title="Lägg till undermål">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
+              <Icon name="lucide:plus" class="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -1314,11 +1362,29 @@ watch(selectedParentIndex, async () => {
                    title="Ändra ikon">
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
-                 <div class="flex-1 p-4 block cursor-pointer" @click="$router.push(`/goal/${child.id}`)">
-                  <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
+                 <!-- Started-toggle (s) -->
+                 <button
+                   @click.stop="toggleStarted(child)"
+                   class="flex-shrink-0 p-1 rounded transition-colors"
+                   :class="child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-400'"
+                   title="Påbörja (s)">
+                   <Icon name="lucide:circle-play" class="w-5 h-5"
+                     :style="{ opacity: child.started ? 1 : 0.25 }" />
+                 </button>
+                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
+                  <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
-                </div>
+                </NuxtLink>
+                <button
+                  v-if="weightEditingChildId !== child.id"
+                  @click.stop="startWeightEdit(child)"
+                  class="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors p-2 rounded hover:bg-gray-800"
+                  title="Ändra vikt">
+                  <span class="text-xs font-mono px-2 py-1 rounded bg-gray-800">
+                    {{ child.weight }}
+                  </span>
+                </button>
                 <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
                   <div class="flex items-center gap-2">
                     <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1" />

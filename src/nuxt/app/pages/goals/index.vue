@@ -2,7 +2,7 @@
 import type { Goal } from '~/types/goal'
 
 const router = useRouter()
-const { toggleGoalFinished, deleteGoal } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, deleteGoal } = useGoalApi()
 
 const { data: goals, pending, error, refresh } = await useFetch<Goal[]>('/api/goals')
 
@@ -16,13 +16,18 @@ watch(goals, (newGoals) => {
 }, { immediate: true })
 
 const displayedGoals = computed(() => localGoals.value)
+const showStarted = ref(false)
 
 const filteredGoals = computed(() => {
-  if (!searchQuery.value) return displayedGoals.value
-  const query = searchQuery.value.toLowerCase()
-  return displayedGoals.value.filter(g => 
-    g.title.toLowerCase().includes(query)
-  )
+  let result = displayedGoals.value
+  if (showStarted.value) {
+    result = result.filter(g => g.started !== null)
+  }
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(g => g.title.toLowerCase().includes(query))
+  }
+  return result
 })
 
 // Navigera till mål
@@ -51,6 +56,20 @@ async function toggleFinished(goal: Goal) {
     }
   } catch (err) {
     console.error('Failed to toggle finished:', err)
+  }
+}
+
+// Toggle started
+async function toggleStarted(goal: Goal) {
+  try {
+    const newStartedValue = goal.started ? null : new Date().toISOString()
+    await toggleGoalStarted(goal.id, newStartedValue)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    if (idx !== -1) {
+      localGoals.value[idx] = { ...localGoals.value[idx], started: newStartedValue }
+    }
+  } catch (err) {
+    console.error('Failed to toggle started:', err)
   }
 }
 
@@ -112,6 +131,15 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault()
     if (filteredGoals.value.length > 0) {
       toggleFinished(filteredGoals.value[selectedIndex.value])
+    }
+    return
+  }
+
+  // s - toggle started
+  if (event.key === 's') {
+    event.preventDefault()
+    if (filteredGoals.value.length > 0) {
+      toggleStarted(filteredGoals.value[selectedIndex.value])
     }
     return
   }
@@ -198,9 +226,19 @@ definePageMeta({
   <div class="p-6 max-w-4xl mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-3xl font-bold">Mina mål</h1>
-      <span class="text-gray-500 text-sm">
-        j/k navigera · l/Enter öppna · d klar · x ta bort
-      </span>
+      <div class="flex items-center gap-3">
+        <!-- Visa endast påbörjade -->
+        <button @click="showStarted = !showStarted"
+          class="p-1 rounded transition-colors"
+          :class="showStarted ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-500 hover:text-gray-300'"
+          :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'">
+          <Icon name="lucide:circle-play" class="w-5 h-5"
+            :style="{ opacity: showStarted ? 1 : 0.3 }" />
+        </button>
+        <span class="text-gray-500 text-sm">
+          j/k navigera · l/Enter öppna · d klar · x ta bort
+        </span>
+      </div>
     </div>
 
     <div v-if="pending" class="text-gray-400">
@@ -226,6 +264,14 @@ definePageMeta({
         @click="goToGoal(goal.id)"
       >
         <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0" />
+        <!-- Started (klicka eller s) -->
+        <button @click.stop="toggleStarted(goal)"
+          class="flex-shrink-0 p-1 rounded transition-colors"
+          :class="goal.started ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'"
+          :title="goal.started ? 'Avmarkerad (s)' : 'Påbörja (s)'">
+          <Icon name="lucide:circle-play" class="w-5 h-5"
+            :style="{ opacity: goal.started ? 1 : 0.25 }" />
+        </button>
         <span class="flex-1 truncate">{{ goal.title }}</span>
         <span v-if="goal.finished" class="text-green-400 text-sm">✓ Klar</span>
         <span v-else class="text-gray-500 text-sm">#{{ goal.id }}</span>

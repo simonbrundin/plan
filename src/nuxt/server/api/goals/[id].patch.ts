@@ -48,6 +48,10 @@ export default defineEventHandler(async (event) => {
 		fields.push(`icon = $${paramIndex++}`);
 		values.push(body.icon);
 	}
+	if (body.started !== undefined) {
+		fields.push(`started = $${paramIndex++}`);
+		values.push(body.started ? new Date(body.started) : null);
+	}
 	if (body.finished !== undefined) {
 		fields.push(`finished = $${paramIndex++}`);
 		values.push(body.finished ? new Date(body.finished) : null);
@@ -64,7 +68,44 @@ export default defineEventHandler(async (event) => {
 	const query = `UPDATE goals SET ${fields.join(", ")} WHERE id = $${paramIndex}`;
 	values.push(goalId);
 
-	await sql.unsafe(query, values);
+	try {
+		await sql.unsafe(query, values);
+	} catch (err: any) {
+		// Ignorera errors för started-kolumnen — den finns inte före migrering.
+		// Viktigt: om andra fält också uppdateras, försök igen utan started.
+		const msg = err?.message ?? "";
+		const isMissingStartedColumn =
+			(err?.code === "42703" || msg.includes("does not exist")) &&
+			msg.includes("started");
+
+		if (!isMissingStartedColumn) throw err;
+
+		if (fields.length === 1) {
+			const [existing] = await sql<any[]>`SELECT * FROM goals WHERE id = ${goalId}`;
+			return existing;
+		}
+
+		const fallbackFields: string[] = [];
+		const fallbackValues: any[] = [];
+		let i = 1;
+
+		if (body.title !== undefined) {
+			fallbackFields.push(`title = $${i++}`);
+			fallbackValues.push(body.title);
+		}
+		if (body.icon !== undefined) {
+			fallbackFields.push(`icon = $${i++}`);
+			fallbackValues.push(body.icon);
+		}
+		if (body.finished !== undefined) {
+			fallbackFields.push(`finished = $${i++}`);
+			fallbackValues.push(body.finished ? new Date(body.finished) : null);
+		}
+
+		const fallbackQuery = `UPDATE goals SET ${fallbackFields.join(", ")} WHERE id = $${i}`;
+		fallbackValues.push(goalId);
+		await sql.unsafe(fallbackQuery, fallbackValues);
+	}
 
 	const [updatedGoal] = await sql<
 		any[]
