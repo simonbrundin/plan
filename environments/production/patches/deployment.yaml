@@ -8,7 +8,7 @@ spec:
       containers:
         - name: plan-app
           # Updated by .github/workflows/commit.nuxt.yaml.
-          image: ghcr.io/simonbrundin/plan@sha256:824ada509145260e900ff0b28b6887f49b3e5b44f71866090bd9caeee66683be
+          image: ghcr.io/simonbrundin/plan@sha256:5571bbf109d1dba0a21b92854f83323df8e55549828da8a5ec858d61c41b71dc
           env:
             - name: NODE_ENV
               value: "production"
