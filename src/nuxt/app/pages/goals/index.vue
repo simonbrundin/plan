@@ -16,13 +16,18 @@ watch(goals, (newGoals) => {
 }, { immediate: true })
 
 const displayedGoals = computed(() => localGoals.value)
+const showStarted = ref(false)
 
 const filteredGoals = computed(() => {
-  if (!searchQuery.value) return displayedGoals.value
-  const query = searchQuery.value.toLowerCase()
-  return displayedGoals.value.filter(g => 
-    g.title.toLowerCase().includes(query)
-  )
+  let result = displayedGoals.value
+  if (showStarted.value) {
+    result = result.filter(g => g.started !== null)
+  }
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(g => g.title.toLowerCase().includes(query))
+  }
+  return result
 })
 
 // Navigera till mål
@@ -221,9 +226,19 @@ definePageMeta({
   <div class="p-6 max-w-4xl mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-3xl font-bold">Mina mål</h1>
-      <span class="text-gray-500 text-sm">
-        j/k navigera · l/Enter öppna · d klar · x ta bort
-      </span>
+      <div class="flex items-center gap-3">
+        <!-- Visa endast påbörjade -->
+        <button @click="showStarted = !showStarted"
+          class="p-1 rounded transition-colors"
+          :class="showStarted ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-500 hover:text-gray-300'"
+          :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'">
+          <Icon name="lucide:circle-play" class="w-5 h-5"
+            :style="{ opacity: showStarted ? 1 : 0.3 }" />
+        </button>
+        <span class="text-gray-500 text-sm">
+          j/k navigera · l/Enter öppna · d klar · x ta bort
+        </span>
+      </div>
     </div>
 
     <div v-if="pending" class="text-gray-400">
