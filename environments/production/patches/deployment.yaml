@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: plan-app
-          image: ghcr.io/simonbrundin/plan@sha256:0aaf4c1bbee00b4d3c14fe700d520831db6f73f5afe48081d3f1612a6ef421b3
+          image: ghcr.io/simonbrundin/plan@sha256:907a4e048be67dd86367eca2f821911f0368a62d0da088b7562a61c6f84042b5
           env:
             - name: NODE_ENV
               value: "production"
