@@ -101,6 +101,20 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätt vikt via UPSERT — skapar relationen om den inte finns, uppdaterar
+	// om den finns. Användbart när prioriteringssidan vill sätta vikt på ett
+	// top-level-mål som kanske inte har någon parent-relation ännu.
+	const setGoalWeight = async (
+		childId: number,
+		parentId: number,
+		weight: number,
+	) => {
+		await $fetch("/api/goals/relations", {
+			method: "POST",
+			body: { childId, parentId, weight },
+		});
+	};
+
 	const loadAllGoals = async (): Promise<Goal[]> => {
 		return await $fetch<Goal[]>("/api/goals");
 	};
@@ -124,6 +138,7 @@ export function useGoalApi() {
 		addChildRelation,
 		updateGoalOrder,
 		updateGoalWeight,
+		setGoalWeight,
 		createGoal,
 		loadAllGoals,
 	};

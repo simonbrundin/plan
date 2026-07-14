@@ -4,7 +4,10 @@ import { matchesStartedFilter, type StartedFilter } from "~/utils/goalFilters";
 interface PrioritizedGoal extends Goal {
 	weight: number;
 	parentTitle: string | null;
+	parentId: number | null;
 }
+
+const ROOT_GOAL_ID = 1;
 
 const { isSearchOpen } = useSearchState();
 
@@ -34,6 +37,8 @@ function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
 }
 
 export function usePriorityMode() {
+	const { setGoalWeight } = useGoalApi();
+
 	const visibleGoals = computed(() =>
 		prioritizedGoals.value.filter(matchesStartedFilterForGoals),
 	);
@@ -80,6 +85,16 @@ export function usePriorityMode() {
 		prioritizedGoals.value = [...prioritizedGoals.value].sort(
 			(a, b) => b.weight - a.weight,
 		);
+
+		// Spara till backend. Om målet inte har någon parent-relation ännu
+		// (top-level utan explicit parent) skapar vi en till root (ID 1) via
+		// UPSERT i relations.post. Annars uppdaterar vi befintlig relation.
+		const parentId = goal.parentId ?? ROOT_GOAL_ID;
+		try {
+			await setGoalWeight(goalId, parentId, newWeight);
+		} catch (err) {
+			console.error("Failed to persist weight change:", err);
+		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
