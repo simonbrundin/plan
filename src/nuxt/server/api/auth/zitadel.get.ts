@@ -20,7 +20,16 @@ export default eventHandler(async (event) => {
 
 	const ZITADEL_DOMAIN = config.oauth.zitadel.domain;
 	const CLIENT_ID = config.oauth.zitadel.clientId;
-	const REDIRECT_URL = config.oauth.zitadel.redirectUrl;
+	const REDIRECT_URL =
+		config.oauth.zitadel.redirectUrl ||
+		config.public.appUrl + "/api/auth/zitadel";
+
+	if (!REDIRECT_URL.startsWith("http://") && !REDIRECT_URL.startsWith("https://")) {
+		throw new Error(
+			`REDIRECT_URL must be an absolute URL (got: "${REDIRECT_URL}"). ` +
+				"Set NUXT_OAUTH_ZITADEL_REDIRECT_URL or NUXT_PUBLIC_APP_URL.",
+		);
+	}
 
 	console.log("=== ZITADEL HANDLER ===");
 
