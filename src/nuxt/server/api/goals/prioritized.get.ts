@@ -60,8 +60,9 @@ export default defineEventHandler(async (event) => {
         AND g.id <> 1
       ORDER BY weight DESC, g.created DESC
 	  `;
-	} catch (_) {
+	} catch (err: any) {
 		// Kolumnen started finns inte ännu — fallback utan den
+		if (err?.code !== "42703" || !(err?.message ?? "").includes("started")) throw err;
 		goals = await sql<any[]>`
 		  SELECT
         g.id,
