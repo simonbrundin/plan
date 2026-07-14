@@ -17,7 +17,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -742,6 +742,24 @@ async function toggleFinished(goalToToggle: Goal) {
   }
 }
 
+// Toggla started status på ett mål
+async function toggleStarted(goalToToggle: Goal) {
+  try {
+    const newStartedValue = goalToToggle.started ? null : new Date().toISOString();
+    await toggleGoalStarted(goalToToggle.id, newStartedValue);
+    goalsStore.updateGoal(goalToToggle.id, { started: newStartedValue });
+    if (goalData.value?.allGoals) {
+      const goalIndex = goalData.value.allGoals.findIndex((g) => g.id === goalToToggle.id);
+      if (goalIndex !== -1) {
+        goalData.value.allGoals[goalIndex].started = newStartedValue;
+      }
+    }
+    await refresh();
+  } catch (error) {
+    console.error("Failed to toggle goal started status:", error);
+  }
+}
+
 // Uppdatera goal icon
 async function updateGoalIcon(newIcon: string) {
   try {
@@ -921,9 +939,31 @@ function handleKeydown(event: KeyboardEvent) {
     if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
       toggleFinished(parent);
-    } else if (filteredChildren.value.length > 0) {
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
       const child = filteredChildren.value[selectedChildIndex.value];
       toggleFinished(child);
+    }
+    return;
+  }
+
+  // Hantera 's' för att toggla started status
+  if (event.key === "s") {
+    event.preventDefault();
+    if (isParentMode.value && parents.value.length > 0) {
+      const parent = parents.value[selectedParentIndex.value];
+      toggleStarted(parent);
+    } else if (isGoalSelected.value && goal.value) {
+      toggleStarted(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      const child = filteredChildren.value[selectedChildIndex.value];
+      toggleStarted(child);
     }
     return;
   }
@@ -1193,6 +1233,17 @@ watch(selectedParentIndex, async () => {
         <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
           isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
         ]">{{ goal?.title }}</h1>
+        <!-- Started-toggle (s) -->
+        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          @click.stop="toggleStarted(goal)"
+          class="p-2 rounded transition-colors"
+          :class="goal.started
+            ? 'text-yellow-400 hover:text-yellow-300'
+            : 'text-gray-600 hover:text-gray-400'"
+          title="Påbörja (s)">
+          <Icon name="lucide:circle-play" class="w-6 h-6"
+            :style="{ opacity: goal.started ? 1 : 0.25 }" />
+        </button>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
@@ -1313,6 +1364,15 @@ watch(selectedParentIndex, async () => {
                    class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
                    title="Ändra ikon">
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                 </button>
+                 <!-- Started-toggle (s) -->
+                 <button
+                   @click.stop="toggleStarted(child)"
+                   class="flex-shrink-0 p-1 rounded transition-colors"
+                   :class="child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-400'"
+                   title="Påbörja (s)">
+                   <Icon name="lucide:circle-play" class="w-5 h-5"
+                     :style="{ opacity: child.started ? 1 : 0.25 }" />
                  </button>
                  <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
                   <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)">
