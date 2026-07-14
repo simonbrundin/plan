@@ -55,9 +55,10 @@ export default defineEventHandler(async (event) => {
       FROM goals g
       INNER JOIN user_goals ug ON g.id = ug.goal_id
       WHERE ug.user_id = ${user.id}
-	    AND g.finished IS NULL
-	      AND g.id <> 1
-		ORDER BY weight DESC, g.created DESC
+        AND g.finished IS NULL
+        AND g.inbox = 0
+        AND g.id <> 1
+      ORDER BY weight DESC, g.created DESC
 	  `;
 	} catch (_) {
 		// Kolumnen started finns inte ännu — fallback utan den
