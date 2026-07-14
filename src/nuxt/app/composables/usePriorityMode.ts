@@ -1,4 +1,5 @@
 import type { Goal } from "~/types/goal";
+import { matchesStartedFilter, type StartedFilter } from "~/utils/goalFilters";
 
 interface PrioritizedGoal extends Goal {
 	weight: number;
@@ -23,38 +24,39 @@ const isPriorityMode = ref(false);
 const selectedGoalId = ref<number | null>(null);
 const prioritizedGoals = ref<PrioritizedGoal[]>([]);
 const isLoading = ref(false);
+const startedFilter = ref<StartedFilter>("all");
 
 let lastUpdateTime = 0;
 const UPDATE_DEBOUNCE_MS = 150;
 
+function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
+	return matchesStartedFilter(goal, startedFilter.value);
+}
+
 export function usePriorityMode() {
+	const visibleGoals = computed(() =>
+		prioritizedGoals.value.filter(matchesStartedFilterForGoals),
+	);
+
 	async function loadPrioritizedGoals() {
 		if (isLoading.value) return;
 		isLoading.value = true;
 
 		try {
-			const goals = await $fetch<Goal[]>("/api/goals");
+			// Backend returnerar redan filtrerade och sorterade goals med
+			// weight från goal_relations, så vi behöver inte mappa om eller
+			// sortera client-side.
+			const goals = await $fetch<PrioritizedGoal[]>("/api/goals/prioritized");
 
-			const goalsWithWeight: PrioritizedGoal[] = goals
-				.filter((g) => !g.finished)
-				.map((g) => ({
-					...g,
-					weight: 10,
-					parentTitle: null,
-				}))
-				.sort((a, b) => b.weight - a.weight);
-
-			prioritizedGoals.value = goalsWithWeight;
+			prioritizedGoals.value = goals;
 
 			if (selectedGoalId.value !== null) {
-				const stillExists = goalsWithWeight.some(
-					(g) => g.id === selectedGoalId.value,
-				);
+				const stillExists = goals.some((g) => g.id === selectedGoalId.value);
 				if (!stillExists) {
-					selectedGoalId.value = goalsWithWeight[0]?.id ?? null;
+					selectedGoalId.value = visibleGoals.value[0]?.id ?? null;
 				}
-			} else if (goalsWithWeight.length > 0) {
-				selectedGoalId.value = goalsWithWeight[0]?.id ?? null;
+			} else if (visibleGoals.value.length > 0) {
+				selectedGoalId.value = visibleGoals.value[0]?.id ?? null;
 			}
 		} catch (err) {
 			console.error("Failed to load prioritized goals:", err);
@@ -121,22 +123,24 @@ export function usePriorityMode() {
 				navigateTo(`/goal/${selectedGoalId.value}`);
 			} else if (key === "j") {
 				event.preventDefault();
-				const currentIndex = prioritizedGoals.value.findIndex(
+				const list = visibleGoals.value;
+				const currentIndex = list.findIndex(
 					(g) => g.id === selectedGoalId.value,
 				);
-				if (currentIndex < prioritizedGoals.value.length - 1) {
-					const nextGoal = prioritizedGoals.value[currentIndex + 1];
+				if (currentIndex < list.length - 1) {
+					const nextGoal = list[currentIndex + 1];
 					if (nextGoal) {
 						selectedGoalId.value = nextGoal.id;
 					}
 				}
 			} else if (key === "k") {
 				event.preventDefault();
-				const currentIndex = prioritizedGoals.value.findIndex(
+				const list = visibleGoals.value;
+				const currentIndex = list.findIndex(
 					(g) => g.id === selectedGoalId.value,
 				);
 				if (currentIndex > 0) {
-					const prevGoal = prioritizedGoals.value[currentIndex - 1];
+					const prevGoal = list[currentIndex - 1];
 					if (prevGoal) {
 						selectedGoalId.value = prevGoal.id;
 					}
@@ -164,21 +168,33 @@ export function usePriorityMode() {
 	}
 
 	function getSelectedIndex(): number {
-		return prioritizedGoals.value.findIndex(
-			(g) => g.id === selectedGoalId.value,
-		);
+		return visibleGoals.value.findIndex((g) => g.id === selectedGoalId.value);
+	}
+
+	function setStartedFilter(filter: "all" | "started" | "not_started") {
+		startedFilter.value = filter;
+		const list = visibleGoals.value;
+		if (
+			selectedGoalId.value === null ||
+			!list.some((g) => g.id === selectedGoalId.value)
+		) {
+			selectedGoalId.value = list[0]?.id ?? null;
+		}
 	}
 
 	return {
 		isPriorityMode: readonly(isPriorityMode),
 		selectedGoalId: readonly(selectedGoalId),
 		prioritizedGoals: readonly(prioritizedGoals),
+		visibleGoals,
 		isLoading: readonly(isLoading),
+		startedFilter: readonly(startedFilter),
 		loadPrioritizedGoals,
 		updateWeight,
 		handleKeydown,
 		handleKeyup,
 		selectGoal,
 		getSelectedIndex,
+		setStartedFilter,
 	};
 }
