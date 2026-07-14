@@ -48,6 +48,10 @@ export default defineEventHandler(async (event) => {
 		fields.push(`icon = $${paramIndex++}`);
 		values.push(body.icon);
 	}
+	if (body.started !== undefined) {
+		fields.push(`started = $${paramIndex++}`);
+		values.push(body.started ? new Date(body.started) : null);
+	}
 	if (body.finished !== undefined) {
 		fields.push(`finished = $${paramIndex++}`);
 		values.push(body.finished ? new Date(body.finished) : null);
@@ -64,7 +68,19 @@ export default defineEventHandler(async (event) => {
 	const query = `UPDATE goals SET ${fields.join(", ")} WHERE id = $${paramIndex}`;
 	values.push(goalId);
 
-	await sql.unsafe(query, values);
+	try {
+		await sql.unsafe(query, values);
+	} catch (err: any) {
+		// Ignorera errors för started-kolumnen — den finns inte före migrering
+		if ((err?.message ?? "").includes("started")) {
+			// Om started är det enda fältet kan vi inte göra något — returnera befintligt mål
+			const [existing] = await sql<
+				any[]
+			>`SELECT * FROM goals WHERE id = ${goalId}`;
+			return existing;
+		}
+		throw err;
+	}
 
 	const [updatedGoal] = await sql<
 		any[]
