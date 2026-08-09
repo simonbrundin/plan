@@ -28,10 +28,11 @@ interface StatusUpdate {
 
 export function useGoalApi() {
 	const config = useRuntimeConfig();
+	const { user } = useUserSession();
 	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
 
-	const fetchOptions = () => ({
-		credentials: "include" as const,
+	const authHeaders = () => ({
+		Authorization: `Bearer user_${(user.value as any)?.id}`,
 	});
 
 	const fetchGoalData = async (
@@ -41,14 +42,14 @@ export function useGoalApi() {
 		const url = forceRefresh
 			? `${goApiUrl}/goals/${goalId}?_=${Date.now()}`
 			: `${goApiUrl}/goals/${goalId}`;
-		return await $fetch<GoalData>(url, fetchOptions());
+		return await $fetch<GoalData>(url, { headers: authHeaders() });
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
 		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
-			...fetchOptions(),
+			headers: authHeaders(),
 		});
 	};
 
@@ -56,7 +57,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
-			...fetchOptions(),
+			headers: authHeaders(),
 		});
 	};
 
@@ -64,7 +65,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
-			...fetchOptions(),
+			headers: authHeaders(),
 		});
 	};
 
@@ -72,6 +73,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { started },
+			headers: authHeaders(),
 		});
 	};
 
@@ -82,12 +84,14 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { finished },
+			headers: authHeaders(),
 		});
 	};
 
 	const deleteGoal = async (goalId: number) => {
 		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "DELETE",
+			headers: authHeaders(),
 		});
 	};
 
@@ -95,6 +99,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId },
+			headers: authHeaders(),
 		});
 	};
 
@@ -102,6 +107,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "DELETE",
 			body: { childId, parentId },
+			headers: authHeaders(),
 		});
 	};
 
@@ -113,6 +119,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, order },
+			headers: authHeaders(),
 		});
 	};
 
@@ -124,6 +131,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, order },
+			headers: authHeaders(),
 		});
 	};
 
@@ -135,6 +143,7 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, weight },
+			headers: authHeaders(),
 		});
 	};
 
@@ -146,11 +155,14 @@ export function useGoalApi() {
 		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, weight },
+			headers: authHeaders(),
 		});
 	};
 
 	const loadAllGoals = async (): Promise<Goal[]> => {
-		return await $fetch<Goal[]>(`${goApiUrl}/goals`);
+		return await $fetch<Goal[]>(`${goApiUrl}/goals`, {
+			headers: authHeaders(),
+		});
 	};
 
 	const createGoal = async (
@@ -164,6 +176,7 @@ export function useGoalApi() {
 		return await $fetch<Goal>(`${goApiUrl}/goals`, {
 			method: "POST",
 			body,
+			headers: authHeaders(),
 		});
 	};
 
@@ -171,16 +184,21 @@ export function useGoalApi() {
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await $fetch<GoalDependency>(`${goApiUrl}/goals/dependencies`, {
-			method: "POST",
-			body: { goalId, dependsOnId },
-		});
+		return await $fetch<GoalDependency>(
+			`${goApiUrl}/goals/dependencies`,
+			{
+				method: "POST",
+				body: { goalId, dependsOnId },
+				headers: authHeaders(),
+			},
+		);
 	};
 
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
 		await $fetch(`${goApiUrl}/goals/dependencies`, {
 			method: "DELETE",
 			body: { goalId, dependsOnId },
+			headers: authHeaders(),
 		});
 	};
 
