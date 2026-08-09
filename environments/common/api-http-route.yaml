@@ -11,9 +11,13 @@ spec:
       name: simons-gateway
       namespace: envoy
   hostnames:
-    - "api.plan.simonbrundin.com"
+    - "plan.simonbrundin.com"
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1
+      backendRefs:
         - kind: Service
           name: plan-api-service
           port: 8080
