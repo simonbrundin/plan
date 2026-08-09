@@ -27,7 +27,17 @@ export interface GoalWithWeight extends Goal {
 	weight: number;
 }
 
+export interface GoalDependency {
+	id: number;
+	goal_id: number;
+	depends_on_id: number;
+	created: string;
+}
+
 export interface GetGoalResponse {
 	goal: GoalWithRelations;
 	allGoals: Goal[];
+	dependencies: GoalDependency[];
+	dependsOn: Goal[];
+	blocking: Goal[];
 }

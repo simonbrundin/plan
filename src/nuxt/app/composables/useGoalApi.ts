@@ -1,4 +1,4 @@
-import type { Goal } from "~/types/goal";
+import type { Goal, GoalDependency } from "~/types/goal";
 
 interface GoalWithWeight extends Goal {
 	weight: number;
@@ -13,8 +13,15 @@ interface GoalData {
 }
 
 export function useGoalApi() {
-	const fetchGoalData = async (goalId: number): Promise<GoalData> => {
-		return await $fetch<GoalData>(`/api/goals/${goalId}`);
+	const fetchGoalData = async (
+		goalId: number,
+		forceRefresh = false,
+	): Promise<GoalData> => {
+		// Add cache-busting to ensure fresh data after updates
+		const url = forceRefresh
+			? `/api/goals/${goalId}?_=${Date.now()}`
+			: `/api/goals/${goalId}`;
+		return await $fetch<GoalData>(url);
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
@@ -126,6 +133,25 @@ export function useGoalApi() {
 		});
 	};
 
+	// Add a dependency: goalId depends on dependsOnId
+	const addDependency = async (
+		goalId: number,
+		dependsOnId: number,
+	): Promise<GoalDependency> => {
+		return await $fetch<GoalDependency>("/api/goals/dependencies", {
+			method: "POST",
+			body: { goalId, dependsOnId },
+		});
+	};
+
+	// Remove a dependency: goalId no longer depends on dependsOnId
+	const removeDependency = async (goalId: number, dependsOnId: number) => {
+		await $fetch("/api/goals/dependencies", {
+			method: "DELETE",
+			body: JSON.stringify({ goalId, dependsOnId }),
+		});
+	};
+
 	return {
 		fetchGoalData,
 		updateGoalTitle,
@@ -141,5 +167,7 @@ export function useGoalApi() {
 		setGoalWeight,
 		createGoal,
 		loadAllGoals,
+		addDependency,
+		removeDependency,
 	};
 }

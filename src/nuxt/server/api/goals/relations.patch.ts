@@ -14,6 +14,13 @@ export default defineEventHandler(async (event) => {
 	const body = await readBody(event);
 	const { childId, parentId, order, weight } = body;
 
+	console.log("[PATCH /api/goals/relations] Received:", {
+		childId,
+		parentId,
+		order,
+		weight,
+	});
+
 	if (!childId || !parentId) {
 		throw createError({
 			statusCode: 400,
@@ -40,13 +47,14 @@ export default defineEventHandler(async (event) => {
 	const values: any[] = [];
 	let paramIndex = 1;
 
-	if (order !== undefined) {
+	// Only update order if it's explicitly provided (can be 0)
+	if (order !== undefined && order !== null) {
 		fields.push(`"order" = $${paramIndex++}`);
-		values.push(order);
+		values.push(Number(order));
 	}
-	if (weight !== undefined) {
+	if (weight !== undefined && weight !== null) {
 		fields.push(`weight = $${paramIndex++}`);
-		values.push(weight);
+		values.push(Number(weight));
 	}
 
 	if (fields.length === 0) {
@@ -59,12 +67,21 @@ export default defineEventHandler(async (event) => {
 	values.push(parentId, childId);
 	const query = `UPDATE goal_relations SET ${fields.join(", ")} WHERE parent_id = $${paramIndex++} AND child_id = $${paramIndex}`;
 
+	console.log(
+		"[PATCH /api/goals/relations] Executing:",
+		query,
+		"with values:",
+		values,
+	);
+
 	await sql.unsafe(query, values);
 
 	const [updated] = await sql<any[]>`
     SELECT * FROM goal_relations 
     WHERE parent_id = ${parentId} AND child_id = ${childId}
   `;
+
+	console.log("[PATCH /api/goals/relations] Updated:", updated);
 
 	return updated;
 });
