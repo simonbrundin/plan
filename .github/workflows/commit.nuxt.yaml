@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - src/nuxt/**
+  workflow_dispatch:
 jobs:
   unit-tests:
     permissions:
