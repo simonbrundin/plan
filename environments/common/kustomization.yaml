@@ -6,4 +6,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - http-route.yaml
+  - api-deployment.yaml
+  - api-service.yaml
+  - api-http-route.yaml
   - db/atlas-schema.yaml
