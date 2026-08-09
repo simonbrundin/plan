@@ -16,16 +16,16 @@ their objectives using a modern web interface with hierarchical goal structures.
 erDiagram
     USERS {
         int id PK
-        varchar sub UK NN
-        varchar email UK NN
-        varchar firstName
-        varchar lastName
+        string sub UK NN
+        string email UK NN
+        string firstName
+        string lastName
         timestamp createdAt NN
     }
     GOALS {
         int id PK
-        varchar title
-        varchar icon
+        string title
+        string icon
         timestamp createdAt NN
         timestamp startedAt
         timestamp finishedAt
