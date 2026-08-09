@@ -48,12 +48,12 @@ jobs:
       - name: Output image
         id: image
         run: |
-          IMAGE_URL="ghcr.io/simonbrundin/plan-api@${{ github.sha }}"
+          IMAGE_URL="ghcr.io/simonbrundin/plan-api:${{ github.sha }}"
           echo "image=$IMAGE_URL" >> $GITHUB_OUTPUT
 
       - name: Update deployment image
         env:
-          IMAGE: ghcr.io/simonbrundin/plan-api@${{ github.sha }}
+          IMAGE: ghcr.io/simonbrundin/plan-api:${{ github.sha }}
         run: |
           echo "Updating image to: $IMAGE"
           sed -i "s|image: ghcr.io/simonbrundin/plan-api.*|image: $IMAGE|" \
