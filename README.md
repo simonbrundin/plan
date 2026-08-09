@@ -16,36 +16,36 @@ their objectives using a modern web interface with hierarchical goal structures.
 erDiagram
     USERS {
         int id PK
-        string sub UK NN
-        string email UK NN
+        string sub
+        string email
         string firstName
         string lastName
-        timestamp createdAt NN
+        timestamp createdAt
     }
     GOALS {
         int id PK
         string title
         string icon
-        timestamp createdAt NN
+        timestamp createdAt
         timestamp startedAt
         timestamp finishedAt
-        int inbox NN
+        int inbox
     }
     USERGOALS {
-        int userId FK NN
-        int goalId FK NN
+        int userId FK
+        int goalId FK
     }
     GOALRELATIONS {
-        int parentId FK NN
-        int childId FK NN
-        int orderIndex NN
-        int weight NN
+        int parentId FK
+        int childId FK
+        int orderIndex
+        int weight
     }
     GOALDEPENDENCIES {
         int id PK
-        int goalId FK NN
-        int dependsOnId FK NN
-        timestamp createdAt NN
+        int goalId FK
+        int dependsOnId FK
+        timestamp createdAt
     }
     USERS ||--o{ USERGOALS : ""
     GOALS ||--o{ USERGOALS : ""
