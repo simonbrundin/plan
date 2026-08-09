@@ -31,7 +31,7 @@ jobs:
         with:
           images: ghcr.io/simonbrundin/plan-api
           tags: |
-            type=sha,prefix=
+            type=sha,format=short
             type=raw,value=latest
 
       - name: Build and push
@@ -69,7 +69,7 @@ jobs:
           title: "chore: update plan-api image"
           body: |
             Automated image update from Go API workflow
-            - Image: `ghcr.io/simonbrundin/plan-api@${{ github.sha }}`
+            - Image: `ghcr.io/simonbrundin/plan-api:${{ github.sha }}`
           labels: |
             ci
             skip-review
