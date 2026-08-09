@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "Updating image to: $IMAGE"
           sed -i "s|image: ghcr.io/simonbrundin/plan-api.*|image: $IMAGE|" \
-            environments/common/api-deployment.yaml
+            environments/production/patches/api-deployment.yaml
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v7
@@ -78,4 +78,4 @@ jobs:
             ci
             skip-review
           add-paths: |
-            environments/common/api-deployment.yaml
+            environments/production/patches/api-deployment.yaml
