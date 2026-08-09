@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - src/api/**
+  workflow_dispatch:
 
 jobs:
   build-publish-image:
