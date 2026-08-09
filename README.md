@@ -14,6 +14,38 @@ their objectives using a modern web interface with hierarchical goal structures.
 
 ```mermaid
 erDiagram
+    USERS {
+        INTEGER id PK
+        VARCHAR(255) sub
+        VARCHAR(40) email
+        VARCHAR(16) first_name
+        VARCHAR(40) last_name
+        TIMESTAMPTZ created
+    }
+    GOALS {
+        INTEGER id PK
+        VARCHAR(64) title
+        VARCHAR(100) icon
+        TIMESTAMPTZ created
+        TIMESTAMPTZ started
+        TIMESTAMPTZ finished
+        INTEGER inbox
+    }
+    USERGOALS {
+        INTEGER user_id FK
+        INTEGER goal_id FK
+    }
+    GOALRELATIONS {
+        INTEGER parent_id FK
+        INTEGER child_id FK
+        INTEGER order
+        INTEGER weight
+    }
+    GOALDEPENDENCIES {
+        INTEGER goal_id FK
+        INTEGER depends_on_id FK
+        TIMESTAMPTZ created
+    }
     USERS ||--o{ USERGOALS : ""
     GOALS ||--o{ USERGOALS : ""
     GOALS ||--o{ GOALRELATIONS : "parent"
@@ -21,31 +53,3 @@ erDiagram
     GOALDEPENDENCIES }o--|| GOALS : "waits for"
     GOALS }o--|| GOALDEPENDENCIES : "blocks"
 ```
-
-| Table | Column | Type | Constraints |
-|-------|--------|------|-------------|
-| **users** | id | INTEGER | PK, NOT NULL, UNIQUE |
-| | sub | VARCHAR(255) | NOT NULL, UNIQUE |
-| | email | VARCHAR(40) | NOT NULL, UNIQUE |
-| | first_name | VARCHAR(16) | |
-| | last_name | VARCHAR(40) | |
-| | created | TIMESTAMPTZ | NOT NULL |
-| **goals** | id | INTEGER | PK, NOT NULL, UNIQUE |
-| | title | VARCHAR(64) | |
-| | icon | VARCHAR(100) | DEFAULT 'heroicons:star' |
-| | created | TIMESTAMPTZ | NOT NULL |
-| | started | TIMESTAMPTZ | |
-| | finished | TIMESTAMPTZ | |
-| | inbox | INTEGER | NOT NULL, DEFAULT 1 |
-| **user_goals** | user_id | INTEGER | FK → users(id), NOT NULL |
-| | goal_id | INTEGER | FK → goals(id), NOT NULL |
-| | | | **PK**: (user_id, goal_id) |
-| **goal_relations** | parent_id | INTEGER | FK → goals(id), NOT NULL |
-| | child_id | INTEGER | FK → goals(id), NOT NULL |
-| | order | INTEGER | NOT NULL, DEFAULT 0 |
-| | weight | INTEGER | NOT NULL, DEFAULT 10 |
-| | | | **PK**: (parent_id, child_id) |
-| **goal_dependencies** | goal_id | INTEGER | FK → goals(id), NOT NULL |
-| | depends_on_id | INTEGER | FK → goals(id), NOT NULL |
-| | created | TIMESTAMPTZ | NOT NULL |
-| | | | **PK**: (goal_id, depends_on_id) |
