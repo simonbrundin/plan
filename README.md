@@ -12,4 +12,50 @@ their objectives using a modern web interface with hierarchical goal structures.
 
 ## Database Schema
 
-[Database Schema](https://www.drawdb.app/editor?shareId=a3185456f5496cf6a48840b0ecfea7e0)
+```mermaid
+erDiagram
+    users {
+        integer id PK
+        varchar sub UK NN
+        varchar email UK NN
+        varchar first_name
+        varchar last_name
+        timestamptz created NN
+    }
+
+    goals {
+        integer id PK
+        varchar title
+        varchar icon
+        timestamptz created NN
+        timestamptz started
+        timestamptz finished
+        integer inbox NN
+    }
+
+    user_goals {
+        integer user_id FK NN
+        integer goal_id FK NN
+    }
+
+    goal_relations {
+        integer parent_id FK NN
+        integer child_id FK NN
+        integer order NN
+        integer weight NN
+    }
+
+    goal_dependencies {
+        integer id PK
+        integer goal_id FK NN
+        integer depends_on_id FK NN
+        timestamptz created NN
+    }
+
+    users ||--o{ user_goals : ""
+    goals ||--o{ user_goals : ""
+    goals ||--o{ goal_relations : "parent"
+    goals ||--o{ goal_relations : "child"
+    goal_dependencies }o--|| goals : "waits for"
+    goals }o--|| goal_dependencies : "blocks"
+```
