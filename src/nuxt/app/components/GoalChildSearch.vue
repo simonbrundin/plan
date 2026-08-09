@@ -5,22 +5,23 @@ defineProps<{
   showChildSearch: boolean
   childSearchQuery: string
   childSearchResults: Goal[]
-  childSearchInput: HTMLInputElement | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'update:childSearchQuery': [value: string]
   'add-existing-child': [childId: number]
   'handle-search-keydown': [event: KeyboardEvent]
+  'close': []
 }>()
 
-const childSearchInputRef = ref<HTMLInputElement | null>(null)
+const childSearchInput = ref<HTMLInputElement | null>(null)
 
+// Focus the input when search is shown
 watch(
-  () => childSearchInputRef.value,
-  (newVal) => {
-    if (newVal) {
-      newVal.focus()
+  () => childSearchInput.value,
+  (el) => {
+    if (el) {
+      el.focus()
     }
   }
 )
@@ -31,14 +32,14 @@ watch(
   <div v-if="showChildSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 mb-4">
     <div class="mb-2">
       <input
-        ref="childSearchInputRef"
+        ref="childSearchInput"
         :value="childSearchQuery"
         @input="$emit('update:childSearchQuery', ($event.target as HTMLInputElement).value)"
-        @keydown="$emit('handle-search-keydown', $event)"
+        @keydown.enter.prevent="$emit('handle-search-keydown', $event)"
+        @keydown.escape.prevent="$emit('close')"
         type="text"
         placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
         class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        autofocus
       />
     </div>
 
