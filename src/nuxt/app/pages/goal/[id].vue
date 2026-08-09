@@ -17,19 +17,19 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal, addDependency, removeDependency } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 
-const refresh = async () => {
+const refresh = async (forceRefresh = false) => {
   isLoading.value = true;
   error.value = null;
 
   try {
-    goalData.value = await fetchGoalData(goalId.value);
+    goalData.value = await fetchGoalData(goalId.value, forceRefresh);
   } catch (err) {
     console.error("Fetch goal error:", err);
     error.value = err instanceof Error ? err.message : "Unknown error";
@@ -68,6 +68,185 @@ const progress = computed(() => {
   return Math.round((completed / children.value.length) * 100);
 });
 
+// Dependencies (mål som detta mål väntar på)
+const dependsOn = computed(() => {
+  return goalData.value?.dependsOn || [];
+});
+
+// Blocking (mål som detta mål blockerar)
+const blocking = computed(() => {
+  return goalData.value?.blocking || [];
+});
+
+// Kollar om detta mål är "klart" baserat på dependencies
+const isBlocked = computed(() => {
+  // Om inga dependencies, är det inte blockerat
+  if (dependsOn.value.length === 0) return false;
+  // Om alla dependencies är klara, är det inte blockerat
+  return dependsOn.value.some((d: any) => !d.finished);
+});
+
+// Bygg dependency-info för varje barn
+const childDependencies = computed(() => {
+  const deps: Record<number, { dependsOn: any[]; blocking: any[] }> = {};
+  children.value.forEach(child => {
+    deps[child.id] = {
+      dependsOn: child.dependsOn || [],
+      blocking: child.blocking || []
+    };
+  });
+  return deps;
+});
+
+// Hjälpfunktioner för barn-status
+function isChildBlocked(childId: number): boolean {
+  const info = childDependencies.value[childId];
+  if (!info || info.dependsOn.length === 0) return false;
+  return info.dependsOn.some((d: any) => !d.finished);
+}
+
+function getChildWaitingForTitle(childId: number): string | null {
+  const info = childDependencies.value[childId];
+  if (!info || info.dependsOn.length === 0) return null;
+  const waitingFor = info.dependsOn.find((d: any) => !d.finished);
+  return waitingFor?.title || null;
+}
+
+// Visa/dölj dependencies-sektion
+const showDependencies = ref(false);
+
+// Sök för att lägga till dependency
+const showDependencySearch = ref(false);
+const dependencySearchQuery = ref("");
+const dependencySearchInput = ref<HTMLInputElement | null>(null);
+
+const filteredDependencySearchResults = computed(() => {
+  if (!dependencySearchQuery.value.trim()) return [];
+
+  const results = goalsStore.searchGoals(dependencySearchQuery.value);
+
+  // Filtrera bort nuvarande målet, befintliga dependencies, och mål som redan är klara
+  const currentDependsOnIds = dependsOn.value.map((d: any) => d.depends_on_id);
+  return results.filter(
+    (g) => g.id !== goalId.value && !currentDependsOnIds.includes(g.id)
+  );
+});
+
+async function addExistingDependency(dependencyGoalId: number) {
+  try {
+    await addDependency(goalId.value, dependencyGoalId);
+    await refresh();
+    showDependencySearch.value = false;
+    dependencySearchQuery.value = "";
+  } catch (error: any) {
+    console.error("Failed to add dependency:", error);
+    alert(error?.data?.message || error?.message || "Kunde inte lägga till beroende");
+  }
+}
+
+async function removeExistingDependency(dependencyGoalId: number) {
+  try {
+    await removeDependency(goalId.value, dependencyGoalId);
+    await refresh();
+  } catch (error) {
+    console.error("Failed to remove dependency:", error);
+  }
+}
+
+async function toggleDependencySearch() {
+  showDependencySearch.value = !showDependencySearch.value;
+  if (showDependencySearch.value) {
+    await nextTick();
+    dependencySearchInput.value?.focus();
+  }
+}
+
+function handleDependencySearchKeydown(event: KeyboardEvent) {
+  if (event.key === "Escape") {
+    showDependencySearch.value = false;
+    dependencySearchQuery.value = "";
+  } else if (event.key === "Enter" && filteredDependencySearchResults.value.length > 0) {
+    addExistingDependency(filteredDependencySearchResults.value[0].id);
+  }
+}
+
+// Dependency drag functions (mouse-based)
+function handleDepMouseDown(event: MouseEvent, childId: number) {
+  // Endast hantera vänster musknapp
+  if (event.button !== 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  depDragChildId.value = childId;
+  isDepDragging.value = true;
+}
+
+function handleDepMouseMove(event: MouseEvent) {
+  if (!isDepDragging.value || !depDragChildId.value) return;
+  
+  // Hitta elementet under muspekaren
+  const target = document.elementFromPoint(event.clientX, event.clientY);
+  if (!target) {
+    depDragOverChildId.value = null;
+    return;
+  }
+  
+  // Hitta närmaste li-element (barnrad)
+  const li = target.closest('li[data-child-index]') as HTMLElement;
+  if (li) {
+    const index = parseInt(li.dataset.childIndex || '0');
+    const child = filteredChildren.value[index];
+    if (child && child.id !== depDragChildId.value) {
+      depDragOverChildId.value = child.id;
+    } else {
+      depDragOverChildId.value = null;
+    }
+  } else {
+    depDragOverChildId.value = null;
+  }
+}
+
+function handleDepMouseUp(_event: MouseEvent) {
+  if (!isDepDragging.value) return;
+  
+  // Skapa eller ta bort dependency beroende på om den redan finns
+  if (depDragOverChildId.value && depDragChildId.value !== depDragOverChildId.value) {
+    const childInfo = childDependencies.value[depDragChildId.value];
+    const existingDep = childInfo?.dependsOn?.find(
+      (d: any) => d.depends_on_id === depDragOverChildId.value
+    );
+    
+    if (existingDep) {
+      // Ta bort beroendet om det redan finns
+      console.log('Removing dependency:', depDragChildId.value, '->', depDragOverChildId.value);
+      removeDependency(depDragChildId.value, depDragOverChildId.value).then(() => {
+        refresh();
+      });
+    } else {
+      // Skapa beroendet om det inte finns
+      console.log('Creating dependency:', depDragChildId.value, '->', depDragOverChildId.value);
+      addDependency(depDragChildId.value, depDragOverChildId.value).then(() => {
+        refresh();
+      });
+    }
+  }
+  
+  // Nollställ state
+  depDragChildId.value = null;
+  depDragOverChildId.value = null;
+  isDepDragging.value = false;
+}
+
+// Globala mus-event listeners för dependency drag
+onMounted(() => {
+  window.addEventListener('mousemove', handleDepMouseMove);
+  window.addEventListener('mouseup', handleDepMouseUp);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', handleDepMouseMove);
+  window.removeEventListener('mouseup', handleDepMouseUp);
+});
+
 // Använd goals store
 const goalsStore = useGoalsStore();
 
@@ -93,6 +272,11 @@ const editingIconGoalIcon = ref<string>('');
 const weightEditingChildId = ref<number | null>(null);
 const tempWeight = ref(10);
 
+// Dependency drag state (mouse-based for simpler handling)
+const depDragChildId = ref<number | null>(null);
+const depDragOverChildId = ref<number | null>(null);
+const isDepDragging = ref(false);
+
 // Filtrerade undermål baserat på showCompleted och showStarted
 const filteredChildren = computed(() => {
   let result = children.value;
@@ -102,7 +286,96 @@ const filteredChildren = computed(() => {
   if (showStarted.value) {
     result = result.filter((c) => c.started !== null);
   }
-  return result;
+  
+  // Topologisk sortering: goals whose dependencies are done come first
+  // Then goals in dependency chain order
+  
+  // Build a map of goal -> array of goal IDs it depends on (that are not finished)
+  // Use dependsOn directly from each child
+  const dependenciesMap = new Map<number, number[]>();
+  result.forEach(child => {
+    const dependsOn = child.dependsOn || [];
+    // Filter out finished dependencies
+    const unfinishedDeps = dependsOn
+      .filter((d: any) => !d.finished)
+      .map((d: any) => d.depends_on_id);
+    dependenciesMap.set(child.id, unfinishedDeps);
+  });
+  
+  // Debug log
+  console.log('Topological sort debug:', {
+    childrenIds: result.map(c => c.id),
+    childrenCount: result.length,
+    dependenciesMap: JSON.stringify([...dependenciesMap.entries()]),
+  });
+  
+  // Kahn's algorithm - process one goal at a time to keep dependency chains together
+  const mutableDeps = new Map<number, number[]>();
+  
+  result.forEach(child => {
+    const depsNeeded = (dependenciesMap.get(child.id) || []).slice();
+    mutableDeps.set(child.id, depsNeeded);
+  });
+  
+  const sorted: any[] = [];
+  const completed = new Set<number>();
+  
+  // Keep processing until all goals are sorted
+  while (sorted.length < result.length) {
+    // Find all goals that are now ready (no remaining dependencies)
+    const ready: any[] = [];
+    for (const child of result) {
+      if (completed.has(child.id)) continue;
+      const depsNeeded = mutableDeps.get(child.id) || [];
+      if (depsNeeded.length === 0) {
+        ready.push(child);
+      }
+    }
+    
+    if (ready.length === 0) {
+      // No ready goals - shouldn't happen with valid dependencies
+      for (const child of result) {
+        if (!completed.has(child.id)) {
+          sorted.push(child);
+          completed.add(child.id);
+        }
+      }
+      break;
+    }
+    
+    // Sort ready: prefer goals that HAVE dependencies (part of a chain) over goals that don't
+    // This keeps dependency chains together
+    ready.sort((a, b) => {
+      // Check if goal has original dependencies (is part of a chain)
+      const aHasDeps = (dependenciesMap.get(a.id) || []).length > 0;
+      const bHasDeps = (dependenciesMap.get(b.id) || []).length > 0;
+      
+      // If one has deps and one doesn't, prefer the one with deps
+      if (aHasDeps && !bHasDeps) return -1;
+      if (!aHasDeps && bHasDeps) return 1;
+      
+      // If both have deps or both don't, sort by original order
+      const aOriginal = result.indexOf(a);
+      const bOriginal = result.indexOf(b);
+      return aOriginal - bOriginal;
+    });
+    const current = ready[0];
+    sorted.push(current);
+    completed.add(current.id);
+    
+    // Remove this goal from dependencies of remaining goals
+    for (const child of result) {
+      if (completed.has(child.id)) continue;
+      const depsNeeded = mutableDeps.get(child.id) || [];
+      const idx = depsNeeded.indexOf(current.id);
+      if (idx !== -1) {
+        depsNeeded.splice(idx, 1);
+        mutableDeps.set(child.id, depsNeeded);
+      }
+    }
+  }
+  
+  return sorted;
 });
 
 // Sökfunktion för att lägga till föräldrar
@@ -452,6 +725,8 @@ async function moveChildUp() {
   const movingChild = displayedChildren[currentIndex];
   const aboveChild = displayedChildren[currentIndex - 1];
 
+  console.log('moveChildUp: moving child', movingChild.id, 'with order', movingChild.order, 'to position of', aboveChild.id, 'with order', aboveChild.order);
+
   try {
     // Byt ordningen mellan de två målen
     const movingOrder = movingChild.order;
@@ -462,14 +737,18 @@ async function moveChildUp() {
       updateGoalOrder(goalId.value, aboveChild.id, movingOrder),
     ]);
 
+    console.log('moveChildUp: order updated, refreshing with force');
+
     // Uppdatera markerad index
     selectedChildIndex.value = currentIndex - 1;
 
-    // Uppdatera data från server
-    await refresh();
+    // Uppdatera data från server med force refresh
+    await refresh(true);
+    
+    console.log('moveChildUp: refresh complete, children count:', children.value.length);
   } catch (error) {
     console.error("Failed to move child up:", error);
-    await refresh();
+    await refresh(true);
   }
 }
 
@@ -494,6 +773,8 @@ async function moveChildDown() {
   const movingChild = displayedChildren[currentIndex];
   const belowChild = displayedChildren[currentIndex + 1];
 
+  console.log('moveChildDown: moving child', movingChild.id, 'with order', movingChild.order, 'to position of', belowChild.id, 'with order', belowChild.order);
+
   try {
     // Byt ordningen mellan de två målen
     const movingOrder = movingChild.order;
@@ -504,14 +785,18 @@ async function moveChildDown() {
       updateGoalOrder(goalId.value, belowChild.id, movingOrder),
     ]);
 
+    console.log('moveChildDown: order updated, refreshing with force');
+
     // Uppdatera markerad index
     selectedChildIndex.value = currentIndex + 1;
 
-    // Uppdatera data från server
-    await refresh();
+    // Uppdatera data från server med force refresh
+    await refresh(true);
+    
+    console.log('moveChildDown: refresh complete, children count:', children.value.length);
   } catch (error) {
     console.error("Failed to move child down:", error);
-    await refresh();
+    await refresh(true);
   }
 }
 
@@ -798,15 +1083,7 @@ async function updateGoalIcon(newIcon: string) {
 
 // Weight editing functions
 function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
-  if (weight <= 2) {
-    return { color: '#888888', opacity: 0.3 }
-  } else if (weight <= 9) {
-    return { color: '#888888', opacity: 0.55 }
-  } else if (weight <= 14) {
-    return { color: '#6B7280', opacity: 1 }
-  } else {
-    return { color: '#3B82F6', opacity: 1, fontWeight: weight > 100 ? 'bold' : 'normal' }
-  }
+  return { color: '#FFFFFF', opacity: 1 }
 }
 
 function startWeightEdit(child: GoalWithWeight) {
@@ -1251,6 +1528,89 @@ watch(selectedParentIndex, async () => {
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
         </button>
+        <!-- Toggle dependencies visibility -->
+        <button @click.stop="showDependencies = !showDependencies"
+          class="p-2 rounded transition-colors"
+          :class="showDependencies ? 'text-orange-400 hover:text-orange-300' : 'text-gray-600 hover:text-gray-400'"
+          title="Beroenden (blockerade mål)">
+          <Icon name="lucide:git-branch" class="w-6 h-6" />
+        </button>
+      </div>
+
+      <!-- Dependencies-sektion -->
+      <div v-if="showDependencies" class="border border-gray-700 rounded-lg p-4 bg-gray-800/50 mb-4">
+        <!-- Väntar på -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <Icon name="lucide:clock" class="w-4 h-4" />
+              Väntar på ({{ dependsOn.length }})
+            </h3>
+            <button @click="toggleDependencySearch"
+              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-700"
+              title="Lägg till beroende">
+              <Icon name="lucide:plus" class="w-4 h-4" />
+            </button>
+          </div>
+          
+          <!-- Sök för att lägga till dependency -->
+          <div v-if="showDependencySearch" class="mb-3">
+            <input ref="dependencySearchInput" v-model="dependencySearchQuery" @keydown="handleDependencySearchKeydown"
+              type="text"
+              placeholder="Sök efter mål att vänta på..."
+              class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+              autofocus />
+            <div v-if="filteredDependencySearchResults.length > 0" class="mt-2 space-y-1">
+              <button v-for="result in filteredDependencySearchResults.slice(0, 5)" :key="result.id"
+                @click="addExistingDependency(result.id)"
+                class="w-full text-left px-3 py-2 hover:bg-gray-700 rounded transition-colors flex items-center gap-2">
+                <Icon :name="result.icon || 'heroicons:star'" class="w-4 h-4 text-gray-400" />
+                <span class="text-gray-200 text-sm">{{ result.title }}</span>
+                <span v-if="result.finished" class="text-xs text-green-400 ml-auto">Klar</span>
+              </button>
+            </div>
+            <div v-else-if="dependencySearchQuery.trim() && filteredDependencySearchResults.length === 0" class="text-xs text-gray-500 mt-2 px-2">
+              Inga matchande mål hittades
+            </div>
+          </div>
+          
+          <!-- Lista över dependencies -->
+          <div v-if="dependsOn.length > 0" class="space-y-2">
+            <div v-for="dep in dependsOn" :key="dep.depends_on_id"
+              class="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded hover:bg-gray-700 transition-colors">
+              <Icon :name="dep.icon || 'heroicons:star'" class="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <NuxtLink :to="`/goal/${dep.depends_on_id}`" class="flex-1 text-sm text-gray-200 hover:text-white">
+                {{ dep.title }}
+              </NuxtLink>
+              <span v-if="dep.finished" class="text-xs text-green-400">Klar</span>
+              <span v-else class="text-xs text-orange-400">Väntar...</span>
+              <button @click.stop="removeExistingDependency(dep.depends_on_id)"
+                class="text-gray-500 hover:text-red-400 transition-colors p-1">
+                <Icon name="lucide:x" class="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+          <div v-else class="text-sm text-gray-500 px-2">
+            Inga beroenden. Lägg till mål som måste göras först.
+          </div>
+        </div>
+        
+        <!-- Blockerar -->
+        <div v-if="blocking.length > 0">
+          <h3 class="text-sm font-medium text-gray-400 flex items-center gap-2 mb-2">
+            <Icon name="lucide:lock" class="w-4 h-4" />
+            Blockerar ({{ blocking.length }})
+          </h3>
+          <div class="space-y-2">
+            <div v-for="block in blocking" :key="block.goal_id"
+              class="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded">
+              <Icon :name="block.icon || 'heroicons:star'" class="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <NuxtLink :to="`/goal/${block.goal_id}`" class="flex-1 text-sm text-gray-200 hover:text-white">
+                {{ block.title }}
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Undermål - scrollbar container -->
@@ -1305,14 +1665,16 @@ watch(selectedParentIndex, async () => {
           </div>
         </div>
 
-        <ul v-if="filteredChildren.length > 0" class="space-y-3">
+        <ul v-if="filteredChildren.length > 0" class="space-y-3" :class="{ 'select-none': isDepDragging }">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
             @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
             @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
             class="relative overflow-hidden rounded-lg transition-opacity"
             :class="[
+              isChildBlocked(child.id) ? 'ml-4 pl-3' : '',
               dragOverChildId === child.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900' : 'opacity-100',
-              draggedChildId === child.id ? 'opacity-30' : ''
+              draggedChildId === child.id ? 'opacity-30' : '',
+              depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-gray-900' : ''
             ]">
             <!-- Reparent indicator -->
             <div v-if="dragOverChildId === child.id && draggedChildId !== child.id" 
@@ -1321,22 +1683,26 @@ watch(selectedParentIndex, async () => {
                 Flytta in i detta mål
               </div>
             </div>
+            <!-- Dependency indicator -->
+            <div v-if="depDragOverChildId === child.id && depDragChildId !== child.id" 
+              class="absolute inset-0 bg-orange-500/20 flex items-center justify-center z-10 rounded-lg">
+              <div class="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                🔗 Skapa beroende
+              </div>
+            </div>
             <!-- Swipe bakgrund -->
             <div class="absolute inset-0 flex items-center justify-start px-6"
-              :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'">
-              <span class="text-2xl">{{ child.finished ? "↩️" : "✓" }}</span>
+              :class="child.finished ? 'bg-red-900/50' : 'bg-transparent'">
+              <span class="text-2xl">{{ child.finished ? "↩️" : "" }}</span>
             </div>
 
             <!-- Huvudinnehåll -->
-            <div class="relative rounded-lg transition-all bg-gray-900" :class="selectedChildIndex === index
-              ? 'border border-blue-500'
-              : ''
-              " :style="{
-                transform: `translateX(${getSwipeOffset(child.id)}px)`,
-                transition: swipeState.isSwiping
-                  ? 'none'
-                  : 'transform 0.3s ease',
-              }" 
+            <div class="relative rounded-lg transition-all bg-gray-900" :class="{
+              'border border-blue-500': selectedChildIndex === index
+            }" :style="{
+              transform: 'translateX(' + getSwipeOffset(child.id) + 'px)',
+              transition: swipeState.isSwiping ? 'none' : 'transform 0.3s ease',
+            }"
               draggable="true"
               @dragstart.stop="handleDragStart($event, child.id)" 
               @dragover.stop="handleDragOver($event, child.id)"
@@ -1358,30 +1724,46 @@ watch(selectedParentIndex, async () => {
               <div v-else class="flex items-center gap-2">
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                   class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 hover:bg-gray-600"
+                   :class="['flex-shrink-0 transition-colors rounded p-1', isChildBlocked(child.id) || child.finished ? 'text-gray-600 hover:text-gray-600' : 'text-white hover:text-white hover:bg-gray-600']"
                    title="Ändra ikon">
-                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.finished ? { color: '#6B7280' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="isChildBlocked(child.id) || child.finished ? { color: '#4B5563' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
                  <!-- Started-toggle (s) -->
                  <button
                    @click.stop="toggleStarted(child)"
-                   class="flex-shrink-0 p-1 rounded transition-colors"
-                   :class="child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-400'"
+                   :class="['flex-shrink-0 p-1 rounded transition-colors', isChildBlocked(child.id) || child.finished ? 'text-gray-600' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-gray-300']"
                    title="Påbörja (s)">
                    <Icon name="lucide:circle-play" class="w-5 h-5"
-                     :style="{ opacity: child.started ? 1 : 0.25 }" />
+                     :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
+                 </button>
+                 <!-- Dependency-drag handle -->
+                 <button
+                   @mousedown.stop="handleDepMouseDown($event, child.id)"
+                   :class="[
+                     'flex-shrink-0 p-1 rounded transition-colors hover:bg-gray-700',
+                     isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
+                     isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-orange-400'
+                   ]"
+                   title="Dra för att skapa beroende">
+                   <Icon name="lucide:link" class="w-5 h-5" />
                  </button>
                  <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
-                  <h3 class="text-lg font-normal select-none" :class="child.finished ? 'text-gray-500' : ''" :style="child.finished ? {} : getWeightStyle(child.weight)">
+                  <h3 class="text-lg font-normal select-none" :class="child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'" :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
+                  <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-gray-600 mt-1">
+                    🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
+                  </p>
                 </NuxtLink>
                 <button
                   v-if="weightEditingChildId !== child.id"
                   @click.stop="startWeightEdit(child)"
-                  class="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors p-2 rounded hover:bg-gray-800"
+                  :class="[
+                    'flex-shrink-0 transition-colors p-2 rounded',
+                    isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-gray-300 hover:bg-gray-800'
+                  ]"
                   title="Ändra vikt">
-                  <span class="text-xs font-mono px-2 py-1 rounded bg-gray-800">
+                  <span :class="['text-xs font-mono px-2 py-1 rounded bg-gray-800', isChildBlocked(child.id) ? 'text-gray-600' : 'text-white']">
                     {{ child.weight }}
                   </span>
                 </button>

@@ -19,6 +19,7 @@ const props = defineProps<{
   editTitle: string
   weightEditingChildId: number | null
   tempWeight: number
+  childDependencies?: Record<number, { dependsOn: any[]; blocking: any[] }>
 }>()
 
 const emit = defineEmits<{
@@ -39,6 +40,92 @@ const emit = defineEmits<{
   'start-weight-edit': [childId: number, weight: number]
   'update:tempWeight': [value: number]
 }>()
+
+// Hjälpfunktioner för dependencies
+function isBlocked(childId: number): boolean {
+  if (!props.childDependencies) return false
+  const info = props.childDependencies[childId]
+  if (!info || info.dependsOn.length === 0) return false
+  return info.dependsOn.some((d: any) => !d.finished)
+}
+
+function getWaitingForTitle(childId: number): string | null {
+  if (!props.childDependencies) return null
+  const info = props.childDependencies[childId]
+  if (!info || info.dependsOn.length === 0) return null
+  const waitingFor = info.dependsOn.find((d: any) => !d.finished)
+  return waitingFor?.title || null
+}
+
+// Sortera barn: körbara först (efter vikt), sedan blockerade (i dependency-ordning)
+const sortedChildren = computed(() => {
+  if (!props.childDependencies) return props.filteredChildren
+  
+  const children = [...props.filteredChildren]
+  const depMap = props.childDependencies
+
+  // Bygg en karta över vilka mål som väntar på vilket annat mål
+  const waitingForMap = new Map<number, string>()
+  children.forEach(child => {
+    const info = depMap[child.id]
+    if (info && info.dependsOn.length > 0) {
+      const waitingFor = info.dependsOn.find((d: any) => !d.finished)
+      if (waitingFor) {
+        waitingForMap.set(child.id, waitingFor.title)
+      }
+    }
+  })
+
+  // Topologisk sortering: körbara först, sedan i kedjorder
+  const result: typeof children = []
+  const blocked = new Set<number>()
+  
+  // Lägg till alla körbara först (sorterade efter vikt)
+  const ready = children
+    .filter(c => !waitingForMap.has(c.id) && !c.finished)
+    .sort((a, b) => b.weight - a.weight)
+  
+  // Hitta starten av varje kedja
+  const waitingOnTitle = new Map<string, typeof children>()
+  children.forEach(c => {
+    const wf = waitingForMap.get(c.id)
+    if (wf) {
+      if (!waitingOnTitle.has(wf)) waitingOnTitle.set(wf, [])
+      waitingOnTitle.get(wf)!.push(c)
+    }
+  })
+
+  // Lägg till körbara mål
+  result.push(...ready)
+
+  // Lägg till blockerade i rätt ordning
+  const remaining = children.filter(c => !result.includes(c))
+  while (remaining.length > 0) {
+    let found = false
+    for (let i = 0; i < remaining.length; i++) {
+      const child = remaining[i]
+      const wf = waitingForMap.get(child.id)
+      if (wf) {
+        // Hitta om det målet redan är i resultatet
+        const targetInResult = result.find(r => r.title === wf)
+        if (targetInResult) {
+          // Lägg till efter alla som redan är före targetInResult
+          const insertIndex = result.findIndex(r => r.title === wf) + 1
+          result.splice(insertIndex, 0, child)
+          remaining.splice(i, 1)
+          found = true
+          break
+        }
+      }
+    }
+    if (!found) break
+  }
+
+  // Lägg till resterande (t.ex. klara mål) sist
+  result.push(...remaining.filter(c => !result.includes(c)))
+
+  return result
+})
 
 function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
   if (weight <= 2) {
@@ -110,8 +197,8 @@ function getSwipeOffset(childId: number): number {
       </div>
     </div>
 
-    <ul v-if="filteredChildren.length > 0" class="space-y-3">
-      <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
+    <ul v-if="sortedChildren.length > 0" class="space-y-3">
+      <li v-for="(child, index) in sortedChildren" :key="child.id" :data-child-index="index" draggable="true"
         @dragstart="$emit('dragstart', $event, index)" @dragover="$emit('dragover', $event, index)"
         @dragleave="$emit('dragleave')" @drop="$emit('drop', $event, index)"
         class="relative overflow-hidden rounded-lg transition-opacity"
@@ -124,7 +211,11 @@ function getSwipeOffset(childId: number): number {
 
         <!-- Huvudinnehåll -->
         <div class="relative rounded-lg transition-all bg-gray-900"
-          :class="selectedChildIndex === index ? 'border border-blue-500' : ''" :style="{
+          :class="{
+            'border border-blue-500': selectedChildIndex === index,
+            'border border-orange-500/50': isBlocked(child.id) && !child.finished,
+            'opacity-50': isBlocked(child.id) && !child.finished
+          }" :style="{
             transform: `translateX(${getSwipeOffset(child.id)}px)`,
             transition: swipeState.isSwiping ? 'none' : 'transform 0.3s ease',
           }" @touchstart="$emit('touchstart', $event, child.id)" @touchmove="$emit('touchmove', $event)"
@@ -153,6 +244,9 @@ function getSwipeOffset(childId: number): number {
                 :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
                 {{ child.title }}
               </h3>
+              <p v-if="getWaitingForTitle(child.id)" class="text-xs text-orange-400 mt-1">
+                🔗 Väntar på: {{ getWaitingForTitle(child.id) }}
+              </p>
             </NuxtLink>
             <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
               <div class="flex items-center gap-2">
