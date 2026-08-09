@@ -15,43 +15,38 @@ their objectives using a modern web interface with hierarchical goal structures.
 ```mermaid
 erDiagram
     users {
-        integer id PK
+        int id PK
         varchar sub UK NN
         varchar email UK NN
         varchar first_name
         varchar last_name
         timestamptz created NN
     }
-
     goals {
-        integer id PK
+        int id PK
         varchar title
         varchar icon
         timestamptz created NN
         timestamptz started
         timestamptz finished
-        integer inbox NN
+        int inbox NN
     }
-
     user_goals {
-        integer user_id FK NN
-        integer goal_id FK NN
+        int user_id FK NN
+        int goal_id FK NN
     }
-
     goal_relations {
-        integer parent_id FK NN
-        integer child_id FK NN
-        integer order NN
-        integer weight NN
+        int parent_id FK NN
+        int child_id FK NN
+        int order NN
+        int weight NN
     }
-
     goal_dependencies {
-        integer id PK
-        integer goal_id FK NN
-        integer depends_on_id FK NN
+        int id PK
+        int goal_id FK NN
+        int depends_on_id FK NN
         timestamptz created NN
     }
-
     users ||--o{ user_goals : ""
     goals ||--o{ user_goals : ""
     goals ||--o{ goal_relations : "parent"
