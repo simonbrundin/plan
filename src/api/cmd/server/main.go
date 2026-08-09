@@ -75,7 +75,7 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API routes with authentication
-	api := r.Group("/api")
+	api := r.Group("/api/v1")
 	api.Use(middleware.AuthMiddleware())
 	api.Use(func(c *gin.Context) {
 		c.Set("dbConnected", dbConnected)
