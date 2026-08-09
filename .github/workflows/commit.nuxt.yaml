@@ -45,7 +45,7 @@ jobs:
           IMAGE: ${{ needs.build-publish-image.outputs.image }}
         run: |
           echo "Updating image to: $IMAGE"
-          sed -i 's|image: ghcr.io/simonbrundin/plan@sha256:[a-f0-9]*|image: $IMAGE|'\
+          sed -i 's|ghcr.io/simonbrundin/plan@sha256:[a-f0-9]*|$IMAGE|'\
             environments/production/patches/deployment.yaml
           cat environments/production/patches/deployment.yaml
 
