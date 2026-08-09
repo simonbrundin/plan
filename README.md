@@ -18,34 +18,36 @@ erDiagram
         int id PK
         string sub
         string email
-        string firstName
-        string lastName
-        timestamp createdAt
+        string first_name
+        string last_name
+        timestamp created
     }
     GOALS {
         int id PK
         string title
         string icon
-        timestamp createdAt
-        timestamp startedAt
-        timestamp finishedAt
+        timestamp created
+        timestamp started
+        timestamp finished
         int inbox
     }
     USERGOALS {
-        int userId FK
-        int goalId FK
+        int user_id FK
+        int goal_id FK
+        int PRIMARY_KEY user_id, goal_id
     }
     GOALRELATIONS {
-        int parentId FK
-        int childId FK
-        int orderIndex
+        int parent_id FK
+        int child_id FK
+        int order
         int weight
+        int PRIMARY_KEY parent_id, child_id
     }
     GOALDEPENDENCIES {
-        int id PK
-        int goalId FK
-        int dependsOnId FK
-        timestamp createdAt
+        int goal_id FK
+        int depends_on_id FK
+        timestamp created
+        int PRIMARY_KEY goal_id, depends_on_id
     }
     USERS ||--o{ USERGOALS : ""
     GOALS ||--o{ USERGOALS : ""
