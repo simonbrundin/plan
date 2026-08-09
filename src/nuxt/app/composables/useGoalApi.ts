@@ -39,13 +39,13 @@ export function useGoalApi() {
 		forceRefresh = false,
 	): Promise<GoalData> => {
 		const url = forceRefresh
-			? `${goApiUrl}/api/goals/${goalId}?_=${Date.now()}`
-			: `${goApiUrl}/api/goals/${goalId}`;
+			? `${goApiUrl}/goals/${goalId}?_=${Date.now()}`
+			: `${goApiUrl}/goals/${goalId}`;
 		return await $fetch<GoalData>(url, fetchOptions());
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
 			...fetchOptions(),
@@ -53,7 +53,7 @@ export function useGoalApi() {
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
 			...fetchOptions(),
@@ -61,7 +61,7 @@ export function useGoalApi() {
 	};
 
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}/status`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
 			...fetchOptions(),
@@ -150,7 +150,7 @@ export function useGoalApi() {
 	};
 
 	const loadAllGoals = async (): Promise<Goal[]> => {
-		return await $fetch<Goal[]>(`${goApiUrl}/api/goals`);
+		return await $fetch<Goal[]>(`${goApiUrl}/goals`);
 	};
 
 	const createGoal = async (
@@ -161,7 +161,7 @@ export function useGoalApi() {
 		if (statusId) {
 			body.status_id = statusId;
 		}
-		return await $fetch<Goal>(`${goApiUrl}/api/goals`, {
+		return await $fetch<Goal>(`${goApiUrl}/goals`, {
 			method: "POST",
 			body,
 		});
