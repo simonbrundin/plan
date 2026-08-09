@@ -57,7 +57,8 @@ jobs:
 
       - name: Update deployment image
         env:
-          IMAGE: ghcr.io/simonbrundin/plan-api:sha-${{ steps.sha.outputs.short-sha }}
+          IMAGE: >-
+            ghcr.io/simonbrundin/plan-api:sha-${{ steps.sha.outputs.short-sha }}
         run: |
           echo "Updating image to: $IMAGE"
           sed -i "s|image: ghcr.io/simonbrundin/plan-api.*|image: $IMAGE|" \

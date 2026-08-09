@@ -24,6 +24,7 @@ jobs:
       dockerfile: src/nuxt/Dockerfile
       dockerfile-context: src/nuxt
       registry: ghcr.io/simonbrundin/plan
+      platforms: linux/amd64,linux/arm64
   update-deployment:
     needs: build-publish-image
     runs-on: ubuntu-latest
