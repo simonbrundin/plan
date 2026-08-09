@@ -46,4 +46,4 @@ spec:
                   name: auth
                   key: NUXT_OAUTH_ZITADEL_REDIRECT_URL
             - name: NUXT_PUBLIC_GO_API_URL
-              value: "https://api.plan.simonbrundin.com"
+              value: "https://plan.simonbrundin.com/api/v1"
