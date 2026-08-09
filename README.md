@@ -14,43 +14,43 @@ their objectives using a modern web interface with hierarchical goal structures.
 
 ```mermaid
 erDiagram
-    users {
+    USERS {
         int id PK
-        string sub UK NN
-        string email UK NN
-        string first_name
-        string last_name
-        timestamp created NN
+        varchar sub UK NN
+        varchar email UK NN
+        varchar firstName
+        varchar lastName
+        timestamp createdAt NN
     }
-    goals {
+    GOALS {
         int id PK
-        string title
-        string icon
-        timestamp created NN
-        timestamp started
-        timestamp finished
+        varchar title
+        varchar icon
+        timestamp createdAt NN
+        timestamp startedAt
+        timestamp finishedAt
         int inbox NN
     }
-    user_goals {
-        int user_id FK NN
-        int goal_id FK NN
+    USERGOALS {
+        int userId FK NN
+        int goalId FK NN
     }
-    goal_relations {
-        int parent_id FK NN
-        int child_id FK NN
-        int order NN
+    GOALRELATIONS {
+        int parentId FK NN
+        int childId FK NN
+        int orderIndex NN
         int weight NN
     }
-    goal_dependencies {
+    GOALDEPENDENCIES {
         int id PK
-        int goal_id FK NN
-        int depends_on_id FK NN
-        timestamp created NN
+        int goalId FK NN
+        int dependsOnId FK NN
+        timestamp createdAt NN
     }
-    users ||--o{ user_goals : ""
-    goals ||--o{ user_goals : ""
-    goals ||--o{ goal_relations : "parent"
-    goals ||--o{ goal_relations : "child"
-    goal_dependencies }o--|| goals : "waits for"
-    goals }o--|| goal_dependencies : "blocks"
+    USERS ||--o{ USERGOALS : ""
+    GOALS ||--o{ USERGOALS : ""
+    GOALS ||--o{ GOALRELATIONS : "parent"
+    GOALS ||--o{ GOALRELATIONS : "child"
+    GOALDEPENDENCIES }o--|| GOALS : "waits for"
+    GOALS }o--|| GOALDEPENDENCIES : "blocks"
 ```
