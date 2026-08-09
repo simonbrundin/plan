@@ -8,7 +8,8 @@ spec:
       containers:
         - name: plan-app
           # Updated by .github/workflows/commit.nuxt.yaml.
-          image: ghcr.io/simonbrundin/plan@sha256:8141905a264a3f5e3c1d1eac76d76dba2b26c1ea783bfe8c7b3f04a47ba5b14b
+          image: >-
+            ghcr.io/simonbrundin/plan@sha256:8141905a264a3f5e3c1d1eac76d76dba2b26c1ea783bfe8c7b3f04a47ba5b14b
           env:
             - name: NODE_ENV
               value: "production"
@@ -44,3 +45,5 @@ spec:
                 secretKeyRef:
                   name: auth
                   key: NUXT_OAUTH_ZITADEL_REDIRECT_URL
+            - name: NUXT_PUBLIC_GO_API_URL
+              value: "https://api.plan.simonbrundin.com"
