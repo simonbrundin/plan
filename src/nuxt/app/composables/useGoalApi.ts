@@ -10,36 +10,59 @@ interface GoalData {
 	children: GoalWithWeight[];
 	parents: Goal[];
 	allGoals: Goal[];
+	dependencies: GoalDependency[];
+	dependsOn: Goal[];
+	blocking: Goal[];
+	statusHistory?: StatusUpdate[];
+}
+
+interface StatusUpdate {
+	id: number;
+	goal_id: number;
+	from_status_id?: number;
+	to_status_id: number;
+	changed_at: string;
+	from_status_name?: string;
+	to_status_name: string;
 }
 
 export function useGoalApi() {
+	const config = useRuntimeConfig();
+	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
+
 	const fetchGoalData = async (
 		goalId: number,
 		forceRefresh = false,
 	): Promise<GoalData> => {
-		// Add cache-busting to ensure fresh data after updates
 		const url = forceRefresh
-			? `/api/goals/${goalId}?_=${Date.now()}`
-			: `/api/goals/${goalId}`;
+			? `${goApiUrl}/api/goals/${goalId}?_=${Date.now()}`
+			: `${goApiUrl}/api/goals/${goalId}`;
 		return await $fetch<GoalData>(url);
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		await $fetch(`/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
 		});
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		await $fetch(`/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
 		});
 	};
 
+	const updateGoalStatus = async (goalId: number, statusId: number) => {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}/status`, {
+			method: "PATCH",
+			body: { status_id: statusId },
+		});
+	};
+
 	const toggleGoalStarted = async (goalId: number, started: string | null) => {
-		await $fetch(`/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "PATCH",
 			body: { started },
 		});
@@ -49,29 +72,29 @@ export function useGoalApi() {
 		goalId: number,
 		finished: string | null,
 	) => {
-		await $fetch(`/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "PATCH",
 			body: { finished },
 		});
 	};
 
 	const deleteGoal = async (goalId: number) => {
-		await $fetch(`/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "DELETE",
 		});
 	};
 
 	const addParentRelation = async (childId: number, parentId: number) => {
-		await $fetch("/api/goals/relations", {
+		await $fetch(`${goApiUrl}/api/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId },
 		});
 	};
 
 	const removeParentRelation = async (childId: number, parentId: number) => {
-		await $fetch("/api/goals/relations", {
+		await $fetch(`${goApiUrl}/api/goals/relations`, {
 			method: "DELETE",
-			body: JSON.stringify({ childId, parentId }),
+			body: { childId, parentId },
 		});
 	};
 
@@ -80,7 +103,7 @@ export function useGoalApi() {
 		parentId: number,
 		order: number,
 	) => {
-		await $fetch("/api/goals/relations", {
+		await $fetch(`${goApiUrl}/api/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, order },
 		});
@@ -91,7 +114,7 @@ export function useGoalApi() {
 		childId: number,
 		order: number,
 	) => {
-		await $fetch("/api/goals/relations", {
+		await $fetch(`${goApiUrl}/api/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, order },
 		});
@@ -102,53 +125,55 @@ export function useGoalApi() {
 		childId: number,
 		weight: number,
 	) => {
-		await $fetch("/api/goals/relations", {
+		await $fetch(`${goApiUrl}/api/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, weight },
 		});
 	};
 
-	// Sätt vikt via UPSERT — skapar relationen om den inte finns, uppdaterar
-	// om den finns. Användbart när prioriteringssidan vill sätta vikt på ett
-	// top-level-mål som kanske inte har någon parent-relation ännu.
 	const setGoalWeight = async (
 		childId: number,
 		parentId: number,
 		weight: number,
 	) => {
-		await $fetch("/api/goals/relations", {
+		await $fetch(`${goApiUrl}/api/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, weight },
 		});
 	};
 
 	const loadAllGoals = async (): Promise<Goal[]> => {
-		return await $fetch<Goal[]>("/api/goals");
+		return await $fetch<Goal[]>(`${goApiUrl}/api/goals`);
 	};
 
-	const createGoal = async (title: string): Promise<Goal> => {
-		return await $fetch<Goal>("/api/goals", {
+	const createGoal = async (
+		title: string,
+		statusId?: number,
+	): Promise<Goal> => {
+		const body: { title: string; status_id?: number } = { title };
+		if (statusId) {
+			body.status_id = statusId;
+		}
+		return await $fetch<Goal>(`${goApiUrl}/api/goals`, {
 			method: "POST",
-			body: { title },
+			body,
 		});
 	};
 
-	// Add a dependency: goalId depends on dependsOnId
 	const addDependency = async (
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await $fetch<GoalDependency>("/api/goals/dependencies", {
+		return await $fetch<GoalDependency>(`${goApiUrl}/api/goals/dependencies`, {
 			method: "POST",
 			body: { goalId, dependsOnId },
 		});
 	};
 
-	// Remove a dependency: goalId no longer depends on dependsOnId
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
-		await $fetch("/api/goals/dependencies", {
+		await $fetch(`${goApiUrl}/api/goals/dependencies`, {
 			method: "DELETE",
-			body: JSON.stringify({ goalId, dependsOnId }),
+			body: { goalId, dependsOnId },
 		});
 	};
 
@@ -156,6 +181,7 @@ export function useGoalApi() {
 		fetchGoalData,
 		updateGoalTitle,
 		updateGoalIcon,
+		updateGoalStatus,
 		toggleGoalStarted,
 		toggleGoalFinished,
 		deleteGoal,

@@ -86,16 +86,16 @@ const isBlocked = computed(() => {
   return dependsOn.value.some((d: any) => !d.finished);
 });
 
-// Bygg dependency-info för varje barn
+	// Bygg dependency-info för varje barn
 const childDependencies = computed(() => {
-  const deps: Record<number, { dependsOn: any[]; blocking: any[] }> = {};
-  children.value.forEach(child => {
-    deps[child.id] = {
-      dependsOn: child.dependsOn || [],
-      blocking: child.blocking || []
-    };
-  });
-  return deps;
+	const deps: Record<number, { dependsOn: any[]; blocking: any[] }> = {};
+	children.value.forEach(child => {
+		deps[child.id] = {
+			dependsOn: child.dependsOn || [],  // Array av Goals
+			blocking: child.blocking || []     // Array av Goals
+		};
+	});
+	return deps;
 });
 
 // Hjälpfunktioner för barn-status
@@ -126,7 +126,7 @@ const filteredDependencySearchResults = computed(() => {
   const results = goalsStore.searchGoals(dependencySearchQuery.value);
 
   // Filtrera bort nuvarande målet, befintliga dependencies, och mål som redan är klara
-  const currentDependsOnIds = dependsOn.value.map((d: any) => d.depends_on_id);
+  const currentDependsOnIds = dependsOn.value.map((d: any) => d.id);
   return results.filter(
     (g) => g.id !== goalId.value && !currentDependsOnIds.includes(g.id)
   );
@@ -211,8 +211,9 @@ function handleDepMouseUp(_event: MouseEvent) {
   // Skapa eller ta bort dependency beroende på om den redan finns
   if (depDragOverChildId.value && depDragChildId.value !== depDragOverChildId.value) {
     const childInfo = childDependencies.value[depDragChildId.value];
+    // dependsOn är nu array av Goals, inte {depends_on_id} objekter
     const existingDep = childInfo?.dependsOn?.find(
-      (d: any) => d.depends_on_id === depDragOverChildId.value
+      (d: any) => d.id === depDragOverChildId.value
     );
     
     if (existingDep) {
@@ -1293,7 +1294,11 @@ function handleKeydown(event: KeyboardEvent) {
       event.preventDefault();
       const selectedParent = parents.value[selectedParentIndex.value];
       if (selectedParent) {
-        router.push(`/goal/${selectedParent.id}`);
+        if (selectedParent.id === 1) {
+          router.push('/goals');
+        } else {
+          router.push(`/goal/${selectedParent.id}`);
+        }
       }
     } else if (event.key === "j") {
       event.preventDefault();
@@ -1319,15 +1324,22 @@ function handleKeydown(event: KeyboardEvent) {
     } else if (event.key === "k") {
       event.preventDefault();
       if (selectedChildIndex.value === 0 && !isGoalSelected.value) {
+        // Go to goal title from first child
         isGoalSelected.value = true;
         selectedChildIndex.value = -1;
       } else if (isGoalSelected.value) {
-        if (parents.value.length > 0) {
+        // From goal title, go to parent mode or /goals
+        if (parents.value.length === 0 || parents.value[0].id === 1) {
+          // No parents or root is parent -> go to /goals
+          router.push('/goals');
+        } else {
+          // Has real parents -> go to parent mode
           isGoalSelected.value = false;
           isParentMode.value = true;
           selectedParentIndex.value = 0;
         }
       } else {
+        // Move up in children list
         const childrenCount = filteredChildren.value.length;
         if (childrenCount > 0) {
           selectedChildIndex.value = Math.max(selectedChildIndex.value - 1, 0);
