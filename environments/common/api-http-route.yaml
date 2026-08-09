@@ -21,3 +21,11 @@ spec:
         - kind: Service
           name: plan-api-service
           port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /swagger
+      backendRefs:
+        - kind: Service
+          name: plan-api-service
+          port: 8080

@@ -30,34 +30,41 @@ export function useGoalApi() {
 	const config = useRuntimeConfig();
 	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
 
+	const fetchOptions = () => ({
+		credentials: "include" as const,
+	});
+
 	const fetchGoalData = async (
 		goalId: number,
 		forceRefresh = false,
 	): Promise<GoalData> => {
 		const url = forceRefresh
-			? `${goApiUrl}/goals/${goalId}?_=${Date.now()}`
-			: `${goApiUrl}/goals/${goalId}`;
-		return await $fetch<GoalData>(url);
+			? `${goApiUrl}/api/goals/${goalId}?_=${Date.now()}`
+			: `${goApiUrl}/api/goals/${goalId}`;
+		return await $fetch<GoalData>(url, fetchOptions());
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
+			...fetchOptions(),
 		});
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
+			...fetchOptions(),
 		});
 	};
 
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}/status`, {
+		await $fetch(`${goApiUrl}/api/goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
+			...fetchOptions(),
 		});
 	};
 
