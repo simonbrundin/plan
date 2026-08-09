@@ -35,34 +35,34 @@ export function useGoalApi() {
 		forceRefresh = false,
 	): Promise<GoalData> => {
 		const url = forceRefresh
-			? `${goApiUrl}/api/goals/${goalId}?_=${Date.now()}`
-			: `${goApiUrl}/api/goals/${goalId}`;
+			? `${goApiUrl}/goals/${goalId}?_=${Date.now()}`
+			: `${goApiUrl}/goals/${goalId}`;
 		return await $fetch<GoalData>(url);
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
 		});
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
 		});
 	};
 
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}/status`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
 		});
 	};
 
 	const toggleGoalStarted = async (goalId: number, started: string | null) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { started },
 		});
@@ -72,27 +72,27 @@ export function useGoalApi() {
 		goalId: number,
 		finished: string | null,
 	) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { finished },
 		});
 	};
 
 	const deleteGoal = async (goalId: number) => {
-		await $fetch(`${goApiUrl}/api/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "DELETE",
 		});
 	};
 
 	const addParentRelation = async (childId: number, parentId: number) => {
-		await $fetch(`${goApiUrl}/api/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId },
 		});
 	};
 
 	const removeParentRelation = async (childId: number, parentId: number) => {
-		await $fetch(`${goApiUrl}/api/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "DELETE",
 			body: { childId, parentId },
 		});
@@ -103,7 +103,7 @@ export function useGoalApi() {
 		parentId: number,
 		order: number,
 	) => {
-		await $fetch(`${goApiUrl}/api/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, order },
 		});
@@ -114,7 +114,7 @@ export function useGoalApi() {
 		childId: number,
 		order: number,
 	) => {
-		await $fetch(`${goApiUrl}/api/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, order },
 		});
@@ -125,7 +125,7 @@ export function useGoalApi() {
 		childId: number,
 		weight: number,
 	) => {
-		await $fetch(`${goApiUrl}/api/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, weight },
 		});
@@ -136,7 +136,7 @@ export function useGoalApi() {
 		parentId: number,
 		weight: number,
 	) => {
-		await $fetch(`${goApiUrl}/api/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, weight },
 		});
@@ -164,14 +164,14 @@ export function useGoalApi() {
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await $fetch<GoalDependency>(`${goApiUrl}/api/goals/dependencies`, {
+		return await $fetch<GoalDependency>(`${goApiUrl}/goals/dependencies`, {
 			method: "POST",
 			body: { goalId, dependsOnId },
 		});
 	};
 
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
-		await $fetch(`${goApiUrl}/api/goals/dependencies`, {
+		await $fetch(`${goApiUrl}/goals/dependencies`, {
 			method: "DELETE",
 			body: { goalId, dependsOnId },
 		});
