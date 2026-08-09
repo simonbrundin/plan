@@ -7,5 +7,6 @@ resources:
   - secrets
 
 patches:
+  - path: patches/api-deployment.yaml
   - path: patches/deployment.yaml
   - path: patches/http-route.yaml

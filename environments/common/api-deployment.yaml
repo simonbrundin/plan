@@ -16,8 +16,7 @@ spec:
     spec:
       containers:
         - name: api
-          # Updated by .github/workflows/commit.api.yaml.
-          image: ghcr.io/simonbrundin/plan-api:sha-4d0ab58
+          # Image overridden by production patch
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
