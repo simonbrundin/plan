@@ -71,6 +71,7 @@ export default defineNuxtConfig({
 	runtimeConfig: {
 		public: {
 			appUrl: process.env.NUXT_PUBLIC_APP_URL || "",
+			goApiUrl: process.env.NUXT_PUBLIC_GO_API_URL || "http://localhost:8080",
 		},
 		oauth: {
 			// Zitadel OAuth provider configuration (PKCE - no secret)

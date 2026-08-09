@@ -2,16 +2,18 @@
 import type { GoalWithWeight } from '~/types/goal'
 
 interface SwipeState {
-  startX: number;
-  currentX: number;
-  isSwiping: boolean;
-  childId: number | null;
+  startX: number
+  currentX: number
+  isSwiping: boolean
+  childId: number | null
 }
 
 const props = defineProps<{
   filteredChildren: GoalWithWeight[]
   showCompleted: boolean
-  dragOverChildIndex: number | null
+  showStarted: boolean
+  dragOverChildId: number | null
+  draggedChildId: number | null
   selectedChildIndex: number
   swipeState: SwipeState
   mode: 'normal' | 'insert'
@@ -19,17 +21,20 @@ const props = defineProps<{
   editTitle: string
   weightEditingChildId: number | null
   tempWeight: number
-  childDependencies?: Record<number, { dependsOn: any[]; blocking: any[] }>
+  childDependencies: Record<number, { dependsOn: any[]; blocking: any[] }>
+  depDragChildId: number | null
+  depDragOverChildId: number | null
+  isDepDragging: boolean
 }>()
 
 const emit = defineEmits<{
-  'update-weight': [childId: number, weight: number]
   'toggle-completed': []
+  'toggle-started': []
   'open-child-search': []
-  'dragstart': [event: DragEvent, index: number]
-  'dragover': [event: DragEvent, index: number]
+  'dragstart': [event: DragEvent, childId: number]
+  'dragover': [event: DragEvent, childId: number]
   'dragleave': []
-  'drop': [event: DragEvent, index: number]
+  'drop': [event: DragEvent, childId: number]
   'touchstart': [event: TouchEvent, childId: number]
   'touchmove': [event: TouchEvent]
   'touchend': [child: GoalWithWeight]
@@ -37,124 +42,27 @@ const emit = defineEmits<{
   'update:editTitle': [title: string]
   'save-edit': []
   'cancel-edit': []
-  'start-weight-edit': [childId: number, weight: number]
+  'start-weight-edit': [child: GoalWithWeight]
   'update:tempWeight': [value: number]
+  'toggle-finished': [child: GoalWithWeight]
+  'toggle-started': [child: GoalWithWeight]
+  'dep-mousedown': [event: MouseEvent, childId: number]
+  'select-child': [index: number]
+  'delete-child': [child: GoalWithWeight]
 }>()
 
 // Hjälpfunktioner för dependencies
-function isBlocked(childId: number): boolean {
-  if (!props.childDependencies) return false
+function isChildBlocked(childId: number): boolean {
   const info = props.childDependencies[childId]
   if (!info || info.dependsOn.length === 0) return false
   return info.dependsOn.some((d: any) => !d.finished)
 }
 
-function getWaitingForTitle(childId: number): string | null {
-  if (!props.childDependencies) return null
+function getChildWaitingForTitle(childId: number): string | null {
   const info = props.childDependencies[childId]
   if (!info || info.dependsOn.length === 0) return null
   const waitingFor = info.dependsOn.find((d: any) => !d.finished)
   return waitingFor?.title || null
-}
-
-// Sortera barn: körbara först (efter vikt), sedan blockerade (i dependency-ordning)
-const sortedChildren = computed(() => {
-  if (!props.childDependencies) return props.filteredChildren
-  
-  const children = [...props.filteredChildren]
-  const depMap = props.childDependencies
-
-  // Bygg en karta över vilka mål som väntar på vilket annat mål
-  const waitingForMap = new Map<number, string>()
-  children.forEach(child => {
-    const info = depMap[child.id]
-    if (info && info.dependsOn.length > 0) {
-      const waitingFor = info.dependsOn.find((d: any) => !d.finished)
-      if (waitingFor) {
-        waitingForMap.set(child.id, waitingFor.title)
-      }
-    }
-  })
-
-  // Topologisk sortering: körbara först, sedan i kedjorder
-  const result: typeof children = []
-  const blocked = new Set<number>()
-  
-  // Lägg till alla körbara först (sorterade efter vikt)
-  const ready = children
-    .filter(c => !waitingForMap.has(c.id) && !c.finished)
-    .sort((a, b) => b.weight - a.weight)
-  
-  // Hitta starten av varje kedja
-  const waitingOnTitle = new Map<string, typeof children>()
-  children.forEach(c => {
-    const wf = waitingForMap.get(c.id)
-    if (wf) {
-      if (!waitingOnTitle.has(wf)) waitingOnTitle.set(wf, [])
-      waitingOnTitle.get(wf)!.push(c)
-    }
-  })
-
-  // Lägg till körbara mål
-  result.push(...ready)
-
-  // Lägg till blockerade i rätt ordning
-  const remaining = children.filter(c => !result.includes(c))
-  while (remaining.length > 0) {
-    let found = false
-    for (let i = 0; i < remaining.length; i++) {
-      const child = remaining[i]
-      const wf = waitingForMap.get(child.id)
-      if (wf) {
-        // Hitta om det målet redan är i resultatet
-        const targetInResult = result.find(r => r.title === wf)
-        if (targetInResult) {
-          // Lägg till efter alla som redan är före targetInResult
-          const insertIndex = result.findIndex(r => r.title === wf) + 1
-          result.splice(insertIndex, 0, child)
-          remaining.splice(i, 1)
-          found = true
-          break
-        }
-      }
-    }
-    if (!found) break
-  }
-
-  // Lägg till resterande (t.ex. klara mål) sist
-  result.push(...remaining.filter(c => !result.includes(c)))
-
-  return result
-})
-
-function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
-  if (weight <= 2) {
-    return { color: '#888888', opacity: 0.3 }
-  } else if (weight <= 9) {
-    return { color: '#888888', opacity: 0.55 }
-  } else if (weight <= 14) {
-    return { color: '#6B7280', opacity: 1 }
-  } else if (weight <= 40) {
-    return { color: '#2E5AFF', opacity: 1 }
-  } else if (weight <= 100) {
-    return { color: '#9C27B0', opacity: 1 }
-  } else {
-    return { color: '#7B1FA2', opacity: 1, fontWeight: 'bold' }
-  }
-}
-
-function startWeightEdit(child: GoalWithWeight) {
-  emit('start-weight-edit', child.id, child.weight)
-}
-
-function saveWeight() {
-  if (props.weightEditingChildId !== null) {
-    emit('update-weight', props.weightEditingChildId, props.tempWeight)
-  }
-}
-
-function cancelWeightEdit() {
-  emit('cancel-weight-edit')
 }
 
 function getSwipeOffset(childId: number): number {
@@ -164,68 +72,127 @@ function getSwipeOffset(childId: number): number {
   }
   return 0
 }
+
+function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
+  return { color: '#FFFFFF', opacity: 1 }
+}
+
+function getIconOpacity(child: GoalWithWeight): number {
+  if (isChildBlocked(child.id) || child.finished) return 0.6
+  return 1
+}
 </script>
 
 <template>
   <div class="flex-1 overflow-y-auto min-h-0">
+    <!-- Header with toggle buttons -->
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-2xl font-semibold text-gray-300"></h2>
       <div class="flex items-center gap-2">
-        <button @click="$emit('toggle-completed')"
+        <!-- Visa avklarade -->
+        <button
+          @click="$emit('toggle-completed')"
           class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-          :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'">
-          <svg v-if="showCompleted" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-          </svg>
+          :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'"
+        >
+          <Icon :name="showCompleted ? 'lucide:eye' : 'lucide:eye-off'" class="h-5 w-5" />
         </button>
-        <button @click="$emit('open-child-search')"
+        <!-- Visa endast påbörjade -->
+        <button
+          @click="$emit('toggle-started')"
           class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-          title="Lägg till undermål">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+          :class="showStarted ? 'text-yellow-400' : ''"
+          :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'"
+        >
+          <Icon name="lucide:circle-play" class="h-5 w-5" :style="{ opacity: showStarted ? 1 : 0.3 }" />
+        </button>
+        <!-- Lägg till undermål -->
+        <button
+          @click="$emit('open-child-search')"
+          class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
+          title="Lägg till undermål"
+        >
+          <Icon name="lucide:plus" class="h-5 w-5" />
         </button>
       </div>
     </div>
 
-    <ul v-if="sortedChildren.length > 0" class="space-y-3">
-      <li v-for="(child, index) in sortedChildren" :key="child.id" :data-child-index="index" draggable="true"
-        @dragstart="$emit('dragstart', $event, index)" @dragover="$emit('dragover', $event, index)"
-        @dragleave="$emit('dragleave')" @drop="$emit('drop', $event, index)"
+    <!-- Children list -->
+    <ul v-if="filteredChildren.length > 0" class="space-y-3" :class="{ 'select-none': isDepDragging }">
+      <li
+        v-for="(child, index) in filteredChildren"
+        :key="child.id"
+        :data-child-index="index"
+        draggable="true"
         class="relative overflow-hidden rounded-lg transition-opacity"
-        :class="dragOverChildIndex === index ? 'opacity-50' : 'opacity-100'">
+        :class="[
+          isChildBlocked(child.id) ? 'ml-4 pl-3' : '',
+          dragOverChildId === child.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900' : '',
+          draggedChildId === child.id ? 'opacity-30' : '',
+          depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-gray-900' : ''
+        ]"
+        @dragstart="$emit('dragstart', $event, child.id)"
+        @dragover="$emit('dragover', $event, child.id)"
+        @dragleave="$emit('dragleave')"
+        @drop="$emit('drop', $event, child.id)"
+      >
+        <!-- Reparent indicator -->
+        <div
+          v-if="dragOverChildId === child.id && draggedChildId !== child.id"
+          class="absolute inset-0 bg-purple-500/20 flex items-center justify-center z-10 rounded-lg"
+        >
+          <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+            Flytta in i detta mål
+          </div>
+        </div>
+
+        <!-- Dependency indicator -->
+        <div
+          v-if="depDragOverChildId === child.id && depDragChildId !== child.id"
+          class="absolute inset-0 bg-orange-500/20 flex items-center justify-center z-10 rounded-lg"
+        >
+          <div class="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+            🔗 Skapa beroende
+          </div>
+        </div>
+
         <!-- Swipe bakgrund -->
-        <div class="absolute inset-0 flex items-center justify-start px-6"
-          :class="child.finished ? 'bg-red-900/50' : 'bg-green-900/50'">
-          <span class="text-2xl">{{ child.finished ? "↩️" : "✓" }}</span>
+        <div
+          class="absolute inset-0 flex items-center justify-start px-6"
+          :class="child.finished ? 'bg-red-900/50' : 'bg-transparent'"
+        >
+          <span class="text-2xl">{{ child.finished ? "↩️" : "" }}</span>
         </div>
 
         <!-- Huvudinnehåll -->
-        <div class="relative rounded-lg transition-all bg-gray-900"
+        <div
+          class="relative rounded-lg transition-all bg-gray-900"
           :class="{
-            'border border-blue-500': selectedChildIndex === index,
-            'border border-orange-500/50': isBlocked(child.id) && !child.finished,
-            'opacity-50': isBlocked(child.id) && !child.finished
-          }" :style="{
+            'border border-blue-500': selectedChildIndex === index
+          }"
+          :style="{
             transform: `translateX(${getSwipeOffset(child.id)}px)`,
-            transition: swipeState.isSwiping ? 'none' : 'transform 0.3s ease',
-          }" @touchstart="$emit('touchstart', $event, child.id)" @touchmove="$emit('touchmove', $event)"
-          @touchend="$emit('touchend', child)">
+            transition: swipeState.isSwiping ? 'none' : 'transform 0.3s ease'
+          }"
+          draggable="true"
+          @dragstart.stop="$emit('dragstart', $event, child.id)"
+          @dragover.stop="$emit('dragover', $event, child.id)"
+          @dragleave.stop="$emit('dragleave')"
+          @drop.stop.prevent="$emit('drop', $event, child.id)"
+          @touchstart="$emit('touchstart', $event, child.id)"
+          @touchmove="$emit('touchmove', $event)"
+          @touchend="$emit('touchend', child)"
+        >
           <!-- Insert mode - visa input -->
           <div v-if="mode === 'insert' && editingGoalId === child.id" class="p-4">
-            <input :value="editTitle" @input="$emit('update:editTitle', ($event.target as HTMLInputElement).value)"
+            <input
+              :value="editTitle"
+              @input="$emit('update:editTitle', ($event.target as HTMLInputElement).value)"
               type="text"
               class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              @keydown.enter.prevent="$emit('save-edit')" @keydown.esc.prevent="$emit('cancel-edit')" />
+              @keydown.enter.prevent="$emit('save-edit')"
+              @keydown.esc.prevent="$emit('cancel-edit')"
+            />
             <div class="text-xs text-gray-500 mt-2">
               Enter för att spara, Escape för att avbryta
             </div>
@@ -233,29 +200,114 @@ function getSwipeOffset(childId: number): number {
 
           <!-- Normal mode - visa länk -->
           <div v-else class="flex items-center gap-2">
-            <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
+            <!-- Icon button -->
+            <button
               @click.stop="$emit('open-icon-picker', child.id)"
-              class="flex-shrink-0 text-gray-400 hover:text-gray-200 transition-colors rounded p-1 pl-2 hover:bg-gray-600"
-              title="Ändra ikon">
-              <Icon :name="child.icon || 'heroicons:star'" class="w-6 h-6 text-white" />
+              :class="[
+                'flex-shrink-0 transition-colors rounded p-1',
+                isChildBlocked(child.id) || child.finished ? 'text-gray-600' : 'text-white hover:text-white hover:bg-gray-600'
+              ]"
+              title="Ändra ikon"
+            >
+              <Icon
+                :name="child.icon || 'heroicons:star'"
+                class="w-5 h-5"
+                :style="{ color: isChildBlocked(child.id) || child.finished ? '#4B5563' : '#FFFFFF', opacity: getIconOpacity(child) }"
+              />
             </button>
-            <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block">
-              <h3 class="text-lg font-medium" :class="child.finished ? 'text-gray-500' : ''"
-                :style="child.finished ? {} : getWeightStyle(child.weight)" @click.stop="startWeightEdit(child)">
+
+            <!-- Started-toggle (s) -->
+            <button
+              @click.stop="$emit('toggle-started', child)"
+              :class="[
+                'flex-shrink-0 p-1 rounded transition-colors',
+                isChildBlocked(child.id) || child.finished ? 'text-gray-600' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-gray-300'
+              ]"
+              title="Påbörja (s)"
+            >
+              <Icon
+                name="lucide:circle-play"
+                class="w-5 h-5"
+                :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }"
+              />
+            </button>
+
+            <!-- Dependency-drag handle -->
+            <button
+              @mousedown.stop="$emit('dep-mousedown', $event, child.id)"
+              :class="[
+                'flex-shrink-0 p-1 rounded transition-colors hover:bg-gray-700',
+                isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
+                isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-orange-400'
+              ]"
+              title="Dra för att skapa beroende"
+            >
+              <Icon name="lucide:link" class="w-5 h-5" />
+            </button>
+
+            <!-- Title link -->
+            <NuxtLink
+              :to="`/goal/${child.id}`"
+              class="flex-1 p-4 block cursor-pointer"
+              @click="$emit('select-child', index)"
+            >
+              <h3
+                class="text-lg font-normal select-none"
+                :class="child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'"
+                :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)"
+              >
                 {{ child.title }}
               </h3>
-              <p v-if="getWaitingForTitle(child.id)" class="text-xs text-orange-400 mt-1">
-                🔗 Väntar på: {{ getWaitingForTitle(child.id) }}
+              <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-gray-600 mt-1">
+                🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
               </p>
             </NuxtLink>
+
+            <!-- Weight button -->
+            <button
+              v-if="weightEditingChildId !== child.id"
+              @click.stop="$emit('start-weight-edit', child)"
+              :class="[
+                'flex-shrink-0 transition-colors p-2 rounded',
+                isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-gray-300 hover:bg-gray-800'
+              ]"
+              title="Ändra vikt"
+            >
+              <span
+                :class="[
+                  'text-xs font-mono px-2 py-1 rounded bg-gray-800',
+                  isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'
+                ]"
+              >
+                {{ child.weight }}
+              </span>
+            </button>
+
+            <!-- Weight editing -->
             <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
               <div class="flex items-center gap-2">
-                <input :value="tempWeight"
-                  @input="$emit('update:tempWeight', ($event.target as HTMLInputElement).valueAsNumber)" type="range"
-                  min="1" max="200" step="1" class="flex-1" />
+                <input
+                  :value="tempWeight"
+                  @input="$emit('update:tempWeight', ($event.target as HTMLInputElement).valueAsNumber)"
+                  type="range"
+                  min="1"
+                  max="200"
+                  step="1"
+                  class="flex-1"
+                />
                 <span class="text-sm text-gray-400 w-8">{{ tempWeight }}</span>
-                <button @click="saveWeight" class="text-green-400 hover:text-green-300">✓</button>
-                <button @click="cancelWeightEdit" class="text-red-400 hover:text-red-300">✗</button>
+                <button
+                  @click="$emit('save-weight')"
+                  class="text-green-400 hover:text-green-300"
+                >
+                  ✓
+                </button>
+                <button
+                  @click="$emit('cancel-weight-edit')"
+                  class="text-red-400 hover:text-red-300"
+                >
+                  ✗
+                </button>
               </div>
             </div>
           </div>
@@ -263,7 +315,11 @@ function getSwipeOffset(childId: number): number {
       </li>
     </ul>
 
-    <div v-else class="text-gray-500 p-6 border border-gray-700 rounded-lg text-center">
+    <!-- Empty state -->
+    <div
+      v-else
+      class="text-gray-500 p-6 border border-gray-700 rounded-lg text-center"
+    >
       Inga undermål ännu. Skapa ett för att dela upp detta mål i mindre delar.
     </div>
   </div>

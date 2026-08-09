@@ -7,15 +7,16 @@ defineProps<{
   editingGoalId: number | null
   editTitle: string
   mode: 'normal' | 'insert'
+  showDependencies: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'update:editTitle': [value: string]
-  'update:mode': [value: 'normal' | 'insert']
-  'update:editingGoalId': [value: number | null]
   'save-edit': []
   'cancel-edit': []
   'open-icon-picker': []
+  'toggle-started': []
+  'toggle-dependencies': []
 }>()
 </script>
 
@@ -37,11 +38,35 @@ defineEmits<{
 
   <!-- Normal mode -->
   <div v-else class="flex items-center gap-4 flex-shrink-0">
-    <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
-      isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
-    ]">
+    <h1
+      :class="[
+        'text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
+        isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
+      ]"
+    >
       {{ goal?.title }}
     </h1>
+
+    <!-- Started-toggle (s) -->
+    <button
+      v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+      @click.stop="$emit('toggle-started')"
+      class="p-2 rounded transition-colors"
+      :class="
+        goal.started
+          ? 'text-yellow-400 hover:text-yellow-300'
+          : 'text-gray-600 hover:text-gray-400'
+      "
+      title="Påbörja (s)"
+    >
+      <Icon
+        name="lucide:circle-play"
+        class="w-6 h-6"
+        :style="{ opacity: goal.started ? 1 : 0.25 }"
+      />
+    </button>
+
+    <!-- Icon button -->
     <button
       v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
       @click.stop="$emit('open-icon-picker')"
@@ -49,6 +74,20 @@ defineEmits<{
       title="Ändra ikon"
     >
       <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
+    </button>
+
+    <!-- Toggle dependencies visibility -->
+    <button
+      @click.stop="$emit('toggle-dependencies')"
+      class="p-2 rounded transition-colors"
+      :class="
+        showDependencies
+          ? 'text-orange-400 hover:text-orange-300'
+          : 'text-gray-600 hover:text-gray-400'
+      "
+      title="Beroenden (blockerade mål)"
+    >
+      <Icon name="lucide:git-branch" class="w-6 h-6" />
     </button>
   </div>
 </template>
