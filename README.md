@@ -16,19 +16,19 @@ their objectives using a modern web interface with hierarchical goal structures.
 erDiagram
     users {
         int id PK
-        varchar sub UK NN
-        varchar email UK NN
-        varchar first_name
-        varchar last_name
-        timestamptz created NN
+        string sub UK NN
+        string email UK NN
+        string first_name
+        string last_name
+        timestamp created NN
     }
     goals {
         int id PK
-        varchar title
-        varchar icon
-        timestamptz created NN
-        timestamptz started
-        timestamptz finished
+        string title
+        string icon
+        timestamp created NN
+        timestamp started
+        timestamp finished
         int inbox NN
     }
     user_goals {
@@ -45,7 +45,7 @@ erDiagram
         int id PK
         int goal_id FK NN
         int depends_on_id FK NN
-        timestamptz created NN
+        timestamp created NN
     }
     users ||--o{ user_goals : ""
     goals ||--o{ user_goals : ""
