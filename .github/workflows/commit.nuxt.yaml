@@ -40,12 +40,15 @@ jobs:
           persist-credentials: true
           ref: main
 
+      - name: Install yq
+        uses: mikefarah/yq-action@v1
+
       - name: Update deployment image
         env:
           IMAGE: ${{ needs.build-publish-image.outputs.image }}
         run: |
           echo "Updating image to: $IMAGE"
-          sed -i 's|ghcr.io/simonbrundin/plan@sha256:[a-f0-9]*|$IMAGE|'\
+          yq -i '.spec.template.spec.containers[0].image = strenv(IMAGE)' \
             environments/production/patches/deployment.yaml
           cat environments/production/patches/deployment.yaml
 
