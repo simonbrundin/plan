@@ -184,14 +184,11 @@ export function useGoalApi() {
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await $fetch<GoalDependency>(
-			`${goApiUrl}/goals/dependencies`,
-			{
-				method: "POST",
-				body: { goalId, dependsOnId },
-				headers: authHeaders(),
-			},
-		);
+		return await $fetch<GoalDependency>(`${goApiUrl}/goals/dependencies`, {
+			method: "POST",
+			body: { goalId, dependsOnId },
+			headers: authHeaders(),
+		});
 	};
 
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
