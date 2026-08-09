@@ -74,6 +74,11 @@ func main() {
 	// Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Auth routes (no authentication required)
+	authHandler := handlers.NewAuthHandler(dbConnected)
+	r.GET("/api/v1/auth/login", authHandler.Login)
+	r.GET("/api/v1/auth/callback", authHandler.Callback)
+
 	// API routes with authentication
 	api := r.Group("/api/v1")
 	api.Use(middleware.AuthMiddleware())

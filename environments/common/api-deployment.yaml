@@ -33,6 +33,21 @@ spec:
                 secretKeyRef:
                   name: plan-db-user
                   key: uri
+            - name: ZITADEL_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: zitadel
+                  key: domain
+            - name: ZITADEL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: zitadel
+                  key: clientId
+            - name: ZITADEL_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: zitadel
+                  key: clientSecret
           resources:
             requests:
               memory: "64Mi"
