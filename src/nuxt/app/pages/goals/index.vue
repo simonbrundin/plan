@@ -2,18 +2,29 @@
 import type { Goal } from '~/types/goal'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, deleteGoal } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, deleteGoal, loadAllGoals } = useGoalApi()
 
-const { data: goals, pending, error, refresh } = await useFetch<Goal[]>('/api/goals')
+const goals = ref<Goal[]>([])
+const pending = ref(false)
+const error = ref<Error | null>(null)
+
+onMounted(async () => {
+  pending.value = true
+  try {
+    goals.value = await loadAllGoals()
+  } catch (e) {
+    error.value = e as Error
+    console.error('Failed to load goals:', e)
+  } finally {
+    pending.value = false
+  }
+})
 
 const selectedIndex = ref(0)
 const mode = ref<'normal' | 'insert'>('normal')
 
 // Lokal state för att uppdatera UI direkt
-const localGoals = ref<Goal[]>([])
-watch(goals, (newGoals) => {
-  if (newGoals) localGoals.value = newGoals
-}, { immediate: true })
+const localGoals = computed(() => goals.value)
 
 const displayedGoals = computed(() => localGoals.value)
 const showStarted = ref(false)
