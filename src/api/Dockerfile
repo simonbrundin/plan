@@ -16,6 +16,9 @@ RUN go mod download
 # Kopiera källkod
 COPY . .
 
+# Uppdatera dependencies
+RUN go mod tidy
+
 # Bygg binären
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o plan-api ./cmd/server/main.go
 
