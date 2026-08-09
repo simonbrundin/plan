@@ -1,0 +1,60 @@
+# ------------------------------------------------------------------
+# Local Development Mode
+# Runs database in Docker, frontend locally
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+# Docker Compose Setup
+# ------------------------------------------------------------------
+
+# Ladda backend services (postgres) från dedikerad compose-fil
+docker_compose('./docker-compose.backend.yml')
+
+# ------------------------------------------------------------------
+# PostgreSQL Database
+# ------------------------------------------------------------------
+
+dc_resource(
+  'postgres',
+  labels=['Database'],
+)
+
+# ------------------------------------------------------------------
+# Go API Server
+# ------------------------------------------------------------------
+
+local_resource(
+  'Go API',
+  serve_cmd=[
+    'bash', '-c',
+    'cd ../../src/api && ' +
+    'DATABASE_URL="postgresql://plan:plan@localhost:5432/plan" ' +
+    'PORT=8080 ' +
+    'AUTH_DISABLED=true ' +
+    'go run cmd/server/main.go'
+  ],
+  links=['http://localhost:8080', 'http://localhost:8080/swagger/index.html'],
+  labels=['API'],
+  resource_deps=['postgres'],
+)
+
+# ------------------------------------------------------------------
+# Frontend (Nuxt Dev Server) - körs lokalt
+# ------------------------------------------------------------------
+
+local_resource(
+  'Nuxt Dev Server',
+  serve_cmd=[
+    'bash', '-c',
+    'cd ../../src/nuxt && ' +
+    'DATABASE_URL="postgresql://plan:plan@localhost:5432/plan" ' +
+    'NUXT_SESSION_PASSWORD="5c3ddb48cdb04a05aed90cdb9330cbc2" ' +
+    'NUXT_SESSION_COOKIE_SECURE=false ' +
+    'NUXT_SESSION_COOKIE_SAMESITE=lax ' +
+    'NUXT_PUBLIC_APP_URL="http://localhost:3000" ' +
+    'bun run dev --host'
+  ],
+  links=['http://localhost:3000'],
+  labels=['Frontend'],
+  resource_deps=['postgres'],  # Vänta på PostgreSQL
+)
