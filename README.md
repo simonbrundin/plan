@@ -46,10 +46,9 @@ erDiagram
         INTEGER depends_on_id FK
         TIMESTAMPTZ created
     }
-    USERS ||--o{ USERGOALS : ""
-    GOALS ||--o{ USERGOALS : ""
+    USERS ||--o{ USERGOALS : "has"
+    GOALS ||--o{ USERGOALS : "assigned to"
     GOALS ||--o{ GOALRELATIONS : "parent"
     GOALS ||--o{ GOALRELATIONS : "child"
-    GOALDEPENDENCIES }o--|| GOALS : "waits for"
-    GOALS }o--|| GOALDEPENDENCIES : "blocks"
+    GOALS ||--o{ GOALDEPENDENCIES : "depends on"
 ```
