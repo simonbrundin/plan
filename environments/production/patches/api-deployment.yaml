@@ -8,7 +8,7 @@ spec:
       containers:
         - name: api
           # sha-4ab1edb
-          image: ghcr.io/simonbrundin/plan-api:sha-bd4c3c1
+          image: ghcr.io/simonbrundin/plan-api:sha-d7bb09e
           env:
             - name: AUTH_DISABLED
               value: "false"
