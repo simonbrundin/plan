@@ -36,18 +36,18 @@ spec:
             - name: ZITADEL_DOMAIN
               valueFrom:
                 secretKeyRef:
-                  name: zitadel
-                  key: domain
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_DOMAIN
             - name: ZITADEL_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: zitadel
-                  key: clientId
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_CLIENT_ID
             - name: ZITADEL_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: zitadel
-                  key: clientSecret
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_CLIENT_SECRET
           resources:
             requests:
               memory: "64Mi"
