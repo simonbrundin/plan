@@ -38,7 +38,7 @@ const handleLogout = async () => {
   </div>
   <div v-else>
     <h1>Not logged in</h1>
-    <a href="/api/auth/zitadel">
+    <a href="/api/auth/login">
       <UButton>Logga in</UButton>
     </a>
   </div>
