@@ -4,7 +4,7 @@ import { withQuery } from "ufo";
 export default eventHandler(async (event) => {
 	const config = useRuntimeConfig();
 	const query = getQuery(event);
-	
+
 	// Go API URL
 	const GO_API_URL = config.public.goApiUrl || "http://localhost:8080";
 	const CALLBACK_URL = GO_API_URL + "/api/v1/auth/callback";

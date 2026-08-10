@@ -19,11 +19,11 @@ export default eventHandler(async (event) => {
 
 	const ZITADEL_DOMAIN = config.oauth.zitadel.domain;
 	const CLIENT_ID = config.oauth.zitadel.clientId;
-	
+
 	// Go API URL for callback
 	const GO_API_URL = config.public.goApiUrl || "http://localhost:8080";
 	const CALLBACK_URL = GO_API_URL + "/api/v1/auth/callback";
-	
+
 	// Frontend URL to redirect after login
 	const FRONTEND_URL = config.public.appUrl + "/api/auth/callback";
 
@@ -53,7 +53,11 @@ export default eventHandler(async (event) => {
 		const challenge = await generateCodeChallenge(verifier);
 		const state = generateRandomString(32);
 
-		const combinedData = JSON.stringify({ state, verifier, frontendUrl: FRONTEND_URL });
+		const combinedData = JSON.stringify({
+			state,
+			verifier,
+			frontendUrl: FRONTEND_URL,
+		});
 		setCookie(event, "oauth_data", combinedData, {
 			httpOnly: true,
 			secure: true,

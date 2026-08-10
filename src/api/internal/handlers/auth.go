@@ -23,9 +23,9 @@ func NewAuthHandler(dbConnected bool) *AuthHandler {
 }
 
 type OAuthState struct {
-	State   string `json:"state"`
+	State        string `json:"state"`
 	PKCEVerifier string `json:"pkce_verifier"`
-	RedirectURL string `json:"redirect_url"`
+	RedirectURL  string `json:"redirect_url"`
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -47,22 +47,22 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Generate PKCE verifier
 	verifier := generateRandomString(64)
-	
+
 	// Generate state
 	state := generateRandomString(32)
-	
+
 	// Calculate challenge
 	hash := sha256.Sum256([]byte(verifier))
 	challenge := base64.RawURLEncoding.EncodeToString(hash[:])
 
 	// Store state in cookie or return it
 	stateData := OAuthState{
-		State: state,
+		State:        state,
 		PKCEVerifier: verifier,
-		RedirectURL: redirectURI,
+		RedirectURL:  redirectURI,
 	}
 	stateJSON, _ := json.Marshal(stateData)
-	
+
 	c.SetCookie("oauth_state", string(stateJSON), 600, "/", "", c.Request.TLS != nil, true)
 
 	// Build authorization URL
@@ -77,7 +77,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"auth_url": authURL,
-		"state": state,
+		"state":    state,
 	})
 }
 
@@ -88,7 +88,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	if errorParam != "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errorParam,
+			"error":       errorParam,
 			"description": c.Query("error_description"),
 		})
 		return
@@ -127,7 +127,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	// Exchange code for token
 	tokenURL := "https://" + zitadelDomain + "/oauth/v2/token"
-	
+
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("client_id", clientID)
@@ -137,7 +137,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	req, _ := http.NewRequest("POST", tokenURL, strings.NewReader(data.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	
+
 	if clientSecret != "" {
 		req.SetBasicAuth(clientID, clientSecret)
 	}
@@ -151,7 +151,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
-	
+
 	var tokenResponse map[string]interface{}
 	if err := json.Unmarshal(body, &tokenResponse); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid token response"})
@@ -160,7 +160,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	if tokenResponse["error"] != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": tokenResponse["error"],
+			"error":       tokenResponse["error"],
 			"description": tokenResponse["error_description"],
 		})
 		return
@@ -169,10 +169,10 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 	// Get user info
 	accessToken := tokenResponse["access_token"].(string)
 	userInfoURL := "https://" + zitadelDomain + "/oidc/v1/userinfo"
-	
+
 	userReq, _ := http.NewRequest("GET", userInfoURL, nil)
 	userReq.Header.Set("Authorization", "Bearer "+accessToken)
-	
+
 	userResp, err := client.Do(userReq)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User info request failed"})
@@ -190,12 +190,12 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 	// Return token and user info
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
-		"token_type": tokenResponse["token_type"],
-		"expires_in": tokenResponse["expires_in"],
+		"token_type":   tokenResponse["token_type"],
+		"expires_in":   tokenResponse["expires_in"],
 		"user": gin.H{
-			"sub": userInfo["sub"],
-			"email": userInfo["email"],
-			"name": userInfo["name"],
+			"sub":                userInfo["sub"],
+			"email":              userInfo["email"],
+			"name":               userInfo["name"],
 			"preferred_username": userInfo["preferred_username"],
 		},
 	})
