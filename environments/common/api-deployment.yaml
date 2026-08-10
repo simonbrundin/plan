@@ -48,6 +48,8 @@ spec:
                 secretKeyRef:
                   name: auth
                   key: NUXT_OAUTH_ZITADEL_CLIENT_SECRET
+            - name: APP_DOMAIN
+              value: "plan.simonbrundin.com"
           resources:
             requests:
               memory: "64Mi"
