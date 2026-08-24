@@ -6,7 +6,7 @@
 
 - [ ] Bilservicelista
 - [ ] Beställ skenor till mamma
-- [ ] Köp plywood
+- [x] Köp plywood
 - [x] Köp båt
 - [ ] Konstruera plywoodlådor
 - [x] Ladda batterierna i vanen
@@ -31,7 +31,7 @@
 - [ ] Kolla så min app är upplagd efter
       [länk](https://nuxt.com/docs/4.x/directory-structure)
 - [ ] Installera Calibre i Homelab
-- [ ] Installera Immich i Homelab
+- [x] Installera Immich i Homelab
 - [x] iptv fungerar
 - [ ] Dashboard för allt. En del ska vara dora metrics för mina olika projekt
 - [ ] development mode i zitadel. vad betyder det och ska jag ha ktvå appar?

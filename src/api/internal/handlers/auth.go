@@ -199,9 +199,9 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 	// TODO: Create or find user in DB when dbConnected
 	_ = h.dbConnected // Suppress unused warning
 
-	// Redirect to frontend callback with token
+	// Redirect to Nuxt server API callback
 	frontendCallbackURL := fmt.Sprintf(
-		"https://%s/auth/callback?token=%s&sub=%s&email=%s",
+		"https://%s/api/auth/callback?token=%s&sub=%s&email=%s",
 		osGetenv("APP_DOMAIN", "plan.simonbrundin.com"),
 		url.QueryEscape(accessToken),
 		url.QueryEscape(sub),
