@@ -9,7 +9,7 @@ spec:
         - name: plan-app
           # Updated by .github/workflows/commit.nuxt.yaml.
           image: >-
-            ghcr.io/simonbrundin/plan@sha256:62516f06e2a687810b229d17c69b4c145061dfbaa2f28e71f48a37d4c3ed622f
+            ghcr.io/simonbrundin/plan@sha256:2727165e97ed35e8cb5a4302409e72248ff2311d2817f7ae83c00701ffec0093
           env:
             - name: NODE_ENV
               value: "production"
