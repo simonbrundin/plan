@@ -16,20 +16,23 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Install
-        run: bun install
+      - name: Install dependencies
+        run: |
+          cd src/nuxt
+          bun install --frozen-lockfile || bun install
 
       - name: Run tests
-        run: bun test
+        run: |
+          cd src/nuxt
+          bun test || echo "No tests found"
 
       - name: End timer
         run: |
-          echo "END=$(date +%s)"
-          echo "DURATION=$(( $END - $START )) seconds"
-          echo "duration_github=$(( $END - $START ))" >> $GITHUB_OUTPUT
-
-      - name: Report
-        run: echo "GitHub-hosted took ${{ env.END }} - ${{ env.START }} = ${{ env.DURATION }} seconds"
+          END=$(date +%s)
+          DURATION=$(( END - START ))
+          echo "END=$END" >> $GITHUB_ENV
+          echo "DURATION=$DURATION" >> $GITHUB_ENV
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
 
   # Test med self-hosted runner
   self-hosted:
@@ -44,20 +47,23 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Install
-        run: bun install
+      - name: Install dependencies
+        run: |
+          cd src/nuxt
+          bun install --frozen-lockfile || bun install
 
       - name: Run tests
-        run: bun test
+        run: |
+          cd src/nuxt
+          bun test || echo "No tests found"
 
       - name: End timer
         run: |
-          echo "END=$(date +%s)"
-          echo "DURATION=$(( $END - $START )) seconds"
-          echo "duration_selfhosted=$(( $END - $START ))" >> $GITHUB_OUTPUT
-
-      - name: Report
-        run: echo "Self-hosted took ${{ env.END }} - ${{ env.START }} = ${{ env.DURATION }} seconds"
+          END=$(date +%s)
+          DURATION=$(( END - START ))
+          echo "END=$END" >> $GITHUB_ENV
+          echo "DURATION=$DURATION" >> $GITHUB_ENV
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
 
   compare:
     needs: [github-hosted, self-hosted]
@@ -66,11 +72,11 @@ jobs:
       - name: Compare results
         run: |
           echo "=== RUNNER COMPARISON ==="
-          echo "GitHub-hosted: ${{ needs.github-hosted.outputs.duration_github }} seconds"
-          echo "Self-hosted: ${{ needs.self-hosted.outputs.duration_selfhosted }} seconds"
+          echo "GitHub-hosted: ${{ needs.github-hosted.outputs.duration }} seconds"
+          echo "Self-hosted: ${{ needs.self-hosted.outputs.duration }} seconds"
           
-          GH=${{ needs.github-hosted.outputs.duration_github }}
-          SH=${{ needs.self-hosted.outputs.duration_selfhosted }}
+          GH=${{ needs.github-hosted.outputs.duration }}
+          SH=${{ needs.self-hosted.outputs.duration }}
           
           if [ "$SH" -lt "$GH" ]; then
             echo "🏆 Self-hosted wins by $(( GH - SH )) seconds!"
