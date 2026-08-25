@@ -10,6 +10,8 @@ interface PrioritizedGoal extends Goal {
 const ROOT_GOAL_ID = 1;
 
 const { isSearchOpen } = useSearchState();
+const config = useRuntimeConfig();
+const goApiUrl = config.public.goApiUrl as string;
 
 function isSearchFieldFocused(): boolean {
 	if (isSearchOpen.value) return true;
@@ -51,7 +53,7 @@ export function usePriorityMode() {
 			// Backend returnerar redan filtrerade och sorterade goals med
 			// weight från goal_relations, så vi behöver inte mappa om eller
 			// sortera client-side.
-			const goals = await $fetch<PrioritizedGoal[]>("/api/goals/prioritized");
+			const goals = await $fetch<PrioritizedGoal[]>(`${goApiUrl}/goals/prioritized`);
 
 			prioritizedGoals.value = goals;
 

@@ -74,10 +74,12 @@ const links = [
 ] satisfies NavigationMenuItem[][];
 
 const goalsData = ref<Goal[] | null>(null);
+const config = useRuntimeConfig();
+const goApiUrl = config.public.goApiUrl as string;
 
 const fetchGoals = async () => {
   try {
-    goalsData.value = await $fetch<Goal[]>("/api/goals");
+    goalsData.value = await $fetch<Goal[]>(`${goApiUrl}/goals`);
   } catch (error) {
     console.warn("Failed to load goals for navigation:", error);
   }
