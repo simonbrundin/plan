@@ -1,2 +1,6 @@
 extends:
   - standard
+
+# Ignore custom self-hosted runner labels
+env:
+  CUSTOM_LABELS: self-hosted-runners
