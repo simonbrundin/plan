@@ -1,0 +1,79 @@
+name: Test Runner Comparison
+on:
+  workflow_dispatch:
+
+jobs:
+  # Test med GitHub-hosted runner
+  github-hosted:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start timer
+        run: echo "START=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+      - name: End timer
+        run: |
+          echo "END=$(date +%s)"
+          echo "DURATION=$(( $END - $START )) seconds"
+          echo "duration_github=$(( $END - $START ))" >> $GITHUB_OUTPUT
+
+      - name: Report
+        run: echo "GitHub-hosted took ${{ env.END }} - ${{ env.START }} = ${{ env.DURATION }} seconds"
+
+  # Test med self-hosted runner
+  self-hosted:
+    runs-on: self-hosted-runners
+    steps:
+      - name: Start timer
+        run: echo "START=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+      - name: End timer
+        run: |
+          echo "END=$(date +%s)"
+          echo "DURATION=$(( $END - $START )) seconds"
+          echo "duration_selfhosted=$(( $END - $START ))" >> $GITHUB_OUTPUT
+
+      - name: Report
+        run: echo "Self-hosted took ${{ env.END }} - ${{ env.START }} = ${{ env.DURATION }} seconds"
+
+  compare:
+    needs: [github-hosted, self-hosted]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare results
+        run: |
+          echo "=== RUNNER COMPARISON ==="
+          echo "GitHub-hosted: ${{ needs.github-hosted.outputs.duration_github }} seconds"
+          echo "Self-hosted: ${{ needs.self-hosted.outputs.duration_selfhosted }} seconds"
+          
+          GH=${{ needs.github-hosted.outputs.duration_github }}
+          SH=${{ needs.self-hosted.outputs.duration_selfhosted }}
+          
+          if [ "$SH" -lt "$GH" ]; then
+            echo "🏆 Self-hosted wins by $(( GH - SH )) seconds!"
+          else
+            echo "🏆 GitHub-hosted wins by $(( SH - GH )) seconds!"
+          fi
