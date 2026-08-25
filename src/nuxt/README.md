@@ -82,3 +82,4 @@ more information.
 
 # trigger
 # Trigger CI
+# Plan app health check trigger
