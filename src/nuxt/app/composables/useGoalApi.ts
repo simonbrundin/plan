@@ -32,7 +32,7 @@ export function useGoalApi() {
 	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
 
 	const authHeaders = () => ({
-		Authorization: `Bearer user_${(user.value as any)?.id}`,
+		Authorization: `Bearer ${(user.value as any)?.accessToken || (user.value as any)?.id}`,
 	});
 
 	const fetchGoalData = async (

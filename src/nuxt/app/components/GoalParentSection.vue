@@ -11,10 +11,9 @@ defineProps<{
   showParentSearch: boolean
   parentSearchQuery: string
   searchResults: Goal[]
-  parentSearchInput: HTMLInputElement | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'toggle-parent-search': []
   'update:parentSearchQuery': [value: string]
   'add-existing-parent': [parentId: number]
@@ -25,10 +24,19 @@ defineEmits<{
   'save-edit': []
   'cancel-edit': []
   'update:editTitle': [value: string]
-  'navigate-to-parent': [parentId: number]
 }>()
 
-const router = useRouter()
+const parentSearchInput = ref<HTMLInputElement | null>(null)
+
+// Focus the input when parent search is shown
+watch(
+  () => parentSearchInput.value,
+  (el) => {
+    if (el) {
+      el.focus()
+    }
+  }
+)
 </script>
 
 <template>
@@ -47,6 +55,7 @@ const router = useRouter()
       <div v-for="(parent, index) in parents" :key="parent.id">
         <div v-if="mode === 'insert' && editingGoalId === parent.id" class="inline-block">
           <input
+            ref="parentSearchInput"
             :value="editTitle"
             @input="$emit('update:editTitle', ($event.target as HTMLInputElement).value)"
             type="text"
@@ -62,9 +71,10 @@ const router = useRouter()
           :to="`/goal/${parent.id}`"
           :data-parent-index="index"
           class="px-2 py-1 rounded transition-all select-none inline-block"
-          :class="isParentMode && selectedParentIndex === index
-            ? 'text-gray-100 bg-blue-500 font-medium'
-            : 'text-gray-500 hover:text-gray-300'
+          :class="
+            isParentMode && selectedParentIndex === index
+              ? 'text-gray-100 bg-blue-500 font-medium'
+              : 'text-gray-500 hover:text-gray-300'
           "
           @mousedown="$emit('handle-parent-mousedown', parent.id)"
           @mouseup="$emit('handle-parent-mouseup')"
@@ -84,9 +94,7 @@ const router = useRouter()
       class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
       title="Lägg till förälder"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
+      <Icon name="lucide:plus" class="h-5 w-5" />
     </button>
   </div>
 
@@ -94,14 +102,13 @@ const router = useRouter()
   <div v-if="showParentSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 flex-shrink-0">
     <div class="mb-2">
       <input
-        :ref="el => { if (el) parentSearchInput = el as HTMLInputElement }"
+        ref="parentSearchInput"
         :value="parentSearchQuery"
         @input="$emit('update:parentSearchQuery', ($event.target as HTMLInputElement).value)"
         @keydown="$emit('handle-search-keydown', $event)"
         type="text"
         placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
         class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        autofocus
       />
     </div>
 
