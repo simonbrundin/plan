@@ -1,0 +1,3 @@
+filter:
+  labels:
+    - self-hosted-runners
