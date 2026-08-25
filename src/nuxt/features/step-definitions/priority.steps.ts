@@ -1,4 +1,11 @@
-import { Given, When, Then, Before, setWorldConstructor, World } from "@cucumber/cucumber";
+import {
+	Given,
+	When,
+	Then,
+	Before,
+	setWorldConstructor,
+	World,
+} from "@cucumber/cucumber";
 import assert from "node:assert";
 
 // --- PriorityWorld class ---
@@ -95,9 +102,9 @@ Given(
 	/the filter is "([^"]+)"/,
 	function (this: PriorityWorld, _filter: string) {
 		const filterMap: Record<string, StartedFilter> = {
-Alla: "all",
-Påbörjade: "started",
-"Ej påbörjade": "not_started",
+			Alla: "all",
+			Påbörjade: "started",
+			"Ej påbörjade": "not_started",
 		};
 		this.startedFilter = filterMap[_filter] ?? "all";
 		this.visibleTitles = this.goals
@@ -106,12 +113,9 @@ Påbörjade: "started",
 	},
 );
 
-Given(
-	/a goal has started value null/,
-	function (this: PriorityWorld) {
-		this.goals.push(makeGoal("Testmål", null));
-	},
-);
+Given(/a goal has started value null/, function (this: PriorityWorld) {
+	this.goals.push(makeGoal("Testmål", null));
+});
 
 // --- When steps ---
 
@@ -150,15 +154,12 @@ When(
 	},
 );
 
-When(
-	/the user marks the goal as started/,
-	function (this: PriorityWorld) {
-		const goal = this.goals[0];
-		if (!goal) throw new Error("No goal to mark");
-		goal.started = new Date().toISOString();
-		apiPatchCalls.push({ goalId: goal.id, body: { started: goal.started } });
-	},
-);
+When(/the user marks the goal as started/, function (this: PriorityWorld) {
+	const goal = this.goals[0];
+	if (!goal) throw new Error("No goal to mark");
+	goal.started = new Date().toISOString();
+	apiPatchCalls.push({ goalId: goal.id, body: { started: goal.started } });
+});
 
 // --- Then steps ---
 
@@ -240,8 +241,7 @@ Then(
 				"API was expected to receive a date but got null",
 			);
 			assert.ok(
-				typeof body.started === "string" &&
-					(body.started as string).length > 0,
+				typeof body.started === "string" && (body.started as string).length > 0,
 				`API was expected to receive a timestamp but got "${body.started}"`,
 			);
 		} else if (_expectedValue === "null") {
