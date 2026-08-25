@@ -155,12 +155,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			var userID int64
 			for _, ch := range tokenString[5:] {
 				if ch < '0' || ch > '9' {
+					log.Printf("Auth: Invalid user token format")
 					c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid user token"})
 					c.Abort()
 					return
 				}
 				userID = userID*10 + int64(ch-'0')
 			}
+			log.Printf("Auth: Using dev token for user %d", userID)
 			c.Set("userID", userID)
 			c.Set("userSub", fmt.Sprintf("user_%d", userID))
 			c.Next()
@@ -174,6 +176,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		parser := jwt.NewParser()
 		token, _, err := parser.ParseUnverified(tokenString, &ZitadelClaims{})
 		if err != nil {
+			log.Printf("Auth: Failed to parse token: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": fmt.Sprintf("Invalid token format: %v", err)})
 			c.Abort()
 			return
@@ -181,14 +184,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		kid, ok := token.Header["kid"].(string)
 		if !ok {
+			log.Printf("Auth: Token missing kid header")
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token missing kid header"})
 			c.Abort()
 			return
 		}
 
+		log.Printf("Auth: Validating token with kid=%s", kid)
+
 		// Get the public key for this kid
 		publicKey, err := getRSAKey(zitadelDomain, kid)
 		if err != nil {
+			log.Printf("Auth: Failed to get public key: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": fmt.Sprintf("Failed to get public key: %v", err)})
 			c.Abort()
 			return
@@ -204,11 +211,21 @@ func AuthMiddleware() gin.HandlerFunc {
 			return publicKey, nil
 		})
 
-		if err != nil || !validatedToken.Valid {
+		if err != nil {
+			log.Printf("Auth: Token validation failed: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
 			c.Abort()
 			return
 		}
+
+		if !validatedToken.Valid {
+			log.Printf("Auth: Token not valid")
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		log.Printf("Auth: Token valid, subject=%s, email=%s", claims.Subject, claims.Email)
 
 		// Extract user info from claims
 		subject := claims.Subject
