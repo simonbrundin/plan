@@ -1,3 +1,2 @@
-filter:
-  labels:
-    - self-hosted-runners
+extends:
+  - standard
