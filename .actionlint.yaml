@@ -1,3 +1,3 @@
-# Ignore custom self-hosted runner labels
-extends:
-  - standard
+# Custom labels for self-hosted runners
+labels:
+  - self-hosted-runners
