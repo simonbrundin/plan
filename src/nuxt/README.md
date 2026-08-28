@@ -84,3 +84,4 @@ more information.
 # Trigger CI
 # Plan app health check trigger
 # Health endpoint trigger
+# Trigger rebuild for health endpoint and probe changes
