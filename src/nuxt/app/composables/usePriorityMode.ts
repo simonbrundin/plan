@@ -9,11 +9,7 @@ interface PrioritizedGoal extends Goal {
 
 const ROOT_GOAL_ID = 1;
 
-const { isSearchOpen } = useSearchState();
-const config = useRuntimeConfig();
-const goApiUrl = config.public.goApiUrl as string;
-
-function isSearchFieldFocused(): boolean {
+function isSearchFieldFocused(isSearchOpen: Readonly<Ref<boolean>>): boolean {
 	if (isSearchOpen.value) return true;
 	const active = document.activeElement;
 	if (!active) return false;
@@ -39,6 +35,9 @@ function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
 }
 
 export function usePriorityMode() {
+	const { isSearchOpen } = useSearchState();
+	const config = useRuntimeConfig();
+	const goApiUrl = config.public.goApiUrl as string;
 	const { setGoalWeight } = useGoalApi();
 
 	const visibleGoals = computed(() =>
@@ -119,7 +118,7 @@ export function usePriorityMode() {
 			target.tagName === "INPUT" ||
 			target.tagName === "TEXTAREA" ||
 			target.isContentEditable ||
-			isSearchFieldFocused()
+			isSearchFieldFocused(isSearchOpen)
 		) {
 			return;
 		}

@@ -45,11 +45,9 @@ const isLeaderMode = ref(false);
 const leaderTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const leaderFirstKey = ref("");
 
-const { isSearchOpen } = useSearchState();
-
 let goalPageCallbacks: GoalPageCallbacks | null = null;
 
-function isSearchFieldFocused(): boolean {
+function isSearchFieldFocused(isSearchOpen: Readonly<Ref<boolean>>): boolean {
 	if (isSearchOpen.value) return true;
 	const active = document.activeElement;
 	if (!active) return false;
@@ -61,6 +59,8 @@ function isSearchFieldFocused(): boolean {
 }
 
 export function useGlobalNavigation() {
+	const { isSearchOpen } = useSearchState();
+
 	function enableNavigation() {
 		isEnabled.value = true;
 	}
@@ -131,7 +131,7 @@ export function useGlobalNavigation() {
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isEnabled.value) return;
 
-		if (isSearchFieldFocused()) {
+		if (isSearchFieldFocused(isSearchOpen)) {
 			return;
 		}
 
@@ -179,7 +179,7 @@ export function useGlobalNavigation() {
 			return;
 		}
 
-		if (isInputFocused() || isSearchFieldFocused()) return;
+		if (isInputFocused() || isSearchFieldFocused(isSearchOpen)) return;
 
 		if (currentPage.value !== "goal") return;
 		if (!goalPageCallbacks) return;
