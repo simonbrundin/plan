@@ -58,8 +58,9 @@ export default defineNuxtConfig({
 		classSuffix: "",
 	},
 	icon: {
-		// Disable client-side fetching to prevent timeouts
+		// Disable client-side and external Iconify fetching to prevent SSR timeouts.
 		provider: "server",
+		fallbackToApi: false,
 		serverBundle: {
 			collections: ["material-symbols", "material-symbols-light", "lucide"],
 		},
