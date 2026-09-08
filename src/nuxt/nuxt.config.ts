@@ -58,16 +58,11 @@ export default defineNuxtConfig({
 		classSuffix: "",
 	},
 	icon: {
-		// Disable client-side and external Iconify fetching to prevent SSR timeouts.
-		provider: "server",
-		fallbackToApi: false,
-		serverBundle: {
-			collections: ["material-symbols", "material-symbols-light", "lucide"],
+		// Bundle icons in the client so SSR never waits on Iconify network calls.
+		provider: "none",
+		clientBundle: {
+			scan: true,
 		},
-		// Disable client-side bundle to prevent runtime fetching
-		clientBundle: false,
-		// Set a very short timeout for any remaining requests
-		timeout: 100,
 	},
 	runtimeConfig: {
 		public: {
