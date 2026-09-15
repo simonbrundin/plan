@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"plan-api/internal/database"
 )
 
 // JWKS cache
@@ -249,16 +251,22 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 // lookupUserBySub looks up a user by their Zitadel subject (sub)
-// This should query your database
 func lookupUserBySub(sub string) (int64, error) {
-	// TODO: Implement database lookup
-	// For now, hardcode the known user
-	if sub == "378032824856347117" {
-		return 1, nil
+	pool := database.GetPool()
+	if pool == nil {
+		log.Printf("Auth: Database pool not available")
+		return 0, fmt.Errorf("database not connected")
 	}
 
-	// Return error for unknown users
-	return 0, fmt.Errorf("user not found")
+	var userID int64
+	err := pool.QueryRow(context.Background(),
+		"SELECT id FROM users WHERE sub = $1", sub).Scan(&userID)
+	if err != nil {
+		log.Printf("Auth: User not found for sub=%s: %v", sub, err)
+		return 0, fmt.Errorf("user not found")
+	}
+
+	return userID, nil
 }
 
 // osGetenv is a helper for getting env vars with defaults
