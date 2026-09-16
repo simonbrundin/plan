@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - src/nuxt/**
+      - .github/workflows/commit.nuxt.yaml
   workflow_dispatch:
 jobs:
   unit-tests:
