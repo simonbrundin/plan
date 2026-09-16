@@ -26,22 +26,21 @@ RUN bun run build
 # ==============================
 # Runtime Stage (minimal, säker)
 # ==============================
-FROM oven/bun:1-slim AS production
+FROM node:lts-alpine AS production
 
 WORKDIR /app
 
-# Använd inbyggd non-root 'bun'-användare
-USER bun
+# Skapa icke-root användare
+RUN addgroup -g 1001 nodejs && adduser -S nodejs -u 1001
 
 # Kopiera bara det som behövs för runtime
-COPY --from=build --chown=bun:bun /app/.output .
+COPY --from=build --chown=nodejs:nodejs /app/.output .
 
 # Exponera port
-# TODO: Consider using multi-stage build to reduce image size
 EXPOSE 3000
 
-# Sätt NODE_PATH så att Bun hittar node_modules från root
-ENV NODE_PATH=/app/node_modules
+# Byt till icke-root användare
+USER nodejs
 
 # Startkommando
-CMD ["bun", "server/index.mjs"]
+CMD ["node", "server/index.mjs"]
