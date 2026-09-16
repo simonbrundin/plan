@@ -98,6 +98,14 @@ export default defineNuxtConfig({
 		preset: "node-server",
 		host: "0.0.0.0",
 		trustProxy: true,
+		// Bundle all dependencies including ipx dependencies
+		rollupConfig: {
+			external: [],
+		},
+	},
+	// Ensure ipx and its dependencies are properly bundled
+	build: {
+		transpile: ["ipx", "ofetch"],
 	},
 
 	vite: {
