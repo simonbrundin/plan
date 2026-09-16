@@ -37,6 +37,8 @@ USER bun
 COPY --from=build --chown=bun:bun /app/.output .
 # Kopiera fullständiga node_modules från build (mer tillförlitligt än .output/server/node_modules)
 COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
+# Kopiera node_modules till server/node_modules för att fixa ipx ofetch-beroende
+COPY --from=build --chown=bun:bun /app/node_modules ./server/node_modules
 
 # Exponera port
 EXPOSE 3000
