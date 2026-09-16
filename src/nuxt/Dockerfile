@@ -5,44 +5,37 @@ FROM node:lts-alpine AS build
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++ gcc
-# RUN apk add openssh g++ make python3 git
-
 
 # Kopiera bara det som behövs för install
-COPY package.json bun.lock* ./
+COPY package.json package-lock.json* ./
 
-# Installera Bun (globalt)
-RUN npm install -g bun
-
-# Installera beroenden (cache-vänligt)
-RUN bun install --frozen-lockfile
+# Installera beroenden
+RUN npm ci
 
 # Kopiera källkod (efter install för bättre cache)
 COPY . .
 
 # Bygg applikationen
-RUN bun run build
+RUN npm run build
 
 # ==============================
 # Runtime Stage (minimal, säker)
 # ==============================
-FROM oven/bun:1-slim AS production
+FROM node:lts-alpine AS production
 
 WORKDIR /app
 
-# Använd inbyggd non-root 'bun'-användare
-USER bun
+# Skapa icke-root användare
+RUN addgroup -g 1001 nodejs && adduser -S nodejs -u 1001
 
 # Kopiera bara det som behövs för runtime
-COPY --from=build --chown=bun:bun /app/.output .
-# Kopiera fullständiga node_modules från build (mer tillförlitligt än .output/server/node_modules)
-# COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
+COPY --from=build --chown=nodejs:nodejs /app/.output .
 
 # Exponera port
 EXPOSE 3000
 
-# Sätt NODE_PATH så att Bun hittar node_modules från root
-ENV NODE_PATH=/app/node_modules
+# Byt till icke-root användare
+USER nodejs
 
 # Startkommando
-CMD ["bun", "server/index.mjs"]
+CMD ["node", "server/index.mjs"]
