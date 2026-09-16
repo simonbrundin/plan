@@ -12,3 +12,5 @@ spec:
           env:
             - name: AUTH_DISABLED
               value: "false"
+            - name: SESSION_SECRET
+              value: "3eDqjso1WefD4doxeG2nR4ZQvg4SjOMe669ac4B8UQE="

@@ -1,29 +1,8 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [x] Testa secrets skill
-- [ ]
-- [x] Installera zitadel i kluster
-- [x] Läsa in mig på skillnaden på oidc och idp. ifall jag kanske ska avnända
-- [x] Skydda longhorn url
-- [x] Säkerställ inte vem som helst kan skapa ett konto och logga in. Behövs
-      något speciellt scope?
-- [x] Uppdatera flux
-- [x] Skydda rutter
-- [x] Ta bort url skydd på flux tillfälligt tills zitadel är tillbaka
-- [x] auth.simonbrundin.com fungerar [ ] Dubbelkolla om någon ha arbete måste
-      göras i zitadel https://zitadel.com/docs/concepts/architecture/solution
-- [x] Flux Webhook fungerar
-- [x] Lös detta i Plan: Kustomization Failed 4m ago flux-system/plan health
-      check failed after 4m30.058886584s: timeout waiting for:
-      [Job/plan/grant-user-permissions status: 'InProgress']
-- [x] longhorn.simonbrundin.com använder oidc
-- [x] Uptime Kuma fungerade
-- [x] Få flux ui att bli skyddad av zitadel igen genom att lägga till security
-- [x] Säkerställ att webhook i flux fungerar och startar synkning policy i
-      kustomization.yaml igen
 - [ ] Sätta upp så man inte kan pusha till main utan PR
-- [ ] Push kör CI
-- [ ] Kunna logga in med Zitadel på Plan
+- [x] Push kör CI
+- [x] Kunna logga in med Zitadel på Plan
 - [ ] iptv fungerar
 - [ ] development mode i zitadel. vad betyder det och ska jag ha två appar?
 - [ ] Installer Kyverno Chainsaw
@@ -830,3 +809,23 @@ Länken ska öppna en ephemeral environment där jag kan preview förändringen
 - [x] Cron Jobs
 - [x] Cron Jobs
 - [x] Cron Jobs
+- [x] Testa secrets skill
+- [ ]
+- [x] Installera zitadel i kluster
+- [x] Läsa in mig på skillnaden på oidc och idp. ifall jag kanske ska avnända
+- [x] Skydda longhorn url
+- [x] Säkerställ inte vem som helst kan skapa ett konto och logga in. Behövs
+      något speciellt scope?
+- [x] Uppdatera flux
+- [x] Skydda rutter
+- [x] Ta bort url skydd på flux tillfälligt tills zitadel är tillbaka
+- [x] auth.simonbrundin.com fungerar [ ] Dubbelkolla om någon ha arbete måste
+      göras i zitadel https://zitadel.com/docs/concepts/architecture/solution
+- [x] Flux Webhook fungerar
+- [x] Lös detta i Plan: Kustomization Failed 4m ago flux-system/plan health
+      check failed after 4m30.058886584s: timeout waiting for:
+      [Job/plan/grant-user-permissions status: 'InProgress']
+- [x] longhorn.simonbrundin.com använder oidc
+- [x] Uptime Kuma fungerade
+- [x] Få flux ui att bli skyddad av zitadel igen genom att lägga till security
+- [x] Säkerställ att webhook i flux fungerar och startar synkning policy i
