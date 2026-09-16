@@ -19,6 +19,19 @@ import (
 	"plan-api/internal/database"
 )
 
+// Zitadel introspection response
+type introspectionResponse struct {
+	Active   bool   `json:"active"`
+	Subject  string `json:"sub"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	ClientID string `json:"client_id"`
+	Scope    string `json:"scope"`
+	Exp      int64  `json:"exp"`
+	Iat      int64  `json:"iat"`
+}
+
 // JWKS cache
 var (
 	jwksCache     *JWKS
@@ -172,73 +185,77 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Validate Zitadel JWT
+		// Validate Zitadel JWT or opaque token
 		zitadelDomain := osGetenv("ZITADEL_DOMAIN", "auth.simonbrundin.com")
 
-		// Parse token without validation first to get the kid
+		var subject, email string
+		var userID int64
+		var validationErr error
+
+		// First, try to parse as JWT (for standard JWT tokens)
 		parser := jwt.NewParser()
 		token, _, err := parser.ParseUnverified(tokenString, &ZitadelClaims{})
-		if err != nil {
-			log.Printf("Auth: Failed to parse token: %v", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"message": fmt.Sprintf("Invalid token format: %v", err)})
-			c.Abort()
-			return
-		}
 
-		kid, ok := token.Header["kid"].(string)
-		if !ok {
-			log.Printf("Auth: Token missing kid header")
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token missing kid header"})
-			c.Abort()
-			return
-		}
+		if err == nil && token != nil {
+			// Token looks like JWT, try to validate it
+			kid, ok := token.Header["kid"].(string)
+			if ok {
+				publicKey, pubErr := getRSAKey(zitadelDomain, kid)
+				if pubErr == nil {
+					claims := &ZitadelClaims{}
+					validatedToken, valErr := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+						if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+							return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+						}
+						return publicKey, nil
+					})
 
-		log.Printf("Auth: Validating token with kid=%s", kid)
-
-		// Get the public key for this kid
-		publicKey, err := getRSAKey(zitadelDomain, kid)
-		if err != nil {
-			log.Printf("Auth: Failed to get public key: %v", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"message": fmt.Sprintf("Failed to get public key: %v", err)})
-			c.Abort()
-			return
-		}
-
-		// Parse and validate the token
-		claims := &ZitadelClaims{}
-		validatedToken, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			// Verify signing method
-			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+					if valErr == nil && validatedToken.Valid {
+						log.Printf("Auth: Token validated as JWT, subject=%s, email=%s", claims.Subject, claims.Email)
+						subject = claims.Subject
+						email = claims.Email
+						userID, validationErr = lookupOrCreateUser(subject, email)
+						if validationErr == nil {
+							c.Set("userID", userID)
+							c.Set("userSub", subject)
+							c.Set("userEmail", email)
+							c.Next()
+							return
+						}
+					}
+				}
 			}
-			return publicKey, nil
-		})
+		}
 
-		if err != nil {
-			log.Printf("Auth: Token validation failed: %v", err)
+		// If JWT validation failed, try introspection (for opaque/JWE tokens)
+		log.Printf("Auth: JWT parsing failed, trying introspection for token")
+		introspectionResult, intErr := introspectToken(zitadelDomain, tokenString)
+		if intErr != nil {
+			log.Printf("Auth: Introspection failed: %v", intErr)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
 			c.Abort()
 			return
 		}
 
-		if !validatedToken.Valid {
-			log.Printf("Auth: Token not valid")
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+		if !introspectionResult.Active {
+			log.Printf("Auth: Token is not active (expired or revoked)")
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token expired or revoked"})
 			c.Abort()
 			return
 		}
 
-		log.Printf("Auth: Token valid, subject=%s, email=%s", claims.Subject, claims.Email)
+		log.Printf("Auth: Token validated via introspection, subject=%s, email=%s",
+			introspectionResult.Subject, introspectionResult.Email)
 
-		// Extract user info from claims
-		subject := claims.Subject
-		email := claims.Email
+		subject = introspectionResult.Subject
+		email = introspectionResult.Email
+		if email == "" {
+			email = introspectionResult.Username
+		}
 
-		// Look up user in database or use default
-		userID, err := lookupUserBySub(subject)
-		if err != nil {
-			// If user not found and AUTH_DISABLED=false, reject
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "User not found in database"})
+		userID, validationErr = lookupOrCreateUser(subject, email)
+		if validationErr != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Failed to create user session"})
 			c.Abort()
 			return
 		}
@@ -267,6 +284,72 @@ func lookupUserBySub(sub string) (int64, error) {
 	}
 
 	return userID, nil
+}
+
+// lookupOrCreateUser looks up a user by sub and creates them if they don't exist
+func lookupOrCreateUser(sub, email string) (int64, error) {
+	pool := database.GetPool()
+	if pool == nil {
+		log.Printf("Auth: Database pool not available")
+		return 0, fmt.Errorf("database not connected")
+	}
+
+	// First try to find existing user
+	var userID int64
+	err := pool.QueryRow(context.Background(),
+		"SELECT id FROM users WHERE sub = $1", sub).Scan(&userID)
+	if err == nil {
+		log.Printf("Auth: Found existing user id=%d for sub=%s", userID, sub)
+		return userID, nil
+	}
+
+	// User doesn't exist, create them
+	log.Printf("Auth: Creating new user for sub=%s, email=%s", sub, email)
+
+	err = pool.QueryRow(context.Background(),
+		"INSERT INTO users (sub, email) VALUES ($1, $2) RETURNING id",
+		sub, email).Scan(&userID)
+	if err != nil {
+		log.Printf("Auth: Failed to create user for sub=%s: %v", sub, err)
+		return 0, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	log.Printf("Auth: Created new user id=%d for sub=%s", userID, sub)
+	return userID, nil
+}
+
+// introspectToken validates an opaque/JWE token via Zitadel's introspection endpoint
+func introspectToken(zitadelDomain, token string) (*introspectionResponse, error) {
+	introspectionURL := fmt.Sprintf("https://%s/oauth/v2/introspect", zitadelDomain)
+
+	data := strings.NewReader(fmt.Sprintf("token=%s", token))
+	req, err := http.NewRequest("POST", introspectionURL, data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create introspection request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Use client credentials if available
+	clientID := osGetenv("ZITADEL_CLIENT_ID", "")
+	clientSecret := osGetenv("ZITADEL_CLIENT_SECRET", "")
+	if clientID != "" {
+		req.SetBasicAuth(clientID, clientSecret)
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("introspection request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var result introspectionResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode introspection response: %w", err)
+	}
+
+	return &result, nil
 }
 
 // osGetenv is a helper for getting env vars with defaults
