@@ -19,7 +19,7 @@ jobs:
       contents: read
       packages: write
     uses: >-
-      simonbrundin/deployment-pipeline/.github/workflows/commit.build-publish-image.yaml@189fca2
+      simonbrundin/deployment-pipeline/.github/workflows/commit.build-publish-image.yaml@main
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
