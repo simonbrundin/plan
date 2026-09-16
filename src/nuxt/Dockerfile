@@ -37,6 +37,7 @@ USER bun
 COPY --from=build --chown=bun:bun /app/.output .
 
 # Exponera port
+# TODO: Consider using multi-stage build to reduce image size
 EXPOSE 3000
 
 # Sätt NODE_PATH så att Bun hittar node_modules från root
