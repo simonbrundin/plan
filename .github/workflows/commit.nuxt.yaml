@@ -18,7 +18,7 @@ jobs:
       contents: read
       packages: write
     uses: >-
-      simonbrundin/deployment-pipeline/.github/workflows/commit.build-publish-image.yaml@main
+      simonbrundin/deployment-pipeline/.github/workflows/commit.build-publish-image.yaml@fix/no-cache
     secrets:
       REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     with:
