@@ -166,6 +166,17 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString := parts[1]
 
+		// First, try to validate as our own session token
+		session, sessErr := ValidateSession(tokenString)
+		if sessErr == nil {
+			log.Printf("Auth: Valid session token for user %d (sub=%s)", session.UserID, session.Sub)
+			c.Set("userID", session.UserID)
+			c.Set("userSub", session.Sub)
+			c.Set("userEmail", session.Email)
+			c.Next()
+			return
+		}
+
 		// For development/testing, accept tokens in format "user_<id>"
 		if strings.HasPrefix(tokenString, "user_") {
 			var userID int64
@@ -214,7 +225,7 @@ func AuthMiddleware() gin.HandlerFunc {
 						log.Printf("Auth: Token validated as JWT, subject=%s, email=%s", claims.Subject, claims.Email)
 						subject = claims.Subject
 						email = claims.Email
-						userID, validationErr = lookupOrCreateUser(subject, email)
+						userID, validationErr = LookupOrCreateUser(subject, email)
 						if validationErr == nil {
 							c.Set("userID", userID)
 							c.Set("userSub", subject)
@@ -253,7 +264,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			email = introspectionResult.Username
 		}
 
-		userID, validationErr = lookupOrCreateUser(subject, email)
+		userID, validationErr = LookupOrCreateUser(subject, email)
 		if validationErr != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Failed to create user session"})
 			c.Abort()
@@ -286,8 +297,8 @@ func lookupUserBySub(sub string) (int64, error) {
 	return userID, nil
 }
 
-// lookupOrCreateUser looks up a user by sub and creates them if they don't exist
-func lookupOrCreateUser(sub, email string) (int64, error) {
+// LookupOrCreateUser looks up a user by sub and creates them if they don't exist
+func LookupOrCreateUser(sub, email string) (int64, error) {
 	pool := database.GetPool()
 	if pool == nil {
 		log.Printf("Auth: Database pool not available")

@@ -3,25 +3,24 @@ import { eventHandler, getQuery, sendRedirect, getCookie } from "h3";
 export default eventHandler(async (event) => {
 	const query = getQuery(event);
 
-	const token = query.token as string;
+	const sessionToken = query.session as string;
 	const sub = query.sub as string;
 	const email = query.email as string;
 
-	console.log("OAuth callback:", { token: token?.substring(0, 50), sub, email });
+	console.log("OAuth callback:", { session: sessionToken?.substring(0, 50), sub, email });
 
-	if (!token) {
-		console.error("No token in callback");
+	if (!sessionToken) {
+		console.error("No session in callback");
 		return sendRedirect(event, "/?error=auth_failed");
 	}
 
-	// Set user session with JWT from Go API
-	// accessToken is stored in user object (encrypted in sealed cookie)
+	// Set user session with our own session token (not the Zitadel token)
 	const sessionData = {
 		user: {
 			id: sub,
 			sub: sub,
 			email: email,
-			accessToken: token,
+			sessionToken: sessionToken, // Our own session token
 		},
 		loggedInAt: Number(Date.now()),
 	};
@@ -31,8 +30,8 @@ export default eventHandler(async (event) => {
 	await setUserSession(event, sessionData);
 
 	// Verify session was set
-	const session = await getUserSession(event);
-	console.log("Session after setUserSession:", JSON.stringify(session, null, 2));
+	const savedSession = await getUserSession(event);
+	console.log("Session after setUserSession:", JSON.stringify(savedSession, null, 2));
 
 	return sendRedirect(event, "/");
 });
