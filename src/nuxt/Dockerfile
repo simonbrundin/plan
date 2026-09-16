@@ -36,7 +36,7 @@ USER bun
 # Kopiera bara det som behövs för runtime
 COPY --from=build --chown=bun:bun /app/.output .
 # Kopiera fullständiga node_modules från build (mer tillförlitligt än .output/server/node_modules)
-# COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
+COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
 
 # Exponera port
 EXPOSE 3000
