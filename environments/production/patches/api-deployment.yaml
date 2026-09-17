@@ -12,5 +12,14 @@ spec:
           env:
             - name: AUTH_DISABLED
               value: "false"
+            - name: NUXT_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD
+            # Keep SESSION_SECRET for backwards compatibility during rollout
             - name: SESSION_SECRET
-              value: "3eDqjso1WefD4doxeG2nR4ZQvg4SjOMe669ac4B8UQE="
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD

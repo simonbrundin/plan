@@ -32,8 +32,14 @@ type dbSessionStore struct {
 var globalSessionStore *dbSessionStore
 
 func init() {
+	// Use NUXT_SESSION_PASSWORD so Nuxt and Go API use the same session secret
+	// (nuxt-auth-utils uses NUXT_SESSION_PASSWORD for cookie signing)
 	globalSessionStore = &dbSessionStore{
-		secret: []byte(os.Getenv("SESSION_SECRET")),
+		secret: []byte(os.Getenv("NUXT_SESSION_PASSWORD")),
+	}
+	if len(globalSessionStore.secret) == 0 {
+		// Fallback to SESSION_SECRET for backwards compatibility
+		globalSessionStore.secret = []byte(os.Getenv("SESSION_SECRET"))
 	}
 	if len(globalSessionStore.secret) == 0 {
 		globalSessionStore.secret = []byte("dev-secret-change-in-production")
@@ -47,6 +53,11 @@ func InitSessionStore(secret string) {
 	if secret != "" {
 		globalSessionStore.secret = []byte(secret)
 	}
+}
+
+// GetSecret returns the current session secret (for testing/debugging)
+func GetSecret() string {
+	return string(globalSessionStore.secret)
 }
 
 // ensureSessionsTable creates the sessions table if it doesn't exist
