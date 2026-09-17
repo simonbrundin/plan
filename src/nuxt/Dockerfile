@@ -26,22 +26,20 @@ RUN bun run build
 # ==============================
 # Runtime Stage (minimal, säker)
 # ==============================
-FROM oven/bun:1-slim AS production
+FROM node:lts-alpine AS production
 
 WORKDIR /app
 
-# Använd inbyggd non-root 'bun'-användare
-USER bun
+# Kör Nitro med Node.js. Nitro använder preset node-server och Bun kan starta
+# processen men inte alltid hantera HTTP-trafiken korrekt i produktion.
+USER node
 
 # Kopiera bara det som behövs för runtime
-COPY --from=build --chown=bun:bun /app/.output .
+COPY --from=build --chown=node:node /app/.output .
 
-# Exponera port
-# TODO: Consider using multi-stage build to reduce image size
 EXPOSE 3000
 
-# Sätt NODE_PATH så att Bun hittar node_modules från root
-ENV NODE_PATH=/app/node_modules
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
-# Startkommando
-CMD ["bun", "server/index.mjs"]
+CMD ["node", "server/index.mjs"]
