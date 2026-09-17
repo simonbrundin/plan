@@ -93,6 +93,20 @@ ALTER TABLE "status_updates"
 ADD FOREIGN KEY("goal_id") REFERENCES "goals"("id")
 ON UPDATE NO ACTION ON DELETE CASCADE;
 
+-- Sessions: User sessions for authentication
+CREATE TABLE "sessions" (
+  "token" TEXT PRIMARY KEY,
+  "user_id" BIGINT NOT NULL,
+  "sub" TEXT NOT NULL,
+  "email" TEXT NOT NULL,
+  "created_at" TIMESTAMPTZ NOT NULL,
+  "expires_at" TIMESTAMPTZ NOT NULL
+);
+
+ALTER TABLE "sessions"
+ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
+ON UPDATE NO ACTION ON DELETE CASCADE;
+
 -- Seed: Statuses
 INSERT INTO statuses (name, label) VALUES
   ('define', 'Defining'),
