@@ -13,6 +13,7 @@ spec:
       labels:
         app: plan-app
     spec:
+      enableServiceLinks: false
       imagePullSecrets:
         - name: ghcr-secret
       containers:
