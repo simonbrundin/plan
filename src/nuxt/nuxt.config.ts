@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+// Build: test Bun HTTP handling
 import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
