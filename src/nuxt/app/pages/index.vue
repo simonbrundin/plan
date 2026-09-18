@@ -2,7 +2,7 @@
 import { useGoalsStore } from '~/stores/goals'
 import { useGoalApi } from '~/composables/useGoalApi'
 
-const { loggedIn } = useUserSession()
+const { loggedIn: isLoggedIn } = useUserSession()
 const goalsStore = useGoalsStore()
 const { loadAllGoals } = useGoalApi()
 
@@ -36,30 +36,39 @@ const addGoalToInbox = async (goal) => {
 
 <template>
   <div class="max-w-4xl mx-auto p-6">
-    <div v-if="loggedIn" class="space-y-8">
-      <div class="text-center">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen tillbaka!</h1>
-        <div class="flex justify-center gap-4">
-          <NuxtLink to="/goals">
-            <UButton size="lg" icon="material-symbols:arrow-forward-rounded">
-              Gå till mål
-            </UButton>
-          </NuxtLink>
-          <NuxtLink to="/priority">
-            <UButton size="lg" icon="material-symbols:sort">
-              Prioriteringslista
-            </UButton>
-          </NuxtLink>
+    <ClientOnly>
+      <div v-if="isLoggedIn" class="space-y-8">
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen tillbaka!</h1>
+          <div class="flex justify-center gap-4">
+            <NuxtLink to="/goals">
+              <UButton size="lg" icon="material-symbols:arrow-forward-rounded">
+                Gå till mål
+              </UButton>
+            </NuxtLink>
+            <NuxtLink to="/priority">
+              <UButton size="lg" icon="material-symbols:sort">
+                Prioriteringslista
+              </UButton>
+            </NuxtLink>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-6">
+          <InboxInput @add="addGoalToInbox" />
+          <InboxGoalsList />
         </div>
       </div>
-
-      <div class="bg-gray-50 rounded-lg p-6">
-        <InboxInput @add="addGoalToInbox" />
-        <InboxGoalsList />
-      </div>
-    </div>
-
-    <div v-else class="flex items-center justify-center min-h-[50vh]">
+      <template #fallback>
+        <div class="flex items-center justify-center min-h-[50vh]">
+          <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">Laddar...</h1>
+          </div>
+        </div>
+      </template>
+    </ClientOnly>
+    
+    <div v-if="!isLoggedIn" class="flex items-center justify-center min-h-[50vh]">
       <div class="text-center">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen till Plan</h1>
         <NuxtLink to="/login">
