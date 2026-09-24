@@ -57,5 +57,5 @@ node_modules/
 *.njsproj
 *.sln
 *.sw?
+!src/nuxt/server/
 server
-!src/nuxt/server/api/auth/
