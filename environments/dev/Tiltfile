@@ -8,6 +8,10 @@
 #   tilt up -- --mode=local          # Explicit lokal mode
 #   tilt up -- --mode=kubernetes     # Kör i Kubernetes
 #
+# Access:
+#   App:      http://localhost:3000
+#   pgview:   http://localhost:5051
+#
 # ==================================================================
 
 # ------------------------------------------------------------------

@@ -26,14 +26,36 @@ interface StatusUpdate {
 	to_status_name: string;
 }
 
+// Custom error for authentication failures
+export class AuthenticationError extends Error {
+	constructor(message = "Authentication required") {
+		super(message);
+		this.name = "AuthenticationError";
+	}
+}
+
 export function useGoalApi() {
 	const config = useRuntimeConfig();
-	const { user } = useUserSession();
+	const { user, loggedIn } = useUserSession();
 	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
 
-	const authHeaders = () => ({
-		Authorization: `Bearer ${(user.value as any)?.sessionToken || (user.value as any)?.id}`,
-	});
+	const authHeaders = () => {
+		// Check if user is logged in
+		if (!loggedIn.value || !user.value) {
+			throw new AuthenticationError("Du måste vara inloggad för att utföra denna åtgärd");
+		}
+		
+		const sessionToken = (user.value as any)?.sessionToken;
+		const userId = (user.value as any)?.id;
+		
+		if (!sessionToken && !userId) {
+			throw new AuthenticationError("Ingen giltig session hittades. Vänligen logga in igen.");
+		}
+		
+		return {
+			Authorization: `Bearer ${sessionToken || userId}`,
+		};
+	};
 
 	const fetchGoalData = async (
 		goalId: number,

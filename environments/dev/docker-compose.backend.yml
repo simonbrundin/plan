@@ -16,6 +16,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - dev-net
+
+  pgview:
+    image: lcurrol/pg-view
+    container_name: plan-dev-pgview
+    ports:
+      - "5051:3000"
+    environment:
+      DB_URL: postgresql://plan:plan@postgres:5432/plan
+    networks:
+      - dev-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  dev-net:
+    name: dev_default
 
 volumes:
   plan-postgres-data:

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Goal } from '~/types/goal'
+import { AuthenticationError } from '~/composables/useGoalApi'
 
 const router = useRouter()
 const { toggleGoalFinished, toggleGoalStarted, deleteGoal, loadAllGoals } = useGoalApi()
@@ -7,13 +8,23 @@ const { toggleGoalFinished, toggleGoalStarted, deleteGoal, loadAllGoals } = useG
 const goals = ref<Goal[]>([])
 const pending = ref(false)
 const error = ref<Error | null>(null)
+const authError = ref(false)
 
 onMounted(async () => {
   pending.value = true
   try {
     goals.value = await loadAllGoals()
+    authError.value = false
   } catch (e) {
-    error.value = e as Error
+    if (e instanceof AuthenticationError) {
+      authError.value = true
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        router.push('/login')
+      }, 2000)
+    } else {
+      error.value = e as Error
+    }
     console.error('Failed to load goals:', e)
   } finally {
     pending.value = false
@@ -230,6 +241,7 @@ watch(showSearch, async (val) => {
 
 definePageMeta({
   title: 'Mina mål',
+  ssr: false, // Disable SSR to ensure session is hydrated before API calls
 })
 </script>
 
@@ -254,6 +266,19 @@ definePageMeta({
 
     <div v-if="pending" class="text-gray-400">
       Laddar...
+    </div>
+
+    <div v-else-if="authError" class="text-center py-12">
+      <div class="mb-4">
+        <Icon name="lucide:alert-circle" class="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+        <p class="text-yellow-400 text-lg mb-2">Sessionen har gått ut</p>
+        <p class="text-gray-400">Du omdirigeras till inloggningssidan...</p>
+      </div>
+      <NuxtLink to="/login">
+        <UButton color="warning" icon="lucide:log-in">
+          Logga in
+        </UButton>
+      </NuxtLink>
     </div>
 
     <div v-else-if="error" class="text-red-400">
