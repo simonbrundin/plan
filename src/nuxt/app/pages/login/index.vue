@@ -38,8 +38,8 @@ const handleLogout = async () => {
   </div>
   <div v-else>
     <h1>Not logged in</h1>
-    <a href="/api/v1/auth/login">
-      <UButton>Logga in</UButton>
+    <a href="/api/auth/zitadel">
+      <UButton>Logga in med Zitadel</UButton>
     </a>
   </div>
   <NuxtLink to="/">
