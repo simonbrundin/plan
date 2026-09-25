@@ -1,14 +1,33 @@
-import { requireUserSession } from 'nuxt-auth-utils'
+import { useSession } from "h3";
+
+interface SessionData {
+  user: {
+    id: string;
+    email?: string;
+    name?: string;
+  };
+  secure: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresAt: number;
+  };
+  loggedInAt: number;
+}
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
+  // Get session
+  const session = await useSession<SessionData>(event, {
+    password: process.env.NUXT_SESSION_PASSWORD || 'default-secret-change-in-production',
+    name: 'plan-session',
+  });
+
+  const user = await session.data;
   
-  const accessToken = session.secure?.accessToken as string | undefined
-  if (!accessToken) {
+  if (!user?.secure?.accessToken) {
     throw createError({
       statusCode: 401,
-      message: 'No access token'
-    })
+      message: 'Not authenticated'
+    });
   }
   
   // Get the path from the URL
@@ -30,11 +49,11 @@ export default defineEventHandler(async (event) => {
   const method = getMethod(event)
   const body = method !== 'GET' ? await readBody(event) : undefined
   
-  // Forward the request
+  // Forward the request with access token
   const response = await $fetch(`${goApiUrl}/${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${user.secure.accessToken}`,
       'Content-Type': 'application/json',
     },
     query,

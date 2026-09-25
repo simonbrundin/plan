@@ -1,30 +1,30 @@
 <script setup lang="ts">
-const { loggedIn, user, session, clear } = useUserSession()
+// Custom session composable that reads from our API
+const { data: session, refresh } = await useFetch('/api/auth/session')
 
 const handleLogout = async () => {
-  await clear()
+  await $fetch('/api/auth/logout', { method: 'POST' })
   window.location.reload()
 }
 </script>
 
 <template>
-  <div v-if="loggedIn">
-    <h1 class="text-3xl font-bold text-gray-300 mb-2" v-if="user">Inloggad</h1>
-    <h1 class="text-3xl font-bold text-gray-300 mb-2" v-else>Utloggad</h1>
+  <div v-if="session">
+    <h1 class="text-3xl font-bold text-gray-300 mb-2">Inloggad</h1>
 
-    <p v-if="user" class="mb-2">
-      User ID: <span class="font-mono text-sm">{{ user.id }}</span>
+    <p v-if="session.user" class="mb-2">
+      User ID: <span class="font-mono text-sm">{{ session.user.id }}</span>
     </p>
 
-    <p v-if="user?.email" class="mb-2">
-      Email: <span class="font-mono text-sm">{{ user.email }}</span>
+    <p v-if="session.user?.email" class="mb-2">
+      Email: <span class="font-mono text-sm">{{ session.user.email }}</span>
     </p>
 
-    <p v-if="user?.name" class="mb-2">
-      Namn: <span class="font-mono text-sm">{{ user.name }}</span>
+    <p v-if="session.user?.name" class="mb-2">
+      Namn: <span class="font-mono text-sm">{{ session.user.name }}</span>
     </p>
 
-    <p v-if="session?.loggedInAt">
+    <p v-if="session.loggedInAt">
       Inloggad sedan
       {{
         new Date(session.loggedInAt).toLocaleString("sv-SE", {
