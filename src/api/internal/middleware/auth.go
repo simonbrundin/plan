@@ -305,19 +305,37 @@ func LookupOrCreateUser(sub, email string) (int64, error) {
 		return 0, fmt.Errorf("database not connected")
 	}
 
-	// First try to find existing user
+	ctx := context.Background()
+
+	// First try to find existing user by sub
 	var userID int64
-	err := pool.QueryRow(context.Background(),
+	err := pool.QueryRow(ctx,
 		"SELECT id FROM users WHERE sub = $1", sub).Scan(&userID)
 	if err == nil {
 		log.Printf("Auth: Found existing user id=%d for sub=%s", userID, sub)
 		return userID, nil
 	}
 
-	// User doesn't exist, create them
+	// User doesn't exist by sub, try to find by email and update sub
+	err = pool.QueryRow(ctx,
+		"SELECT id FROM users WHERE email = $1", email).Scan(&userID)
+	if err == nil {
+		// User found by email, update their sub
+		log.Printf("Auth: Found user id=%d by email, updating sub to %s", userID, sub)
+		_, err = pool.Exec(ctx,
+			"UPDATE users SET sub = $1 WHERE id = $2",
+			sub, userID)
+		if err != nil {
+			log.Printf("Auth: Failed to update sub for user id=%d: %v", userID, err)
+			return 0, fmt.Errorf("failed to update user: %w", err)
+		}
+		return userID, nil
+	}
+
+	// User doesn't exist at all, create them
 	log.Printf("Auth: Creating new user for sub=%s, email=%s", sub, email)
 
-	err = pool.QueryRow(context.Background(),
+	err = pool.QueryRow(ctx,
 		"INSERT INTO users (sub, email) VALUES ($1, $2) RETURNING id",
 		sub, email).Scan(&userID)
 	if err != nil {
