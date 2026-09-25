@@ -9,6 +9,8 @@ export default eventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig(event);
   const zitadelConfig = config.oauth?.zitadel;
   
+  console.log("Zitadel OAuth callback started");
+  
   if (!zitadelConfig?.clientId || !zitadelConfig?.domain) {
     console.error("Zitadel OAuth not configured");
     return sendRedirect(event, "/login?error=missing_config");
@@ -18,6 +20,7 @@ export default eventHandler(async (event: H3Event) => {
   
   // If no code, redirect to Zitadel login
   if (!query.code) {
+    console.log("No code in callback, redirecting to Zitadel login");
     const state = crypto.randomUUID();
     const verifier = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
     
@@ -59,6 +62,8 @@ export default eventHandler(async (event: H3Event) => {
   const savedState = getCookie(event, 'oauth_zitadel_state');
   const verifier = getCookie(event, 'oauth_zitadel_verifier');
   
+  console.log("Code received, validating state");
+  
   if (!state || state !== savedState) {
     console.error("Invalid OAuth state");
     return sendRedirect(event, "/login?error=invalid_state");
@@ -71,6 +76,8 @@ export default eventHandler(async (event: H3Event) => {
   // Exchange code for tokens
   const tokenURL = `https://${zitadelConfig.domain}/oauth/v2/token`;
   const redirectUrl = zitadelConfig.redirectUrl || `${config.public.appUrl}/api/auth/zitadel`;
+  
+  console.log("Exchanging code for tokens");
   
   try {
     const tokenResponse = await $fetch<{
@@ -92,12 +99,15 @@ export default eventHandler(async (event: H3Event) => {
         code: query.code as string,
         code_verifier: verifier || '',
       }).toString(),
+      timeout: 15000, // 15 second timeout
     });
 
     if (tokenResponse.error) {
       console.error("Token exchange failed:", tokenResponse);
       return sendRedirect(event, "/login?error=token_failed");
     }
+
+    console.log("Token received, getting user info");
 
     // Get user info using access token
     const userInfoURL = `https://${zitadelConfig.domain}/oidc/v1/userinfo`;
@@ -111,14 +121,17 @@ export default eventHandler(async (event: H3Event) => {
       headers: {
         Authorization: `Bearer ${tokenResponse.access_token}`,
         Accept: 'application/json'
-      }
+      },
+      timeout: 10000, // 10 second timeout
     });
+
+    console.log("User info received:", userInfo.sub);
 
     // Calculate when the token expires
     const expiresAt = Date.now() + (tokenResponse.expires_in * 1000);
     
     // Set user session with Zitadel tokens and expiry info
-    await setUserSession(event, {
+    const sessionData = {
       user: {
         id: userInfo.sub,
         sub: userInfo.sub,
@@ -129,7 +142,10 @@ export default eventHandler(async (event: H3Event) => {
         expiresAt: expiresAt,
       },
       loggedInAt: Date.now(),
-    });
+    };
+    
+    console.log("Setting session with data:", JSON.stringify({...sessionData, user: {...sessionData.user, accessToken: '[REDACTED]'}}));
+    await setUserSession(event, sessionData);
 
     console.log("Zitadel OAuth success for user:", userInfo.sub, "expires in:", tokenResponse.expires_in, "seconds");
     return sendRedirect(event, "/");
