@@ -1,5 +1,5 @@
 import { eventHandler, getQuery, sendRedirect, getCookie, setCookie, deleteCookie } from "h3";
-import { withQuery, base64url } from "ufo";
+import { withQuery } from "ufo";
 import { useRuntimeConfig } from "#imports";
 import type { H3Event } from "h3";
 
@@ -10,6 +10,14 @@ interface SessionData {
   name?: string;
   sessionToken: string;
   loggedInAt: number;
+}
+
+// Simple base64url encoding
+function base64urlEncode(str: string): string {
+  return Buffer.from(str).toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
 }
 
 // Simple session management using signed cookies
@@ -24,7 +32,7 @@ function getSession(event: H3Event): SessionData | null {
     
     // Verify signature (simple HMAC)
     const secret = process.env.NUXT_SESSION_PASSWORD || 'default-secret';
-    const expectedSig = base64url.encode(
+    const expectedSig = base64urlEncode(
       Buffer.from(secret + dataB64).toString('base64')
     ).slice(0, 32);
     
@@ -43,7 +51,7 @@ function getSession(event: H3Event): SessionData | null {
 function setSession(event: H3Event, data: SessionData): void {
   const secret = process.env.NUXT_SESSION_PASSWORD || 'default-secret';
   const dataB64 = Buffer.from(JSON.stringify(data)).toString('base64');
-  const signature = base64url.encode(
+  const signature = base64urlEncode(
     Buffer.from(secret + dataB64).toString('base64')
   ).slice(0, 32);
   

@@ -1,5 +1,4 @@
 import { eventHandler, getCookie } from "h3";
-import { base64url } from "ufo";
 
 interface SessionData {
   userId: string;
@@ -7,6 +6,20 @@ interface SessionData {
   name?: string;
   sessionToken: string;
   loggedInAt: number;
+}
+
+// Simple base64url encoding/decoding
+function base64urlEncode(str: string): string {
+  return Buffer.from(str).toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
+function base64urlDecode(str: string): string {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  return Buffer.from(str, 'base64').toString();
 }
 
 function getSession(event: any): SessionData | null {
@@ -18,7 +31,7 @@ function getSession(event: any): SessionData | null {
     if (!dataB64 || !signature) return null;
     
     const secret = process.env.NUXT_SESSION_PASSWORD || 'default-secret';
-    const expectedSig = base64url.encode(
+    const expectedSig = base64urlEncode(
       Buffer.from(secret + dataB64).toString('base64')
     ).slice(0, 32);
     
@@ -26,7 +39,7 @@ function getSession(event: any): SessionData | null {
       return null;
     }
     
-    return JSON.parse(Buffer.from(dataB64, 'base64').toString());
+    return JSON.parse(base64urlDecode(dataB64));
   } catch (e) {
     return null;
   }
