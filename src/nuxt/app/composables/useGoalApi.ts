@@ -34,102 +34,44 @@ export class AuthenticationError extends Error {
 	}
 }
 
-// Token info stored in session
-interface TokenInfo {
-	accessToken: string;
-	refreshToken?: string;
-	expiresAt?: number;
+// Custom session data interface
+interface SessionData {
+	userId: string;
+	email?: string;
+	name?: string;
+	sessionToken: string;
+	loggedInAt: number;
+}
+
+// Get session from our custom cookie
+async function getSession(): Promise<SessionData | null> {
+	try {
+		const response = await $fetch<SessionData>('/api/auth/session');
+		return response;
+	} catch {
+		return null;
+	}
 }
 
 export function useGoalApi() {
 	const config = useRuntimeConfig();
-	const { user, loggedIn, fetch: refreshSession } = useUserSession();
 	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
 	
-	// Get token info from session
-	const getTokenInfo = (): TokenInfo => {
-		const userData = user.value as any;
-		return {
-			accessToken: userData?.accessToken,
-			refreshToken: userData?.refreshToken,
-			expiresAt: userData?.expiresAt,
-		};
-	};
+	let cachedSession: SessionData | null = null;
 	
-	// Check if token needs refresh (expired or will expire in 5 minutes)
-	const isTokenExpiringSoon = (): boolean => {
-		const tokenInfo = getTokenInfo();
-		if (!tokenInfo.accessToken) return true;
-		if (!tokenInfo.expiresAt) return false; // No expiry info, assume valid
-		// Refresh if expires within 5 minutes
-		return Date.now() >= (tokenInfo.expiresAt - 5 * 60 * 1000);
-	};
-
-	// Refresh the access token
-	const refreshAccessToken = async (): Promise<boolean> => {
-		try {
-			const response = await $fetch<{ success: boolean; expiresAt: number }>('/api/auth/refresh', {
-				method: 'POST',
-			});
-			// Refresh the client-side session
-			await refreshSession();
-			console.log('Token refreshed successfully');
-			return true;
-		} catch (error) {
-			console.error('Failed to refresh token:', error);
-			return false;
+	const getAuthHeaders = async () => {
+		// Get session from our custom endpoint
+		if (!cachedSession) {
+			cachedSession = await getSession();
 		}
-	};
-
-	const authHeaders = () => {
-		// Check if user is logged in
-		if (!loggedIn.value || !user.value) {
+		
+		if (!cachedSession?.sessionToken) {
 			throw new AuthenticationError("Du måste vara inloggad för att utföra denna åtgärd");
 		}
 		
-		const tokenInfo = getTokenInfo();
-		
-		if (!tokenInfo.accessToken) {
-			throw new AuthenticationError("Ingen giltig session hittades. Vänligen logga in igen.");
-		}
-		
 		return {
-			Authorization: `Bearer ${tokenInfo.accessToken}`,
+			Authorization: `Bearer ${cachedSession.sessionToken}`,
 		};
-	};
-
-	// Make API request with automatic token refresh on 401
-	const apiRequest = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
-		const response = await $fetch<T>(url, {
-			...options,
-			headers: {
-				...options.headers,
-				...authHeaders(),
-			},
-		});
-		return response;
-	};
-
-	// API request that handles 401 and retries with refreshed token
-	const apiRequestWithRetry = async <T>(
-		url: string, 
-		options: RequestInit = {},
-		retryOn401 = true
-	): Promise<T> => {
-		try {
-			return await apiRequest<T>(url, options);
-		} catch (error: any) {
-			// If 401 and we haven't retried yet, try refreshing token
-			if (retryOn401 && error?.status === 401) {
-				console.log('Got 401, attempting token refresh...');
-				const refreshed = await refreshAccessToken();
-				if (refreshed) {
-					// Retry the request with new token
-					return await apiRequest<T>(url, options);
-				}
-			}
-			throw error;
-		}
 	};
 
 	const fetchGoalData = async (
@@ -139,34 +81,38 @@ export function useGoalApi() {
 		const url = forceRefresh
 			? `${goApiUrl}/goals/${goalId}?_=${Date.now()}`
 			: `${goApiUrl}/goals/${goalId}`;
-		return await apiRequestWithRetry<GoalData>(url);
+		return await $fetch<GoalData>(url, { headers: await getAuthHeaders() });
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/${goalId}/status`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const toggleGoalStarted = async (goalId: number, started: string | null) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { started },
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -174,29 +120,33 @@ export function useGoalApi() {
 		goalId: number,
 		finished: string | null,
 	) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "PATCH",
 			body: { finished },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const deleteGoal = async (goalId: number) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/${goalId}`, {
+		await $fetch(`${goApiUrl}/goals/${goalId}`, {
 			method: "DELETE",
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const addParentRelation = async (childId: number, parentId: number) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const removeParentRelation = async (childId: number, parentId: number) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "DELETE",
 			body: { childId, parentId },
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -205,9 +155,10 @@ export function useGoalApi() {
 		parentId: number,
 		order: number,
 	) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, order },
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -216,9 +167,10 @@ export function useGoalApi() {
 		childId: number,
 		order: number,
 	) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, order },
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -227,9 +179,10 @@ export function useGoalApi() {
 		childId: number,
 		weight: number,
 	) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, weight },
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -238,14 +191,17 @@ export function useGoalApi() {
 		parentId: number,
 		weight: number,
 	) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/relations`, {
+		await $fetch(`${goApiUrl}/goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, weight },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const loadAllGoals = async (): Promise<Goal[]> => {
-		return await apiRequestWithRetry<Goal[]>(`${goApiUrl}/goals`);
+		return await $fetch<Goal[]>(`${goApiUrl}/goals`, {
+			headers: await getAuthHeaders(),
+		});
 	};
 
 	const createGoal = async (
@@ -256,9 +212,10 @@ export function useGoalApi() {
 		if (statusId) {
 			body.status_id = statusId;
 		}
-		return await apiRequestWithRetry<Goal>(`${goApiUrl}/goals`, {
+		return await $fetch<Goal>(`${goApiUrl}/goals`, {
 			method: "POST",
 			body,
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -266,16 +223,18 @@ export function useGoalApi() {
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await apiRequestWithRetry<GoalDependency>(`${goApiUrl}/goals/dependencies`, {
+		return await $fetch<GoalDependency>(`${goApiUrl}/goals/dependencies`, {
 			method: "POST",
 			body: { goalId, dependsOnId },
+			headers: await getAuthHeaders(),
 		});
 	};
 
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
-		return await apiRequestWithRetry(`${goApiUrl}/goals/dependencies`, {
+		await $fetch(`${goApiUrl}/goals/dependencies`, {
 			method: "DELETE",
 			body: { goalId, dependsOnId },
+			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -297,6 +256,5 @@ export function useGoalApi() {
 		loadAllGoals,
 		addDependency,
 		removeDependency,
-		refreshAccessToken,
 	};
 }

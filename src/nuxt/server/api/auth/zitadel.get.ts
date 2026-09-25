@@ -1,13 +1,66 @@
-import { eventHandler, getQuery, sendRedirect } from "h3";
-import { withQuery } from "ufo";
+import { eventHandler, getQuery, sendRedirect, getCookie, setCookie, deleteCookie } from "h3";
+import { withQuery, base64url } from "ufo";
 import { useRuntimeConfig } from "#imports";
 import type { H3Event } from "h3";
 
+// Session data stored in a signed cookie
+interface SessionData {
+  userId: string;
+  email?: string;
+  name?: string;
+  sessionToken: string;
+  loggedInAt: number;
+}
+
+// Simple session management using signed cookies
+function getSession(event: H3Event): SessionData | null {
+  const sessionCookie = getCookie(event, 'plan_session');
+  if (!sessionCookie) return null;
+  
+  try {
+    // Cookie format: base64(JSON data).signature
+    const [dataB64, signature] = sessionCookie.split('.');
+    if (!dataB64 || !signature) return null;
+    
+    // Verify signature (simple HMAC)
+    const secret = process.env.NUXT_SESSION_PASSWORD || 'default-secret';
+    const expectedSig = base64url.encode(
+      Buffer.from(secret + dataB64).toString('base64')
+    ).slice(0, 32);
+    
+    if (signature !== expectedSig) {
+      console.warn('Invalid session signature');
+      return null;
+    }
+    
+    return JSON.parse(Buffer.from(dataB64, 'base64').toString());
+  } catch (e) {
+    console.error('Failed to parse session:', e);
+    return null;
+  }
+}
+
+function setSession(event: H3Event, data: SessionData): void {
+  const secret = process.env.NUXT_SESSION_PASSWORD || 'default-secret';
+  const dataB64 = Buffer.from(JSON.stringify(data)).toString('base64');
+  const signature = base64url.encode(
+    Buffer.from(secret + dataB64).toString('base64')
+  ).slice(0, 32);
+  
+  setCookie(event, 'plan_session', `${dataB64}.${signature}`, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: '/',
+  });
+}
+
 // Zitadel OAuth handler using PKCE
-// Stores Zitadel tokens with expiry time for automatic refresh
 export default eventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig(event);
   const zitadelConfig = config.oauth?.zitadel;
+  const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
   
   console.log("Zitadel OAuth callback started");
   
@@ -24,12 +77,11 @@ export default eventHandler(async (event: H3Event) => {
     const state = crypto.randomUUID();
     const verifier = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
     
-    // Store state and verifier in cookies
     setCookie(event, 'oauth_zitadel_state', state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 600, // 10 minutes
+      maxAge: 600,
       path: '/'
     });
     setCookie(event, 'oauth_zitadel_verifier', verifier, {
@@ -40,7 +92,6 @@ export default eventHandler(async (event: H3Event) => {
       path: '/'
     });
 
-    // Calculate code challenge for PKCE
     const codeChallenge = await calculateCodeChallenge(verifier);
     
     const authorizationURL = `https://${zitadelConfig.domain}/oauth/v2/authorize`;
@@ -50,7 +101,7 @@ export default eventHandler(async (event: H3Event) => {
       response_type: 'code',
       client_id: zitadelConfig.clientId,
       redirect_uri: redirectUrl,
-      scope: 'openid email profile offline_access', // offline_access for refresh token
+      scope: 'openid email profile',
       state,
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
@@ -69,11 +120,9 @@ export default eventHandler(async (event: H3Event) => {
     return sendRedirect(event, "/login?error=invalid_state");
   }
 
-  // Clear state cookies
   deleteCookie(event, 'oauth_zitadel_state');
   deleteCookie(event, 'oauth_zitadel_verifier');
 
-  // Exchange code for tokens
   const tokenURL = `https://${zitadelConfig.domain}/oauth/v2/token`;
   const redirectUrl = zitadelConfig.redirectUrl || `${config.public.appUrl}/api/auth/zitadel`;
   
@@ -99,7 +148,7 @@ export default eventHandler(async (event: H3Event) => {
         code: query.code as string,
         code_verifier: verifier || '',
       }).toString(),
-      timeout: 15000, // 15 second timeout
+      timeout: 15000,
     });
 
     if (tokenResponse.error) {
@@ -109,7 +158,6 @@ export default eventHandler(async (event: H3Event) => {
 
     console.log("Token received, getting user info");
 
-    // Get user info using access token
     const userInfoURL = `https://${zitadelConfig.domain}/oidc/v1/userinfo`;
     const userInfo = await $fetch<{
       sub: string;
@@ -122,32 +170,44 @@ export default eventHandler(async (event: H3Event) => {
         Authorization: `Bearer ${tokenResponse.access_token}`,
         Accept: 'application/json'
       },
-      timeout: 10000, // 10 second timeout
+      timeout: 10000,
     });
 
     console.log("User info received:", userInfo.sub);
 
-    // Calculate when the token expires
-    const expiresAt = Date.now() + (tokenResponse.expires_in * 1000);
-    
-    // Set user session with Zitadel tokens and expiry info
-    const sessionData = {
-      user: {
-        id: userInfo.sub,
-        sub: userInfo.sub,
-        email: userInfo.email,
-        name: userInfo.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
-        accessToken: tokenResponse.access_token,
-        refreshToken: tokenResponse.refresh_token,
-        expiresAt: expiresAt,
-      },
+    // Get session token from Go API
+    let sessionToken = tokenResponse.access_token;
+    try {
+      console.log("Getting session from Go API");
+      const sessionResponse = await $fetch<{
+        session: string;
+        user_id: string;
+      }>(`${goApiUrl}/auth/session`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${tokenResponse.access_token}`,
+        },
+        timeout: 10000,
+      });
+      sessionToken = sessionResponse.session;
+      console.log("Got session token from Go API");
+    } catch (apiError) {
+      console.warn("Failed to get session from Go API, using Zitadel token:", apiError);
+    }
+
+    // Set session using our custom session management
+    const sessionData: SessionData = {
+      userId: userInfo.sub,
+      email: userInfo.email,
+      name: userInfo.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
+      sessionToken: sessionToken,
       loggedInAt: Date.now(),
     };
     
-    console.log("Setting session with data:", JSON.stringify({...sessionData, user: {...sessionData.user, accessToken: '[REDACTED]'}}));
-    await setUserSession(event, sessionData);
+    console.log("Setting session for user:", sessionData.userId);
+    setSession(event, sessionData);
 
-    console.log("Zitadel OAuth success for user:", userInfo.sub, "expires in:", tokenResponse.expires_in, "seconds");
+    console.log("Zitadel OAuth success for user:", userInfo.sub);
     return sendRedirect(event, "/");
 
   } catch (error) {
@@ -156,7 +216,6 @@ export default eventHandler(async (event: H3Event) => {
   }
 });
 
-// Calculate PKCE code challenge
 async function calculateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
