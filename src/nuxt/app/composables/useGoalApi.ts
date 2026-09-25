@@ -34,15 +34,19 @@ export class AuthenticationError extends Error {
 	}
 }
 
-// Proxy API calls through our server route which has access to secure tokens
+// Proxy API calls through our server route which attaches session cookie
 const apiProxy = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-	const response = await $fetch<T>(`/api/proxy/${path}`, {
-		...options,
-		headers: {
-			...options.headers,
-		},
-	});
-	return response;
+	try {
+		const response = await $fetch<T>(`/api/proxy/${path}`, {
+			...options,
+		});
+		return response;
+	} catch (error: any) {
+		if (error?.statusCode === 401) {
+			throw new AuthenticationError("Sessionen har gått ut. Vänligen logga in igen.");
+		}
+		throw error;
+	}
 };
 
 export function useGoalApi() {

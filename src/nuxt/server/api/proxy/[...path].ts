@@ -1,33 +1,14 @@
-import { useSession } from "h3";
+import { getCookie } from "h3";
 
-interface SessionData {
-  user: {
-    id: string;
-    email?: string;
-    name?: string;
-  };
-  secure: {
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt: number;
-  };
-  loggedInAt: number;
-}
-
+// Proxy API calls to Go API, attaching session cookie
 export default defineEventHandler(async (event) => {
-  // Get session
-  const session = await useSession<SessionData>(event, {
-    password: process.env.NUXT_SESSION_PASSWORD || 'default-secret-change-in-production',
-    name: 'plan-session',
-  });
-
-  const user = await session.data;
+  const sessionCookie = getCookie(event, 'plan_session')
   
-  if (!user?.secure?.accessToken) {
+  if (!sessionCookie) {
     throw createError({
       statusCode: 401,
       message: 'Not authenticated'
-    });
+    })
   }
   
   // Get the path from the URL
@@ -49,11 +30,12 @@ export default defineEventHandler(async (event) => {
   const method = getMethod(event)
   const body = method !== 'GET' ? await readBody(event) : undefined
   
-  // Forward the request with access token
+  // Forward the request with session cookie
   const response = await $fetch(`${goApiUrl}/${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${user.secure.accessToken}`,
+      // Pass session cookie as header (Go API expects X-Session-Token)
+      'X-Session-Token': sessionCookie,
       'Content-Type': 'application/json',
     },
     query,
