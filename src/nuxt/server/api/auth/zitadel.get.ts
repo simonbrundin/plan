@@ -4,9 +4,11 @@ import { useRuntimeConfig } from "#imports";
 import type { H3Event } from "h3";
 
 // Zitadel OAuth handler using PKCE
+// Exchanges Zitadel tokens for a longer-lived session token from Go API
 export default eventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig(event);
   const zitadelConfig = config.oauth?.zitadel;
+  const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
   
   if (!zitadelConfig?.clientId || !zitadelConfig?.domain) {
     console.error("Zitadel OAuth not configured");
@@ -78,6 +80,7 @@ export default eventHandler(async (event: H3Event) => {
       id_token?: string;
       token_type: string;
       expires_in: number;
+      error?: string;
     }>(tokenURL, {
       method: 'POST',
       headers: {
@@ -112,16 +115,34 @@ export default eventHandler(async (event: H3Event) => {
       }
     });
 
-    // Set user session with Zitadel tokens
+    // Exchange Zitadel token for a longer-lived session token from Go API
+    let sessionToken = tokenResponse.access_token;
+    try {
+      const sessionResponse = await $fetch<{
+        session: string;
+        user_id: string;
+      }>(`${goApiUrl}/auth/session`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${tokenResponse.access_token}`,
+        },
+      });
+      sessionToken = sessionResponse.session;
+      console.log("Got session token from Go API");
+    } catch (apiError) {
+      console.warn("Failed to get session from Go API, using Zitadel token directly:", apiError);
+      // Fall back to using Zitadel token
+    }
+
+    // Set user session with the session token
     await setUserSession(event, {
       user: {
         id: userInfo.sub,
         sub: userInfo.sub,
         email: userInfo.email,
         name: userInfo.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
-        accessToken: tokenResponse.access_token,
+        sessionToken: sessionToken,
         refreshToken: tokenResponse.refresh_token,
-        idToken: tokenResponse.id_token,
       },
       loggedInAt: Date.now(),
     });

@@ -45,19 +45,17 @@ export function useGoalApi() {
 			throw new AuthenticationError("Du måste vara inloggad för att utföra denna åtgärd");
 		}
 		
-		// Prioritize accessToken from Zitadel OAuth flow
-		// Fall back to sessionToken or id for legacy sessions
+		// Priority: sessionToken (from Go API) > id (legacy)
 		const userData = user.value as any;
-		const accessToken = userData?.accessToken;
 		const sessionToken = userData?.sessionToken;
 		const userId = userData?.id;
 		
-		if (!accessToken && !sessionToken && !userId) {
+		if (!sessionToken && !userId) {
 			throw new AuthenticationError("Ingen giltig session hittades. Vänligen logga in igen.");
 		}
 		
 		return {
-			Authorization: `Bearer ${accessToken || sessionToken || userId}`,
+			Authorization: `Bearer ${sessionToken || userId}`,
 		};
 	};
 
