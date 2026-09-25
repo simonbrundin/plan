@@ -39,7 +39,7 @@ export default defineNuxtConfig({
 		"@nuxt/ui",
 		"@nuxt/icon",
 		"shadcn-nuxt",
-		"nuxt-auth-utils",
+		["nuxt-auth-utils", { session: { includeUserInSession: true } }],
 		[
 			"@pinia/nuxt",
 			{
