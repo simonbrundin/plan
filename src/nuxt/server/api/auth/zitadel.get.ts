@@ -4,11 +4,10 @@ import { useRuntimeConfig } from "#imports";
 import type { H3Event } from "h3";
 
 // Zitadel OAuth handler using PKCE
-// Exchanges Zitadel tokens for a longer-lived session token from Go API
+// Stores Zitadel tokens with expiry time for automatic refresh
 export default eventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig(event);
   const zitadelConfig = config.oauth?.zitadel;
-  const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
   
   if (!zitadelConfig?.clientId || !zitadelConfig?.domain) {
     console.error("Zitadel OAuth not configured");
@@ -48,7 +47,7 @@ export default eventHandler(async (event: H3Event) => {
       response_type: 'code',
       client_id: zitadelConfig.clientId,
       redirect_uri: redirectUrl,
-      scope: 'openid email profile',
+      scope: 'openid email profile offline_access', // offline_access for refresh token
       state,
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
@@ -115,39 +114,24 @@ export default eventHandler(async (event: H3Event) => {
       }
     });
 
-    // Exchange Zitadel token for a longer-lived session token from Go API
-    let sessionToken = tokenResponse.access_token;
-    try {
-      const sessionResponse = await $fetch<{
-        session: string;
-        user_id: string;
-      }>(`${goApiUrl}/auth/session`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${tokenResponse.access_token}`,
-        },
-      });
-      sessionToken = sessionResponse.session;
-      console.log("Got session token from Go API");
-    } catch (apiError) {
-      console.warn("Failed to get session from Go API, using Zitadel token directly:", apiError);
-      // Fall back to using Zitadel token
-    }
-
-    // Set user session with the session token
+    // Calculate when the token expires
+    const expiresAt = Date.now() + (tokenResponse.expires_in * 1000);
+    
+    // Set user session with Zitadel tokens and expiry info
     await setUserSession(event, {
       user: {
         id: userInfo.sub,
         sub: userInfo.sub,
         email: userInfo.email,
         name: userInfo.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
-        sessionToken: sessionToken,
+        accessToken: tokenResponse.access_token,
         refreshToken: tokenResponse.refresh_token,
+        expiresAt: expiresAt,
       },
       loggedInAt: Date.now(),
     });
 
-    console.log("Zitadel OAuth success for user:", userInfo.sub);
+    console.log("Zitadel OAuth success for user:", userInfo.sub, "expires in:", tokenResponse.expires_in, "seconds");
     return sendRedirect(event, "/");
 
   } catch (error) {
