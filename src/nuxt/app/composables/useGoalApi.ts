@@ -34,85 +34,51 @@ export class AuthenticationError extends Error {
 	}
 }
 
-// Custom session data interface
-interface SessionData {
-	userId: string;
-	email?: string;
-	name?: string;
-	sessionToken: string;
-	loggedInAt: number;
-}
-
-// Get session from our custom cookie
-async function getSession(): Promise<SessionData | null> {
-	try {
-		const response = await $fetch<SessionData>('/api/auth/session');
-		return response;
-	} catch {
-		return null;
-	}
-}
+// Proxy API calls through our server route which has access to secure tokens
+const apiProxy = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
+	const response = await $fetch<T>(`/api/proxy/${path}`, {
+		...options,
+		headers: {
+			...options.headers,
+		},
+	});
+	return response;
+};
 
 export function useGoalApi() {
-	const config = useRuntimeConfig();
-	const goApiUrl = config.public.goApiUrl || "http://localhost:8080";
-	
-	let cachedSession: SessionData | null = null;
-	
-	const getAuthHeaders = async () => {
-		// Get session from our custom endpoint
-		if (!cachedSession) {
-			cachedSession = await getSession();
-		}
-		
-		if (!cachedSession?.sessionToken) {
-			throw new AuthenticationError("Du måste vara inloggad för att utföra denna åtgärd");
-		}
-		
-		return {
-			Authorization: `Bearer ${cachedSession.sessionToken}`,
-		};
-	};
-
 	const fetchGoalData = async (
 		goalId: number,
 		forceRefresh = false,
 	): Promise<GoalData> => {
-		const url = forceRefresh
-			? `${goApiUrl}/goals/${goalId}?_=${Date.now()}`
-			: `${goApiUrl}/goals/${goalId}`;
-		return await $fetch<GoalData>(url, { headers: await getAuthHeaders() });
+		const query = forceRefresh ? `?_=${Date.now()}` : '';
+		return await apiProxy<GoalData>(`goals/${goalId}${query}`);
 	};
 
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await apiProxy(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await apiProxy(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}/status`, {
+		await apiProxy(`goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const toggleGoalStarted = async (goalId: number, started: string | null) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await apiProxy(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { started },
-			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -120,33 +86,29 @@ export function useGoalApi() {
 		goalId: number,
 		finished: string | null,
 	) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await apiProxy(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { finished },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const deleteGoal = async (goalId: number) => {
-		await $fetch(`${goApiUrl}/goals/${goalId}`, {
+		await apiProxy(`goals/${goalId}`, {
 			method: "DELETE",
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const addParentRelation = async (childId: number, parentId: number) => {
-		await $fetch(`${goApiUrl}/goals/relations`, {
+		await apiProxy(`goals/relations`, {
 			method: "POST",
 			body: { childId, parentId },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const removeParentRelation = async (childId: number, parentId: number) => {
-		await $fetch(`${goApiUrl}/goals/relations`, {
+		await apiProxy(`goals/relations`, {
 			method: "DELETE",
 			body: { childId, parentId },
-			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -155,10 +117,9 @@ export function useGoalApi() {
 		parentId: number,
 		order: number,
 	) => {
-		await $fetch(`${goApiUrl}/goals/relations`, {
+		await apiProxy(`goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, order },
-			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -167,10 +128,9 @@ export function useGoalApi() {
 		childId: number,
 		order: number,
 	) => {
-		await $fetch(`${goApiUrl}/goals/relations`, {
+		await apiProxy(`goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, order },
-			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -179,10 +139,9 @@ export function useGoalApi() {
 		childId: number,
 		weight: number,
 	) => {
-		await $fetch(`${goApiUrl}/goals/relations`, {
+		await apiProxy(`goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, weight },
-			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -191,17 +150,14 @@ export function useGoalApi() {
 		parentId: number,
 		weight: number,
 	) => {
-		await $fetch(`${goApiUrl}/goals/relations`, {
+		await apiProxy(`goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, weight },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const loadAllGoals = async (): Promise<Goal[]> => {
-		return await $fetch<Goal[]>(`${goApiUrl}/goals`, {
-			headers: await getAuthHeaders(),
-		});
+		return await apiProxy<Goal[]>(`goals`);
 	};
 
 	const createGoal = async (
@@ -212,10 +168,9 @@ export function useGoalApi() {
 		if (statusId) {
 			body.status_id = statusId;
 		}
-		return await $fetch<Goal>(`${goApiUrl}/goals`, {
+		return await apiProxy<Goal>(`goals`, {
 			method: "POST",
 			body,
-			headers: await getAuthHeaders(),
 		});
 	};
 
@@ -223,18 +178,16 @@ export function useGoalApi() {
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await $fetch<GoalDependency>(`${goApiUrl}/goals/dependencies`, {
+		return await apiProxy<GoalDependency>(`goals/dependencies`, {
 			method: "POST",
 			body: { goalId, dependsOnId },
-			headers: await getAuthHeaders(),
 		});
 	};
 
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
-		await $fetch(`${goApiUrl}/goals/dependencies`, {
+		await apiProxy(`goals/dependencies`, {
 			method: "DELETE",
 			body: { goalId, dependsOnId },
-			headers: await getAuthHeaders(),
 		});
 	};
 
