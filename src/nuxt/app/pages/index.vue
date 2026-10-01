@@ -6,20 +6,6 @@ const { loggedIn: isLoggedIn } = useUserSession()
 const goalsStore = useGoalsStore()
 const { loadAllGoals } = useGoalApi()
 
-// Load goals on mount
-// Temporarily disabled to debug hanging issue
-// onMounted(async () => {
-//   if (loggedIn) {
-//     try {
-//       const goals = await loadAllGoals()
-//       goalsStore.goals = goals
-//       goalsStore.isLoaded = true
-//     } catch (error) {
-//       console.error('Failed to load goals:', error)
-//     }
-//   }
-// })
-
 const { createGoal: createGoalApi } = useGoalApi()
 
 const addGoalToInbox = async (goal) => {
@@ -32,6 +18,10 @@ const addGoalToInbox = async (goal) => {
     console.error('Failed to add goal to inbox:', error)
   }
 }
+
+definePageMeta({
+  ssr: false, // Disable SSR for this page - icons and heavy components load better on client
+})
 </script>
 
 <template>

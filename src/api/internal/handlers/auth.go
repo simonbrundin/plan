@@ -42,6 +42,13 @@ type UserInfo struct {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
+	// Dev mode: redirect to Nuxt dev-login endpoint
+	if os.Getenv("AUTH_DISABLED") == "true" {
+		appDomain := osGetenv("APP_DOMAIN", "localhost:3000")
+		c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("http://%s/auth/dev-login", appDomain))
+		return
+	}
+
 	zitadelDomain := osGetenv("ZITADEL_DOMAIN", "")
 	clientID := osGetenv("ZITADEL_CLIENT_ID", "")
 	redirectURI := fmt.Sprintf("https://%s/api/v1/auth/callback", osGetenv("APP_DOMAIN", "plan.simonbrundin.com"))
