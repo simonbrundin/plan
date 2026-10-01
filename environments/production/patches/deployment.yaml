@@ -9,7 +9,7 @@ spec:
         - name: plan-app
           # Updated by .github/workflows/commit.nuxt.yaml.
           image: >-
-            ghcr.io/simonbrundin/plan@sha256:ef95c99dac6699ef195c432beac4e6dc2f7097ec2db9d48d7b7eedc896c32558
+            ghcr.io/simonbrundin/plan@sha256:d6d2a4256cb3a32749003b4c96be31921baba40011cf505d6f16288d5640f0c3
           # Faster probes to restart hung pods sooner (Bun runtime is more stable but we still want quick recovery)
           readinessProbe:
             httpGet:
