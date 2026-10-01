@@ -10,6 +10,23 @@ spec:
           # Updated by .github/workflows/commit.nuxt.yaml.
           image: >-
             ghcr.io/simonbrundin/plan@sha256:c6aadef04ffb51789a282b5b04f31710ca76b59fd1fed384b260aa4508cdc944
+          # Faster probes to restart hung pods sooner (Bun runtime is more stable but we still want quick recovery)
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"

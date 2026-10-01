@@ -5,14 +5,12 @@ FROM node:lts-alpine AS build
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++ gcc
-# RUN apk add openssh g++ make python3 git
 
+# Installera Bun för att bygga och installera dependencies
+RUN npm install -g bun
 
 # Kopiera bara det som behövs för install
 COPY package.json bun.lock* ./
-
-# Installera Bun (globalt)
-RUN npm install -g bun
 
 # Installera beroenden (cache-vänligt)
 RUN bun install --frozen-lockfile
@@ -24,22 +22,24 @@ COPY . .
 RUN bun run build
 
 # ==============================
-# Runtime Stage (minimal, säker)
+# Runtime Stage (Bun)
 # ==============================
-FROM node:lts-alpine AS production
+FROM oven/bun:1-slim AS production
 
 WORKDIR /app
 
-# Kör Nitro med Node.js. Nitro använder preset node-server och Bun kan starta
-# processen men inte alltid hantera HTTP-trafiken korrekt i produktion.
-USER node
+# Kör med Bun - mer stabil HTTP-hantering än Node.js vid långa upptider
+USER bun
 
 # Kopiera bara det som behövs för runtime
-COPY --from=build --chown=node:node /app/.output .
+COPY --from=build --chown=bun:bun /app/.output .
 
 EXPOSE 3000
 
 ENV HOST=0.0.0.0
 ENV PORT=3000
+ENV NODE_ENV=production
 
-CMD ["node", "server/index.mjs"]
+# Bun hanterar HTTP-trafiken stabilare än Node.js vid långa upptider
+# och har bättre minneshantering vid hög belastning
+CMD ["bun", "run", "server/index.mjs"]
