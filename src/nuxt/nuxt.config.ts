@@ -63,11 +63,10 @@ export default defineNuxtConfig({
 		classSuffix: "",
 	},
 	icon: {
-		// Bundle icons in the client so SSR never waits on Iconify network calls.
+		// Disable server-side icon processing to avoid SSR delays
+		// Icons will only load on the client side
 		provider: "none",
-		clientBundle: {
-			scan: true,
-		},
+		serverBundle: false,
 	},
 	runtimeConfig: {
 		public: {
