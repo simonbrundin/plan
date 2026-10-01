@@ -176,6 +176,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Next()
 			return
 		}
+		log.Printf("Auth: ValidateSession failed: %v", sessErr)
 
 		// For development/testing, accept tokens in format "user_<id>"
 		if strings.HasPrefix(tokenString, "user_") {
