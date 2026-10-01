@@ -34,8 +34,8 @@ export default defineEventHandler(async (event) => {
   const response = await $fetch(`${goApiUrl}/${path}`, {
     method,
     headers: {
-      // Pass session cookie as header (Go API expects X-Session-Token)
-      'X-Session-Token': sessionCookie,
+      // Go API expects Authorization: Bearer <token>
+      'Authorization': `Bearer ${sessionCookie}`,
       'Content-Type': 'application/json',
     },
     query,
