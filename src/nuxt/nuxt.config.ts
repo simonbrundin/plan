@@ -100,7 +100,7 @@ export default defineNuxtConfig({
 		componentDir: "./app/components/ui",
 	},
 	nitro: {
-		preset: "node-server",
+		preset: "bun",
 		host: "0.0.0.0",
 		trustProxy: true,
 	},

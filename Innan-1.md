@@ -1,14 +1,14 @@
 # Mål att nå innan jag går över till Plan 1.0
 
-- [ ] Sätta upp så man inte kan pusha till main utan PR
+- [x] Sätta upp så man inte kan pusha till main utan PR
 - [x] Push kör CI
 - [x] Kunna logga in med Zitadel på Plan
-- [ ] iptv fungerar
-- [ ] development mode i zitadel. vad betyder det och ska jag ha två appar?
+- [x] iptv fungerar
+- [x] development mode i zitadel. vad betyder det och ska jag ha två appar?
 - [ ] Installer Kyverno Chainsaw
 - [x] Zitadel nås via auth.simonbrundin.com
-- [ ] Jellyfin fungerande
-- [ ] Hårddisken i worker-2 fungerar
+- [x] Jellyfin fungerande
+- [x] Hårddisken i worker-2 fungerar
 - [ ] Installera sista datorn i klustret
 - [x] Installera Orange Pi:s
 - [ ] Plan går att använda
