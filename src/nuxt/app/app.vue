@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const startTime = Date.now()
+console.log('[SSR] app.vue start')
+
 const colorMode = useColorMode();
 
 const color = computed(() =>
@@ -28,6 +31,8 @@ useHead({
     },
   ],
 });
+
+console.log(`[SSR] app.vue setup done, time: ${Date.now() - startTime}ms`)
 </script>
 
 <template>
