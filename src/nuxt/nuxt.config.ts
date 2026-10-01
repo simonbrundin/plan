@@ -12,6 +12,13 @@ export default defineNuxtConfig({
 	// ],
 	compatibilityDate: "2025-07-15",
 	devtools: { enabled: true },
+
+	// Disable SSR globally to avoid performance issues with icon loading
+	// and complex component rendering
+	routeRules: {
+		'/**': { ssr: false },
+	},
+
 	css: ["@/assets/css/main.css"],
 	ui: {
 		theme: {
