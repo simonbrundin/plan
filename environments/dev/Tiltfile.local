@@ -1,35 +1,68 @@
 # ------------------------------------------------------------------
 # Local Development Mode
-# Runs database in Docker, frontend locally
+# Runs database in Docker, frontend locally, behind a shared HTTPS gateway
 # ------------------------------------------------------------------
 
+# Resolve worktree name (defaults to 'session' for the primary checkout)
+WORKTREE_NAME = os.environ.get('TILT_WORKTREE', 'session')
+GATEWAY_PORT = int(os.environ.get('TILT_GATEWAY_PORT', '3000'))
+# Deterministic per-worktree ports based on a stable hash of the worktree name.
+def stable_offset(name, mod, base):
+    total = 0
+    for i in range(len(name)):
+        total = total + ord(name[i])
+    return base + (total % mod)
+
+APP_PORT    = stable_offset(WORKTREE_NAME, 100, 3100)  # Nuxt
+API_PORT    = stable_offset(WORKTREE_NAME, 100, 4080)  # Go API
+
+print('==========================================')
+print('Worktree:  ' + WORKTREE_NAME)
+print('Nuxt port: ' + str(APP_PORT))
+print('API port:  ' + str(API_PORT))
+print('Gateway:   http://localhost:' + str(GATEWAY_PORT) + '/' + WORKTREE_NAME + '/')
+print('==========================================')
+
 # ------------------------------------------------------------------
-# Docker Compose Setup
+# Docker Compose Setup - postgres + pgview
 # ------------------------------------------------------------------
 
-# Ladda backend services (postgres) från dedikerad compose-fil
 docker_compose('./docker-compose.backend.yml')
 
+dc_resource('postgres', labels=['Database'])
+dc_resource('pgview',   labels=['Database'])
+
 # ------------------------------------------------------------------
-# PostgreSQL Database
+# Dev gateway (Caddy) - shared HTTPS entrypoint on :3000
+#
+# Started as a standalone resource. Routes per-worktree dev servers into
+# /<worktree>/* paths. The OAuth callback is always at the gateway root
+# (/oauth/callback) and is routed by a worktree cookie set by Go API.
 # ------------------------------------------------------------------
 
-dc_resource(
-  'postgres',
-  labels=['Database'],
+local_resource(
+  'Dev Gateway',
+  serve_cmd=['bash', '-c', 'cd ./gateway && docker compose up'],
+  links=['http://localhost:' + str(GATEWAY_PORT) + '/health'],
+  labels=['Gateway'],
+  resource_deps=['postgres'],
+)
+
+# Register this worktree's two ports (Nuxt on APP_PORT, Go API on API_PORT)
+# with the gateway once the admin API is up.
+local_resource(
+  'Register Worktree',
+  serve_cmd=[
+    'bash', '-c',
+    'until curl -fsS http://localhost:2019/config/apps/http/servers/srv0 >/dev/null 2>&1; do sleep 1; done && ' +
+    './gateway/register-worktree.sh add ' + WORKTREE_NAME + ' ' + str(APP_PORT) + ' ' + str(API_PORT)
+  ],
+  labels=['Gateway'],
+  resource_deps=['Dev Gateway'],
 )
 
 # ------------------------------------------------------------------
-# pgview - PostgreSQL Viewer
-# ------------------------------------------------------------------
-
-dc_resource(
-  'pgview',
-  labels=['Database'],
-)
-
-# ------------------------------------------------------------------
-# Go API Server
+# Go API Server - per-worktree port
 # ------------------------------------------------------------------
 
 local_resource(
@@ -38,17 +71,20 @@ local_resource(
     'bash', '-c',
     'cd ../../src/api && ' +
     'DATABASE_URL="postgresql://plan:plan@localhost:5432/plan" ' +
-    'PORT=8080 ' +
-    'AUTH_DISABLED=true ' +
+    'PORT=' + str(API_PORT) + ' ' +
+    'APP_DOMAIN="localhost:' + str(GATEWAY_PORT) + '" ' +
+    'ZITADEL_DOMAIN="auth.simonbrundin.com" ' +
+    'ZITADEL_CLIENT_ID="391431970426454645" ' +
+    'WORKTREE_NAME="' + WORKTREE_NAME + '" ' +
     'go run cmd/server/main.go'
   ],
-  links=['http://localhost:8080', 'http://localhost:8080/swagger/index.html'],
+  links=['http://localhost:' + str(API_PORT) + '/health'],
   labels=['API'],
   resource_deps=['postgres'],
 )
 
 # ------------------------------------------------------------------
-# Frontend (Nuxt Dev Server) - körs lokalt
+# Frontend (Nuxt Dev Server) - per-worktree port, HTTPS via gateway
 # ------------------------------------------------------------------
 
 local_resource(
@@ -60,10 +96,11 @@ local_resource(
     'NUXT_SESSION_PASSWORD="5c3ddb48cdb04a05aed90cdb9330cbc2" ' +
     'NUXT_SESSION_COOKIE_SECURE=false ' +
     'NUXT_SESSION_COOKIE_SAMESITE=lax ' +
-    'NUXT_PUBLIC_APP_URL="http://localhost:3000" ' +
-    'bun run dev --host'
+    'NUXT_PUBLIC_APP_URL="http://localhost:' + str(GATEWAY_PORT) + '/' + WORKTREE_NAME + '" ' +
+    'NUXT_PUBLIC_GO_API_URL="http://localhost:' + str(API_PORT) + '/api/v1" ' +
+    './node_modules/.bin/nuxt dev --host 0.0.0.0 --port ' + str(APP_PORT)
   ],
-  links=['http://localhost:3000'],
+  links=['http://localhost:' + str(GATEWAY_PORT) + '/' + WORKTREE_NAME + '/'],
   labels=['Frontend'],
-  resource_deps=['postgres'],  # Vänta på PostgreSQL
+  resource_deps=['Register Worktree'],
 )
