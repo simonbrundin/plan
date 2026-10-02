@@ -113,7 +113,7 @@ export default defineNuxtConfig({
 
 	vite: {
 		server: {
-			allowedHosts: [".simonbrundin.com"],
+			allowedHosts: [".simonbrundin.com", "localhost"],
 		},
 	},
 

@@ -1,0 +1,13 @@
+{
+    admin 0.0.0.0:2019
+}
+
+# Plain HTTP gateway on :3000.
+# Worktrees share this single OAuth redirect URL:
+#   http://localhost:3000/oauth/callback
+# Per-worktree routes are registered at runtime via the admin API.
+http://localhost:3000 {
+    handle /health {
+        respond "ok\n" 200
+    }
+}

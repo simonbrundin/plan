@@ -10,11 +10,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"plan-api/internal/middleware"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"plan-api/internal/middleware"
 )
 
 type AuthHandler struct {
@@ -51,7 +51,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	zitadelDomain := osGetenv("ZITADEL_DOMAIN", "")
 	clientID := osGetenv("ZITADEL_CLIENT_ID", "")
-	redirectURI := fmt.Sprintf("https://%s/api/v1/auth/callback", osGetenv("APP_DOMAIN", "plan.simonbrundin.com"))
+	worktree := osGetenv("WORKTREE_NAME", "")
+
+	// OAuth callback URL. In dev (worktree mode) it always points to the
+	// shared dev gateway so multiple worktrees can share one Zitadel
+	// application. In prod it points to the worktree's host directly.
+	var redirectURI string
+	if worktree != "" {
+		appDomain := osGetenv("APP_DOMAIN", "localhost:3000")
+		redirectURI = fmt.Sprintf("http://%s/oauth/callback", appDomain)
+		// Mark this browser as belonging to the current worktree so the
+		// dev gateway can route the callback to the correct upstream.
+		c.SetCookie("wt", worktree, 600, "/", "", c.Request.TLS != nil, false)
+	} else {
+		redirectURI = fmt.Sprintf("https://%s/api/v1/auth/callback", osGetenv("APP_DOMAIN", "plan.simonbrundin.com"))
+	}
 
 	if zitadelDomain == "" || clientID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Zitadel configuration missing"})
@@ -69,6 +83,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	stateData := map[string]string{
 		"state":    state,
 		"verifier": verifier,
+		"worktree": worktree,
 	}
 	stateJSON, _ := json.Marshal(stateData)
 	c.SetCookie("oauth_state", string(stateJSON), 600, "/", "", c.Request.TLS != nil, true)
@@ -218,16 +233,46 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	// Redirect to Nuxt with our session token
-	frontendCallbackURL := fmt.Sprintf(
-		"https://%s/api/auth/callback?session=%s&sub=%s&email=%s",
-		osGetenv("APP_DOMAIN", "plan.simonbrundin.com"),
+	// Redirect to Nuxt with our session token.
+	// In worktree/dev mode the callback URL is scoped to the worktree path
+	// so the dev gateway routes it to the correct Nuxt instance.
+	frontendCallbackURL := buildFrontendCallbackURL(sessionToken, sub, email)
+
+	c.Redirect(http.StatusTemporaryRedirect, frontendCallbackURL)
+}
+
+// buildFrontendCallbackURL returns the URL the Go API redirects to after a
+// successful Zitadel callback. In worktree/dev mode the URL is scoped to
+// the worktree path so the shared dev gateway (Caddy) can route the
+// request to the correct Nuxt instance. In prod the URL is the plain
+// per-domain Nuxt callback.
+func buildFrontendCallbackURL(sessionToken, sub, email string) string {
+	appDomain := osGetenv("APP_DOMAIN", "plan.simonbrundin.com")
+	worktree := osGetenv("WORKTREE_NAME", "")
+
+	var scheme string
+	if worktree != "" {
+		scheme = "http"
+	} else {
+		scheme = "https"
+	}
+
+	var callbackPath string
+	if worktree != "" {
+		callbackPath = fmt.Sprintf("/%s/api/auth/callback", worktree)
+	} else {
+		callbackPath = "/api/auth/callback"
+	}
+
+	return fmt.Sprintf(
+		"%s://%s%s?session=%s&sub=%s&email=%s",
+		scheme,
+		appDomain,
+		callbackPath,
 		url.QueryEscape(sessionToken),
 		url.QueryEscape(sub),
 		url.QueryEscape(email),
 	)
-
-	c.Redirect(http.StatusTemporaryRedirect, frontendCallbackURL)
 }
 
 // RefreshSession handles session refresh requests
