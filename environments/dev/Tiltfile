@@ -9,8 +9,10 @@
 #   tilt up -- --mode=kubernetes     # Kör i Kubernetes
 #
 # Access:
-#   App:      http://localhost:3000
+#   Gateway:  http://localhost:3000/<worktree>/
 #   pgview:   http://localhost:5051
+#
+# See ./README.md for details on the shared dev gateway architecture.
 #
 # ==================================================================
 

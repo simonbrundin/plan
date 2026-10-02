@@ -1,0 +1,15 @@
+services:
+  caddy:
+    build: .
+    container_name: plan-dev-gateway
+    ports:
+      - "3000:3000"
+      - "2019:2019"
+    restart: unless-stopped
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:
