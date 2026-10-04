@@ -2,9 +2,7 @@ services:
   caddy:
     build: .
     container_name: plan-dev-gateway
-    ports:
-      - "3000:3000"
-      - "2019:2019"
+    network_mode: host
     restart: unless-stopped
     volumes:
       - caddy-data:/data

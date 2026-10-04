@@ -40,8 +40,9 @@ add_route() {
   # Remove any existing routes for this worktree first so re-registration is idempotent.
   curl -fsS -X DELETE "${CADDY_API}/id/wt-${wt}-oauth-callback" > /dev/null 2>&1 || true
   curl -fsS -X DELETE "${CADDY_API}/id/wt-${wt}-path-route"     > /dev/null 2>&1 || true
+  curl -fsS -X DELETE "${CADDY_API}/id/wt-${wt}-path-root"      > /dev/null 2>&1 || true
 
-  # Route 1: regular navigation under /<wt>/* -> Nuxt
+  # Route 1a: /<wt>/* -> Nuxt (with path)
   local path_route
   path_route=$(cat <<EOF
 {
@@ -58,6 +59,24 @@ EOF
   curl -fsS -H "Content-Type: application/json" \
     -X POST "${CADDY_API}/config/apps/http/servers/srv0/routes" \
     --data "$path_route" > /dev/null
+
+  # Route 1b: /<wt> (root without trailing slash) -> Nuxt
+  local path_root
+  path_root=$(cat <<EOF
+{
+  "@id": "wt-${wt}-path-root",
+  "match": [{"path": ["/${wt}"]}],
+  "handle": [{
+    "handler": "reverse_proxy",
+    "upstreams": [{"dial": "127.0.0.1:${nuxt}"}]
+  }],
+  "terminal": true
+}
+EOF
+)
+  curl -fsS -H "Content-Type: application/json" \
+    -X POST "${CADDY_API}/config/apps/http/servers/srv0/routes" \
+    --data "$path_root" > /dev/null
 
   # Route 2: /oauth/callback with Cookie: wt=<wt> -> Go API
   local oauth_route
