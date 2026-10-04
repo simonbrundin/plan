@@ -86,7 +86,8 @@ func CreateSession(userID int64, sub, email string) (string, error) {
 		Sub:      sub,
 		Email:    email,
 		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(24 * time.Hour),
+		// Match the Nuxt cookie maxAge of 7 days
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 
 	// Generate session token
@@ -153,18 +154,27 @@ func ValidateSession(token string) (*Session, error) {
 		return nil, fmt.Errorf("session expired")
 	}
 
-	// Verify session exists in database
+	// Verify session exists in database and extend expiry (sliding expiration)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var found bool
-	err = database.GetPool().QueryRow(ctx,
-		"SELECT EXISTS(SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW())",
-		token,
-	).Scan(&found)
-	if err != nil || !found {
+	// Extend session expiry by 7 days from now
+	newExpiry := time.Now().Add(7 * 24 * time.Hour)
+	result, err := database.GetPool().Exec(ctx,
+		"UPDATE sessions SET expires_at = $1 WHERE token = $2 AND expires_at > NOW()",
+		newExpiry, token,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extend session: %w", err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
 		return nil, fmt.Errorf("session not found")
 	}
+
+	// Update session object with new expiry for return value
+	session.ExpiresAt = newExpiry
 
 	return &session, nil
 }
