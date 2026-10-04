@@ -168,7 +168,7 @@ func ValidateSession(token string) (*Session, error) {
 		return nil, fmt.Errorf("failed to extend session: %w", err)
 	}
 
-	rowsAffected, _ := result.RowsAffected()
+	rowsAffected := result.RowsAffected()
 	if rowsAffected == 0 {
 		return nil, fmt.Errorf("session not found")
 	}
