@@ -1,0 +1,47 @@
+# Dev pgview service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgview
+  labels:
+    app: plan
+    tier: tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plan
+      tier: tools
+      component: pgview
+  template:
+    metadata:
+      labels:
+        app: plan
+        tier: tools
+        component: pgview
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: pgview
+          image: lcurrol/pg-view:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DB_URL
+              value: postgresql://plan:plan@plan-dev-db-rw:5432/plan
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgview
+  labels:
+    app: plan
+spec:
+  type: ClusterIP
+  selector:
+    app: plan
+    tier: tools
+    component: pgview
+  ports:
+    - port: 3000
+      targetPort: 3000

@@ -1,0 +1,51 @@
+# Dev overlay för frontend (Nuxt)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: plan
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plan
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: plan
+        tier: frontend
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: frontend
+          image: plan-frontend:dev
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: development
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: plan
+spec:
+  type: ClusterIP
+  selector:
+    app: plan
+    tier: frontend
+  ports:
+    - port: 3000
+      targetPort: 3000

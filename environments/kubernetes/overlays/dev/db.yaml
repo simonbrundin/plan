@@ -1,0 +1,37 @@
+# Dev PostgreSQL using CNPG operator
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: plan-dev-db
+  labels:
+    app: plan
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.5
+  storage:
+    size: 1Gi
+  env:
+    - name: POSTGRES_DB
+      value: plan
+    - name: POSTGRES_USER
+      value: plan
+    - name: POSTGRES_PASSWORD
+      value: plan
+  bootstrap:
+    initdb:
+      database: plan
+      owner: plan
+      secret:
+        name: plan-dev-db-secret
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+---
+# Secret för dev-databasen
+apiVersion: v1
+kind: Secret
+metadata:
+  name: plan-dev-db-secret
+type: kubernetes.io/basic-auth
+stringData:
+  username: plan
+  password: plan
