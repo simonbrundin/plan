@@ -1,0 +1,26 @@
+# Development Dockerfile för API (för Tilt med live_update)
+FROM golang:1.25-alpine
+
+# Installera build-beroenden
+RUN apk add --no-cache git curl
+
+WORKDIR /app
+
+# Kopiera go mod-filer
+COPY go.mod go.sum ./
+
+# Hämta dependencies
+RUN go mod download
+
+# Kopiera källkod
+COPY . .
+
+# Exponera port
+EXPOSE 8080
+
+# Miljövariabler
+ENV GIN_MODE=debug
+
+# Kör med hot-reload via air eller vanlig go run
+# Använd air för bättre dev-upplevelse
+CMD ["go", "run", "./cmd/server/main.go"]

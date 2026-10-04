@@ -1,0 +1,51 @@
+# Dev overlay för API (Go)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: plan
+    tier: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plan
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: plan
+        tier: api
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: api
+          image: plan-api:dev
+          ports:
+            - containerPort: 8080
+          env:
+            - name: GIN_MODE
+              value: debug
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  labels:
+    app: plan
+spec:
+  type: ClusterIP
+  selector:
+    app: plan
+    tier: api
+  ports:
+    - port: 8080
+      targetPort: 8080
