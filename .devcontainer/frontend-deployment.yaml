@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: nuxt-app
   template:
     metadata:
       labels:
-        app: frontend
+        app: nuxt-app
     spec:
       containers:
         - name: frontend
