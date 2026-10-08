@@ -19,5 +19,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return sendRedirect(event, `${goApiUrl}/auth/login`)
+  return sendRedirect(event, `${goApiUrl}/api/v1/auth/login`)
 })
