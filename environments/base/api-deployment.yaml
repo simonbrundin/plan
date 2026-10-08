@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: plan-api
+  name: go-api
   labels:
-    app: plan-api
+    app: go-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: plan-api
+      app: go-api
   template:
     metadata:
       labels:
-        app: plan-api
+        app: go-api
     spec:
       containers:
         - name: api

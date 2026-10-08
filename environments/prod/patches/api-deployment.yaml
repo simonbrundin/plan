@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          # sha-4ab1edb
+          image: ghcr.io/simonbrundin/go-api:sha-be72fcf
+          env:
+            - name: AUTH_DISABLED
+              value: "false"
+            - name: NUXT_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD
+            # Keep SESSION_SECRET for backwards compatibility during rollout
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD

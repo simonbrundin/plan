@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plan-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: plan-app
+          # Updated by .github/workflows/commit.nuxt.yaml.
+          image: >-
+            ghcr.io/simonbrundin/plan@sha256:b5c76d6735900959a0e2eabe4ae207420c9d88a8dff0e6065796583171ad1385
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NUXT_PUBLIC_APP_URL
+              value: "https://plan.simonbrundin.com"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: plan-db-user
+                  key: uri
+            - name: NUXT_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD
+            - name: NUXT_OAUTH_ZITADEL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_CLIENT_ID
+            - name: NUXT_OAUTH_ZITADEL_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_CLIENT_SECRET
+            - name: NUXT_OAUTH_ZITADEL_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_DOMAIN
+            - name: NUXT_OAUTH_ZITADEL_REDIRECT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_OAUTH_ZITADEL_REDIRECT_URL
+            - name: NUXT_PUBLIC_GO_API_URL
+              value: "https://plan.simonbrundin.com/api/v1"

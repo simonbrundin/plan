@@ -1,0 +1,21 @@
+resources:
+  nuxt:
+    type: dockerfile
+    image-name: nuxt-app # Måste matcha image: i deployment.yaml
+    dockerfile: ../../src/nuxt
+    port: 3000
+
+  go:
+    type: dockerfile
+    image-name: go
+    dockerfile: ../../src/go
+    port: 8080
+  # pg-view:
+  #   type: local
+# local_resource(
+#   'Drizzle Studio',
+#   serve_cmd='cd ../frontend && bun run db:studio',
+#   links=['https://local.drizzle.studio'],
+#   labels=['Database'],
+#   resource_deps=['PostgreSQL'],  # Vänta på PostgreSQL
+# )
