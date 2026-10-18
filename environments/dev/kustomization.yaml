@@ -1,25 +1,9 @@
-# DO NOT EDIT MANUALLY
-# Dev environment
-
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: plan
-
 resources:
   - ../base
-  - pgadmin
+  - ./db
   - secrets/plan-db-admin.yaml
   - secrets/plan-db-user.yaml
   - secrets/auth.yaml
-
-# Images byggda av Tilt
-images:
-  - name: ghcr.io/simonbrundin/plan
-    newName: plan-nuxt
-    newTag: latest
-  - name: ghcr.io/simonbrundin/plan:frontend-202606121357
-    newName: plan-nuxt
-    newTag: latest
-  - name: plan-go-api
-    newName: plan-go-api
