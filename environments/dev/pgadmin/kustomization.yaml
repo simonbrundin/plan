@@ -1,0 +1,14 @@
+# pgAdmin for plan dev environment
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: plan
+
+helmCharts:
+  - name: pgadmin4
+    repo: https://helm.runix.net
+    version: "1.70.4"
+    releaseName: pgadmin4
+    namespace: plan
+    valuesFile: ./pgadmin-values.yaml
