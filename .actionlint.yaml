@@ -1,4 +1,0 @@
-# Custom labels for self-hosted runners in ARC
-self-hosted-runner:
-  labels:
-    - self-hosted-runners

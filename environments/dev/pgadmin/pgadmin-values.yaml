@@ -1,0 +1,30 @@
+# pgAdmin values for plan dev environment
+# Connects to plan database automatically
+
+test:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  email: admin@local.dev
+  password: admin
+
+persistentVolume:
+  enabled: false
+
+serverDefinitions:
+  enabled: true
+  resourceType: ConfigMap
+  servers:
+    "plan":
+      Name: "plan"
+      Group: "Development"
+      Host: "plan-db-rw.plan.svc.cluster.local"
+      Port: 5432
+      Username: "admin"
+      MaintenanceDB: "plan"
+      ConnectionParameters:
+        sslmode: "disable"

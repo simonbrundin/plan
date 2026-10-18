@@ -1,0 +1,383 @@
+name: PR Preview Deployment
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  # ============================================
+  # JOB 1: Skapa/Uppdatera PR Preview
+  # ============================================
+  create-preview:
+    name: Skapa PR Preview
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.publish.outputs.image }}
+      pr-number: ${{ steps.pr-info.outputs.pr_number }}
+    steps:
+      - name: Hämta PR-info
+        id: pr-info
+        run: |
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "pr_branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Bygg och publicera image
+        id: publish
+        uses: docker/build-push-action@v5
+        with:
+          context: src/nuxt
+          file: src/nuxt/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-{{ github.sha }}
+            ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+
+      - name: Sätt upp Python för Git operationer
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Skapa PR Preview resurser
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          IMAGE_DIGEST: ${{ steps.publish.outputs.image }}
+        run: |
+          python3 << 'EOF'
+          import os
+          import yaml
+          
+          pr_num = os.environ['PR_NUM']
+          image_digest = os.environ['IMAGE_DIGEST']
+          
+          # Extrahera image name och digest
+          parts = image_digest.split('@')
+          image_name = parts[0]
+          digest = parts[1] if len(parts) > 1 else image_name.split(':')[-1]
+          
+          # =============================================
+          # DEL 1: environments/pr/<PR_NUM>/
+          # Overlay som använder base
+          # =============================================
+          pr_env_dir = f"environments/pr/{pr_num}"
+          os.makedirs(pr_env_dir, exist_ok=True)
+          
+          # kustomization.yaml - pekar på base + inkluderar overrides
+          with open(f"{pr_env_dir}/kustomization.yaml", "w") as f:
+              f.write(f"""# DO NOT EDIT MANUALLY
+# PR Preview overlay - använder base + PR-specifika overrides
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: plan-pr-{pr_num}
+
+patches:
+  - patch: |-
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: plan-pr-{pr_num}
+        labels:
+          app.kubernetes.io/managed-by: flux
+          preview: "true"
+          pr-number: "{pr_num}"
+    target:
+      kind: Namespace
+      name: plan
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: plan
+        labels:
+          app: plan
+          preview: "true"
+      spec:
+        replicas: 1
+        template:
+          spec:
+            containers:
+              - name: plan
+                image: {image_name}@{digest}
+                resources:
+                  requests:
+                    memory: "64Mi"
+                    cpu: "50m"
+                  limits:
+                    memory: "128Mi"
+                    cpu: "200m"
+    target:
+      kind: Deployment
+      name: plan
+  - patch: |-
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      metadata:
+        name: plan
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: plan-pr-{pr_num}.simonbrundin.com.
+      spec:
+        hostnames:
+          - "plan-pr-{pr_num}.simonbrundin.com"
+    target:
+      kind: HTTPRoute
+      name: plan
+""")
+          
+          print(f"✓ Skapade {pr_env_dir}/kustomization.yaml (använder base + patches)")
+          
+          # =============================================
+          # DEL 2: Uppdatera environments/pr/kustomization.yaml
+          # =============================================
+          kustomization_file = "environments/pr/kustomization.yaml"
+          
+          # Läs befintlig kustomization om den finns
+          existing_resources = []
+          if os.path.exists(kustomization_file):
+              with open(kustomization_file, 'r') as f:
+                  existing_kustomization = yaml.safe_load(f)
+                  if existing_kustomization and 'resources' in existing_kustomization:
+                      existing_resources = existing_kustomization.get('resources', [])
+          
+          # Ta bort eventuella varianter av denna PR
+          existing_resources = [
+              r for r in existing_resources 
+              if not (str(r) == pr_num or str(r) == f"./{pr_num}" or str(r).endswith(f"/{pr_num}"))
+          ]
+          
+          # Lägg till den nya PR:n
+          existing_resources.append(f"./{pr_num}")
+          
+          # Sortera för konsekvent ordning
+          existing_resources.sort(key=lambda x: (not x.startswith('./'), x))
+          
+          # Skriv tillbaka
+          new_kustomization = {
+              'apiVersion': 'kustomize.config.k8s.io/v1beta1',
+              'kind': 'Kustomization',
+              'resources': existing_resources
+          }
+          
+          with open(kustomization_file, 'w') as f:
+              f.write("# DO NOT EDIT MANUALLY\n")
+              f.write("# Denna fil uppdateras automatiskt av GitHub Actions\n\n")
+              yaml.dump(new_kustomization, f, default_flow_style=False, sort_keys=False)
+          
+          print(f"✓ Uppdaterade {kustomization_file}")
+          print(f"  Resurser: {existing_resources}")
+          print(f"✓ Image: {image_name}@{digest}")
+          EOF
+
+      - name: Commit och pusha ändringar
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Konfigurera git
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Lägg till alla ändringar
+          git add environments/pr/
+          
+          # Kontrollera om det finns något att committa
+          if git diff --staged --quiet; then
+            echo "Inga ändringar att committa"
+            exit 0
+          fi
+          
+          # Committa
+          git commit -m "chore: add preview resources for PR $PR_NUM
+
+Auto-generated by GitHub Actions PR Preview workflow.
+Flux will reconcile these manifests to create a preview deployment.
+
+Image: ${{ steps.publish.outputs.image }}"
+          
+          # Pusha
+          git push origin ${{ github.event.pull_request.head.ref }}
+          
+          echo "✓ Pushade preview manifests"
+
+      - name: Lägg till PR-kommentar med preview-info
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          IMAGE: ${{ steps.publish.outputs.image }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT_BODY="## 🚀 PR Preview Deployment
+  
+En preview-miljö håller på att deployas för denna PR.
+
+### Resurser
+| Resurs | Värde |
+|--------|-------|
+| **Namespace** | \`plan-pr-$PR_NUM\` |
+| **URL** | https://plan-pr-$PR_NUM.simonbrundin.com |
+| **Image** | \`$IMAGE\` |
+
+### GitOps Flöde
+\`\`\`
+GitHub Actions
+    │
+    ├── Build image → GHCR
+    │
+    └── Commit → environments/pr/$PR_NUM/
+                      └── environments/pr/kustomization.yaml
+                             │
+                             ▼
+                       Flux
+                         │
+                         ▼
+                  preview-plan-pr-$PR_NUM
+\`\`\`
+
+> [!NOTE]
+> Det kan ta 1-2 minuter innan Flux har reconcilat alla resurser."
+          
+          gh pr comment $PR_NUM --body "$COMMENT_BODY"
+
+  # ============================================
+  # JOB 2: Städa bort preview vid PR-stängning
+  # ============================================
+  cleanup-preview:
+    name: Städa upp PR Preview
+    if: github.event_name == 'pull_request_target' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta PR-nummer
+        id: pr-info
+        run: |
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            environments/pr
+
+      - name: Sätt upp Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Ta bort preview-resurser och uppdatera kustomization
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          python3 << 'EOF'
+          import os
+          import yaml
+          
+          pr_num = os.environ['PR_NUM']
+          
+          # Ta bort environments/pr/<PR_NUM>
+          pr_dir = f"environments/pr/{pr_num}"
+          if os.path.exists(pr_dir):
+              import shutil
+              shutil.rmtree(pr_dir)
+              print(f"✓ Tog bort {pr_dir}")
+          else:
+              print(f"- {pr_dir} fanns inte")
+          
+          # Uppdatera environments/pr/kustomization.yaml
+          kustomization_file = "environments/pr/kustomization.yaml"
+          if os.path.exists(kustomization_file):
+              with open(kustomization_file, 'r') as f:
+                  kustomization = yaml.safe_load(f)
+              
+              if kustomization and 'resources' in kustomization:
+                  original_count = len(kustomization['resources'])
+                  kustomization['resources'] = [
+                      r for r in kustomization['resources']
+                      if not (str(r) == pr_num or str(r) == f"./{pr_num}" or str(r).endswith(f"/{pr_num}"))
+                  ]
+                  
+                  if len(kustomization['resources']) < original_count:
+                      with open(kustomization_file, 'w') as f:
+                          f.write("# DO NOT EDIT MANUALLY\n")
+                          f.write("# Denna fil uppdateras automatiskt av GitHub Actions\n\n")
+                          yaml.dump(kustomization, f, default_flow_style=False, sort_keys=False)
+                      print(f"✓ Uppdaterade {kustomization_file}")
+                      print(f"  Kvarvarande resurser: {kustomization['resources']}")
+                  else:
+                      print(f"- {pr_num} fanns inte i kustomization.yaml")
+              
+              # Ta bort kustomization.yaml om inga resurser finns kvar
+              if not kustomization.get('resources'):
+                  os.remove(kustomization_file)
+                  print(f"✓ Tog bort tom kustomization.yaml")
+          else:
+              print(f"- {kustomization_file} fanns inte")
+          
+          # Städa upp tomma mappar
+          try:
+              os.rmdir(f"environments/pr")
+              print(f"✓ Tog bort tom environments/pr/-mapp")
+          except OSError:
+              pass  # Mappen finns kvar om den inte är tom
+          EOF
+
+      - name: Commit och pusha
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Konfigurera git
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Lägg till ändringar
+          git add environments/pr/
+          
+          if git diff --staged --quiet; then
+            echo "Inga ändringar att committa"
+            exit 0
+          fi
+          
+          # Committa
+          git commit -m "chore: remove preview resources for PR $PR_NUM
+
+Auto-generated cleanup by GitHub Actions.
+Flux will clean up Kubernetes resources."
+          
+          # Pusha direkt till main
+          git push origin main
+          
+          echo "✓ Tog bort preview-resurser"
+
+      - name: Kommentera PR
+        if: always()
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment $PR_NUM --body "## 🧹 PR Preview Stängd
+
+Preview-miljön \`plan-pr-$PR_NUM\` håller på att städas bort.
+
+Flux tar bort alla Kubernetes-resurser."

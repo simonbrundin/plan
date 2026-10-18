@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: api
-          # Image overridden by production patch
+          image: plan-go-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

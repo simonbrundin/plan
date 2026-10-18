@@ -1,0 +1,89 @@
+# =============================================================================
+# Ladda klusterkomponenter från devenv
+# =============================================================================
+
+load("../../../devenv/Tiltfile", "setup_cluster_components")
+load("../../../devenv/Tiltfile", "print_long_line")
+load("../../../devenv/Tiltfile", "used_ports")
+load("../../../devenv/Tiltfile", "STARTING_PORT")
+load("../../../devenv/Tiltfile", "allocate_port")
+load("../../../devenv/Tiltfile", "get_allocated_ports")
+load("../../../devenv/Tiltfile", "PORTS")
+
+# =============================================================================
+# Egen tracker med kännedom om devenv's portar
+# =============================================================================
+
+_tracker = {"used": used_ports(), "allocated": dict(PORTS)}
+
+for port_str in _tracker["allocated"].values():
+    host_port = int(port_str.split(":")[0])
+    _tracker["used"].add(host_port)
+
+
+def allocate_port(service, container_port):
+    port = STARTING_PORT
+    while port in _tracker["used"]:
+        port += 1
+
+    _tracker["used"].add(port)
+    _tracker["allocated"][service] = "{host}:{container}".format(host=port, container=container_port)
+    print_long_line("Allocating {name} -> {port}".format(name=service, port=_tracker["allocated"][service]))
+    return _tracker["allocated"][service]
+
+
+# =============================================================================
+# Använd samma registry som KIND-noden konfigureras att nå i devenv/dev.sh.
+default_registry("localhost:5000")
+
+# Ignorera varningar om oanvända images
+update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api"])
+
+# =============================================================================
+# Bygg images med docker_build
+# =============================================================================
+
+docker_build("plan-nuxt", "../../src/nuxt")
+docker_build("plan-go-api", "../../src/go")
+
+# =============================================================================
+# Konfiguration
+# =============================================================================
+
+allocate_port("nuxt", 3000)
+allocate_port("go", 8080)
+allocate_port("pgAdmin", 80)
+
+k8s_yaml(kustomize(".",
+        flags=["--load-restrictor", "LoadRestrictionsNone", "--enable-helm"]))
+
+nuxt_port = _tracker["allocated"].get("nuxt").split(":")[0]
+go_port = _tracker["allocated"].get("go").split(":")[0]
+
+# =============================================================================
+# Resurser med port-forwards
+# =============================================================================
+
+k8s_resource(
+    "nuxt-app",
+    new_name="nuxt",
+    port_forwards=_tracker["allocated"].get("nuxt"),
+    links=[link("http://localhost:"+ nuxt_port, "Plan App")]
+)
+
+k8s_resource(
+    "go-api",
+    new_name="go",
+    port_forwards=_tracker["allocated"].get("go"),
+    links=[
+        link("http://localhost:"+ go_port + "/health", "API Health"),
+        link("http://localhost:"+ go_port + "/docs", "API Docs")
+    ]
+)
+
+k8s_resource(
+    "pgadmin4",
+    new_name="pgAdmin",
+    port_forwards=_tracker["allocated"].get("pgAdmin"),
+    links=[link("http://localhost:" + _tracker["allocated"].get("pgAdmin").split(":")[0], "pgAdmin")]
+)
