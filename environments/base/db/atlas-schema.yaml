@@ -7,7 +7,7 @@ spec:
   urlFrom:
     secretKeyRef:
       key: uri
-      name: plan-db-admin
+      name: plan-db-user
   schema:
     configMapKeyRef:
       key: schema.sql

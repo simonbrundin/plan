@@ -81,7 +81,8 @@ func main() {
 
 	// API routes with authentication
 	api := r.Group("/api/v1")
-	api.Use(middleware.AuthMiddleware())
+	api.Use(middleware.APIKeyAuth()) // Try API key first
+	api.Use(middleware.AuthMiddleware()) // Fall back to session auth
 	api.Use(func(c *gin.Context) {
 		c.Set("dbConnected", dbConnected)
 		c.Next()
@@ -111,6 +112,12 @@ func main() {
 		// Dependencies endpoints
 		api.POST("/goals/dependencies", goalHandler.CreateDependency)
 		api.DELETE("/goals/dependencies", goalHandler.DeleteDependency)
+
+		// API Keys endpoints
+		apiKeyHandler := handlers.NewAPIKeyHandler()
+		api.GET("/api-keys", apiKeyHandler.ListAPIKeys)
+		api.POST("/api-keys", apiKeyHandler.CreateAPIKey)
+		api.DELETE("/api-keys", apiKeyHandler.DeleteAPIKey)
 	}
 
 	// Get port from environment or default to 8080

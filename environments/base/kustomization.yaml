@@ -9,4 +9,4 @@ resources:
   - api-deployment.yaml
   - api-service.yaml
   - api-http-route.yaml
-  - db/atlas-schema.yaml
+  - db
