@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"plan-api/internal/middleware"
 )
 
 type AuthHandler struct {
@@ -196,19 +197,55 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	// TODO: Create or find user in DB when dbConnected
-	_ = h.dbConnected // Suppress unused warning
+	// Create or find user in database
+	userID, err := middleware.LookupOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user session"})
+		return
+	}
 
-	// Redirect to Nuxt server API callback
+	// Create our own session token (not the Zitadel token)
+	sessionToken, err := middleware.CreateSession(userID, sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+
+	// Redirect to Nuxt with our session token
 	frontendCallbackURL := fmt.Sprintf(
-		"https://%s/api/auth/callback?token=%s&sub=%s&email=%s",
+		"https://%s/api/auth/callback?session=%s&sub=%s&email=%s",
 		osGetenv("APP_DOMAIN", "plan.simonbrundin.com"),
-		url.QueryEscape(accessToken),
+		url.QueryEscape(sessionToken),
 		url.QueryEscape(sub),
 		url.QueryEscape(email),
 	)
 
 	c.Redirect(http.StatusTemporaryRedirect, frontendCallbackURL)
+}
+
+// RefreshSession handles session refresh requests
+func (h *AuthHandler) RefreshSession(c *gin.Context) {
+	sessionToken := c.GetHeader("X-Session-Token")
+	if sessionToken == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Session token required"})
+		return
+	}
+
+	session, err := middleware.ValidateSession(sessionToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired session"})
+		return
+	}
+
+	// Refresh the session (extend expiry)
+	middleware.DeleteSession(sessionToken)
+	newToken, err := middleware.CreateSession(session.UserID, session.Sub, session.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to refresh session"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"session": newToken})
 }
 
 func generateRandomString(length int) string {
