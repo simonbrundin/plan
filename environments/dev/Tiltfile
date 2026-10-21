@@ -8,7 +8,7 @@
 
 version_settings(constraint='>=0.22.2')
 
-allow_k8s_contexts('teleport.simonbrundin.com-cluster1')
+allow_k8s_contexts('admin@cluster1')
 
 namespace = k8s_namespace()
 
@@ -24,6 +24,7 @@ docker_build(
     'plan-frontend',
     context='../../src/nuxt',
     dockerfile='../../src/nuxt/Dockerfile.dev',
+    platform='linux/arm64',
     only=[
         'app', 'server', 'pages', 'components', 'composables', 'utils',
         'nuxt.config.ts', 'package.json', 'bun.lock', 'bun.lockb',
@@ -46,6 +47,7 @@ docker_build(
     'plan-api',
     context='../../src/api',
     dockerfile='../../src/api/Dockerfile.dev',
+    platform='linux/arm64',
     live_update=[
         fall_back_on('../../src/api/go.mod'),
         sync('../../src/api/internal', '/app/internal'),
@@ -54,12 +56,12 @@ docker_build(
 )
 
 # Kubernetes Resources
-k8s_yaml(kustomize('./kubernetes/overlays/dev'))
+k8s_yaml(kustomize('../kubernetes/overlays/dev'))
 
 k8s_resource(workload='frontend', new_name='Nuxt Dev Server', port_forwards=3000, labels=['Frontend'])
 k8s_resource(workload='api', new_name='Go API', port_forwards=8080, labels=['API'])
-k8s_resource(workload='plan-dev-db', new_name='PostgreSQL', port_forwards=5432, labels=['Database'])
-k8s_resource(workload='pgview', new_name='pgview', port_forwards=5051, labels=['Database'])
+k8s_resource(workload='postgres', new_name='PostgreSQL', port_forwards=5433, labels=['Database'])
+k8s_resource(workload='pgview', new_name='pgview', port_forwards=5052, labels=['Database'])
 
 frontend_url = namespace + '.simonbrundin.com'
 
@@ -70,10 +72,10 @@ Namespace: {namespace}
 
 Access:
   Frontend: http://{frontend}
-  pgview:   http://localhost:5051
+  pgview:   http://localhost:5052
 
 Database:
-  Host:     plan-dev-db-rw (in-cluster)
+  Host:     postgres (in-cluster) eller localhost:5433
   User:     plan
   Password: plan
   Database: plan
