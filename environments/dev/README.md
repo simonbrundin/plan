@@ -1,210 +1,173 @@
-# Plan local development environment
+# Plan dev-miljö
 
-This directory contains the local-mode Tilt configuration and the **shared
-dev gateway** that lets multiple git worktrees run side-by-side against
-the same Zitadel OAuth application.
+Dev-miljön körs i ett **kind-kluster** (namespace `plan`) via Tilt.
+Tilt bygger images, applicerar kustomize-manifesten och port-forwardar
+tjänsterna till fasta portar på din laptop.
 
-## Architecture
+## Adresser
+
+| Tjänst  | URL                        | Kommentar                          |
+| ------- | -------------------------- | ---------------------------------- |
+| Nuxt    | http://localhost:3100      | Appen - logga in här               |
+| Go API  | http://localhost:4100      | REST-API, `/health`, `/swagger`    |
+| pgAdmin | http://localhost:4200      | Databasadmin                       |
+
+Portarna är **fasta** (`Tiltfile`). Tidigare allokerades de dynamiskt
+från 3000, vilket gav nya URL:er varje gång Tilt startade - det gjorde
+det omöjligt att ha en stabil OAuth-redirect-URI och bröt bookmarks och
+cookies mellan omstarter.
+
+## Arkitektur
 
 ```
         Browser
-           │
-           │ http://localhost:3000/<worktree>/
+           │  http://localhost:3100
            ▼
-┌──────────────────────────────────────────────────────────┐
-│  Caddy dev gateway (Docker, :3000)                        │
-│   /<worktree>/*      → Nuxt  (per-worktree port)         │
-│   /oauth/callback    → Go API (per-worktree port,         │
-│                         selected via wt=<name> cookie)    │
-└──────┬───────────────────────────────────┬─────────────────┘
-       │                                   │
-       ▼                                   ▼
-┌─────────────────────┐          ┌──────────────────────┐
-│  Nuxt dev server    │          │  Go API              │
-│  :3100+hash         │ ──proxy──▶ :4080+hash            │
-│  (Vue + Nitro)     │   via    │  (Gin + OAuth)       │
-│                    │   Bearer │                      │
-└──────────┬──────────┘   token  └──────────┬───────────┘
-           │                              │
-           └──────────────┬───────────────┘
-                          ▼
-                 ┌────────────────────┐
-                 │  PostgreSQL        │
-                 │  (Docker, :5432)  │
-                 └────────────────────┘
+┌─────────────────────┐   cookie + Bearer   ┌──────────────────────┐
+│  Nuxt (Nitro)       │ ───────────────────▶ │  Go API (Gin)        │
+│  :3100              │   tunn proxy        │  :4100               │
+│  /api/proxy/*       │                     │  /api/v1/*           │
+└──────────┬──────────┘                     └──────────┬───────────┘
+           │                                           │
+           │  sessionkoken i cookie                    ▼
+           │  (sätts av Go)                   ┌────────────────────┐
+           ▼                                 │  PostgreSQL (CNPG) │
+    plan_session (httpOnly)                  │  plan-db-rw        │
+    plan_user    (läsbar hint)               └────────────────────┘
 ```
 
-Per-worktree port assignment is **deterministic** — the same worktree
-always gets the same port across restarts, so cookies and bookmarks
-survive `tilt down`.
+### Authen ligger i Go API:t
+
+Go äger hela inloggningen:
+
+| Steg | Vem gör vad |
+| ---- | ----------- |
+| `/auth/login` (Nuxt) | Vidarebefordras till Go, som bygger Zitadel-URL:en och sätter `oauth_state` |
+| Zitadel → `/api/v1/auth/callback` (Go) | Byter code mot token, skapar session, **sätter `plan_session` + `plan_user`** och redirectar till apparoten |
+| `/api/proxy/*` (Nuxt) | Vidarebefordrar cookien till Go - Go validerar sessionen |
+| `/api/v1/auth/session` (Go) | Returnerar användaren bakom sessionen |
+| `/api/v1/auth/logout` (Go) | Raderar sessionen och rensar cookierna |
+
+Sessionen godkänds via `plan_session`-cookien **eller** `Authorization: Bearer`
+(API-klienter). Sessionstoken cirkulerar aldrig i en URL.
+
+`plan_user` är en läsbar hint-cookie (sub + email) som bara gör att UI:t kan
+rendera direkt - servern är alltid auktoritativ. Den sätts också av Go.
+
+Nuxt:s proxy ligger i `server/utils/goApi.ts` och sköter tre saker:
+vidarebefordrar `Cookie`, kopierar tillbaka `Set-Cookie` och `Location`, och
+följer inte redirects själv (annars skulle OAuth-flödet köras server-side).
+
+### URL:er
+
+- Serverinternt: `NUXT_GO_API_INTERNAL_URL` (`http://go-api-service.plan:8080/api/v1`)
+- Webbläsaren: `NUXT_PUBLIC_GO_API_URL` (`http://localhost:4100/api/v1`)
+
+## Inloggning i dev
+
+### Dev-login (rekommenderat, kräver ingen Zitadel)
+
+Öppna http://localhost:3100/login och klicka **"Dev-login (utan Zitadel)"**.
+
+Flödet:
+
+1. Nuxt:s route `/auth/dev-login` anropar `POST /api/v1/auth/dev-login`
+   på Go API:t (intern URL).
+2. Go API:t skapar/findar användaren `dev-user` (`dev@plan.local`) och
+   skapar en riktig session i tabellen `sessions`.
+3. Nuxt sätter `plan_session` (httpOnly) + `plan_user` och redirectar till `/`.
+
+Endpointen är bara aktiverad när `DEV_AUTH_ENABLED=true` (sätts i
+`patches/api-deployment.yaml` för dev). I prod svarar den 404.
+
+### Zitadel-inloggning
+
+Fungerar bara om **Zitadel är nåbart** (`auth.simonbrundin.com` pekar på
+hemlabet - laptop och kluster måste nå det nätverket) och redirect-URI:t
+är registrerat i Zitadel:
 
 ```
-hash = sum(ord(c) for c in WORKTREE_NAME)
-Nuxt port = 3100 + hash % 100
-API port  = 4080 + hash % 100
+http://localhost:4100/api/v1/auth/callback
 ```
 
-## Why a shared gateway?
+Flödet: `/auth/login` (Nuxt) → Go bygger authorize-URL:en med
+`redirect_uri` (= `ZITADEL_REDIRECT_URI`) och PKCE → Zitadel → callback
+till Go → Go skapar sessionen, sätter cookierna och redirectar till
+`FRONTEND_URL`.
 
-Without one, every worktree needs its own Zitadel redirect URI registered
-in the Zitadel admin UI, and port collisions make it impossible to run
-more than one worktree at a time.
+`redirect_uri` måste vara **identisk** i authorize- och token-bytet,
+annars avvisar Zitadel bytet. Båda läser `ZITADEL_REDIRECT_URI`.
 
-With the gateway:
+Cookie-sättning: Go sätter `plan_session` för värdet `localhost` - porten
+spelar ingen roll för cookies, så även om cookien sätts i svaret från
+API:t (port 4100) skickas den till Nuxt (port 3100).
 
-- A single redirect URI: `http://localhost:3000/oauth/callback`
-  is registered in Zitadel.
-- The worktree identity is carried in a `wt=<name>` cookie that Go API
-  sets when the OAuth flow starts.
-- Caddy matches that cookie on `/oauth/callback` and routes the
-  callback to the correct worktree's Go API.
-
-## OAuth flow
-
-1. User visits `http://localhost:3000/<worktree>/login`.
-2. Caddy routes `/<worktree>/*` to Nuxt.
-3. User clicks "Logga in med Zitadel" → Nuxt redirects to
-   `http://localhost:<API_PORT>/api/v1/auth/login` (Nuxt
-   server route `/auth/login`).
-4. Go API builds the Zitadel auth URL with:
-   - `redirect_uri=http://localhost:3000/oauth/callback`
-   - PKCE `code_challenge` and `state`
-   - Sets cookie `wt=<worktree>` so the gateway can route the callback
-   - Sets cookie `oauth_state` (with verifier + worktree)
-   - Redirects to Zitadel.
-5. Zitadel authenticates and redirects to
-   `http://localhost:3000/oauth/callback?code=...&state=...`.
-6. Caddy matches path `/oauth/callback` AND cookie `wt=<worktree>` →
-   routes to `127.0.0.1:<API_PORT>` (this worktree's Go API).
-7. Go API exchanges `code` for tokens, fetches userinfo,
-   `LookupOrCreateUser` + `CreateSession`, then redirects to
-   `http://localhost:3000/<worktree>/api/auth/callback?session=...`.
-8. Caddy routes `/<worktree>/*` to Nuxt. Nuxt
-   `server/api/auth/callback.get.ts` sets `plan_session` + `plan_user`
-   cookies and redirects to `/`.
-
-## Files
-
-- `Tiltfile` — dispatches to `Tiltfile.local` or `Tiltfile.kubernetes`.
-- `Tiltfile.local` — runs Postgres + pgview via Docker Compose, the
-  gateway via Docker Compose, Go API + Nuxt as `local_resource`s.
-- `docker-compose.backend.yml` — Postgres + pgview containers.
-- `gateway/` — the Caddy dev gateway.
-  - `Caddyfile` — minimal HTTP listener on :3000. Per-worktree routes
-    are added at runtime.
-  - `Dockerfile` — `caddy:2` image.
-  - `docker-compose.yml` — gateway container (ports 3000 and 2019).
-  - `register-worktree.sh` — CLI to add/remove worktree routes via
-    Caddy's admin API. Used by Tilt on startup.
-
-## Setup (one-time)
-
-1. Add a single OAuth redirect URI in the Zitadel application
-   (`391431970426454645`):
-
-   ```
-   http://localhost:3000/oauth/callback
-   ```
-
-   This is the **only** redirect URI you register — all worktrees share it.
-
-2. Start the gateway (once, persistent across `tilt down`):
-   ```bash
-   cd environments/dev/gateway
-   docker compose up -d
-   ```
-
-## Running
+## Kör
 
 ```bash
 cd environments/dev
 tilt up
 ```
 
-By default the worktree name is `session`. To run another worktree in
-parallel:
+Stoppa:
 
 ```bash
-TILT_WORKTREE=other tilt up -- --port=10351   # different Tilt UI port
+tilt down
 ```
 
-Each Tilt instance will:
+## Filer
 
-1. Start its own Go API on a deterministic port (e.g. `:4117`).
-2. Start its own Nuxt on a deterministic port (e.g. `:3145`).
-3. Register itself with the shared gateway via `register-worktree.sh`.
-4. Be reachable at `http://localhost:3000/<worktree>/`.
+- `Tiltfile` - bygger images, applicerar `kustomize(".")`, port-forwardar
+  de fasta portarna.
+- `kustomization.yaml` - dev-overlay: base + pgadmin + secrets + patches.
+- `patches/nuxt-deployment.yaml` - env för Nuxt (URL:er, dev-auth).
+- `patches/api-deployment.yaml` - env för Go API:t (dev-auth, OAuth-URL:er).
+- `secrets/` - dev-secrets (DB-användare, auth).
+- `pgadmin/` - pgAdmin för devdatabasen.
+- `gateway/` - **används inte** i nuvarande läge. En gammal Caddy-gateway
+  från en tidigare "local mode"-uppsättning med flera worktrees. Kan
+  tas bort.
 
-Stop everything:
+## Databasen
 
-```bash
-tilt down                       # stops worktree-specific resources
-cd gateway && docker compose down  # stops gateway (only if you want it gone)
-```
+- CNPG-kluster `plan-db`, databasen `plan`, rollen `plan` äger tabellerna.
+- Schemat appliceras av Atlas Operator (`AtlasSchema` `plan-db-schema`) -
+  som rollen `plan`, så API:t har rätt att ändra tabellerna.
+- **Atlas applicerar schemat deklarativt (bara DDL)** - `INSERT`-raderna i
+  `schema.yaml` körs alltså *inte*. Applikationen seedar därför själv
+  (statusarna + Root-målet + goals-sekvensen) i
+  `src/go/internal/database/seed.go` vid start.
+- `sessions`-tabellen ingår i `environments/base/db/schema.yaml`; annars
+  vill Atlas radera den (den skapas också av API:t vid runtime).
+- `GRANT`-satser får **inte** ligga i `schema.yaml` - Atlas (community)
+  avvisar dem med "permissions are available to logged-in users only".
+  Rättigheterna sätts i stället via `postInitSQL` i
+  `environments/base/db/postgres-cluster.yaml`.
+- Varning: en Atlas-apply är deklarativ. Ett schema som saknar tabeller
+  **raderar** dem - testa aldrig genom att tömma `schema.yaml`.
 
-## OAuth login from a fresh browser
+## Felsökning
 
-1. Open `http://localhost:3000/<worktree>/login`.
-2. Click "Logga in med Zitadel".
-3. Zitadel login page → authenticate.
-4. Browser lands back on `http://localhost:3000/<worktree>/` logged in.
+### "404 på /auth/login"
 
-## Troubleshooting
+Kontrollera att du använder **http://localhost:3100** och inte en gammal
+dynamiskt allokerad port. Port-forwarden ändras inte när Tilt startar om
+- men den gamla porten dör med den gamla processen.
 
-### "duplicate ID" errors in Caddy logs
+### 401 från API:t trots inloggad
 
-The gateway container reused an `autosave.json` from a previous run with
-routes that were never cleaned up. Reset with:
+Kontrollera i Go API:t:s logg: `ValidateSession failed: ...`. Om det
+står "session expired" är det tokenets tidsstämpar som inte avkodas -
+`signSession` och `Session`-structen måste använda samma format
+(JSON-taggar + RFC3339).
 
-```bash
-docker compose down -v
-docker compose up -d
-```
+### "Mål kan inte skapas" (duplicate key på goals_pkey)
 
-### `Container plan-dev-postgres ... already in use`
+Root-målet seedas med explicit `id = 1`, vilket lämnar identitetssekvensen
+efter. Applikationen fixar sekvensen vid start (`seed.go`).
 
-A leftover container from a previous Tilt run. Remove it:
+### AtlasSchema är "Stalled"
 
-```bash
-docker stop plan-dev-postgres && docker rm plan-dev-postgres
-```
-
-### Login redirect goes to the wrong worktree
-
-Make sure the gateway admin API doesn't have stale routes from a
-previous worktree. Inspect with:
-
-```bash
-curl -s http://localhost:2019/config/apps/http/servers/srv0/routes \
-  | ./gateway/register-worktree.sh list
-```
-
-### Cookies not being sent
-
-Browsers treat `localhost` cookie scope by host (not port). If you are
-hitting Caddy at `:3000` and Nuxt at `:3172`, cookies set by Nuxt do
-not flow back through Caddy unless they are scoped to `path=/`. Both
-`plan_session` and `plan_user` are set with `path=/`.
-
-### Zitadel rejects the redirect URI
-
-Make sure the URI in the Zitadel application matches exactly:
-
-```
-http://localhost:3000/oauth/callback
-```
-
-(Schemal, host, port, path — all four.)
-
-## Manual gateway operations
-
-```bash
-# Add a worktree manually (e.g. when not using Tilt)
-./gateway/register-worktree.sh add <name> <nuxt_port> <api_port>
-
-# Remove a worktree
-./gateway/register-worktree.sh remove <name>
-
-# List all registered routes
-./gateway/register-worktree.sh list
-```
+Kontrollera att `DATABASE_URL`/Atlas-URI:n använder **FQDN**
+(`plan-db-rw.plan.svc.cluster.local`) - korta namn fungerar bara från
+samma namespace som tjänsten.

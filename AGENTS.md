@@ -5,22 +5,25 @@ This file contains preferences and requirements for AI coding agents working on 
 ## Runtime Preferences
 
 ### Nuxt Application
-- **Use Bun for runtime**, NOT Node.js
-- The Nuxt app uses `nitro preset: "node-server"` (for the server-side code), but runs on Bun (`oven/bun:1-slim` container)
-- Dockerfile MUST use `oven/bun:1-slim` for production runtime, not `node:lts-alpine`
+- **Bun används för build och dependency-installation** (`bun install`, `bun run build`)
+- **Runtime i produktion är Node.js** (`node:lts-alpine`) - ändrat i PR #72 eftersom Bun
+  gav problem med HTTP-svar i produktion. Ändra inte tillbaka utan att verifiera.
+- `bun.lock` måste hållas synkad med `package.json` - Dockerfile:n kör
+  `bun install --frozen-lockfile`
 
 ## Important Context
 
-### Authentication Fix (fix-goals-401-auth-error)
-- Zitadel returns opaque/JWE tokens that the JWT library can't parse
-- Solution: Use session tokens with `introspectToken()` for Zitadel introspection
-- Session tokens use HMAC-SHA256 signing with `SESSION_SECRET`
-- Users auto-provisioned via `LookupOrCreateUser()` on first login
+### Auth (2026-11)
+- **Authen ligger i Go API:t**, inte i Nuxt. Go skapar sessionen, sätter
+  `plan_session` (httpOnly) + `plan_user` (läsbar hint) och validerar sessionen
+  från cookie *eller* `Authorization: Bearer`.
+- Nuxt är en tunn proxy (`server/utils/goApi.ts`): vidarebefordrar cookien och
+  kopierar tillbaka `Set-Cookie` + `Location` från Go.
+- Sessionstoken får inte cirkula i URL:er - det var den gamla callback-flödet.
 
 ### Current Production Issues
 - plan.simonbrundin.com not responding to HTTP requests (upstream timeout)
 - Readiness probe failing: `/api/health` endpoint not responding inside Kubernetes
-- Bun runtime may have issues with HTTP responses in production
 - GitHub Actions cache causing stale builds with missing dependencies
 
 ## Secrets
@@ -36,7 +39,7 @@ This file contains preferences and requirements for AI coding agents working on 
 
 | Layer        | Technology       | Docker Image        | Port | Purpose                     |
 | ------------ | --------------- | ------------------- | ---- | --------------------------- |
-| **Frontend** | Nuxt 4 (SPA)    | `oven/bun:1-slim`  | 3000 | Interface, SPA routing      |
+| **Frontend** | Nuxt 4 (SPA)    | `node:lts-alpine`  | 3000 | Interface, SPA routing      |
 | **API**      | Go + Gin        | `gcr.io/distroless` | 8080 | REST API, business logic    |
 | **Database** | PostgreSQL      | CNPG               | 5432 | Data storage (Kubernetes)  |
 | **Schema**   | Atlas           | Operator           | -    | Schema migration (K8s)     |
