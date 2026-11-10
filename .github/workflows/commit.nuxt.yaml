@@ -52,8 +52,8 @@ jobs:
         run: |
           echo "Updating image to: $IMAGE"
           yq -i '.spec.template.spec.containers[0].image = strenv(IMAGE)' \
-            environments/production/patches/deployment.yaml
-          cat environments/production/patches/deployment.yaml
+            environments/prod/patches/deployment.yaml
+          cat environments/prod/patches/deployment.yaml
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v7
@@ -70,4 +70,4 @@ jobs:
             ci
             skip-review
           add-paths: |
-            environments/production/patches/deployment.yaml
+            environments/prod/patches/deployment.yaml

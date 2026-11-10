@@ -2,7 +2,7 @@ name: CI för Go API
 on:
   push:
     paths:
-      - src/api/**
+      - src/go/**
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/simonbrundin/plan-api
+          images: ghcr.io/simonbrundin/go-api
           tags: |
             type=sha,format=short
             type=raw,value=latest
@@ -41,8 +41,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: src/api
-          file: src/api/Dockerfile
+          context: src/go
+          file: src/go/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -59,11 +59,11 @@ jobs:
       - name: Update deployment image
         env:
           IMAGE: >-
-            ghcr.io/simonbrundin/plan-api:sha-${{ steps.sha.outputs.short-sha }}
+            ghcr.io/simonbrundin/go-api:sha-${{ steps.sha.outputs.short-sha }}
         run: |
           echo "Updating image to: $IMAGE"
-          sed -i "s|image: ghcr.io/simonbrundin/plan-api.*|image: $IMAGE|" \
-            environments/production/patches/api-deployment.yaml
+          sed -i "s|image: ghcr.io/simonbrundin/go-api.*|image: $IMAGE|" \
+            environments/prod/patches/api-deployment.yaml
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v7
@@ -75,9 +75,9 @@ jobs:
           title: "chore: update plan-api image"
           body: |
             Automated image update from Go API workflow
-            - Image: `ghcr.io/simonbrundin/plan-api:${{ github.sha }}`
+            - Image: `ghcr.io/simonbrundin/go-api:sha-${{ steps.sha.outputs.short-sha }}`
           labels: |
             ci
             skip-review
           add-paths: |
-            environments/production/patches/api-deployment.yaml
+            environments/prod/patches/api-deployment.yaml

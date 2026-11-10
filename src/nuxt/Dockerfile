@@ -1,7 +1,10 @@
 # ==============================
 # Build Stage
 # ==============================
-FROM node:lts-alpine AS build
+# Node-versionen är pinnad: "lts" flyttade sig till Node 26, vilket gjorde
+# att better-sqlite3 (ett auto-installerat peer-dependency) inte gick att
+# kompilera - byggen föll i CI.
+FROM node:24-alpine AS build
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++ gcc
@@ -15,7 +18,10 @@ COPY package.json bun.lock* ./
 RUN npm install -g bun
 
 # Installera beroenden (cache-vänligt)
-RUN bun install --frozen-lockfile
+# --omit=peer: peer-dependencies (t.ex. better-sqlite3) auto-installeras av
+# bun och kräver en nativ kompilering som är skör över Node-versioner.
+# Appen använder dem inte.
+RUN bun install --frozen-lockfile --omit=peer
 
 # Kopiera källkod (efter install för bättre cache)
 COPY . .
@@ -26,7 +32,7 @@ RUN bun run build
 # ==============================
 # Runtime Stage (minimal, säker)
 # ==============================
-FROM node:lts-alpine AS production
+FROM node:24-alpine AS production
 
 WORKDIR /app
 
