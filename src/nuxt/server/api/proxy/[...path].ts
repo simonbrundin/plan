@@ -1,46 +1,24 @@
-import { getCookie } from "h3";
+import { createError, getRouterParam } from "h3";
 
-// Proxy API calls to Go API, attaching session cookie
+// Proxy API calls to the Go API. The session cookie is forwarded as-is and
+// the Go API validates it - the auth logic lives there, not here.
 export default defineEventHandler(async (event) => {
-  const sessionCookie = getCookie(event, 'plan_session')
-  
-  if (!sessionCookie) {
-    throw createError({
-      statusCode: 401,
-      message: 'Not authenticated'
-    })
-  }
-  
-  // Get the path from the URL
-  const path = getRouterParam(event, 'path')
+  const path = getRouterParam(event, "path");
+
   if (!path) {
     throw createError({
       statusCode: 400,
-      message: 'Missing path'
-    })
+      statusMessage: "Missing path parameter",
+    });
   }
-  
-  const config = useRuntimeConfig()
-  const goApiUrl = config.public.goApiUrl || 'http://localhost:8080'
-  
-  // Get query params
-  const query = getQuery(event)
-  
-  // Get method and body
-  const method = getMethod(event)
-  const body = method !== 'GET' ? await readBody(event) : undefined
-  
-  // Forward the request with session cookie
-  const response = await $fetch(`${goApiUrl}/${path}`, {
-    method,
-    headers: {
-      // Go API expects Authorization: Bearer <token>
-      'Authorization': `Bearer ${sessionCookie}`,
-      'Content-Type': 'application/json',
-    },
-    query,
-    body,
-  })
-  
-  return response
-})
+
+  try {
+    return await forwardToGo(event, path);
+  } catch (error: any) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Proxy error",
+      data: error?.message,
+    });
+  }
+});

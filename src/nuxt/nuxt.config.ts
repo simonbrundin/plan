@@ -76,9 +76,16 @@ export default defineNuxtConfig({
 		serverBundle: false,
 	},
 	runtimeConfig: {
+		// Server-side URL to the Go API (inside the cluster/network).
+		// Used by the API proxy and the auth routes. Falls back to the
+		// public URL when not set.
+		goApiInternalUrl: process.env.NUXT_GO_API_INTERNAL_URL || "",
 		public: {
 			appUrl: process.env.NUXT_PUBLIC_APP_URL || "",
-			goApiUrl: process.env.NUXT_PUBLIC_GO_API_URL || "http://localhost:8080",
+			goApiUrl: process.env.NUXT_PUBLIC_GO_API_URL || "http://localhost:8080/api/v1",
+			// Enables the local dev-login button (no Zitadel needed).
+			// Env-override: NUXT_PUBLIC_DEV_AUTH_ENABLED
+			devAuthEnabled: process.env.NUXT_PUBLIC_DEV_AUTH_ENABLED === "true",
 		},
 		oauth: {
 			// Zitadel OAuth provider configuration (PKCE - no secret)

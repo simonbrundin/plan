@@ -7,20 +7,24 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
 	"plan-api/internal/database"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Session represents a user session
 type Session struct {
-	UserID    int64
-	Sub      string
-	Email    string
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	UserID    int64     `json:"user_id"`
+	Sub       string    `json:"sub"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 // dbSessionStore persists sessions in PostgreSQL
@@ -83,8 +87,8 @@ func CreateSession(userID int64, sub, email string) (string, error) {
 
 	session := &Session{
 		UserID:    userID,
-		Sub:      sub,
-		Email:    email,
+		Sub:       sub,
+		Email:     email,
 		CreatedAt: time.Now(),
 		ExpiresAt: time.Now().Add(24 * time.Hour),
 	}
@@ -114,13 +118,9 @@ func CreateSession(userID int64, sub, email string) (string, error) {
 	return token, nil
 }
 
-// ValidateSession validates a session token and returns the session
-func ValidateSession(token string) (*Session, error) {
-	if database.GetPool() == nil {
-		return nil, fmt.Errorf("database not connected")
-	}
-
-	// Verify token signature first
+// parseSession decodes a session token and verifies its signature.
+// It does not touch the database, which makes it testable on its own.
+func parseSession(token string) (*Session, error) {
 	parts := splitToken(token)
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid token format")
@@ -133,7 +133,7 @@ func ValidateSession(token string) (*Session, error) {
 
 	var session Session
 	if err := json.Unmarshal(dataJSON, &session); err != nil {
-		return nil, fmt.Errorf("invalid token data")
+		return nil, fmt.Errorf("invalid session data")
 	}
 
 	// Verify HMAC
@@ -142,6 +142,93 @@ func ValidateSession(token string) (*Session, error) {
 	expectedSig := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 	if !hmac.Equal([]byte(parts[1]), []byte(expectedSig)) {
 		return nil, fmt.Errorf("invalid session token")
+	}
+
+	return &session, nil
+}
+
+const (
+	// SessionCookieName is the httpOnly cookie holding the session token.
+	SessionCookieName = "plan_session"
+	// UserCookieName is a readable hint cookie for the client (sub + email).
+	// It is NOT authoritative - the server validates the session itself.
+	UserCookieName = "plan_user"
+)
+
+// SetSessionCookies stores the session token in an httpOnly cookie and a
+// readable hint cookie for the client. The auth flow lives in the Go API,
+// so the browser gets its cookies straight from here.
+func SetSessionCookies(c *gin.Context, token, sub, email string) {
+	secure := c.Request.TLS != nil || os.Getenv("COOKIE_SECURE") == "true"
+	maxAge := 60 * 60 * 24 * 7 // 7 days
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     SessionCookieName,
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   maxAge,
+	})
+
+	userData, _ := json.Marshal(map[string]string{"sub": sub, "email": email})
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     UserCookieName,
+		Value:    base64.StdEncoding.EncodeToString(userData),
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   maxAge,
+	})
+}
+
+// ClearSessionCookies removes the session cookies from the browser.
+func ClearSessionCookies(c *gin.Context) {
+	secure := c.Request.TLS != nil || os.Getenv("COOKIE_SECURE") == "true"
+
+	for _, name := range []string{SessionCookieName, UserCookieName} {
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     name,
+			Value:    "",
+			Path:     "/",
+			HttpOnly: name == SessionCookieName,
+			Secure:   secure,
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   -1,
+		})
+	}
+}
+
+// SessionTokenFromRequest returns the session token from the session cookie
+// or from an Authorization: Bearer header.
+func SessionTokenFromRequest(c *gin.Context) string {
+	if cookie, err := c.Cookie(SessionCookieName); err == nil && cookie != "" {
+		return cookie
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		return ""
+	}
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return ""
+	}
+	return parts[1]
+}
+
+// ValidateSession validates a session token and returns the session
+func ValidateSession(token string) (*Session, error) {
+	if database.GetPool() == nil {
+		return nil, fmt.Errorf("database not connected")
+	}
+
+	// Verify token signature and payload
+	session, err := parseSession(token)
+	if err != nil {
+		return nil, err
 	}
 
 	// Check expiry
@@ -166,7 +253,7 @@ func ValidateSession(token string) (*Session, error) {
 		return nil, fmt.Errorf("session not found")
 	}
 
-	return &session, nil
+	return session, nil
 }
 
 // DeleteSession removes a session
@@ -195,8 +282,8 @@ func signSession(session *Session) string {
 		"user_id":    session.UserID,
 		"sub":        session.Sub,
 		"email":      session.Email,
-		"created_at": session.CreatedAt.Unix(),
-		"expires_at": session.ExpiresAt.Unix(),
+		"created_at": session.CreatedAt.UTC().Format(time.RFC3339),
+		"expires_at": session.ExpiresAt.UTC().Format(time.RFC3339),
 	}
 
 	jsonData, _ := json.Marshal(data)

@@ -13,6 +13,10 @@ resources:
   - secrets/plan-db-user.yaml
   - secrets/auth.yaml
 
+patches:
+  - path: patches/nuxt-deployment.yaml
+  - path: patches/api-deployment.yaml
+
 # Images byggda av Tilt
 images:
   - name: ghcr.io/simonbrundin/plan

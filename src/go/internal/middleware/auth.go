@@ -149,22 +149,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
+		// Session token: from the session cookie (browser) or a Bearer
+		// header (API-klienter).
+		tokenString := SessionTokenFromRequest(c)
+		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Authorization header required"})
 			c.Abort()
 			return
 		}
-
-		// Expect "Bearer <token>"
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization format"})
-			c.Abort()
-			return
-		}
-
-		tokenString := parts[1]
 
 		// First, try to validate as our own session token
 		session, sessErr := ValidateSession(tokenString)

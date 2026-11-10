@@ -78,10 +78,13 @@ func main() {
 	authHandler := handlers.NewAuthHandler(dbConnected)
 	r.GET("/api/v1/auth/login", authHandler.Login)
 	r.GET("/api/v1/auth/callback", authHandler.Callback)
+	r.POST("/api/v1/auth/dev-login", authHandler.DevLogin)
+	r.GET("/api/v1/auth/session", authHandler.Session)
+	r.POST("/api/v1/auth/logout", authHandler.Logout)
 
 	// API routes with authentication
 	api := r.Group("/api/v1")
-	api.Use(middleware.APIKeyAuth()) // Try API key first
+	api.Use(middleware.APIKeyAuth())     // Try API key first
 	api.Use(middleware.AuthMiddleware()) // Fall back to session auth
 	api.Use(func(c *gin.Context) {
 		c.Set("dbConnected", dbConnected)

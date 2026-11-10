@@ -1,27 +1,4 @@
-import { getCookie } from "h3";
-
-// Get current user session info
+// The current user, according to the Go API (which owns the session).
 export default defineEventHandler(async (event) => {
-  const sessionCookie = getCookie(event, 'plan_session')
-  const userCookie = getCookie(event, 'plan_user')
-  
-  if (!sessionCookie || !userCookie) {
-    throw createError({
-      statusCode: 401,
-      message: 'Not authenticated'
-    })
-  }
-  
-  try {
-    const user = JSON.parse(atob(userCookie))
-    return {
-      sub: user.sub,
-      email: user.email,
-    }
-  } catch {
-    throw createError({
-      statusCode: 401,
-      message: 'Invalid session'
-    })
-  }
-})
+  return await forwardToGo(event, "auth/session");
+});

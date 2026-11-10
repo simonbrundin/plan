@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          env:
+            # Lokal inloggning utan Zitadel (POST /api/v1/auth/dev-login).
+            - name: DEV_AUTH_ENABLED
+              value: "true"
+            - name: NUXT_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD
+            # Adresser för dev: frontend via port-forward, API via port-forward.
+            - name: APP_DOMAIN
+              value: "localhost:4100"
+            - name: FRONTEND_URL
+              value: "http://localhost:3100"
+            # Måste vara identisk med redirect_uri i authorize- och
+            # token-bytet (Zitadel avvisar annars bytet).
+            - name: ZITADEL_REDIRECT_URI
+              value: "http://localhost:4100/api/v1/auth/callback"

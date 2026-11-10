@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // Read user info from cookie set by auth callback
+const config = useRuntimeConfig()
 const userCookie = useCookie('plan_user')
+
+const devAuthEnabled = computed(() => !!config.public.devAuthEnabled)
 
 const user = computed(() => {
   if (!userCookie.value) return null
@@ -12,13 +15,10 @@ const user = computed(() => {
 })
 
 const handleLogout = async () => {
-  // Clear cookies
-  const cookies = useCookie()
-  cookies.value = null
-  
-  // Also call logout endpoint if it exists
+  // Logouten sköts av Go API:t (sessionen raderas server side, cookierna
+  // rensas) - här rensas bara den läsbara hint-cookien.
   await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
-  
+  userCookie.value = null
   window.location.reload()
 }
 </script>
@@ -42,6 +42,9 @@ const handleLogout = async () => {
       <h1>Not logged in</h1>
       <a href="/auth/login">
         <UButton>Logga in med Zitadel</UButton>
+      </a>
+      <a v-if="devAuthEnabled" href="/auth/dev-login" class="block mt-2">
+        <UButton color="neutral" variant="outline">Dev-login (utan Zitadel)</UButton>
       </a>
     </div>
     <NuxtLink to="/">

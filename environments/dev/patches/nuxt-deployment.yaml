@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nuxt-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: plan-app
+          env:
+            - name: NODE_ENV
+              value: "production"
+            # Browser-facing URLs. Porterna är fasta (se Tiltfile) så att
+            # bookmarks och OAuth-redirects fungerar mellan omstarter.
+            - name: NUXT_PUBLIC_APP_URL
+              value: "http://localhost:3100"
+            - name: NUXT_PUBLIC_GO_API_URL
+              value: "http://localhost:4100/api/v1"
+            # Server-side URL till Go API:t ( används av proxy:en och
+            # auth-routsen inifrån clusteret).
+            - name: NUXT_GO_API_INTERNAL_URL
+              value: "http://go-api-service.plan:8080/api/v1"
+            # Visar dev-login-knappen på /login (ingen Zitadel behövs).
+            - name: NUXT_PUBLIC_DEV_AUTH_ENABLED
+              value: "true"
+            - name: NUXT_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: NUXT_SESSION_PASSWORD

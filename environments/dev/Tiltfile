@@ -50,9 +50,14 @@ docker_build("plan-go-api", "../../src/go")
 # Konfiguration
 # =============================================================================
 
-allocate_port("nuxt", 3000)
-allocate_port("go", 8080)
-allocate_port("pgAdmin", 80)
+# Fasta portar. Dynamisk allokering ger nya portar varje gång Tilt startar,
+# vilket bryter bookmarks, cookies och OAuth-redirect URI:er.
+nuxt_port = "3100"
+go_port = "4100"
+pgadmin_port = "4200"
+_tracker["allocated"]["nuxt"] = "{0}:3000".format(nuxt_port)
+_tracker["allocated"]["go"] = "{0}:8080".format(go_port)
+_tracker["allocated"]["pgAdmin"] = "{0}:80".format(pgadmin_port)
 
 k8s_yaml(kustomize(".",
         flags=["--load-restrictor", "LoadRestrictionsNone", "--enable-helm"]))

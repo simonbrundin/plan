@@ -1,13 +1,4 @@
-import { deleteCookie } from "h3";
-
-// Clear session cookies
+// Logout: the Go API deletes the session and clears the cookies.
 export default defineEventHandler(async (event) => {
-  deleteCookie(event, 'plan_session', {
-    path: '/',
-  })
-  deleteCookie(event, 'plan_user', {
-    path: '/',
-  })
-  
-  return { success: true }
-})
+  return await forwardToGo(event, "auth/logout", { method: "POST" });
+});

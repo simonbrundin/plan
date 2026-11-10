@@ -44,8 +44,7 @@ type UserInfo struct {
 func (h *AuthHandler) Login(c *gin.Context) {
 	// Dev mode: redirect to Nuxt dev-login endpoint
 	if os.Getenv("AUTH_DISABLED") == "true" {
-		appDomain := osGetenv("APP_DOMAIN", "localhost:3000")
-		c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("http://%s/auth/dev-login", appDomain))
+		c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/auth/dev-login", frontendBaseURL()))
 		return
 	}
 
@@ -53,18 +52,15 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	clientID := osGetenv("ZITADEL_CLIENT_ID", "")
 	worktree := osGetenv("WORKTREE_NAME", "")
 
-	// OAuth callback URL. In dev (worktree mode) it always points to the
-	// shared dev gateway so multiple worktrees can share one Zitadel
-	// application. In prod it points to the worktree's host directly.
-	var redirectURI string
+	// OAuth callback URL. Must be identical to the one used in the token
+	// exchange, otherwise Zitadel rejects the exchange. Configurable via
+	// ZITADEL_REDIRECT_URI so dev can point at its own address.
+	redirectURI := oauthRedirectURI()
+
 	if worktree != "" {
-		appDomain := osGetenv("APP_DOMAIN", "localhost:3000")
-		redirectURI = fmt.Sprintf("http://%s/oauth/callback", appDomain)
 		// Mark this browser as belonging to the current worktree so the
 		// dev gateway can route the callback to the correct upstream.
 		c.SetCookie("wt", worktree, 600, "/", "", c.Request.TLS != nil, false)
-	} else {
-		redirectURI = fmt.Sprintf("https://%s/api/v1/auth/callback", osGetenv("APP_DOMAIN", "plan.simonbrundin.com"))
 	}
 
 	if zitadelDomain == "" || clientID == "" {
@@ -143,7 +139,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 	zitadelDomain := osGetenv("ZITADEL_DOMAIN", "")
 	clientID := osGetenv("ZITADEL_CLIENT_ID", "")
 	clientSecret := osGetenv("ZITADEL_CLIENT_SECRET", "")
-	redirectURI := fmt.Sprintf("https://%s/api/v1/auth/callback", osGetenv("APP_DOMAIN", "plan.simonbrundin.com"))
+	redirectURI := oauthRedirectURI()
 
 	// Exchange code for token
 	tokenURL := fmt.Sprintf("https://%s/oauth/v2/token", zitadelDomain)
@@ -233,46 +229,118 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	// Redirect to Nuxt with our session token.
-	// In worktree/dev mode the callback URL is scoped to the worktree path
-	// so the dev gateway routes it to the correct Nuxt instance.
-	frontendCallbackURL := buildFrontendCallbackURL(sessionToken, sub, email)
+	// The session lives in the Go API: the browser gets the session cookie
+	// directly from this response, so the token never travels in a URL.
+	middleware.SetSessionCookies(c, sessionToken, sub, email)
 
-	c.Redirect(http.StatusTemporaryRedirect, frontendCallbackURL)
+	c.Redirect(http.StatusTemporaryRedirect, frontendRootURL())
 }
 
-// buildFrontendCallbackURL returns the URL the Go API redirects to after a
-// successful Zitadel callback. In worktree/dev mode the URL is scoped to
-// the worktree path so the shared dev gateway (Caddy) can route the
-// request to the correct Nuxt instance. In prod the URL is the plain
-// per-domain Nuxt callback.
-func buildFrontendCallbackURL(sessionToken, sub, email string) string {
-	appDomain := osGetenv("APP_DOMAIN", "plan.simonbrundin.com")
-	worktree := osGetenv("WORKTREE_NAME", "")
+// frontendRootURL returns the URL of the app the user should land on after
+// a successful login. In worktree mode the app lives under the worktree
+// path of the shared dev gateway.
+func frontendRootURL() string {
+	base := frontendBaseURL()
 
-	var scheme string
-	if worktree != "" {
-		scheme = "http"
-	} else {
-		scheme = "https"
+	if worktree := osGetenv("WORKTREE_NAME", ""); worktree != "" && os.Getenv("FRONTEND_URL") == "" {
+		return fmt.Sprintf("%s/%s/", base, worktree)
 	}
 
-	var callbackPath string
-	if worktree != "" {
-		callbackPath = fmt.Sprintf("/%s/api/auth/callback", worktree)
-	} else {
-		callbackPath = "/api/auth/callback"
+	return fmt.Sprintf("%s/", base)
+}
+
+// oauthRedirectURI returns the redirect_uri that is sent to Zitadel in the
+// authorize request. The exact same value must be used in the token
+// exchange, so both callers use this helper.
+func oauthRedirectURI() string {
+	if uri := os.Getenv("ZITADEL_REDIRECT_URI"); uri != "" {
+		return uri
 	}
 
-	return fmt.Sprintf(
-		"%s://%s%s?session=%s&sub=%s&email=%s",
-		scheme,
-		appDomain,
-		callbackPath,
-		url.QueryEscape(sessionToken),
-		url.QueryEscape(sub),
-		url.QueryEscape(email),
-	)
+	domain := osGetenv("APP_DOMAIN", "plan.simonbrundin.com")
+	if worktree := osGetenv("WORKTREE_NAME", ""); worktree != "" {
+		// The shared dev gateway owns the callback and routes it to the
+		// right worktree using the `wt` cookie.
+		return fmt.Sprintf("http://%s/oauth/callback", domain)
+	}
+
+	return fmt.Sprintf("https://%s/api/v1/auth/callback", domain)
+}
+
+// frontendBaseURL returns the base URL of the Nuxt frontend that the user
+// should end up on after a successful login.
+func frontendBaseURL() string {
+	if base := os.Getenv("FRONTEND_URL"); base != "" {
+		return strings.TrimSuffix(base, "/")
+	}
+
+	domain := osGetenv("APP_DOMAIN", "plan.simonbrundin.com")
+	if worktree := osGetenv("WORKTREE_NAME", ""); worktree != "" {
+		return fmt.Sprintf("http://%s", domain)
+	}
+
+	return fmt.Sprintf("https://%s", domain)
+}
+
+// DevLogin creates a session for a local development user without going
+// through Zitadel. It is only available when DEV_AUTH_ENABLED=true, which
+// is set in the dev environment only.
+func (h *AuthHandler) DevLogin(c *gin.Context) {
+	if os.Getenv("DEV_AUTH_ENABLED") != "true" {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	sub := osGetenv("DEV_AUTH_SUB", "dev-user")
+	email := osGetenv("DEV_AUTH_EMAIL", "dev@plan.local")
+
+	userID, err := middleware.LookupOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	sessionToken, err := middleware.CreateSession(userID, sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+
+	middleware.SetSessionCookies(c, sessionToken, sub, email)
+
+	c.Redirect(http.StatusTemporaryRedirect, frontendRootURL())
+}
+
+// Session returns the user behind the current session (cookie or Bearer).
+func (h *AuthHandler) Session(c *gin.Context) {
+	token := middleware.SessionTokenFromRequest(c)
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		return
+	}
+
+	session, err := middleware.ValidateSession(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired session"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"sub":     session.Sub,
+		"email":   session.Email,
+		"user_id": session.UserID,
+	})
+}
+
+// Logout deletes the current session and clears the cookies.
+func (h *AuthHandler) Logout(c *gin.Context) {
+	if token := middleware.SessionTokenFromRequest(c); token != "" {
+		middleware.DeleteSession(token)
+	}
+
+	middleware.ClearSessionCookies(c)
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
 // RefreshSession handles session refresh requests

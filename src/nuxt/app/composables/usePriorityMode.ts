@@ -36,8 +36,6 @@ function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
 
 export function usePriorityMode() {
 	const { isSearchOpen } = useSearchState();
-	const config = useRuntimeConfig();
-	const goApiUrl = config.public.goApiUrl as string;
 	const { setGoalWeight } = useGoalApi();
 
 	const visibleGoals = computed(() =>
@@ -52,7 +50,8 @@ export function usePriorityMode() {
 			// Backend returnerar redan filtrerade och sorterade goals med
 			// weight från goal_relations, så vi behöver inte mappa om eller
 			// sortera client-side.
-			const goals = await $fetch<PrioritizedGoal[]>(`${goApiUrl}/goals/prioritized`);
+			// Via our own server route so the session cookie is attached.
+			const goals = await $fetch<PrioritizedGoal[]>('/api/proxy/goals/prioritized');
 
 			prioritizedGoals.value = goals;
 
