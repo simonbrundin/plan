@@ -77,10 +77,10 @@ func (r *GoalRepository) CreateGoal(ctx context.Context, userID int64, title, ic
 
 	// Insert goal
 	var goal models.Goal
-	query := `INSERT INTO goals (title, icon) VALUES ($1, $2) 
-			  RETURNING id, title, icon, created, started, finished, inbox`
+	query := `INSERT INTO goals (title, icon) VALUES ($1, $2)
+			  RETURNING id, title, icon, status_id, created, started, finished, inbox`
 	err = tx.QueryRow(ctx, query, title, icon).Scan(
-		&goal.ID, &goal.Title, &goal.Icon, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox)
+		&goal.ID, &goal.Title, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create goal: %w", err)
 	}

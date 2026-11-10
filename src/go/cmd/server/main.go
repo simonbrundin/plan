@@ -53,6 +53,14 @@ func main() {
 		log.Println("Connected to database")
 		defer database.Close()
 		dbConnected = true
+
+		// The schema is applied declaratively (DDL only), so the seed data
+		// has to be ensured by the application itself.
+		if err := database.EnsureSeedData(ctx); err != nil {
+			log.Printf("Warning: Could not seed data: %v", err)
+		} else {
+			log.Println("Seed data verified")
+		}
 	}
 
 	// Set Gin mode

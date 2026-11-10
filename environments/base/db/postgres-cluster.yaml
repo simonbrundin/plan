@@ -10,6 +10,13 @@ spec:
     initdb:
       database: plan
       owner: admin
+      # Applikationsrollen ("plan") ska kunna skapa och äga tabellerna -
+      # annars saknar API:t INSERT/UPDATE på t.ex. users och kan inte
+      # skapa sessioner. Schemat appliceras av Atlas som samma roll.
+      postInitSQL:
+        - "GRANT ALL ON SCHEMA public TO plan"
+        - "ALTER DEFAULT PRIVILEGES FOR ROLE admin IN SCHEMA public GRANT ALL ON TABLES TO plan"
+        - "ALTER DEFAULT PRIVILEGES FOR ROLE admin IN SCHEMA public GRANT ALL ON SEQUENCES TO plan"
 
   storage:
     storageClass: cnpg
@@ -26,7 +33,7 @@ spec:
         superuser: true
         passwordSecret:
           name: plan-db-admin
-      - name: user
+      - name: plan
         ensure: present
         login: true
         passwordSecret:

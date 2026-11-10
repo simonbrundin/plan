@@ -96,6 +96,18 @@ data:
     ADD FOREIGN KEY("goal_id") REFERENCES "goals"("id")
     ON UPDATE NO ACTION ON DELETE CASCADE;
 
+    -- Sessions: skapas av API:t (CreateSession) men ska också finnas i
+    -- schemat, annars vill Atlas radera tabellen.
+    CREATE TABLE "sessions" (
+      "token"      TEXT NOT NULL,
+      "user_id"    BIGINT NOT NULL,
+      "sub"        TEXT NOT NULL,
+      "email"      TEXT NOT NULL,
+      "created_at" TIMESTAMPTZ NOT NULL,
+      "expires_at" TIMESTAMPTZ NOT NULL,
+      PRIMARY KEY("token")
+    );
+
     -- Seed: Statuses
     INSERT INTO statuses (name, label) VALUES
       ('define', 'Defining'),
@@ -107,6 +119,14 @@ data:
 
     -- Seed: Root goal
     INSERT INTO goals (id, title, icon) VALUES (1, 'Root', 'heroicons:home') ON CONFLICT DO NOTHING;
+
+    -- The seed uses an explicit id, which leaves the identity sequence at 1.
+    -- Without this the first insert from the app collides with the Root goal.
+    SELECT setval(pg_get_serial_sequence('goals', 'id'), (SELECT COALESCE(MAX(id), 0) + 1 FROM goals));
+
+    -- NOTE: Atlas applies the schema declaratively (DDL only), so the INSERT
+    -- statements above are not executed by the operator. The application
+    -- seeds the same rows itself on start (see internal/database/seed.go).
 kind: ConfigMap
 metadata:
   name: plan-db-schema
