@@ -3,7 +3,7 @@ import type { Goal } from '~/types/goal'
 import { AuthenticationError } from '~/composables/useGoalApi'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, deleteGoal, loadAllGoals } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, deleteGoal, loadAllGoals, createGoal } = useGoalApi()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -56,6 +56,52 @@ const filteredGoals = computed(() => {
 function goToGoal(goalId: number) {
   router.push(`/goal/${goalId}`)
 }
+
+// Skapa nytt grundmål (mål utan förälder)
+const showNewGoalInput = ref(false)
+const newGoalTitle = ref('')
+const newGoalInput = ref<HTMLInputElement | null>(null)
+
+function startNewGoal() {
+  showNewGoalInput.value = true
+  newGoalTitle.value = ''
+}
+
+function cancelNewGoal() {
+  showNewGoalInput.value = false
+  newGoalTitle.value = ''
+}
+
+async function saveNewGoal() {
+  const title = newGoalTitle.value.trim()
+  if (!title) {
+    cancelNewGoal()
+    return
+  }
+
+  try {
+    const newGoal = await createGoal(title)
+    goals.value.push(newGoal)
+    showNewGoalInput.value = false
+    newGoalTitle.value = ''
+
+    // Markera det ny skapade målet
+    await nextTick()
+    const idx = filteredGoals.value.findIndex(g => g.id === newGoal.id)
+    if (idx !== -1) {
+      selectedIndex.value = idx
+    }
+  } catch (err) {
+    console.error('Failed to create goal:', err)
+  }
+}
+
+watch(showNewGoalInput, async (val) => {
+  if (val) {
+    await nextTick()
+    newGoalInput.value?.focus()
+  }
+})
 
 // Öppna sök
 const showSearch = ref(false)
@@ -191,8 +237,15 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
-  // Enter eller l - öppna markerat mål
-  if (event.key === 'Enter' || event.key === 'l') {
+  // Enter - lägg till ett nytt grundmål
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    startNewGoal()
+    return
+  }
+
+  // l - öppna markerat mål
+  if (event.key === 'l') {
     event.preventDefault()
     if (filteredGoals.value.length > 0) {
       goToGoal(filteredGoals.value[selectedIndex.value].id)
@@ -250,6 +303,12 @@ definePageMeta({
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-3xl font-bold">Mina mål</h1>
       <div class="flex items-center gap-3">
+        <!-- Nytt grundmål -->
+        <button @click="startNewGoal"
+          class="p-1 rounded transition-colors text-gray-500 hover:text-gray-300"
+          title="Nytt grundmål (Enter)">
+          <Icon name="lucide:plus" class="w-5 h-5" />
+        </button>
         <!-- Visa endast påbörjade -->
         <button @click="showStarted = !showStarted"
           class="p-1 rounded transition-colors"
@@ -259,7 +318,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="text-gray-500 text-sm">
-          j/k navigera · l/Enter öppna · d klar · x ta bort
+          j/k navigera · l öppna · Enter nytt grundmål · d klar · x ta bort
         </span>
       </div>
     </div>
@@ -285,11 +344,28 @@ definePageMeta({
       Fel vid laddning av mål: {{ error.message }}
     </div>
 
-    <div v-else-if="displayedGoals.length === 0" class="text-gray-400">
+    <div v-else-if="displayedGoals.length === 0 && !showNewGoalInput" class="text-gray-400">
       Inga mål hittades.
     </div>
 
     <div v-else class="space-y-2">
+      <!-- Nytt grundmål -->
+      <div
+        v-if="showNewGoalInput"
+        class="flex items-center gap-3 p-4 rounded-lg bg-blue-600 text-white"
+      >
+        <Icon name="heroicons:star" class="w-6 h-6 flex-shrink-0" />
+        <input
+          ref="newGoalInput"
+          v-model="newGoalTitle"
+          type="text"
+          placeholder="Nytt grundmål..."
+          class="flex-1 bg-transparent border-none outline-none placeholder-blue-200 text-white"
+          @keydown.enter.prevent="saveNewGoal"
+          @keydown.esc.prevent="cancelNewGoal"
+        />
+      </div>
+
       <div
         v-for="(goal, index) in filteredGoals"
         :key="goal.id"
