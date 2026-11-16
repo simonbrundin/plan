@@ -65,6 +65,49 @@ func strPtr(s string) *string {
 	return &s
 }
 
+func TestUpdateGoalRequestDescriptionDecoding(t *testing.T) {
+	tests := []struct {
+		name    string
+		body    string
+		wantSet bool
+		want    string
+	}{
+		{
+			name:    "a description sets the description",
+			body:    `{"description": "En längre beskrivning"}`,
+			wantSet: true,
+			want:    "En längre beskrivning",
+		},
+		{
+			name:    "an empty description clears the description",
+			body:    `{"description": ""}`,
+			wantSet: true,
+			want:    "",
+		},
+		{
+			name:    "a missing field leaves the description untouched",
+			body:    `{"title": "Ny titel"}`,
+			wantSet: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req UpdateGoalRequest
+			if err := json.Unmarshal([]byte(tt.body), &req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if (req.Description != nil) != tt.wantSet {
+				t.Fatalf("Description set = %v, want %v", req.Description != nil, tt.wantSet)
+			}
+			if tt.wantSet && *req.Description != tt.want {
+				t.Errorf("Description = %q, want %q", *req.Description, tt.want)
+			}
+		})
+	}
+}
+
 func TestUpdateGoalRequestEternalDecoding(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -148,5 +191,28 @@ func TestUpdateGoalRequestFinishesGoal(t *testing.T) {
 				t.Errorf("FinishesGoal() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestGoalMarshalsNullTimestamps(t *testing.T) {
+	data, err := json.Marshal(Goal{ID: 1, Title: "Mål"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var raw map[string]any
+	if err := json.Unmarshal(data, &raw); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	for _, field := range []string{"started", "finished"} {
+		value, ok := raw[field]
+		if !ok {
+			t.Errorf("fältet %q saknas i JSON-svaret", field)
+			continue
+		}
+		if value != nil {
+			t.Errorf("%s = %v, want null", field, value)
+		}
 	}
 }

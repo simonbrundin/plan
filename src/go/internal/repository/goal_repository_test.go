@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestMergeChildOrder(t *testing.T) {
+func TestMergeOrder(t *testing.T) {
 	tests := []struct {
 		name      string
 		existing  []int64
@@ -46,9 +46,9 @@ func TestMergeChildOrder(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := mergeChildOrder(tt.existing, tt.requested)
+			got := mergeOrder(tt.existing, tt.requested)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("mergeChildOrder(%v, %v) = %v, want %v", tt.existing, tt.requested, got, tt.want)
+				t.Errorf("mergeOrder(%v, %v) = %v, want %v", tt.existing, tt.requested, got, tt.want)
 			}
 		})
 	}
