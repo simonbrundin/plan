@@ -70,9 +70,11 @@ export default defineNuxtConfig({
 		classSuffix: "",
 	},
 	icon: {
-		// Disable server-side icon processing to avoid SSR delays
-		// Icons will only load on the client side
-		provider: "none",
+		// "none" gjorde att inga ikoner renderades alls (tom client-bundle),
+		// även dynamiska som målets ikon. "iconify" hämtar ikonerna från
+		// Iconifys API i klienten, vilket också gör att valfri ikon från
+		// IconPicker kan renderas.
+		provider: "iconify",
 		serverBundle: false,
 	},
 	runtimeConfig: {

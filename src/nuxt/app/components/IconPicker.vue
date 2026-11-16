@@ -25,6 +25,7 @@ const searchQuery = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
 const searchResults = ref<IconResult[]>([])
 const isSearching = ref(false)
+const searchError = ref('')
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 const displayOpen = computed({
@@ -52,6 +53,7 @@ watch(searchQuery, (newQuery) => {
   // Don't search with less than 2 characters
   if (!newQuery || newQuery.trim().length < 2) {
     searchResults.value = []
+    searchError.value = ''
     return
   }
 
@@ -62,13 +64,18 @@ watch(searchQuery, (newQuery) => {
 })
 
 async function performSearch(query: string) {
+  searchError.value = ''
   try {
     const response = await fetch(`/api/icons?q=${encodeURIComponent(query)}`)
+    if (!response.ok) {
+      throw new Error(`Icon search failed with status ${response.status}`)
+    }
     const data = await response.json()
     searchResults.value = data.results || []
   } catch (error) {
     console.error('Failed to search icons:', error)
     searchResults.value = []
+    searchError.value = 'Kunde inte söka ikoner just nu. Försök igen om en stund.'
   } finally {
     isSearching.value = false
   }
@@ -133,6 +140,11 @@ function close() {
               <div class="text-gray-500 text-xs">{{ icon.collection }}</div>
             </div>
           </button>
+        </div>
+
+        <!-- Meddelande när sökningen misslyckades -->
+        <div v-else-if="searchError" class="text-center py-8 text-red-400">
+          {{ searchError }}
         </div>
 
         <!-- Meddelande när inga resultat -->
