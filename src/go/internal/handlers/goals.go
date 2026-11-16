@@ -261,6 +261,19 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 		return
 	}
 
+	// Ett evigt mål kan inte slutföras - det pågår hela livet.
+	if req.FinishesGoal() {
+		existing, err := h.repo.GetGoalByID(c.Request.Context(), goalID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+		if existing != nil && existing.Eternal {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Ett evigt mål kan inte slutföras"})
+			return
+		}
+	}
+
 	goal, err := h.repo.UpdateGoal(c.Request.Context(), goalID, req)
 	if err != nil {
 		if errors.Is(err, repository.ErrInvalidTimestamp) {

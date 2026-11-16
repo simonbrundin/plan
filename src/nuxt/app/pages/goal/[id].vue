@@ -8,6 +8,7 @@ import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight } from '~/types/goal'
 import { moveChildId, nextChildOrder } from '~/utils/childOrder'
+import { canBeFinished } from '~/utils/goalRules'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -18,7 +19,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -921,6 +922,11 @@ async function createSiblingGoal() {
 
 // Toggla finished status på ett mål
 async function toggleFinished(goalToToggle: Goal) {
+  // Eviga mål pågår hela livet och kan inte slutföras.
+  if (!canBeFinished(goalToToggle)) {
+    return;
+  }
+
   try {
     const newFinishedValue = goalToToggle.finished ? null : new Date().toISOString();
 
@@ -941,6 +947,35 @@ async function toggleFinished(goalToToggle: Goal) {
     await refresh();
   } catch (error) {
     console.error("Failed to toggle goal finished status:", error);
+  }
+}
+
+// Markera ett mål som evigt (eller upphäva evigt-flaggan).
+// Ett evigt mål kan inte slutföras - det markeras bara som pågående.
+async function toggleEternal(goalToToggle: Goal) {
+  const newEternal = !goalToToggle.eternal;
+
+  try {
+    await setGoalEternal(goalToToggle.id, newEternal);
+    goalsStore.updateGoal(goalToToggle.id, { eternal: newEternal });
+
+    // Uppdatera lokal state i component
+    if (goalData.value?.allGoals) {
+      const goalIndex = goalData.value.allGoals.findIndex(
+        (g) => g.id === goalToToggle.id
+      );
+      if (goalIndex !== -1) {
+        goalData.value.allGoals[goalIndex].eternal = newEternal;
+      }
+    }
+    if (goalData.value?.goal && goalData.value.goal.id === goalToToggle.id) {
+      goalData.value.goal.eternal = newEternal;
+    }
+
+    // Uppdatera data från server
+    await refresh();
+  } catch (error) {
+    console.error("Failed to toggle eternal status:", error);
   }
 }
 
@@ -1153,6 +1188,23 @@ function handleKeydown(event: KeyboardEvent) {
     ) {
       const child = filteredChildren.value[selectedChildIndex.value];
       toggleFinished(child);
+    }
+    return;
+  }
+
+  // Hantera 'e' för att växla evigt-flaggan
+  if (event.key === "e") {
+    event.preventDefault();
+    if (isParentMode.value && parents.value.length > 0) {
+      toggleEternal(parents.value[selectedParentIndex.value]);
+    } else if (isGoalSelected.value && goal.value) {
+      toggleEternal(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      toggleEternal(filteredChildren.value[selectedChildIndex.value]);
     }
     return;
   }
@@ -1394,6 +1446,8 @@ watch(selectedParentIndex, async () => {
             <NuxtLink v-else :to="`/goal/${parent.id}`" :data-parent-index="index"
               class="px-2 py-1 rounded transition-all select-none inline-block" :class="isParentMode && selectedParentIndex === index
                 ? 'text-gray-100 bg-blue-500 font-medium'
+                : parent.eternal
+                ? 'text-pink-300 hover:text-pink-200'
                 : 'text-gray-500 hover:text-gray-300'
                 " @mousedown="handleParentMouseDown(parent.id)" @mouseup="handleParentMouseUp"
               @mouseleave="handleParentMouseUp" @touchstart="handleParentMouseDown(parent.id)"
@@ -1448,7 +1502,8 @@ watch(selectedParentIndex, async () => {
       </div>
       <div v-else class="flex items-center gap-4 flex-shrink-0">
         <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
-          isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
+          isGoalSelected ? 'border border-blue-500' : '',
+          goal?.eternal ? 'text-pink-300' : 'text-gray-100'
         ]">{{ goal?.title }}</h1>
         <!-- Started-toggle (s) -->
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
@@ -1460,6 +1515,17 @@ watch(selectedParentIndex, async () => {
           :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
           <Icon name="lucide:circle-play" class="w-6 h-6"
             :style="{ opacity: goal.started ? 1 : 0.25 }" />
+        </button>
+        <!-- Evigt mål-toggle (e) -->
+        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          @click.stop="toggleEternal(goal)"
+          class="p-2 rounded transition-colors"
+          :class="goal.eternal
+            ? 'text-pink-400 hover:text-pink-300'
+            : 'text-gray-600 hover:text-gray-400'"
+          :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
+          <Icon name="lucide:infinity" class="w-6 h-6"
+            :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
         </button>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
@@ -1661,9 +1727,9 @@ watch(selectedParentIndex, async () => {
               <div v-else class="flex items-center gap-2">
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                   :class="['flex-shrink-0 transition-colors rounded p-1', isChildBlocked(child.id) || child.finished ? 'text-gray-600 hover:text-gray-600' : 'text-white hover:text-white hover:bg-gray-600']"
+                   :class="['flex-shrink-0 transition-colors rounded p-1', child.eternal ? 'text-pink-300 hover:text-pink-200' : isChildBlocked(child.id) || child.finished ? 'text-gray-600 hover:text-gray-600' : 'text-white hover:text-white hover:bg-gray-600']"
                    title="Ändra ikon">
-                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="isChildBlocked(child.id) || child.finished ? { color: '#4B5563' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: '#F9A8D4' } : isChildBlocked(child.id) || child.finished ? { color: '#4B5563' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
                  <!-- Started-toggle (s) -->
                  <button
@@ -1685,9 +1751,12 @@ watch(selectedParentIndex, async () => {
                    <Icon name="lucide:link" class="w-5 h-5" />
                  </button>
                  <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
-                  <h3 class="text-lg font-normal select-none" :class="child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'" :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
+                  <h3 class="text-lg font-normal select-none" :class="child.eternal ? 'text-pink-300' : child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'" :style="child.eternal ? { color: '#F9A8D4' } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
+                  <p v-if="child.eternal" class="text-xs text-pink-400 mt-1">
+                    Evigt mål - kan inte slutföras
+                  </p>
                   <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-gray-600 mt-1">
                     🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
                   </p>

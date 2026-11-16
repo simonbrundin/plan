@@ -29,7 +29,7 @@ func NewGoalRepository() *GoalRepository {
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox 
+		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal 
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
 		WHERE ug.user_id = $1
@@ -44,7 +44,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox)
+		err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
@@ -56,11 +56,11 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 
 // GetGoalByID returns a single goal by ID
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
-	query := `SELECT id, title, icon, created, started, finished, inbox FROM goals WHERE id = $1`
+	query := `SELECT id, title, icon, created, started, finished, inbox, eternal FROM goals WHERE id = $1`
 
 	var g models.Goal
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox)
+		&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
@@ -82,9 +82,9 @@ func (r *GoalRepository) CreateGoal(ctx context.Context, userID int64, title, ic
 	// Insert goal
 	var goal models.Goal
 	query := `INSERT INTO goals (title, icon) VALUES ($1, $2)
-			  RETURNING id, title, icon, status_id, created, started, finished, inbox`
+			  RETURNING id, title, icon, status_id, created, started, finished, inbox, eternal`
 	err = tx.QueryRow(ctx, query, title, icon).Scan(
-		&goal.ID, &goal.Title, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox)
+		&goal.ID, &goal.Title, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox, &goal.Eternal)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create goal: %w", err)
 	}
@@ -136,7 +136,11 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 			argNum++
 		}
 	}
-	if req.Finished.Set {
+	// Ett evigt mål kan aldrig vara färdigt. När målet markeras som evigt
+	// nollställs därför finished, oavsett vad requesten samtidigt säger.
+	becomesEternal := req.Eternal != nil && *req.Eternal
+
+	if req.Finished.Set && !becomesEternal {
 		hasUpdate = true
 		if req.Finished.Value == nil || *req.Finished.Value == "" {
 			query += "finished = NULL, "
@@ -148,6 +152,15 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 			query += fmt.Sprintf("finished = $%d, ", argNum)
 			args = append(args, t)
 			argNum++
+		}
+	}
+	if req.Eternal != nil {
+		hasUpdate = true
+		query += fmt.Sprintf("eternal = $%d, ", argNum)
+		args = append(args, *req.Eternal)
+		argNum++
+		if becomesEternal {
+			query += "finished = NULL, "
 		}
 	}
 
@@ -235,7 +248,7 @@ func (r *GoalRepository) GetChildRelations(ctx context.Context, parentID int64) 
 // GetParentRelations returns parent goals for a goal
 func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox
+		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
 		FROM goal_relations gr
 		INNER JOIN goals g ON g.id = gr.parent_id
 		WHERE gr.child_id = $1`
@@ -250,7 +263,7 @@ func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) 
 	for rows.Next() {
 		var g models.Goal
 		if err := rows.Scan(&g.ID, &g.Title, &g.Icon,
-			&g.Created, &g.Started, &g.Finished, &g.Inbox); err != nil {
+			&g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
 		goals = append(goals, g)
@@ -411,7 +424,7 @@ func (r *GoalRepository) GetDependencies(ctx context.Context, goalID int64) ([]m
 // GetBlockingGoals returns goals that depend on this goal
 func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox
+		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
 		FROM goal_dependencies gd
 		INNER JOIN goals g ON g.id = gd.goal_id
 		WHERE gd.depends_on_id = $1`
@@ -425,7 +438,7 @@ func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		if err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox); err != nil {
+		if err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
 			return nil, err
 		}
 		goals = append(goals, g)
@@ -498,7 +511,7 @@ func (r *GoalRepository) CheckForCycle(ctx context.Context, goalID, dependsOnID 
 func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) ([]models.PrioritizedGoal, error) {
 	query := `
 		SELECT
-			g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox,
+			g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal,
 			COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
 			(SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
 			(SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id
@@ -520,7 +533,7 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		var g models.PrioritizedGoal
 		var parentTitle *string
 		var parentID *int64
-		if err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox,
+		if err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal,
 			&g.Weight, &parentTitle, &parentID); err != nil {
 			return nil, err
 		}

@@ -96,6 +96,15 @@ export function useGoalApi() {
 		});
 	};
 
+	// Markerar ett mål som evigt (eller upphäver evigt-flaggan).
+	// Ett evigt mål kan inte slutföras - API:t avvisar det.
+	const setGoalEternal = async (goalId: number, eternal: boolean) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { eternal },
+		});
+	};
+
 	const deleteGoal = async (goalId: number) => {
 		await apiProxy(`goals/${goalId}`, {
 			method: "DELETE",
@@ -213,6 +222,7 @@ export function useGoalApi() {
 		updateGoalStatus,
 		toggleGoalStarted,
 		toggleGoalFinished,
+		setGoalEternal,
 		deleteGoal,
 		addParentRelation,
 		removeParentRelation,

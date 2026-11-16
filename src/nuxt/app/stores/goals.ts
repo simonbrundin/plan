@@ -7,6 +7,7 @@ interface Goal {
 	created: string;
 	finished: string | null;
 	inbox: number;
+	eternal: boolean;
 }
 
 interface GoalRelation {

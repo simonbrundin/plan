@@ -64,3 +64,89 @@ func TestUpdateGoalRequestStartedDecoding(t *testing.T) {
 func strPtr(s string) *string {
 	return &s
 }
+
+func TestUpdateGoalRequestEternalDecoding(t *testing.T) {
+	tests := []struct {
+		name     string
+		body     string
+		wantSet  bool
+		wantEtal bool
+	}{
+		{
+			name:     "true marks the goal as eternal",
+			body:     `{"eternal": true}`,
+			wantSet:  true,
+			wantEtal: true,
+		},
+		{
+			name:     "false removes the eternal mark",
+			body:     `{"eternal": false}`,
+			wantSet:  true,
+			wantEtal: false,
+		},
+		{
+			name:     "a missing field leaves the goal untouched",
+			body:     `{"title": "Ny titel"}`,
+			wantSet:  false,
+			wantEtal: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req UpdateGoalRequest
+			if err := json.Unmarshal([]byte(tt.body), &req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if (req.Eternal != nil) != tt.wantSet {
+				t.Fatalf("Eternal set = %v, want %v", req.Eternal != nil, tt.wantSet)
+			}
+			if tt.wantSet && *req.Eternal != tt.wantEtal {
+				t.Errorf("Eternal = %v, want %v", *req.Eternal, tt.wantEtal)
+			}
+		})
+	}
+}
+
+func TestUpdateGoalRequestFinishesGoal(t *testing.T) {
+	tests := []struct {
+		name string
+		body string
+		want bool
+	}{
+		{
+			name: "a timestamp finishes the goal",
+			body: `{"finished": "2026-01-02T03:04:05Z"}`,
+			want: true,
+		},
+		{
+			name: "clearing the timestamp does not finish the goal",
+			body: `{"finished": null}`,
+			want: false,
+		},
+		{
+			name: "an empty string does not finish the goal",
+			body: `{"finished": ""}`,
+			want: false,
+		},
+		{
+			name: "a missing field does not finish the goal",
+			body: `{"title": "Ny titel"}`,
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req UpdateGoalRequest
+			if err := json.Unmarshal([]byte(tt.body), &req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if got := req.FinishesGoal(); got != tt.want {
+				t.Errorf("FinishesGoal() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

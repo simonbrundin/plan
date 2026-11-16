@@ -16,6 +16,9 @@ type Goal struct {
 	Started  *time.Time `json:"started,omitempty"`
 	Finished *time.Time `json:"finished,omitempty"`
 	Inbox    int        `json:"inbox" example:"0"`
+	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
+	// kan inte slutföras och markeras alltid som pågående.
+	Eternal bool `json:"eternal" example:"false"`
 }
 
 // Status represents a goal status
@@ -129,6 +132,16 @@ type UpdateGoalRequest struct {
 	StatusID *int         `json:"status_id,omitempty"`
 	Started  NullableTime `json:"started,omitempty"`
 	Finished NullableTime `json:"finished,omitempty"`
+	// Eternal sätter eller tar bort evigt-flaggan på ett mål.
+	// nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
+	Eternal *bool `json:"eternal,omitempty"`
+}
+
+// FinishesGoal returnerar true om requesten försöker markera målet som klart,
+// dvs. sätter en finished-tidsstämpel. Att rensa finished (null) räknas
+// inte som att slutföra målet.
+func (r UpdateGoalRequest) FinishesGoal() bool {
+	return r.Finished.Set && r.Finished.Value != nil && *r.Finished.Value != ""
 }
 
 // UpdateStatusRequest is the request body for updating goal status

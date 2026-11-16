@@ -6,6 +6,8 @@ export interface Goal {
 	started: string | null;
 	finished: string | null;
 	inbox: number;
+	// Evigt mål - pågår hela livet och kan inte slutföras.
+	eternal: boolean;
 }
 
 export interface ChildRelation {

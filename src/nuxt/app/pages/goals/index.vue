@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { Goal } from '~/types/goal'
 import { AuthenticationError } from '~/composables/useGoalApi'
+import { canBeFinished } from '~/utils/goalRules'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, deleteGoal, loadAllGoals, createGoal } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, loadAllGoals, createGoal } = useGoalApi()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -113,6 +114,11 @@ const goalToDelete = ref<Goal | null>(null)
 
 // Toggle finished
 async function toggleFinished(goal: Goal) {
+  // Eviga mål pågår hela livet och kan inte slutföras.
+  if (!canBeFinished(goal)) {
+    return
+  }
+
   try {
     const newFinishedValue = goal.finished ? null : new Date().toISOString()
     await toggleGoalFinished(goal.id, newFinishedValue)
@@ -138,6 +144,20 @@ async function toggleStarted(goal: Goal) {
     }
   } catch (err) {
     console.error('Failed to toggle started:', err)
+  }
+}
+
+// Toggle evigt-märke
+async function toggleEternal(goal: Goal) {
+  const newEternal = !goal.eternal
+  try {
+    await setGoalEternal(goal.id, newEternal)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    if (idx !== -1) {
+      localGoals.value[idx] = { ...localGoals.value[idx], eternal: newEternal }
+    }
+  } catch (err) {
+    console.error('Failed to toggle eternal:', err)
   }
 }
 
@@ -199,6 +219,15 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault()
     if (filteredGoals.value.length > 0) {
       toggleFinished(filteredGoals.value[selectedIndex.value])
+    }
+    return
+  }
+
+  // e - växla evigt-märke
+  if (event.key === 'e') {
+    event.preventDefault()
+    if (filteredGoals.value.length > 0) {
+      toggleEternal(filteredGoals.value[selectedIndex.value])
     }
     return
   }
@@ -318,7 +347,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="text-gray-500 text-sm">
-          j/k navigera · l öppna · Enter nytt grundmål · d klar · x ta bort
+          j/k navigera · l öppna · Enter nytt grundmål · d klar · e evigt mål · x ta bort
         </span>
       </div>
     </div>
@@ -375,7 +404,8 @@ definePageMeta({
           : 'bg-gray-800 text-gray-200 hover:bg-gray-700'"
         @click="goToGoal(goal.id)"
       >
-        <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0" />
+        <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0"
+          :class="goal.eternal ? 'text-pink-300' : ''" />
         <!-- Started (klicka eller s) -->
         <button @click.stop="toggleStarted(goal)"
           class="flex-shrink-0 p-1 rounded transition-colors"
@@ -384,8 +414,17 @@ definePageMeta({
           <Icon name="lucide:circle-play" class="w-5 h-5"
             :style="{ opacity: goal.started ? 1 : 0.25 }" />
         </button>
-        <span class="flex-1 truncate">{{ goal.title }}</span>
+        <!-- Evigt mål (e) -->
+        <button @click.stop="toggleEternal(goal)"
+          class="flex-shrink-0 p-1 rounded transition-colors"
+          :class="goal.eternal ? 'text-pink-400 hover:text-pink-300' : 'text-gray-600 hover:text-gray-400'"
+          :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
+          <Icon name="lucide:infinity" class="w-5 h-5"
+            :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
+        </button>
+        <span class="flex-1 truncate" :class="goal.eternal ? 'text-pink-300' : ''">{{ goal.title }}</span>
         <span v-if="goal.finished" class="text-green-400 text-sm">✓ Klar</span>
+        <span v-else-if="goal.eternal" class="text-pink-400 text-sm">∞ Evigt</span>
         <span v-else class="text-gray-500 text-sm">#{{ goal.id }}</span>
       </div>
     </div>
