@@ -7,6 +7,7 @@ import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight } from '~/types/goal'
+import { moveChildId, nextChildOrder } from '~/utils/childOrder'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -17,7 +18,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, updateGoalOrder, updateGoalWeight, createGoal, addDependency, removeDependency } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -278,7 +279,9 @@ const depDragChildId = ref<number | null>(null);
 const depDragOverChildId = ref<number | null>(null);
 const isDepDragging = ref(false);
 
-// Filtrerade undermål baserat på showCompleted och showStarted
+// Filtrerade undermål baserat på showCompleted och showStarted.
+// Ordningen kommer från servern (fältet "order") - den är det användaren
+// styr med piltangenterna, så den får inte sorteras om här.
 const filteredChildren = computed(() => {
   let result = children.value;
   if (!showCompleted.value) {
@@ -287,96 +290,7 @@ const filteredChildren = computed(() => {
   if (showStarted.value) {
     result = result.filter((c) => c.started !== null);
   }
-  
-  // Topologisk sortering: goals whose dependencies are done come first
-  // Then goals in dependency chain order
-  
-  // Build a map of goal -> array of goal IDs it depends on (that are not finished)
-  // Use dependsOn directly from each child
-  const dependenciesMap = new Map<number, number[]>();
-  result.forEach(child => {
-    const dependsOn = child.dependsOn || [];
-    // Filter out finished dependencies
-    const unfinishedDeps = dependsOn
-      .filter((d: any) => !d.finished)
-      .map((d: any) => d.depends_on_id);
-    dependenciesMap.set(child.id, unfinishedDeps);
-  });
-  
-  // Debug log
-  console.log('Topological sort debug:', {
-    childrenIds: result.map(c => c.id),
-    childrenCount: result.length,
-    dependenciesMap: JSON.stringify([...dependenciesMap.entries()]),
-  });
-  
-  // Kahn's algorithm - process one goal at a time to keep dependency chains together
-  const mutableDeps = new Map<number, number[]>();
-  
-  result.forEach(child => {
-    const depsNeeded = (dependenciesMap.get(child.id) || []).slice();
-    mutableDeps.set(child.id, depsNeeded);
-  });
-  
-  const sorted: any[] = [];
-  const completed = new Set<number>();
-  
-  // Keep processing until all goals are sorted
-  while (sorted.length < result.length) {
-    // Find all goals that are now ready (no remaining dependencies)
-    const ready: any[] = [];
-    for (const child of result) {
-      if (completed.has(child.id)) continue;
-      const depsNeeded = mutableDeps.get(child.id) || [];
-      if (depsNeeded.length === 0) {
-        ready.push(child);
-      }
-    }
-    
-    if (ready.length === 0) {
-      // No ready goals - shouldn't happen with valid dependencies
-      for (const child of result) {
-        if (!completed.has(child.id)) {
-          sorted.push(child);
-          completed.add(child.id);
-        }
-      }
-      break;
-    }
-    
-    // Sort ready: prefer goals that HAVE dependencies (part of a chain) over goals that don't
-    // This keeps dependency chains together
-    ready.sort((a, b) => {
-      // Check if goal has original dependencies (is part of a chain)
-      const aHasDeps = (dependenciesMap.get(a.id) || []).length > 0;
-      const bHasDeps = (dependenciesMap.get(b.id) || []).length > 0;
-      
-      // If one has deps and one doesn't, prefer the one with deps
-      if (aHasDeps && !bHasDeps) return -1;
-      if (!aHasDeps && bHasDeps) return 1;
-      
-      // If both have deps or both don't, sort by original order
-      const aOriginal = result.indexOf(a);
-      const bOriginal = result.indexOf(b);
-      return aOriginal - bOriginal;
-    });
-    const current = ready[0];
-    sorted.push(current);
-    completed.add(current.id);
-    
-    // Remove this goal from dependencies of remaining goals
-    for (const child of result) {
-      if (completed.has(child.id)) continue;
-      const depsNeeded = mutableDeps.get(child.id) || [];
-      const idx = depsNeeded.indexOf(current.id);
-      if (idx !== -1) {
-        depsNeeded.splice(idx, 1);
-        mutableDeps.set(child.id, depsNeeded);
-      }
-    }
-  }
-  
-  return sorted;
+  return result;
 });
 
 // Sökfunktion för att lägga till föräldrar
@@ -479,10 +393,15 @@ const childSearchResults = computed(() => {
   );
 });
 
+// Nästa lediga ordningsnummer för ett nytt undermål
+function nextChildOrderNumber(): number {
+  return nextChildOrder(children.value.map((c) => c.order ?? 0));
+}
+
 // Lägg till befintligt mål som barn
 async function addExistingChild(childId: number) {
   try {
-    const nextOrder = goal.value?.childRelations?.length || 0;
+    const nextOrder = nextChildOrderNumber();
     await addChildRelation(childId, goalId.value, nextOrder);
     goalsStore.addRelation(childId, goalId.value);
     await refresh();
@@ -499,7 +418,7 @@ async function addExistingChild(childId: number) {
 
     try {
       const newGoal = await createGoal(childSearchQuery.value.trim());
-      const nextOrder = children.value.length;
+      const nextOrder = nextChildOrderNumber();
       await addChildRelation(newGoal.id, goalId.value, nextOrder);
       goalsStore.addGoal(newGoal);
       goalsStore.addRelation(newGoal.id, goalId.value);
@@ -705,99 +624,91 @@ async function handleDrop(event: DragEvent, dropChildId: number) {
   draggedChildId.value = null;
 }
 
-// Flytta markerat barn upp i listan
-async function moveChildUp() {
-  if (
-    selectedChildIndex.value <= 0 ||
-    isParentMode.value ||
-    isGoalSelected.value
-  ) {
+// Flytta det markerade barnet upp eller ner i listan.
+//
+// Ordningen uppdateras lokalt först (optimistiskt) så att tangenttryck
+// direkt ger respons, och sparas sedan till servern. Sparandet serialiseras
+// och slås ihop, så att snabba tangenttryck inte skriver över varandra.
+function moveChild(direction: "up" | "down") {
+  if (isParentMode.value || isGoalSelected.value) {
     return;
   }
 
-  const currentIndex = selectedChildIndex.value;
-  const displayedChildren = filteredChildren.value;
+  const visible = filteredChildren.value;
+  const index = selectedChildIndex.value;
 
-  if (currentIndex >= displayedChildren.length) {
+  if (index < 0 || index >= visible.length) {
     return;
   }
 
-  // Hämta de två målen som ska bytas
-  const movingChild = displayedChildren[currentIndex];
-  const aboveChild = displayedChildren[currentIndex - 1];
+  const movingChild = visible[index];
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
 
-  console.log('moveChildUp: moving child', movingChild.id, 'with order', movingChild.order, 'to position of', aboveChild.id, 'with order', aboveChild.order);
+  const allIds = children.value.map((c) => c.id);
+  const visibleIds = visible.map((c) => c.id);
+  const reordered = moveChildId(allIds, visibleIds, movingChild.id, direction);
 
-  try {
-    // Byt ordningen mellan de två målen
-    const movingOrder = movingChild.order;
-    const aboveOrder = aboveChild.order;
-
-    await Promise.all([
-      updateGoalOrder(goalId.value, movingChild.id, aboveOrder),
-      updateGoalOrder(goalId.value, aboveChild.id, movingOrder),
-    ]);
-
-    console.log('moveChildUp: order updated, refreshing with force');
-
-    // Uppdatera markerad index
-    selectedChildIndex.value = currentIndex - 1;
-
-    // Uppdatera data från server med force refresh
-    await refresh(true);
-    
-    console.log('moveChildUp: refresh complete, children count:', children.value.length);
-  } catch (error) {
-    console.error("Failed to move child up:", error);
-    await refresh(true);
+  if (!reordered) {
+    return;
   }
+
+  applyLocalOrder(reordered);
+  selectedChildIndex.value = targetIndex;
+
+  persistChildOrder();
 }
 
-// Flytta markerat barn ner i listan
-async function moveChildDown() {
-  if (
-    selectedChildIndex.value < 0 ||
-    isParentMode.value ||
-    isGoalSelected.value
-  ) {
+// Sätter den nya ordningen lokalt utan att vänta på servern
+function applyLocalOrder(ids: number[]) {
+  const data = goalData.value;
+  if (!data?.children) {
     return;
   }
 
-  const currentIndex = selectedChildIndex.value;
-  const displayedChildren = filteredChildren.value;
+  const byId = new Map(data.children.map((c) => [c.id, c]));
+  const reordered = ids
+    .map((id) => byId.get(id))
+    .filter((c): c is GoalWithWeight => Boolean(c));
 
-  if (currentIndex >= displayedChildren.length - 1) {
+  reordered.forEach((child, index) => {
+    child.order = index;
+  });
+
+  data.children = reordered;
+}
+
+// Sparar ordningen till servern. Anropen körs i kedjan och senaste ordningen
+// vinner - flera snabba tangenttryck slås ihop till ett anrop.
+let orderSaveChain: Promise<void> = Promise.resolve();
+let pendingOrder: number[] | null = null;
+let isSavingOrder = false;
+
+function persistChildOrder() {
+  pendingOrder = children.value.map((c) => c.id);
+
+  if (isSavingOrder) {
     return;
   }
 
-  // Hämta de två målen som ska bytas
-  const movingChild = displayedChildren[currentIndex];
-  const belowChild = displayedChildren[currentIndex + 1];
+  isSavingOrder = true;
+  orderSaveChain = orderSaveChain.then(flushChildOrder);
+}
 
-  console.log('moveChildDown: moving child', movingChild.id, 'with order', movingChild.order, 'to position of', belowChild.id, 'with order', belowChild.order);
-
+async function flushChildOrder() {
   try {
-    // Byt ordningen mellan de två målen
-    const movingOrder = movingChild.order;
-    const belowOrder = belowChild.order;
+    while (pendingOrder) {
+      const ids = pendingOrder;
+      pendingOrder = null;
 
-    await Promise.all([
-      updateGoalOrder(goalId.value, movingChild.id, belowOrder),
-      updateGoalOrder(goalId.value, belowChild.id, movingOrder),
-    ]);
-
-    console.log('moveChildDown: order updated, refreshing with force');
-
-    // Uppdatera markerad index
-    selectedChildIndex.value = currentIndex + 1;
-
-    // Uppdatera data från server med force refresh
-    await refresh(true);
-    
-    console.log('moveChildDown: refresh complete, children count:', children.value.length);
-  } catch (error) {
-    console.error("Failed to move child down:", error);
-    await refresh(true);
+      try {
+        await reorderChildren(goalId.value, ids);
+      } catch (error) {
+        console.error("Failed to save child order:", error);
+        await refresh(true);
+      }
+    }
+  } finally {
+    isSavingOrder = false;
   }
 }
 
@@ -1186,6 +1097,16 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
+  // Tangenter i formulärfält (t.ex. viktslidern) ska inte styra listan
+  const eventTarget = event.target as HTMLElement | null;
+  const isFormField =
+    !!eventTarget &&
+    (["INPUT", "TEXTAREA", "SELECT"].includes(eventTarget.tagName) ||
+      eventTarget.isContentEditable);
+  if (isFormField) {
+    return;
+  }
+
   // ===============================================
   // LEADER MODE CHECKS - PRIORITERA FÖRE ALLT ANNAT
   // ===============================================
@@ -1207,6 +1128,10 @@ function handleKeydown(event: KeyboardEvent) {
 
   // Hantera leader key (space) - enter leader mode
   if (event.key === " ") {
+    // En fokuserad knapp ska aktiveras med mellanslag, inte öppna leader mode
+    if (eventTarget?.tagName === "BUTTON") {
+      return;
+    }
     event.preventDefault();
     isLeaderModalOpen.value = true;
     return;
@@ -1371,10 +1296,10 @@ function handleKeydown(event: KeyboardEvent) {
       }
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      moveChildUp();
+      moveChild("up");
     } else if (event.key === "ArrowDown") {
       event.preventDefault();
-      moveChildDown();
+      moveChild("down");
     }
   }
 }

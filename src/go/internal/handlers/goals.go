@@ -480,6 +480,55 @@ func (h *GoalHandler) DeleteRelation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"deleted": true})
 }
 
+// ReorderRelations godoc
+// @Summary Reorder the children of a goal
+// @Description Sets a new order for all children of a goal in one transaction
+// @Tags relations
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param relation body models.ReorderRelationsRequest true "New order of the children"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Router /api/goals/relations/reorder [patch]
+func (h *GoalHandler) ReorderRelations(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	var req models.ReorderRelationsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "parentId and childIds are required"})
+		return
+	}
+
+	if len(req.ChildIDs) == 0 {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "childIds must contain at least one child"})
+		return
+	}
+
+	hasAccess, _ := h.repo.UserHasAccess(c.Request.Context(), userID, req.ParentID)
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{Message: "Access denied"})
+		return
+	}
+
+	if err := h.repo.ReorderRelations(c.Request.Context(), req.ParentID, req.ChildIDs); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"updated": true})
+}
+
 // CreateDependency godoc
 // @Summary Create a dependency
 // @Description Create a dependency between two goals

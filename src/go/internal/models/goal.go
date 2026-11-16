@@ -118,6 +118,13 @@ type UpdateRelationRequest struct {
 	Weight   *int  `json:"weight,omitempty"`
 }
 
+// ReorderRelationsRequest is the request body for reordering the children of a goal.
+// ChildIDs contains the children in their new order.
+type ReorderRelationsRequest struct {
+	ParentID int64   `json:"parentId" binding:"required"`
+	ChildIDs []int64 `json:"childIds" binding:"required"`
+}
+
 // DeleteRelationRequest is the request body for deleting a relation
 type DeleteRelationRequest struct {
 	ChildID  int64 `json:"childId" binding:"required"`

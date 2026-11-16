@@ -138,6 +138,17 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter en ny ordning på alla undermål i ett svep (en request, en transaktion)
+	const reorderChildren = async (
+		parentId: number,
+		childIds: number[],
+	) => {
+		await apiProxy(`goals/relations/reorder`, {
+			method: "PATCH",
+			body: { parentId, childIds },
+		});
+	};
+
 	const updateGoalWeight = async (
 		parentId: number,
 		childId: number,
@@ -207,6 +218,7 @@ export function useGoalApi() {
 		removeParentRelation,
 		addChildRelation,
 		updateGoalOrder,
+		reorderChildren,
 		updateGoalWeight,
 		setGoalWeight,
 		createGoal,

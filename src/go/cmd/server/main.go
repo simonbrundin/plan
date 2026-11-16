@@ -119,6 +119,7 @@ func main() {
 		api.POST("/goals/relations", goalHandler.CreateRelation)
 		api.PATCH("/goals/relations", goalHandler.UpdateRelation)
 		api.DELETE("/goals/relations", goalHandler.DeleteRelation)
+		api.PATCH("/goals/relations/reorder", goalHandler.ReorderRelations)
 
 		// Dependencies endpoints
 		api.POST("/goals/dependencies", goalHandler.CreateDependency)

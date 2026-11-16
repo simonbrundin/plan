@@ -25,6 +25,7 @@ export interface GoalWithRelations extends Goal {
 
 export interface GoalWithWeight extends Goal {
 	weight: number;
+	order: number;
 }
 
 export interface GoalDependency {
@@ -36,6 +37,7 @@ export interface GoalDependency {
 
 export interface GetGoalResponse {
 	goal: GoalWithRelations;
+	children: GoalWithWeight[];
 	allGoals: Goal[];
 	dependencies: GoalDependency[];
 	dependsOn: Goal[];

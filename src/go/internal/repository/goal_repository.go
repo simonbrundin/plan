@@ -290,6 +290,82 @@ func (r *GoalRepository) UpdateRelation(ctx context.Context, parentID, childID i
 	return err
 }
 
+// ReorderRelations sets a new order for the children of a goal.
+// The children in childIDs get order 0, 1, 2... in the given order. Any child
+// that is not listed keeps its relative position and is placed after the
+// listed ones, so a stale client can never leave gaps or duplicates behind.
+func (r *GoalRepository) ReorderRelations(ctx context.Context, parentID int64, childIDs []int64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Fetch the children that are not part of the request so they can be
+	// appended instead of being left with a colliding order value.
+	rows, err := tx.Query(ctx, `SELECT child_id FROM goal_relations WHERE parent_id = $1 ORDER BY "order" ASC, child_id ASC`, parentID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch child relations: %w", err)
+	}
+	var existing []int64
+	for rows.Next() {
+		var childID int64
+		if err := rows.Scan(&childID); err != nil {
+			rows.Close()
+			return fmt.Errorf("failed to scan child relation: %w", err)
+		}
+		existing = append(existing, childID)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("failed to read child relations: %w", err)
+	}
+
+	for i, childID := range mergeChildOrder(existing, childIDs) {
+		if _, err := tx.Exec(ctx, `UPDATE goal_relations SET "order" = $1 WHERE parent_id = $2 AND child_id = $3`, i, parentID, childID); err != nil {
+			return fmt.Errorf("failed to update order for child %d: %w", childID, err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit reorder: %w", err)
+	}
+	return nil
+}
+
+// mergeChildOrder combines the requested order with the children that exist
+// on the server but were not part of the request. The requested children come
+// first, in the requested order, and the rest keep their relative order.
+// Children that do not exist on the server are ignored, so the resulting
+// order always has exactly one slot per existing child.
+func mergeChildOrder(existing []int64, requested []int64) []int64 {
+	known := make(map[int64]bool, len(existing))
+	for _, id := range existing {
+		known[id] = true
+	}
+
+	ordered := make([]int64, 0, len(existing))
+	seen := make(map[int64]bool, len(existing))
+
+	for _, id := range requested {
+		if seen[id] || !known[id] {
+			continue
+		}
+		seen[id] = true
+		ordered = append(ordered, id)
+	}
+
+	for _, id := range existing {
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		ordered = append(ordered, id)
+	}
+
+	return ordered
+}
+
 // DeleteRelation deletes a parent-child relation
 func (r *GoalRepository) DeleteRelation(ctx context.Context, parentID, childID int64) error {
 	_, err := r.pool.Exec(ctx, `DELETE FROM goal_relations WHERE parent_id = $1 AND child_id = $2`, parentID, childID)
