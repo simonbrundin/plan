@@ -18,6 +18,7 @@
         "pinia": "^2.3.0",
         "shadcn-nuxt": "^2.2.0",
         "tailwindcss": "^4.1.13",
+        "translate": "^3.1.1",
         "typescript": "^5.0.0",
         "vue": "^3.5.21",
         "vue-router": "^4.5.1",
@@ -2062,6 +2063,8 @@
     "touch": ["touch@3.1.1", "", { "bin": { "nodetouch": "bin/nodetouch.js" } }, "sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA=="],
 
     "tr46": ["tr46@0.0.3", "", {}, "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="],
+
+    "translate": ["translate@3.1.1", "", {}, "sha512-ImT6fAOY8hGYbAEOieqzlufKq9bDa+2R4lR/Vq5lDxKYUHxG+YbIEJUH//6477XZIDZewuOgQcMYHKmDZV9h/g=="],
 
     "traverse": ["traverse@0.6.8", "", {}, "sha512-aXJDbk6SnumuaZSANd21XAo15ucCDE38H4fkqiGsc3MhCK+wOlZvLP9cB/TvpHT0mOyWgC4Z8EwRlzqYSUzdsA=="],
 
