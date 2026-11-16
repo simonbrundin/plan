@@ -17,3 +17,14 @@ export function matchesStartedFilter(
 	if (filter === "started") return goal.started !== null;
 	return goal.started === null;
 }
+
+/**
+ * Avgör om ett mål är ett grundmål, dvs. inte har någon förälder.
+ *
+ * Endast grundmål listas under /goals - undermål visas på sitt
+ * föräldermål. Saknas has_parent (t.ex. från ett svar som inte
+ * innehåller relationer) räknas målet som grundmål.
+ */
+export function isRootGoal(goal: Pick<Goal, "has_parent">): boolean {
+	return !goal.has_parent;
+}

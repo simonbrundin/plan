@@ -8,6 +8,9 @@ export interface Goal {
 	inbox: number;
 	// Evigt mål - pågår hela livet och kan inte slutföras.
 	eternal: boolean;
+	// Sant om målet har en förälder. Endast grundmål (has_parent = false)
+	// listas under /goals.
+	has_parent?: boolean;
 }
 
 export interface ChildRelation {

@@ -29,7 +29,8 @@ func NewGoalRepository() *GoalRepository {
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal 
+		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal,
+			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
 		WHERE ug.user_id = $1
@@ -44,7 +45,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal)
+		err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.HasParent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
@@ -56,11 +57,14 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 
 // GetGoalByID returns a single goal by ID
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
-	query := `SELECT id, title, icon, created, started, finished, inbox, eternal FROM goals WHERE id = $1`
+	query := `
+		SELECT id, title, icon, created, started, finished, inbox, eternal,
+			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent
+		FROM goals WHERE id = $1`
 
 	var g models.Goal
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal)
+		&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.HasParent)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil

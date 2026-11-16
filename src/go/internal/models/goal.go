@@ -19,6 +19,9 @@ type Goal struct {
 	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
 	// kan inte slutföras och markeras alltid som pågående.
 	Eternal bool `json:"eternal" example:"false"`
+	// HasParent anger om målet har en förälder (det är child i goal_relations).
+	// Endast grundmål (utan förälder) listas på /goals.
+	HasParent bool `json:"has_parent" example:"false"`
 }
 
 // Status represents a goal status

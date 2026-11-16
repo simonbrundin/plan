@@ -2,6 +2,7 @@
 import type { Goal } from '~/types/goal'
 import { AuthenticationError } from '~/composables/useGoalApi'
 import { canBeFinished } from '~/utils/goalRules'
+import { isRootGoal } from '~/utils/goalFilters'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
@@ -39,7 +40,9 @@ const mode = ref<'normal' | 'insert'>('normal')
 // Lokal state för att uppdatera UI direkt
 const localGoals = computed(() => goals.value)
 
-const displayedGoals = computed(() => localGoals.value)
+// Endast grundmål (utan förälder) visas under /goals - undermål nås
+// via sitt föräldermål.
+const displayedGoals = computed(() => localGoals.value.filter(isRootGoal))
 const showStarted = ref(false)
 
 const filteredGoals = computed(() => {
