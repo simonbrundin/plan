@@ -316,6 +316,18 @@ watch(filteredGoals, () => {
   }
 })
 
+// Scrolla till markerat mål när selectedIndex ändras
+watch(selectedIndex, async () => {
+  await nextTick()
+  const selectedElement = document.querySelector(`[data-goal-index="${selectedIndex.value}"]`) as HTMLElement
+  if (selectedElement) {
+    selectedElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    })
+  }
+})
+
 // Fokusera sök-input när sök öppnas
 const searchInput = ref<HTMLInputElement | null>(null)
 watch(showSearch, async (val) => {
@@ -402,6 +414,7 @@ definePageMeta({
       <div
         v-for="(goal, index) in filteredGoals"
         :key="goal.id"
+        :data-goal-index="index"
         class="flex items-center gap-3 p-4 rounded-lg transition-all cursor-pointer"
         :class="index === selectedIndex 
           ? 'bg-blue-600 text-white' 
