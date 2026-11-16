@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Goal } from '~/types/goal'
 import { canBeFinished } from '~/utils/goalRules'
+import { ETERNAL_ACCENT, ETERNAL_BORDER, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 definePageMeta({
   ssr: false,
@@ -185,7 +186,7 @@ const filterOptions = [
           <button
             @click.stop="toggleFinished(goal)"
             class="w-6 h-6 rounded border-2 border-gray-600 flex items-center justify-center transition-colors hover:border-gray-400"
-            :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? 'border-pink-500 cursor-not-allowed' : ''"
+            :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? ETERNAL_BORDER + ' cursor-not-allowed' : ''"
             :title="goal.eternal ? 'Ett evigt mål kan inte slutföras' : goal.finished ? 'Avmarkera som klar' : 'Markera som klar'"
             :disabled="goal.eternal"
           >
@@ -197,16 +198,16 @@ const filterOptions = [
 
         <div class="flex items-center gap-2 flex-1 min-w-0">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-5 h-5 flex-shrink-0"
-            :class="goal.eternal ? 'text-pink-300' : 'text-gray-400'" />
+            :class="goal.eternal ? ETERNAL_TEXT : 'text-gray-400'" />
           <NuxtLink
             :to="`/goal/${goal.id}`"
             class="truncate transition-colors"
-            :class="goal.eternal ? 'text-pink-300 hover:text-pink-200' : 'text-gray-200 hover:text-white'"
+            :class="goal.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : 'text-gray-200 hover:text-white'"
             @click.stop
           >
             {{ goal.title }}
           </NuxtLink>
-          <span v-if="goal.eternal" class="text-pink-400 text-xs flex-shrink-0">∞ Evigt</span>
+          <span v-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-xs flex-shrink-0'">∞</span>
         </div>
 
         <div class="flex-shrink-0 text-right">

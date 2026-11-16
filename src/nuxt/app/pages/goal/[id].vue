@@ -9,6 +9,7 @@ import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight } from '~/types/goal'
 import { moveChildId, nextChildOrder } from '~/utils/childOrder'
 import { canBeFinished } from '~/utils/goalRules'
+import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -1447,7 +1448,7 @@ watch(selectedParentIndex, async () => {
               class="px-2 py-1 rounded transition-all select-none inline-block" :class="isParentMode && selectedParentIndex === index
                 ? 'text-gray-100 bg-blue-500 font-medium'
                 : parent.eternal
-                ? 'text-pink-300 hover:text-pink-200'
+                ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER
                 : 'text-gray-500 hover:text-gray-300'
                 " @mousedown="handleParentMouseDown(parent.id)" @mouseup="handleParentMouseUp"
               @mouseleave="handleParentMouseUp" @touchstart="handleParentMouseDown(parent.id)"
@@ -1503,7 +1504,7 @@ watch(selectedParentIndex, async () => {
       <div v-else class="flex items-center gap-4 flex-shrink-0">
         <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
           isGoalSelected ? 'border border-blue-500' : '',
-          goal?.eternal ? 'text-pink-300' : 'text-gray-100'
+          goal?.eternal ? ETERNAL_TEXT : 'text-gray-100'
         ]">{{ goal?.title }}</h1>
         <!-- Started-toggle (s) -->
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
@@ -1521,7 +1522,7 @@ watch(selectedParentIndex, async () => {
           @click.stop="toggleEternal(goal)"
           class="p-2 rounded transition-colors"
           :class="goal.eternal
-            ? 'text-pink-400 hover:text-pink-300'
+            ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER
             : 'text-gray-600 hover:text-gray-400'"
           :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
           <Icon name="lucide:infinity" class="w-6 h-6"
@@ -1727,9 +1728,9 @@ watch(selectedParentIndex, async () => {
               <div v-else class="flex items-center gap-2">
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                   :class="['flex-shrink-0 transition-colors rounded p-1', child.eternal ? 'text-pink-300 hover:text-pink-200' : isChildBlocked(child.id) || child.finished ? 'text-gray-600 hover:text-gray-600' : 'text-white hover:text-white hover:bg-gray-600']"
+                   :class="['flex-shrink-0 transition-colors rounded p-1', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-gray-600 hover:text-gray-600' : 'text-white hover:text-white hover:bg-gray-600']"
                    title="Ändra ikon">
-                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: '#F9A8D4' } : isChildBlocked(child.id) || child.finished ? { color: '#4B5563' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#4B5563' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
                  <!-- Started-toggle (s) -->
                  <button
@@ -1751,12 +1752,9 @@ watch(selectedParentIndex, async () => {
                    <Icon name="lucide:link" class="w-5 h-5" />
                  </button>
                  <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
-                  <h3 class="text-lg font-normal select-none" :class="child.eternal ? 'text-pink-300' : child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'" :style="child.eternal ? { color: '#F9A8D4' } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
+                  <h3 class="text-lg font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
-                  <p v-if="child.eternal" class="text-xs text-pink-400 mt-1">
-                    Evigt mål - kan inte slutföras
-                  </p>
                   <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-gray-600 mt-1">
                     🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
                   </p>

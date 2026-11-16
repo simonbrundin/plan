@@ -2,6 +2,7 @@
 import type { Goal } from '~/types/goal'
 import { AuthenticationError } from '~/composables/useGoalApi'
 import { canBeFinished } from '~/utils/goalRules'
+import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, loadAllGoals, createGoal } = useGoalApi()
@@ -405,7 +406,7 @@ definePageMeta({
         @click="goToGoal(goal.id)"
       >
         <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0"
-          :class="goal.eternal ? 'text-pink-300' : ''" />
+          :class="goal.eternal ? ETERNAL_TEXT : ''" />
         <!-- Started (klicka eller s) -->
         <button @click.stop="toggleStarted(goal)"
           class="flex-shrink-0 p-1 rounded transition-colors"
@@ -417,14 +418,14 @@ definePageMeta({
         <!-- Evigt mål (e) -->
         <button @click.stop="toggleEternal(goal)"
           class="flex-shrink-0 p-1 rounded transition-colors"
-          :class="goal.eternal ? 'text-pink-400 hover:text-pink-300' : 'text-gray-600 hover:text-gray-400'"
+          :class="goal.eternal ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER : 'text-gray-600 hover:text-gray-400'"
           :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
           <Icon name="lucide:infinity" class="w-5 h-5"
             :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
         </button>
-        <span class="flex-1 truncate" :class="goal.eternal ? 'text-pink-300' : ''">{{ goal.title }}</span>
+        <span class="flex-1 truncate" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
         <span v-if="goal.finished" class="text-green-400 text-sm">✓ Klar</span>
-        <span v-else-if="goal.eternal" class="text-pink-400 text-sm">∞ Evigt</span>
+        <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm'">∞</span>
         <span v-else class="text-gray-500 text-sm">#{{ goal.id }}</span>
       </div>
     </div>
