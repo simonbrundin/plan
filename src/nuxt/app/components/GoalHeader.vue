@@ -57,7 +57,7 @@ const emit = defineEmits<{
           ? 'text-yellow-400 hover:text-yellow-300'
           : 'text-gray-600 hover:text-gray-400'
       "
-      title="Påbörja (s)"
+      :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'"
     >
       <Icon
         name="lucide:circle-play"

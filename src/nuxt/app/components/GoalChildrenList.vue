@@ -223,7 +223,7 @@ function getIconOpacity(child: GoalWithWeight): number {
                 'flex-shrink-0 p-1 rounded transition-colors',
                 isChildBlocked(child.id) || child.finished ? 'text-gray-600' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-gray-300'
               ]"
-              title="Påbörja (s)"
+              :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'"
             >
               <Icon
                 name="lucide:circle-play"

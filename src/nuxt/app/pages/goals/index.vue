@@ -380,7 +380,7 @@ definePageMeta({
         <button @click.stop="toggleStarted(goal)"
           class="flex-shrink-0 p-1 rounded transition-colors"
           :class="goal.started ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'"
-          :title="goal.started ? 'Avmarkerad (s)' : 'Påbörja (s)'">
+          :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
           <Icon name="lucide:circle-play" class="w-5 h-5"
             :style="{ opacity: goal.started ? 1 : 0.25 }" />
         </button>

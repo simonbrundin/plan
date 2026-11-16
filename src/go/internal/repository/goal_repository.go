@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// ErrInvalidTimestamp betyder att en tidsstämpel inte kunde tolkas som RFC3339.
+var ErrInvalidTimestamp = errors.New("invalid timestamp")
 
 type GoalRepository struct {
 	pool *pgxpool.Pool
@@ -104,39 +108,50 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 	query := "UPDATE goals SET "
 	var args []interface{}
 	argNum := 1
+	hasUpdate := false
 
 	if req.Title != nil {
 		query += fmt.Sprintf("title = $%d, ", argNum)
 		args = append(args, *req.Title)
 		argNum++
+		hasUpdate = true
 	}
 	if req.Icon != nil {
 		query += fmt.Sprintf("icon = $%d, ", argNum)
 		args = append(args, *req.Icon)
 		argNum++
+		hasUpdate = true
 	}
-	if req.Started != nil {
-		if *req.Started == "" {
+	if req.Started.Set {
+		hasUpdate = true
+		if req.Started.Value == nil || *req.Started.Value == "" {
 			query += "started = NULL, "
 		} else {
+			t, err := time.Parse(time.RFC3339, *req.Started.Value)
+			if err != nil {
+				return nil, fmt.Errorf("%w: %q", ErrInvalidTimestamp, *req.Started.Value)
+			}
 			query += fmt.Sprintf("started = $%d, ", argNum)
-			t, _ := time.Parse(time.RFC3339, *req.Started)
 			args = append(args, t)
 			argNum++
 		}
 	}
-	if req.Finished != nil {
-		if *req.Finished == "" {
+	if req.Finished.Set {
+		hasUpdate = true
+		if req.Finished.Value == nil || *req.Finished.Value == "" {
 			query += "finished = NULL, "
 		} else {
+			t, err := time.Parse(time.RFC3339, *req.Finished.Value)
+			if err != nil {
+				return nil, fmt.Errorf("%w: %q", ErrInvalidTimestamp, *req.Finished.Value)
+			}
 			query += fmt.Sprintf("finished = $%d, ", argNum)
-			t, _ := time.Parse(time.RFC3339, *req.Finished)
 			args = append(args, t)
 			argNum++
 		}
 	}
 
-	if len(args) == 0 {
+	if !hasUpdate {
 		return r.GetGoalByID(ctx, goalID)
 	}
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -262,6 +263,10 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 
 	goal, err := h.repo.UpdateGoal(c.Request.Context(), goalID, req)
 	if err != nil {
+		if errors.Is(err, repository.ErrInvalidTimestamp) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}

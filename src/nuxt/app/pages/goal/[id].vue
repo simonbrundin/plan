@@ -1457,7 +1457,7 @@ watch(selectedParentIndex, async () => {
           :class="goal.started
             ? 'text-yellow-400 hover:text-yellow-300'
             : 'text-gray-600 hover:text-gray-400'"
-          title="Påbörja (s)">
+          :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
           <Icon name="lucide:circle-play" class="w-6 h-6"
             :style="{ opacity: goal.started ? 1 : 0.25 }" />
         </button>
@@ -1669,7 +1669,7 @@ watch(selectedParentIndex, async () => {
                  <button
                    @click.stop="toggleStarted(child)"
                    :class="['flex-shrink-0 p-1 rounded transition-colors', isChildBlocked(child.id) || child.finished ? 'text-gray-600' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-gray-300']"
-                   title="Påbörja (s)">
+                   :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
                    <Icon name="lucide:circle-play" class="w-5 h-5"
                      :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
                  </button>

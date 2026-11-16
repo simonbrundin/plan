@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"bytes"
+	"encoding/json"
+	"time"
+)
 
 // Goal represents a goal in the system
 type Goal struct {
@@ -88,13 +92,43 @@ type CreateGoalRequest struct {
 	StatusID int    `json:"status_id" example:"1"`
 }
 
+// NullableTime is a timestamp field in an update request.
+//
+// Det skiljer på tre tillstånd:
+//   - fältet saknas i request-bodyn (Set == false) → lämnas oförändrat
+//   - fältet finns med ett värde (Value != nil) → sätts till tidsstämpeln
+//   - fältet finns som null (Set == true, Value == nil) → tidsstämpeln rensas
+//
+// En vanlig *string räcker inte, eftersom JSON null och ett utelämnat fält
+// är samma sak för en pekare.
+type NullableTime struct {
+	Set   bool
+	Value *string
+}
+
+// UnmarshalJSON parses a timestamp that is either a RFC3339-sträng eller null.
+func (n *NullableTime) UnmarshalJSON(data []byte) error {
+	n.Set = true
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		n.Value = nil
+		return nil
+	}
+
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	n.Value = &s
+	return nil
+}
+
 // UpdateGoalRequest is the request body for updating a goal
 type UpdateGoalRequest struct {
-	Title    *string `json:"title,omitempty"`
-	Icon     *string `json:"icon,omitempty"`
-	StatusID *int    `json:"status_id,omitempty"`
-	Started  *string `json:"started,omitempty"`
-	Finished *string `json:"finished,omitempty"`
+	Title    *string      `json:"title,omitempty"`
+	Icon     *string      `json:"icon,omitempty"`
+	StatusID *int         `json:"status_id,omitempty"`
+	Started  NullableTime `json:"started,omitempty"`
+	Finished NullableTime `json:"finished,omitempty"`
 }
 
 // UpdateStatusRequest is the request body for updating goal status
