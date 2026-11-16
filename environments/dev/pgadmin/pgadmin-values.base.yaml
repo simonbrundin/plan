@@ -1,0 +1,18 @@
+# pgAdmin values for dev environment
+# Servernsdefinitionen för Neon ligger i pgadmin-values.yaml, som genereras
+# ur environments/dev/db/neon.env (gitignoras) av
+# environments/dev/db/sync-neon-env.sh.
+
+test:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  email: admin@local.dev
+  password: admin
+
+persistentVolume:
+  enabled: false

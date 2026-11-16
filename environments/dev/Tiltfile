@@ -47,6 +47,17 @@ docker_build("plan-nuxt", "../../src/nuxt")
 docker_build("plan-go-api", "../../src/go")
 
 # =============================================================================
+# Databasen i dev är Neon (ingen Postgres i klustret)
+#
+# Se db/README.md. neon.env gitignoras och måste finnas innan Tilt startar.
+# =============================================================================
+
+local("test -f db/neon.env || (echo 'FEL: environments/dev/db/neon.env saknas. Kopiera neon.env.example -> neon.env och fyll i Neon-credentials. Se environments/dev/db/README.md' >&2; exit 1)")
+
+# Generera pgAdmin-värden (serverdefinition för Neon) ur neon.env.
+local("./db/sync-neon-env.sh")
+
+# =============================================================================
 # Konfiguration
 # =============================================================================
 

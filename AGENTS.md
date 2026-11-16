@@ -41,7 +41,7 @@ This file contains preferences and requirements for AI coding agents working on 
 | ------------ | --------------- | ------------------- | ---- | --------------------------- |
 | **Frontend** | Nuxt 4 (SPA)    | `node:lts-alpine`  | 3000 | Interface, SPA routing      |
 | **API**      | Go + Gin        | `gcr.io/distroless` | 8080 | REST API, business logic    |
-| **Database** | PostgreSQL      | CNPG               | 5432 | Data storage (Kubernetes)  |
+| **Database** | PostgreSQL      | Neon (dev) / CNPG (prod) | 5432 | Data storage           |
 | **Schema**   | Atlas           | Operator           | -    | Schema migration (K8s)     |
 
 ## Communication
@@ -97,6 +97,13 @@ cd src/go && go run ./cmd/api
 # PostgreSQL (if local)
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres:16
 ```
+
+### Databas i dev = Neon
+
+Dev kör **inte** mot en Postgres i klustret. `environments/dev/db/neon.env`
+(gitignoras) innehåller anslutningssträngarna till Neon-branch `dev` i
+projektet `fragrant-pine-27757562`, och blir Secret `plan-db-neon` via
+kustomize. Se `environments/dev/README.md` och `environments/dev/db/README.md`.
 
 ### Database Schema
 

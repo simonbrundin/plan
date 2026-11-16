@@ -8,14 +8,39 @@ namespace: plan
 
 resources:
   - ../base
+  - db
   - pgadmin
-  - secrets/plan-db-admin.yaml
-  - secrets/plan-db-user.yaml
   - secrets/auth.yaml
 
 patches:
   - path: patches/nuxt-deployment.yaml
   - path: patches/api-deployment.yaml
+  # Dev har ingen Postgres i klustret - databasen är Neon.
+  # Ta bort CNPG-klustret som ligger i base/db.
+  - target:
+      group: postgresql.cnpg.io
+      version: v1
+      kind: Cluster
+      name: plan-db
+    patch: |-
+      $patch: delete
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
+        name: plan-db
+  # Atlas operatören ska applicera schemat mot Neon, inte mot CNPG.
+  - target:
+      group: db.atlasgo.io
+      version: v1alpha1
+      kind: AtlasSchema
+      name: plan-db-schema
+    patch: |-
+      - op: replace
+        path: /spec/urlFrom/secretKeyRef/name
+        value: plan-db-neon
+      - op: replace
+        path: /spec/urlFrom/secretKeyRef/key
+        value: uri
 
 # Images byggda av Tilt
 images:

@@ -49,6 +49,10 @@ dev-debug.log
 node_modules/
 # Environment variables
 .env
+# Neon-credentials för dev (gitignoras - innehåller riktiga lösenord)
+environments/dev/db/neon.env
+# Genererad ur neon.env av environments/dev/db/sync-neon-env.sh
+environments/dev/pgadmin/pgadmin-values.yaml
 # Editor directories and files
 .idea
 .vscode

@@ -31,8 +31,8 @@ cookies mellan omstarter.
            │                                           │
            │  sessionkoken i cookie                    ▼
            │  (sätts av Go)                   ┌────────────────────┐
-           ▼                                 │  PostgreSQL (CNPG) │
-    plan_session (httpOnly)                  │  plan-db-rw        │
+           ▼                                 │  Neon (dev-branch) │
+    plan_session (httpOnly)                  │  poolad endpoint   │
     plan_user    (läsbar hint)               └────────────────────┘
 ```
 
@@ -122,15 +122,39 @@ tilt down
 - `kustomization.yaml` - dev-overlay: base + pgadmin + secrets + patches.
 - `patches/nuxt-deployment.yaml` - env för Nuxt (URL:er, dev-auth).
 - `patches/api-deployment.yaml` - env för Go API:t (dev-auth, OAuth-URL:er).
-- `secrets/` - dev-secrets (DB-användare, auth).
-- `pgadmin/` - pgAdmin för devdatabasen.
+- `secrets/` - dev-secrets (auth).
+- `db/` - Neon-kopplingen: `neon.env` (gitignoras), `neon.env.example`,
+  `sync-neon-env.sh` och en README.
+- `pgadmin/` - pgAdmin mot Neon (`pgadmin-values.yaml` genereras ur
+  `db/neon.env`).
 - `gateway/` - **används inte** i nuvarande läge. En gammal Caddy-gateway
   från en tidigare "local mode"-uppsättning med flera worktrees. Kan
   tas bort.
 
 ## Databasen
 
-- CNPG-kluster `plan-db`, databasen `plan`, rollen `plan` äger tabellerna.
+Dev kör mot **Neon** (Lakebase Postgres), inte mot en Postgres i klustret.
+Det finns **ingen CNPG-kluster i dev** - `environments/dev/kustomization.yaml`
+tar bort `plan-db` från base och pekar om API:t och Atlas mot Neon.
+
+- Neon-projekt `fragrant-pine-27757562`, branch `dev`
+  (ID `br-misty-frost-aldds5s5`), databasen `neondb`.
+- Anslutningssträngarna ligger i `environments/dev/db/neon.env` (gitignoras)
+  och blir Secret `plan-db-neon` via `secretGenerator`.
+  - `DATABASE_URL` - poolad endpoint, används av API:t (pgx).
+  - `DATABASE_URL_UNPOOLED` - direkt endpoint, för psql och migrationer.
+  - `uri` - direkt endpoint **utan** `channel_binding` (Atlas använder
+    `lib/pq`, som inte stöder parametern).
+- **pgAdmin** pekar på Neon via `environments/dev/pgadmin/pgadmin-values.yaml`,
+  som genereras ur `neon.env` av `environments/dev/db/sync-neon-env.sh`.
+  Kör synkningen när credentials eller endpoint ändras.
+- Så här byter man databas (t.ex. till en ny Neon-branch):
+  1. Skriv `environments/dev/db/neon.env` (utgångspunkt: `neon.env.example`).
+  2. `./environments/dev/db/sync-neon-env.sh`
+  3. `tilt up`
+
+Det gamla CNPG-klustret `plan-db` ligger kvar i `base/db` och används av
+**prod**. I dev raderas det via en `$patch: delete` i dev-overlayen.
 - Schemat appliceras av Atlas Operator (`AtlasSchema` `plan-db-schema`) -
   som rollen `plan`, så API:t har rätt att ändra tabellerna.
 - **Atlas applicerar schemat deklarativt (bara DDL)** - `INSERT`-raderna i
@@ -142,7 +166,8 @@ tilt down
 - `GRANT`-satser får **inte** ligga i `schema.yaml` - Atlas (community)
   avvisar dem med "permissions are available to logged-in users only".
   Rättigheterna sätts i stället via `postInitSQL` i
-  `environments/base/db/postgres-cluster.yaml`.
+  `environments/base/db/postgres-cluster.yaml` (gäller prod - i dev äger
+  `neondb_owner` alla rättigheter).
 - Varning: en Atlas-apply är deklarativ. Ett schema som saknar tabeller
   **raderar** dem - testa aldrig genom att tömma `schema.yaml`.
 
@@ -168,6 +193,8 @@ efter. Applikationen fixar sekvensen vid start (`seed.go`).
 
 ### AtlasSchema är "Stalled"
 
-Kontrollera att `DATABASE_URL`/Atlas-URI:n använder **FQDN**
+I dev: kontrollera att Secret `plan-db-neon` finns och att `uri` pekar på
+Neons **direkta** endpoint (utan `channel_binding`). I prod: kontrollera att
+`DATABASE_URL`/Atlas-URI:n använder **FQDN**
 (`plan-db-rw.plan.svc.cluster.local`) - korta namn fungerar bara från
 samma namespace som tjänsten.

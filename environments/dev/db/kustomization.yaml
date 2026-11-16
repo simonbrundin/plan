@@ -1,0 +1,24 @@
+# DO NOT EDIT MANUALLY
+# Dev database configuration.
+#
+# Dev kör mot Neon (Lakebase Postgres) - det finns ingen Postgres i klustret.
+# Anslutningssträngarna kommer ur neon.env, som gitignoras och måste finnas
+# innan `kustomize build`/`tilt up` (se ./README.md).
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+namespace: plan
+
+# Secret med Neon-anslutningarna. Nycklarna:
+#   DATABASE_URL / DATABASE_URL_UNPOOLED - appen (poolad resp. direkt)
+#   uri                                 - Atlas (direkt endpoint)
+secretGenerator:
+  - name: plan-db-neon
+    envs:
+      - neon.env
+    options:
+      disableNameSuffixHash: true
