@@ -2,11 +2,14 @@
 import type { Goal } from '~/types/goal'
 import { AuthenticationError } from '~/composables/useGoalApi'
 import { canBeFinished } from '~/utils/goalRules'
-import { isRootGoal } from '~/utils/goalFilters'
+import { isRootGoal, isUnfinishedGoal, matchesStartedFilter } from '~/utils/goalFilters'
+import { moveChildId } from '~/utils/childOrder'
+import { sortGoalsByOrder } from '~/utils/goalOrder'
+import { descriptionPreview } from '~/utils/goalDescription'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, loadAllGoals, createGoal } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription } = useGoalApi()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -40,15 +43,24 @@ const mode = ref<'normal' | 'insert'>('normal')
 // Lokal state för att uppdatera UI direkt
 const localGoals = computed(() => goals.value)
 
+// Grundmål (utan förälder) i sin sparade ordning. Målen som saknar order
+// hamnar sist i gruppen, med nyast först - samma ordning som API:t gav
+// innan orderfältet fanns.
+const rootGoals = computed(() =>
+  sortGoalsByOrder(localGoals.value.filter(isRootGoal))
+)
+
 // Endast grundmål (utan förälder) visas under /goals - undermål nås
-// via sitt föräldermål.
-const displayedGoals = computed(() => localGoals.value.filter(isRootGoal))
+// via sitt föräldermål. Slutförda mål döljs helt.
+const displayedGoals = computed(() =>
+  rootGoals.value.filter(isUnfinishedGoal)
+)
 const showStarted = ref(false)
 
 const filteredGoals = computed(() => {
   let result = displayedGoals.value
   if (showStarted.value) {
-    result = result.filter(g => g.started !== null)
+    result = result.filter(g => matchesStartedFilter(g, 'started'))
   }
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -56,6 +68,87 @@ const filteredGoals = computed(() => {
   }
   return result
 })
+
+// Flytta det markerade grundmålet upp eller ner i listan.
+//
+// Ordningen uppdateras lokalt först (optimistiskt) så att tangenttryck
+// direkt ger respons, och sparas sedan till servern. Sparandet serialiseras
+// och slås ihop, så att snabba tangenttryck inte skriver över varandra.
+function moveGoal(direction: 'up' | 'down') {
+  const visible = filteredGoals.value
+  const index = selectedIndex.value
+  if (index < 0 || index >= visible.length) return
+
+  const moving = visible[index]
+  if (!moving) return
+
+  const reordered = moveChildId(
+    rootGoals.value.map(g => g.id),
+    visible.map(g => g.id),
+    moving.id,
+    direction,
+  )
+  if (!reordered) return
+
+  applyLocalOrder(reordered)
+  selectedIndex.value = direction === 'up' ? index - 1 : index + 1
+
+  persistGoalOrder()
+}
+
+// Sätter den nya ordningen lokalt utan att vänta på servern
+function applyLocalOrder(ids: number[]) {
+  const byId = new Map(goals.value.map(g => [g.id, g]))
+  ids.forEach((id, index) => {
+    const goal = byId.get(id)
+    if (goal) {
+      goal.order = index
+    }
+  })
+}
+
+// Sparar ordningen till servern. Anropen körs i kedjan och senaste ordningen
+// vinner - flera snabba tangenttryck slås ihop till ett anrop.
+let orderSaveChain: Promise<void> = Promise.resolve()
+let pendingOrder: number[] | null = null
+let isSavingOrder = false
+
+function persistGoalOrder() {
+  pendingOrder = rootGoals.value.map(g => g.id)
+
+  if (isSavingOrder) {
+    return
+  }
+
+  isSavingOrder = true
+  orderSaveChain = orderSaveChain.then(flushGoalOrder)
+}
+
+async function flushGoalOrder() {
+  try {
+    while (pendingOrder) {
+      const ids = pendingOrder
+      pendingOrder = null
+
+      try {
+        await reorderGoals(ids)
+      } catch (err) {
+        console.error('Failed to save goal order:', err)
+        await refreshGoals()
+      }
+    }
+  } finally {
+    isSavingOrder = false
+  }
+}
+
+async function refreshGoals() {
+  try {
+    goals.value = await loadAllGoals()
+  } catch (err) {
+    console.error('Failed to reload goals:', err)
+  }
+}
 
 // Navigera till mål
 function goToGoal(goalId: number) {
@@ -182,6 +275,46 @@ async function handleDelete(goal: Goal) {
   }
 }
 
+// Redigera beskrivning för det markerade målet
+const editingDescriptionGoalId = ref<number | null>(null)
+const descriptionDraft = ref('')
+
+function startEditDescription(goal: Goal) {
+  editingDescriptionGoalId.value = goal.id
+  descriptionDraft.value = goal.description ?? ''
+  nextTick(() => {
+    const el = document.querySelector('#goal-description-input') as HTMLTextAreaElement | null
+    el?.focus()
+  })
+}
+
+function cancelEditDescription() {
+  editingDescriptionGoalId.value = null
+  descriptionDraft.value = ''
+}
+
+function handleDescriptionKeydown(event: KeyboardEvent, goal: Goal) {
+  if (event.key !== 'Enter' || (!event.ctrlKey && !event.metaKey)) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  void saveDescription(goal)
+}
+
+async function saveDescription(goal: Goal) {
+  const description = descriptionDraft.value
+  try {
+    await updateGoalDescription(goal.id, description)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    if (idx !== -1) {
+      localGoals.value[idx] = { ...localGoals.value[idx], description }
+    }
+    cancelEditDescription()
+  } catch (err) {
+    console.error('Failed to save goal description:', err)
+  }
+}
+
 // Vim tangentbordshantering
 function handleKeydown(event: KeyboardEvent) {
   const target = event.target as HTMLElement
@@ -236,6 +369,15 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
+  // t - redigera beskrivning för det markerade målet
+  if (event.key === 't') {
+    event.preventDefault()
+    if (filteredGoals.value.length > 0) {
+      startEditDescription(filteredGoals.value[selectedIndex.value])
+    }
+    return
+  }
+
   // s - toggle started
   if (event.key === 's') {
     event.preventDefault()
@@ -267,6 +409,20 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'k') {
     event.preventDefault()
     selectedIndex.value = Math.max(selectedIndex.value - 1, 0)
+    return
+  }
+
+  // ArrowUp - flytta markerat grundmål upp
+  if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    moveGoal('up')
+    return
+  }
+
+  // ArrowDown - flytta markerat grundmål ner
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    moveGoal('down')
     return
   }
 
@@ -344,31 +500,34 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold">Mina mål</h1>
-      <div class="flex items-center gap-3">
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-ink">Mina mål</h1>
+        <p class="text-sm text-ink-dim mt-1">
+          {{ filteredGoals.length }} av {{ displayedGoals.length }} grundmål
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
         <!-- Nytt grundmål -->
-        <button @click="startNewGoal"
-          class="p-1 rounded transition-colors text-gray-500 hover:text-gray-300"
-          title="Nytt grundmål (Enter)">
+        <button @click="startNewGoal" class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Nytt grundmål (Enter)">
           <Icon name="lucide:plus" class="w-5 h-5" />
         </button>
         <!-- Visa endast påbörjade -->
         <button @click="showStarted = !showStarted"
-          class="p-1 rounded transition-colors"
-          :class="showStarted ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-500 hover:text-gray-300'"
+          class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+          :class="showStarted ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
           :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'">
           <Icon name="lucide:circle-play" class="w-5 h-5"
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
-        <span class="text-gray-500 text-sm">
-          j/k navigera · l öppna · Enter nytt grundmål · d klar · e evigt mål · x ta bort
+        <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · t beskrivning · x ta bort
         </span>
       </div>
     </div>
 
-    <div v-if="pending" class="text-gray-400">
+    <div v-if="pending" class="text-ink-muted">
       Laddar...
     </div>
 
@@ -376,7 +535,7 @@ definePageMeta({
       <div class="mb-4">
         <Icon name="lucide:alert-circle" class="w-12 h-12 text-yellow-500 mx-auto mb-4" />
         <p class="text-yellow-400 text-lg mb-2">Sessionen har gått ut</p>
-        <p class="text-gray-400">Du omdirigeras till inloggningssidan...</p>
+        <p class="text-ink-muted">Du omdirigeras till inloggningssidan...</p>
       </div>
       <NuxtLink to="/login">
         <UButton color="warning" icon="lucide:log-in">
@@ -389,7 +548,8 @@ definePageMeta({
       Fel vid laddning av mål: {{ error.message }}
     </div>
 
-    <div v-else-if="displayedGoals.length === 0 && !showNewGoalInput" class="text-gray-400">
+    <div v-else-if="filteredGoals.length === 0 && !showNewGoalInput"
+      class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-10 text-center text-ink-muted">
       Inga mål hittades.
     </div>
 
@@ -397,15 +557,15 @@ definePageMeta({
       <!-- Nytt grundmål -->
       <div
         v-if="showNewGoalInput"
-        class="flex items-center gap-3 p-4 rounded-lg bg-blue-600 text-white"
+        class="flex items-center gap-3 p-4 rounded-2xl border border-accent bg-accent/10"
       >
-        <Icon name="heroicons:star" class="w-6 h-6 flex-shrink-0" />
+        <Icon name="heroicons:star" class="w-6 h-6 flex-shrink-0 text-accent-light" />
         <input
           ref="newGoalInput"
           v-model="newGoalTitle"
           type="text"
           placeholder="Nytt grundmål..."
-          class="flex-1 bg-transparent border-none outline-none placeholder-blue-200 text-white"
+          class="flex-1 bg-transparent border-none outline-none placeholder-ink-dim text-ink"
           @keydown.enter.prevent="saveNewGoal"
           @keydown.esc.prevent="cancelNewGoal"
         />
@@ -414,35 +574,69 @@ definePageMeta({
       <div
         v-for="(goal, index) in filteredGoals"
         :key="goal.id"
-        :data-goal-index="index"
-        class="flex items-center gap-3 p-4 rounded-lg transition-all cursor-pointer"
-        :class="index === selectedIndex 
-          ? 'bg-blue-600 text-white' 
-          : 'bg-gray-800 text-gray-200 hover:bg-gray-700'"
-        @click="goToGoal(goal.id)"
+        class="space-y-2"
       >
-        <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0"
-          :class="goal.eternal ? ETERNAL_TEXT : ''" />
-        <!-- Started (klicka eller s) -->
-        <button @click.stop="toggleStarted(goal)"
-          class="flex-shrink-0 p-1 rounded transition-colors"
-          :class="goal.started ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'"
-          :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
-          <Icon name="lucide:circle-play" class="w-5 h-5"
-            :style="{ opacity: goal.started ? 1 : 0.25 }" />
-        </button>
-        <!-- Evigt mål (e) -->
-        <button @click.stop="toggleEternal(goal)"
-          class="flex-shrink-0 p-1 rounded transition-colors"
-          :class="goal.eternal ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER : 'text-gray-600 hover:text-gray-400'"
-          :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
-          <Icon name="lucide:infinity" class="w-5 h-5"
-            :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
-        </button>
-        <span class="flex-1 truncate" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
-        <span v-if="goal.finished" class="text-green-400 text-sm">✓ Klar</span>
-        <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm'">∞</span>
-        <span v-else class="text-gray-500 text-sm">#{{ goal.id }}</span>
+        <div
+          :data-goal-index="index"
+          class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 cursor-pointer"
+          :class="index === selectedIndex ? 'ring-1 ring-accent' : ''"
+          @click="goToGoal(goal.id)"
+        >
+          <span
+            class="w-1 h-8 rounded-full transition-colors"
+            :class="index === selectedIndex ? 'bg-accent' : 'bg-transparent group-hover:bg-line-strong'"
+          />
+          <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0 text-ink-muted group-hover:text-ink transition-colors"
+            :class="goal.eternal ? ETERNAL_TEXT : ''" />
+          <!-- Started (klicka eller s) -->
+          <button @click.stop="toggleStarted(goal)"
+            class="flex-shrink-0 p-1 rounded transition-colors"
+            :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
+            :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+            <Icon name="lucide:circle-play" class="w-5 h-5"
+              :style="{ opacity: goal.started ? 1 : 0.25 }" />
+          </button>
+          <!-- Evigt mål (e) -->
+          <button @click.stop="toggleEternal(goal)"
+            class="flex-shrink-0 p-1 rounded transition-colors"
+            :class="goal.eternal ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER : 'text-ink-dim hover:text-ink-muted'"
+            :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
+            <Icon name="lucide:infinity" class="w-5 h-5"
+              :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
+          </button>
+          <div class="flex-1 min-w-0">
+            <span class="block truncate text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
+            <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">
+              {{ descriptionPreview(goal.description) }}
+            </p>
+          </div>
+          <span v-if="goal.finished" class="text-green-400 text-sm">✓ Klar</span>
+          <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm'">∞</span>
+          <span v-else class="text-ink-dim text-sm tabular-nums">#{{ goal.id }}</span>
+        </div>
+
+        <!-- Redigera beskrivning (t) -->
+        <div v-if="editingDescriptionGoalId === goal.id" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4">
+          <textarea
+            id="goal-description-input"
+            v-model="descriptionDraft"
+            rows="4"
+            class="w-full bg-surface-2 border border-accent rounded p-3 text-ink focus:outline-none focus:ring-2 focus:ring-accent resize-y"
+            placeholder="Beskrivning - vad vill du uppnå?"
+            @keydown="handleDescriptionKeydown($event, goal)"
+            @keydown.esc.prevent="cancelEditDescription"
+          />
+          <div class="flex items-center justify-between mt-2 gap-4">
+            <span class="text-xs text-ink-dim">Ctrl+Enter spara · Esc avbryta</span>
+            <div class="flex gap-2">
+              <button @click="cancelEditDescription" class="rounded-lg border border-line bg-surface-2 px-4 py-2 text-ink-muted transition-colors hover:border-line-strong hover:text-ink">Avbryt</button>
+              <button @click="saveDescription(goal)"
+                class="px-3 py-1.5 bg-accent-strong hover:bg-accent rounded-lg text-white transition-colors">
+                Spara
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -453,38 +647,38 @@ definePageMeta({
         v-model="searchQuery"
         type="text"
         placeholder="Sök mål..."
-        class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full"
         @keydown.escape="showSearch = false"
       />
     </div>
 
     <!-- Delete confirmation modal -->
-    <div 
-      v-if="showDeleteConfirm && goalToDelete" 
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+    <div
+      v-if="showDeleteConfirm && goalToDelete"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       @click.self="showDeleteConfirm = false"
     >
-      <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-md">
-        <h3 class="text-lg font-bold mb-2">Ta bort mål?</h3>
-        <p class="text-gray-400 mb-4">
+      <div class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-6 max-w-md w-full mx-4 shadow-2xl">
+        <h3 class="text-lg font-semibold mb-2 text-ink">Ta bort mål?</h3>
+        <p class="text-ink-muted mb-4">
           Är du säker på att du vill ta bort "{{ goalToDelete.title }}"?
           Detta kan inte ångras.
         </p>
         <div class="flex gap-3">
-          <button 
+          <button
             @click="showDeleteConfirm = false"
-            class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+            class="rounded-lg border border-line bg-surface-2 px-4 py-2 text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
           >
             Avbryt
           </button>
-          <button 
+          <button
             @click="handleDelete(goalToDelete!)"
-            class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded transition-colors"
+            class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white transition-colors"
           >
             Ta bort
           </button>
         </div>
-        <p class="text-gray-500 text-sm mt-4">
+        <p class="text-xs text-ink-dim mt-4">
           Tryck Escape för att avbryta
         </p>
       </div>

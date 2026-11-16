@@ -63,14 +63,14 @@ onUnmounted(() => {
           color="gray"
           variant="ghost"
           @click="close"
-          :class="selection === 'cancel' ? 'ring-2 ring-blue-500' : ''"
+          :class="selection === 'cancel' ? 'ring-2 ring-accent' : ''"
         >
           Avbryt
         </UButton>
         <UButton
           color="red"
           @click="$emit('execute-delete')"
-          :class="selection === 'confirm' ? 'ring-2 ring-blue-400' : ''"
+          :class="selection === 'confirm' ? 'ring-2 ring-accent' : ''"
         >
           Ta bort
         </UButton>

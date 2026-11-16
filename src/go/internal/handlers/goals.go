@@ -547,6 +547,48 @@ func (h *GoalHandler) ReorderRelations(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"updated": true})
 }
 
+// ReorderGoals godoc
+// @Summary Reorder the root goals
+// @Description Sets a new order for the root goals (goals without a parent) of the current user
+// @Tags goals
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param goals body models.ReorderGoalsRequest true "New order of the root goals"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Router /api/goals/reorder [patch]
+func (h *GoalHandler) ReorderGoals(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	var req models.ReorderGoalsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "goalIds is required"})
+		return
+	}
+
+	if len(req.GoalIDs) == 0 {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "goalIds must contain at least one goal"})
+		return
+	}
+
+	if err := h.repo.ReorderRootGoals(c.Request.Context(), userID, req.GoalIDs); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"updated": true})
+}
+
 // CreateDependency godoc
 // @Summary Create a dependency
 // @Description Create a dependency between two goals

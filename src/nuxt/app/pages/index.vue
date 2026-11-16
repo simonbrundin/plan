@@ -25,26 +25,27 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-4xl mx-auto px-6 py-8">
     <ClientOnly>
       <div v-if="isLoggedIn" class="space-y-8">
-        <div class="text-center">
-          <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen tillbaka!</h1>
-          <div class="flex justify-center gap-4">
+        <div class="text-center py-6">
+          <h1 class="text-3xl font-bold tracking-tight text-ink mb-2">Välkommen tillbaka!</h1>
+          <p class="text-ink-muted mb-6">Fånga tankar i inboxen, bryt ner dem sedan till mål.</p>
+          <div class="flex justify-center gap-3">
             <NuxtLink to="/goals">
               <UButton size="lg" icon="material-symbols:arrow-forward-rounded">
                 Gå till mål
               </UButton>
             </NuxtLink>
             <NuxtLink to="/priority">
-              <UButton size="lg" icon="material-symbols:sort">
+              <UButton size="lg" color="neutral" variant="outline" icon="material-symbols:sort">
                 Prioriteringslista
               </UButton>
             </NuxtLink>
           </div>
         </div>
 
-        <div class="bg-gray-50 rounded-lg p-6">
+        <div class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-6">
           <InboxInput @add="addGoalToInbox" />
           <InboxGoalsList />
         </div>
@@ -52,15 +53,15 @@ definePageMeta({
       <template #fallback>
         <div class="flex items-center justify-center min-h-[50vh]">
           <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">Laddar...</h1>
+            <h1 class="text-3xl font-bold tracking-tight text-ink mb-6">Laddar...</h1>
           </div>
         </div>
       </template>
     </ClientOnly>
-    
+
     <div v-if="!isLoggedIn" class="flex items-center justify-center min-h-[50vh]">
       <div class="text-center">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">Välkommen till Plan</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-ink mb-6">Välkommen till Plan</h1>
         <NuxtLink to="/login">
           <UButton size="lg" icon="material-symbols:login-rounded">
             Logga in

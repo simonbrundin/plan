@@ -195,8 +195,8 @@ onUnmounted(() => {
       v-model:open="open"
       collapsible
       resizable
-      class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
+      class="bg-surface/80 backdrop-blur-xl border-r border-line"
+      :ui="{ footer: 'lg:border-t lg:border-line' }"
     >
       <template #default="{ collapsed }">
         <UDashboardSearchButton
@@ -226,19 +226,19 @@ onUnmounted(() => {
     <Transition name="fade">
       <div
         v-if="showPriorityIndicator && prioritizedGoals.length > 0"
-        class="fixed top-4 right-4 z-50 px-4 py-2 bg-purple-600/90 backdrop-blur-sm rounded-lg shadow-lg"
+        class="fixed top-4 right-4 z-50 px-4 py-2.5 bg-fuchsia-600/90 backdrop-blur-sm rounded-xl shadow-lg border border-fuchsia-400/30"
       >
         <div class="flex items-center gap-3">
-          <span class="text-purple-100 text-sm font-medium">Prioriteringsläge</span>
-          <div class="flex items-center gap-2 text-sm">
-            <span class="text-purple-200">j/k: navigera</span>
-            <span class="text-purple-200">P+K/J: ändra vikt</span>
+          <span class="text-fuchsia-100 text-sm font-medium">Prioriteringsläge</span>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-fuchsia-200">j/k: navigera</span>
+            <span class="text-fuchsia-200">P+K/J: ändra vikt</span>
           </div>
         </div>
       </div>
     </Transition>
 
-    <UDashboardPanel class="!overflow-y-auto !h-screen">
+    <UDashboardPanel class="!overflow-y-auto !h-screen bg-canvas">
       <UDashboardNavbar class="hidden lg:flex">
         <template #toggle>
           <UDashboardSidebarToggle />
@@ -254,7 +254,7 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around gap-2 border-t border-default bg-elevated/95 backdrop-blur-sm p-4 lg:hidden"
+        class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around gap-2 border-t border-line bg-surface/90 backdrop-blur-xl p-3 lg:hidden"
       >
         <UDashboardSidebarToggle />
         <UDashboardSearchButton collapsed />

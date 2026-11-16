@@ -25,7 +25,10 @@ const isPriorityMode = ref(false);
 const selectedGoalId = ref<number | null>(null);
 const prioritizedGoals = ref<PrioritizedGoal[]>([]);
 const isLoading = ref(false);
-const startedFilter = ref<StartedFilter>("all");
+// Default: visa endast mål som är påbörjade.
+const DEFAULT_STARTED_FILTER: StartedFilter = "started";
+
+const startedFilter = ref<StartedFilter>(DEFAULT_STARTED_FILTER);
 
 let lastUpdateTime = 0;
 const UPDATE_DEBOUNCE_MS = 150;

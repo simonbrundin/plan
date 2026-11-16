@@ -17,9 +17,9 @@ const moveFromInbox = async (goalId: number) => {
 
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-semibold text-gray-900">Inbox</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-ink-dim">Inbox</h2>
 
-    <div v-if="inboxGoals.length === 0" class="text-gray-500 text-center py-8">
+    <div v-if="inboxGoals.length === 0" class="text-ink-dim text-center py-10 border border-dashed border-line rounded-2xl">
       Din inbox är tom. Lägg till nya mål ovan!
     </div>
 
@@ -27,16 +27,16 @@ const moveFromInbox = async (goalId: number) => {
       <div
         v-for="goal in inboxGoals"
         :key="goal.id"
-        class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+        class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 flex items-center justify-between px-4 py-3"
       >
-        <div class="flex items-center space-x-3">
-          <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 text-gray-600" />
-          <span class="text-gray-900">{{ goal.title }}</span>
+        <div class="flex items-center space-x-3 min-w-0">
+          <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 text-ink-muted flex-shrink-0" />
+          <span class="text-ink truncate">{{ goal.title }}</span>
         </div>
 
         <button
           @click="moveFromInbox(goal.id)"
-          class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          class="ml-3 px-3 py-1.5 text-sm bg-accent-strong text-white rounded-lg hover:bg-accent-deep transition-colors flex-shrink-0"
         >
           Bearbeta
         </button>

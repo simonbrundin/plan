@@ -29,7 +29,7 @@ watch(
 
 <template>
   <!-- Sökfält för undermål -->
-  <div v-if="showChildSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 mb-4">
+  <div v-if="showChildSearch" class="border border-line rounded-lg p-4 bg-surface-2 mb-4">
     <div class="mb-2">
       <input
         ref="childSearchInput"
@@ -39,7 +39,7 @@ watch(
         @keydown.escape.prevent="$emit('close')"
         type="text"
         placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
-        class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full px-4 py-2 bg-surface border border-line rounded-lg text-ink placeholder-ink-dim focus:outline-none focus:ring-2 focus:ring-accent"
       />
     </div>
 
@@ -49,17 +49,17 @@ watch(
         v-for="result in childSearchResults"
         :key="result.id"
         @click="$emit('add-existing-child', result.id)"
-        class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors"
+        class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors"
       >
-        <div class="font-medium text-gray-200">{{ result.title }}</div>
-        <div class="text-xs text-gray-500">
+        <div class="font-medium text-ink">{{ result.title }}</div>
+        <div class="text-xs text-ink-dim">
           {{ new Date(result.created).toLocaleDateString("sv-SE") }}
         </div>
       </button>
     </div>
 
     <!-- Meddelande när inga resultat -->
-    <div v-else-if="childSearchQuery.trim()" class="text-sm text-gray-500 px-4 py-2">
+    <div v-else-if="childSearchQuery.trim()" class="text-sm text-ink-dim px-4 py-2">
       Tryck Enter för att skapa "{{ childSearchQuery }}" som nytt undermål
     </div>
   </div>

@@ -27,11 +27,11 @@ const emit = defineEmits<{
       :value="editTitle"
       @input="$emit('update:editTitle', ($event.target as HTMLInputElement).value)"
       type="text"
-      class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      class="w-full px-3 py-2 bg-surface-2 border border-accent rounded text-ink focus:outline-none focus:ring-2 focus:ring-accent"
       @keydown.enter.prevent="$emit('save-edit')"
       @keydown.esc.prevent="$emit('cancel-edit')"
     />
-    <div class="text-xs text-gray-500 mt-2">
+    <div class="text-xs text-ink-dim mt-2">
       Enter för att spara, Escape för att avbryta
     </div>
   </div>
@@ -41,7 +41,7 @@ const emit = defineEmits<{
     <h1
       :class="[
         'text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
-        isGoalSelected ? 'border border-blue-500 text-gray-100' : 'text-gray-100'
+        isGoalSelected ? 'border border-accent text-ink' : 'text-ink'
       ]"
     >
       {{ goal?.title }}
@@ -55,7 +55,7 @@ const emit = defineEmits<{
       :class="
         goal.started
           ? 'text-yellow-400 hover:text-yellow-300'
-          : 'text-gray-600 hover:text-gray-400'
+          : 'text-ink-dim hover:text-ink-muted'
       "
       :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'"
     >
@@ -70,7 +70,7 @@ const emit = defineEmits<{
     <button
       v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
       @click.stop="$emit('open-icon-picker')"
-      class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800"
+      class="text-ink-muted hover:text-ink transition-colors p-2 rounded hover:bg-surface-2"
       title="Ändra ikon"
     >
       <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
@@ -83,7 +83,7 @@ const emit = defineEmits<{
       :class="
         showDependencies
           ? 'text-orange-400 hover:text-orange-300'
-          : 'text-gray-600 hover:text-gray-400'
+          : 'text-ink-dim hover:text-ink-muted'
       "
       title="Beroenden (blockerade mål)"
     >

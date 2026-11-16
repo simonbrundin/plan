@@ -27,12 +27,12 @@ const handleKeydown = (event: KeyboardEvent) => {
       @keydown="handleKeydown"
       type="text"
       placeholder="Lägg till en ny uppgift..."
-      class="flex-1 px-4 py-2 border text-gray-600 border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="flex-1 px-4 py-2 border text-ink-dim border-line-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
     />
     <button
       @click="addTodo"
       :disabled="!newTodo.trim()"
-      class="px-6 py-2 bg-blue-600 text-gray-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+      class="px-6 py-2 bg-accent-strong text-ink-dim rounded-lg hover:bg-accent-deep disabled:bg-elevated disabled:cursor-not-allowed transition-colors"
     >
       Lägg till
     </button>

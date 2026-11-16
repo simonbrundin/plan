@@ -87,12 +87,12 @@ function getIconOpacity(child: GoalWithWeight): number {
   <div class="flex-1 overflow-y-auto min-h-0">
     <!-- Header with toggle buttons -->
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-2xl font-semibold text-gray-300"></h2>
+      <h2 class="text-2xl font-semibold text-ink-muted"></h2>
       <div class="flex items-center gap-2">
         <!-- Visa avklarade -->
         <button
           @click="$emit('toggle-completed')"
-          class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
+          class="text-ink-dim hover:text-ink-muted transition-colors p-1 rounded hover:bg-surface-2"
           :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'"
         >
           <Icon :name="showCompleted ? 'lucide:eye' : 'lucide:eye-off'" class="h-5 w-5" />
@@ -100,7 +100,7 @@ function getIconOpacity(child: GoalWithWeight): number {
         <!-- Visa endast påbörjade -->
         <button
           @click="$emit('toggle-started')"
-          class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
+          class="text-ink-dim hover:text-ink-muted transition-colors p-1 rounded hover:bg-surface-2"
           :class="showStarted ? 'text-yellow-400' : ''"
           :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'"
         >
@@ -109,7 +109,7 @@ function getIconOpacity(child: GoalWithWeight): number {
         <!-- Lägg till undermål -->
         <button
           @click="$emit('open-child-search')"
-          class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
+          class="text-ink-dim hover:text-ink-muted transition-colors p-1 rounded hover:bg-surface-2"
           title="Lägg till undermål"
         >
           <Icon name="lucide:plus" class="h-5 w-5" />
@@ -127,9 +127,9 @@ function getIconOpacity(child: GoalWithWeight): number {
         class="relative overflow-hidden rounded-lg transition-opacity"
         :class="[
           isChildBlocked(child.id) ? 'ml-4 pl-3' : '',
-          dragOverChildId === child.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900' : '',
+          dragOverChildId === child.id ? 'ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-canvas' : '',
           draggedChildId === child.id ? 'opacity-30' : '',
-          depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-gray-900' : ''
+          depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-canvas' : ''
         ]"
         @dragstart="$emit('dragstart', $event, child.id)"
         @dragover="$emit('dragover', $event, child.id)"
@@ -139,9 +139,9 @@ function getIconOpacity(child: GoalWithWeight): number {
         <!-- Reparent indicator -->
         <div
           v-if="dragOverChildId === child.id && draggedChildId !== child.id"
-          class="absolute inset-0 bg-purple-500/20 flex items-center justify-center z-10 rounded-lg"
+          class="absolute inset-0 bg-fuchsia-500/20 flex items-center justify-center z-10 rounded-lg"
         >
-          <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+          <div class="bg-fuchsia-600 text-white px-3 py-1 rounded-full text-sm font-medium">
             Flytta in i detta mål
           </div>
         </div>
@@ -166,9 +166,9 @@ function getIconOpacity(child: GoalWithWeight): number {
 
         <!-- Huvudinnehåll -->
         <div
-          class="relative rounded-lg transition-all bg-gray-900"
+          class="relative rounded-lg transition-all bg-surface"
           :class="{
-            'border border-blue-500': selectedChildIndex === index
+            'border border-accent': selectedChildIndex === index
           }"
           :style="{
             transform: `translateX(${getSwipeOffset(child.id)}px)`,
@@ -189,11 +189,11 @@ function getIconOpacity(child: GoalWithWeight): number {
               :value="editTitle"
               @input="$emit('update:editTitle', ($event.target as HTMLInputElement).value)"
               type="text"
-              class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              class="w-full px-3 py-2 bg-surface-2 border border-accent rounded text-ink focus:outline-none focus:ring-2 focus:ring-accent"
               @keydown.enter.prevent="$emit('save-edit')"
               @keydown.esc.prevent="$emit('cancel-edit')"
             />
-            <div class="text-xs text-gray-500 mt-2">
+            <div class="text-xs text-ink-dim mt-2">
               Enter för att spara, Escape för att avbryta
             </div>
           </div>
@@ -205,7 +205,7 @@ function getIconOpacity(child: GoalWithWeight): number {
               @click.stop="$emit('open-icon-picker', child.id)"
               :class="[
                 'flex-shrink-0 transition-colors rounded p-1',
-                isChildBlocked(child.id) || child.finished ? 'text-gray-600' : 'text-white hover:text-white hover:bg-gray-600'
+                isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : 'text-white hover:text-white hover:bg-elevated'
               ]"
               title="Ändra ikon"
             >
@@ -221,7 +221,7 @@ function getIconOpacity(child: GoalWithWeight): number {
               @click.stop="$emit('toggle-started', child)"
               :class="[
                 'flex-shrink-0 p-1 rounded transition-colors',
-                isChildBlocked(child.id) || child.finished ? 'text-gray-600' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-gray-300'
+                isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-ink-muted'
               ]"
               :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'"
             >
@@ -236,9 +236,9 @@ function getIconOpacity(child: GoalWithWeight): number {
             <button
               @mousedown.stop="$emit('dep-mousedown', $event, child.id)"
               :class="[
-                'flex-shrink-0 p-1 rounded transition-colors hover:bg-gray-700',
+                'flex-shrink-0 p-1 rounded transition-colors hover:bg-elevated',
                 isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
-                isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-orange-400'
+                isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-orange-400'
               ]"
               title="Dra för att skapa beroende"
             >
@@ -253,12 +253,12 @@ function getIconOpacity(child: GoalWithWeight): number {
             >
               <h3
                 class="text-lg font-normal select-none"
-                :class="child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'"
+                :class="child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'"
                 :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)"
               >
                 {{ child.title }}
               </h3>
-              <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-gray-600 mt-1">
+              <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-1">
                 🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
               </p>
             </NuxtLink>
@@ -269,14 +269,14 @@ function getIconOpacity(child: GoalWithWeight): number {
               @click.stop="$emit('start-weight-edit', child)"
               :class="[
                 'flex-shrink-0 transition-colors p-2 rounded',
-                isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-gray-300 hover:bg-gray-800'
+                isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-ink-muted hover:bg-surface-2'
               ]"
               title="Ändra vikt"
             >
               <span
                 :class="[
-                  'text-xs font-mono px-2 py-1 rounded bg-gray-800',
-                  isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'
+                  'text-xs font-mono px-2 py-1 rounded bg-surface-2',
+                  isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'
                 ]"
               >
                 {{ child.weight }}
@@ -295,7 +295,7 @@ function getIconOpacity(child: GoalWithWeight): number {
                   step="1"
                   class="flex-1"
                 />
-                <span class="text-sm text-gray-400 w-8">{{ tempWeight }}</span>
+                <span class="text-sm text-ink-muted w-8">{{ tempWeight }}</span>
                 <button
                   @click="$emit('save-weight')"
                   class="text-green-400 hover:text-green-300"
@@ -318,7 +318,7 @@ function getIconOpacity(child: GoalWithWeight): number {
     <!-- Empty state -->
     <div
       v-else
-      class="text-gray-500 p-6 border border-gray-700 rounded-lg text-center"
+      class="text-ink-dim p-6 border border-line rounded-lg text-center"
     >
       Inga undermål ännu. Skapa ett för att dela upp detta mål i mindre delar.
     </div>

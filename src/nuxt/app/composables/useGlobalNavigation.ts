@@ -147,6 +147,10 @@ export function useGlobalNavigation() {
 			}
 		}
 
+		// Mellanslag ska fungera normalt i textarea/input. Kontrollera detta
+		// innan leader-mode hanterar mellanslag och gör preventDefault().
+		if (isInputFocused()) return;
+
 		if (event.key === " ") {
 			event.preventDefault();
 			isLeaderMode.value = true;

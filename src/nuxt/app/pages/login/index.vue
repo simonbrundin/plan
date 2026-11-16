@@ -24,34 +24,48 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <div>
-    <div v-if="user">
-      <h1 class="text-3xl font-bold text-gray-300 mb-2">Inloggad</h1>
+  <div class="max-w-md mx-auto px-6 py-16">
+    <div class="rounded-2xl border border-line bg-surface p-8">
+      <div v-if="user">
+        <h1 class="text-3xl font-bold tracking-tight text-ink mb-1">Inloggad</h1>
+        <p class="text-sm text-ink-dim mb-6">Din session är aktiv.</p>
 
-      <p v-if="user.sub" class="mb-2">
-        User ID: <span class="font-mono text-sm">{{ user.sub }}</span>
-      </p>
+        <dl class="space-y-2 mb-6 text-sm">
+          <div v-if="user.sub" class="flex items-center justify-between gap-4">
+            <dt class="text-ink-dim">User ID</dt>
+            <dd class="font-mono text-ink">{{ user.sub }}</dd>
+          </div>
+          <div v-if="user.email" class="flex items-center justify-between gap-4">
+            <dt class="text-ink-dim">Email</dt>
+            <dd class="font-mono text-ink truncate">{{ user.email }}</dd>
+          </div>
+        </dl>
 
-      <p v-if="user.email" class="mb-2">
-        Email: <span class="font-mono text-sm">{{ user.email }}</span>
-      </p>
+        <UButton @click="handleLogout" icon="solar:logout-2-line-duotone">Logga ut</UButton>
+      </div>
 
-      <UButton @click="handleLogout" icon="solar:logout-2-line-duotone">Logout</UButton>
+      <div v-else>
+        <h1 class="text-3xl font-bold tracking-tight text-ink mb-1">Logga in</h1>
+        <p class="text-sm text-ink-dim mb-6">Logga in för att se dina mål.</p>
+
+        <div class="flex flex-col gap-3">
+          <a href="/auth/login">
+            <UButton block>Logga in med Zitadel</UButton>
+          </a>
+          <a v-if="devAuthEnabled" href="/auth/dev-login" class="block">
+            <UButton block color="neutral" variant="outline">Dev-login (utan Zitadel)</UButton>
+          </a>
+        </div>
+      </div>
     </div>
-    <div v-else>
-      <h1>Not logged in</h1>
-      <a href="/auth/login">
-        <UButton>Logga in med Zitadel</UButton>
-      </a>
-      <a v-if="devAuthEnabled" href="/auth/dev-login" class="block mt-2">
-        <UButton color="neutral" variant="outline">Dev-login (utan Zitadel)</UButton>
-      </a>
+
+    <div class="mt-6 text-center">
+      <NuxtLink to="/">
+        <UButton color="neutral" variant="ghost" icon="material-symbols-light:home-outline-rounded"
+          >Till startsidan</UButton
+        >
+      </NuxtLink>
     </div>
-    <NuxtLink to="/">
-      <UButton color="neutral" icon="material-symbols-light:home-outline-rounded"
-        >Hem</UButton
-      >
-    </NuxtLink>
   </div>
 </template>
 <style scoped></style>

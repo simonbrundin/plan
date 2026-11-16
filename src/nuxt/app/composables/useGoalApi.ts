@@ -72,6 +72,17 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter målets beskrivning (lång fritext). Tom sträng rensar den.
+	const updateGoalDescription = async (
+		goalId: number,
+		description: string,
+	) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { description },
+		});
+	};
+
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
 		await apiProxy(`goals/${goalId}/status`, {
 			method: "PATCH",
@@ -158,6 +169,14 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter en ny ordning på grundmålen (mål utan förälder) i ett svep
+	const reorderGoals = async (goalIds: number[]) => {
+		await apiProxy(`goals/reorder`, {
+			method: "PATCH",
+			body: { goalIds },
+		});
+	};
+
 	const updateGoalWeight = async (
 		parentId: number,
 		childId: number,
@@ -184,14 +203,33 @@ export function useGoalApi() {
 		return await apiProxy<Goal[]>(`goals`);
 	};
 
+	const findIconForGoalTitle = async (title: string): Promise<string | undefined> => {
+		const query = title.trim();
+		if (query.length < 2) return undefined;
+
+		try {
+			const response = await $fetch<{ results?: Array<{ full?: string }> }>("/api/icons", {
+				query: { q: query, translate: "true" },
+			});
+			return response.results?.[0]?.full || undefined;
+		} catch (error) {
+			// Ikonvalet får inte hindra att målet skapas om översättning eller Iconify är otillgängligt.
+			console.warn("Kunde inte hitta en ikon för målet:", error);
+			return undefined;
+		}
+	};
+
 	const createGoal = async (
 		title: string,
 		statusId?: number,
+		icon?: string,
 	): Promise<Goal> => {
-		const body: { title: string; status_id?: number } = { title };
+		const body: { title: string; status_id?: number; icon?: string } = { title };
 		if (statusId) {
 			body.status_id = statusId;
 		}
+		body.icon = icon ?? await findIconForGoalTitle(title);
+
 		return await apiProxy<Goal>(`goals`, {
 			method: "POST",
 			body,
@@ -219,6 +257,7 @@ export function useGoalApi() {
 		fetchGoalData,
 		updateGoalTitle,
 		updateGoalIcon,
+		updateGoalDescription,
 		updateGoalStatus,
 		toggleGoalStarted,
 		toggleGoalFinished,
@@ -229,6 +268,7 @@ export function useGoalApi() {
 		addChildRelation,
 		updateGoalOrder,
 		reorderChildren,
+		reorderGoals,
 		updateGoalWeight,
 		setGoalWeight,
 		createGoal,

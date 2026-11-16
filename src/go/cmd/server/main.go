@@ -108,6 +108,7 @@ func main() {
 		api.GET("/goals/:id", goalHandler.GetGoal)
 		api.PATCH("/goals/:id", goalHandler.UpdateGoal)
 		api.DELETE("/goals/:id", goalHandler.DeleteGoal)
+		api.PATCH("/goals/reorder", goalHandler.ReorderGoals)
 
 		// Status endpoints
 		api.GET("/statuses", goalHandler.GetStatuses)

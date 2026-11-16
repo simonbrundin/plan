@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 interface Goal {
 	id: number;
 	title: string;
+	description: string;
 	icon: string;
 	created: string;
 	finished: string | null;

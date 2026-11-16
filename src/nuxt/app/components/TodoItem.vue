@@ -26,17 +26,17 @@ const deleteTodo = () => {
 </script>
 
 <template>
-  <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-shadow">
+  <div class="flex items-center gap-3 p-3 bg-surface rounded-lg border border-line hover:shadow-sm transition-shadow">
     <input
       type="checkbox"
       :checked="todo.completed"
       @change="toggleTodo"
-      class="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+      class="h-4 w-4 text-accent rounded focus:ring-accent"
     />
     <span
       :class="[
         'flex-1 text-sm',
-        todo.completed ? 'line-through text-gray-500' : 'text-gray-900'
+        todo.completed ? 'line-through text-ink-dim' : 'text-ink'
       ]"
     >
       {{ todo.text }}

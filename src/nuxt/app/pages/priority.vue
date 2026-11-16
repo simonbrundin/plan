@@ -69,17 +69,17 @@ async function toggleStarted(goal: PrioritizedGoalRow) {
 }
 
 function getWeightColor(weight: number): string {
-  if (weight <= 2) return 'text-gray-400'
-  if (weight <= 9) return 'text-gray-500'
-  if (weight <= 14) return 'text-gray-600'
-  return 'text-blue-400'
+  if (weight <= 2) return 'text-ink-muted'
+  if (weight <= 9) return 'text-ink-dim'
+  if (weight <= 14) return 'text-ink-dim'
+  return 'text-accent'
 }
 
 function getWeightBgColor(weight: number): string {
-  if (weight <= 2) return 'bg-gray-700/30'
-  if (weight <= 9) return 'bg-gray-700/50'
-  if (weight <= 14) return 'bg-gray-700/70'
-  return 'bg-blue-900/30'
+  if (weight <= 2) return 'bg-elevated/30'
+  if (weight <= 9) return 'bg-elevated/50'
+  if (weight <= 14) return 'bg-elevated/70'
+  return 'bg-accent/30'
 }
 
 const filterOptions = [
@@ -90,24 +90,28 @@ const filterOptions = [
 </script>
 
 <template>
-  <div v-if="user" class="max-w-4xl mx-auto p-6">
-    <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-4">
-        <h1 class="text-3xl font-bold text-gray-100">Prioriteringslista</h1>
-        <div v-if="isPriorityMode" class="px-3 py-1 bg-purple-600/30 rounded-full text-sm text-purple-300">
+  <div v-if="user" class="max-w-4xl mx-auto px-6 py-8">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <h1 class="text-3xl font-bold tracking-tight text-ink">Prioriteringslista</h1>
+        <span
+          v-if="isPriorityMode"
+          class="px-3 py-1 rounded-full text-xs bg-fuchsia-600/20 text-fuchsia-300 border border-fuchsia-500/30"
+        >
           Prioriteringsläge (håll P + K/J)
-        </div>
+        </span>
       </div>
-      <NuxtLink to="/" class="text-gray-400 hover:text-gray-200 transition-colors">
-        ← Tillbaka
+      <NuxtLink to="/" class="rounded-lg border border-line bg-surface-2 px-4 py-2 text-ink-muted transition-colors hover:border-line-strong hover:text-ink inline-flex items-center gap-2">
+        <Icon name="lucide:arrow-left" class="w-4 h-4" />
+        Tillbaka
       </NuxtLink>
     </div>
 
-    <div class="text-sm text-gray-500 mb-4">
-      <span class="text-gray-400">j/k</span> navigera &nbsp;|&nbsp;
-      <span class="text-gray-400">l</span> öppna mål &nbsp;|&nbsp;
-      <span class="text-gray-400">Håll P</span> + <span class="text-gray-400">K/J</span> ändra vikt &nbsp;|&nbsp;
-      <span class="text-gray-400">s</span> markera påbörjad
+    <div class="text-xs text-ink-dim mb-6">
+      <span class="text-ink-muted">j/k</span> navigera &nbsp;|&nbsp;
+      <span class="text-ink-muted">l</span> öppna mål &nbsp;|&nbsp;
+      <span class="text-ink-muted">Håll P</span> + <span class="text-ink-muted">K/J</span> ändra vikt &nbsp;|&nbsp;
+      <span class="text-ink-muted">s</span> markera påbörjad
     </div>
 
     <div class="flex flex-wrap items-center gap-2 mb-6">
@@ -116,51 +120,51 @@ const filterOptions = [
         :key="option.value"
         type="button"
         @click="setStartedFilter(option.value)"
-        class="px-3 py-1.5 rounded-full text-sm transition-colors"
+        class="px-3 py-1.5 rounded-full text-sm transition-colors border"
         :class="
           startedFilter === option.value
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+            ? 'bg-accent-strong text-white border-accent-strong'
+            : 'bg-surface-2 text-ink-muted border-line hover:border-line-strong hover:text-ink'
         "
       >
         {{ option.label }}
       </button>
-      <span class="text-xs text-gray-500 ml-2">
+      <span class="text-xs text-ink-dim ml-2">
         {{ visibleGoals.length }} av {{ prioritizedGoals.length }} mål visas
       </span>
     </div>
 
     <div v-if="isLoading" class="text-center py-12">
-      <p class="text-gray-500">Laddar...</p>
+      <p class="text-ink-muted">Laddar...</p>
     </div>
 
-    <div v-else-if="prioritizedGoals.length === 0" class="text-center py-12">
-      <p class="text-gray-500">Inga mål att prioritera</p>
+    <div v-else-if="prioritizedGoals.length === 0" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-10 text-center">
+      <p class="text-ink-muted">Inga mål att prioritera</p>
     </div>
 
-    <div v-else-if="visibleGoals.length === 0" class="text-center py-12">
-      <p class="text-gray-500">
+    <div v-else-if="visibleGoals.length === 0" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-10 text-center">
+      <p class="text-ink-muted">
         Inga mål matchar filtret &quot;{{
           filterOptions.find((o) => o.value === startedFilter)?.label
         }}&quot;
       </p>
     </div>
 
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-2">
       <div
         v-for="(goal, index) in visibleGoals"
         :key="goal.id"
         :data-index="index"
-        class="flex items-center gap-4 p-4 rounded-lg transition-all cursor-pointer"
+        class="rounded-2xl border border-line transition-colors hover:border-line-strong flex items-center gap-4 px-4 py-3.5 cursor-pointer"
         :class="[
           getWeightBgColor(goal.weight),
-          selectedGoalId === goal.id ? 'ring-2 ring-blue-500' : '',
-          isPriorityMode && selectedGoalId === goal.id ? 'ring-2 ring-purple-500' : ''
+          selectedGoalId === goal.id ? 'ring-1 ring-accent' : '',
+          isPriorityMode && selectedGoalId === goal.id ? 'ring-1 ring-fuchsia-500' : ''
         ]"
         @click="selectGoal(goal.id)"
       >
         <div class="flex-shrink-0 w-8 text-center">
-          <span class="text-lg font-bold" :class="getWeightColor(goal.weight)">
+          <span class="text-lg font-bold tabular-nums" :class="getWeightColor(goal.weight)">
             {{ index + 1 }}
           </span>
         </div>
@@ -168,10 +172,8 @@ const filterOptions = [
         <div class="flex-shrink-0">
           <button
             @click.stop="toggleStarted(goal)"
-            class="p-1.5 rounded transition-colors"
-            :class="goal.started
-              ? 'text-yellow-400 hover:text-yellow-300'
-              : 'text-gray-600 hover:text-gray-400'"
+            class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
             :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'"
           >
             <Icon
@@ -185,8 +187,8 @@ const filterOptions = [
         <div class="flex-shrink-0">
           <button
             @click.stop="toggleFinished(goal)"
-            class="w-6 h-6 rounded border-2 border-gray-600 flex items-center justify-center transition-colors hover:border-gray-400"
-            :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? ETERNAL_BORDER + ' cursor-not-allowed' : ''"
+            class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors"
+            :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? ETERNAL_BORDER + ' cursor-not-allowed' : 'border-line-strong hover:border-ink-muted'"
             :title="goal.eternal ? 'Ett evigt mål kan inte slutföras' : goal.finished ? 'Avmarkera som klar' : 'Markera som klar'"
             :disabled="goal.eternal"
           >
@@ -197,12 +199,12 @@ const filterOptions = [
         </div>
 
         <div class="flex items-center gap-2 flex-1 min-w-0">
-          <Icon :name="goal.icon || 'heroicons:star'" class="w-5 h-5 flex-shrink-0"
-            :class="goal.eternal ? ETERNAL_TEXT : 'text-gray-400'" />
+          <Icon :name="goal.icon || 'heroicons:star'" class="w-5 h-5 flex-shrink-0 text-ink-muted"
+            :class="goal.eternal ? ETERNAL_TEXT : ''" />
           <NuxtLink
             :to="`/goal/${goal.id}`"
             class="truncate transition-colors"
-            :class="goal.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : 'text-gray-200 hover:text-white'"
+            :class="goal.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : 'text-ink hover:text-white'"
             @click.stop
           >
             {{ goal.title }}
@@ -212,7 +214,7 @@ const filterOptions = [
 
         <div class="flex-shrink-0 text-right">
           <div
-            class="text-sm font-mono px-2 py-1 rounded min-w-[3rem] text-center"
+            class="text-sm font-mono px-2 py-1 rounded-lg min-w-[3rem] text-center tabular-nums"
             :class="getWeightBgColor(goal.weight) + ' ' + getWeightColor(goal.weight)"
           >
             {{ goal.weight }}
@@ -224,7 +226,7 @@ const filterOptions = [
 
   <div v-else class="flex items-center justify-center min-h-[50vh]">
     <div class="text-center">
-      <h1 class="text-3xl font-bold text-gray-900 mb-6">Prioriteringslista</h1>
+      <h1 class="text-3xl font-bold tracking-tight text-ink mb-6">Prioriteringslista</h1>
       <NuxtLink to="/login">
         <UButton size="lg" icon="material-symbols:login-rounded">
           Logga in

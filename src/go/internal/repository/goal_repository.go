@@ -29,7 +29,7 @@ func NewGoalRepository() *GoalRepository {
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal,
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal, g."order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
@@ -45,7 +45,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.HasParent)
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
@@ -58,13 +58,13 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 // GetGoalByID returns a single goal by ID
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
 	query := `
-		SELECT id, title, icon, created, started, finished, inbox, eternal,
+		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, inbox, eternal, "order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent
 		FROM goals WHERE id = $1`
 
 	var g models.Goal
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.HasParent)
+		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
@@ -83,12 +83,18 @@ func (r *GoalRepository) CreateGoal(ctx context.Context, userID int64, title, ic
 	}
 	defer tx.Rollback(ctx)
 
-	// Insert goal
+	// Insert goal. Nya grundmål läggs sist i ordningen, så att de inte
+	// hamnar ovanför mål som redan har en sparad placering.
 	var goal models.Goal
-	query := `INSERT INTO goals (title, icon) VALUES ($1, $2)
-			  RETURNING id, title, icon, status_id, created, started, finished, inbox, eternal`
-	err = tx.QueryRow(ctx, query, title, icon).Scan(
-		&goal.ID, &goal.Title, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox, &goal.Eternal)
+	query := `INSERT INTO goals (title, icon, "order")
+			  SELECT $1, $2, COALESCE((
+				  SELECT MAX(g2."order") + 1
+				  FROM goals g2
+				  INNER JOIN user_goals ug2 ON g2.id = ug2.goal_id
+				  WHERE ug2.user_id = $3), 0)
+			  RETURNING id, title, COALESCE(description, ''), icon, status_id, created, started, finished, inbox, eternal, "order"`
+	err = tx.QueryRow(ctx, query, title, icon, userID).Scan(
+		&goal.ID, &goal.Title, &goal.Description, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox, &goal.Eternal, &goal.Order)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create goal: %w", err)
 	}
@@ -117,6 +123,12 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 	if req.Title != nil {
 		query += fmt.Sprintf("title = $%d, ", argNum)
 		args = append(args, *req.Title)
+		argNum++
+		hasUpdate = true
+	}
+	if req.Description != nil {
+		query += fmt.Sprintf("description = $%d, ", argNum)
+		args = append(args, *req.Description)
 		argNum++
 		hasUpdate = true
 	}
@@ -252,7 +264,7 @@ func (r *GoalRepository) GetChildRelations(ctx context.Context, parentID int64) 
 // GetParentRelations returns parent goals for a goal
 func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
 		FROM goal_relations gr
 		INNER JOIN goals g ON g.id = gr.parent_id
 		WHERE gr.child_id = $1`
@@ -266,7 +278,7 @@ func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) 
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		if err := rows.Scan(&g.ID, &g.Title, &g.Icon,
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon,
 			&g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
@@ -353,7 +365,7 @@ func (r *GoalRepository) ReorderRelations(ctx context.Context, parentID int64, c
 		return fmt.Errorf("failed to read child relations: %w", err)
 	}
 
-	for i, childID := range mergeChildOrder(existing, childIDs) {
+	for i, childID := range mergeOrder(existing, childIDs) {
 		if _, err := tx.Exec(ctx, `UPDATE goal_relations SET "order" = $1 WHERE parent_id = $2 AND child_id = $3`, i, parentID, childID); err != nil {
 			return fmt.Errorf("failed to update order for child %d: %w", childID, err)
 		}
@@ -365,12 +377,67 @@ func (r *GoalRepository) ReorderRelations(ctx context.Context, parentID int64, c
 	return nil
 }
 
-// mergeChildOrder combines the requested order with the children that exist
-// on the server but were not part of the request. The requested children come
-// first, in the requested order, and the rest keep their relative order.
-// Children that do not exist on the server are ignored, so the resulting
-// order always has exactly one slot per existing child.
-func mergeChildOrder(existing []int64, requested []int64) []int64 {
+// ReorderRootGoals sets a new order for a user's root goals (goals without a
+// parent). The goals in goalIDs get order 0, 1, 2... in the given order. Any
+// root goal that is not listed keeps its relative position and is placed
+// after the listed ones, so a stale client can never leave gaps or
+// duplicates behind. Goals that belong to another user are ignored.
+func (r *GoalRepository) ReorderRootGoals(ctx context.Context, userID int64, goalIDs []int64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Fetch the root goals that are not part of the request so they can be
+	// appended instead of being left with a colliding order value.
+	rows, err := tx.Query(ctx, `
+		SELECT g.id
+		FROM goals g
+		INNER JOIN user_goals ug ON ug.goal_id = g.id
+		WHERE ug.user_id = $1
+			AND NOT EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id)
+		ORDER BY g."order" ASC, g.created DESC, g.id ASC`, userID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch root goals: %w", err)
+	}
+	var existing []int64
+	for rows.Next() {
+		var goalID int64
+		if err := rows.Scan(&goalID); err != nil {
+			rows.Close()
+			return fmt.Errorf("failed to scan root goal: %w", err)
+		}
+		existing = append(existing, goalID)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("failed to read root goals: %w", err)
+	}
+
+	for i, goalID := range mergeOrder(existing, goalIDs) {
+		if _, err := tx.Exec(ctx, `
+			UPDATE goals SET "order" = $1
+			WHERE id = $2
+				AND id IN (SELECT goal_id FROM user_goals WHERE user_id = $3)
+				AND NOT EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id)`,
+			i, goalID, userID); err != nil {
+			return fmt.Errorf("failed to update order for goal %d: %w", goalID, err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit reorder: %w", err)
+	}
+	return nil
+}
+
+// mergeOrder combines the requested order with the items that exist on the
+// server but were not part of the request. The requested items come first, in
+// the requested order, and the rest keep their relative order. Items that do
+// not exist on the server are ignored, so the resulting order always has
+// exactly one slot per existing item.
+func mergeOrder(existing []int64, requested []int64) []int64 {
 	known := make(map[int64]bool, len(existing))
 	for _, id := range existing {
 		known[id] = true
@@ -428,7 +495,7 @@ func (r *GoalRepository) GetDependencies(ctx context.Context, goalID int64) ([]m
 // GetBlockingGoals returns goals that depend on this goal
 func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
 		FROM goal_dependencies gd
 		INNER JOIN goals g ON g.id = gd.goal_id
 		WHERE gd.depends_on_id = $1`
@@ -442,7 +509,7 @@ func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		if err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
 			return nil, err
 		}
 		goals = append(goals, g)
@@ -515,7 +582,7 @@ func (r *GoalRepository) CheckForCycle(ctx context.Context, goalID, dependsOnID 
 func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) ([]models.PrioritizedGoal, error) {
 	query := `
 		SELECT
-			g.id, g.title, g.icon, g.created, g.started, g.finished, g.inbox, g.eternal,
+			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal,
 			COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
 			(SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
 			(SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id
@@ -537,7 +604,7 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		var g models.PrioritizedGoal
 		var parentTitle *string
 		var parentID *int64
-		if err := rows.Scan(&g.ID, &g.Title, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal,
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal,
 			&g.Weight, &parentTitle, &parentID); err != nil {
 			return nil, err
 		}

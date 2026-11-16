@@ -1,6 +1,9 @@
 export interface Goal {
 	id: number;
 	title: string;
+	// En längre fritext om målet. Titeln är kort - beskrivningen
+	// får plats för allt som inte passar i titeln.
+	description: string;
 	icon: string;
 	created: string;
 	started: string | null;
@@ -11,6 +14,9 @@ export interface Goal {
 	// Sant om målet har en förälder. Endast grundmål (has_parent = false)
 	// listas under /goals.
 	has_parent?: boolean;
+	// Målets placering bland grundmål. Grundmål sorteras på /goals efter
+	// detta värde (stigande).
+	order?: number;
 }
 
 export interface ChildRelation {

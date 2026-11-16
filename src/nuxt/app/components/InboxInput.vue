@@ -30,12 +30,12 @@ const handleKeydown = (event: KeyboardEvent) => {
       @keydown="handleKeydown"
       type="text"
       placeholder="Lägg till ett nytt mål i inbox..."
-      class="flex-1 px-4 py-2 border text-gray-600 border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 flex-1"
     />
     <button
       @click="addGoal"
       :disabled="!newGoalTitle.trim()"
-      class="px-6 py-2 bg-blue-600 text-gray-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+      class="rounded-lg bg-accent-strong px-4 py-2 font-medium text-white transition-colors hover:bg-accent-deep disabled:opacity-40 disabled:cursor-not-allowed disabled:opacity-40 disabled:cursor-not-allowed"
     >
       Lägg till
     </button>

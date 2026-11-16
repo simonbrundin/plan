@@ -9,6 +9,7 @@ import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight } from '~/types/goal'
 import { moveChildId, nextChildOrder } from '~/utils/childOrder'
 import { canBeFinished } from '~/utils/goalRules'
+import { descriptionPreview } from '~/utils/goalDescription'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
@@ -20,7 +21,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -728,6 +729,58 @@ const editInputRef = ref<HTMLInputElement | null>(null);
 // Goal selection (själva målet är markerat, inte barn eller föräldrar)
 const isGoalSelected = ref(false);
 
+// Redigera beskrivning (t)
+const editingDescriptionId = ref<number | null>(null);
+const descriptionDraft = ref("");
+
+function startEditDescription(target: { id: number; description?: string }) {
+  editingDescriptionId.value = target.id;
+  descriptionDraft.value = target.description ?? "";
+
+  nextTick(() => {
+    const el = document.querySelector(
+      `[data-description-input="${target.id}"]`
+    ) as HTMLTextAreaElement | null;
+    el?.focus();
+  });
+}
+
+function cancelEditDescription() {
+  editingDescriptionId.value = null;
+  descriptionDraft.value = "";
+}
+
+function handleDescriptionKeydown(event: KeyboardEvent, id: number) {
+  if (event.key !== "Enter" || (!event.ctrlKey && !event.metaKey)) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  void saveDescription(id);
+}
+
+async function saveDescription(id: number) {
+  const description = descriptionDraft.value;
+
+  try {
+    await updateGoalDescription(id, description);
+
+    if (goalData.value) {
+      if (goalData.value.goal.id === id) {
+        goalData.value.goal.description = description;
+      }
+      const child = goalData.value.children.find((c) => c.id === id);
+      if (child) {
+        child.description = description;
+      }
+    }
+    goalsStore.updateGoal(id, { description });
+
+    cancelEditDescription();
+  } catch (error) {
+    console.error("Failed to update goal description:", error);
+  }
+}
+
 // Delete confirmation
 const showDeleteConfirmation = ref(false);
 const goalToDelete = ref<{ id: number; title: string } | null>(null);
@@ -769,7 +822,7 @@ async function enterInsertMode(
     // Fallback: försök hitta vilket input-element som helst
     setTimeout(() => {
       const fallbackInput = document.querySelector(
-        "input.border-blue-500"
+        "input.border-accent"
       ) as HTMLInputElement;
       if (fallbackInput) {
         fallbackInput.focus();
@@ -1210,6 +1263,21 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
+  // Hantera 't' för att redigera beskrivningen
+  if (event.key === "t") {
+    event.preventDefault();
+    if (isGoalSelected.value && goal.value) {
+      startEditDescription(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      startEditDescription(filteredChildren.value[selectedChildIndex.value]);
+    }
+    return;
+  }
+
   // Hantera 's' för att toggla started status
   if (event.key === "s") {
     event.preventDefault();
@@ -1421,17 +1489,17 @@ watch(selectedParentIndex, async () => {
 </script>
 
 <template>
-  <div v-if="user" class="max-w-4xl mx-auto p-6 h-screen flex flex-col overflow-hidden">
+  <div v-if="user" class="max-w-4xl mx-auto px-6 py-6 h-screen flex flex-col overflow-hidden">
     <div v-if="!goal" class="text-center py-12">
-      <p class="text-gray-500">Laddar mål...</p>
+      <p class="text-ink-dim">Laddar mål...</p>
     </div>
 
-    <div v-else class="flex flex-col h-full gap-6">
+    <div v-else class="flex flex-col h-full gap-5">
       <!-- Breadcrumb / Föräldrar -->
       <div class="flex items-center justify-between flex-shrink-0">
-        <div class="flex items-center gap-2 text-sm flex-wrap">
+        <div class="flex items-center gap-1.5 text-sm flex-wrap">
           <NuxtLink v-if="parents.length === 0" to="/goals"
-            class="text-blue-400 hover:text-blue-300 transition-colors font-medium">
+            class="px-2.5 py-1 rounded-lg bg-surface-2 border border-line text-accent hover:text-accent-light hover:border-line-strong transition-colors font-medium">
             Root
           </NuxtLink>
 
@@ -1439,17 +1507,17 @@ watch(selectedParentIndex, async () => {
           <div v-for="(parent, index) in parents" :key="parent.id">
             <div v-if="mode === 'insert' && editingGoalId === parent.id" class="inline-block">
               <input ref="editInputRef" v-model="editTitle" type="text"
-                class="px-3 py-1 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
                 @keydown.enter.prevent="saveEdit" @keydown.esc.prevent="cancelEdit" />
             </div>
 
             <!-- Normal mode för förälder -->
             <NuxtLink v-else :to="`/goal/${parent.id}`" :data-parent-index="index"
-              class="px-2 py-1 rounded transition-all select-none inline-block" :class="isParentMode && selectedParentIndex === index
-                ? 'text-gray-100 bg-blue-500 font-medium'
+              class="px-2.5 py-1 rounded-lg border transition-all select-none inline-block" :class="isParentMode && selectedParentIndex === index
+                ? 'text-ink bg-accent-strong border-accent-strong font-medium'
                 : parent.eternal
-                ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER
-                : 'text-gray-500 hover:text-gray-300'
+                ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER + ' bg-surface-2 border-line'
+                : 'text-ink-dim hover:text-ink hover:bg-surface-2 border-transparent'
                 " @mousedown="handleParentMouseDown(parent.id)" @mouseup="handleParentMouseUp"
               @mouseleave="handleParentMouseUp" @touchstart="handleParentMouseDown(parent.id)"
               @touchend="handleParentMouseUp" @touchcancel="handleParentMouseUp">
@@ -1459,60 +1527,55 @@ watch(selectedParentIndex, async () => {
         </div>
 
         <!-- + knapp för att lägga till förälder -->
-        <button @click="toggleParentSearch"
-          class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-          title="Lägg till förälder">
+        <button @click="toggleParentSearch" class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Lägg till förälder">
           <Icon name="lucide:plus" class="h-5 w-5" />
         </button>
       </div>
 
       <!-- Sökfält för föräldrar -->
-      <div v-if="showParentSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 flex-shrink-0">
+      <div v-if="showParentSearch" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 flex-shrink-0">
         <div class="mb-2">
           <input ref="parentSearchInput" v-model="parentSearchQuery" @keydown="handleSearchKeydown" type="text"
             placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
-            class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full"
             autofocus />
         </div>
 
         <!-- Sökresultat -->
         <div v-if="searchResults.length > 0" class="space-y-1 mt-2">
           <button v-for="result in searchResults" :key="result.id" @click="addExistingParent(result.id)"
-            class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors">
-            <div class="font-medium text-gray-200">{{ result.title }}</div>
-            <div class="text-xs text-gray-500">
+            class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors">
+            <div class="font-medium text-ink">{{ result.title }}</div>
+            <div class="text-xs text-ink-dim">
               {{ new Date(result.created).toLocaleDateString("sv-SE") }}
             </div>
           </button>
         </div>
 
         <!-- Meddelande när inga resultat -->
-        <div v-else-if="parentSearchQuery.trim()" class="text-sm text-gray-500 px-4 py-2">
+        <div v-else-if="parentSearchQuery.trim()" class="text-sm text-ink-dim px-4 py-2">
           Tryck Enter för att skapa "{{ parentSearchQuery }}" som nytt mål
         </div>
       </div>
 
       <!-- Huvudmål -->
-      <div v-if="mode === 'insert' && editingGoalId === goal?.id" class="mb-4">
-        <input ref="editInputRef" v-model="editTitle" type="text"
-          class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      <div v-if="mode === 'insert' && editingGoalId === goal?.id" class="mb-1">
+        <input ref="editInputRef" v-model="editTitle" type="text" class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full text-lg"
           @keydown.enter.prevent="saveEdit" @keydown.esc.prevent="cancelEdit" />
-        <div class="text-xs text-gray-500 mt-2">
+        <div class="text-xs text-ink-dim mt-2">
           Enter för att spara, Escape för att avbryta
         </div>
       </div>
-      <div v-else class="flex items-center gap-4 flex-shrink-0">
-        <h1 :class="['text-4xl font-bold transition-colors px-3 py-2 rounded flex-1',
-          isGoalSelected ? 'border border-blue-500' : '',
-          goal?.eternal ? ETERNAL_TEXT : 'text-gray-100'
+      <div v-else class="flex items-center gap-3 flex-shrink-0">
+        <h1 :class="['text-3xl font-bold tracking-tight transition-colors px-3 py-2 rounded-xl flex-1 border',
+          isGoalSelected ? 'border-accent bg-accent/10' : 'border-transparent',
+          goal?.eternal ? ETERNAL_TEXT : 'text-ink'
         ]">{{ goal?.title }}</h1>
         <!-- Started-toggle (s) -->
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           @click.stop="toggleStarted(goal)"
-          class="p-2 rounded transition-colors"
-          :class="goal.started
-            ? 'text-yellow-400 hover:text-yellow-300'
-            : 'text-gray-600 hover:text-gray-400'"
+          class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+          :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
           :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
           <Icon name="lucide:circle-play" class="w-6 h-6"
             :style="{ opacity: goal.started ? 1 : 0.25 }" />
@@ -1520,96 +1583,118 @@ watch(selectedParentIndex, async () => {
         <!-- Evigt mål-toggle (e) -->
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           @click.stop="toggleEternal(goal)"
-          class="p-2 rounded transition-colors"
+          class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
           :class="goal.eternal
             ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER
-            : 'text-gray-600 hover:text-gray-400'"
+            : ''"
           :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
           <Icon name="lucide:infinity" class="w-6 h-6"
             :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
         </button>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
-          class="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded hover:bg-gray-800" title="Ändra ikon">
-          <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-white" />
+          class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
+          <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-ink" />
         </button>
         <!-- Toggle dependencies visibility -->
         <button @click.stop="showDependencies = !showDependencies"
-          class="p-2 rounded transition-colors"
-          :class="showDependencies ? 'text-orange-400 hover:text-orange-300' : 'text-gray-600 hover:text-gray-400'"
+          class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+          :class="showDependencies ? 'text-orange-400' : 'text-ink-dim hover:text-ink-muted'"
           title="Beroenden (blockerade mål)">
           <Icon name="lucide:git-branch" class="w-6 h-6" />
         </button>
       </div>
 
+      <!-- Beskrivning -->
+      <div v-if="goal" class="flex-shrink-0">
+        <div v-if="editingDescriptionId === goal.id">
+          <textarea :data-description-input="goal.id" v-model="descriptionDraft" rows="4"
+            class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full resize-y"
+            placeholder="Beskrivning - vad vill du uppnå?"
+            @keydown="handleDescriptionKeydown($event, goal.id)"
+            @keydown.esc.prevent="cancelEditDescription" />
+          <div class="flex items-center justify-between mt-2 gap-4">
+            <span class="text-xs text-ink-dim">Ctrl+Enter spara, Escape avbryta</span>
+            <div class="flex gap-2">
+              <button @click="cancelEditDescription" class="rounded-lg border border-line bg-surface-2 px-4 py-2 text-ink-muted transition-colors hover:border-line-strong hover:text-ink">Avbryt</button>
+              <button @click="saveDescription(goal.id)"
+                class="px-3 py-1.5 bg-accent-strong hover:bg-accent rounded-lg text-white transition-colors">
+                Spara
+              </button>
+            </div>
+          </div>
+        </div>
+        <p v-else-if="goal.description" class="text-sm text-ink-muted whitespace-pre-wrap">
+          {{ goal.description }}
+        </p>
+      </div>
+
       <!-- Dependencies-sektion -->
-      <div v-if="showDependencies" class="border border-gray-700 rounded-lg p-4 bg-gray-800/50 mb-4">
+      <div v-if="showDependencies" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-1 flex-shrink-0">
         <!-- Väntar på -->
         <div class="mb-4">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-medium text-gray-400 flex items-center gap-2">
+            <h3 class="text-sm font-medium text-ink-muted flex items-center gap-2">
               <Icon name="lucide:clock" class="w-4 h-4" />
               Väntar på ({{ dependsOn.length }})
             </h3>
-            <button @click="toggleDependencySearch"
-              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-700"
-              title="Lägg till beroende">
+            <button @click="toggleDependencySearch" class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Lägg till beroende">
               <Icon name="lucide:plus" class="w-4 h-4" />
             </button>
           </div>
-          
+
           <!-- Sök för att lägga till dependency -->
           <div v-if="showDependencySearch" class="mb-3">
             <input ref="dependencySearchInput" v-model="dependencySearchQuery" @keydown="handleDependencySearchKeydown"
               type="text"
               placeholder="Sök efter mål att vänta på..."
-              class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+              class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full text-sm"
               autofocus />
             <div v-if="filteredDependencySearchResults.length > 0" class="mt-2 space-y-1">
               <button v-for="result in filteredDependencySearchResults.slice(0, 5)" :key="result.id"
                 @click="addExistingDependency(result.id)"
-                class="w-full text-left px-3 py-2 hover:bg-gray-700 rounded transition-colors flex items-center gap-2">
-                <Icon :name="result.icon || 'heroicons:star'" class="w-4 h-4 text-gray-400" />
-                <span class="text-gray-200 text-sm">{{ result.title }}</span>
+                class="w-full text-left px-3 py-2 hover:bg-elevated rounded-lg transition-colors flex items-center gap-2">
+                <Icon :name="result.icon || 'heroicons:star'" class="w-4 h-4 text-ink-muted" />
+                <span class="text-ink text-sm">{{ result.title }}</span>
                 <span v-if="result.finished" class="text-xs text-green-400 ml-auto">Klar</span>
               </button>
             </div>
-            <div v-else-if="dependencySearchQuery.trim() && filteredDependencySearchResults.length === 0" class="text-xs text-gray-500 mt-2 px-2">
+            <div v-else-if="dependencySearchQuery.trim() && filteredDependencySearchResults.length === 0" class="text-xs text-ink-dim mt-2 px-2">
               Inga matchande mål hittades
             </div>
           </div>
-          
+
           <!-- Lista över dependencies -->
           <div v-if="dependsOn.length > 0" class="space-y-2">
             <div v-for="dep in dependsOn" :key="dep.depends_on_id"
-              class="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded hover:bg-gray-700 transition-colors">
-              <Icon :name="dep.icon || 'heroicons:star'" class="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <NuxtLink :to="`/goal/${dep.depends_on_id}`" class="flex-1 text-sm text-gray-200 hover:text-white">
+              class="flex items-center gap-2 px-3 py-2 bg-surface-2 rounded-lg border border-line hover:border-line-strong transition-colors">
+              <Icon :name="dep.icon || 'heroicons:star'" class="w-4 h-4 text-ink-muted flex-shrink-0" />
+              <NuxtLink :to="`/goal/${dep.depends_on_id}`" class="flex-1 text-sm text-ink hover:text-white truncate">
                 {{ dep.title }}
               </NuxtLink>
               <span v-if="dep.finished" class="text-xs text-green-400">Klar</span>
               <span v-else class="text-xs text-orange-400">Väntar...</span>
               <button @click.stop="removeExistingDependency(dep.depends_on_id)"
-                class="text-gray-500 hover:text-red-400 transition-colors p-1">
+                class="text-ink-dim hover:text-red-400 transition-colors p-1">
                 <Icon name="lucide:x" class="w-3 h-3" />
               </button>
             </div>
           </div>
-          <div v-else class="text-sm text-gray-500 px-2">
+          <div v-else class="text-sm text-ink-dim px-2">
             Inga beroenden. Lägg till mål som måste göras först.
           </div>
         </div>
-        
+
         <!-- Blockerar -->
         <div v-if="blocking.length > 0">
-          <h3 class="text-sm font-medium text-gray-400 flex items-center gap-2 mb-2">
+          <h3 class="text-sm font-medium text-ink-muted flex items-center gap-2 mb-2">
             <Icon name="lucide:lock" class="w-4 h-4" />
             Blockerar ({{ blocking.length }})
           </h3>
           <div class="space-y-2">
             <div v-for="block in blocking" :key="block.goal_id"
-              class="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded">
-              <Icon :name="block.icon || 'heroicons:star'" class="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <NuxtLink :to="`/goal/${block.goal_id}`" class="flex-1 text-sm text-gray-200 hover:text-white">
+              class="flex items-center gap-2 px-3 py-2 bg-surface-2 rounded-lg border border-line">
+              <Icon :name="block.icon || 'heroicons:star'" class="w-4 h-4 text-ink-muted flex-shrink-0" />
+              <NuxtLink :to="`/goal/${block.goal_id}`" class="flex-1 text-sm text-ink hover:text-white truncate">
                 {{ block.title }}
               </NuxtLink>
             </div>
@@ -1619,77 +1704,76 @@ watch(selectedParentIndex, async () => {
 
       <!-- Undermål - scrollbar container -->
       <div class="flex-1 overflow-y-auto min-h-0">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-semibold text-gray-300"></h2>
-          <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-ink-dim">
+            Undermål
+          </h2>
+          <div class="flex items-center gap-1">
             <button @click="showCompleted = !showCompleted"
-              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800" :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'
-                ">
+              class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'">
               <Icon :name="showCompleted ? 'lucide:eye' : 'lucide:eye-off'" class="h-5 w-5" />
             </button>
             <!-- Visa endast påbörjade -->
             <button @click="showStarted = !showStarted"
-              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-              :class="showStarted ? 'text-yellow-400' : ''"
+              class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+              :class="showStarted ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
               :title="showStarted ? 'Visa alla mål' : 'Visa endast påbörjade mål'">
               <Icon name="lucide:circle-play" class="h-5 w-5"
                 :style="{ opacity: showStarted ? 1 : 0.3 }" />
             </button>
-            <button @click="toggleChildSearch"
-              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
-              title="Lägg till undermål">
+            <button @click="toggleChildSearch" class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Lägg till undermål">
               <Icon name="lucide:plus" class="h-5 w-5" />
             </button>
           </div>
         </div>
 
         <!-- Sökfält för undermål -->
-        <div v-if="showChildSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 mb-4">
+        <div v-if="showChildSearch" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-4">
           <div class="mb-2">
-             <input ref="childSearchInput" v-model="childSearchQuery" @keydown.enter.prevent="handleChildSearchKeydown" @keydown.escape.prevent="showChildSearch = false; childSearchQuery = ''" type="text"
+            <input ref="childSearchInput" v-model="childSearchQuery" @keydown.enter.prevent="handleChildSearchKeydown" @keydown.escape.prevent="showChildSearch = false; childSearchQuery = ''" type="text"
               placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
-              class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full"
               autofocus />
           </div>
 
           <!-- Sökresultat -->
           <div v-if="childSearchResults.length > 0" class="space-y-1 mt-2">
             <button v-for="result in childSearchResults" :key="result.id" @click="addExistingChild(result.id)"
-              class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors">
-              <div class="font-medium text-gray-200">{{ result.title }}</div>
-              <div class="text-xs text-gray-500">
+              class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors">
+              <div class="font-medium text-ink">{{ result.title }}</div>
+              <div class="text-xs text-ink-dim">
                 {{ new Date(result.created).toLocaleDateString("sv-SE") }}
               </div>
             </button>
           </div>
 
           <!-- Meddelande när inga resultat -->
-          <div v-else-if="childSearchQuery.trim()" class="text-sm text-gray-500 px-4 py-2">
+          <div v-else-if="childSearchQuery.trim()" class="text-sm text-ink-dim px-4 py-2">
             Tryck Enter för att skapa "{{ childSearchQuery }}" som nytt undermål
           </div>
         </div>
 
-        <ul v-if="filteredChildren.length > 0" class="space-y-3" :class="{ 'select-none': isDepDragging }">
+        <ul v-if="filteredChildren.length > 0" class="space-y-2" :class="{ 'select-none': isDepDragging }">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
             @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
             @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
-            class="relative overflow-hidden rounded-lg transition-opacity"
+            class="relative overflow-hidden rounded-2xl transition-opacity"
             :class="[
               isChildBlocked(child.id) ? 'ml-4 pl-3' : '',
-              dragOverChildId === child.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900' : 'opacity-100',
+              dragOverChildId === child.id ? 'ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-canvas' : 'opacity-100',
               draggedChildId === child.id ? 'opacity-30' : '',
-              depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-gray-900' : ''
+              depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-canvas' : ''
             ]">
             <!-- Reparent indicator -->
-            <div v-if="dragOverChildId === child.id && draggedChildId !== child.id" 
-              class="absolute inset-0 bg-purple-500/20 flex items-center justify-center z-10 rounded-lg">
-              <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+            <div v-if="dragOverChildId === child.id && draggedChildId !== child.id"
+              class="absolute inset-0 bg-fuchsia-500/20 flex items-center justify-center z-10 rounded-2xl">
+              <div class="bg-fuchsia-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                 Flytta in i detta mål
               </div>
             </div>
             <!-- Dependency indicator -->
-            <div v-if="depDragOverChildId === child.id && depDragChildId !== child.id" 
-              class="absolute inset-0 bg-orange-500/20 flex items-center justify-center z-10 rounded-lg">
+            <div v-if="depDragOverChildId === child.id && depDragChildId !== child.id"
+              class="absolute inset-0 bg-orange-500/20 flex items-center justify-center z-10 rounded-2xl">
               <div class="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                 🔗 Skapa beroende
               </div>
@@ -1701,25 +1785,25 @@ watch(selectedParentIndex, async () => {
             </div>
 
             <!-- Huvudinnehåll -->
-            <div class="relative rounded-lg transition-all bg-gray-900" :class="{
-              'border border-blue-500': selectedChildIndex === index
+            <div class="relative rounded-2xl border transition-all bg-surface hover:bg-surface-2" :class="{
+              'border-accent shadow-[0_0_0_1px_rgb(129_140_248/0.35)]': selectedChildIndex === index,
+              'border-line': selectedChildIndex !== index
             }" :style="{
               transform: 'translateX(' + getSwipeOffset(child.id) + 'px)',
               transition: swipeState.isSwiping ? 'none' : 'transform 0.3s ease',
             }"
               draggable="true"
-              @dragstart.stop="handleDragStart($event, child.id)" 
+              @dragstart.stop="handleDragStart($event, child.id)"
               @dragover.stop="handleDragOver($event, child.id)"
-              @dragleave.stop="handleDragLeave" 
+              @dragleave.stop="handleDragLeave"
               @drop.stop.prevent="handleDrop($event, child.id)"
               @touchstart="handleTouchStart($event, child.id)" @touchmove="handleTouchMove($event)"
               @touchend="handleTouchEnd(child)">
               <!-- Insert mode - visa input -->
               <div v-if="mode === 'insert' && editingGoalId === child.id" class="p-4">
-                <input ref="editInputRef" v-model="editTitle" type="text"
-                  class="w-full px-3 py-2 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                <input ref="editInputRef" v-model="editTitle" type="text" class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full"
                   @keydown.enter.prevent="saveEdit" @keydown.esc.prevent="cancelEdit" />
-                <div class="text-xs text-gray-500 mt-2">
+                <div class="text-xs text-ink-dim mt-2">
                   Enter för att spara, Escape för att avbryta
                 </div>
               </div>
@@ -1728,14 +1812,14 @@ watch(selectedParentIndex, async () => {
               <div v-else class="flex items-center gap-2">
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                   :class="['flex-shrink-0 transition-colors rounded p-1', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-gray-600 hover:text-gray-600' : 'text-white hover:text-white hover:bg-gray-600']"
+                   :class="['flex-shrink-0 transition-colors rounded-lg p-1.5', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-ink-dim hover:text-ink-dim' : 'text-ink hover:text-white hover:bg-elevated']"
                    title="Ändra ikon">
-                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#4B5563' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
+                    <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#63708a' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
                  <!-- Started-toggle (s) -->
                  <button
                    @click.stop="toggleStarted(child)"
-                   :class="['flex-shrink-0 p-1 rounded transition-colors', isChildBlocked(child.id) || child.finished ? 'text-gray-600' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-gray-300']"
+                   :class="['flex-shrink-0 p-1.5 rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
                    :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
                    <Icon name="lucide:circle-play" class="w-5 h-5"
                      :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
@@ -1744,62 +1828,85 @@ watch(selectedParentIndex, async () => {
                  <button
                    @mousedown.stop="handleDepMouseDown($event, child.id)"
                    :class="[
-                     'flex-shrink-0 p-1 rounded transition-colors hover:bg-gray-700',
+                     'flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-elevated',
                      isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
-                     isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-orange-400'
+                     isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-orange-400'
                    ]"
                    title="Dra för att skapa beroende">
                    <Icon name="lucide:link" class="w-5 h-5" />
                  </button>
                  <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
-                  <h3 class="text-lg font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-gray-600' : 'text-white'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
+                  <h3 class="text-lg font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
-                  <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-gray-600 mt-1">
+                  <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-1">
                     🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
+                  </p>
+                  <p v-if="child.description && editingDescriptionId !== child.id"
+                    class="text-xs text-ink-dim mt-1 truncate">
+                    {{ descriptionPreview(child.description, 80) }}
                   </p>
                 </NuxtLink>
                 <button
                   v-if="weightEditingChildId !== child.id"
                   @click.stop="startWeightEdit(child)"
                   :class="[
-                    'flex-shrink-0 transition-colors p-2 rounded',
-                    isChildBlocked(child.id) ? 'text-gray-600' : 'text-white hover:text-gray-300 hover:bg-gray-800'
+                    'flex-shrink-0 transition-colors p-2 rounded-lg',
+                    isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-ink-muted hover:bg-elevated'
                   ]"
                   title="Ändra vikt">
-                  <span :class="['text-xs font-mono px-2 py-1 rounded bg-gray-800', isChildBlocked(child.id) ? 'text-gray-600' : 'text-white']">
+                  <span :class="['text-xs font-mono px-2 py-1 rounded-lg bg-elevated tabular-nums', isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink']">
                     {{ child.weight }}
                   </span>
                 </button>
                 <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
                   <div class="flex items-center gap-2">
-                    <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1" />
-                    <span class="text-sm text-gray-400 w-8">{{ tempWeight }}</span>
+                    <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1 accent-accent" />
+                    <span class="text-sm text-ink-muted w-8 tabular-nums">{{ tempWeight }}</span>
                     <button @click="saveWeight" class="text-green-400 hover:text-green-300">✓</button>
                     <button @click="cancelWeightEdit" class="text-red-400 hover:text-red-300">✗</button>
                   </div>
                 </div>
               </div>
             </div>
+
+            <!-- Redigera beskrivning för undermål (t) -->
+            <div v-if="editingDescriptionId === child.id" class="relative rounded-2xl border border-accent bg-surface p-4 mt-2">
+              <textarea :data-description-input="child.id" v-model="descriptionDraft" rows="3"
+                class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full resize-y"
+                placeholder="Beskrivning - vad vill du uppnå?"
+                @keydown="handleDescriptionKeydown($event, child.id)"
+                @keydown.esc.prevent="cancelEditDescription" />
+              <div class="flex items-center justify-between mt-2 gap-4">
+                <span class="text-xs text-ink-dim">Ctrl+Enter spara, Escape avbryta</span>
+                <div class="flex gap-2">
+                  <button @click="cancelEditDescription" class="rounded-lg border border-line bg-surface-2 px-4 py-2 text-ink-muted transition-colors hover:border-line-strong hover:text-ink">Avbryt</button>
+                  <button @click="saveDescription(child.id)"
+                    class="px-3 py-1.5 bg-accent-strong hover:bg-accent rounded-lg text-white transition-colors">
+                    Spara
+                  </button>
+                </div>
+              </div>
+            </div>
           </li>
         </ul>
 
-        <div v-else class="text-gray-500 p-6 border border-gray-700 rounded-lg text-center">
+        <div v-else class="text-ink-dim p-10 border border-dashed border-line rounded-2xl text-center">
           Inga undermål ännu. Skapa ett för att dela upp detta mål i mindre
           delar.
         </div>
       </div>
     </div>
 
-    <!-- Vim mode indikator -->
+    <!-- Vim mode indicator -->
     <div v-if="mode === 'insert'"
-      class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-500 text-white font-mono text-sm rounded shadow-lg">
+      class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-accent-strong text-white font-mono text-sm rounded-xl shadow-lg">
       -- INSERT --
     </div>
 
     <!-- Modal för att bekräfta borttagning av föräldrarelation -->
     <UModal v-model:open="showRemoveConfirmation" title="Ta bort föräldrarelation?">
-      <p v-if="parentToRemove" class="text-gray-400">
+      <p v-if="parentToRemove" class="text-ink-muted">
         Vill du ta bort relationen till
         <strong>{{
           parents.find((p) => p.id === parentToRemove)?.title
@@ -1822,18 +1929,15 @@ watch(selectedParentIndex, async () => {
     <UModal v-model:open="showDeleteConfirmation" title="Ta bort mål?">
       <template #footer="{ close }">
         <div class="flex justify-end gap-2">
-          <UButton color="gray" variant="ghost" @click="cancelDelete" :class="deleteDialogSelection === 'cancel' ? 'ring-2 ring-blue-500' : ''
+          <UButton color="gray" variant="ghost" @click="cancelDelete" :class="deleteDialogSelection === 'cancel' ? 'ring-2 ring-accent' : ''
             ">
             Avbryt
           </UButton>
-          <UButton color="red" @click="executeDelete" :class="deleteDialogSelection === 'confirm' ? 'ring-2 ring-blue-400' : ''
+          <UButton color="red" @click="executeDelete" :class="deleteDialogSelection === 'confirm' ? 'ring-2 ring-accent' : ''
             ">
             Ta bort
           </UButton>
         </div>
-        <!-- <div class="text-xs text-gray-500 mt-3 text-center"> -->
-        <!--   h/l = navigera, Enter = Bekräfta, Escape = Avbryt -->
-        <!-- </div> -->
       </template>
     </UModal>
 
@@ -1853,10 +1957,10 @@ watch(selectedParentIndex, async () => {
       @execute-command="executeLeaderCommand($event)"
     />
   </div>
-  <div v-else class="max-w-4xl mx-auto p-6">
+  <div v-else class="max-w-4xl mx-auto px-6 py-8">
     <div class="text-center">
-      <h1 class="text-3xl font-bold text-gray-300 mb-4">Du måste logga in</h1>
-      <p class="text-gray-600 mb-6">
+      <h1 class="text-3xl font-bold tracking-tight text-ink mb-4">Du måste logga in</h1>
+      <p class="text-ink-dim mb-6">
         För att se dina mål måste du vara inloggad.
       </p>
       <NuxtLink to="/login">

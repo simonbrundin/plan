@@ -12,7 +12,7 @@ defineEmits<{
 
 <template>
   <UModal :model-value="open" title="Ta bort föräldrarelation?" @update:model-value="(val) => $emit('update:open', val)">
-    <p class="text-gray-400">
+    <p class="text-ink-muted">
       Vill du ta bort relationen till
       <strong>{{ parentTitle }}</strong
       >? Själva målet kommer inte tas bort.

@@ -46,7 +46,7 @@ watch(
       <NuxtLink
         v-if="parents.length === 0"
         to="/goals"
-        class="text-blue-400 hover:text-blue-300 transition-colors font-medium"
+        class="text-accent hover:text-accent-light transition-colors font-medium"
       >
         Root
       </NuxtLink>
@@ -59,7 +59,7 @@ watch(
             :value="editTitle"
             @input="$emit('update:editTitle', ($event.target as HTMLInputElement).value)"
             type="text"
-            class="px-3 py-1 bg-gray-800 border border-blue-500 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            class="px-3 py-1 bg-surface-2 border border-accent rounded text-ink focus:outline-none focus:ring-2 focus:ring-accent"
             @keydown.enter.prevent="$emit('save-edit')"
             @keydown.esc.prevent="$emit('cancel-edit')"
           />
@@ -73,8 +73,8 @@ watch(
           class="px-2 py-1 rounded transition-all select-none inline-block"
           :class="
             isParentMode && selectedParentIndex === index
-              ? 'text-gray-100 bg-blue-500 font-medium'
-              : 'text-gray-500 hover:text-gray-300'
+              ? 'text-ink bg-accent font-medium'
+              : 'text-ink-dim hover:text-ink-muted'
           "
           @mousedown="$emit('handle-parent-mousedown', parent.id)"
           @mouseup="$emit('handle-parent-mouseup')"
@@ -91,7 +91,7 @@ watch(
     <!-- + knapp för att lägga till förälder -->
     <button
       @click="$emit('toggle-parent-search')"
-      class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-gray-800"
+      class="text-ink-dim hover:text-ink-muted transition-colors p-1 rounded hover:bg-surface-2"
       title="Lägg till förälder"
     >
       <Icon name="lucide:plus" class="h-5 w-5" />
@@ -99,7 +99,7 @@ watch(
   </div>
 
   <!-- Sökfält för föräldrar -->
-  <div v-if="showParentSearch" class="border border-gray-700 rounded-lg p-4 bg-gray-800 flex-shrink-0">
+  <div v-if="showParentSearch" class="border border-line rounded-lg p-4 bg-surface-2 flex-shrink-0">
     <div class="mb-2">
       <input
         ref="parentSearchInput"
@@ -108,7 +108,7 @@ watch(
         @keydown="$emit('handle-search-keydown', $event)"
         type="text"
         placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
-        class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full px-4 py-2 bg-surface border border-line rounded-lg text-ink placeholder-ink-dim focus:outline-none focus:ring-2 focus:ring-accent"
       />
     </div>
 
@@ -118,17 +118,17 @@ watch(
         v-for="result in searchResults"
         :key="result.id"
         @click="$emit('add-existing-parent', result.id)"
-        class="w-full text-left px-4 py-2 hover:bg-gray-700 rounded-lg transition-colors"
+        class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors"
       >
-        <div class="font-medium text-gray-200">{{ result.title }}</div>
-        <div class="text-xs text-gray-500">
+        <div class="font-medium text-ink">{{ result.title }}</div>
+        <div class="text-xs text-ink-dim">
           {{ new Date(result.created).toLocaleDateString("sv-SE") }}
         </div>
       </button>
     </div>
 
     <!-- Meddelande när inga resultat -->
-    <div v-else-if="parentSearchQuery.trim()" class="text-sm text-gray-500 px-4 py-2">
+    <div v-else-if="parentSearchQuery.trim()" class="text-sm text-ink-dim px-4 py-2">
       Tryck Enter för att skapa "{{ parentSearchQuery }}" som nytt mål
     </div>
   </div>

@@ -8,13 +8,20 @@ import (
 
 // Goal represents a goal in the system
 type Goal struct {
-	ID       int64      `json:"id" example:"1"`
-	Title    string     `json:"title" example:"My Goal"`
-	Icon     string     `json:"icon" example:"heroicons:star"`
-	StatusID int        `json:"status_id" example:"1"`
-	Created  time.Time  `json:"created"`
-	Started  *time.Time `json:"started,omitempty"`
-	Finished *time.Time `json:"finished,omitempty"`
+	ID    int64  `json:"id" example:"1"`
+	Title string `json:"title" example:"My Goal"`
+	// Description är en längre fritext om målet. Används när titeln
+	// inte räcker för att beskriva vad som ska uppnås.
+	Description string    `json:"description" example:"En längre beskrivning av målet"`
+	Icon        string    `json:"icon" example:"heroicons:star"`
+	StatusID    int       `json:"status_id" example:"1"`
+	Created     time.Time `json:"created"`
+	// Started och Finished skickas alltid ut, även när de är null.
+	// Med omitempty skulle fältet försvinna ur JSON-svaret och klienten
+	// fick undefined i stället för null - vilket gjorde att filter som
+	// "started !== null" felaktigt matchade mål utan startdatum.
+	Started  *time.Time `json:"started"`
+	Finished *time.Time `json:"finished"`
 	Inbox    int        `json:"inbox" example:"0"`
 	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
 	// kan inte slutföras och markeras alltid som pågående.
@@ -22,6 +29,10 @@ type Goal struct {
 	// HasParent anger om målet har en förälder (det är child i goal_relations).
 	// Endast grundmål (utan förälder) listas på /goals.
 	HasParent bool `json:"has_parent" example:"false"`
+	// Order är målets placering bland grundmål. Grundmål sorteras på /goals
+	// efter detta värde (stigande), och det sätts när målen flyttas med
+	// piltangenterna.
+	Order int `json:"order" example:"0"`
 }
 
 // Status represents a goal status
@@ -130,11 +141,14 @@ func (n *NullableTime) UnmarshalJSON(data []byte) error {
 
 // UpdateGoalRequest is the request body for updating a goal
 type UpdateGoalRequest struct {
-	Title    *string      `json:"title,omitempty"`
-	Icon     *string      `json:"icon,omitempty"`
-	StatusID *int         `json:"status_id,omitempty"`
-	Started  NullableTime `json:"started,omitempty"`
-	Finished NullableTime `json:"finished,omitempty"`
+	Title *string `json:"title,omitempty"`
+	// Description sätter eller rensar målets beskrivning.
+	// nil = lämnas oförändrat.
+	Description *string      `json:"description,omitempty"`
+	Icon        *string      `json:"icon,omitempty"`
+	StatusID    *int         `json:"status_id,omitempty"`
+	Started     NullableTime `json:"started,omitempty"`
+	Finished    NullableTime `json:"finished,omitempty"`
 	// Eternal sätter eller tar bort evigt-flaggan på ett mål.
 	// nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
 	Eternal *bool `json:"eternal,omitempty"`
@@ -173,6 +187,12 @@ type UpdateRelationRequest struct {
 type ReorderRelationsRequest struct {
 	ParentID int64   `json:"parentId" binding:"required"`
 	ChildIDs []int64 `json:"childIds" binding:"required"`
+}
+
+// ReorderGoalsRequest is the request body for reordering root goals.
+// GoalIDs contains the root goals (goals without a parent) in their new order.
+type ReorderGoalsRequest struct {
+	GoalIDs []int64 `json:"goalIds" binding:"required"`
 }
 
 // DeleteRelationRequest is the request body for deleting a relation

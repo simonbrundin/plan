@@ -21,6 +21,10 @@ export default defineNuxtConfig({
 
 	css: ["@/assets/css/main.css"],
 	ui: {
+		colors: {
+			primary: "indigo",
+			neutral: "slate",
+		},
 		theme: {
 			colors: [
 				"primary",
@@ -68,6 +72,9 @@ export default defineNuxtConfig({
 	},
 	colorMode: {
 		classSuffix: "",
+		// Appen är mörk i grunden - den följer inte systemets ljustema.
+		preference: "dark",
+		fallback: "dark",
 	},
 	icon: {
 		// "none" gjorde att inga ikoner renderades alls (tom client-bundle),
