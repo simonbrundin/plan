@@ -9,8 +9,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test:watch": "nodemon --exec 'npx cucumber-js --import tsx --import features/step-definitions/priority.steps.ts' --ext feature,js,vue,ts",
-    "test": "cucumber-js --import tsx --import features/step-definitions/priority.steps.ts"
+    "test:watch": "nodemon --exec 'npx cucumber-js --import tsx --import features/step-definitions/priority.steps.ts --import features/step-definitions/natural-language.steps.ts --import features/step-definitions/icons.steps.ts --import features/step-definitions/calendar-detail.steps.ts' --ext feature,js,vue,ts",
+    "test": "cucumber-js --import tsx --import features/step-definitions/priority.steps.ts --import features/step-definitions/natural-language.steps.ts --import features/step-definitions/icons.steps.ts --import features/step-definitions/calendar-detail.steps.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.111",
@@ -24,6 +24,7 @@
     "nuxt": "^4.1.2",
     "ofetch": "^1.5.1",
     "pinia": "^2.3.0",
+    "rrule": "^2.8.1",
     "shadcn-nuxt": "^2.2.0",
     "tailwindcss": "^4.1.13",
     "translate": "^3.1.1",
