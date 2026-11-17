@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -13,9 +14,8 @@ import (
 	"plan-api/internal/handlers"
 	"plan-api/internal/middleware"
 
+	openapiui "github.com/PeterTakahashi/gin-openapi/openapiui"
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "plan-api/docs"
 )
@@ -41,6 +41,30 @@ import (
 // @description Type "Bearer" followed by a token. For development, use "user_<id>" format (e.g., "user_1")
 
 var dbConnected bool
+
+func getDocsPath() string {
+	if path := os.Getenv("DOCS_PATH"); path != "" {
+		return path
+	}
+	return "./docs/swagger.json"
+}
+
+func readSwaggerSpec() ([]byte, error) {
+	return os.ReadFile(getDocsPath())
+}
+
+func withHost(specJSON []byte, host string) ([]byte, error) {
+	var spec map[string]interface{}
+	if err := json.Unmarshal(specJSON, &spec); err != nil {
+		return nil, err
+	}
+	if host == "" {
+		delete(spec, "host")
+	} else {
+		spec["host"] = host
+	}
+	return json.Marshal(spec)
+}
 
 func main() {
 	// Connect to database
@@ -79,8 +103,19 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	// Swagger UI
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// API documentation with Scalar UI
+	r.GET("/docs/*any", openapiui.WrapHandler(openapiui.Config{
+		SpecURL: "/docs/openapi.json",
+		SpecProvider: func() ([]byte, error) {
+			spec, err := readSwaggerSpec()
+			if err != nil {
+				return nil, err
+			}
+			return withHost(spec, os.Getenv("API_HOST"))
+		},
+		Title: "Goals Management API",
+		Theme: "dark",
+	}))
 
 	// Auth routes (no authentication required)
 	authHandler := handlers.NewAuthHandler(dbConnected)
@@ -100,6 +135,23 @@ func main() {
 	})
 	{
 		goalHandler := handlers.NewGoalHandler(dbConnected)
+		calendarEventHandler := handlers.NewCalendarEventHandler(dbConnected)
+		calendarHandler := handlers.NewCalendarHandler(dbConnected)
+
+		// Calendar endpoints
+		api.GET("/calendars", calendarHandler.List)
+		api.POST("/calendars", calendarHandler.Create)
+		api.PATCH("/calendars/:id", calendarHandler.Update)
+		api.DELETE("/calendars/:id", calendarHandler.Delete)
+
+		// Calendar event endpoints
+		api.GET("/calendar-events", calendarEventHandler.List)
+		api.POST("/calendar-events", calendarEventHandler.Create)
+		api.GET("/calendar-events/:id", calendarEventHandler.Get)
+		api.PATCH("/calendar-events/:id", calendarEventHandler.Update)
+		api.POST("/calendar-events/:id/occurrences", calendarEventHandler.CreateOccurrenceOverride)
+		api.POST("/calendar-events/:id/split", calendarEventHandler.SplitSeries)
+		api.DELETE("/calendar-events/:id", calendarEventHandler.Delete)
 
 		// Goals endpoints
 		api.GET("/goals", goalHandler.GetGoals)
@@ -109,6 +161,7 @@ func main() {
 		api.PATCH("/goals/:id", goalHandler.UpdateGoal)
 		api.DELETE("/goals/:id", goalHandler.DeleteGoal)
 		api.PATCH("/goals/reorder", goalHandler.ReorderGoals)
+		api.PATCH("/goals/priority/reorder", goalHandler.ReorderPriorityGoals)
 
 		// Status endpoints
 		api.GET("/statuses", goalHandler.GetStatuses)
@@ -148,7 +201,7 @@ func main() {
 	// Graceful shutdown
 	go func() {
 		log.Printf("Starting server on port %s", port)
-		log.Printf("Swagger UI available at http://localhost:%s/swagger/index.html", port)
+		log.Printf("Scalar UI available at http://localhost:%s/docs/", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}

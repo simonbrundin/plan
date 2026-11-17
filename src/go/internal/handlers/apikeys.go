@@ -9,7 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"plan-api/internal/database"
 	"plan-api/internal/middleware"
+	"plan-api/internal/models"
 )
+
+// Keep the response model available to swaggo annotations in this package.
+type ErrorResponse = models.ErrorResponse
 
 // APIKey represents an API key (without the actual key)
 type APIKey struct {
@@ -47,7 +51,7 @@ func NewAPIKeyHandler() *APIKeyHandler {
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {array} APIKey
-// @Failure 401 {object} ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
 // @Router /api/api-keys [get]
 func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 	userID := getUserID(c)
@@ -99,8 +103,8 @@ func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 // @Security BearerAuth
 // @Param key body CreateAPIKeyRequest true "API key data"
 // @Success 201 {object} APIKeyResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
 // @Router /api/api-keys [post]
 func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 	userID := getUserID(c)
@@ -155,8 +159,8 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path int true "API Key ID"
 // @Success 200 {object} map[string]bool
-// @Failure 401 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
 // @Router /api/api-keys/{id} [delete]
 func (h *APIKeyHandler) DeleteAPIKey(c *gin.Context) {
 	userID := getUserID(c)

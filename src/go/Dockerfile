@@ -1,4 +1,14 @@
 # ==============================
+# OpenAPI documentation stage
+# ==============================
+FROM golang:1.25-alpine AS swag
+WORKDIR /app
+
+RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
+COPY . .
+RUN swag init -g cmd/server/main.go -o docs --parseFuncBody --quiet
+
+# ==============================
 # Build Stage
 # ==============================
 FROM golang:1.25-alpine AS build
@@ -13,11 +23,9 @@ COPY go.mod go.sum ./
 # Hämta dependencies
 RUN go mod download
 
-# Kopiera källkod
+# Kopiera källkod och den genererade OpenAPI-specifikationen
 COPY . .
-
-# Uppdatera dependencies
-RUN go mod tidy
+COPY --from=swag /app/docs ./docs
 
 # Bygg binären
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o plan-api ./cmd/server/main.go
@@ -32,8 +40,12 @@ WORKDIR /app
 # Installera ca-certificates för HTTPS
 RUN apk --no-cache add ca-certificates tzdata
 
-# Kopiera binären från build-steget
+# Kopiera binären och OpenAPI-specifikationen
 COPY --from=build /app/plan-api .
+COPY --from=build /app/docs ./docs
+
+# Scalar läser specen från denna sökväg
+ENV DOCS_PATH=/app/docs/swagger.json
 
 # Exponera port
 EXPOSE 8080

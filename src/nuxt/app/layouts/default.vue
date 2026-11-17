@@ -10,7 +10,6 @@ const showHelpModal = ref(false);
 const showPriorityIndicator = ref(false);
 const { isSearchOpen, openSearch, closeSearch } = useSearchState();
 
-const searchButtonRef = ref<InstanceType<typeof UDashboardSearchButton> | null>(null);
 
 const {
   isPriorityMode,
@@ -30,7 +29,10 @@ const {
   disableNavigation,
   handleKeydown: handleNavigationKeydown,
   handleKeyup: handleNavigationKeyup,
+  isLeaderMode,
 } = useGlobalNavigation();
+
+const { isOpen: isQuickAddOpen, open: openQuickAdd, close: closeQuickAdd } = useQuickAdd();
 
 watch(isPriorityMode, (val) => {
   showPriorityIndicator.value = val;
@@ -58,6 +60,14 @@ const links = [
       label: "Prioritet",
       icon: "i-lucide-sort-desc",
       to: "/priority",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: "Kalender",
+      icon: "i-lucide-calendar-days",
+      to: "/calendar",
       onSelect: () => {
         open.value = false;
       },
@@ -119,6 +129,33 @@ function handleGlobalKeydown(event: KeyboardEvent) {
     target.tagName === "INPUT" ||
     target.tagName === "TEXTAREA" ||
     target.isContentEditable;
+
+  // Snabbt läggande till öppnas med "n", som i Fantastical. Fältet får
+  // fokus direkt så att man kan börja skriva.
+  if (
+    event.key === "n" &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey &&
+    !event.defaultPrevented &&
+    !isInInput &&
+    !isSearchOpen.value &&
+    !isLeaderMode.value &&
+    !isQuickAddOpen.value
+  ) {
+    event.preventDefault();
+    openQuickAdd();
+    return;
+  }
+
+  // Escape stänger snabbfältet när det är öppet. Det hanteras här och inte
+  // bara i textfältet, så att Escape även fungerar när fokus ligger på
+  // en knapp i overlayen.
+  if (event.key === "Escape" && isQuickAddOpen.value) {
+    event.preventDefault();
+    closeQuickAdd();
+    return;
+  }
 
   // Handle Escape FIRST - always let it propagate for Vim
   if (event.key === "Escape") {
@@ -199,12 +236,6 @@ onUnmounted(() => {
       :ui="{ footer: 'lg:border-t lg:border-line' }"
     >
       <template #default="{ collapsed }">
-        <UDashboardSearchButton
-          ref="searchButtonRef"
-          :collapsed="collapsed"
-          class="bg-transparent ring-default"
-        />
-
         <UNavigationMenu
           :collapsed="collapsed"
           :items="links[0]"
@@ -223,6 +254,8 @@ onUnmounted(() => {
 
     <HelpModal v-model:open="showHelpModal" />
 
+    <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />
+
     <Transition name="fade">
       <div
         v-if="showPriorityIndicator && prioritizedGoals.length > 0"
@@ -238,15 +271,17 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <UDashboardPanel class="!overflow-y-auto !h-screen bg-canvas">
-      <UDashboardNavbar class="hidden lg:flex">
+    <!-- Kalendern ska ligga direkt på sidans bakgrund, så panelens egen
+         yta sätts av på den sidan. -->
+    <UDashboardPanel
+      class="!overflow-y-auto !h-screen"
+      :class="route.path === '/calendar' ? 'bg-transparent' : 'bg-canvas'"
+    >
+      <UDashboardNavbar v-if="route.path !== '/calendar'" class="hidden lg:flex">
         <template #toggle>
           <UDashboardSidebarToggle />
         </template>
 
-        <template #right>
-          <UDashboardSearchButton collapsed />
-        </template>
       </UDashboardNavbar>
 
       <div class="pb-20 lg:pb-0">
@@ -254,10 +289,9 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around gap-2 border-t border-line bg-surface/90 backdrop-blur-xl p-3 lg:hidden"
+        class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center border-t border-line bg-surface/90 p-1.5 backdrop-blur-xl lg:hidden"
       >
         <UDashboardSidebarToggle />
-        <UDashboardSearchButton collapsed />
       </div>
     </UDashboardPanel>
   </UDashboardGroup>

@@ -24,7 +24,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /swagger
+            value: /docs
       backendRefs:
         - kind: Service
           name: go-api-service
