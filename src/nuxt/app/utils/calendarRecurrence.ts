@@ -35,30 +35,29 @@ export const MAX_OCCURRENCES_PER_SERIES = 5000;
  */
 export const MAX_EXPANSION_SPAN = 50 * 365 * DAY;
 
-interface CachedRule {
-	source: string;
-	rule: RRule;
+/** Max antal tidsfönster som cachas samtidigt. */
+const MAX_CACHED_WINDOWS = 8;
+
+/** Ett tidsfönster i millisekunder. */
+export interface TimeWindow {
+	from: number;
+	to: number;
 }
 
-// Regelinstanserna är dyra att skapa och används för varje bildruta när
-// tidsfönstret flyttas, så de behålls mellan anropen. Nyckeln är seriens
-// id, och källsträngen kontrolleras så att en ändrad serie inte återanvänder
-// en gammal regel.
-const ruleCache = new Map<number, CachedRule>();
-
-const parseRule = (series: CalendarEvent): RRule | null => {
+/**
+ * Regeln för en serie, eller null om regeln inte går att tolka.
+ *
+ * Att tolka en regel kostar någon tiondels millisekund, så det görs varje
+ * gång serien expanderas. Det håller funktionerna rena från tillstånd.
+ */
+const ruleFor = (series: CalendarEvent): RRule | null => {
 	const source = series.recurrence_rule;
 
 	if (!source) return null;
 
-	const cached = ruleCache.get(series.id);
-	if (cached && cached.source === source) return cached.rule;
-
 	try {
 		const parsed = RRule.parseString(source);
-		const rule = new RRule({ ...parsed, dtstart: new Date(series.start_at) });
-		ruleCache.set(series.id, { source, rule });
-		return rule;
+		return new RRule({ ...parsed, dtstart: new Date(series.start_at) });
 	} catch {
 		// En trasig regel ska inte krascha kalendern - serien visas då
 		// bara som en enstaka händelse.
@@ -66,6 +65,12 @@ const parseRule = (series: CalendarEvent): RRule | null => {
 	}
 };
 
+/** Sant om serien har en regel som går att tolka. */
+export function canExpandSeries(series: CalendarEvent): boolean {
+	return ruleFor(series) !== null;
+}
+
+/** Sant om händelsen pågår inom tidsfönstret. */
 const overlaps = (event: CalendarEvent, from: number, to: number): boolean => {
 	const start = Date.parse(event.start_at);
 	const end = Date.parse(event.end_at);
@@ -73,25 +78,50 @@ const overlaps = (event: CalendarEvent, from: number, to: number): boolean => {
 	return start < to && end > from;
 };
 
+/** Händelsens längd i millisekunder. */
+const durationOf = (event: CalendarEvent): number =>
+	Math.max(0, Date.parse(event.end_at) - Date.parse(event.start_at));
+
 /**
- * Fördelar förekomster jämnt över tidsfönstret när de blir för många.
+ * Fördelar förekomsterna över dagarna de ligger i.
  *
  * Att behålla de första förekomsterna skulle lämna resten av fönstret tomt.
- * Änträdet är i stället att hoppa över var n:te förekomst, så att serien
- * finns representerad i hela fönstret.
+ * Änträdet är i stället att behålla en förekomst per dag, med en vikt som
+ * motsvarar hur många förekomster dagen faktiskt hade. Då finns serien
+ * representerad i hela fönstret, och antalen per dag, månad och år blir
+ * ändå exakta.
  */
-const spread = (occurrences: Date[]): Date[] => {
-	const step = Math.ceil(occurrences.length / MAX_OCCURRENCES_PER_SERIES);
-	const result: Date[] = [];
+const thinOut = (
+	starts: number[],
+): Array<{ start: number; weight: number }> => {
+	const perDay = new Map<number, number[]>();
 
-	for (let index = 0; index < occurrences.length; index += step) {
-		result.push(occurrences[index]);
+	for (const start of starts) {
+		const day = Math.floor(start / DAY);
+		const bucket = perDay.get(day);
+
+		if (bucket) {
+			bucket.push(start);
+		} else {
+			perDay.set(day, [start]);
+		}
+	}
+
+	const result: Array<{ start: number; weight: number }> = [];
+
+	for (const bucket of perDay.values()) {
+		const [first] = bucket;
+
+		if (first === undefined) continue;
+
+		result.push({ start: first, weight: bucket.length });
 	}
 
 	return result;
 };
 
-const clampWindow = (from: number, to: number): { from: number; to: number } => {
+/** Tidsfönstret begränsat till högst MAX_EXPANSION_SPAN. */
+const clampWindow = (from: number, to: number): TimeWindow => {
 	const span = to - from;
 
 	if (span <= MAX_EXPANSION_SPAN) return { from, to };
@@ -104,167 +134,335 @@ const clampWindow = (from: number, to: number): { from: number; to: number } => 
 };
 
 /**
+ * Sant om förekomsten räknas in i fönstret.
+ *
+ * En förekomst som börjar före fönstrets början men slutar inne i fönstret
+ * räknas med, precis som servern gör det.
+ */
+const isInsideWindow = (
+	start: number,
+	duration: number,
+	window: TimeWindow,
+): boolean => start < window.to && start + duration > window.from;
+
+/** En förekomst som en händelse. */
+const occurrenceOf = (
+	series: CalendarEvent,
+	start: number,
+	duration: number,
+	weight = 1,
+	total?: number,
+): CalendarEvent => ({
+	...series,
+	occurrence_id: `${series.id}-${start}`,
+	original_start_at: new Date(start).toISOString(),
+	start_at: new Date(start).toISOString(),
+	end_at: new Date(start + duration).toISOString(),
+	occurrence_weight: weight,
+	...(total === undefined ? {} : { occurrence_total: total }),
+});
+
+/**
+ * Seriens förekomster i tidsfönstret, som starttid.
+ *
+ * Returnerar `null` om regeln inte går att tolka - då ska serien visas som
+ * en enstaka händelse i stället för att försvinna ur kalendern.
+ *
+ * När serien har fler förekomster än capen tunnas den ut: en förekomst per
+ * dag behålls, med en vikt som gör att antalen blir rätta ändå. Det sanna
+ * antalet förekomster i fönstret finns då i `occurrence_total`.
+ */
+const occurrenceStarts = (
+	series: CalendarEvent,
+	from: number,
+	to: number,
+): Array<{ start: number; weight: number; total?: number }> | null => {
+	const rule = ruleFor(series);
+
+	if (!rule) return null;
+
+	const duration = durationOf(series);
+	const window = clampWindow(from, to);
+	const occurrences = rule.between(
+		new Date(window.from - duration),
+		new Date(window.to),
+		true,
+	);
+	const inside = occurrences
+		.map((occurrence) => occurrence.getTime())
+		.filter((start) => isInsideWindow(start, duration, window));
+
+	if (inside.length <= MAX_OCCURRENCES_PER_SERIES) {
+		return inside.map((start) => ({ start, weight: 1 }));
+	}
+
+	return thinOut(inside).map((entry) => ({
+		...entry,
+		total: inside.length,
+	}));
+};
+
+/**
  * Expanderar en serie till de förekomster som ligger i tidsfönstret.
  *
  * Serien börjar på `start_at` och varje förekomst är lika lång som
- * händelsen. En förekomst som börjar före fönstrets början men slutar
- * inne i fönstret räknas med, precis som servern gör det.
+ * händelsen.
  */
 export function expandSeries(
 	series: CalendarEvent,
 	from: number,
 	to: number,
 ): CalendarEvent[] {
-	const rule = parseRule(series);
+	const starts = occurrenceStarts(series, from, to);
 
-	if (!rule) return [];
+	if (!starts) return [];
 
-	const start = Date.parse(series.start_at);
-	const end = Date.parse(series.end_at);
-	const duration = Math.max(0, end - start);
-	const window = clampWindow(from, to);
+	const duration = durationOf(series);
 
-	const raw = rule.between(
-		new Date(window.from - duration),
-		new Date(window.to),
-		true,
+	return starts.map(({ start, weight, total }) =>
+		occurrenceOf(series, start, duration, weight, total),
 	);
-	const occurrences = raw.length > MAX_OCCURRENCES_PER_SERIES ? spread(raw) : raw;
-
-	const result: CalendarEvent[] = [];
-
-	for (const occurrence of occurrences) {
-		const occurrenceStart = occurrence.getTime();
-		const occurrenceEnd = occurrenceStart + duration;
-
-		if (occurrenceStart >= window.to || occurrenceEnd <= window.from) continue;
-
-		result.push({
-			...series,
-			occurrence_id: `${series.id}-${occurrenceStart}`,
-			original_start_at: new Date(occurrenceStart).toISOString(),
-			start_at: new Date(occurrenceStart).toISOString(),
-			end_at: new Date(occurrenceEnd).toISOString(),
-		});
-	}
-
-	return result;
 }
 
-const overrideKey = (parentId: number, originalStartAt: string): string =>
+/**
+ * Nyckel för en förekomst: vilken serie den hör till och vilken start den
+ * hade innan den eventuellt flyttades.
+ */
+const occurrenceKey = (parentId: number, originalStartAt: string): string =>
 	`${parentId}|${Date.parse(originalStartAt)}`;
+
+/**
+ * Register över override-rader.
+ *
+ * En override hör till en förekomst i en serie, och identifieras av seriens
+ * id och förekomstens ursprungliga start.
+ */
+class OverrideIndex {
+	private readonly byOccurrence = new Map<string, CalendarEvent>();
+	private readonly used = new Set<CalendarEvent>();
+
+	constructor(private readonly overrides: CalendarEvent[]) {
+		for (const override of overrides) {
+			if (!override.parent_event_id || !override.original_start_at) continue;
+
+			this.byOccurrence.set(
+				occurrenceKey(override.parent_event_id, override.original_start_at),
+				override,
+			);
+		}
+	}
+
+	/** Override-raden som hör till förekomsten, om det finns någon. */
+	find(parentId: number, originalStartAt: string): CalendarEvent | undefined {
+		return this.byOccurrence.get(occurrenceKey(parentId, originalStartAt));
+	}
+
+	/** Markerar att override-raden har använts mot en förekomst. */
+	markUsed(override: CalendarEvent): void {
+		this.used.add(override);
+	}
+
+	/** De override-rader som inte har motsvarat någon förekomst. */
+	unused(): CalendarEvent[] {
+		return this.overrides.filter((override) => !this.used.has(override));
+	}
+}
+
+/** Delar upp datasetet i serier och override-rader. */
+const splitEvents = (
+	events: CalendarEvent[],
+): { series: CalendarEvent[]; overrides: CalendarEvent[] } => ({
+	series: events.filter((event) => !event.parent_event_id),
+	overrides: events.filter((event) => event.parent_event_id),
+});
+
+/** Händelsen om den ligger i fönstret, annars ingenting. */
+const visibleInside = (
+	event: CalendarEvent,
+	from: number,
+	to: number,
+): CalendarEvent[] => (overlaps(event, from, to) ? [event] : []);
+
+/**
+ * Ersätter en förekomst med sin override, om det finns någon.
+ *
+ * En avstängd override tar bort förekomsten helt.
+ */
+const applyOverride = (
+	occurrence: CalendarEvent,
+	masterId: number,
+	overrides: OverrideIndex,
+): CalendarEvent[] => {
+	const override = overrides.find(masterId, occurrence.start_at);
+
+	if (!override) return [occurrence];
+
+	overrides.markUsed(override);
+
+	if (override.status === "cancelled") return [];
+
+	// Vikten förs vidare från förekomsten. En override ersätter en
+	// förekomst, men den förekomsten kan representera flera.
+	return [
+		{
+			...override,
+			occurrence_id: occurrence.occurrence_id,
+			occurrence_weight: occurrence.occurrence_weight,
+			occurrence_total: occurrence.occurrence_total,
+		},
+	];
+};
+
+/**
+ * Expanderar en masterhändelse till de händelser som syns i fönstret.
+ *
+ * En serie expanderas till sina förekomster, medan en enstaka händelse bara
+ * visas om den ligger i fönstret. En override ersätter den förekomst den
+ * hör till, och en avstängd override tar bort förekomsten.
+ */
+const expandMaster = (
+	master: CalendarEvent,
+	from: number,
+	to: number,
+	overrides: OverrideIndex,
+): CalendarEvent[] => {
+	const starts = occurrenceStarts(master, from, to);
+
+	// En serie utan regel, eller med en regel som inte går att tolka, visas
+	// som en enstaka händelse - den får inte försvinna ur kalendern.
+	if (!starts) return visibleInside(master, from, to);
+
+	const duration = durationOf(master);
+
+	return starts
+		.map(({ start, weight, total }) =>
+			occurrenceOf(master, start, duration, weight, total),
+		)
+		.flatMap((occurrence) => applyOverride(occurrence, master.id, overrides));
+};
+
+/**
+ * Override-rader som inte motsvarar någon förekomst i fönstret.
+ *
+ * Det kan till exempel vara en förekomst som har flyttats hit från ett
+ * annat ställe. Den visas ändå, så länge den ligger i fönstret.
+ */
+const unmatchedOverrides = (
+	overrides: OverrideIndex,
+	from: number,
+	to: number,
+): CalendarEvent[] =>
+	overrides
+		.unused()
+		.filter((override) => override.status !== "cancelled")
+		.filter((override) => overlaps(override, from, to))
+		.map((override) => ({
+			...override,
+			occurrence_id: `${override.id}-${Date.parse(override.start_at)}`,
+		}));
 
 /**
  * Expanderar hela datasetet till de händelser som syns i tidsfönstret.
  *
  * Datasetet innehåller både serier (rader med `recurrence_rule`) och
- * override-rader (rader med `parent_event_id`). En override ersätter den
- * förekomst den hör till, och en avstängd override tar bort förekomsten.
+ * override-rader (rader med `parent_event_id`).
  */
 export function expandCalendarEvents(
 	events: CalendarEvent[],
 	from: number,
 	to: number,
 ): CalendarEvent[] {
-	const masters = events.filter((event) => !event.parent_event_id);
-	const overrides = events.filter((event) => event.parent_event_id);
-
-	const overrideByKey = new Map<string, CalendarEvent>();
-	for (const override of overrides) {
-		if (!override.parent_event_id || !override.original_start_at) continue;
-		overrideByKey.set(
-			overrideKey(override.parent_event_id, override.original_start_at),
-			override,
-		);
-	}
-
-	const unmatched = new Set(overrides);
+	const { series, overrides } = splitEvents(events);
+	const index = new OverrideIndex(overrides);
 	const result: CalendarEvent[] = [];
 
-	for (const master of masters) {
-		if (!master.recurrence_rule) {
-			if (overlaps(master, from, to)) result.push(master);
-			continue;
-		}
-
-		for (const occurrence of expandSeries(master, from, to)) {
-			const key = overrideKey(master.id, occurrence.start_at);
-			const override = overrideByKey.get(key);
-
-			if (!override) {
-				result.push(occurrence);
-				continue;
-			}
-
-			unmatched.delete(override);
-
-			// En avstängd override tar bort förekomsten helt.
-			if (override.status === "cancelled") continue;
-
-			result.push({
-				...override,
-				occurrence_id: occurrence.occurrence_id,
-			});
-		}
+	for (const master of series) {
+		result.push(...expandMaster(master, from, to, index));
 	}
 
-	// Overrides som inte motsvarar någon förekomst i fönstret - till exempel
-	// en förekomst som har flyttats hit från ett annat ställe - visas ändå,
-	// så länge de ligger i fönstret.
-	for (const override of unmatched) {
-		if (override.status === "cancelled") continue;
-		if (!overlaps(override, from, to)) continue;
-
-		result.push({
-			...override,
-			occurrence_id: `${override.id}-${Date.parse(override.start_at)}`,
-		});
-	}
+	result.push(...unmatchedOverrides(index, from, to));
 
 	return result.sort(
 		(left, right) => Date.parse(left.start_at) - Date.parse(right.start_at),
 	);
 }
 
+/** Tidsfönstret avrundat till hela dygn. */
+const dayWindow = (from: number, to: number): TimeWindow => ({
+	from: Math.floor(from / DAY) * DAY,
+	to: Math.ceil(to / DAY) * DAY,
+});
+
 /**
- * Expanderar datasetet till synliga händelser, med cachning.
+ * Cache av expanderade tidsfönster.
  *
  * Tidsfönstret flyttas under scroll och zoom, och varje bildruta kan utlösa
  * en ny beräkning. Fönstret avrundas därför ned till hela dygn innan
  * expansionen görs, så att samma cache-nyckel återanvänds så länge
  * visningen ligger inom samma dygn.
+ *
+ * Cachen hänger på händelsearrayen: en ny hämtning ger en ny array och då
+ * börjar cachen om från början.
  */
-export class CalendarExpander {
-	private events: CalendarEvent[] = [];
-	private revision = 0;
-	private readonly cache = new Map<string, CalendarEvent[]>();
+class WindowCache {
+	private readonly entries = new WeakMap<
+		CalendarEvent[],
+		Map<string, CalendarEvent[]>
+	>();
 
-	/** Sätter in de händelser som ska expanderas och tömmer cachen. */
-	setEvents(events: CalendarEvent[]): void {
-		this.events = events;
-		this.revision += 1;
-		this.cache.clear();
-	}
+	/** De expanderade händelserna för fönstret, beräknade vid behov. */
+	get(
+		events: CalendarEvent[],
+		window: TimeWindow,
+		expand: () => CalendarEvent[],
+	): CalendarEvent[] {
+		const key = `${window.from}:${window.to}`;
 
-	/** De händelser som ligger i tidsfönstret. */
-	visible(from: number, to: number): CalendarEvent[] {
-		const bucketFrom = Math.floor(from / DAY) * DAY;
-		const bucketTo = Math.ceil(to / DAY) * DAY;
-		const key = `${this.revision}:${bucketFrom}:${bucketTo}`;
+		let cache = this.entries.get(events);
 
-		let cached = this.cache.get(key);
-
-		if (!cached) {
-			cached = expandCalendarEvents(this.events, bucketFrom, bucketTo);
-			this.cache.set(key, cached);
-
-			// Cacheen ska inte växa obegränsat när användaren rör sig i tiden.
-			if (this.cache.size > 8) {
-				const oldest = this.cache.keys().next().value;
-				if (oldest !== undefined) this.cache.delete(oldest);
-			}
+		if (!cache) {
+			cache = new Map();
+			this.entries.set(events, cache);
 		}
 
-		return cached.filter((event) => overlaps(event, from, to));
+		const cached = cache.get(key);
+
+		if (cached) return cached;
+
+		const expanded = expand();
+		cache.set(key, expanded);
+
+		// Cacheen ska inte växa obegränsat när användaren rör sig i tiden.
+		if (cache.size > MAX_CACHED_WINDOWS) {
+			const oldest = cache.keys().next().value;
+			if (oldest !== undefined) cache.delete(oldest);
+		}
+
+		return expanded;
+	}
+}
+
+/**
+ * Expanderar datasetet till synliga händelser, med cachning.
+ *
+ * Händelserna skickas in i varje anrop i stället för att hållas inne i
+ * expanderaren. Då beror resultatet på de händelser som faktiskt är laddade,
+ * och vyn räknas om så fort en ny hämtning kommer in.
+ */
+export class CalendarExpander {
+	private readonly cache = new WindowCache();
+
+	/** De händelser som ligger i tidsfönstret. */
+	visible(
+		events: CalendarEvent[],
+		from: number,
+		to: number,
+	): CalendarEvent[] {
+		const window = dayWindow(from, to);
+		const expanded = this.cache.get(events, window, () =>
+			expandCalendarEvents(events, window.from, window.to),
+		);
+
+		return expanded.filter((event) => overlaps(event, from, to));
 	}
 }

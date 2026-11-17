@@ -41,7 +41,7 @@ const expander = new CalendarExpander()
 // en enda kalender - till exempel bara jobbet.
 const visibleEvents = computed(() =>
   expander
-    .visible(startTime.value, endTime.value)
+    .visible(allEvents.value, startTime.value, endTime.value)
     .filter((event) => !isEventHidden(event, hiddenCalendarIds.value)),
 )
 // Färgen löses upp här, så att kort och prickar alltid visar samma färg:
@@ -49,6 +49,84 @@ const visibleEvents = computed(() =>
 const coloredEvents = computed<CalendarEvent[]>(() =>
   visibleEvents.value.map((event) => ({ ...event, color: resolveColor(event) })),
 )
+
+// Återkommande serier döljs aldrig för att zoomnivån är låg. I stället
+// sammanfattas de ovanför tidslinjen, med antalet förekomster i den synliga
+// vyn och en knapp som hoppar till nästa förekomst. En tät rutin ska synas
+// på tidslinjen, inte försvinna ur den.
+interface RecurringSeriesSummary {
+  key: string
+  title: string
+  label: string
+  count: number
+  nextAt: number | null
+}
+
+// Regeln för varje serie i vyn. Override-rader bär inte själva regeln, så
+// den slås upp via seriens nyckel.
+const seriesRules = computed(() => {
+  const rules = new Map<string, string>()
+
+  for (const event of visibleEvents.value) {
+    const key = recurrenceSeriesKey(event)
+    if (!key || !event.recurrence_rule) continue
+
+    rules.set(key, event.recurrence_rule)
+  }
+
+  return rules
+})
+
+const recurringSeries = computed<RecurringSeriesSummary[]>(() => {
+  const series = new Map<string, { summary: RecurringSeriesSummary; starts: number[] }>()
+
+  for (const event of visibleEvents.value) {
+    const key = recurrenceSeriesKey(event)
+    if (!key) continue
+
+    const start = Date.parse(event.start_at)
+    const existing = series.get(key)
+
+    if (existing) {
+      existing.summary.count += 1
+      existing.starts.push(start)
+      continue
+    }
+
+    series.set(key, {
+      summary: {
+        key,
+        title: event.title,
+        label: describeRecurrence(seriesRules.value.get(key)) || 'återkommande',
+        count: 1,
+        nextAt: null,
+      },
+      starts: [start],
+    })
+  }
+
+  return [...series.values()].map(({ summary, starts }) => {
+    // Nästa förekomst är den första som ligger vid eller efter toppen av
+    // vyn. Finns ingen tränas kalendern tillbaka till seriens första
+    // förekomst i vyn.
+    const upcoming = starts.filter((start) => start >= startTime.value)
+    const next = upcoming.length > 0
+      ? Math.min(...upcoming)
+      : starts.length > 0
+        ? Math.min(...starts)
+        : null
+
+    return { ...summary, nextAt: next }
+  })
+})
+
+// Etiketten som visas på kortet för en återkommande förekomst.
+const recurrenceLabel = (event: CalendarEvent) => {
+  const key = recurrenceSeriesKey(event)
+  if (!key) return ''
+
+  return describeRecurrence(seriesRules.value.get(key)) || 'återkommande'
+}
 const showCreateEvent = ref(false)
 const editingEvent = ref<CalendarEvent | null>(null)
 const editScope = ref<'occurrence' | 'series' | 'following'>('occurrence')
@@ -367,10 +445,10 @@ const eventStyle = (event: CalendarEvent, index: number) => {
 // att en ensam händelse får hela bredden.
 const eventLanes = computed<Array<{ lane: number; lanes: number }>>(() => {
   if (detailLevel.value !== 'full' && detailLevel.value !== 'compact') {
-    return displayEvents.value.map(() => ({ lane: 0, lanes: 1 }))
+    return coloredEvents.value.map(() => ({ lane: 0, lanes: 1 }))
   }
 
-  const intervals = displayEvents.value.map((event): [number, number] => {
+  const intervals = coloredEvents.value.map((event): [number, number] => {
     const start = Math.max(Date.parse(event.start_at), startTime.value)
     const end = Math.min(Date.parse(event.end_at), endTime.value)
     const from = timeToPosition(start)
@@ -388,7 +466,6 @@ const loadEvents = async () => {
   try {
     const loaded = await loadAllCalendarEvents()
     if (request === eventRequest) {
-      expander.setEvents(loaded)
       allEvents.value = loaded
     }
   } catch (error) {
@@ -429,6 +506,15 @@ const zoomBy = (distance: number) => {
   zoomTo(targetDuration.value * Math.exp(distance / ZOOM_SENSITIVITY))
 }
 
+// Hoppar till nästa förekomst av en serie och zoomar in till det dygn
+// förekomsten ligger i.
+const jumpToSeries = (series: RecurringSeriesSummary) => {
+  if (series.nextAt === null) return
+
+  startTime.value = series.nextAt - 60 * 60 * 1000
+  zoomTo(24 * 60 * 60 * 1000)
+}
+
 const panBy = (distance: number) => {
   const height = viewport.value?.clientHeight || 600
   startTime.value += distance * visibleDuration.value / height
@@ -467,23 +553,13 @@ const cardMargin = computed(() => {
   return (CARD_MARGIN_PX / viewportHeight.value) * 100
 })
 
-const displayEvents = computed(() => {
-  if (detailLevel.value !== 'monthly' && detailLevel.value !== 'yearly') {
-    return coloredEvents.value
-  }
-
-  return limitRecurringOccurrences(coloredEvents.value, MAX_VISIBLE_RECURRENCES) as CalendarEvent[]
-})
-
-const hiddenRecurringCount = computed(() => visibleEvents.value.length - displayEvents.value.length)
-
 const markers = computed<RenderedMarker[]>(() => {
   const groups = detailLevel.value === 'daily'
-    ? groupEventsByDay(displayEvents.value)
+    ? groupEventsByDay(coloredEvents.value)
     : detailLevel.value === 'monthly'
-      ? groupEventsByMonth(displayEvents.value)
+      ? groupEventsByMonth(coloredEvents.value)
       : detailLevel.value === 'yearly'
-        ? groupEventsByYear(displayEvents.value)
+        ? groupEventsByYear(coloredEvents.value)
         : []
 
   if (groups.length === 0) return groups
@@ -856,6 +932,9 @@ onUnmounted(() => {
         <span class="legend-dot" :style="{ background: calendar.color }" />
         {{ calendar.name }}
       </button>
+      <button type="button" class="legend-add" @click="openCreateEvent">
+        + Händelse
+      </button>
       <button type="button" class="legend-add" @click="managerOpen = true">
         + Kalender
       </button>
@@ -951,10 +1030,24 @@ onUnmounted(() => {
       <button type="button" class="now-button" @click="showCreateEvent = false">Avbryt</button>
     </form>
 
-    <p v-if="hiddenRecurringCount > 0" class="recurrence-notice" role="status">
-      {{ hiddenRecurringCount }} återkommande förekomster döljs i den här översikten.
-      Zooma in för att se dem.
-    </p>
+    <!-- Återkommande serier visas alltid, oavsett zoomnivå. Sammanfattningen
+         här ersätter dold utrymme: antalet förekomster i vyn syns direkt, och
+         knappen hoppar till nästa förekomst. -->
+    <div v-if="recurringSeries.length > 0" class="recurrence-summary">
+      <button
+        v-for="series in recurringSeries"
+        :key="series.key"
+        type="button"
+        class="recurrence-series"
+        :title="`Hoppa till nästa förekomst av ${series.title}`"
+        @click="jumpToSeries(series)"
+      >
+        <span class="recurrence-icon" aria-hidden="true">↻</span>
+        <strong>{{ series.title }}</strong>
+        <span>{{ series.label }}</span>
+        <span class="recurrence-count">{{ series.count }} i vyn</span>
+      </button>
+    </div>
 
     <div
       ref="viewport"
@@ -1014,7 +1107,7 @@ onUnmounted(() => {
             <template v-if="detailLevel === 'full' || detailLevel === 'compact'">
               <TransitionGroup name="detail-move" tag="div" class="event-layer">
                 <article
-                  v-for="(event, eventIndex) in displayEvents"
+                  v-for="(event, eventIndex) in coloredEvents"
                   :key="event.occurrence_id || `${event.id}-${event.start_at}`"
                   class="calendar-event"
                   :class="[detailLevel, { tentative: event.status === 'tentative', 'has-lanes': (eventLanes[eventIndex]?.lanes ?? 1) > 1 }]"
@@ -1027,6 +1120,13 @@ onUnmounted(() => {
                     <span class="event-title">
                       <EventIcon v-if="event.icon" :icon="event.icon" class="event-icon" />
                       <strong>{{ event.title }}</strong>
+                      <!-- Återkommande förekomster märks, så att det går att se
+                           att de hör till en serie. -->
+                      <span
+                        v-if="recurrenceLabel(event)"
+                        class="event-recurrence"
+                        :title="`Återkommer: ${recurrenceLabel(event)}`"
+                      >↻</span>
                     </span>
                     <small class="event-time">{{ formatTime(Date.parse(event.start_at)) }}</small>
                   </span>
@@ -1060,7 +1160,7 @@ onUnmounted(() => {
           <i />
         </div>
 
-        <div v-if="displayEvents.length === 0" class="empty-state" aria-hidden="true">
+        <div v-if="coloredEvents.length === 0" class="empty-state" aria-hidden="true">
           <span class="empty-icon">◷</span>
           <p>Din tidslinje</p>
           <small>Kalenderhändelser visas här</small>
@@ -1082,12 +1182,51 @@ onUnmounted(() => {
   padding: 0 1.5rem 1rem;
 }
 
-.recurrence-notice {
+/* Sammanfattning av de återkommande serierna i vyn. Den ersätter den
+   gamla notisen om dolda förekomster: ingenting döljs, men serierna syns
+   här med sitt antal och går att klicka för att hoppa till nästa
+   förekomst. */
+.recurrence-summary {
   flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   margin: 0 0 0.45rem;
+}
+
+.recurrence-series {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: var(--color-surface);
   color: var(--color-ink-muted);
   font-size: 0.72rem;
-  text-align: center;
+  cursor: pointer;
+}
+
+.recurrence-series:hover {
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+}
+
+.recurrence-icon {
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.recurrence-series strong {
+  color: var(--color-ink);
+  font-weight: 650;
+}
+
+.recurrence-count {
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Rad med kalendrarna över tidslinjen. Klick på en kalender döljer den. */
@@ -1552,6 +1691,15 @@ onUnmounted(() => {
   font-size: 0.85rem;
   line-height: 1;
   opacity: 0.85;
+}
+
+/* Märket på kortet visar att händelsen är en del av en återkommande serie. */
+.event-recurrence {
+  flex: 0 0 auto;
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  line-height: 1;
+  opacity: 0.9;
 }
 
 .calendar-event .event-time {

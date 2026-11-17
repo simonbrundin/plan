@@ -123,21 +123,30 @@ func (h *CalendarEventHandler) List(c *gin.Context) {
 		return
 	}
 
-	scope := c.Query("scope")
-	if scope == "all" {
-		events, err := h.repo.ListAll(c.Request.Context(), userID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, events)
-		return
-	}
-	if scope != "" {
+	switch c.Query("scope") {
+	case "all":
+		h.listAll(c, userID)
+	case "":
+		h.listInWindow(c, userID)
+	default:
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "scope must be 'all'"})
+	}
+}
+
+// listAll svarar med alla händelser, där återkommande serier inte
+// expanderas. Klienten expanderar dem själv.
+func (h *CalendarEventHandler) listAll(c *gin.Context, userID int64) {
+	events, err := h.repo.ListAll(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
+	c.JSON(http.StatusOK, events)
+}
 
+// listInWindow svarar med de händelser som ligger i tidsfönstret, där
+// återkommande serier expanderas till förekomster.
+func (h *CalendarEventHandler) listInWindow(c *gin.Context, userID int64) {
 	from, err := parseCalendarTime(c.Query("from"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "from must be an RFC3339 timestamp"})

@@ -143,43 +143,67 @@ describe("expandCalendarEvents", () => {
 			"2026-11-19T09:00:00.000Z",
 		]);
 	});
+
+	it("visar en serie med trasig regel som en enstaka händelse", () => {
+		const series = event({
+			id: 7,
+			title: "Löpning",
+			recurrence_rule: "det här är ingen regel",
+		});
+
+		const events = expandCalendarEvents(
+			[series],
+			Date.parse("2026-11-17T00:00:00.000Z"),
+			Date.parse("2026-11-20T00:00:00.000Z"),
+		);
+
+		expect(events).toHaveLength(1);
+		expect(events[0].title).toBe("Löpning");
+	});
 });
 
 describe("CalendarExpander", () => {
 	it("expanderar serier lokalt utan att fråga servern", () => {
 		const expander = new CalendarExpander();
-		expander.setEvents([
+		const events = [
 			event({
 				id: 7,
 				title: "Löpning",
 				recurrence_rule: "FREQ=DAILY",
 			}),
-		]);
+		];
 
 		const from = Date.parse("2026-11-17T00:00:00.000Z");
 		const to = Date.parse("2026-11-19T00:00:00.000Z");
 
-		expect(expander.visible(from, to)).toHaveLength(2);
+		expect(expander.visible(events, from, to)).toHaveLength(2);
 		// Samma fönster igen ger samma resultat - cachen används.
-		expect(expander.visible(from, to)).toHaveLength(2);
+		expect(expander.visible(events, from, to)).toHaveLength(2);
 		// Ett annat fönster expanderas om.
 		expect(
-			expander.visible(Date.parse("2026-11-18T00:00:00.000Z"), Date.parse("2026-11-20T00:00:00.000Z")),
+			expander.visible(
+				events,
+				Date.parse("2026-11-18T00:00:00.000Z"),
+				Date.parse("2026-11-20T00:00:00.000Z"),
+			),
 		).toHaveLength(2);
 	});
 
 	it("glömmer gamla händelser när nya laddas", () => {
 		const expander = new CalendarExpander();
-		expander.setEvents([event({ id: 1, title: "Fika" })]);
-
 		const from = Date.parse("2026-11-17T00:00:00.000Z");
 		const to = Date.parse("2026-11-18T00:00:00.000Z");
 
-		expect(expander.visible(from, to)).toHaveLength(1);
+		expect(
+			expander.visible([event({ id: 1, title: "Fika" })], from, to),
+		).toHaveLength(1);
 
-		expander.setEvents([event({ id: 2, title: "Möte" })]);
-
-		expect(expander.visible(from, to)).toHaveLength(1);
-		expect(expander.visible(from, to)[0].title).toBe("Möte");
+		// En ny hämtning ger en ny array - den gamla cachen ska inte användas.
+		expect(
+			expander.visible([event({ id: 2, title: "Möte" })], from, to),
+		).toHaveLength(1);
+		expect(
+			expander.visible([event({ id: 2, title: "Möte" })], from, to)[0].title,
+		).toBe("Möte");
 	});
 });

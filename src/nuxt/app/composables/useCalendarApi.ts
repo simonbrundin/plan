@@ -22,6 +22,18 @@ export interface CalendarEvent {
   recurrence_rule?: string
   parent_event_id?: number
   original_start_at?: string
+  /**
+   * Hur många verkliga förekomster den här förekomsten representerar.
+   *
+   * En serie med fler förekomster än expanderaren klarar tunnas ut, så att
+   * varje visad förekomst står för flera verkliga. Fältet gör det möjligt
+   * att räkna rätt i stället för att visa ett godtyckligt antal.
+   */
+  occurrence_weight?: number
+  /**
+   * Det sanna antalet förekomster i serien, när den har tunnats ut.
+   */
+  occurrence_total?: number
 }
 
 export function useCalendarApi() {
