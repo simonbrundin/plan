@@ -3,8 +3,51 @@ package models
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
 )
+
+// DueDateFormat är formatet som due-datum skickas över API:t ("YYYY-MM-DD").
+const DueDateFormat = "2006-01-02"
+
+// ErrInvalidDueDate betyder att ett due-datum inte kunde tolkas som "YYYY-MM-DD".
+var ErrInvalidDueDate = errors.New("invalid due date")
+
+// DueDate är det kalenderdatum då ett mål ska vara klart.
+//
+// Det är ett eget datum utan klockslag, till skillnad från started/finished
+// som är tidsstämplar. Egen typ gör att datumet inte flyttas när tidszonen
+// ändras - "2026-11-20" är alltid den 20 november, oavsett var klienten står.
+type DueDate struct {
+	time.Time
+}
+
+// MarshalJSON serialiserar datumet som "YYYY-MM-DD".
+func (d DueDate) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Format(DueDateFormat))
+}
+
+// UnmarshalJSON tolkar "YYYY-MM-DD" (eller null).
+func (d *DueDate) UnmarshalJSON(data []byte) error {
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		d.Time = time.Time{}
+		return nil
+	}
+
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	t, err := time.Parse(DueDateFormat, s)
+	if err != nil {
+		return fmt.Errorf("%w: %q", ErrInvalidDueDate, s)
+	}
+	d.Time = t
+
+	return nil
+}
 
 // Goal represents a goal in the system
 type Goal struct {
@@ -22,7 +65,10 @@ type Goal struct {
 	// "started !== null" felaktigt matchade mål utan startdatum.
 	Started  *time.Time `json:"started"`
 	Finished *time.Time `json:"finished"`
-	Inbox    int        `json:"inbox" example:"0"`
+	// Due är det datum målet ska vara klart. Skickas alltid ut, även när
+	// det är null - samma resonemang som för started/finished.
+	Due  *DueDate `json:"due"`
+	Inbox int     `json:"inbox" example:"0"`
 	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
 	// kan inte slutföras och markeras alltid som pågående.
 	Eternal bool `json:"eternal" example:"false"`
@@ -149,6 +195,8 @@ type UpdateGoalRequest struct {
 	StatusID    *int         `json:"status_id,omitempty"`
 	Started     NullableTime `json:"started,omitempty"`
 	Finished    NullableTime `json:"finished,omitempty"`
+	// Due sätter eller rensar målets due-datum ("YYYY-MM-DD" eller null).
+	Due NullableDueDate `json:"due,omitempty"`
 	// Eternal sätter eller tar bort evigt-flaggan på ett mål.
 	// nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
 	Eternal *bool `json:"eternal,omitempty"`
@@ -159,6 +207,34 @@ type UpdateGoalRequest struct {
 // inte som att slutföra målet.
 func (r UpdateGoalRequest) FinishesGoal() bool {
 	return r.Finished.Set && r.Finished.Value != nil && *r.Finished.Value != ""
+}
+
+// NullableDueDate sätter eller rensar målets due-datum.
+//
+// Det skiljer på tre tillstånd:
+//   - fältet saknas i request-bodyn (Set == false) → lämnas oförändrat
+//   - fältet finns med ett värde (Value != nil) → sätts till datumet
+//   - fältet finns som null (Set == true, Value == nil) → datumet rensas
+type NullableDueDate struct {
+	Set   bool
+	Value *string
+}
+
+// UnmarshalJSON parses a due date that is either a "YYYY-MM-DD"-sträng eller null.
+func (n *NullableDueDate) UnmarshalJSON(data []byte) error {
+	n.Set = true
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		n.Value = nil
+		return nil
+	}
+
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	n.Value = &s
+
+	return nil
 }
 
 // UpdateStatusRequest is the request body for updating goal status
@@ -195,6 +271,11 @@ type ReorderGoalsRequest struct {
 	GoalIDs []int64 `json:"goalIds" binding:"required"`
 }
 
+// ReorderPriorityGoalsRequest is the request body for reordering the priority list.
+type ReorderPriorityGoalsRequest struct {
+	GoalIDs []int64 `json:"goalIds" binding:"required"`
+}
+
 // DeleteRelationRequest is the request body for deleting a relation
 type DeleteRelationRequest struct {
 	ChildID  int64 `json:"childId" binding:"required"`
@@ -216,9 +297,10 @@ type DeleteDependencyRequest struct {
 // PrioritizedGoal represents a goal with priority information
 type PrioritizedGoal struct {
 	Goal
-	Weight      int     `json:"weight" example:"10"`
-	ParentTitle *string `json:"parentTitle,omitempty"`
-	ParentID    *int64  `json:"parentId,omitempty"`
+	Weight        int     `json:"weight" example:"10"`
+	ParentTitle   *string `json:"parentTitle,omitempty"`
+	ParentID      *int64  `json:"parentId,omitempty"`
+	PriorityOrder int     `json:"priorityOrder" example:"0"`
 }
 
 // ErrorResponse represents an API error

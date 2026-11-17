@@ -10,6 +10,7 @@ import type { Goal, GoalWithWeight } from '~/types/goal'
 import { moveChildId, nextChildOrder } from '~/utils/childOrder'
 import { canBeFinished } from '~/utils/goalRules'
 import { descriptionPreview } from '~/utils/goalDescription'
+import { dueTone, formatDueDate } from '~/utils/dueDate'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
@@ -21,7 +22,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -1033,6 +1034,87 @@ async function toggleEternal(goalToToggle: Goal) {
   }
 }
 
+// Due-datum (deadline) för ett mål. Datumet är ett kalenderdatum
+// ("YYYY-MM-DD") - tom sträng rensar det.
+//
+// dueTargetId anger VILKET mål väljaren är öppen för, så att tangenten
+// 'c' kan följa det markerade målet (förälder, huvudmål eller undermål)
+// och väljaren visas bredvid just det målet.
+const dueTargetId = ref<number | null>(null);
+const dueDraft = ref('');
+const dueInputRef = ref<HTMLInputElement | null>(null);
+
+function dueToneClass(due: string | null): string {
+	const tone = dueTone(due);
+	if (tone === 'overdue') return 'text-red-400';
+	if (tone === 'today') return 'text-amber-400';
+	return 'text-ink-muted';
+}
+
+function openDuePicker(target: Goal) {
+	dueDraft.value = target.due ?? '';
+	dueTargetId.value = target.id;
+
+	nextTick(() => {
+		const input = document.querySelector(
+			`[data-due-input="${target.id}"]`,
+		) as (HTMLInputElement & { showPicker?: () => void }) | null;
+
+		input?.focus();
+		// showPicker öppnar den inbyggda kalender-popupen direkt. Äldre
+		// webbläsare saknar API:t, så fokus är fallback där.
+		try {
+			input?.showPicker?.();
+		} catch {
+			// Webbläsaren kan neka showPicker utan user activation.
+		}
+	});
+}
+
+function closeDuePicker() {
+	dueTargetId.value = null;
+	dueDraft.value = '';
+}
+
+async function saveDue(target: Goal, value: string) {
+	const due = value ? value : null;
+
+	try {
+		await setGoalDue(target.id, due);
+		applyDue(target.id, due);
+		closeDuePicker();
+		await refresh();
+	} catch (error) {
+		console.error('Failed to save goal due date:', error);
+	}
+}
+
+function applyDue(id: number, due: string | null) {
+	goalsStore.updateGoal(id, { due });
+
+	if (goalData.value?.allGoals) {
+		const goalIndex = goalData.value.allGoals.findIndex((g: Goal) => g.id === id);
+		if (goalIndex !== -1) {
+			goalData.value.allGoals[goalIndex].due = due;
+		}
+	}
+	if (goalData.value?.goal && goalData.value.goal.id === id) {
+		goalData.value.goal.due = due;
+	}
+	if (goalData.value?.children) {
+		const childIndex = goalData.value.children.findIndex((c) => c.id === id);
+		if (childIndex !== -1) {
+			goalData.value.children[childIndex].due = due;
+		}
+	}
+	if (goalData.value?.parents) {
+		const parentIndex = goalData.value.parents.findIndex((p) => p.id === id);
+		if (parentIndex !== -1) {
+			goalData.value.parents[parentIndex].due = due;
+		}
+	}
+}
+
 // Toggla started status på ett mål
 async function toggleStarted(goalToToggle: Goal) {
   try {
@@ -1297,6 +1379,25 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
+  // Hantera 'c' för att sätta deadline (due-datum)
+  if (event.key === "c") {
+    event.preventDefault();
+    // Tangenten följer det markerade målet: förälder (parent-läge),
+    // huvudmålet eller det markerade undermålet.
+    if (isParentMode.value && parents.value.length > 0) {
+      openDuePicker(parents.value[selectedParentIndex.value]);
+    } else if (isGoalSelected.value && goal.value) {
+      openDuePicker(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      openDuePicker(filteredChildren.value[selectedChildIndex.value]);
+    }
+    return;
+  }
+
   // Hantera 'x' för att ta bort mål
   if (event.key === "x") {
     event.preventDefault();
@@ -1504,7 +1605,7 @@ watch(selectedParentIndex, async () => {
           </NuxtLink>
 
           <!-- Insert mode för förälder -->
-          <div v-for="(parent, index) in parents" :key="parent.id">
+          <div v-for="(parent, index) in parents" :key="parent.id" class="flex items-center gap-1.5">
             <div v-if="mode === 'insert' && editingGoalId === parent.id" class="inline-block">
               <input ref="editInputRef" v-model="editTitle" type="text"
                 class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
@@ -1523,6 +1624,30 @@ watch(selectedParentIndex, async () => {
               @touchend="handleParentMouseUp" @touchcancel="handleParentMouseUp">
               {{ parent.title }}
             </NuxtLink>
+
+            <!-- Deadline för förälder (bara den markerade föräldern) -->
+            <template v-if="isParentMode && selectedParentIndex === index">
+              <template v-if="dueTargetId === parent.id">
+                <input :data-due-input="parent.id" :value="dueDraft" type="date" autofocus draggable="false"
+                  class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  @click.stop @input="dueDraft = ($event.target as HTMLInputElement).value"
+                  @change="saveDue(parent, ($event.target as HTMLInputElement).value)"
+                  @keydown.enter.prevent="saveDue(parent, ($event.target as HTMLInputElement).value)"
+                  @keydown.esc.prevent="closeDuePicker" />
+                <button @click.stop="saveDue(parent, '')"
+                  class="rounded-lg p-1 text-ink-dim transition-colors hover:bg-elevated hover:text-ink"
+                  title="Rensa deadline">
+                  <Icon name="lucide:x" class="w-4 h-4" />
+                </button>
+              </template>
+              <button v-else @click.stop="openDuePicker(parent)"
+                class="rounded-lg p-1 transition-colors"
+                :class="parent.due ? dueToneClass(parent.due) : 'text-ink-dim hover:text-ink-muted'"
+                :title="parent.due ? `Deadline: ${formatDueDate(parent.due)}` : 'Sätt deadline (c)'">
+                <Icon name="lucide:calendar-clock" class="w-4 h-4"
+                  :style="{ opacity: parent.due ? 1 : 0.25 }" />
+              </button>
+            </template>
           </div>
         </div>
 
@@ -1591,6 +1716,34 @@ watch(selectedParentIndex, async () => {
           <Icon name="lucide:infinity" class="w-6 h-6"
             :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
         </button>
+        <!-- Due-datum / deadline (c) -->
+        <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="flex items-center gap-1.5 flex-shrink-0">
+          <template v-if="dueTargetId === goal.id">
+            <input ref="dueInputRef" :data-due-input="goal.id" v-model="dueDraft" type="date"
+              class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+              @change="saveDue(goal, dueDraft)"
+              @keydown.enter.prevent="saveDue(goal, dueDraft)"
+              @keydown.esc.prevent="closeDuePicker" />
+            <button @click.stop="saveDue(goal, '')"
+              class="rounded-lg p-1 text-ink-dim transition-colors hover:bg-elevated hover:text-ink"
+              title="Rensa deadline">
+              <Icon name="lucide:x" class="w-4 h-4" />
+            </button>
+          </template>
+          <template v-else>
+            <button @click.stop="openDuePicker(goal)"
+              class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+              :class="goal.due ? dueToneClass(goal.due) : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.due ? `Deadline: ${formatDueDate(goal.due)}` : 'Sätt deadline (c)'">
+              <Icon name="lucide:calendar-clock" class="w-6 h-6"
+                :style="{ opacity: goal.due ? 1 : 0.25 }" />
+            </button>
+            <span v-if="goal.due" class="text-sm tabular-nums" :class="dueToneClass(goal.due)">
+              {{ formatDueDate(goal.due) }}
+            </span>
+          </template>
+        </div>
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-ink" />
@@ -1847,6 +2000,34 @@ watch(selectedParentIndex, async () => {
                     {{ descriptionPreview(child.description, 80) }}
                   </p>
                 </NuxtLink>
+                <!-- Deadline för undermål (c) -->
+                <div class="flex-shrink-0 flex items-center gap-1.5 pr-2">
+                  <template v-if="dueTargetId === child.id">
+                    <input :data-due-input="child.id" :value="dueDraft" type="date" autofocus draggable="false"
+                      class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      @click.stop @input="dueDraft = ($event.target as HTMLInputElement).value"
+                      @change="saveDue(child, ($event.target as HTMLInputElement).value)"
+                      @keydown.enter.prevent="saveDue(child, ($event.target as HTMLInputElement).value)"
+                      @keydown.esc.prevent="closeDuePicker" />
+                    <button @click.stop="saveDue(child, '')"
+                      class="rounded-lg p-1 text-ink-dim transition-colors hover:bg-elevated hover:text-ink"
+                      title="Rensa deadline">
+                      <Icon name="lucide:x" class="w-4 h-4" />
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button @click.stop="openDuePicker(child)"
+                      class="rounded-lg p-1.5 transition-colors"
+                      :class="child.due ? dueToneClass(child.due) : 'text-ink-dim hover:text-ink-muted'"
+                      :title="child.due ? `Deadline: ${formatDueDate(child.due)}` : 'Sätt deadline (c)'">
+                      <Icon name="lucide:calendar-clock" class="w-5 h-5"
+                        :style="{ opacity: child.due ? 1 : 0.25 }" />
+                    </button>
+                    <span v-if="child.due" class="text-xs tabular-nums" :class="dueToneClass(child.due)">
+                      {{ formatDueDate(child.due) }}
+                    </span>
+                  </template>
+                </div>
                 <button
                   v-if="weightEditingChildId !== child.id"
                   @click.stop="startWeightEdit(child)"

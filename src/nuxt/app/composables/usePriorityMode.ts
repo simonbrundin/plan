@@ -1,5 +1,6 @@
 import type { Goal } from "~/types/goal";
 import { matchesStartedFilter, type StartedFilter } from "~/utils/goalFilters";
+import { moveChildId } from "~/utils/childOrder";
 
 interface PrioritizedGoal extends Goal {
 	weight: number;
@@ -39,7 +40,7 @@ function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
 
 export function usePriorityMode() {
 	const { isSearchOpen } = useSearchState();
-	const { setGoalWeight } = useGoalApi();
+	const { setGoalWeight, reorderPriorityGoals } = useGoalApi();
 
 	const visibleGoals = computed(() =>
 		prioritizedGoals.value.filter(matchesStartedFilterForGoals),
@@ -85,10 +86,6 @@ export function usePriorityMode() {
 
 		const newWeight = Math.max(1, Math.min(100, goal.weight + delta));
 		goal.weight = newWeight;
-		prioritizedGoals.value = [...prioritizedGoals.value].sort(
-			(a, b) => b.weight - a.weight,
-		);
-
 		// Spara till backend. Om målet inte har någon parent-relation ännu
 		// (top-level utan explicit parent) skapar vi en till root (ID 1) via
 		// UPSERT i relations.post. Annars uppdaterar vi befintlig relation.
@@ -98,6 +95,36 @@ export function usePriorityMode() {
 		} catch (err) {
 			console.error("Failed to persist weight change:", err);
 		}
+	}
+
+	let prioritySaveChain: Promise<void> = Promise.resolve();
+
+	function moveGoal(direction: "up" | "down") {
+		const movingId = selectedGoalId.value;
+		if (movingId === null) return;
+
+		const reordered = moveChildId(
+			prioritizedGoals.value.map((goal) => goal.id),
+			visibleGoals.value.map((goal) => goal.id),
+			movingId,
+			direction,
+		);
+		if (!reordered) return;
+
+		const byId = new Map(prioritizedGoals.value.map((goal) => [goal.id, goal]));
+		reordered.forEach((id, index) => {
+			const goal = byId.get(id);
+			if (goal) goal.priorityOrder = index;
+		});
+		prioritizedGoals.value = reordered
+			.map((id) => byId.get(id))
+			.filter((goal): goal is PrioritizedGoal => goal !== undefined);
+		selectedGoalId.value = movingId;
+
+		const ids = reordered;
+		prioritySaveChain = prioritySaveChain
+			.then(() => reorderPriorityGoals(ids))
+			.catch((err) => console.error("Failed to save priority order:", err));
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -136,7 +163,10 @@ export function usePriorityMode() {
 				isPriorityMode.value = false;
 			}
 		} else {
-			if (key === "l" && selectedGoalId.value !== null) {
+			if (key === "arrowup" || key === "arrowdown") {
+				event.preventDefault();
+				moveGoal(key === "arrowup" ? "up" : "down");
+			} else if (key === "l" && selectedGoalId.value !== null) {
 				event.preventDefault();
 				navigateTo(`/goal/${selectedGoalId.value}`);
 			} else if (key === "j") {

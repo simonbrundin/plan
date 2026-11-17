@@ -6,10 +6,12 @@ import { isRootGoal, isUnfinishedGoal, matchesStartedFilter } from '~/utils/goal
 import { moveChildId } from '~/utils/childOrder'
 import { sortGoalsByOrder } from '~/utils/goalOrder'
 import { descriptionPreview } from '~/utils/goalDescription'
+import { dueTone, formatDueDate } from '~/utils/dueDate'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription } = useGoalApi()
+const { revision: quickAddRevision } = useQuickAdd()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -150,6 +152,9 @@ async function refreshGoals() {
   }
 }
 
+// Ett mål som skapats via det globala snabbfältet ska synas direkt.
+watch(quickAddRevision, refreshGoals)
+
 // Navigera till mål
 function goToGoal(goalId: number) {
   router.push(`/goal/${goalId}`)
@@ -241,6 +246,40 @@ async function toggleStarted(goal: Goal) {
     }
   } catch (err) {
     console.error('Failed to toggle started:', err)
+  }
+}
+
+// Due-datum (deadline) för ett grundmål. Datumet är ett kalenderdatum
+// ("YYYY-MM-DD") - tom sträng rensar det.
+const dueGoalId = ref<number | null>(null)
+const dueDraft = ref('')
+const dueInputRef = ref<HTMLInputElement | null>(null)
+
+function dueToneClass(due: string | null): string {
+  const tone = dueTone(due)
+  if (tone === 'overdue') return 'text-red-400'
+  if (tone === 'today') return 'text-amber-400'
+  return 'text-ink-muted'
+}
+
+function openDuePicker(goal: Goal) {
+  dueDraft.value = goal.due ?? ''
+  dueGoalId.value = goal.id
+  nextTick(() => dueInputRef.value?.focus())
+}
+
+async function saveDue(goal: Goal, value: string) {
+  const due = value ? value : null
+  try {
+    await setGoalDue(goal.id, due)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    const current = localGoals.value[idx]
+    if (idx !== -1 && current) {
+      localGoals.value[idx] = { ...current, due }
+    }
+    dueGoalId.value = null
+  } catch (err) {
+    console.error('Failed to save due date:', err)
   }
 }
 
@@ -387,6 +426,16 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
+  // c - sätt deadline (due-datum)
+  if (event.key === 'c') {
+    event.preventDefault()
+    const goal = filteredGoals.value[selectedIndex.value]
+    if (goal) {
+      openDuePicker(goal)
+    }
+    return
+  }
+
   // x - delete
   if (event.key === 'x') {
     event.preventDefault()
@@ -522,7 +571,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · t beskrivning · x ta bort
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · t beskrivning · x ta bort
         </span>
       </div>
     </div>
@@ -604,6 +653,31 @@ definePageMeta({
             <Icon name="lucide:infinity" class="w-5 h-5"
               :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
           </button>
+          <!-- Due-datum / deadline (c) -->
+          <template v-if="dueGoalId === goal.id">
+            <input ref="dueInputRef" v-model="dueDraft" type="date" @click.stop
+              class="flex-shrink-0 rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+              @change="saveDue(goal, dueDraft)"
+              @keydown.enter.prevent="saveDue(goal, dueDraft)"
+              @keydown.esc.prevent="dueGoalId = null" />
+            <button @click.stop="saveDue(goal, '')"
+              class="flex-shrink-0 p-1 rounded text-ink-dim transition-colors hover:text-ink-muted"
+              title="Rensa deadline">
+              <Icon name="lucide:x" class="w-4 h-4" />
+            </button>
+          </template>
+          <template v-else>
+            <button @click.stop="openDuePicker(goal)"
+              class="flex-shrink-0 p-1 rounded transition-colors"
+              :class="goal.due ? dueToneClass(goal.due) : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.due ? `Deadline: ${formatDueDate(goal.due)}` : 'Sätt deadline (c)'">
+              <Icon name="lucide:calendar-clock" class="w-5 h-5"
+                :style="{ opacity: goal.due ? 1 : 0.25 }" />
+            </button>
+            <span v-if="goal.due" class="text-sm tabular-nums" :class="dueToneClass(goal.due)">
+              {{ formatDueDate(goal.due) }}
+            </span>
+          </template>
           <div class="flex-1 min-w-0">
             <span class="block truncate text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
             <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">

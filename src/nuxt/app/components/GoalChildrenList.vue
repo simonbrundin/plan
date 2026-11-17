@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GoalWithWeight } from '~/types/goal'
+import { dueTone, formatDueDate } from '~/utils/dueDate'
 
 interface SwipeState {
   startX: number
@@ -80,6 +81,13 @@ function getWeightStyle(weight: number): { color: string; opacity: number; fontW
 function getIconOpacity(child: GoalWithWeight): number {
   if (isChildBlocked(child.id) || child.finished) return 0.6
   return 1
+}
+
+function dueToneClass(due: string | null): string {
+  const tone = dueTone(due)
+  if (tone === 'overdue') return 'text-red-400'
+  if (tone === 'today') return 'text-amber-400'
+  return 'text-ink-dim'
 }
 </script>
 
@@ -258,6 +266,9 @@ function getIconOpacity(child: GoalWithWeight): number {
               >
                 {{ child.title }}
               </h3>
+              <p v-if="child.due" class="text-xs mt-1 tabular-nums" :class="dueToneClass(child.due)">
+                📅 {{ formatDueDate(child.due) }}
+              </p>
               <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-1">
                 🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
               </p>

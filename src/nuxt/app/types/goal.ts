@@ -8,6 +8,9 @@ export interface Goal {
 	created: string;
 	started: string | null;
 	finished: string | null;
+	// Due är det datum ("YYYY-MM-DD") målet ska vara klart.
+	// Null = inget datum satt.
+	due: string | null;
 	inbox: number;
 	// Evigt mål - pågår hela livet och kan inte slutföras.
 	eternal: boolean;
@@ -17,6 +20,7 @@ export interface Goal {
 	// Målets placering bland grundmål. Grundmål sorteras på /goals efter
 	// detta värde (stigande).
 	order?: number;
+	priorityOrder?: number;
 }
 
 export interface ChildRelation {

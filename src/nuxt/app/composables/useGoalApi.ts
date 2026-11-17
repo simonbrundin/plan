@@ -107,6 +107,14 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter målets due-datum ("YYYY-MM-DD"). Null rensar datumet.
+	const setGoalDue = async (goalId: number, due: string | null) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { due },
+		});
+	};
+
 	// Markerar ett mål som evigt (eller upphäver evigt-flaggan).
 	// Ett evigt mål kan inte slutföras - API:t avvisar det.
 	const setGoalEternal = async (goalId: number, eternal: boolean) => {
@@ -172,6 +180,13 @@ export function useGoalApi() {
 	// Sätter en ny ordning på grundmålen (mål utan förälder) i ett svep
 	const reorderGoals = async (goalIds: number[]) => {
 		await apiProxy(`goals/reorder`, {
+			method: "PATCH",
+			body: { goalIds },
+		});
+	};
+
+	const reorderPriorityGoals = async (goalIds: number[]) => {
+		await apiProxy(`goals/priority/reorder`, {
 			method: "PATCH",
 			body: { goalIds },
 		});
@@ -261,6 +276,7 @@ export function useGoalApi() {
 		updateGoalStatus,
 		toggleGoalStarted,
 		toggleGoalFinished,
+		setGoalDue,
 		setGoalEternal,
 		deleteGoal,
 		addParentRelation,
@@ -269,6 +285,7 @@ export function useGoalApi() {
 		updateGoalOrder,
 		reorderChildren,
 		reorderGoals,
+		reorderPriorityGoals,
 		updateGoalWeight,
 		setGoalWeight,
 		createGoal,

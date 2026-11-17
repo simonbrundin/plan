@@ -16,6 +16,22 @@ import (
 // ErrInvalidTimestamp betyder att en tidsstämpel inte kunde tolkas som RFC3339.
 var ErrInvalidTimestamp = errors.New("invalid timestamp")
 
+// ErrInvalidDueDate betyder att ett due-datum inte kunde tolkas som "YYYY-MM-DD".
+// Det är samma fel som models.ErrInvalidDueDate - models-felet uppstår när
+// ett datum avkodas, repot-felet när det skrivs till databasen.
+var ErrInvalidDueDate = models.ErrInvalidDueDate
+
+// dueDateFromTime omvandlar en nullable datumkolumn till ett DueDate.
+// Kolumnen är ett DATE, så tiden är alltid midnatt UTC - bara datumet
+// används vidare.
+func dueDateFromTime(due *time.Time) *models.DueDate {
+	if due == nil {
+		return nil
+	}
+
+	return &models.DueDate{Time: *due}
+}
+
 type GoalRepository struct {
 	pool *pgxpool.Pool
 }
@@ -29,7 +45,7 @@ func NewGoalRepository() *GoalRepository {
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal, g."order",
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal, g."order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
@@ -45,10 +61,12 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
+		var due *time.Time
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
+		g.Due = dueDateFromTime(due)
 		goals = append(goals, g)
 	}
 
@@ -58,19 +76,21 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 // GetGoalByID returns a single goal by ID
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
 	query := `
-		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, inbox, eternal, "order",
+		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, due, inbox, eternal, "order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent
 		FROM goals WHERE id = $1`
 
 	var g models.Goal
+	var due *time.Time
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
+		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get goal: %w", err)
 	}
+	g.Due = dueDateFromTime(due)
 
 	return &g, nil
 }
@@ -86,18 +106,20 @@ func (r *GoalRepository) CreateGoal(ctx context.Context, userID int64, title, ic
 	// Insert goal. Nya grundmål läggs sist i ordningen, så att de inte
 	// hamnar ovanför mål som redan har en sparad placering.
 	var goal models.Goal
+	var due *time.Time
 	query := `INSERT INTO goals (title, icon, "order")
 			  SELECT $1, $2, COALESCE((
 				  SELECT MAX(g2."order") + 1
 				  FROM goals g2
 				  INNER JOIN user_goals ug2 ON g2.id = ug2.goal_id
 				  WHERE ug2.user_id = $3), 0)
-			  RETURNING id, title, COALESCE(description, ''), icon, status_id, created, started, finished, inbox, eternal, "order"`
+			  RETURNING id, title, COALESCE(description, ''), icon, status_id, created, started, finished, due, inbox, eternal, "order"`
 	err = tx.QueryRow(ctx, query, title, icon, userID).Scan(
-		&goal.ID, &goal.Title, &goal.Description, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &goal.Inbox, &goal.Eternal, &goal.Order)
+		&goal.ID, &goal.Title, &goal.Description, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &due, &goal.Inbox, &goal.Eternal, &goal.Order)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create goal: %w", err)
 	}
+	goal.Due = dueDateFromTime(due)
 
 	// Associate with user
 	_, err = tx.Exec(ctx, `INSERT INTO user_goals (user_id, goal_id) VALUES ($1, $2)`, userID, goal.ID)
@@ -177,6 +199,20 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 		argNum++
 		if becomesEternal {
 			query += "finished = NULL, "
+		}
+	}
+	if req.Due.Set {
+		hasUpdate = true
+		if req.Due.Value == nil || *req.Due.Value == "" {
+			query += "due = NULL, "
+		} else {
+			t, err := time.Parse(models.DueDateFormat, *req.Due.Value)
+			if err != nil {
+				return nil, fmt.Errorf("%w: %q", ErrInvalidDueDate, *req.Due.Value)
+			}
+			query += fmt.Sprintf("due = $%d, ", argNum)
+			args = append(args, t)
+			argNum++
 		}
 	}
 
@@ -264,7 +300,7 @@ func (r *GoalRepository) GetChildRelations(ctx context.Context, parentID int64) 
 // GetParentRelations returns parent goals for a goal
 func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal
 		FROM goal_relations gr
 		INNER JOIN goals g ON g.id = gr.parent_id
 		WHERE gr.child_id = $1`
@@ -278,10 +314,12 @@ func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) 
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
+		var due *time.Time
 		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon,
-			&g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
+			&g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal); err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
+		g.Due = dueDateFromTime(due)
 		goals = append(goals, g)
 	}
 
@@ -432,6 +470,52 @@ func (r *GoalRepository) ReorderRootGoals(ctx context.Context, userID int64, goa
 	return nil
 }
 
+// ReorderPriorityGoals sets the order of all active goals in the priority list.
+func (r *GoalRepository) ReorderPriorityGoals(ctx context.Context, userID int64, goalIDs []int64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, `
+		SELECT g.id
+		FROM goals g
+		INNER JOIN user_goals ug ON ug.goal_id = g.id
+		WHERE ug.user_id = $1 AND g.finished IS NULL AND g.id <> 1
+		ORDER BY g.priority_order ASC, g.created DESC, g.id ASC`, userID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch priority goals: %w", err)
+	}
+	var existing []int64
+	for rows.Next() {
+		var goalID int64
+		if err := rows.Scan(&goalID); err != nil {
+			rows.Close()
+			return fmt.Errorf("failed to scan priority goal: %w", err)
+		}
+		existing = append(existing, goalID)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("failed to read priority goals: %w", err)
+	}
+
+	for i, goalID := range mergeOrder(existing, goalIDs) {
+		if _, err := tx.Exec(ctx, `
+			UPDATE goals SET priority_order = $1
+			WHERE id = $2 AND id IN (SELECT goal_id FROM user_goals WHERE user_id = $3)
+				AND finished IS NULL AND id <> 1`, i, goalID, userID); err != nil {
+			return fmt.Errorf("failed to update priority order for goal %d: %w", goalID, err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit priority reorder: %w", err)
+	}
+	return nil
+}
+
 // mergeOrder combines the requested order with the items that exist on the
 // server but were not part of the request. The requested items come first, in
 // the requested order, and the rest keep their relative order. Items that do
@@ -495,7 +579,7 @@ func (r *GoalRepository) GetDependencies(ctx context.Context, goalID int64) ([]m
 // GetBlockingGoals returns goals that depend on this goal
 func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal
 		FROM goal_dependencies gd
 		INNER JOIN goals g ON g.id = gd.goal_id
 		WHERE gd.depends_on_id = $1`
@@ -509,9 +593,11 @@ func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]
 	var goals []models.Goal
 	for rows.Next() {
 		var g models.Goal
-		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal); err != nil {
+		var due *time.Time
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal); err != nil {
 			return nil, err
 		}
+		g.Due = dueDateFromTime(due)
 		goals = append(goals, g)
 	}
 
@@ -582,7 +668,8 @@ func (r *GoalRepository) CheckForCycle(ctx context.Context, goalID, dependsOnID 
 func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) ([]models.PrioritizedGoal, error) {
 	query := `
 		SELECT
-			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.inbox, g.eternal,
+			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal,
+			g.priority_order,
 			COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
 			(SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
 			(SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id
@@ -591,7 +678,7 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		WHERE ug.user_id = $1
 		  AND g.finished IS NULL
 		  AND g.id <> 1
-		ORDER BY weight DESC, g.created DESC`
+		ORDER BY g.priority_order ASC, weight DESC, g.created DESC`
 
 	rows, err := r.pool.Query(ctx, query, userID)
 	if err != nil {
@@ -604,10 +691,12 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		var g models.PrioritizedGoal
 		var parentTitle *string
 		var parentID *int64
-		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &g.Inbox, &g.Eternal,
-			&g.Weight, &parentTitle, &parentID); err != nil {
+		var due *time.Time
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal,
+			&g.PriorityOrder, &g.Weight, &parentTitle, &parentID); err != nil {
 			return nil, err
 		}
+		g.Due = dueDateFromTime(due)
 		g.ParentTitle = parentTitle
 		g.ParentID = parentID
 		goals = append(goals, g)

@@ -7,6 +7,8 @@ interface Goal {
 	icon: string;
 	created: string;
 	finished: string | null;
+	// Due är det datum ("YYYY-MM-DD") målet ska vara klart.
+	due: string | null;
 	inbox: number;
 	eternal: boolean;
 }

@@ -280,6 +280,10 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
 			return
 		}
+		if errors.Is(err, repository.ErrInvalidDueDate) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "due-datumet måste vara på formatet YYYY-MM-DD"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
@@ -582,6 +586,43 @@ func (h *GoalHandler) ReorderGoals(c *gin.Context) {
 	}
 
 	if err := h.repo.ReorderRootGoals(c.Request.Context(), userID, req.GoalIDs); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"updated": true})
+}
+
+// ReorderPriorityGoals godoc
+// @Summary Reorder the priority list
+// @Description Sets a new order for the active goals in the priority list
+// @Tags goals
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param goals body models.ReorderPriorityGoalsRequest true "New priority order"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Router /api/goals/priority/reorder [patch]
+func (h *GoalHandler) ReorderPriorityGoals(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	var req models.ReorderPriorityGoalsRequest
+	if err := c.ShouldBindJSON(&req); err != nil || len(req.GoalIDs) == 0 {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "goalIds must contain at least one goal"})
+		return
+	}
+
+	if err := h.repo.ReorderPriorityGoals(c.Request.Context(), userID, req.GoalIDs); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
