@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 func TestUpdateGoalRequestStartedDecoding(t *testing.T) {
@@ -63,6 +64,95 @@ func TestUpdateGoalRequestStartedDecoding(t *testing.T) {
 
 func strPtr(s string) *string {
 	return &s
+}
+
+func TestUpdateGoalRequestDueDecoding(t *testing.T) {
+	tests := []struct {
+		name      string
+		body      string
+		wantSet   bool
+		wantValue *string
+	}{
+		{
+			name:      "null clears the due date",
+			body:      `{"due": null}`,
+			wantSet:   true,
+			wantValue: nil,
+		},
+		{
+			name:      "a date sets the due date",
+			body:      `{"due": "2026-11-20"}`,
+			wantSet:   true,
+			wantValue: strPtr("2026-11-20"),
+		},
+		{
+			name:      "an empty string clears the due date",
+			body:      `{"due": ""}`,
+			wantSet:   true,
+			wantValue: strPtr(""),
+		},
+		{
+			name:      "a missing field leaves the due date untouched",
+			body:      `{"title": "Ny titel"}`,
+			wantSet:   false,
+			wantValue: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req UpdateGoalRequest
+			if err := json.Unmarshal([]byte(tt.body), &req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if req.Due.Set != tt.wantSet {
+				t.Errorf("Due.Set = %v, want %v", req.Due.Set, tt.wantSet)
+			}
+
+			switch {
+			case tt.wantValue == nil && req.Due.Value != nil:
+				t.Errorf("Due.Value = %q, want nil", *req.Due.Value)
+			case tt.wantValue != nil && req.Due.Value == nil:
+				t.Errorf("Due.Value = nil, want %q", *tt.wantValue)
+			case tt.wantValue != nil && *req.Due.Value != *tt.wantValue:
+				t.Errorf("Due.Value = %q, want %q", *req.Due.Value, *tt.wantValue)
+			}
+		})
+	}
+}
+
+func TestDueDateMarshalsAsCalendarDate(t *testing.T) {
+	due, err := time.Parse(DueDateFormat, "2026-11-20")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	data, err := json.Marshal(Goal{ID: 1, Title: "Mål", Due: &DueDate{Time: due}})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var raw struct {
+		Due *string `json:"due"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if raw.Due == nil {
+		t.Fatal("due saknas i JSON-svaret")
+	}
+	if *raw.Due != "2026-11-20" {
+		t.Errorf("due = %q, want %q", *raw.Due, "2026-11-20")
+	}
+}
+
+func TestDueDateUnmarshalRejectsInvalidFormat(t *testing.T) {
+	var due DueDate
+	if err := json.Unmarshal([]byte(`"2026-11-20T10:00:00Z"`), &due); err == nil {
+		t.Fatal("väntade sig ett fel för ett datum med klockslag")
+	}
 }
 
 func TestUpdateGoalRequestDescriptionDecoding(t *testing.T) {
@@ -205,7 +295,7 @@ func TestGoalMarshalsNullTimestamps(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	for _, field := range []string{"started", "finished"} {
+	for _, field := range []string{"started", "finished", "due"} {
 		value, ok := raw[field]
 		if !ok {
 			t.Errorf("fältet %q saknas i JSON-svaret", field)
