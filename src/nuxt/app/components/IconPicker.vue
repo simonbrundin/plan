@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 
-interface IconResult {
-  name: string
-  collection: string
-  full: string
-}
-
 interface Props {
   modelValue: string
   open?: boolean
@@ -21,12 +15,8 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const searchQuery = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
-const searchResults = ref<IconResult[]>([])
-const isSearching = ref(false)
-const searchError = ref('')
-let searchTimeout: ReturnType<typeof setTimeout> | null = null
+const { searchQuery, searchResults, isSearching, searchError, reset } = useIconSearch()
 
 const displayOpen = computed({
   get: () => props.open,
@@ -39,61 +29,19 @@ watch(displayOpen, async (newValue) => {
     searchInput.value?.focus()
   } else {
     // Clear search when closing
-    searchQuery.value = ''
-    searchResults.value = []
+    reset()
   }
 })
 
-// Watch search query and debounce API calls
-watch(searchQuery, (newQuery) => {
-  if (searchTimeout) {
-    clearTimeout(searchTimeout)
-  }
-
-  // Don't search with less than 2 characters
-  if (!newQuery || newQuery.trim().length < 2) {
-    searchResults.value = []
-    searchError.value = ''
-    return
-  }
-
-  isSearching.value = true
-  searchTimeout = setTimeout(async () => {
-    await performSearch(newQuery)
-  }, 300) // Debounce for 300ms
-})
-
-async function performSearch(query: string) {
-  searchError.value = ''
-  try {
-    const response = await fetch(`/api/icons?q=${encodeURIComponent(query)}`)
-    if (!response.ok) {
-      throw new Error(`Icon search failed with status ${response.status}`)
-    }
-    const data = await response.json()
-    searchResults.value = data.results || []
-  } catch (error) {
-    console.error('Failed to search icons:', error)
-    searchResults.value = []
-    searchError.value = 'Kunde inte söka ikoner just nu. Försök igen om en stund.'
-  } finally {
-    isSearching.value = false
-  }
-}
-
-const filteredIcons = computed(() => {
-  return searchResults.value
-})
-
-function selectIcon(iconResult: IconResult) {
+function selectIcon(iconResult: { full: string }) {
   emit('update:modelValue', iconResult.full)
   displayOpen.value = false
-  searchQuery.value = ''
+  reset()
 }
 
 function close() {
   displayOpen.value = false
-  searchQuery.value = ''
+  reset()
 }
 </script>
 
@@ -130,8 +78,8 @@ function close() {
         </div>
 
         <!-- Ikon grid -->
-        <div v-else-if="filteredIcons.length > 0" class="grid grid-cols-6 gap-2 max-h-96 overflow-y-auto">
-          <button v-for="icon in filteredIcons" :key="icon.full" @click="selectIcon(icon)"
+        <div v-else-if="searchResults.length > 0" class="grid grid-cols-6 gap-2 max-h-96 overflow-y-auto">
+          <button v-for="icon in searchResults" :key="icon.full" @click="selectIcon(icon)"
             class="aspect-square flex flex-col items-center justify-center rounded-lg p-2 hover:bg-elevated transition-colors group relative"
             :class="modelValue === icon.full ? 'bg-accent-strong' : 'bg-elevated'">
             <Icon :name="icon.full" class="w-8 h-8 text-white" />
@@ -153,8 +101,8 @@ function close() {
         </div>
 
         <!-- Results counter -->
-        <div v-if="filteredIcons.length > 0" class="text-center py-2 text-xs text-ink-dim">
-          Visar {{ filteredIcons.length }} resultat
+        <div v-if="searchResults.length > 0" class="text-center py-2 text-xs text-ink-dim">
+          Visar {{ searchResults.length }} resultat
         </div>
       </div>
     </div>
