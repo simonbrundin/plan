@@ -637,6 +637,12 @@ definePageMeta({
           />
           <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0 text-ink-muted group-hover:text-ink transition-colors"
             :class="goal.eternal ? ETERNAL_TEXT : ''" />
+          <div class="flex-1 min-w-0">
+            <span class="block truncate text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
+            <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">
+              {{ descriptionPreview(goal.description) }}
+            </p>
+          </div>
           <!-- Started (klicka eller s) -->
           <button @click.stop="toggleStarted(goal)"
             class="flex-shrink-0 p-1 rounded transition-colors"
@@ -674,19 +680,13 @@ definePageMeta({
               <Icon name="lucide:calendar-clock" class="w-5 h-5"
                 :style="{ opacity: goal.due ? 1 : 0.25 }" />
             </button>
-            <span v-if="goal.due" class="text-sm tabular-nums" :class="dueToneClass(goal.due)">
+            <span v-if="goal.due" class="text-sm tabular-nums flex-shrink-0" :class="dueToneClass(goal.due)">
               {{ formatDueDate(goal.due) }}
             </span>
           </template>
-          <div class="flex-1 min-w-0">
-            <span class="block truncate text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
-            <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">
-              {{ descriptionPreview(goal.description) }}
-            </p>
-          </div>
-          <span v-if="goal.finished" class="text-green-400 text-sm">✓ Klar</span>
-          <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm'">∞</span>
-          <span v-else class="text-ink-dim text-sm tabular-nums">#{{ goal.id }}</span>
+          <span v-if="goal.finished" class="text-green-400 text-sm flex-shrink-0">✓ Klar</span>
+          <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm flex-shrink-0'">∞</span>
+          <span v-else class="text-ink-dim text-sm tabular-nums flex-shrink-0">#{{ goal.id }}</span>
         </div>
 
         <!-- Redigera beskrivning (t) -->

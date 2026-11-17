@@ -1692,6 +1692,10 @@ watch(selectedParentIndex, async () => {
         </div>
       </div>
       <div v-else class="flex items-center gap-3 flex-shrink-0">
+        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
+          class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
+          <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-ink" />
+        </button>
         <h1 :class="['text-3xl font-bold tracking-tight transition-colors px-3 py-2 rounded-xl flex-1 border',
           isGoalSelected ? 'border-accent bg-accent/10' : 'border-transparent',
           goal?.eternal ? ETERNAL_TEXT : 'text-ink'
@@ -1744,10 +1748,6 @@ watch(selectedParentIndex, async () => {
             </span>
           </template>
         </div>
-        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
-          class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
-          <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-ink" />
-        </button>
         <!-- Toggle dependencies visibility -->
         <button @click.stop="showDependencies = !showDependencies"
           class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
@@ -1965,14 +1965,26 @@ watch(selectedParentIndex, async () => {
               <div v-else class="flex items-center gap-2">
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                   :class="['flex-shrink-0 transition-colors rounded-lg p-1.5', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-ink-dim hover:text-ink-dim' : 'text-ink hover:text-white hover:bg-elevated']"
+                   :class="['flex-shrink-0 transition-colors rounded-lg p-1', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-ink-dim hover:text-ink-dim' : 'text-ink hover:text-white hover:bg-elevated']"
                    title="Ändra ikon">
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#63708a' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
+                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 px-4 py-2 block cursor-pointer">
+                  <h3 class="text-base font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
+                    {{ child.title }}
+                  </h3>
+                  <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-0.5">
+                    🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
+                  </p>
+                  <p v-if="child.description && editingDescriptionId !== child.id"
+                    class="text-xs text-ink-dim mt-0.5 truncate">
+                    {{ descriptionPreview(child.description, 80) }}
+                  </p>
+                </NuxtLink>
                  <!-- Started-toggle (s) -->
                  <button
                    @click.stop="toggleStarted(child)"
-                   :class="['flex-shrink-0 p-1.5 rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
+                   :class="['flex-shrink-0 p-1 rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
                    :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
                    <Icon name="lucide:circle-play" class="w-5 h-5"
                      :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
@@ -1981,25 +1993,13 @@ watch(selectedParentIndex, async () => {
                  <button
                    @mousedown.stop="handleDepMouseDown($event, child.id)"
                    :class="[
-                     'flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-elevated',
+                     'flex-shrink-0 p-1 rounded-lg transition-colors hover:bg-elevated',
                      isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
                      isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-orange-400'
                    ]"
                    title="Dra för att skapa beroende">
                    <Icon name="lucide:link" class="w-5 h-5" />
                  </button>
-                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 p-4 block cursor-pointer">
-                  <h3 class="text-lg font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
-                    {{ child.title }}
-                  </h3>
-                  <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-1">
-                    🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
-                  </p>
-                  <p v-if="child.description && editingDescriptionId !== child.id"
-                    class="text-xs text-ink-dim mt-1 truncate">
-                    {{ descriptionPreview(child.description, 80) }}
-                  </p>
-                </NuxtLink>
                 <!-- Deadline för undermål (c) -->
                 <div class="flex-shrink-0 flex items-center gap-1.5 pr-2">
                   <template v-if="dueTargetId === child.id">
@@ -2032,11 +2032,11 @@ watch(selectedParentIndex, async () => {
                   v-if="weightEditingChildId !== child.id"
                   @click.stop="startWeightEdit(child)"
                   :class="[
-                    'flex-shrink-0 transition-colors p-2 rounded-lg',
+                    'flex-shrink-0 transition-colors p-1 rounded-lg',
                     isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-ink-muted hover:bg-elevated'
                   ]"
                   title="Ändra vikt">
-                  <span :class="['text-xs font-mono px-2 py-1 rounded-lg bg-elevated tabular-nums', isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink']">
+                  <span :class="['text-xs font-mono px-2 py-0.5 rounded-lg bg-elevated tabular-nums', isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink']">
                     {{ child.weight }}
                   </span>
                 </button>

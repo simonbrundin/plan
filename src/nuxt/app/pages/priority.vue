@@ -352,6 +352,18 @@ const filterOptions = [
             </span>
           </div>
 
+          <div class="flex items-center gap-2 flex-1 min-w-0">
+            <Icon :name="goal.icon || 'heroicons:star'" class="w-5 h-5 flex-shrink-0 text-ink-muted"
+              :class="goal.eternal ? ETERNAL_TEXT : ''" />
+            <NuxtLink
+              :to="`/goal/${goal.id}`"
+              class="truncate transition-colors"
+              :class="goal.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : 'text-ink hover:text-white'"
+              @click.stop
+            >
+              {{ goal.title }}
+            </NuxtLink>
+          </div>
           <div class="flex-shrink-0">
             <button
               @click.stop="toggleStarted(goal)"
@@ -413,17 +425,7 @@ const filterOptions = [
             </button>
           </div>
 
-          <div class="flex items-center gap-2 flex-1 min-w-0">
-            <Icon :name="goal.icon || 'heroicons:star'" class="w-5 h-5 flex-shrink-0 text-ink-muted"
-              :class="goal.eternal ? ETERNAL_TEXT : ''" />
-            <NuxtLink
-              :to="`/goal/${goal.id}`"
-              class="truncate transition-colors"
-              :class="goal.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : 'text-ink hover:text-white'"
-              @click.stop
-            >
-              {{ goal.title }}
-            </NuxtLink>
+          <div class="flex items-center gap-2 flex-shrink-0">
             <span v-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-xs flex-shrink-0'">∞</span>
             <span v-if="goal.due" class="text-xs flex-shrink-0 tabular-nums" :class="dueToneClass(goal.due)">
               📅 {{ formatDueDate(goal.due) }}

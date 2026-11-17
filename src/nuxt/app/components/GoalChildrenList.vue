@@ -224,6 +224,27 @@ function dueToneClass(due: string | null): string {
               />
             </button>
 
+            <!-- Title link -->
+            <NuxtLink
+              :to="`/goal/${child.id}`"
+              class="flex-1 px-4 py-2 block cursor-pointer"
+              @click="$emit('select-child', index)"
+            >
+              <h3
+                class="text-base font-normal select-none"
+                :class="child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'"
+                :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)"
+              >
+                {{ child.title }}
+              </h3>
+              <p v-if="child.due" class="text-xs mt-0.5 tabular-nums" :class="dueToneClass(child.due)">
+                📅 {{ formatDueDate(child.due) }}
+              </p>
+              <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-0.5">
+                🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
+              </p>
+            </NuxtLink>
+
             <!-- Started-toggle (s) -->
             <button
               @click.stop="$emit('toggle-started', child)"
@@ -253,40 +274,19 @@ function dueToneClass(due: string | null): string {
               <Icon name="lucide:link" class="w-5 h-5" />
             </button>
 
-            <!-- Title link -->
-            <NuxtLink
-              :to="`/goal/${child.id}`"
-              class="flex-1 p-4 block cursor-pointer"
-              @click="$emit('select-child', index)"
-            >
-              <h3
-                class="text-lg font-normal select-none"
-                :class="child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'"
-                :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)"
-              >
-                {{ child.title }}
-              </h3>
-              <p v-if="child.due" class="text-xs mt-1 tabular-nums" :class="dueToneClass(child.due)">
-                📅 {{ formatDueDate(child.due) }}
-              </p>
-              <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-1">
-                🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
-              </p>
-            </NuxtLink>
-
             <!-- Weight button -->
             <button
               v-if="weightEditingChildId !== child.id"
               @click.stop="$emit('start-weight-edit', child)"
               :class="[
-                'flex-shrink-0 transition-colors p-2 rounded',
+                'flex-shrink-0 transition-colors p-1 rounded',
                 isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-ink-muted hover:bg-surface-2'
               ]"
               title="Ändra vikt"
             >
               <span
                 :class="[
-                  'text-xs font-mono px-2 py-1 rounded bg-surface-2',
+                  'text-xs font-mono px-2 py-0.5 rounded bg-surface-2',
                   isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'
                 ]"
               >
