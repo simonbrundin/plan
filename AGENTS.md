@@ -114,6 +114,33 @@ Schema is managed declaratively via Atlas Operator:
 
 Changes to schema start in `environments/base/db/schema.sql`, then are tested in dev/pr, and finally applied to production via Flux.
 
+### Testdata i dev-databasen (viktigt)
+
+Dev-databasen i Neon innehåller **användarens riktiga data**. Följande regler
+gäller:
+
+- **Rör aldrig rader som inte är testdata.** Radera aldrig "alla rader i ett
+  tidsintervall" - det tar användarens data med.
+- Testhändelser **ska** ha titeln prefuxad med `[test]`.
+- Städa bort testdata med `scripts/cleanup-test-events.sh` (kräver `--force`).
+  Verktyget raderar bara `[test]`-rader och listar det som lämnas orört.
+- Kolla alltid efter användardata innan en `DELETE` körs mot dev.
+
+### Återställning av raderad data i Neon
+
+Neon-branchen `dev` har 6 timmars WAL-historik
+(`history_retention_seconds`). Rader som försvinner utanför det fönstret går
+inte att återställa. Kontrollera därför alltid historiken **innan** data
+raderas:
+
+```bash
+neon connection-string "dev@2026-11-17T09:00:00Z" --project-id fragrant-pine-27757562
+psql "<uri>" -tAc "SELECT count(*) FROM calendar_events"
+```
+
+Det finns inga snapshots och ingen lokal backup - tidsresan är enda
+återställningsvägen.
+
 <!-- wiki:start -->
 ## Kunskaps-wiki
 

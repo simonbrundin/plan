@@ -9,7 +9,7 @@ tjänsterna till fasta portar på din laptop.
 | Tjänst  | URL                        | Kommentar                          |
 | ------- | -------------------------- | ---------------------------------- |
 | Nuxt    | http://localhost:3100      | Appen - logga in här               |
-| Go API  | http://localhost:4100      | REST-API, `/health`, `/swagger`    |
+| Go API  | http://localhost:4100      | REST-API, `/health`, `/docs` (Scalar) |
 | pgAdmin | http://localhost:4200      | Databasadmin                       |
 
 Portarna är **fasta** (`Tiltfile`). Tidigare allokerades de dynamiskt

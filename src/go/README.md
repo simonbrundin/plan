@@ -1,6 +1,6 @@
 # Plan API
 
-A Go-based REST API for goals management with OpenAPI/Swagger documentation.
+A Go-based REST API for goals management with OpenAPI documentation and Scalar UI.
 
 ## Quick Start
 
@@ -65,20 +65,18 @@ Authorization: Bearer <token>
 
 For development, use the format `user_<id>` (e.g., `user_1` for user ID 1).
 
-## Swagger UI
+## Scalar API documentation
 
 When the server is running, access the interactive API documentation at:
 
 ```
-http://localhost:8080/swagger/index.html
+http://localhost:8080/docs/
 ```
-
-## OpenAPI Spec
 
 The OpenAPI specification is available at:
 
 ```
-http://localhost:8080/swagger/doc.json
+http://localhost:8080/docs/openapi.json
 ```
 
 ## Project Structure
@@ -92,7 +90,7 @@ src/api/
 │   ├── middleware/     # Auth and CORS middleware
 │   ├── models/         # Data models
 │   └── repository/     # Database operations
-├── docs/               # Swagger documentation
+├── docs/               # Generated OpenAPI documentation
 ├── go.mod
 └── README.md
 ```
