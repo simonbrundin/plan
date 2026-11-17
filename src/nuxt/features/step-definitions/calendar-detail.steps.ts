@@ -91,13 +91,20 @@ Given(
 		const events: CalendarEventLike[] = [];
 
 		for (let i = 1; i < rows.length; i++) {
-			const [title, start, end] = rows[i];
-			events.push({
-				id: events.length + 1,
+			const [title, start, end, recurrence, series] = rows[i];
+			const event: CalendarEventLike = {
+				// Kolumnen "series" låter flera rader dela samma serie-id,
+				// vilket är hur förekomster från en återkommande serie ser
+				// ut i verkligheten.
+				id: series?.trim() ? Number(series.trim()) : events.length + 1,
 				title: title.trim(),
 				start_at: start.trim(),
 				end_at: end.trim(),
-			});
+			};
+
+			if (recurrence?.trim()) event.recurrence_rule = recurrence.trim();
+
+			events.push(event);
 		}
 
 		stateOf(this).events = events;
@@ -116,15 +123,15 @@ When(/the events are grouped by year/, function (this: object) {
 	stateOf(this).yearGroups = groupEventsByYear(stateOf(this).events);
 });
 
-Then(/there should be (\d+) day groups/, function (this: object, expected: string) {
+Then(/there should be (\d+) day groups?/, function (this: object, expected: string) {
 	assert.equal(stateOf(this).dayGroups.length, Number(expected));
 });
 
-Then(/there should be (\d+) month groups/, function (this: object, expected: string) {
+Then(/there should be (\d+) month groups?/, function (this: object, expected: string) {
 	assert.equal(stateOf(this).monthGroups.length, Number(expected));
 });
 
-Then(/there should be (\d+) year groups/, function (this: object, expected: string) {
+Then(/there should be (\d+) year groups?/, function (this: object, expected: string) {
 	assert.equal(stateOf(this).yearGroups.length, Number(expected));
 });
 
@@ -175,6 +182,41 @@ Then(
 			(groups[0]?.startAt ?? 0) < (groups[1]?.startAt ?? 0),
 			"Den första gruppen ska ligga före den andra i tiden",
 		);
+	},
+);
+
+Then(
+	/the (first|second) (day|month|year) group should mention "([^"]*)"/,
+	function (this: object, which: string, period: string, expected: string) {
+		const state = stateOf(this);
+		const groups =
+			period === "day"
+				? state.dayGroups
+				: period === "month"
+					? state.monthGroups
+					: state.yearGroups;
+		const group = which === "first" ? groups[0] : groups[1];
+
+		assert.ok(
+			group?.title.includes(expected),
+			`Förväntade att etiketten skulle innehålla "${expected}" men fick "${group?.title}"`,
+		);
+	},
+);
+
+Then(
+	/the (first|second) (day|month|year) group should be recurring/,
+	function (this: object, which: string, period: string) {
+		const state = stateOf(this);
+		const groups =
+			period === "day"
+				? state.dayGroups
+				: period === "month"
+					? state.monthGroups
+					: state.yearGroups;
+		const group = which === "first" ? groups[0] : groups[1];
+
+		assert.equal(group?.recurring, true);
 	},
 );
 

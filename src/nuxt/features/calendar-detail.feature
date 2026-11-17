@@ -183,3 +183,42 @@ Feature: Detaljnivåer i den vertikala kalendern
     Then there should be 2 year groups
     And the first year group should contain 2 events
     And the second year group should contain 1 event
+
+  Scenario: Återkommande förekomster räknas var för sig i gruppen
+    Given the following calendar events exist:
+      | title    | start                | end                  | recurrence | series |
+      | Löpning  | 2027-03-01T09:00:00Z | 2027-03-01T10:00:00Z | FREQ=WEEKLY | 7      |
+      | Löpning  | 2027-03-08T09:00:00Z | 2027-03-08T10:00:00Z | FREQ=WEEKLY | 7      |
+      | Löpning  | 2027-03-15T09:00:00Z | 2027-03-15T10:00:00Z | FREQ=WEEKLY | 7      |
+    When the events are grouped by month
+    Then there should be 1 month group
+    And the first month group should contain 3 events
+    And the first month group should be recurring
+
+  Scenario: Serien skrivs ut en gång i etiketten med sitt antal
+    Given the following calendar events exist:
+      | title    | start                | end                  | recurrence | series |
+      | Löpning  | 2027-03-01T09:00:00Z | 2027-03-01T10:00:00Z | FREQ=WEEKLY | 7      |
+      | Löpning  | 2027-03-08T09:00:00Z | 2027-03-08T10:00:00Z | FREQ=WEEKLY | 7      |
+      | Löpning  | 2027-03-15T09:00:00Z | 2027-03-15T10:00:00Z | FREQ=WEEKLY | 7      |
+    When the events are grouped by month
+    Then the first month group should mention "Löpning ×3"
+
+  Scenario: En tät serie döljer inte de senare månaderna
+    Given the following calendar events exist:
+      | title    | start                | end                  | recurrence | series |
+      | Löpning  | 2027-03-01T09:00:00Z | 2027-03-01T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-02T09:00:00Z | 2027-03-02T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-03T09:00:00Z | 2027-03-03T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-04T09:00:00Z | 2027-03-04T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-05T09:00:00Z | 2027-03-05T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-06T09:00:00Z | 2027-03-06T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-07T09:00:00Z | 2027-03-07T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-08T09:00:00Z | 2027-03-08T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-09T09:00:00Z | 2027-03-09T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-03-10T09:00:00Z | 2027-03-10T10:00:00Z | FREQ=DAILY  | 7      |
+      | Löpning  | 2027-04-05T09:00:00Z | 2027-04-05T10:00:00Z | FREQ=DAILY  | 7      |
+    When the events are grouped by month
+    Then there should be 2 month groups
+    And the first month group should contain 10 events
+    And the second month group should contain 1 event
