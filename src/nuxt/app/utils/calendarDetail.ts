@@ -132,6 +132,15 @@ export interface CalendarEventLike {
   status?: string;
   recurrence_rule?: string | null;
   parent_event_id?: number | null;
+  /**
+   * Hur många verkliga förekomster den här förekomsten står för.
+   *
+   * En serie som tunnas ut för att den blir för stor representeras av ett
+   * urval av förekomster. Vikten gör att antalen ändå blir rätta.
+   */
+  occurrence_weight?: number;
+  /** Det sanna antalet förekomster i serien, när den har tunnats ut. */
+  occurrence_total?: number;
 }
 
 /**
@@ -187,11 +196,40 @@ export function describeRecurrence(rule: string | null | undefined): string {
   return `var ${interval}:e ${base.replace("varje ", "")}`;
 }
 
+/**
+ * En post i en grupperad period.
+ *
+ * En post är en enskild händelse eller en återkommande serie, med antalet
+ * förekomster i perioden. Det gör det möjligt att lista vad som ligger
+ * under en prick, så att flera serier i samma prick går att skilja åt.
+ */
+export interface CalendarMarkerEntry {
+  /** Nyckel för händelsen eller serien. */
+  key: string;
+  /** Händelsens titel. */
+  title: string;
+  /** Antal förekomster i perioden. */
+  count: number;
+  /** Sant om posten hör till en återkommande serie. */
+  recurring: boolean;
+  /** En förekomst som representerar posten. */
+  event: CalendarEventLike;
+}
+
 export interface CalendarMarker {
   /** Stabil nyckel för rendering. */
   key: string;
   /** Tooltip-text som beskriver vad som finns i gruppen. */
   title: string;
+  /** Vad som finns i gruppen, en post per händelse eller serie. */
+  entries: CalendarMarkerEntry[];
+  /**
+   * Sant om antalet är en uppskattning.
+   *
+   * Det händer när en serie är så tät att expanderaren måste tunna ut den.
+   * Då ska antalet inte presenteras som om det vore exakt.
+   */
+  approximate: boolean;
   /** Representativ ikon, hämtad från den första händelsen med ikon. */
   icon?: string;
   /** Representativ färg från den första händelsen med färg. */
@@ -250,30 +288,83 @@ const formatMonthLabel = (timestamp: number) => {
  * skulle en serie som upprepas 52 gånger skriva ut samma titel 52 gånger,
  * vilket gör etiketten oläslig.
  */
-const describeBucket = (bucket: CalendarEventLike[], label: string) => {
-  const word = bucket.length === 1 ? "händelse" : "händelser";
-  const bySeries = new Map<string, { title: string; count: number }>();
+const describeBucket = (
+  bucket: CalendarEventLike[],
+  entries: CalendarMarkerEntry[],
+  label: string,
+) => {
+  const total = countOf(bucket);
+  const word = total === 1 ? "händelse" : "händelser";
+  const shown = entries
+    .slice(0, 4)
+    .map((entry) => (entry.count > 1 ? `${entry.title} ×${entry.count}` : entry.title))
+    .join(", ");
+  const rest = entries.length > 4 ? ` +${entries.length - 4} till` : "";
+  const sampling = maxPerDay(bucket);
+
+  // En tät serie rymmer flera förekomster per dag. Då visas en i taget, och
+  // det ska stå i tooltipen - annars ser antalet ut att vara en bild.
+  const note = sampling > 1 ? ` · visar 1 av ${sampling} per dag` : "";
+
+  return `${total} ${word} ${label}: ${shown}${rest}${note}`;
+};
+
+/**
+ * Antalet förekomster i en period.
+ *
+ * En tunnad serie representeras av ett urval förekomster, där varje
+ * förekomst står för flera verkliga. Då räknas vikterna ihop, så att antalet
+ * blir rätt även om själva förekomsterna är bortvalda.
+ */
+function countOf(bucket: CalendarEventLike[]): number {
+  return bucket.reduce((total, event) => total + (event.occurrence_weight ?? 1), 0);
+}
+
+/**
+ * Hur många förekomster som egentligen ligger i den tätaste dagen.
+ *
+ * En serie som tunnas ut behåller en förekomst per dag, och den förekomsten
+ * står för alla som låg samma dag. Då ska det framgå att tidslinjen inte
+ * visar varje förekomst för sig.
+ */
+const maxPerDay = (bucket: CalendarEventLike[]): number =>
+  bucket.reduce(
+    (highest, event) => Math.max(highest, event.occurrence_weight ?? 1),
+    1,
+  );
+
+/**
+ * Delar upp en period i poster.
+ *
+ * Återkommande förekomster hamnar i samma post, så att en serie som
+ * upprepas 52 gånger beskrivs en gång i stället för 52 gånger. Enstaka
+ * händelser räknas var för sig, så de behöver egen nyckel.
+ */
+const entriesOf = (bucket: CalendarEventLike[]): CalendarMarkerEntry[] => {
+  const byKey = new Map<string, CalendarMarkerEntry>();
 
   for (const event of bucket) {
-    // Enstaka händelser räknas var för sig, så de behöver egen nyckel.
-    const key = recurrenceSeriesKey(event) ?? `event:${event.id}`;
-    const existing = bySeries.get(key);
+    const seriesKey = recurrenceSeriesKey(event);
+    const key = seriesKey ?? `event:${event.id}`;
+    const existing = byKey.get(key);
 
     if (existing) {
-      existing.count += 1;
+      existing.count += event.occurrence_weight ?? 1;
     } else {
-      bySeries.set(key, { title: event.title, count: 1 });
+      byKey.set(key, {
+        key,
+        title: event.title,
+        count: event.occurrence_weight ?? 1,
+        recurring: seriesKey !== null,
+        event,
+      });
     }
   }
 
-  const entries = [...bySeries.values()];
-  const shown = entries
-    .slice(0, 3)
-    .map((entry) => (entry.count > 1 ? `${entry.title} ×${entry.count}` : entry.title))
-    .join(", ");
-  const rest = entries.length > 3 ? ` +${entries.length - 3} till` : "";
-
-  return `${bucket.length} ${word} ${label}: ${shown}${rest}`;
+  // Flest förekomster först, så att det viktigaste syns utan att scrolla.
+  return [...byKey.values()].sort(
+    (left, right) => right.count - left.count || left.title.localeCompare(right.title),
+  );
 };
 
 const collect = (
@@ -298,15 +389,18 @@ const collect = (
   return [...groups.entries()]
     .map(([key, bucket]) => {
       const period = periodOf(new Date(bucket[0].start_at));
+      const entries = entriesOf(bucket);
 
       return {
         key,
-        title: describeBucket(bucket, period.label),
+        title: describeBucket(bucket, entries, period.label),
+        entries,
+        approximate: bucket.some((event) => (event.occurrence_weight ?? 1) > 1),
         icon: bucket.find((event) => event.icon)?.icon,
         color: bucket.find((event) => event.color)?.color,
         startAt: period.startAt,
         endAt: period.endAt,
-        count: bucket.length,
+        count: countOf(bucket),
         tentative: bucket.some((event) => event.status === "tentative"),
         recurring: bucket.some((event) => recurrenceSeriesKey(event) !== null),
       } satisfies CalendarMarker;
