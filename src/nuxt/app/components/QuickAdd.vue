@@ -14,6 +14,13 @@ const emit = defineEmits<{
 const { createCalendarEvent } = useCalendarApi();
 const { createGoal } = useGoalApi();
 const { isOpen, mode, close, markCreated } = useQuickAdd();
+const { calendars, load: loadCalendars } = useCalendars();
+
+/**
+ * Vilken kalender den nya händelsen ska ligga i. Tomt betyder "ingen
+ * kalender", och händelsen får då standardfärgen.
+ */
+const calendarId = ref("");
 
 const text = ref("");
 const saving = ref(false);
@@ -81,6 +88,7 @@ const reset = () => {
 	text.value = "";
 	mode.value = "auto";
 	errorMessage.value = "";
+	calendarId.value = "";
 };
 
 const submit = async () => {
@@ -105,6 +113,7 @@ const submit = async () => {
 				time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 				all_day: entry.allDay,
 				...(entry.icon ? { icon: entry.icon } : {}),
+				...(calendarId.value ? { calendar_id: Number(calendarId.value) } : {}),
 				...(entry.recurrenceRule
 					? { recurrence_rule: entry.recurrenceRule }
 					: {}),
@@ -139,7 +148,12 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 watch(isOpen, (open) => {
-	if (open) focusInput();
+	if (open) {
+		focusInput();
+		// Kalendrarna behövs för att välja vilken kalender händelsen
+		// ska ligga i.
+		loadCalendars();
+	}
 });
 
 onMounted(() => {
@@ -202,6 +216,18 @@ defineExpose({ focusInput });
 							{{ recurrenceLabel }}
 						</span>
 					</p>
+
+					<select
+						v-if="effectiveMode === 'event' && calendars.length"
+						v-model="calendarId"
+						class="quick-add-calendar"
+						aria-label="Kalender"
+					>
+						<option value="">Utan kalender</option>
+						<option v-for="calendar in calendars" :key="calendar.id" :value="String(calendar.id)">
+							{{ calendar.name }}
+						</option>
+					</select>
 
 					<button
 						type="button"
@@ -268,6 +294,17 @@ defineExpose({ focusInput });
 	border: 1px solid var(--color-line);
 	border-radius: 0.5rem;
 	overflow: hidden;
+}
+
+/* Kalenderväljaren i snabbfältet. Den visas bara för händelser, eftersom
+   mål inte hör till någon kalender. */
+.quick-add-calendar {
+	border: 1px solid var(--color-line);
+	border-radius: 0.5rem;
+	padding: 0.28rem 0.5rem;
+	color: var(--color-ink-muted);
+	background: var(--color-surface-2);
+	font-size: 0.85rem;
 }
 
 .quick-add-mode {
