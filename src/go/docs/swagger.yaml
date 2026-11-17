@@ -1,0 +1,1848 @@
+basePath: /
+definitions:
+  internal_handlers.APIKey:
+    properties:
+      created:
+        type: string
+      expires:
+        type: string
+      id:
+        type: integer
+      last_used:
+        type: string
+      name:
+        type: string
+    type: object
+  internal_handlers.APIKeyResponse:
+    properties:
+      id:
+        type: integer
+      key:
+        description: Only returned once!
+        type: string
+      name:
+        type: string
+    type: object
+  internal_handlers.CreateAPIKeyRequest:
+    properties:
+      expires:
+        description: RFC3339 format
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  plan-api_internal_models.Calendar:
+    properties:
+      color:
+        type: string
+      created_at:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  plan-api_internal_models.CalendarEvent:
+    properties:
+      all_day:
+        type: boolean
+      calendar_id:
+        description: |-
+          CalendarID pekar på den kalender händelsen ligger i. Nil betyder att
+          händelsen inte tillhör någon kalender.
+        type: integer
+      color:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      end_at:
+        type: string
+      goal_id:
+        type: integer
+      icon:
+        description: "Icon är en emoji (t.ex. \"\U0001F3C3\") eller ett Iconify-namn
+          (t.ex.\n\"heroicons:star\"). Det är valfritt och används bara för visning."
+        type: string
+      id:
+        type: integer
+      occurrence_id:
+        type: string
+      original_start_at:
+        type: string
+      parent_event_id:
+        type: integer
+      recurrence_rule:
+        type: string
+      start_at:
+        type: string
+      status:
+        type: string
+      time_zone:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  plan-api_internal_models.ChildRelation:
+    properties:
+      child_id:
+        example: 2
+        type: integer
+      order:
+        example: 0
+        type: integer
+      weight:
+        example: 10
+        type: integer
+    type: object
+  plan-api_internal_models.ChildWithDeps:
+    properties:
+      blocking:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      created:
+        type: string
+      dependsOn:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      description:
+        description: |-
+          Description är en längre fritext om målet. Används när titeln
+          inte räcker för att beskriva vad som ska uppnås.
+        example: En längre beskrivning av målet
+        type: string
+      due:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          Due är det datum målet ska vara klart. Skickas alltid ut, även när
+          det är null - samma resonemang som för started/finished.
+      eternal:
+        description: |-
+          Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
+          kan inte slutföras och markeras alltid som pågående.
+        example: false
+        type: boolean
+      finished:
+        type: string
+      has_parent:
+        description: |-
+          HasParent anger om målet har en förälder (det är child i goal_relations).
+          Endast grundmål (utan förälder) listas på /goals.
+        example: false
+        type: boolean
+      icon:
+        example: heroicons:star
+        type: string
+      id:
+        example: 1
+        type: integer
+      inbox:
+        example: 0
+        type: integer
+      order:
+        type: integer
+      started:
+        description: |-
+          Started och Finished skickas alltid ut, även när de är null.
+          Med omitempty skulle fältet försvinna ur JSON-svaret och klienten
+          fick undefined i stället för null - vilket gjorde att filter som
+          "started !== null" felaktigt matchade mål utan startdatum.
+        type: string
+      status_id:
+        example: 1
+        type: integer
+      title:
+        example: My Goal
+        type: string
+      weight:
+        type: integer
+    type: object
+  plan-api_internal_models.CreateCalendarEventRequest:
+    properties:
+      all_day:
+        type: boolean
+      calendar_id:
+        description: |-
+          CalendarID anger vilken kalender händelsen ska ligga i. Nil lämnar
+          händelsen utan kalender.
+        type: integer
+      color:
+        type: string
+      description:
+        type: string
+      end_at:
+        type: string
+      goal_id:
+        type: integer
+      icon:
+        type: string
+      recurrence_rule:
+        type: string
+      start_at:
+        type: string
+      status:
+        type: string
+      time_zone:
+        type: string
+      title:
+        type: string
+    required:
+    - end_at
+    - start_at
+    - title
+    type: object
+  plan-api_internal_models.CreateCalendarOccurrenceRequest:
+    properties:
+      all_day:
+        type: boolean
+      calendar_id:
+        type: integer
+      color:
+        type: string
+      description:
+        type: string
+      end_at:
+        type: string
+      goal_id:
+        type: integer
+      icon:
+        type: string
+      original_start_at:
+        type: string
+      start_at:
+        type: string
+      status:
+        type: string
+      time_zone:
+        type: string
+      title:
+        type: string
+    required:
+    - end_at
+    - original_start_at
+    - start_at
+    type: object
+  plan-api_internal_models.CreateDependencyRequest:
+    properties:
+      dependsOnId:
+        example: 2
+        type: integer
+      goalId:
+        example: 3
+        type: integer
+    required:
+    - dependsOnId
+    - goalId
+    type: object
+  plan-api_internal_models.CreateGoalRequest:
+    properties:
+      icon:
+        example: heroicons:star
+        type: string
+      status_id:
+        example: 1
+        type: integer
+      title:
+        example: New Goal
+        type: string
+    required:
+    - title
+    type: object
+  plan-api_internal_models.CreateRelationRequest:
+    properties:
+      childId:
+        example: 2
+        type: integer
+      order:
+        example: 0
+        type: integer
+      parentId:
+        example: 1
+        type: integer
+      weight:
+        example: 10
+        type: integer
+    required:
+    - childId
+    - parentId
+    type: object
+  plan-api_internal_models.DeleteDependencyRequest:
+    properties:
+      dependsOnId:
+        type: integer
+      goalId:
+        type: integer
+    required:
+    - dependsOnId
+    - goalId
+    type: object
+  plan-api_internal_models.DeleteRelationRequest:
+    properties:
+      childId:
+        type: integer
+      parentId:
+        type: integer
+    required:
+    - childId
+    - parentId
+    type: object
+  plan-api_internal_models.DueDate:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  plan-api_internal_models.ErrorResponse:
+    properties:
+      message:
+        example: Error description
+        type: string
+    type: object
+  plan-api_internal_models.GetGoalResponse:
+    properties:
+      allGoals:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      blocking:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      children:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.ChildWithDeps'
+        type: array
+      dependencies:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.GoalDependency'
+        type: array
+      dependsOn:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      goal:
+        $ref: '#/definitions/plan-api_internal_models.GoalWithRelations'
+      parents:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      statusHistory:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.StatusUpdate'
+        type: array
+    type: object
+  plan-api_internal_models.Goal:
+    properties:
+      created:
+        type: string
+      description:
+        description: |-
+          Description är en längre fritext om målet. Används när titeln
+          inte räcker för att beskriva vad som ska uppnås.
+        example: En längre beskrivning av målet
+        type: string
+      due:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          Due är det datum målet ska vara klart. Skickas alltid ut, även när
+          det är null - samma resonemang som för started/finished.
+      eternal:
+        description: |-
+          Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
+          kan inte slutföras och markeras alltid som pågående.
+        example: false
+        type: boolean
+      finished:
+        type: string
+      has_parent:
+        description: |-
+          HasParent anger om målet har en förälder (det är child i goal_relations).
+          Endast grundmål (utan förälder) listas på /goals.
+        example: false
+        type: boolean
+      icon:
+        example: heroicons:star
+        type: string
+      id:
+        example: 1
+        type: integer
+      inbox:
+        example: 0
+        type: integer
+      order:
+        description: |-
+          Order är målets placering bland grundmål. Grundmål sorteras på /goals
+          efter detta värde (stigande), och det sätts när målen flyttas med
+          piltangenterna.
+        example: 0
+        type: integer
+      started:
+        description: |-
+          Started och Finished skickas alltid ut, även när de är null.
+          Med omitempty skulle fältet försvinna ur JSON-svaret och klienten
+          fick undefined i stället för null - vilket gjorde att filter som
+          "started !== null" felaktigt matchade mål utan startdatum.
+        type: string
+      status_id:
+        example: 1
+        type: integer
+      title:
+        example: My Goal
+        type: string
+    type: object
+  plan-api_internal_models.GoalDependency:
+    properties:
+      created:
+        type: string
+      depends_on_id:
+        example: 2
+        type: integer
+      goal_id:
+        example: 3
+        type: integer
+      id:
+        example: 1
+        type: integer
+    type: object
+  plan-api_internal_models.GoalWithRelations:
+    properties:
+      childRelations:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.ChildRelation'
+        type: array
+      created:
+        type: string
+      description:
+        description: |-
+          Description är en längre fritext om målet. Används när titeln
+          inte räcker för att beskriva vad som ska uppnås.
+        example: En längre beskrivning av målet
+        type: string
+      due:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          Due är det datum målet ska vara klart. Skickas alltid ut, även när
+          det är null - samma resonemang som för started/finished.
+      eternal:
+        description: |-
+          Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
+          kan inte slutföras och markeras alltid som pågående.
+        example: false
+        type: boolean
+      finished:
+        type: string
+      has_parent:
+        description: |-
+          HasParent anger om målet har en förälder (det är child i goal_relations).
+          Endast grundmål (utan förälder) listas på /goals.
+        example: false
+        type: boolean
+      icon:
+        example: heroicons:star
+        type: string
+      id:
+        example: 1
+        type: integer
+      inbox:
+        example: 0
+        type: integer
+      order:
+        description: |-
+          Order är målets placering bland grundmål. Grundmål sorteras på /goals
+          efter detta värde (stigande), och det sätts när målen flyttas med
+          piltangenterna.
+        example: 0
+        type: integer
+      parentRelations:
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Goal'
+        type: array
+      started:
+        description: |-
+          Started och Finished skickas alltid ut, även när de är null.
+          Med omitempty skulle fältet försvinna ur JSON-svaret och klienten
+          fick undefined i stället för null - vilket gjorde att filter som
+          "started !== null" felaktigt matchade mål utan startdatum.
+        type: string
+      status_id:
+        example: 1
+        type: integer
+      title:
+        example: My Goal
+        type: string
+    type: object
+  plan-api_internal_models.NullableDueDate:
+    properties:
+      set:
+        type: boolean
+      value:
+        type: string
+    type: object
+  plan-api_internal_models.NullableTime:
+    properties:
+      set:
+        type: boolean
+      value:
+        type: string
+    type: object
+  plan-api_internal_models.PrioritizedGoal:
+    properties:
+      created:
+        type: string
+      description:
+        description: |-
+          Description är en längre fritext om målet. Används när titeln
+          inte räcker för att beskriva vad som ska uppnås.
+        example: En längre beskrivning av målet
+        type: string
+      due:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          Due är det datum målet ska vara klart. Skickas alltid ut, även när
+          det är null - samma resonemang som för started/finished.
+      eternal:
+        description: |-
+          Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
+          kan inte slutföras och markeras alltid som pågående.
+        example: false
+        type: boolean
+      finished:
+        type: string
+      has_parent:
+        description: |-
+          HasParent anger om målet har en förälder (det är child i goal_relations).
+          Endast grundmål (utan förälder) listas på /goals.
+        example: false
+        type: boolean
+      icon:
+        example: heroicons:star
+        type: string
+      id:
+        example: 1
+        type: integer
+      inbox:
+        example: 0
+        type: integer
+      order:
+        description: |-
+          Order är målets placering bland grundmål. Grundmål sorteras på /goals
+          efter detta värde (stigande), och det sätts när målen flyttas med
+          piltangenterna.
+        example: 0
+        type: integer
+      parentId:
+        type: integer
+      parentTitle:
+        type: string
+      priorityOrder:
+        example: 0
+        type: integer
+      started:
+        description: |-
+          Started och Finished skickas alltid ut, även när de är null.
+          Med omitempty skulle fältet försvinna ur JSON-svaret och klienten
+          fick undefined i stället för null - vilket gjorde att filter som
+          "started !== null" felaktigt matchade mål utan startdatum.
+        type: string
+      status_id:
+        example: 1
+        type: integer
+      title:
+        example: My Goal
+        type: string
+      weight:
+        example: 10
+        type: integer
+    type: object
+  plan-api_internal_models.ReorderGoalsRequest:
+    properties:
+      goalIds:
+        items:
+          type: integer
+        type: array
+    required:
+    - goalIds
+    type: object
+  plan-api_internal_models.ReorderPriorityGoalsRequest:
+    properties:
+      goalIds:
+        items:
+          type: integer
+        type: array
+    required:
+    - goalIds
+    type: object
+  plan-api_internal_models.ReorderRelationsRequest:
+    properties:
+      childIds:
+        items:
+          type: integer
+        type: array
+      parentId:
+        type: integer
+    required:
+    - childIds
+    - parentId
+    type: object
+  plan-api_internal_models.SplitCalendarEventRequest:
+    properties:
+      all_day:
+        type: boolean
+      calendar_id:
+        type: integer
+      color:
+        type: string
+      description:
+        type: string
+      end_at:
+        type: string
+      goal_id:
+        type: integer
+      icon:
+        type: string
+      original_start_at:
+        type: string
+      recurrence_rule:
+        type: string
+      start_at:
+        type: string
+      time_zone:
+        type: string
+      title:
+        type: string
+    required:
+    - end_at
+    - original_start_at
+    - recurrence_rule
+    - start_at
+    type: object
+  plan-api_internal_models.Status:
+    properties:
+      created:
+        type: string
+      id:
+        example: 1
+        type: integer
+      label:
+        example: Defining
+        type: string
+      name:
+        example: define
+        type: string
+    type: object
+  plan-api_internal_models.StatusUpdate:
+    properties:
+      changed_at:
+        type: string
+      from_status_id:
+        type: integer
+      from_status_name:
+        type: string
+      goal_id:
+        type: integer
+      id:
+        type: integer
+      to_status_id:
+        type: integer
+      to_status_name:
+        type: string
+    type: object
+  plan-api_internal_models.UpdateCalendarEventRequest:
+    properties:
+      all_day:
+        type: boolean
+      calendar_id:
+        description: |-
+          CalendarID anger vilken kalender händelsen ska ligga i. Nil behåller
+          händelsens nuvarande kalender, 0 tar bort den.
+        type: integer
+      color:
+        type: string
+      description:
+        type: string
+      end_at:
+        type: string
+      goal_id:
+        type: integer
+      icon:
+        type: string
+      recurrence_rule:
+        type: string
+      start_at:
+        type: string
+      status:
+        type: string
+      time_zone:
+        type: string
+      title:
+        type: string
+    type: object
+  plan-api_internal_models.UpdateGoalRequest:
+    properties:
+      description:
+        description: |-
+          Description sätter eller rensar målets beskrivning.
+          nil = lämnas oförändrat.
+        type: string
+      due:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.NullableDueDate'
+        description: Due sätter eller rensar målets due-datum ("YYYY-MM-DD" eller
+          null).
+      eternal:
+        description: |-
+          Eternal sätter eller tar bort evigt-flaggan på ett mål.
+          nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
+        type: boolean
+      finished:
+        $ref: '#/definitions/plan-api_internal_models.NullableTime'
+      icon:
+        type: string
+      started:
+        $ref: '#/definitions/plan-api_internal_models.NullableTime'
+      status_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  plan-api_internal_models.UpdateRelationRequest:
+    properties:
+      childId:
+        type: integer
+      order:
+        type: integer
+      parentId:
+        type: integer
+      weight:
+        type: integer
+    required:
+    - childId
+    - parentId
+    type: object
+  plan-api_internal_models.UpdateStatusRequest:
+    properties:
+      status_id:
+        example: 2
+        type: integer
+    required:
+    - status_id
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Simon
+    url: https://github.com/simonreming
+  description: API for managing goals with parent-child relations and dependencies
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Goals Management API
+  version: "1.0"
+paths:
+  /api/api-keys:
+    get:
+      description: Get all API keys for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_handlers.APIKey'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - api-keys
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for programmatic access
+      parameters:
+      - description: API key data
+        in: body
+        name: key
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handlers.APIKeyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create an API key
+      tags:
+      - api-keys
+  /api/api-keys/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an API key
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an API key
+      tags:
+      - api-keys
+  /api/calendar-events:
+    get:
+      consumes:
+      - application/json
+      description: List calendar events for the authenticated user. Without a time
+        window the recurring series are returned unexpanded, so the client can expand
+        them locally. Within a time window the recurring events are expanded into
+        occurrences.
+      parameters:
+      - description: all returns every event without expanding recurring series
+        in: query
+        name: scope
+        type: string
+      - description: Start of the window (RFC3339), required unless scope is all
+        in: query
+        name: from
+        type: string
+      - description: End of the window (RFC3339), required unless scope is all
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List calendar events
+      tags:
+      - calendar-events
+    post:
+      consumes:
+      - application/json
+      description: Create a new calendar event, optionally recurring and optionally
+        linked to a goal
+      parameters:
+      - description: Calendar event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CreateCalendarEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a calendar event
+      tags:
+      - calendar-events
+  /api/calendar-events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a calendar event
+      parameters:
+      - description: Calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a calendar event
+      tags:
+      - calendar-events
+    get:
+      consumes:
+      - application/json
+      description: Get a single calendar event by ID
+      parameters:
+      - description: Calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a calendar event
+      tags:
+      - calendar-events
+    patch:
+      consumes:
+      - application/json
+      description: 'Update a calendar event. The icon field has three states: omitted
+        keeps the current icon, an empty string clears it and a value sets it.'
+      parameters:
+      - description: Calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.UpdateCalendarEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a calendar event
+      tags:
+      - calendar-events
+  /api/calendar-events/{id}/occurrences:
+    post:
+      consumes:
+      - application/json
+      description: Create an override for one occurrence in a recurring series. Unspecified
+        fields are inherited from the parent event.
+      parameters:
+      - description: Parent calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Occurrence override
+        in: body
+        name: occurrence
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CreateCalendarOccurrenceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Override a single occurrence
+      tags:
+      - calendar-events
+  /api/calendar-events/{id}/split:
+    post:
+      consumes:
+      - application/json
+      description: End a recurring series before a chosen occurrence and continue
+        it as a new series
+      parameters:
+      - description: Parent calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Split request
+        in: body
+        name: split
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.SplitCalendarEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Split a recurring series
+      tags:
+      - calendar-events
+  /api/calendars:
+    get:
+      description: List the calendars owned by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Calendar'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List calendars
+      tags:
+      - calendars
+    post:
+      consumes:
+      - application/json
+      description: Create a new calendar for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Calendar'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create calendar
+      tags:
+      - calendars
+  /api/calendars/{id}:
+    delete:
+      description: Delete a calendar. Events in it are kept but lose their calendar.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete calendar
+      tags:
+      - calendars
+    patch:
+      consumes:
+      - application/json
+      description: Update the name, color, icon or order of a calendar.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Calendar'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update calendar
+      tags:
+      - calendars
+  /api/goals:
+    get:
+      consumes:
+      - application/json
+      description: Get all goals for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Goal'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all goals
+      tags:
+      - goals
+    post:
+      consumes:
+      - application/json
+      description: Create a new goal for the authenticated user
+      parameters:
+      - description: Goal data
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CreateGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new goal
+      tags:
+      - goals
+  /api/goals/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a goal and all its relations
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a goal
+      tags:
+      - goals
+    get:
+      consumes:
+      - application/json
+      description: Get a single goal with all its relations and dependencies
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.GetGoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a goal by ID
+      tags:
+      - goals
+    patch:
+      consumes:
+      - application/json
+      description: Update a goal's title, icon, started, or finished status
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update data
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.UpdateGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a goal
+      tags:
+      - goals
+  /api/goals/{id}/status:
+    get:
+      consumes:
+      - application/json
+      description: Get the current status of a specific goal
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a goal's current status
+      tags:
+      - statuses
+    patch:
+      consumes:
+      - application/json
+      description: Update a goal's status and log the change in history
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.UpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.StatusUpdate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a goal's status
+      tags:
+      - statuses
+  /api/goals/{id}/status/history:
+    get:
+      consumes:
+      - application/json
+      description: Get all status changes for a specific goal
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.StatusUpdate'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get status change history for a goal
+      tags:
+      - statuses
+  /api/goals/dependencies:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a dependency between two goals
+      parameters:
+      - description: Dependency data
+        in: body
+        name: dependency
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.DeleteDependencyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a dependency
+      tags:
+      - dependencies
+    post:
+      consumes:
+      - application/json
+      description: Create a dependency between two goals
+      parameters:
+      - description: Dependency data
+        in: body
+        name: dependency
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CreateDependencyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.GoalDependency'
+        "400":
+          description: Invalid request or cycle detected
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a dependency
+      tags:
+      - dependencies
+  /api/goals/prioritized:
+    get:
+      consumes:
+      - application/json
+      description: Get all active goals sorted by priority
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.PrioritizedGoal'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get prioritized goals
+      tags:
+      - goals
+  /api/goals/priority/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets a new order for the active goals in the priority list
+      parameters:
+      - description: New priority order
+        in: body
+        name: goals
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.ReorderPriorityGoalsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder the priority list
+      tags:
+      - goals
+  /api/goals/relations:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a parent-child relation
+      parameters:
+      - description: Relation data
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.DeleteRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a relation
+      tags:
+      - relations
+    patch:
+      consumes:
+      - application/json
+      description: Update a relation's order and weight
+      parameters:
+      - description: Update data
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.UpdateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a relation
+      tags:
+      - relations
+    post:
+      consumes:
+      - application/json
+      description: Create a relation between two goals
+      parameters:
+      - description: Relation data
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CreateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ChildRelation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a parent-child relation
+      tags:
+      - relations
+  /api/goals/relations/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets a new order for all children of a goal in one transaction
+      parameters:
+      - description: New order of the children
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.ReorderRelationsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder the children of a goal
+      tags:
+      - relations
+  /api/goals/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets a new order for the root goals (goals without a parent) of
+        the current user
+      parameters:
+      - description: New order of the root goals
+        in: body
+        name: goals
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.ReorderGoalsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder the root goals
+      tags:
+      - goals
+  /api/statuses:
+    get:
+      consumes:
+      - application/json
+      description: Get all available goal statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Status'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all statuses
+      tags:
+      - statuses
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a token. For development, use "user_<id>"
+      format (e.g., "user_1")
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

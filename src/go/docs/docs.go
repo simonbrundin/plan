@@ -23,344 +23,2688 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/goals": {
+        "/api/api-keys": {
             "get": {
-                "security": [{"BearerAuth": []}],
-                "description": "Get all goals for the authenticated user",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["goals"],
-                "summary": "List all goals",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all API keys for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "summary": "List API keys",
                 "responses": {
-                    "200": {"description": "OK", "schema": {"type": "array", "items": {"$ref": "#/definitions/Goal"}}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/internal_handlers.APIKey"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             },
             "post": {
-                "security": [{"BearerAuth": []}],
-                "description": "Create a new goal for the authenticated user",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["goals"],
-                "summary": "Create a new goal",
-                "parameters": [{
-                    "description": "Goal data",
-                    "name": "goal",
-                    "in": "body",
-                    "required": true,
-                    "schema": {"$ref": "#/definitions/CreateGoalRequest"}
-                }],
-                "responses": {
-                    "201": {"description": "Created", "schema": {"$ref": "#/definitions/Goal"}},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-                }
-            }
-        },
-        "/api/goals/prioritized": {
-            "get": {
-                "security": [{"BearerAuth": []}],
-                "description": "Get all active goals sorted by priority",
-                "produces": ["application/json"],
-                "tags": ["goals"],
-                "summary": "Get prioritized goals",
-                "responses": {
-                    "200": {"description": "OK", "schema": {"type": "array", "items": {"$ref": "#/definitions/PrioritizedGoal"}}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-                }
-            }
-        },
-        "/api/goals/{id}": {
-            "get": {
-                "security": [{"BearerAuth": []}],
-                "description": "Get a single goal with all its relations and dependencies",
-                "produces": ["application/json"],
-                "tags": ["goals"],
-                "summary": "Get a goal by ID",
-                "parameters": [{
-                    "type": "integer",
-                    "description": "Goal ID",
-                    "name": "id",
-                    "in": "path",
-                    "required": true
-                }],
-                "responses": {
-                    "200": {"description": "OK", "schema": {"$ref": "#/definitions/GetGoalResponse"}},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "404": {"description": "Not Found", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-                }
-            },
-            "patch": {
-                "security": [{"BearerAuth": []}],
-                "description": "Update a goal's title, icon, started, or finished status",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["goals"],
-                "summary": "Update a goal",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new API key for programmatic access",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "summary": "Create an API key",
                 "parameters": [
-                    {"type": "integer", "description": "Goal ID", "name": "id", "in": "path", "required": true},
-                    {"description": "Update data", "name": "goal", "in": "body", "required": true, "schema": {"$ref": "#/definitions/UpdateGoalRequest"}}
+                    {
+                        "description": "API key data",
+                        "name": "key",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.CreateAPIKeyRequest"
+                        }
+                    }
                 ],
                 "responses": {
-                    "200": {"description": "OK", "schema": {"$ref": "#/definitions/Goal"}},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-                }
-            },
-            "delete": {
-                "security": [{"BearerAuth": []}],
-                "description": "Delete a goal and all its relations",
-                "produces": ["application/json"],
-                "tags": ["goals"],
-                "summary": "Delete a goal",
-                "parameters": [{"type": "integer", "description": "Goal ID", "name": "id", "in": "path", "required": true}],
-                "responses": {
-                    "200": {"description": "OK"},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.APIKeyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             }
         },
-        "/api/goals/relations": {
-            "post": {
-                "security": [{"BearerAuth": []}],
-                "description": "Create a relation between two goals",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["relations"],
-                "summary": "Create a parent-child relation",
-                "parameters": [{"description": "Relation data", "name": "relation", "in": "body", "required": true, "schema": {"$ref": "#/definitions/CreateRelationRequest"}}],
+        "/api/api-keys/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete an API key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "summary": "Delete an API key",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API Key ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "200": {"description": "OK", "schema": {"$ref": "#/definitions/ChildRelation"}},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/calendar-events": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "List calendar events for the authenticated user. Without a time window the recurring series are returned unexpanded, so the client can expand them locally. Within a time window the recurring events are expanded into occurrences.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "List calendar events",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "all returns every event without expanding recurring series",
+                        "name": "scope",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start of the window (RFC3339), required unless scope is all",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End of the window (RFC3339), required unless scope is all",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             },
-            "patch": {
-                "security": [{"BearerAuth": []}],
-                "description": "Update a relation's order and weight",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["relations"],
-                "summary": "Update a relation",
-                "parameters": [{"description": "Update data", "name": "relation", "in": "body", "required": true, "schema": {"$ref": "#/definitions/UpdateRelationRequest"}}],
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new calendar event, optionally recurring and optionally linked to a goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "Create a calendar event",
+                "parameters": [
+                    {
+                        "description": "Calendar event",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CreateCalendarEventRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {"description": "OK"},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/calendar-events/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a single calendar event by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "Get a calendar event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Calendar event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             },
             "delete": {
-                "security": [{"BearerAuth": []}],
-                "description": "Delete a parent-child relation",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["relations"],
-                "summary": "Delete a relation",
-                "parameters": [{"description": "Relation data", "name": "relation", "in": "body", "required": true, "schema": {"$ref": "#/definitions/DeleteRelationRequest"}}],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a calendar event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "Delete a calendar event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Calendar event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "200": {"description": "OK"},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a calendar event. The icon field has three states: omitted keeps the current icon, an empty string clears it and a value sets it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "Update a calendar event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Calendar event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.UpdateCalendarEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/calendar-events/{id}/occurrences": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create an override for one occurrence in a recurring series. Unspecified fields are inherited from the parent event.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "Override a single occurrence",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent calendar event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Occurrence override",
+                        "name": "occurrence",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CreateCalendarOccurrenceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/calendar-events/{id}/split": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "End a recurring series before a chosen occurrence and continue it as a new series",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar-events"
+                ],
+                "summary": "Split a recurring series",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent calendar event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Split request",
+                        "name": "split",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.SplitCalendarEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/calendars": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "List the calendars owned by the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendars"
+                ],
+                "summary": "List calendars",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Calendar"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new calendar for the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendars"
+                ],
+                "summary": "Create calendar",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Calendar"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/calendars/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a calendar. Events in it are kept but lose their calendar.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendars"
+                ],
+                "summary": "Delete calendar",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the name, color, icon or order of a calendar.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendars"
+                ],
+                "summary": "Update calendar",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Calendar"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all goals for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "List all goals",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Goal"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new goal for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Create a new goal",
+                "parameters": [
+                    {
+                        "description": "Goal data",
+                        "name": "goal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CreateGoalRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             }
         },
         "/api/goals/dependencies": {
             "post": {
-                "security": [{"BearerAuth": []}],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a dependency between two goals",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["dependencies"],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dependencies"
+                ],
                 "summary": "Create a dependency",
-                "parameters": [{"description": "Dependency data", "name": "dependency", "in": "body", "required": true, "schema": {"$ref": "#/definitions/CreateDependencyRequest"}}],
+                "parameters": [
+                    {
+                        "description": "Dependency data",
+                        "name": "dependency",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CreateDependencyRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {"description": "OK", "schema": {"$ref": "#/definitions/GoalDependency"}},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.GoalDependency"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or cycle detected",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             },
             "delete": {
-                "security": [{"BearerAuth": []}],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a dependency between two goals",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["dependencies"],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dependencies"
+                ],
                 "summary": "Delete a dependency",
-                "parameters": [{"description": "Dependency data", "name": "dependency", "in": "body", "required": true, "schema": {"$ref": "#/definitions/DeleteDependencyRequest"}}],
+                "parameters": [
+                    {
+                        "description": "Dependency data",
+                        "name": "dependency",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.DeleteDependencyRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {"description": "OK"},
-                    "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "401": {"description": "Unauthorized", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-                    "403": {"description": "Forbidden", "schema": {"$ref": "#/definitions/ErrorResponse"}}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             }
         },
-        "/health": {
+        "/api/goals/prioritized": {
             "get": {
-                "description": "Check if the API is running",
-                "produces": ["application/json"],
-                "tags": ["health"],
-                "summary": "Health check",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all active goals sorted by priority",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get prioritized goals",
                 "responses": {
-                    "200": {"description": "OK"}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.PrioritizedGoal"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/priority/reorder": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Sets a new order for the active goals in the priority list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Reorder the priority list",
+                "parameters": [
+                    {
+                        "description": "New priority order",
+                        "name": "goals",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ReorderPriorityGoalsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/relations": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a relation between two goals",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relations"
+                ],
+                "summary": "Create a parent-child relation",
+                "parameters": [
+                    {
+                        "description": "Relation data",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CreateRelationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ChildRelation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a parent-child relation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relations"
+                ],
+                "summary": "Delete a relation",
+                "parameters": [
+                    {
+                        "description": "Relation data",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.DeleteRelationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a relation's order and weight",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relations"
+                ],
+                "summary": "Update a relation",
+                "parameters": [
+                    {
+                        "description": "Update data",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.UpdateRelationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/relations/reorder": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Sets a new order for all children of a goal in one transaction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relations"
+                ],
+                "summary": "Reorder the children of a goal",
+                "parameters": [
+                    {
+                        "description": "New order of the children",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ReorderRelationsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/reorder": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Sets a new order for the root goals (goals without a parent) of the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Reorder the root goals",
+                "parameters": [
+                    {
+                        "description": "New order of the root goals",
+                        "name": "goals",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ReorderGoalsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a single goal with all its relations and dependencies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get a goal by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.GetGoalResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a goal and all its relations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Delete a goal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a goal's title, icon, started, or finished status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Update a goal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update data",
+                        "name": "goal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.UpdateGoalRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/{id}/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the current status of a specific goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statuses"
+                ],
+                "summary": "Get a goal's current status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Status"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a goal's status and log the change in history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statuses"
+                ],
+                "summary": "Update a goal's status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.UpdateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.StatusUpdate"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/{id}/status/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all status changes for a specific goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statuses"
+                ],
+                "summary": "Get status change history for a goal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.StatusUpdate"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/statuses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all available goal statuses",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statuses"
+                ],
+                "summary": "List all statuses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Status"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
                 }
             }
         }
     },
     "definitions": {
-        "Goal": {
+        "internal_handlers.APIKey": {
             "type": "object",
             "properties": {
-                "id": {"type": "integer"},
-                "title": {"type": "string"},
-                "icon": {"type": "string"},
-                "created": {"type": "string"},
-                "started": {"type": "string"},
-                "finished": {"type": "string"},
-                "inbox": {"type": "integer"}
+                "created": {
+                    "type": "string"
+                },
+                "expires": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_used": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
             }
         },
-        "ChildRelation": {
+        "internal_handlers.APIKeyResponse": {
             "type": "object",
             "properties": {
-                "child_id": {"type": "integer"},
-                "order": {"type": "integer"},
-                "weight": {"type": "integer"}
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "description": "Only returned once!",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
             }
         },
-        "GoalDependency": {
+        "internal_handlers.CreateAPIKeyRequest": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
-                "id": {"type": "integer"},
-                "goal_id": {"type": "integer"},
-                "depends_on_id": {"type": "integer"},
-                "created": {"type": "string"}
+                "expires": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
             }
         },
-        "PrioritizedGoal": {
+        "plan-api_internal_models.Calendar": {
             "type": "object",
             "properties": {
-                "id": {"type": "integer"},
-                "title": {"type": "string"},
-                "icon": {"type": "string"},
-                "created": {"type": "string"},
-                "started": {"type": "string"},
-                "finished": {"type": "string"},
-                "inbox": {"type": "integer"},
-                "weight": {"type": "integer"},
-                "parentTitle": {"type": "string"},
-                "parentId": {"type": "integer"}
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
             }
         },
-        "GetGoalResponse": {
+        "plan-api_internal_models.CalendarEvent": {
             "type": "object",
             "properties": {
-                "goal": {"$ref": "#/definitions/GoalWithRelations"},
-                "children": {"type": "array", "items": {}},
-                "parents": {"type": "array", "items": {}},
-                "allGoals": {"type": "array", "items": {"$ref": "#/definitions/Goal"}},
-                "dependencies": {"type": "array", "items": {"$ref": "#/definitions/GoalDependency"}},
-                "dependsOn": {"type": "array", "items": {"$ref": "#/definitions/Goal"}},
-                "blocking": {"type": "array", "items": {"$ref": "#/definitions/Goal"}}
+                "all_day": {
+                    "type": "boolean"
+                },
+                "calendar_id": {
+                    "description": "CalendarID pekar på den kalender händelsen ligger i. Nil betyder att\nhändelsen inte tillhör någon kalender.",
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "description": "Icon är en emoji (t.ex. \"🏃\") eller ett Iconify-namn (t.ex.\n\"heroicons:star\"). Det är valfritt och används bara för visning.",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "occurrence_id": {
+                    "type": "string"
+                },
+                "original_start_at": {
+                    "type": "string"
+                },
+                "parent_event_id": {
+                    "type": "integer"
+                },
+                "recurrence_rule": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "time_zone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
             }
         },
-        "GoalWithRelations": {
+        "plan-api_internal_models.ChildRelation": {
             "type": "object",
             "properties": {
-                "id": {"type": "integer"},
-                "title": {"type": "string"},
-                "icon": {"type": "string"},
-                "created": {"type": "string"},
-                "started": {"type": "string"},
-                "finished": {"type": "string"},
-                "inbox": {"type": "integer"},
-                "childRelations": {"type": "array", "items": {"$ref": "#/definitions/ChildRelation"}},
-                "parentRelations": {"type": "array", "items": {}}
+                "child_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "order": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "weight": {
+                    "type": "integer",
+                    "example": 10
+                }
             }
         },
-        "CreateGoalRequest": {
+        "plan-api_internal_models.ChildWithDeps": {
             "type": "object",
-            "required": ["title"],
             "properties": {
-                "title": {"type": "string"},
-                "icon": {"type": "string"}
+                "blocking": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "created": {
+                    "type": "string"
+                },
+                "dependsOn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "description": {
+                    "description": "Description är en längre fritext om målet. Används när titeln\ninte räcker för att beskriva vad som ska uppnås.",
+                    "type": "string",
+                    "example": "En längre beskrivning av målet"
+                },
+                "due": {
+                    "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "eternal": {
+                    "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "finished": {
+                    "type": "string"
+                },
+                "has_parent": {
+                    "description": "HasParent anger om målet har en förälder (det är child i goal_relations).\nEndast grundmål (utan förälder) listas på /goals.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:star"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "inbox": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "started": {
+                    "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
+                    "type": "string"
+                },
+                "status_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My Goal"
+                },
+                "weight": {
+                    "type": "integer"
+                }
             }
         },
-        "UpdateGoalRequest": {
+        "plan-api_internal_models.CreateCalendarEventRequest": {
             "type": "object",
+            "required": [
+                "end_at",
+                "start_at",
+                "title"
+            ],
             "properties": {
-                "title": {"type": "string"},
-                "icon": {"type": "string"},
-                "started": {"type": "string"},
-                "finished": {"type": "string"}
+                "all_day": {
+                    "type": "boolean"
+                },
+                "calendar_id": {
+                    "description": "CalendarID anger vilken kalender händelsen ska ligga i. Nil lämnar\nhändelsen utan kalender.",
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "recurrence_rule": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "time_zone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
             }
         },
-        "CreateRelationRequest": {
+        "plan-api_internal_models.CreateCalendarOccurrenceRequest": {
             "type": "object",
-            "required": ["childId", "parentId"],
+            "required": [
+                "end_at",
+                "original_start_at",
+                "start_at"
+            ],
             "properties": {
-                "childId": {"type": "integer"},
-                "parentId": {"type": "integer"},
-                "order": {"type": "integer"},
-                "weight": {"type": "integer"}
+                "all_day": {
+                    "type": "boolean"
+                },
+                "calendar_id": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "original_start_at": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "time_zone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
             }
         },
-        "UpdateRelationRequest": {
+        "plan-api_internal_models.CreateDependencyRequest": {
             "type": "object",
-            "required": ["childId", "parentId"],
+            "required": [
+                "dependsOnId",
+                "goalId"
+            ],
             "properties": {
-                "childId": {"type": "integer"},
-                "parentId": {"type": "integer"},
-                "order": {"type": "integer"},
-                "weight": {"type": "integer"}
+                "dependsOnId": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "goalId": {
+                    "type": "integer",
+                    "example": 3
+                }
             }
         },
-        "DeleteRelationRequest": {
+        "plan-api_internal_models.CreateGoalRequest": {
             "type": "object",
-            "required": ["childId", "parentId"],
+            "required": [
+                "title"
+            ],
             "properties": {
-                "childId": {"type": "integer"},
-                "parentId": {"type": "integer"}
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:star"
+                },
+                "status_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "New Goal"
+                }
             }
         },
-        "CreateDependencyRequest": {
+        "plan-api_internal_models.CreateRelationRequest": {
             "type": "object",
-            "required": ["goalId", "dependsOnId"],
+            "required": [
+                "childId",
+                "parentId"
+            ],
             "properties": {
-                "goalId": {"type": "integer"},
-                "dependsOnId": {"type": "integer"}
+                "childId": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "order": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "parentId": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "weight": {
+                    "type": "integer",
+                    "example": 10
+                }
             }
         },
-        "DeleteDependencyRequest": {
+        "plan-api_internal_models.DeleteDependencyRequest": {
             "type": "object",
-            "required": ["goalId", "dependsOnId"],
+            "required": [
+                "dependsOnId",
+                "goalId"
+            ],
             "properties": {
-                "goalId": {"type": "integer"},
-                "dependsOnId": {"type": "integer"}
+                "dependsOnId": {
+                    "type": "integer"
+                },
+                "goalId": {
+                    "type": "integer"
+                }
             }
         },
-        "ErrorResponse": {
+        "plan-api_internal_models.DeleteRelationRequest": {
+            "type": "object",
+            "required": [
+                "childId",
+                "parentId"
+            ],
+            "properties": {
+                "childId": {
+                    "type": "integer"
+                },
+                "parentId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "plan-api_internal_models.DueDate": {
             "type": "object",
             "properties": {
-                "message": {"type": "string"}
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Error description"
+                }
+            }
+        },
+        "plan-api_internal_models.GetGoalResponse": {
+            "type": "object",
+            "properties": {
+                "allGoals": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "blocking": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.ChildWithDeps"
+                    }
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.GoalDependency"
+                    }
+                },
+                "dependsOn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "goal": {
+                    "$ref": "#/definitions/plan-api_internal_models.GoalWithRelations"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "statusHistory": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.StatusUpdate"
+                    }
+                }
+            }
+        },
+        "plan-api_internal_models.Goal": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description är en längre fritext om målet. Används när titeln\ninte räcker för att beskriva vad som ska uppnås.",
+                    "type": "string",
+                    "example": "En längre beskrivning av målet"
+                },
+                "due": {
+                    "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "eternal": {
+                    "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "finished": {
+                    "type": "string"
+                },
+                "has_parent": {
+                    "description": "HasParent anger om målet har en förälder (det är child i goal_relations).\nEndast grundmål (utan förälder) listas på /goals.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:star"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "inbox": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "order": {
+                    "description": "Order är målets placering bland grundmål. Grundmål sorteras på /goals\nefter detta värde (stigande), och det sätts när målen flyttas med\npiltangenterna.",
+                    "type": "integer",
+                    "example": 0
+                },
+                "started": {
+                    "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
+                    "type": "string"
+                },
+                "status_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My Goal"
+                }
+            }
+        },
+        "plan-api_internal_models.GoalDependency": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "depends_on_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "goal_id": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "plan-api_internal_models.GoalWithRelations": {
+            "type": "object",
+            "properties": {
+                "childRelations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.ChildRelation"
+                    }
+                },
+                "created": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description är en längre fritext om målet. Används när titeln\ninte räcker för att beskriva vad som ska uppnås.",
+                    "type": "string",
+                    "example": "En längre beskrivning av målet"
+                },
+                "due": {
+                    "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "eternal": {
+                    "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "finished": {
+                    "type": "string"
+                },
+                "has_parent": {
+                    "description": "HasParent anger om målet har en förälder (det är child i goal_relations).\nEndast grundmål (utan förälder) listas på /goals.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:star"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "inbox": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "order": {
+                    "description": "Order är målets placering bland grundmål. Grundmål sorteras på /goals\nefter detta värde (stigande), och det sätts när målen flyttas med\npiltangenterna.",
+                    "type": "integer",
+                    "example": 0
+                },
+                "parentRelations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                    }
+                },
+                "started": {
+                    "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
+                    "type": "string"
+                },
+                "status_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My Goal"
+                }
+            }
+        },
+        "plan-api_internal_models.NullableDueDate": {
+            "type": "object",
+            "properties": {
+                "set": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.NullableTime": {
+            "type": "object",
+            "properties": {
+                "set": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.PrioritizedGoal": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description är en längre fritext om målet. Används när titeln\ninte räcker för att beskriva vad som ska uppnås.",
+                    "type": "string",
+                    "example": "En längre beskrivning av målet"
+                },
+                "due": {
+                    "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "eternal": {
+                    "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "finished": {
+                    "type": "string"
+                },
+                "has_parent": {
+                    "description": "HasParent anger om målet har en förälder (det är child i goal_relations).\nEndast grundmål (utan förälder) listas på /goals.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:star"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "inbox": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "order": {
+                    "description": "Order är målets placering bland grundmål. Grundmål sorteras på /goals\nefter detta värde (stigande), och det sätts när målen flyttas med\npiltangenterna.",
+                    "type": "integer",
+                    "example": 0
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "parentTitle": {
+                    "type": "string"
+                },
+                "priorityOrder": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "started": {
+                    "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
+                    "type": "string"
+                },
+                "status_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My Goal"
+                },
+                "weight": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "plan-api_internal_models.ReorderGoalsRequest": {
+            "type": "object",
+            "required": [
+                "goalIds"
+            ],
+            "properties": {
+                "goalIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "plan-api_internal_models.ReorderPriorityGoalsRequest": {
+            "type": "object",
+            "required": [
+                "goalIds"
+            ],
+            "properties": {
+                "goalIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "plan-api_internal_models.ReorderRelationsRequest": {
+            "type": "object",
+            "required": [
+                "childIds",
+                "parentId"
+            ],
+            "properties": {
+                "childIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "parentId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "plan-api_internal_models.SplitCalendarEventRequest": {
+            "type": "object",
+            "required": [
+                "end_at",
+                "original_start_at",
+                "recurrence_rule",
+                "start_at"
+            ],
+            "properties": {
+                "all_day": {
+                    "type": "boolean"
+                },
+                "calendar_id": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "original_start_at": {
+                    "type": "string"
+                },
+                "recurrence_rule": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "time_zone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.Status": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Defining"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "define"
+                }
+            }
+        },
+        "plan-api_internal_models.StatusUpdate": {
+            "type": "object",
+            "properties": {
+                "changed_at": {
+                    "type": "string"
+                },
+                "from_status_id": {
+                    "type": "integer"
+                },
+                "from_status_name": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "to_status_id": {
+                    "type": "integer"
+                },
+                "to_status_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.UpdateCalendarEventRequest": {
+            "type": "object",
+            "properties": {
+                "all_day": {
+                    "type": "boolean"
+                },
+                "calendar_id": {
+                    "description": "CalendarID anger vilken kalender händelsen ska ligga i. Nil behåller\nhändelsens nuvarande kalender, 0 tar bort den.",
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "recurrence_rule": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "time_zone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.UpdateGoalRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description sätter eller rensar målets beskrivning.\nnil = lämnas oförändrat.",
+                    "type": "string"
+                },
+                "due": {
+                    "description": "Due sätter eller rensar målets due-datum (\"YYYY-MM-DD\" eller null).",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.NullableDueDate"
+                        }
+                    ]
+                },
+                "eternal": {
+                    "description": "Eternal sätter eller tar bort evigt-flaggan på ett mål.\nnil = lämnas oförändrat, true = evigt mål, false = vanligt mål.",
+                    "type": "boolean"
+                },
+                "finished": {
+                    "$ref": "#/definitions/plan-api_internal_models.NullableTime"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "started": {
+                    "$ref": "#/definitions/plan-api_internal_models.NullableTime"
+                },
+                "status_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.UpdateRelationRequest": {
+            "type": "object",
+            "required": [
+                "childId",
+                "parentId"
+            ],
+            "properties": {
+                "childId": {
+                    "type": "integer"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "weight": {
+                    "type": "integer"
+                }
+            }
+        },
+        "plan-api_internal_models.UpdateStatusRequest": {
+            "type": "object",
+            "required": [
+                "status_id"
+            ],
+            "properties": {
+                "status_id": {
+                    "type": "integer",
+                    "example": 2
+                }
             }
         }
     },
     "securityDefinitions": {
         "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a token. For development, use \"user_\u003cid\u003e\" format (e.g., \"user_1\")",
             "type": "apiKey",
             "name": "Authorization",
-            "in": "header",
-            "description": "Type \"Bearer\" followed by a token. For development, use \"user_<id>\" format (e.g., \"user_1\")"
+            "in": "header"
         }
     }
 }`
@@ -375,6 +2719,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API for managing goals with parent-child relations and dependencies",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
