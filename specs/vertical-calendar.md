@@ -106,8 +106,9 @@ horisontell skrollning).
 
 ## Avgränsningar
 
-- Den första versionen behöver inte stödja flera kalendrar eller tidszoner,
-  om det inte redan krävs av den befintliga kalenderdatan.
+- Flera kalendrar stöds sedan [calendrarna med egna färger](calendars.md).
+  Tidszoner stöds fortfarande inte utöver att tidsstämpeln lagras med
+  IANA-zon.
 - Minsta zoomnivå fastställs vid implementation efter att viewportens storlek
   och händelsernas informationsdensitet har verifierats. Största intervallet
   begränsas bara av JavaScript `Date`-typens tekniska maxintervall.

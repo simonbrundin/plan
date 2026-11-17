@@ -32,6 +32,20 @@ const errorMessage = ref("");
 /** Namn som redigeras just nu, så att fältet inte hoppar medan man skriver. */
 const draftNames = reactive<Record<number, string>>({});
 
+// Namnfältet redigeras i en egen draft, som fylls på från kalenderns
+// nuvarande namn. Utan det skulle fältet visa en tom sträng.
+watch(
+  calendars,
+  (list) => {
+    for (const calendar of list) {
+      if (draftNames[calendar.id] === undefined) {
+        draftNames[calendar.id] = calendar.name;
+      }
+    }
+  },
+  { immediate: true, deep: true },
+);
+
 const close = () => emit("update:open", false);
 
 const create = async () => {
@@ -67,6 +81,7 @@ const rename = async (calendarId: number) => {
 
   try {
     await save(calendarId, { name });
+    draftNames[calendarId] = name;
   } catch (error) {
     console.error("Kunde inte byta namn på kalendern:", error);
     draftNames[calendarId] = calendar.name;
@@ -89,6 +104,7 @@ const confirmRemove = async (calendarId: number, name: string) => {
 
   try {
     await remove(calendarId);
+    delete draftNames[calendarId];
   } catch (error) {
     console.error("Kunde inte ta bort kalendern:", error);
     errorMessage.value = "Kunde inte ta bort kalendern. Försök igen.";
@@ -160,6 +176,7 @@ onMounted(() => load());
             type="button"
             class="icon-button"
             :aria-pressed="isHidden(calendar.id)"
+            :aria-label="isHidden(calendar.id) ? 'Visa i tidslinjen' : 'Dölj i tidslinjen'"
             :title="isHidden(calendar.id) ? 'Visa i tidslinjen' : 'Dölj i tidslinjen'"
             @click="toggleVisibility(calendar.id)"
           >
