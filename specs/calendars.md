@@ -73,10 +73,12 @@ med 403.
 
 ### Gränssnitt
 
-- **Legendraden** över tidslinjen listar kalendrarna med sina färger. Klick
-  på en kalender döljer eller visar dess händelser.
-- **Kalenderhanteraren** (`+ Kalender`) skapar, döper om, färgar och tar
-  bort kalendrar. Stjärnan sätter kalendern som standardkalender.
+- **Kalenderlistan** ligger i en lista som öppnas med knappen "Kalendrar" i
+  verktygsraden. Kalendrarna ligger alltså inte som etiketter ovanför
+  tidslinjen - de öppnas med en knapp när man behöver dem.
+- **Kalenderhanteraren** skapar, döper om, färgar och tar
+  bort kalendrar. Stjärnan sätter kalendern som standardkalender, och ögat
+  döljer eller visar kalenderns händelser i tidslinjen.
 - **Färgen sätts med färgkod eller ur paletten.** Både i skapa-formuläret
   och i varje rad finns ett fält där hexkoden skrivs, bredvid en
   förhandsvisning av färgen. Paletten med åtta färger är genvägar för den
@@ -86,7 +88,7 @@ med 403.
   färg, och färgen följer med om kalendern byts.
 - **Snabbfältet** har en kalenderväljare när det skapar en händelse, så att
   det går att placera händelser i rätt kalender direkt från tangentbordet.
-- **Legendraden** markerar standardkalendern med en stjärna.
+- **Kalenderlistan** markerar standardkalendern med en stjärna.
 
 ## Avgränsningar
 
@@ -103,6 +105,8 @@ med 403.
 - [x] Händelser i en kalender visas i kalenderns färg.
 - [x] En händelse kan inte ha en egen färg.
 - [x] En kalender kan döljas och visas i tidslinjen.
+- [x] Kalendrarna ligger i en lista som öppnas med en knapp, inte som
+      etiketter ovanför tidslinjen.
 - [x] Händelser kan flyttas mellan kalendrar.
 - [x] En borttagen kalender lämnar händelserna kvar utan kalender.
 - [x] Snabbfältet kan placera en händelse i en vald kalender.

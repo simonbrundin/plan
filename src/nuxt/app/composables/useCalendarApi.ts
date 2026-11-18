@@ -141,6 +141,17 @@ export function useCalendarApi() {
     })
   }
 
+  /**
+   * Tar bort en kalenderhändelse.
+   *
+   * För en återkommande serie tas hela serien bort, inklusive dess
+   * förekomster. Enstaka förekomster tas bort med en avstängd override,
+   * se `createCalendarOccurrenceOverride`.
+   */
+  const deleteCalendarEvent = async (eventId: number): Promise<void> => {
+    await $fetch(`/api/proxy/calendar-events/${eventId}`, { method: "DELETE" })
+  }
+
   /** Hämtar användarens kalendrar. */
   const loadCalendars = async (): Promise<Calendar[]> => {
     return await $fetch<Calendar[]>('/api/proxy/calendars')
@@ -182,6 +193,7 @@ export function useCalendarApi() {
     updateCalendarEvent,
     createCalendarOccurrenceOverride,
     splitCalendarSeries,
+    deleteCalendarEvent,
     loadCalendars,
     createCalendar,
     updateCalendar,

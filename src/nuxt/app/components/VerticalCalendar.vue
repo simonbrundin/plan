@@ -4,6 +4,12 @@ import type { Goal } from '~/types/goal'
 import { CalendarExpander } from '~/utils/calendarRecurrence'
 import { DEFAULT_EVENT_COLOR, isEventHidden } from '~/utils/calendarColors'
 import {
+  duplicateEventPayload,
+  isSeriesOccurrence,
+  parentEventId,
+  truncateRecurrenceRule,
+} from '~/utils/calendarEvents'
+import {
   assignClusteredLanes,
   assignLanes,
   describeRecurrence,
@@ -144,6 +150,9 @@ const showCreateEvent = ref(false)
 const editingEvent = ref<CalendarEvent | null>(null)
 const editScope = ref<'occurrence' | 'series' | 'following'>('occurrence')
 const savingEvent = ref(false)
+const deletingEvent = ref(false)
+const duplicatingEvent = ref(false)
+const errorMessage = ref('')
 const managerOpen = ref(false)
 const draftEvent = reactive({
   title: '',
@@ -164,14 +173,13 @@ const {
   updateCalendarEvent,
   createCalendarOccurrenceOverride,
   splitCalendarSeries,
+  deleteCalendarEvent,
 } = useCalendarApi()
 const { loadAllGoals } = useGoalApi()
 const {
   calendars,
   hiddenCalendarIds,
   load: loadCalendars,
-  isHidden: isCalendarHidden,
-  toggleVisibility: toggleCalendarVisibility,
   colorFor: resolveColor,
   defaultCalendarId,
 } = useCalendars()
@@ -735,7 +743,9 @@ const openCreateEvent = () => {
 
 const openEditEvent = (event: CalendarEvent) => {
   editingEvent.value = event
-  editScope.value = event.recurrence_rule ? 'occurrence' : 'series'
+  // En förekomst i en serie kan ändras för sig, tillsammans med de
+  // följande eller för hela serien. En vanlig händelse har bara en rad.
+  editScope.value = isSeriesOccurrence(event) ? 'occurrence' : 'series'
   draftEvent.title = event.title
   draftEvent.description = event.description || ''
   draftEvent.goalId = event.goal_id ? String(event.goal_id) : ''
@@ -749,6 +759,26 @@ const openEditEvent = (event: CalendarEvent) => {
 const closeEditEvent = () => {
   editingEvent.value = null
 }
+
+/**
+ * Sant om händelsen som redigeras är en förekomst i en serie.
+ *
+ * Förekomsten bär inte alltid seriens upprepningsregel - en förekomst med
+ * egen rad (en override) har bara seriens id. Därför avgörs det av
+ * förekomstens identitet, inte av regeln.
+ */
+const editingIsSeriesOccurrence = computed(() =>
+  editingEvent.value ? isSeriesOccurrence(editingEvent.value) : false,
+)
+
+/**
+ * Seriens masterrad, som har upprepningsregeln.
+ *
+ * Masterraden finns bland de hämtade händelserna, så regeln kan slås upp
+ * där även när den synda förekomsten inte bär med sig den.
+ */
+const seriesMaster = (id: number) =>
+  allEvents.value.find((event) => event.id === id)
 
 const saveEditedEvent = async () => {
   const event = editingEvent.value
@@ -769,19 +799,27 @@ const saveEditedEvent = async () => {
   }
 
   try {
-    if (editScope.value === 'occurrence' && event.recurrence_rule && event.original_start_at) {
-      await createCalendarOccurrenceOverride(event.id, {
-        original_start_at: event.original_start_at,
-        ...payload,
-      })
-    } else if (editScope.value === 'following' && event.recurrence_rule && event.original_start_at) {
-      await splitCalendarSeries(event.id, {
-        original_start_at: event.original_start_at,
-        recurrence_rule: draftEvent.recurrenceRule || event.recurrence_rule,
+    if (editScope.value === 'occurrence' && isSeriesOccurrence(event)) {
+      // En förekomst med egen rad ändras direkt. En förekomst utan egen
+      // rad får en override, som servern lägger till.
+      if (event.parent_event_id) {
+        await updateCalendarEvent(event.id, payload)
+      } else {
+        await createCalendarOccurrenceOverride(parentEventId(event), {
+          original_start_at: event.original_start_at || event.start_at,
+          ...payload,
+        })
+      }
+    } else if (editScope.value === 'following' && isSeriesOccurrence(event)) {
+      const master = seriesMaster(parentEventId(event))
+      await splitCalendarSeries(parentEventId(event), {
+        original_start_at: event.original_start_at || event.start_at,
+        recurrence_rule:
+          draftEvent.recurrenceRule || master?.recurrence_rule || event.recurrence_rule || '',
         ...payload,
       })
     } else {
-      await updateCalendarEvent(event.id, {
+      await updateCalendarEvent(parentEventId(event), {
         ...payload,
         ...(draftEvent.recurrenceRule ? { recurrence_rule: draftEvent.recurrenceRule } : {}),
       })
@@ -790,6 +828,125 @@ const saveEditedEvent = async () => {
     await loadEvents()
   } finally {
     savingEvent.value = false
+  }
+}
+
+/**
+ * Tar bort en händelse.
+ *
+ * Omfattningen beror på vilken rad som egentligen ska försvinna: en vanlig
+ * händelse tas bort som den är, en förekomst i en serie kan tas bort för
+ * sig, tillsammans med de följande eller tillsammans med hela serien.
+ */
+const removeEvent = async (
+  event: CalendarEvent,
+  scope: 'occurrence' | 'series' | 'following',
+) => {
+  if (!isSeriesOccurrence(event)) {
+    await deleteCalendarEvent(event.id)
+    return
+  }
+
+  const parentId = parentEventId(event)
+  const occurrenceStart = Date.parse(event.original_start_at || event.start_at)
+
+  if (scope === 'series') {
+    await deleteCalendarEvent(parentId)
+    return
+  }
+
+  if (scope === 'following') {
+    // Serien slutar strax före förekomsten, så att den och de följande
+    // försvinner ur serien.
+    const master = seriesMaster(parentId)
+    if (master?.recurrence_rule) {
+      await updateCalendarEvent(parentId, {
+        recurrence_rule: truncateRecurrenceRule(
+          master.recurrence_rule,
+          new Date(occurrenceStart - 1000),
+        ),
+      })
+    }
+
+    // Rader för förekomster som nu ligger utanför serien tas bort.
+    // Annars skulle de ligga kvar som egna händelser i vyn.
+    for (const override of allEvents.value) {
+      if (override.parent_event_id !== parentId) continue
+      if (!override.original_start_at) continue
+      if (Date.parse(override.original_start_at) < occurrenceStart) continue
+
+      await deleteCalendarEvent(override.id)
+    }
+    return
+  }
+
+  // Bara den valda förekomsten: den stängs av.
+  if (event.parent_event_id) {
+    // Förekomsten har en egen rad - raden stängs av med sin status.
+    await updateCalendarEvent(event.id, { status: 'cancelled' })
+    return
+  }
+
+  await createCalendarOccurrenceOverride(parentId, {
+    original_start_at: event.original_start_at || event.start_at,
+    start_at: event.start_at,
+    end_at: event.end_at,
+    status: 'cancelled',
+  })
+}
+
+const deleteEvent = async () => {
+  const event = editingEvent.value
+  if (!event) return
+
+  const scope = editScope.value
+  const label = !isSeriesOccurrence(event)
+    ? 'händelsen'
+    : scope === 'series'
+      ? 'hela serien'
+      : scope === 'following'
+        ? 'denna och de följande'
+        : 'denna förekomst'
+
+  if (!window.confirm(`Ta bort ${label}? Det går inte att ångra.`)) return
+
+  deletingEvent.value = true
+  errorMessage.value = ''
+  try {
+    await removeEvent(event, scope)
+    closeEditEvent()
+    await loadEvents()
+  } catch (error) {
+    console.error('Kunde inte ta bort händelsen:', error)
+    errorMessage.value = 'Kunde inte ta bort händelsen. Försök igen.'
+  } finally {
+    deletingEvent.value = false
+  }
+}
+
+/**
+ * Duplicerar en händelse.
+ *
+ * Kopian får samma innehåll och samma tid, och öppnas direkt i formuläret
+ * så att tiden kan justeras med en gång. En förekomst kopplas loss från
+ * sin serie - kopian blir en egen händelse.
+ */
+const duplicateEvent = async () => {
+  const event = editingEvent.value
+  if (!event) return
+
+  duplicatingEvent.value = true
+  errorMessage.value = ''
+  try {
+    const created = await createCalendarEvent(duplicateEventPayload(event))
+    closeEditEvent()
+    await loadEvents()
+    openEditEvent(created)
+  } catch (error) {
+    console.error('Kunde inte duplicera händelsen:', error)
+    errorMessage.value = 'Kunde inte duplicera händelsen. Försök igen.'
+  } finally {
+    duplicatingEvent.value = false
   }
 }
 
@@ -914,27 +1071,20 @@ onUnmounted(() => {
 
 <template>
   <section class="calendar-shell">
-    <!-- Kalendrarna syns som en rad över tidslinjen. Klick på en kalender
-         döljer eller visar dess händelser. -->
-    <div class="calendar-legend">
-      <button
-        v-for="calendar in calendars"
-        :key="calendar.id"
-        type="button"
-        class="legend-chip"
-        :class="{ hidden: isCalendarHidden(calendar.id) }"
-        :aria-pressed="!isCalendarHidden(calendar.id)"
-        @click="toggleCalendarVisibility(calendar.id)"
-      >
-        <span class="legend-dot" :style="{ background: calendar.color }" />
-        {{ calendar.name }}
-        <span v-if="calendar.is_default" class="legend-default" title="Standardkalender">★</span>
-      </button>
-      <button type="button" class="legend-add" @click="openCreateEvent">
+    <!-- Kalendrarna ligger i en lista som öppnas med en knapp, i stället för
+         att ligga som etiketter över tidslinjen. -->
+    <div class="calendar-toolbar">
+      <button type="button" class="toolbar-button" @click="openCreateEvent">
         + Händelse
       </button>
-      <button type="button" class="legend-add" @click="managerOpen = true">
-        + Kalender
+      <button
+        type="button"
+        class="toolbar-button"
+        :aria-expanded="managerOpen"
+        @click="managerOpen = !managerOpen"
+      >
+        Kalendrar
+        <span class="toolbar-count">{{ calendars.length }}</span>
       </button>
     </div>
 
@@ -957,13 +1107,20 @@ onUnmounted(() => {
       <input v-model="draftEvent.startAt" required type="datetime-local" aria-label="Starttid" />
       <input v-model="draftEvent.endAt" required type="datetime-local" aria-label="Sluttid" />
       <input v-model="draftEvent.description" placeholder="Beskrivning" aria-label="Beskrivning" class="field-wide" />
-      <select v-if="editingEvent.recurrence_rule" v-model="editScope" aria-label="Ändra serie">
+      <select v-if="editingIsSeriesOccurrence" v-model="editScope" aria-label="Ändra serie">
         <option value="occurrence">Bara denna förekomst</option>
         <option value="following">Denna och följande</option>
         <option value="series">Hela serien</option>
       </select>
       <button type="submit" class="now-button primary-button" :disabled="savingEvent">Spara</button>
+      <button type="button" class="now-button" :disabled="duplicatingEvent" @click="duplicateEvent">
+        {{ duplicatingEvent ? 'Duplicerar…' : 'Duplicera' }}
+      </button>
+      <button type="button" class="now-button danger-button" :disabled="deletingEvent" @click="deleteEvent">
+        {{ deletingEvent ? 'Tar bort…' : 'Ta bort' }}
+      </button>
       <button type="button" class="now-button" @click="closeEditEvent">Avbryt</button>
+      <p v-if="errorMessage" class="form-error" role="status">{{ errorMessage }}</p>
     </form>
 
     <form v-if="showCreateEvent" class="event-form" @submit.prevent="saveEvent">
@@ -1335,8 +1492,9 @@ onUnmounted(() => {
   opacity: 0.9;
 }
 
-/* Rad med kalendrarna över tidslinjen. Klick på en kalender döljer den. */
-.calendar-legend {
+/* Verktygsrad ovanför tidslinjen. Kalendrarna ligger inte här som
+   etiketter - de finns i en lista som öppnas med knappen bredvid. */
+.calendar-toolbar {
   flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -1345,8 +1503,7 @@ onUnmounted(() => {
   margin-bottom: 0.45rem;
 }
 
-.legend-chip,
-.legend-add {
+.toolbar-button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -1359,27 +1516,17 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.legend-chip:hover,
-.legend-add:hover {
+.toolbar-button:hover {
   border-color: var(--color-accent);
 }
 
-.legend-chip.hidden {
-  opacity: 0.45;
-  text-decoration: line-through;
-}
-
-.legend-dot {
-  width: 0.6rem;
-  height: 0.6rem;
+/* Antalet kalendrar i listan. */
+.toolbar-count {
+  padding: 0 0.35rem;
   border-radius: 999px;
-}
-
-/* Stjärnan markerar standardkalendern, alltså kalendern som nya
-   händelser hamnar i. */
-.legend-default {
-  color: #fbbf24;
-  font-size: 0.7rem;
+  background: var(--color-surface-2);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .now-button {
@@ -1404,6 +1551,23 @@ onUnmounted(() => {
   border-color: var(--color-accent-strong);
   background: var(--color-accent-deep);
   color: white;
+}
+
+/* Knappen som tar bort en händelse. */
+.danger-button {
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+.danger-button:hover {
+  border-color: #ef4444;
+  background: rgb(239 68 68 / 0.12);
+}
+
+.form-error {
+  margin: 0;
+  color: #f87171;
+  font-size: 0.75rem;
 }
 
 .event-form {

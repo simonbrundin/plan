@@ -201,52 +201,6 @@ onMounted(() => load());
         <button type="button" class="close-button" aria-label="Stäng" @click="close">✕</button>
       </header>
 
-      <form class="create-form" @submit.prevent="create">
-        <input
-          v-model="newName"
-          maxlength="64"
-          placeholder="Ny kalender, t.ex. Jobb"
-          aria-label="Kalendernamn"
-        />
-        <!-- Färgkoden kan skrivas valfri, och paletten under är genvägar. -->
-        <div class="color-field">
-          <span
-            class="color-preview"
-            :style="{ background: normalizedColor ?? 'transparent' }"
-            aria-hidden="true"
-          />
-          <input
-            v-model="newColorText"
-            class="hex-input"
-            spellcheck="false"
-            autocomplete="off"
-            maxlength="7"
-            placeholder="#6366f1"
-            aria-label="Färgkod"
-          />
-        </div>
-        <p v-if="colorError" class="error-message" role="status">{{ colorError }}</p>
-        <div class="palette" role="group" aria-label="Färg">
-          <button
-            v-for="color in PALETTE"
-            :key="color"
-            type="button"
-            class="swatch"
-            :class="{ selected: normalizedColor === color }"
-            :style="{ background: color }"
-            :aria-label="`Färg ${color}`"
-            @click="newColorText = color"
-          />
-        </div>
-        <button
-          type="submit"
-          class="save-button"
-          :disabled="saving || !newName.trim() || !normalizedColor"
-        >
-          {{ saving ? "Sparar…" : "Lägg till" }}
-        </button>
-      </form>
-
       <p v-if="errorMessage" class="error-message" role="status">{{ errorMessage }}</p>
 
       <ul v-if="calendars.length" class="calendar-list">
@@ -319,18 +273,66 @@ onMounted(() => load());
       <p v-else class="empty-hint">
         Du har inga kalendrar än. Lägg till en för att kunna skilja till exempel jobb från fritid.
       </p>
+
+      <form class="create-form" @submit.prevent="create">
+        <input
+          v-model="newName"
+          maxlength="64"
+          placeholder="Ny kalender, t.ex. Jobb"
+          aria-label="Kalendernamn"
+        />
+        <!-- Färgkoden kan skrivas valfri, och paletten under är genvägar. -->
+        <div class="color-field">
+          <span
+            class="color-preview"
+            :style="{ background: normalizedColor ?? 'transparent' }"
+            aria-hidden="true"
+          />
+          <input
+            v-model="newColorText"
+            class="hex-input"
+            spellcheck="false"
+            autocomplete="off"
+            maxlength="7"
+            placeholder="#6366f1"
+            aria-label="Färgkod"
+          />
+        </div>
+        <p v-if="colorError" class="error-message" role="status">{{ colorError }}</p>
+        <div class="palette" role="group" aria-label="Färg">
+          <button
+            v-for="color in PALETTE"
+            :key="color"
+            type="button"
+            class="swatch"
+            :class="{ selected: normalizedColor === color }"
+            :style="{ background: color }"
+            :aria-label="`Färg ${color}`"
+            @click="newColorText = color"
+          />
+        </div>
+        <button
+          type="submit"
+          class="save-button"
+          :disabled="saving || !newName.trim() || !normalizedColor"
+        >
+          {{ saving ? "Sparar…" : "Lägg till" }}
+        </button>
+      </form>
     </aside>
   </Transition>
 </template>
 
 <style scoped>
+/* Listan med kalendrar. Den öppnas under knappen i verktygsraden och
+   ligger därför inte längre uppe i hörnet som en klump. */
 .calendar-manager {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 3rem;
+  right: 1.5rem;
   z-index: 30;
-  width: min(22rem, calc(100% - 1rem));
-  max-height: calc(100% - 1rem);
+  width: min(24rem, calc(100% - 2rem));
+  max-height: calc(100% - 3.5rem);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -361,6 +363,8 @@ onMounted(() => load());
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--color-line);
 }
 
 .create-form input[type="text"],
@@ -499,6 +503,8 @@ onMounted(() => load());
   padding: 0.25rem 0.4rem;
 }
 
+/* En dold kalender visas som nedtryckt i listan, så att det går att se
+   vilka kalendrar som inte syns i tidslinjen. */
 .icon-button[aria-pressed="true"] {
   opacity: 0.55;
 }
@@ -537,5 +543,14 @@ onMounted(() => load());
 .manager-leave-to {
   opacity: 0;
   transform: translateX(0.75rem);
+}
+
+@media (max-width: 640px) {
+  .calendar-manager {
+    top: 2.8rem;
+    right: 0.45rem;
+    width: min(24rem, calc(100% - 0.9rem));
+    max-height: calc(100% - 3.2rem);
+  }
 }
 </style>
