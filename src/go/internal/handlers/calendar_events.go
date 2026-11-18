@@ -17,12 +17,14 @@ import (
 
 type CalendarEventHandler struct {
 	repo        *repository.CalendarEventRepository
+	calendars   *repository.CalendarRepository
 	dbConnected bool
 }
 
 func NewCalendarEventHandler(dbConnected bool) *CalendarEventHandler {
 	return &CalendarEventHandler{
 		repo:        repository.NewCalendarEventRepository(),
+		calendars:   repository.NewCalendarRepository(),
 		dbConnected: dbConnected,
 	}
 }
@@ -278,7 +280,17 @@ func (h *CalendarEventHandler) Create(c *gin.Context) {
 	req.Color = color
 
 	if req.CalendarID != nil && *req.CalendarID == 0 {
+		// 0 betyder uttryckligen "ingen kalender".
 		req.CalendarID = nil
+	} else if req.CalendarID == nil {
+		// Ingen kalender angiven - händelsen hamnar i standardkalendern
+		// om användaren har satt någon.
+		defaultCalendarID, err := h.calendars.DefaultCalendarID(c.Request.Context(), userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+		req.CalendarID = defaultCalendarID
 	}
 
 	event, err := h.repo.Create(c.Request.Context(), userID, req, startAt, endAt)

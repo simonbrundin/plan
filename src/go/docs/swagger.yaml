@@ -43,6 +43,11 @@ definitions:
         type: string
       id:
         type: integer
+      is_default:
+        description: |-
+          IsDefault gör kalendern till användarens standardkalender. Nya
+          händelser hamnar där om ingen kalender väljs uttryckligen.
+        type: boolean
       name:
         type: string
       sort_order:

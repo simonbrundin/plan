@@ -144,6 +144,114 @@ func TestCalendarFlowIntegration(t *testing.T) {
 	}
 }
 
+// TestDefaultCalendarIntegration kontrollerar att en användare bara kan ha
+// en standardkalender, och att den byts ut när en ny sätts.
+func TestDefaultCalendarIntegration(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("no DATABASE_URL")
+	}
+	ctx := context.Background()
+	if err := database.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	calendars := NewCalendarRepository()
+
+	var userID int64
+	if err := database.GetPool().QueryRow(ctx, `SELECT id FROM users LIMIT 1`).Scan(&userID); err != nil {
+		t.Skip("no users")
+	}
+
+	// Rensa bort standardkalendern från tidigare körningar, så att testet
+	// inte påverkas av dem.
+	if _, err := database.GetPool().Exec(ctx, `UPDATE calendars SET is_default = FALSE WHERE user_id = $1`, userID); err != nil {
+		t.Fatal("reset:", err)
+	}
+
+	first, err := calendars.Create(ctx, userID, models.CreateCalendarRequest{Name: "[test] Första"})
+	if err != nil {
+		t.Fatal("create first:", err)
+	}
+	defer database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, first.ID)
+
+	if first.IsDefault {
+		t.Fatal("a new calendar should not be default")
+	}
+
+	// 1. Sätt den första kalendern som standard
+	marked, err := calendars.Update(ctx, userID, first.ID, models.UpdateCalendarRequest{IsDefault: boolPtr(true)})
+	if err != nil {
+		t.Fatal("mark default:", err)
+	}
+	if !marked.IsDefault {
+		t.Fatal("calendar should be default")
+	}
+
+	defaultID, err := calendars.DefaultCalendarID(ctx, userID)
+	if err != nil {
+		t.Fatal("default id:", err)
+	}
+	if defaultID == nil || *defaultID != first.ID {
+		t.Fatalf("default calendar = %v, want %d", defaultID, first.ID)
+	}
+
+	// 2. En ny kalender som standard tar över rollen
+	second, err := calendars.Create(ctx, userID, models.CreateCalendarRequest{
+		Name:      "[test] Andra",
+		IsDefault: boolPtr(true),
+	})
+	if err != nil {
+		t.Fatal("create second:", err)
+	}
+	defer database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, second.ID)
+
+	if !second.IsDefault {
+		t.Fatal("second calendar should be default")
+	}
+
+	listed, err := calendars.List(ctx, userID)
+	if err != nil {
+		t.Fatal("list:", err)
+	}
+	defaults := 0
+	for _, candidate := range listed {
+		if candidate.IsDefault {
+			defaults++
+		}
+	}
+	if defaults != 1 {
+		t.Fatalf("there should be exactly one default calendar, got %d", defaults)
+	}
+
+	defaultID, err = calendars.DefaultCalendarID(ctx, userID)
+	if err != nil {
+		t.Fatal("default id:", err)
+	}
+	if defaultID == nil || *defaultID != second.ID {
+		t.Fatalf("default calendar = %v, want %d", defaultID, second.ID)
+	}
+
+	// 3. Ta bort standardmarkeringen - då finns ingen standardkalender
+	cleared, err := calendars.Update(ctx, userID, second.ID, models.UpdateCalendarRequest{IsDefault: boolPtr(false)})
+	if err != nil {
+		t.Fatal("clear default:", err)
+	}
+	if cleared.IsDefault {
+		t.Fatal("calendar should not be default")
+	}
+
+	defaultID, err = calendars.DefaultCalendarID(ctx, userID)
+	if err != nil {
+		t.Fatal("default id:", err)
+	}
+	if defaultID != nil {
+		t.Fatalf("default calendar = %v, want none", *defaultID)
+	}
+}
+
 func strPtr(value string) *string { return &value }
 
 func int64Ptr(value int64) *int64 { return &value }
+
+func boolPtr(value bool) *bool { return &value }

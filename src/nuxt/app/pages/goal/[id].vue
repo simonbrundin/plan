@@ -1962,14 +1962,14 @@ watch(selectedParentIndex, async () => {
               </div>
 
               <!-- Normal mode - visa länk -->
-              <div v-else class="flex items-center gap-2">
+              <div v-else class="flex items-center gap-1.5 px-2">
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
-                   :class="['flex-shrink-0 transition-colors rounded-lg p-1', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-ink-dim hover:text-ink-dim' : 'text-ink hover:text-white hover:bg-elevated']"
+                   :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-ink-dim hover:text-ink-dim' : 'text-ink hover:text-white hover:bg-elevated']"
                    title="Ändra ikon">
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#63708a' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
-                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 px-4 py-2 block cursor-pointer">
+                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 min-w-0 py-1.5 block cursor-pointer">
                   <h3 class="text-base font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
                     {{ child.title }}
                   </h3>
@@ -1984,7 +1984,7 @@ watch(selectedParentIndex, async () => {
                  <!-- Started-toggle (s) -->
                  <button
                    @click.stop="toggleStarted(child)"
-                   :class="['flex-shrink-0 p-1 rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
+                   :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
                    :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
                    <Icon name="lucide:circle-play" class="w-5 h-5"
                      :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
@@ -1993,7 +1993,7 @@ watch(selectedParentIndex, async () => {
                  <button
                    @mousedown.stop="handleDepMouseDown($event, child.id)"
                    :class="[
-                     'flex-shrink-0 p-1 rounded-lg transition-colors hover:bg-elevated',
+                     'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-elevated',
                      isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
                      isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-orange-400'
                    ]"
@@ -2001,7 +2001,7 @@ watch(selectedParentIndex, async () => {
                    <Icon name="lucide:link" class="w-5 h-5" />
                  </button>
                 <!-- Deadline för undermål (c) -->
-                <div class="flex-shrink-0 flex items-center gap-1.5 pr-2">
+                <div class="flex-shrink-0 flex items-center gap-1">
                   <template v-if="dueTargetId === child.id">
                     <input :data-due-input="child.id" :value="dueDraft" type="date" autofocus draggable="false"
                       class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
@@ -2017,7 +2017,7 @@ watch(selectedParentIndex, async () => {
                   </template>
                   <template v-else>
                     <button @click.stop="openDuePicker(child)"
-                      class="rounded-lg p-1.5 transition-colors"
+                      class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
                       :class="child.due ? dueToneClass(child.due) : 'text-ink-dim hover:text-ink-muted'"
                       :title="child.due ? `Deadline: ${formatDueDate(child.due)}` : 'Sätt deadline (c)'">
                       <Icon name="lucide:calendar-clock" class="w-5 h-5"
@@ -2032,13 +2032,11 @@ watch(selectedParentIndex, async () => {
                   v-if="weightEditingChildId !== child.id"
                   @click.stop="startWeightEdit(child)"
                   :class="[
-                    'flex-shrink-0 transition-colors p-1 rounded-lg',
-                    isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-ink-muted hover:bg-elevated'
+                    'flex-shrink-0 h-7 px-2 flex items-center justify-center rounded-lg bg-elevated text-xs font-mono tabular-nums transition-colors',
+                    isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-ink-muted'
                   ]"
                   title="Ändra vikt">
-                  <span :class="['text-xs font-mono px-2 py-0.5 rounded-lg bg-elevated tabular-nums', isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink']">
-                    {{ child.weight }}
-                  </span>
+                  {{ child.weight }}
                 </button>
                 <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
                   <div class="flex items-center gap-2">

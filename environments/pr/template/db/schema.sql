@@ -114,6 +114,7 @@ CREATE TABLE "calendars" (
   "name" VARCHAR(64) NOT NULL,
   "color" VARCHAR(7) NOT NULL DEFAULT '#6366f1',
   "icon" VARCHAR(100),
+  "is_default" BOOLEAN NOT NULL DEFAULT FALSE,
   "sort_order" INTEGER NOT NULL DEFAULT 0,
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -123,6 +124,11 @@ CREATE TABLE "calendars" (
 
 CREATE INDEX "calendars_user_idx"
   ON "calendars" ("user_id", "sort_order", "id");
+
+-- Endast en kalender per användare kan vara standardkalender.
+CREATE UNIQUE INDEX "calendars_user_default_idx"
+  ON "calendars" ("user_id")
+  WHERE "is_default";
 
 -- Calendar events. start_at is inclusive and end_at is exclusive.
 CREATE TABLE "calendar_events" (

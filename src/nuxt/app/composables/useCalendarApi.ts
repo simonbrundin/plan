@@ -34,6 +34,13 @@ export interface CalendarEvent {
    * Det sanna antalet förekomster i serien, när den har tunnats ut.
    */
   occurrence_total?: number
+  /**
+   * Den period serien tunnats ut i, när den har tunnats ut.
+   *
+   * Varje visad förekomst står för alla förekomster i sin period. Det
+   * behövs för att kunna beskriva urvalet rätt.
+   */
+  occurrence_period?: "day" | "month"
 }
 
 export function useCalendarApi() {
@@ -149,6 +156,7 @@ export function useCalendarApi() {
     name: string
     color?: string
     icon?: string
+    is_default?: boolean
   }): Promise<Calendar> => {
     return await $fetch<Calendar>('/api/proxy/calendars', {
       method: 'POST',
@@ -156,10 +164,10 @@ export function useCalendarApi() {
     })
   }
 
-  /** Ändrar en kalenders namn, färg eller ikon. */
+  /** Ändrar en kalenders namn, färg, ikon eller om den är standardkalender. */
   const updateCalendar = async (
     calendarId: number,
-    calendar: { name?: string; color?: string; icon?: string },
+    calendar: { name?: string; color?: string; icon?: string; is_default?: boolean },
   ): Promise<Calendar> => {
     return await $fetch<Calendar>(`/api/proxy/calendars/${calendarId}`, {
       method: 'PATCH',

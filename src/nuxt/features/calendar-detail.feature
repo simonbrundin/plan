@@ -222,3 +222,32 @@ Feature: Detaljnivåer i den vertikala kalendern
     Then there should be 2 month groups
     And the first month group should contain 10 events
     And the second month group should contain 1 event
+
+  Scenario: Ett urval av förekomster ger ändå ett exakt antal
+    Given the following weighted calendar events exist:
+      | title    | start                | end                  | recurrence | series | weight |
+      | Löpning  | 2027-03-01T09:00:00Z | 2027-03-01T10:00:00Z | FREQ=DAILY  | 7      | 12     |
+    When the events are grouped by month
+    Then there should be 1 month group
+    And the first month group should contain 12 events
+
+  Scenario: Ett urval framgår i etiketten
+    Given the following weighted calendar events exist:
+      | title    | start                | end                  | recurrence | series | weight | period |
+      | Löpning  | 2027-03-01T09:00:00Z | 2027-03-01T10:00:00Z | FREQ=DAILY  | 7      | 12     | month  |
+    When the events are grouped by month
+    Then the first month group should mention "visar 1 av 12 per månad"
+
+  Scenario: Två serier under samma prick listas var för sig
+    Given the following calendar events exist:
+      | title    | start                | end                  | recurrence | series |
+      | Löpning  | 2027-03-12T09:00:00Z | 2027-03-12T10:00:00Z | FREQ=WEEKLY | 7      |
+      | Styrning | 2027-03-12T14:00:00Z | 2027-03-12T15:00:00Z | FREQ=WEEKLY | 8      |
+      | Fika     | 2027-03-12T15:00:00Z | 2027-03-12T16:00:00Z |             |        |
+    When the events are grouped by day
+    Then there should be 1 day group
+    And the first day group should contain 3 events
+    And the first day group should list 3 entries
+    And the first day group should have an entry titled "Löpning"
+    And the first day group should have an entry titled "Styrning"
+    And the first day group should have an entry titled "Fika"

@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test";
 import type { CalendarEvent } from "../../app/composables/useCalendarApi";
 import {
 	CalendarExpander,
+	MAX_OCCURRENCES_PER_SERIES,
 	expandCalendarEvents,
 	expandSeries,
 } from "../../app/utils/calendarRecurrence";
@@ -159,6 +160,116 @@ describe("expandCalendarEvents", () => {
 
 		expect(events).toHaveLength(1);
 		expect(events[0].title).toBe("Löpning");
+	});
+});
+
+describe("uttunnade serier", () => {
+	// En timme per gång i ett helår ger långt fler förekomster än capen
+	// tillåter, så serien måste tunnas ut.
+	const dense = event({
+		id: 7,
+		title: "Varmhållning",
+		start_at: "2026-01-01T09:00:00.000Z",
+		end_at: "2026-01-01T10:00:00.000Z",
+		recurrence_rule: "FREQ=HOURLY",
+	});
+
+	it("begränsar antalet förekomster som visas", () => {
+		const occurrences = expandSeries(
+			dense,
+			Date.parse("2026-01-01T00:00:00.000Z"),
+			Date.parse("2027-01-01T09:00:00.000Z"),
+		);
+
+		expect(occurrences.length).toBeLessThanOrEqual(MAX_OCCURRENCES_PER_SERIES);
+	});
+
+	it("behåller serien representerad i hela fönstret", () => {
+		const occurrences = expandSeries(
+			dense,
+			Date.parse("2026-01-01T00:00:00.000Z"),
+			Date.parse("2027-01-01T09:00:00.000Z"),
+		);
+
+		const last = occurrences[occurrences.length - 1];
+
+		// Serien tunnas ut till en förekomst per dag, så den sista förekomsten
+		// ligger på det första tillfället i det sista dygnet.
+		expect(last.start_at).toBe("2027-01-01T00:00:00.000Z");
+	});
+
+	it("gör antalet exakt genom att väga förekomsterna", () => {
+		const occurrences = expandSeries(
+			dense,
+			Date.parse("2026-01-01T00:00:00.000Z"),
+			Date.parse("2027-01-01T09:00:00.000Z"),
+		);
+
+		const total = occurrences.reduce(
+			(sum, occurrence) => sum + (occurrence.occurrence_weight ?? 1),
+			0,
+		);
+
+		// Ett helår med timmesförekomster.
+		expect(total).toBe(24 * 365);
+	});
+
+	it("anger det sanna antalet förekomster", () => {
+		const occurrences = expandSeries(
+			dense,
+			Date.parse("2026-01-01T00:00:00.000Z"),
+			Date.parse("2027-01-01T09:00:00.000Z"),
+		);
+
+		expect(occurrences[0].occurrence_total).toBe(24 * 365);
+	});
+
+	it("behåller en förekomst med override", () => {
+		const override = event({
+			id: 9,
+			title: "Varmhållning (ute)",
+			parent_event_id: 7,
+			original_start_at: "2026-06-01T09:00:00.000Z",
+			start_at: "2026-06-01T18:00:00.000Z",
+			end_at: "2026-06-01T19:00:00.000Z",
+		});
+
+		const events = expandCalendarEvents(
+			[dense, override],
+			Date.parse("2026-01-01T00:00:00.000Z"),
+			Date.parse("2027-01-01T09:00:00.000Z"),
+		);
+
+		const overridden = events.filter(
+			(event) => event.title === "Varmhållning (ute)",
+		);
+
+		expect(overridden).toHaveLength(1);
+		expect(overridden[0].start_at).toBe("2026-06-01T18:00:00.000Z");
+	});
+
+	it("räknar en override som en del av seriens antal", () => {
+		const override = event({
+			id: 9,
+			title: "Varmhållning (ute)",
+			parent_event_id: 7,
+			original_start_at: "2026-06-01T09:00:00.000Z",
+			start_at: "2026-06-01T18:00:00.000Z",
+			end_at: "2026-06-01T19:00:00.000Z",
+		});
+
+		const events = expandCalendarEvents(
+			[dense, override],
+			Date.parse("2026-01-01T00:00:00.000Z"),
+			Date.parse("2027-01-01T09:00:00.000Z"),
+		);
+
+		const total = events.reduce(
+			(sum, event) => sum + (event.occurrence_weight ?? 1),
+			0,
+		);
+
+		expect(total).toBe(24 * 365);
 	});
 });
 

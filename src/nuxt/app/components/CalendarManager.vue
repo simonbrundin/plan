@@ -55,7 +55,9 @@ const create = async () => {
   saving.value = true;
   errorMessage.value = "";
   try {
-    await add(name, newColor.value);
+    // Den första kalendern blir standardkalender, så att nya händelser
+    // hamnar någonstans från början.
+    await add(name, newColor.value, calendars.value.length === 0);
     newName.value = "";
     // Nästa kalender får en ny färg, så att två kalendrar inte blir
     // identiska av en slump.
@@ -93,6 +95,26 @@ const recolor = async (calendarId: number, color: string) => {
     await save(calendarId, { color });
   } catch (error) {
     console.error("Kunde inte byta färg på kalendern:", error);
+  }
+};
+
+/** Gör kalendern till standardkalender. */
+const setDefault = async (calendarId: number) => {
+  try {
+    await save(calendarId, { is_default: true });
+  } catch (error) {
+    console.error("Kunde inte sätta standardkalendern:", error);
+    errorMessage.value = "Kunde inte sätta standardkalendern. Försök igen.";
+  }
+};
+
+/** Tar bort standardmarkeringen, så att nya händelser blir kalenderlösa. */
+const clearDefault = async (calendarId: number) => {
+  try {
+    await save(calendarId, { is_default: false });
+  } catch (error) {
+    console.error("Kunde inte ta bort standardkalendern:", error);
+    errorMessage.value = "Kunde inte ta bort standardkalendern. Försök igen.";
   }
 };
 
@@ -172,6 +194,25 @@ onMounted(() => load());
             @blur="rename(calendar.id)"
             @keyup.enter="rename(calendar.id)"
           />
+          <button
+            type="button"
+            class="icon-button star"
+            :class="{ active: calendar.is_default }"
+            :aria-pressed="calendar.is_default"
+            :aria-label="
+              calendar.is_default
+                ? `Ta bort ${calendar.name} som standardkalender`
+                : `Sätt ${calendar.name} som standardkalender`
+            "
+            :title="
+              calendar.is_default
+                ? 'Ingen standardkalender'
+                : 'Använd som standardkalender för nya händelser'
+            "
+            @click="calendar.is_default ? clearDefault(calendar.id) : setDefault(calendar.id)"
+          >
+            {{ calendar.is_default ? "★" : "☆" }}
+          </button>
           <button
             type="button"
             class="icon-button"
@@ -343,6 +384,15 @@ onMounted(() => load());
 .icon-button.danger:hover {
   border-color: #ef4444;
   color: #ef4444;
+}
+
+.icon-button.star {
+  color: var(--color-ink-muted);
+}
+
+.icon-button.star.active {
+  color: #fbbf24;
+  border-color: #fbbf24;
 }
 
 .error-message {

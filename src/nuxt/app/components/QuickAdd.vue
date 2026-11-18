@@ -14,7 +14,7 @@ const emit = defineEmits<{
 const { createCalendarEvent } = useCalendarApi();
 const { createGoal } = useGoalApi();
 const { isOpen, mode, close, markCreated } = useQuickAdd();
-const { calendars, load: loadCalendars } = useCalendars();
+const { calendars, load: loadCalendars, defaultCalendarId } = useCalendars();
 
 /**
  * Vilken kalender den nya händelsen ska ligga i. Tomt betyder "ingen
@@ -113,7 +113,9 @@ const submit = async () => {
 				time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 				all_day: entry.allDay,
 				...(entry.icon ? { icon: entry.icon } : {}),
-				...(calendarId.value ? { calendar_id: Number(calendarId.value) } : {}),
+				// Nya händelser hamnar i standardkalendern om ingen kalender
+				// väljs uttryckligen. 0 betyder "ingen kalender".
+				calendar_id: calendarId.value ? Number(calendarId.value) : 0,
 				...(entry.recurrenceRule
 					? { recurrence_rule: entry.recurrenceRule }
 					: {}),
@@ -147,12 +149,16 @@ const handleKeydown = (event: KeyboardEvent) => {
 	}
 };
 
-watch(isOpen, (open) => {
+watch(isOpen, async (open) => {
 	if (open) {
 		focusInput();
 		// Kalendrarna behövs för att välja vilken kalender händelsen
 		// ska ligga i.
-		loadCalendars();
+		await loadCalendars();
+		// Standardkalendern är förvald, så att det bara är att skriva.
+		calendarId.value = defaultCalendarId.value
+			? String(defaultCalendarId.value)
+			: "";
 	}
 });
 

@@ -207,12 +207,12 @@ function dueToneClass(due: string | null): string {
           </div>
 
           <!-- Normal mode - visa länk -->
-          <div v-else class="flex items-center gap-2">
+          <div v-else class="flex items-center gap-1.5 px-2">
             <!-- Icon button -->
             <button
               @click.stop="$emit('open-icon-picker', child.id)"
               :class="[
-                'flex-shrink-0 transition-colors rounded p-1',
+                'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors',
                 isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : 'text-white hover:text-white hover:bg-elevated'
               ]"
               title="Ändra ikon"
@@ -227,7 +227,7 @@ function dueToneClass(due: string | null): string {
             <!-- Title link -->
             <NuxtLink
               :to="`/goal/${child.id}`"
-              class="flex-1 px-4 py-2 block cursor-pointer"
+              class="flex-1 min-w-0 py-1.5 block cursor-pointer"
               @click="$emit('select-child', index)"
             >
               <h3
@@ -249,7 +249,7 @@ function dueToneClass(due: string | null): string {
             <button
               @click.stop="$emit('toggle-started', child)"
               :class="[
-                'flex-shrink-0 p-1 rounded transition-colors',
+                'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors',
                 isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-ink-muted'
               ]"
               :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'"
@@ -265,7 +265,7 @@ function dueToneClass(due: string | null): string {
             <button
               @mousedown.stop="$emit('dep-mousedown', $event, child.id)"
               :class="[
-                'flex-shrink-0 p-1 rounded transition-colors hover:bg-elevated',
+                'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-elevated',
                 isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
                 isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-orange-400'
               ]"
@@ -279,19 +279,12 @@ function dueToneClass(due: string | null): string {
               v-if="weightEditingChildId !== child.id"
               @click.stop="$emit('start-weight-edit', child)"
               :class="[
-                'flex-shrink-0 transition-colors p-1 rounded',
-                isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-ink-muted hover:bg-surface-2'
+                'flex-shrink-0 h-7 px-2 flex items-center justify-center rounded-lg bg-surface-2 text-xs font-mono tabular-nums transition-colors',
+                isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-ink-muted'
               ]"
               title="Ändra vikt"
             >
-              <span
-                :class="[
-                  'text-xs font-mono px-2 py-0.5 rounded bg-surface-2',
-                  isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'
-                ]"
-              >
-                {{ child.weight }}
-              </span>
+              {{ child.weight }}
             </button>
 
             <!-- Weight editing -->

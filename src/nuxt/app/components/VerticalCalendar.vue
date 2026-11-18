@@ -14,6 +14,7 @@ import {
   resolveDetailLevel,
   resolveDetailLevelWithHysteresis,
   type CalendarMarker,
+  type CalendarMarkerEntry,
   type DetailLevel,
 } from '~/utils/calendarDetail'
 
@@ -60,6 +61,13 @@ interface RecurringSeriesSummary {
   label: string
   count: number
   nextAt: number | null
+  /**
+   * Sant om serien visas som ett urval av förekomster.
+   *
+   * Då står varje visad förekomst för flera verkliga, och det ska framgå i
+   * sammanfattningen.
+   */
+  sampled: boolean
 }
 
 // Regeln för varje serie i vyn. Override-rader bär inte själva regeln, så
@@ -85,10 +93,14 @@ const recurringSeries = computed<RecurringSeriesSummary[]>(() => {
     if (!key) continue
 
     const start = Date.parse(event.start_at)
+    const weight = event.occurrence_weight ?? 1
     const existing = series.get(key)
 
     if (existing) {
-      existing.summary.count += 1
+      // Vikten räknas in, så att antalet stämmer även när serien visas som
+      // ett urval av förekomster.
+      existing.summary.count += weight
+      existing.summary.sampled = existing.summary.sampled || weight > 1
       existing.starts.push(start)
       continue
     }
@@ -98,8 +110,9 @@ const recurringSeries = computed<RecurringSeriesSummary[]>(() => {
         key,
         title: event.title,
         label: describeRecurrence(seriesRules.value.get(key)) || 'återkommande',
-        count: 1,
+        count: weight,
         nextAt: null,
+        sampled: weight > 1,
       },
       starts: [start],
     })
@@ -163,6 +176,7 @@ const {
   isHidden: isCalendarHidden,
   toggleVisibility: toggleCalendarVisibility,
   colorFor: resolveColor,
+  defaultCalendarId,
 } = useCalendars()
 const { revision: quickAddRevision } = useQuickAdd()
 let eventRequest = 0
@@ -603,7 +617,20 @@ const markerStyle = (marker: RenderedMarker) => {
 // Klick på en prick hoppar in i tiden. En dag blir ett dygn, en månad blir
 // ungefär en månad och ett år blir ett år, så att man landar på rätt
 // detaljnivå.
+//
+// Innehållet i pricken sparas samtidigt, så att det går att se: en prick kan
+// samla flera serier och enstaka händelser, och då ska de gå att skilja åt
+// utan att zooma in.
+const selectedMarker = ref<RenderedMarker | null>(null)
+
+// Pricken som pekas på just nu. Den visas direkt, och den ersätter den
+// markerade pricken i panelen så länge pekaren är kvar.
+const hoveredMarker = ref<RenderedMarker | null>(null)
+
+const visibleMarker = computed(() => hoveredMarker.value ?? selectedMarker.value)
+
 const jumpToMarker = (marker: RenderedMarker) => {
+  selectedMarker.value = marker
   startTime.value = marker.startAt
 
   if (detailLevel.value === 'daily') {
@@ -617,6 +644,14 @@ const jumpToMarker = (marker: RenderedMarker) => {
   }
 
   zoomTo(365 * 24 * 60 * 60 * 1000)
+}
+
+// Hoppar till den förekomst som en post i markören representerar.
+const jumpToEntry = (entry: CalendarMarkerEntry) => {
+  const start = Date.parse(entry.event.start_at)
+
+  startTime.value = start - 60 * 60 * 1000
+  zoomTo(24 * 60 * 60 * 1000)
 }
 
 const handleWheel = (event: WheelEvent) => {
@@ -719,9 +754,11 @@ const openCreateEvent = () => {
   draftEvent.goalId = ''
   draftEvent.recurrenceRule = ''
   draftEvent.icon = ''
-  draftEvent.calendarId = ''
+  // Standardkalendern är förvald, så att det bara är att skriva. Händelsen
+  // ärver kalenderns färg.
+  draftEvent.calendarId = defaultCalendarId.value ? String(defaultCalendarId.value) : ''
   draftEvent.hasColorOverride = false
-  draftEvent.color = DEFAULT_EVENT_COLOR
+  draftEvent.color = calendarColor(draftEvent.calendarId)
   draftEvent.startAt = toLocalInput(start)
   draftEvent.endAt = toLocalInput(end)
   showCreateEvent.value = true
@@ -931,6 +968,7 @@ onUnmounted(() => {
       >
         <span class="legend-dot" :style="{ background: calendar.color }" />
         {{ calendar.name }}
+        <span v-if="calendar.is_default" class="legend-default" title="Standardkalender">★</span>
       </button>
       <button type="button" class="legend-add" @click="openCreateEvent">
         + Händelse
@@ -1046,7 +1084,36 @@ onUnmounted(() => {
         <strong>{{ series.title }}</strong>
         <span>{{ series.label }}</span>
         <span class="recurrence-count">{{ series.count }} i vyn</span>
+        <!-- En serie som tunnas ut visas som ett urval. Det ska stå i
+             sammanfattningen, annars ser antalet ut att vara en bild. -->
+        <span v-if="series.sampled" class="recurrence-sampled">urval</span>
       </button>
+    </div>
+
+    <!-- Innehållet i en vald prick. Flera serier kan ligga under samma
+         prick, och då går de inte att skilja åt i tooltipen. Panelen listar
+         dem var för sig, med sina antal. -->
+    <div v-if="visibleMarker" class="marker-detail">
+      <div class="marker-detail-header">
+        <strong>{{ visibleMarker.label }}</strong>
+        <span>{{ visibleMarker.count }} händelser</span>
+        <button type="button" class="marker-detail-close" title="Stäng" @click="selectedMarker = null; hoveredMarker = null">×</button>
+      </div>
+      <!-- När en serie tunnas ut visas ett urval av förekomsterna. Det ska
+           framgå, annars ser antalen ut att vara exakta. -->
+      <p v-if="visibleMarker.approximate" class="marker-detail-note">
+        Vissa serier visas som ett urval av förekomsterna. Antalet är ändå exakt.
+      </p>
+      <ul class="marker-detail-list">
+        <li v-for="entry in visibleMarker.entries" :key="entry.key">
+          <button type="button" class="marker-detail-entry" @click="jumpToEntry(entry)">
+            <span v-if="entry.recurring" class="marker-detail-icon" aria-hidden="true">↻</span>
+            <span class="marker-detail-title">{{ entry.title }}</span>
+            <span class="marker-detail-count">{{ entry.count }}</span>
+            <span v-if="entry.weight > 1" class="marker-detail-sampled">urval</span>
+          </button>
+        </li>
+      </ul>
     </div>
 
     <div
@@ -1141,10 +1208,14 @@ onUnmounted(() => {
                   :key="marker.key"
                   type="button"
                   class="calendar-marker"
-                  :class="[detailLevel, { tentative: marker.tentative }]"
+                  :class="[detailLevel, { tentative: marker.tentative, selected: visibleMarker?.key === marker.key }]"
                   :style="{ ...markerStyle(marker), '--enter-delay': `${Math.min(markerIndex, 12) * 14}ms` }"
                   :title="marker.title"
+                  :aria-label="marker.title"
                   @pointerdown.stop
+                  @mouseenter="hoveredMarker = marker"
+                  @mouseleave="hoveredMarker = null"
+                  @focus="selectedMarker = marker"
                   @click.stop="jumpToMarker(marker)"
                 >
                   <!-- Antalet visas bara när det är fler än ett. Ett "1" säger ingenting. -->
@@ -1229,6 +1300,105 @@ onUnmounted(() => {
   font-variant-numeric: tabular-nums;
 }
 
+/* En serie som tunnas ut visas som ett urval av förekomsterna. Det ska
+   framgå i sammanfattningen, annars ser antalet ut att vara en bild. */
+.recurrence-sampled {
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--color-surface-raised, rgb(129 140 248 / 0.12));
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+/* Panel som visar innehållet i en prick. Flera serier kan ligga under samma
+   prick, och då går de inte att skilja åt i tooltipen. */
+.marker-detail {
+  flex: 0 0 auto;
+  margin: 0 0 0.45rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0.6rem;
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-size: 0.74rem;
+}
+
+.marker-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.marker-detail-header strong {
+  color: var(--color-ink);
+}
+
+.marker-detail-close {
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--color-ink-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.marker-detail-note {
+  margin: 0.3rem 0 0;
+  opacity: 0.8;
+}
+
+.marker-detail-list {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.marker-detail-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.marker-detail-entry:hover {
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+}
+
+.marker-detail-icon {
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.marker-detail-title {
+  color: var(--color-ink);
+}
+
+.marker-detail-count {
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+/* En post som visas som ett urval av förekomsterna. */
+.marker-detail-sampled {
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: rgb(129 140 248 / 0.14);
+  font-size: 0.64rem;
+  opacity: 0.9;
+}
+
 /* Rad med kalendrarna över tidslinjen. Klick på en kalender döljer den. */
 .calendar-legend {
   flex: 0 0 auto;
@@ -1267,6 +1437,13 @@ onUnmounted(() => {
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 999px;
+}
+
+/* Stjärnan markerar standardkalendern, alltså kalendern som nya
+   händelser hamnar i. */
+.legend-default {
+  color: #fbbf24;
+  font-size: 0.7rem;
 }
 
 .now-button {
@@ -1783,6 +1960,12 @@ onUnmounted(() => {
 
 .calendar-marker:hover {
   outline: 2px solid rgb(226 232 240 / 0.7);
+  outline-offset: 1px;
+}
+
+/* Pricken som panelen visar innehållet i. */
+.calendar-marker.selected {
+  outline: 2px solid var(--color-accent);
   outline-offset: 1px;
 }
 

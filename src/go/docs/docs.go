@@ -1768,6 +1768,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_default": {
+                    "description": "IsDefault gör kalendern till användarens standardkalender. Nya\nhändelser hamnar där om ingen kalender väljs uttryckligen.",
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },

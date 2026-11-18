@@ -78,46 +78,134 @@ const overlaps = (event: CalendarEvent, from: number, to: number): boolean => {
 	return start < to && end > from;
 };
 
+/**
+ * Perioden en samplad förekomst står för.
+ *
+ * Representanten är den första förekomsten i perioden, så perioden går att
+ * härleda från dess starttid. Det görs i lokal tid, precis som `thinOut`
+ * grupperar förekomsterna.
+ */
+const sampleRange = (
+	start: number,
+	period: SamplePeriod,
+): { from: number; to: number } => {
+	const date = new Date(start);
+
+	if (period === "day") {
+		return {
+			from: new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime(),
+			to: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime(),
+		};
+	}
+
+	return {
+		from: new Date(date.getFullYear(), date.getMonth(), 1).getTime(),
+		to: new Date(date.getFullYear(), date.getMonth() + 1, 1).getTime(),
+	};
+};
+
+/**
+ * Sant om händelsen syns i tidsfönstret.
+ *
+ * En samplad förekomst står för en hel period. Även om representanten
+ * ligger utanför fönstret ska den synas, så länge perioden overlappar
+ * fönstret - annars skulle periodens antal försvinna ur vyn, och det är
+ * precis det serierna inte ska göra.
+ */
+const isVisible = (event: CalendarEvent, from: number, to: number): boolean => {
+	const weight = event.occurrence_weight ?? 1;
+	const period = event.occurrence_period;
+
+	if (weight <= 1 || !period) return overlaps(event, from, to);
+
+	const range = sampleRange(Date.parse(event.start_at), period);
+
+	return range.from < to && range.to > from;
+};
+
 /** Händelsens längd i millisekunder. */
 const durationOf = (event: CalendarEvent): number =>
 	Math.max(0, Date.parse(event.end_at) - Date.parse(event.start_at));
 
 /**
- * Fördelar förekomsterna över dagarna de ligger i.
+ * Fördelar förekomsterna över de perioder de ligger i.
  *
  * Att behålla de första förekomsterna skulle lämna resten av fönstret tomt.
- * Änträdet är i stället att behålla en förekomst per dag, med en vikt som
- * motsvarar hur många förekomster dagen faktiskt hade. Då finns serien
+ * Änträdet är i stället att behålla en förekomst per period, med en vikt som
+ * motsvarar hur många förekomster perioden faktiskt hade. Då finns serien
  * representerad i hela fönstret, och antalen per dag, månad och år blir
  * ändå exakta.
+ *
+ * Perioden är dagen så länge antalet dagar ryms under capen. Då blir även
+ * antalet per dag exakt. En serie som sträcker sig över så många dagar att
+ * de inte ryms fördelas per månad i stället - på den nivån är vyn så
+ * överblickbar att enstaka dagar inte längre syns, och antalet per år är
+ * fortfarande exakt.
+ *
+ * Förekomster som har en override måste behållas, annars skulle override
+ * bli överflödiga och deras förekomst räknas in två gånger. De räknas inte
+ * in i periodens vikt, eftersom de visas för sig.
  */
 const thinOut = (
 	starts: number[],
-): Array<{ start: number; weight: number }> => {
-	const perDay = new Map<number, number[]>();
+	mustKeep?: (start: number) => boolean,
+): Array<{ start: number; weight: number; period: SamplePeriod }> => {
+	const kept: number[] = [];
+	const rest: number[] = [];
 
 	for (const start of starts) {
-		const day = Math.floor(start / DAY);
-		const bucket = perDay.get(day);
-
-		if (bucket) {
-			bucket.push(start);
+		if (mustKeep?.(start)) {
+			kept.push(start);
 		} else {
-			perDay.set(day, [start]);
+			rest.push(start);
 		}
 	}
 
-	const result: Array<{ start: number; weight: number }> = [];
+	const byDay = new Map<string, number[]>();
+	const byMonth = new Map<string, number[]>();
 
-	for (const bucket of perDay.values()) {
+	for (const start of rest) {
+		const date = new Date(start);
+		const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+		const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+
+		const day = byDay.get(dayKey);
+
+		if (day) {
+			day.push(start);
+		} else {
+			byDay.set(dayKey, [start]);
+		}
+
+		const month = byMonth.get(monthKey);
+
+		if (month) {
+			month.push(start);
+		} else {
+			byMonth.set(monthKey, [start]);
+		}
+	}
+
+	const buckets = byDay.size <= MAX_OCCURRENCES_PER_SERIES ? byDay : byMonth;
+	const period: SamplePeriod = buckets === byDay ? "day" : "month";
+
+	const result: Array<{ start: number; weight: number; period: SamplePeriod }> = [];
+
+	for (const bucket of buckets.values()) {
 		const [first] = bucket;
 
 		if (first === undefined) continue;
 
-		result.push({ start: first, weight: bucket.length });
+		result.push({ start: first, weight: bucket.length, period });
 	}
 
-	return result;
+	// Förekomster med override behålls var för sig. De är inte samplade,
+	// så de har ingen period - de räknas för sig i stället för i vikten.
+	for (const start of kept) {
+		result.push({ start, weight: 1, period: "day" });
+	}
+
+	return result.sort((left, right) => left.start - right.start);
 };
 
 /** Tidsfönstret begränsat till högst MAX_EXPANSION_SPAN. */
@@ -145,6 +233,20 @@ const isInsideWindow = (
 	window: TimeWindow,
 ): boolean => start < window.to && start + duration > window.from;
 
+/**
+ * Den period en uttunnad serie har tunnats ut i.
+ *
+ * Varje visad förekomst står för alla förekomster i sin period, så det
+ * behövs veta vilken period det är för att kunna beskriva urvalet rätt.
+ */
+export type SamplePeriod = "day" | "month";
+
+/** Etikett för en samplingsperiod. */
+const PERIOD_LABELS: Record<SamplePeriod, string> = {
+	day: "dag",
+	month: "månad",
+};
+
 /** En förekomst som en händelse. */
 const occurrenceOf = (
 	series: CalendarEvent,
@@ -152,6 +254,7 @@ const occurrenceOf = (
 	duration: number,
 	weight = 1,
 	total?: number,
+	period?: SamplePeriod,
 ): CalendarEvent => ({
 	...series,
 	occurrence_id: `${series.id}-${start}`,
@@ -160,6 +263,7 @@ const occurrenceOf = (
 	end_at: new Date(start + duration).toISOString(),
 	occurrence_weight: weight,
 	...(total === undefined ? {} : { occurrence_total: total }),
+	...(period === undefined ? {} : { occurrence_period: period }),
 });
 
 /**
@@ -169,14 +273,15 @@ const occurrenceOf = (
  * en enstaka händelse i stället för att försvinna ur kalendern.
  *
  * När serien har fler förekomster än capen tunnas den ut: en förekomst per
- * dag behålls, med en vikt som gör att antalen blir rätta ändå. Det sanna
- * antalet förekomster i fönstret finns då i `occurrence_total`.
+ * period behålls, med en vikt som gör att antalen blir rätta ändå. Det
+ * sanna antalet förekomster i fönstret finns då i `occurrence_total`.
  */
 const occurrenceStarts = (
 	series: CalendarEvent,
 	from: number,
 	to: number,
-): Array<{ start: number; weight: number; total?: number }> | null => {
+	mustKeep?: (start: number) => boolean,
+): Array<{ start: number; weight: number; total?: number; period?: SamplePeriod }> | null => {
 	const rule = ruleFor(series);
 
 	if (!rule) return null;
@@ -196,7 +301,7 @@ const occurrenceStarts = (
 		return inside.map((start) => ({ start, weight: 1 }));
 	}
 
-	return thinOut(inside).map((entry) => ({
+	return thinOut(inside, mustKeep).map((entry) => ({
 		...entry,
 		total: inside.length,
 	}));
@@ -219,8 +324,8 @@ export function expandSeries(
 
 	const duration = durationOf(series);
 
-	return starts.map(({ start, weight, total }) =>
-		occurrenceOf(series, start, duration, weight, total),
+	return starts.map(({ start, weight, total, period }) =>
+		occurrenceOf(series, start, duration, weight, total, period),
 	);
 }
 
@@ -230,6 +335,10 @@ export function expandSeries(
  */
 const occurrenceKey = (parentId: number, originalStartAt: string): string =>
 	`${parentId}|${Date.parse(originalStartAt)}`;
+
+/** Nyckel för en förekomst, given starttid i millisekunder. */
+const occurrenceKeyAt = (parentId: number, startAt: number): string =>
+	`${parentId}|${startAt}`;
 
 /**
  * Register över override-rader.
@@ -255,6 +364,11 @@ class OverrideIndex {
 	/** Override-raden som hör till förekomsten, om det finns någon. */
 	find(parentId: number, originalStartAt: string): CalendarEvent | undefined {
 		return this.byOccurrence.get(occurrenceKey(parentId, originalStartAt));
+	}
+
+	/** Sant om det finns en override för förekomsten med given start. */
+	has(parentId: number, startAt: number): boolean {
+		return this.byOccurrence.has(occurrenceKeyAt(parentId, startAt));
 	}
 
 	/** Markerar att override-raden har använts mot en förekomst. */
@@ -309,6 +423,7 @@ const applyOverride = (
 			occurrence_id: occurrence.occurrence_id,
 			occurrence_weight: occurrence.occurrence_weight,
 			occurrence_total: occurrence.occurrence_total,
+			occurrence_period: occurrence.occurrence_period,
 		},
 	];
 };
@@ -326,7 +441,11 @@ const expandMaster = (
 	to: number,
 	overrides: OverrideIndex,
 ): CalendarEvent[] => {
-	const starts = occurrenceStarts(master, from, to);
+	// Förekomster med override behålls var för sig när serien tunnas ut,
+	// annars skulle override sakna sin förekomst och visas dubbelt.
+	const starts = occurrenceStarts(master, from, to, (start) =>
+		overrides.has(master.id, start),
+	);
 
 	// En serie utan regel, eller med en regel som inte går att tolka, visas
 	// som en enstaka händelse - den får inte försvinna ur kalendern.
@@ -335,8 +454,8 @@ const expandMaster = (
 	const duration = durationOf(master);
 
 	return starts
-		.map(({ start, weight, total }) =>
-			occurrenceOf(master, start, duration, weight, total),
+		.map(({ start, weight, total, period }) =>
+			occurrenceOf(master, start, duration, weight, total, period),
 		)
 		.flatMap((occurrence) => applyOverride(occurrence, master.id, overrides));
 };
@@ -463,6 +582,6 @@ export class CalendarExpander {
 			expandCalendarEvents(events, window.from, window.to),
 		);
 
-		return expanded.filter((event) => overlaps(event, from, to));
+		return expanded.filter((event) => isVisible(event, from, to));
 	}
 }

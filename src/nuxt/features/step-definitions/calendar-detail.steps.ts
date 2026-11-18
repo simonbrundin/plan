@@ -111,6 +111,34 @@ Given(
 	},
 );
 
+Given(
+	/the following weighted calendar events exist:/,
+	function (this: object, table: { raw: () => string[][] }) {
+		const rows = table.raw();
+		const events: CalendarEventLike[] = [];
+
+		for (let i = 1; i < rows.length; i++) {
+			const [title, start, end, recurrence, series, weight, period] = rows[i];
+			const event: CalendarEventLike = {
+				id: series?.trim() ? Number(series.trim()) : events.length + 1,
+				title: title.trim(),
+				start_at: start.trim(),
+				end_at: end.trim(),
+			};
+
+			if (recurrence?.trim()) event.recurrence_rule = recurrence.trim();
+			if (weight?.trim()) event.occurrence_weight = Number(weight.trim());
+			if (period?.trim()) {
+				event.occurrence_period = period.trim() as "day" | "month";
+			}
+
+			events.push(event);
+		}
+
+		stateOf(this).events = events;
+	},
+);
+
 When(/the events are grouped by day/, function (this: object) {
 	stateOf(this).dayGroups = groupEventsByDay(stateOf(this).events);
 });
@@ -217,6 +245,43 @@ Then(
 		const group = which === "first" ? groups[0] : groups[1];
 
 		assert.equal(group?.recurring, true);
+	},
+);
+
+Then(
+	/the (first|second) (day|month|year) group should list (\d+) entries/,
+	function (this: object, which: string, period: string, expected: string) {
+		const state = stateOf(this);
+		const groups =
+			period === "day"
+				? state.dayGroups
+				: period === "month"
+					? state.monthGroups
+					: state.yearGroups;
+		const group = which === "first" ? groups[0] : groups[1];
+
+		assert.equal(group?.entries.length, Number(expected));
+	},
+);
+
+Then(
+	/the (first|second) (day|month|year) group should have an entry titled "([^"]*)"/,
+	function (this: object, which: string, period: string, expected: string) {
+		const state = stateOf(this);
+		const groups =
+			period === "day"
+				? state.dayGroups
+				: period === "month"
+					? state.monthGroups
+					: state.yearGroups;
+		const group = which === "first" ? groups[0] : groups[1];
+
+		assert.ok(
+			group?.entries.some((entry) => entry.title === expected),
+			`Förväntade en post med titeln "${expected}" men fick "${group?.entries
+				.map((entry) => entry.title)
+				.join(", ")}"`,
+		);
 	},
 );
 

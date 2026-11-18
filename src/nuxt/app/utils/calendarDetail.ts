@@ -141,6 +141,13 @@ export interface CalendarEventLike {
   occurrence_weight?: number;
   /** Det sanna antalet förekomster i serien, när den har tunnats ut. */
   occurrence_total?: number;
+  /**
+   * Den period serien tunnats ut i, när den har tunnats ut.
+   *
+   * Varje visad förekomst står för alla förekomster i sin period. Det
+   * behövs för att kunna beskriva urvalet rätt.
+   */
+  occurrence_period?: "day" | "month";
 }
 
 /**
@@ -208,8 +215,33 @@ export interface CalendarMarkerEntry {
   key: string;
   /** Händelsens titel. */
   title: string;
-  /** Antal förekomster i perioden. */
+  /**
+   * Antal verkliga förekomster i perioden.
+   *
+   * En serie som tunnas ut står för flera förekomster, och då räknas
+   * vikterna ihop så att antalet blir exakt.
+   */
   count: number;
+  /**
+   * Antal förekomster som faktiskt visas i markören.
+   *
+   * Om det är färre än `count` visas ett urval, och det ska framgå.
+   */
+  shown: number;
+  /**
+   * Hur många verkliga förekomster en visad förekomst står för.
+   *
+   * En serie som tunnas ut behåller en förekomst per period, och den står
+   * för alla som låg i perioden. Då ska det framgå att tidslinjen inte
+   * visar varje förekomst för sig.
+   */
+  weight: number;
+  /**
+   * Den period serien tunnats ut i.
+   *
+   * Används för att beskriva urvalet: "visar 1 av 24 per dag".
+   */
+  period: "day" | "month" | null;
   /** Sant om posten hör till en återkommande serie. */
   recurring: boolean;
   /** En förekomst som representerar posten. */
@@ -221,6 +253,8 @@ export interface CalendarMarker {
   key: string;
   /** Tooltip-text som beskriver vad som finns i gruppen. */
   title: string;
+  /** Etikett för perioden, till exempel "mars 2026". */
+  label: string;
   /** Vad som finns i gruppen, en post per händelse eller serie. */
   entries: CalendarMarkerEntry[];
   /**
@@ -297,16 +331,44 @@ const describeBucket = (
   const word = total === 1 ? "händelse" : "händelser";
   const shown = entries
     .slice(0, 4)
-    .map((entry) => (entry.count > 1 ? `${entry.title} ×${entry.count}` : entry.title))
+    .map((entry) => describeEntry(entry))
     .join(", ");
   const rest = entries.length > 4 ? ` +${entries.length - 4} till` : "";
-  const sampling = maxPerDay(bucket);
+  const sampling = samplingNote(entries);
 
-  // En tät serie rymmer flera förekomster per dag. Då visas en i taget, och
-  // det ska stå i tooltipen - annars ser antalet ut att vara en bild.
-  const note = sampling > 1 ? ` · visar 1 av ${sampling} per dag` : "";
+  return `${total} ${word} ${label}: ${shown}${rest}${sampling}`;
+};
 
-  return `${total} ${word} ${label}: ${shown}${rest}${note}`;
+/**
+ * Beskriver en post i en grupperad period.
+ *
+ * Serienamn och antal visas tillsammans, så att det går att se vilken serie
+ * det är och hur många förekomster den står för.
+ */
+const describeEntry = (entry: CalendarMarkerEntry) => {
+  const count = entry.count > 1 ? ` ×${entry.count}` : "";
+
+  return `${entry.title}${count}`;
+};
+
+/**
+ * En not om att tidslinjen visar ett urval av förekomsterna.
+ *
+ * En serie som tunnas ut visas med en förekomst per period, och den förekomsten
+ * står för flera. Då ska det framgå att antalet inte är en bild av exakt
+ * vad som visas.
+ */
+const samplingNote = (entries: CalendarMarkerEntry[]) => {
+  const sampled = entries.filter((entry) => entry.weight > 1);
+
+  if (sampled.length === 0) return "";
+
+  const worst = sampled.reduce((highest, entry) =>
+    entry.weight > highest.weight ? entry : highest,
+  );
+  const unit = worst.period === "month" ? "månad" : "dag";
+
+  return ` · visar 1 av ${worst.weight} per ${unit}`;
 };
 
 /**
@@ -319,19 +381,6 @@ const describeBucket = (
 function countOf(bucket: CalendarEventLike[]): number {
   return bucket.reduce((total, event) => total + (event.occurrence_weight ?? 1), 0);
 }
-
-/**
- * Hur många förekomster som egentligen ligger i den tätaste dagen.
- *
- * En serie som tunnas ut behåller en förekomst per dag, och den förekomsten
- * står för alla som låg samma dag. Då ska det framgå att tidslinjen inte
- * visar varje förekomst för sig.
- */
-const maxPerDay = (bucket: CalendarEventLike[]): number =>
-  bucket.reduce(
-    (highest, event) => Math.max(highest, event.occurrence_weight ?? 1),
-    1,
-  );
 
 /**
  * Delar upp en period i poster.
@@ -350,11 +399,17 @@ const entriesOf = (bucket: CalendarEventLike[]): CalendarMarkerEntry[] => {
 
     if (existing) {
       existing.count += event.occurrence_weight ?? 1;
+      existing.shown += 1;
+      existing.weight = Math.max(existing.weight, event.occurrence_weight ?? 1);
+      existing.period = event.occurrence_period ?? existing.period;
     } else {
       byKey.set(key, {
         key,
         title: event.title,
         count: event.occurrence_weight ?? 1,
+        shown: 1,
+        weight: event.occurrence_weight ?? 1,
+        period: event.occurrence_period ?? null,
         recurring: seriesKey !== null,
         event,
       });
@@ -394,6 +449,7 @@ const collect = (
       return {
         key,
         title: describeBucket(bucket, entries, period.label),
+        label: period.label,
         entries,
         approximate: bucket.some((event) => (event.occurrence_weight ?? 1) > 1),
         icon: bucket.find((event) => event.icon)?.icon,

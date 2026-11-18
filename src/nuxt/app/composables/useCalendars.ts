@@ -1,5 +1,6 @@
 import type { Calendar } from '~/types/calendar'
 import { resolveEventColor, type EventColorSource } from '~/utils/calendarColors'
+import { findDefaultCalendar, findDefaultCalendarId } from '~/utils/calendars'
 
 /**
  * Delat tillstånd för kalendrarna.
@@ -20,6 +21,12 @@ export function useCalendars() {
     () => new Map(calendars.value.map((calendar) => [calendar.id, calendar])),
   );
 
+  /** Användarens standardkalender, om någon är satt. */
+  const defaultCalendar = computed(() => findDefaultCalendar(calendars.value));
+
+  /** Id:t för standardkalendern, eller null om ingen är satt. */
+  const defaultCalendarId = computed(() => findDefaultCalendarId(calendars.value));
+
   const load = async (force = false) => {
     if (isLoaded.value && !force) return;
 
@@ -33,17 +40,26 @@ export function useCalendars() {
     }
   };
 
-  const add = async (name: string, color: string) => {
-    const created = await createCalendar({ name: name.trim(), color });
+  const add = async (name: string, color: string, isDefault = false) => {
+    const created = await createCalendar({ name: name.trim(), color, is_default: isDefault });
     calendars.value = [...calendars.value, created];
     return created;
   };
 
-  const save = async (calendarId: number, changes: { name?: string; color?: string }) => {
+  const save = async (
+    calendarId: number,
+    changes: { name?: string; color?: string; is_default?: boolean },
+  ) => {
     const updated = await updateCalendar(calendarId, changes);
-    calendars.value = calendars.value.map((calendar) =>
-      calendar.id === calendarId ? updated : calendar,
-    );
+    calendars.value = calendars.value.map((calendar) => {
+      if (calendar.id === calendarId) return updated;
+      // Servern avmarkerar den tidigare standardkalendern när en ny sätts,
+      // så lokal state måste följa med.
+      if (changes.is_default === true && calendar.is_default) {
+        return { ...calendar, is_default: false };
+      }
+      return calendar;
+    });
     return updated;
   };
 
@@ -73,6 +89,8 @@ export function useCalendars() {
     hiddenCalendarIds,
     isLoaded,
     calendarMap,
+    defaultCalendar,
+    defaultCalendarId,
     load,
     add,
     save,

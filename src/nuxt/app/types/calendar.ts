@@ -8,5 +8,10 @@ export interface Calendar {
 	name: string;
 	color: string;
 	icon?: string;
+	/**
+	 * Sant om kalendern är användarens standardkalender. Nya händelser
+	 * hamnar där om ingen kalender väljs uttryckligen.
+	 */
+	is_default: boolean;
 	sort_order: number;
 }
