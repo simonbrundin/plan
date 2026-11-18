@@ -82,6 +82,8 @@ func validateIcon(icon *string) (*string, bool) {
 	return &trimmed, true
 }
 
+// validateColor kontrollerar att färgen är en hexkod och normaliserar den.
+// "#abc" skrivs ut som "#aabbcc", så att alltid sex siffror lagras.
 func validateColor(color *string) (*string, bool) {
 	if color == nil {
 		return nil, true
@@ -90,15 +92,29 @@ func validateColor(color *string) (*string, bool) {
 	if trimmed == "" {
 		return &trimmed, true
 	}
-	if len(trimmed) != 7 || trimmed[0] != '#' {
+	if !strings.HasPrefix(trimmed, "#") {
 		return nil, false
 	}
-	for _, character := range trimmed[1:] {
-		if !strings.ContainsRune("0123456789abcdefABCDEF", character) {
+	digits := strings.ToLower(trimmed[1:])
+	for _, character := range digits {
+		if !strings.ContainsRune("0123456789abcdef", character) {
 			return nil, false
 		}
 	}
-	return &trimmed, true
+	switch len(digits) {
+	case 3:
+		expanded := make([]byte, 0, 6)
+		for _, character := range digits {
+			expanded = append(expanded, byte(character), byte(character))
+		}
+		normalized := "#" + string(expanded)
+		return &normalized, true
+	case 6:
+		normalized := "#" + digits
+		return &normalized, true
+	default:
+		return nil, false
+	}
 }
 
 // List godoc

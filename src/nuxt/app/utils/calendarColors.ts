@@ -11,6 +11,28 @@
 /** Färgen som används för händelser utan kalender. */
 export const DEFAULT_EVENT_COLOR = "#6366f1";
 
+/**
+ * Normaliserar en hexkod till sex siffror.
+ *
+ * "#abc" blir "#aabbcc" och "#AABBCC" blir "#aabbcc". Returnerar null om
+ * värdet inte är en giltig hexkod, så att det går att visa ett felmeddelande
+ * istället för att skicka något skräp till servern.
+ */
+export function normalizeHexColor(value: string): string | null {
+	const trimmed = value.trim();
+	const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(trimmed);
+	if (!match) return null;
+
+	const digits = match[1]!.toLowerCase();
+	if (digits.length === 3) {
+		return `#${digits
+			.split("")
+			.map((digit) => digit + digit)
+			.join("")}`;
+	}
+	return `#${digits}`;
+}
+
 export interface ColoredCalendar {
 	id: number;
 	color: string;

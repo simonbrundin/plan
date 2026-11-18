@@ -11,6 +11,7 @@ const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ "update:open": [boolean] }>();
 
 const { calendars, load, add, save, remove, isHidden, toggleVisibility } = useCalendars();
+import { normalizeHexColor } from '~/utils/calendarColors'
 
 /** Färger som snabbt går att välja när en ny kalender skapas. */
 const PALETTE = [
@@ -25,21 +26,37 @@ const PALETTE = [
 ];
 
 const newName = ref("");
-const newColor = ref(PALETTE[0] ?? "#6366f1");
+/** Färgkoden som skrivs, så att det går att ange vilken som helst färg. */
+const newColorText = ref(PALETTE[0] ?? "#6366f1");
 const saving = ref(false);
 const errorMessage = ref("");
+
+/** Den giltiga färgen, eller null om färgkoden är felaktig. */
+const normalizedColor = computed(() => normalizeHexColor(newColorText.value));
+
+const colorError = computed(() => {
+  if (newColorText.value.trim() === "") return "Skriv en färgkod, till exempel #6366f1.";
+  if (!normalizedColor.value) return "Färgkoden måste se ut som #6366f1.";
+  return "";
+});
 
 /** Namn som redigeras just nu, så att fältet inte hoppar medan man skriver. */
 const draftNames = reactive<Record<number, string>>({});
 
-// Namnfältet redigeras i en egen draft, som fylls på från kalenderns
-// nuvarande namn. Utan det skulle fältet visa en tom sträng.
+/** Färgkoder som redigeras just nu, på samma sätt som namnen. */
+const draftColors = reactive<Record<number, string>>({});
+
+// Namn- och färgfältet redigeras i en egen draft, som fylls på från
+// kalenderns nuvarande värden. Utan det skulle fälten visa tomma strängar.
 watch(
   calendars,
   (list) => {
     for (const calendar of list) {
       if (draftNames[calendar.id] === undefined) {
         draftNames[calendar.id] = calendar.name;
+      }
+      if (draftColors[calendar.id] === undefined) {
+        draftColors[calendar.id] = calendar.color;
       }
     }
   },
@@ -50,19 +67,20 @@ const close = () => emit("update:open", false);
 
 const create = async () => {
   const name = newName.value.trim();
-  if (!name) return;
+  const color = normalizedColor.value;
+  if (!name || !color) return;
 
   saving.value = true;
   errorMessage.value = "";
   try {
     // Den första kalendern blir standardkalender, så att nya händelser
     // hamnar någonstans från början.
-    await add(name, newColor.value, calendars.value.length === 0);
+    await add(name, color, calendars.value.length === 0);
     newName.value = "";
     // Nästa kalender får en ny färg, så att två kalendrar inte blir
     // identiska av en slump.
-    const index = PALETTE.indexOf(newColor.value);
-    newColor.value = PALETTE[(index + 1) % PALETTE.length] ?? PALETTE[0];
+    const index = PALETTE.indexOf(color);
+    newColorText.value = PALETTE[(index + 1) % PALETTE.length] ?? PALETTE[0];
   } catch (error) {
     console.error("Kunde inte skapa kalendern:", error);
     errorMessage.value = "Kunde inte skapa kalendern. Försök igen.";
@@ -98,6 +116,37 @@ const recolor = async (calendarId: number, color: string) => {
   }
 };
 
+/**
+ * Sätter kalenderns färg från den färgkod som skrivits i fältet.
+ *
+ * En ogiltig kod avvisas och fältet återställs till kalenderns nuvarande
+ * färg, så att man aldrig ser en trasig färg i tidslinjen.
+ */
+const applyHex = async (calendarId: number) => {
+  const calendar = calendars.value.find((candidate) => candidate.id === calendarId);
+  if (!calendar) return;
+
+  const normalized = normalizeHexColor(draftColors[calendarId] ?? "");
+  if (!normalized) {
+    draftColors[calendarId] = calendar.color;
+    errorMessage.value = "Färgkoden måste se ut som #6366f1.";
+    return;
+  }
+  if (normalized === calendar.color) {
+    draftColors[calendarId] = calendar.color;
+    return;
+  }
+
+  try {
+    await save(calendarId, { color: normalized });
+    draftColors[calendarId] = normalized;
+  } catch (error) {
+    console.error("Kunde inte byta färg på kalendern:", error);
+    draftColors[calendarId] = calendar.color;
+    errorMessage.value = "Kunde inte byta färg på kalendern. Försök igen.";
+  }
+};
+
 /** Gör kalendern till standardkalender. */
 const setDefault = async (calendarId: number) => {
   try {
@@ -127,6 +176,7 @@ const confirmRemove = async (calendarId: number, name: string) => {
   try {
     await remove(calendarId);
     delete draftNames[calendarId];
+    delete draftColors[calendarId];
   } catch (error) {
     console.error("Kunde inte ta bort kalendern:", error);
     errorMessage.value = "Kunde inte ta bort kalendern. Försök igen.";
@@ -158,19 +208,41 @@ onMounted(() => load());
           placeholder="Ny kalender, t.ex. Jobb"
           aria-label="Kalendernamn"
         />
+        <!-- Färgkoden kan skrivas valfri, och paletten under är genvägar. -->
+        <div class="color-field">
+          <span
+            class="color-preview"
+            :style="{ background: normalizedColor ?? 'transparent' }"
+            aria-hidden="true"
+          />
+          <input
+            v-model="newColorText"
+            class="hex-input"
+            spellcheck="false"
+            autocomplete="off"
+            maxlength="7"
+            placeholder="#6366f1"
+            aria-label="Färgkod"
+          />
+        </div>
+        <p v-if="colorError" class="error-message" role="status">{{ colorError }}</p>
         <div class="palette" role="group" aria-label="Färg">
           <button
             v-for="color in PALETTE"
             :key="color"
             type="button"
             class="swatch"
-            :class="{ selected: newColor === color }"
+            :class="{ selected: normalizedColor === color }"
             :style="{ background: color }"
             :aria-label="`Färg ${color}`"
-            @click="newColor = color"
+            @click="newColorText = color"
           />
         </div>
-        <button type="submit" class="save-button" :disabled="saving || !newName.trim()">
+        <button
+          type="submit"
+          class="save-button"
+          :disabled="saving || !newName.trim() || !normalizedColor"
+        >
           {{ saving ? "Sparar…" : "Lägg till" }}
         </button>
       </form>
@@ -185,6 +257,16 @@ onMounted(() => load());
             :value="calendar.color"
             :aria-label="`Färg för ${calendar.name}`"
             @change="recolor(calendar.id, ($event.target as HTMLInputElement).value)"
+          />
+          <input
+            v-model="draftColors[calendar.id]"
+            class="hex-input"
+            spellcheck="false"
+            autocomplete="off"
+            maxlength="7"
+            :aria-label="`Färgkod för ${calendar.name}`"
+            @blur="applyHex(calendar.id)"
+            @keyup.enter="applyHex(calendar.id)"
           />
           <input
             v-model="draftNames[calendar.id]"
@@ -298,6 +380,46 @@ onMounted(() => load());
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+/* Färgkoden och en förhandsvisning av den. */
+.color-field {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.color-preview {
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.hex-input {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.calendar-row .hex-input {
+  width: 5.2rem;
+  flex-shrink: 0;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.calendar-row .hex-input:hover,
+.calendar-row .hex-input:focus {
+  border-color: var(--color-line-strong);
+  background: var(--color-surface-2);
+  color: var(--color-ink);
 }
 
 .swatch {

@@ -49,6 +49,13 @@ En händelse kan inte ha en egen färg - färgen ägs av kalendern. Logiken
 ligger i `src/nuxt/app/utils/calendarColors.ts` och är testad med
 enhetstester.
 
+### Färgkod
+
+Kalenderns färg är en hexkod som användaren väljer själv. Både `#6366f1`
+och `#abc` accepteras; tre siffror skrivs ut som sex (`#abc` blir `#aabbcc`),
+och versaler sänks. En färgkod som inte är giltig avvisas - av servern med
+`Invalid color` och i gränssnittet med ett felmeddelande i fältet.
+
 ### API
 
 | Method | Route | Beskrivning |
@@ -70,6 +77,11 @@ med 403.
   på en kalender döljer eller visar dess händelser.
 - **Kalenderhanteraren** (`+ Kalender`) skapar, döper om, färgar och tar
   bort kalendrar. Stjärnan sätter kalendern som standardkalender.
+- **Färgen sätts med färgkod eller ur paletten.** Både i skapa-formuläret
+  och i varje rad finns ett fält där hexkoden skrivs, bredvid en
+  förhandsvisning av färgen. Paletten med åtta färger är genvägar för den
+  som inte vill skriva kod, och den egna färgknappen öppnar systemets
+  färgväljare.
 - **Händelseformuläret** har en kalenderväljare. Händelsen får kalenderns
   färg, och färgen följer med om kalendern byts.
 - **Snabbfältet** har en kalenderväljare när det skapar en händelse, så att

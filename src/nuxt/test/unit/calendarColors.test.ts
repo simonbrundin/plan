@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
 	DEFAULT_EVENT_COLOR,
 	isEventHidden,
+	normalizeHexColor,
 	resolveEventColor,
 } from "../../app/utils/calendarColors";
 
@@ -47,5 +48,39 @@ describe("isEventHidden", () => {
 
 	it("visar händelser utan kalender oavsett vad", () => {
 		expect(isEventHidden({}, [1, 2])).toBe(false);
+	});
+});
+
+describe("normalizeHexColor", () => {
+	it("lämnar en giltig sexsiffrig kod som den är", () => {
+		expect(normalizeHexColor("#6366f1")).toBe("#6366f1");
+	});
+
+	it("expanderar tre siffror till sex", () => {
+		expect(normalizeHexColor("#abc")).toBe("#aabbcc");
+	});
+
+	it("sänker versaler", () => {
+		expect(normalizeHexColor("#AABBCC")).toBe("#aabbcc");
+	});
+
+	it("trimmar mellanslag", () => {
+		expect(normalizeHexColor("  #6366f1 ")).toBe("#6366f1");
+	});
+
+	it("avvisar en kod utan hash", () => {
+		expect(normalizeHexColor("6366f1")).toBeNull();
+	});
+
+	it("avvisar fel längd", () => {
+		expect(normalizeHexColor("#12345")).toBeNull();
+	});
+
+	it("avvisar ogiltiga tecken", () => {
+		expect(normalizeHexColor("#6366fG")).toBeNull();
+	});
+
+	it("avvisar tomt värde", () => {
+		expect(normalizeHexColor("")).toBeNull();
 	});
 });
