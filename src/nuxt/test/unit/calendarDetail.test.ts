@@ -242,7 +242,7 @@ describe("viktade förekomster", () => {
 
 		expect(groups[0].entries).toHaveLength(1);
 		expect(groups[0].entries[0].count).toBe(12);
-		expect(groups[0].entries[0].shown).toBe(2);
+		expect(groups[0].entries[0].weight).toBe(6);
 		expect(groups[0].title).toContain("Löpning ×12");
 	});
 });

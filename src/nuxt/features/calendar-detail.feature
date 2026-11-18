@@ -238,6 +238,13 @@ Feature: Detaljnivåer i den vertikala kalendern
     When the events are grouped by month
     Then the first month group should mention "visar 1 av 12 per månad"
 
+  Scenario: En serie som tunnats ut per dag skriver ut dagen
+    Given the following weighted calendar events exist:
+      | title    | start                | end                  | recurrence | series | weight | period |
+      | Löpning  | 2027-03-01T09:00:00Z | 2027-03-01T10:00:00Z | FREQ=DAILY  | 7      | 24     | day    |
+    When the events are grouped by month
+    Then the first month group should mention "visar 1 av 24 per dag"
+
   Scenario: Två serier under samma prick listas var för sig
     Given the following calendar events exist:
       | title    | start                | end                  | recurrence | series |

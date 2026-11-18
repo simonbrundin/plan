@@ -1796,9 +1796,6 @@ const docTemplate = `{
                     "description": "CalendarID pekar på den kalender händelsen ligger i. Nil betyder att\nhändelsen inte tillhör någon kalender.",
                     "type": "integer"
                 },
-                "color": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -1958,9 +1955,6 @@ const docTemplate = `{
                     "description": "CalendarID anger vilken kalender händelsen ska ligga i. Nil lämnar\nhändelsen utan kalender.",
                     "type": "integer"
                 },
-                "color": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -2003,9 +1997,6 @@ const docTemplate = `{
                 },
                 "calendar_id": {
                     "type": "integer"
-                },
-                "color": {
-                    "type": "string"
                 },
                 "description": {
                     "type": "string"
@@ -2513,9 +2504,6 @@ const docTemplate = `{
                 "calendar_id": {
                     "type": "integer"
                 },
-                "color": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -2600,9 +2588,6 @@ const docTemplate = `{
                 "calendar_id": {
                     "description": "CalendarID anger vilken kalender händelsen ska ligga i. Nil behåller\nhändelsens nuvarande kalender, 0 tar bort den.",
                     "type": "integer"
-                },
-                "color": {
-                    "type": "string"
                 },
                 "description": {
                     "type": "string"

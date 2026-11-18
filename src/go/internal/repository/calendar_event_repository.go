@@ -22,7 +22,7 @@ func NewCalendarEventRepository() *CalendarEventRepository {
 }
 
 const calendarEventColumns = `
-	id, user_id, goal_id, calendar_id, title, COALESCE(description, ''), COALESCE(icon, ''), COALESCE(color, ''),
+	id, user_id, goal_id, calendar_id, title, COALESCE(description, ''), COALESCE(icon, ''),
 	start_at, end_at, time_zone, all_day, status, recurrence_rule,
 	parent_event_id, original_start_at, created_at, updated_at`
 
@@ -30,7 +30,7 @@ func scanCalendarEvent(row pgx.Row) (*models.CalendarEvent, error) {
 	var event models.CalendarEvent
 	err := row.Scan(
 		&event.ID, &event.UserID, &event.GoalID, &event.CalendarID, &event.Title, &event.Description,
-		&event.Icon, &event.Color, &event.StartAt, &event.EndAt, &event.TimeZone, &event.AllDay,
+		&event.Icon, &event.StartAt, &event.EndAt, &event.TimeZone, &event.AllDay,
 		&event.Status, &event.RecurrenceRule, &event.ParentEventID,
 		&event.OriginalStartAt, &event.CreatedAt, &event.UpdatedAt,
 	)
@@ -88,17 +88,6 @@ func resolveIcon(parentIcon string, requested *string) *string {
 		return nil
 	}
 	inherited := parentIcon
-	return &inherited
-}
-
-func resolveColor(parentColor string, requested *string) *string {
-	if requested != nil {
-		return requested
-	}
-	if parentColor == "" {
-		return nil
-	}
-	inherited := parentColor
 	return &inherited
 }
 
@@ -224,34 +213,33 @@ func (r *CalendarEventRepository) Create(ctx context.Context, userID int64, req 
 	}
 
 	query := `INSERT INTO calendar_events
-		(user_id, goal_id, calendar_id, title, description, icon, color, start_at, end_at, time_zone, all_day, status, recurrence_rule)
-		VALUES ($1, $2, $3, $4, $5, NULLIF($6::text, ''), NULLIF($7::text, ''), $8, $9, $10, $11, $12, $13)
+		(user_id, goal_id, calendar_id, title, description, icon, start_at, end_at, time_zone, all_day, status, recurrence_rule)
+		VALUES ($1, $2, $3, $4, $5, NULLIF($6::text, ''), $7, $8, $9, $10, $11, $12)
 		RETURNING ` + calendarEventColumns
-	return scanCalendarEvent(r.pool.QueryRow(ctx, query, userID, req.GoalID, req.CalendarID, req.Title, req.Description, req.Icon, req.Color, startAt, endAt, timeZone, req.AllDay, status, req.RecurrenceRule))
+	return scanCalendarEvent(r.pool.QueryRow(ctx, query, userID, req.GoalID, req.CalendarID, req.Title, req.Description, req.Icon, startAt, endAt, timeZone, req.AllDay, status, req.RecurrenceRule))
 }
 
 func (r *CalendarEventRepository) Update(ctx context.Context, userID, eventID int64, req models.UpdateCalendarEventRequest, startAt, endAt *time.Time) (*models.CalendarEvent, error) {
-	// calendar_id har samma tre-state-semantik som ikon och färg: nil
-	// betyder "behåll nuvarande kalender" och 0 betyder "ta bort kalendern".
+	// calendar_id har samma tre-state-semantik som ikon: nil betyder "behåll
+	// nuvarande kalender" och 0 betyder "ta bort kalendern".
 
 	query := `UPDATE calendar_events SET
 		goal_id = COALESCE($3, goal_id),
 		title = COALESCE($4, title),
 		description = COALESCE($5, description),
 		icon = CASE WHEN $12::text IS NULL THEN icon WHEN $12::text = '' THEN NULL ELSE $12::text END,
-		color = CASE WHEN $13::text IS NULL THEN color WHEN $13::text = '' THEN NULL ELSE $13::text END,
 		start_at = COALESCE($6, start_at),
 		end_at = COALESCE($7, end_at),
 		time_zone = COALESCE($8, time_zone),
 		all_day = COALESCE($9, all_day),
 		status = COALESCE($10, status),
 		recurrence_rule = COALESCE($11, recurrence_rule),
-		calendar_id = CASE WHEN $14::bigint IS NULL THEN calendar_id ELSE NULLIF($14::bigint, 0) END,
+		calendar_id = CASE WHEN $13::bigint IS NULL THEN calendar_id ELSE NULLIF($13::bigint, 0) END,
 		updated_at = CURRENT_TIMESTAMP
 		WHERE id = $1 AND user_id = $2
 		RETURNING ` + calendarEventColumns
 
-	event, err := scanCalendarEvent(r.pool.QueryRow(ctx, query, eventID, userID, req.GoalID, req.Title, req.Description, startAt, endAt, req.TimeZone, req.AllDay, req.Status, req.RecurrenceRule, req.Icon, req.Color, req.CalendarID))
+	event, err := scanCalendarEvent(r.pool.QueryRow(ctx, query, eventID, userID, req.GoalID, req.Title, req.Description, startAt, endAt, req.TimeZone, req.AllDay, req.Status, req.RecurrenceRule, req.Icon, req.CalendarID))
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
@@ -302,14 +290,13 @@ func (r *CalendarEventRepository) CreateOverride(ctx context.Context, userID, pa
 		calendarID = nil
 	}
 	icon := resolveIcon(parent.Icon, req.Icon)
-	color := resolveColor(parent.Color, req.Color)
 
 	query := `INSERT INTO calendar_events
-		(user_id, goal_id, calendar_id, title, description, icon, color, start_at, end_at, time_zone, all_day, status, parent_event_id, original_start_at)
-		VALUES ($1, $2, $3, $4, $5, NULLIF($6::text, ''), NULLIF($7::text, ''), $8, $9, $10, $11, $12, $13, $14)
+		(user_id, goal_id, calendar_id, title, description, icon, start_at, end_at, time_zone, all_day, status, parent_event_id, original_start_at)
+		VALUES ($1, $2, $3, $4, $5, NULLIF($6::text, ''), $7, $8, $9, $10, $11, $12, $13)
 		ON CONFLICT DO NOTHING
 		RETURNING ` + calendarEventColumns
-	return scanCalendarEvent(r.pool.QueryRow(ctx, query, userID, goalID, calendarID, title, description, icon, color, startAt, endAt, timeZone, allDay, status, parentEventID, originalStart))
+	return scanCalendarEvent(r.pool.QueryRow(ctx, query, userID, goalID, calendarID, title, description, icon, startAt, endAt, timeZone, allDay, status, parentEventID, originalStart))
 }
 
 func (r *CalendarEventRepository) SplitSeries(ctx context.Context, userID, parentEventID int64, req models.SplitCalendarEventRequest, originalStart, startAt, endAt time.Time) (*models.CalendarEvent, error) {
@@ -361,7 +348,6 @@ func (r *CalendarEventRepository) SplitSeries(ctx context.Context, userID, paren
 		calendarID = nil
 	}
 	icon := resolveIcon(parent.Icon, req.Icon)
-	color := resolveColor(parent.Color, req.Color)
 
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
@@ -372,10 +358,10 @@ func (r *CalendarEventRepository) SplitSeries(ctx context.Context, userID, paren
 		return nil, err
 	}
 	query := `INSERT INTO calendar_events
-		(user_id, goal_id, calendar_id, title, description, icon, color, start_at, end_at, time_zone, all_day, status, recurrence_rule)
-		VALUES ($1, $2, $3, $4, $5, NULLIF($6::text, ''), NULLIF($7::text, ''), $8, $9, $10, $11, $12, $13)
+		(user_id, goal_id, calendar_id, title, description, icon, start_at, end_at, time_zone, all_day, status, recurrence_rule)
+		VALUES ($1, $2, $3, $4, $5, NULLIF($6::text, ''), $7, $8, $9, $10, $11, $12)
 		RETURNING ` + calendarEventColumns
-	created, err := scanCalendarEvent(tx.QueryRow(ctx, query, userID, goalID, calendarID, title, description, icon, color, startAt, endAt, timeZone, allDay, parent.Status, req.RecurrenceRule))
+	created, err := scanCalendarEvent(tx.QueryRow(ctx, query, userID, goalID, calendarID, title, description, icon, startAt, endAt, timeZone, allDay, parent.Status, req.RecurrenceRule))
 	if err != nil {
 		return nil, err
 	}

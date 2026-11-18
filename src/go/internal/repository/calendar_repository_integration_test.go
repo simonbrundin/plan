@@ -67,10 +67,6 @@ func TestCalendarFlowIntegration(t *testing.T) {
 	if created.CalendarID == nil || *created.CalendarID != calendar.ID {
 		t.Fatalf("event calendar = %v, want %d", created.CalendarID, calendar.ID)
 	}
-	// Händelsen har ingen egen färg - den ärver kalenderns färg i klienten.
-	if created.Color != "" {
-		t.Fatalf("event color = %q, want empty (ärvs från kalendern)", created.Color)
-	}
 
 	// 3. Flytta händelsen till en annan kalender
 	other, err := calendars.Create(ctx, userID, models.CreateCalendarRequest{Name: "[test] Annan"})

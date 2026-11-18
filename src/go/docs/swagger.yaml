@@ -66,8 +66,6 @@ definitions:
           CalendarID pekar på den kalender händelsen ligger i. Nil betyder att
           händelsen inte tillhör någon kalender.
         type: integer
-      color:
-        type: string
       created_at:
         type: string
       description:
@@ -189,8 +187,6 @@ definitions:
           CalendarID anger vilken kalender händelsen ska ligga i. Nil lämnar
           händelsen utan kalender.
         type: integer
-      color:
-        type: string
       description:
         type: string
       end_at:
@@ -220,8 +216,6 @@ definitions:
         type: boolean
       calendar_id:
         type: integer
-      color:
-        type: string
       description:
         type: string
       end_at:
@@ -615,8 +609,6 @@ definitions:
         type: boolean
       calendar_id:
         type: integer
-      color:
-        type: string
       description:
         type: string
       end_at:
@@ -681,8 +673,6 @@ definitions:
           CalendarID anger vilken kalender händelsen ska ligga i. Nil behåller
           händelsens nuvarande kalender, 0 tar bort den.
         type: integer
-      color:
-        type: string
       description:
         type: string
       end_at:

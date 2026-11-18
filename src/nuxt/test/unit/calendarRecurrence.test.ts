@@ -274,6 +274,31 @@ describe("uttunnade serier", () => {
 });
 
 describe("CalendarExpander", () => {
+	it("behåller en uttunnad serie synlig när perioden går över fönstrets kant", () => {
+		const expander = new CalendarExpander();
+		const events = [
+			event({
+				id: 7,
+				title: "Varmhållning",
+				start_at: "2026-01-01T09:00:00.000Z",
+				end_at: "2026-01-01T10:00:00.000Z",
+				recurrence_rule: "FREQ=HOURLY",
+			}),
+		];
+
+		// Fönstret börjar mitt i ett dygn. Den första dagens förekomster
+		// ligger före fönstret, men dagen som helhet finns i vyn.
+		const from = Date.parse("2026-06-15T10:00:00.000Z");
+		const to = Date.parse("2026-06-17T10:00:00.000Z");
+		const visible = expander.visible(events, from, to);
+
+		const total = visible.reduce(
+			(sum, occurrence) => sum + (occurrence.occurrence_weight ?? 1),
+			0,
+		);
+
+		expect(total).toBe(24 * 2);
+	});
 	it("expanderar serier lokalt utan att fråga servern", () => {
 		const expander = new CalendarExpander();
 		const events = [

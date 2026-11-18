@@ -434,7 +434,7 @@ const filterOptions = [
 
           <div class="flex-shrink-0 text-right">
             <div
-              class="text-sm font-mono px-2 py-1 rounded-lg min-w-[3rem] text-center tabular-nums"
+              class="text-sm font-mono px-3 py-1 rounded-full min-w-[3rem] text-center tabular-nums"
               :class="getWeightBgColor(goal.weight) + ' ' + getWeightColor(goal.weight)"
             >
               {{ goal.weight }}

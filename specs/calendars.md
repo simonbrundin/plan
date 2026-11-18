@@ -12,8 +12,8 @@ eftersom den enda fungerande vägen att skapa händelser är snabbfältet.
 ## Lösning
 
 Användaren kan skapa hur många kalendrar som helst. Varje kalender har ett
-namn och en egen färg. Händelser hör till en kalender och ärver kalenderns
-färg, men kan ha en egen färg om man vill.
+namn och en egen färg. Händelser hör till en kalender och har alltid
+kalenderns färg.
 
 ### Data
 
@@ -42,11 +42,11 @@ transaktion, så att det aldrig kan bli två standardkalendrar.
 
 Färgen löses upp i denna ordning:
 
-1. Händelsens egen färg (`calendar_events.color`).
-2. Kalenderns färg.
-3. Standardfärgen `#6366f1`.
+1. Kalenderns färg.
+2. Standardfärgen `#6366f1` för händelser utan kalender.
 
-Logiken ligger i `src/nuxt/app/utils/calendarColors.ts` och är testad med
+En händelse kan inte ha en egen färg - färgen ägs av kalendern. Logiken
+ligger i `src/nuxt/app/utils/calendarColors.ts` och är testad med
 enhetstester.
 
 ### API
@@ -70,9 +70,8 @@ med 403.
   på en kalender döljer eller visar dess händelser.
 - **Kalenderhanteraren** (`+ Kalender`) skapar, döper om, färgar och tar
   bort kalendrar. Stjärnan sätter kalendern som standardkalender.
-- **Händelseformuläret** har en kalenderväljare. Färgfältet följer
-  kalendern så länge händelsen inte har en egen färg; knappen "Följ
-  kalendern" tar bort en egen färg.
+- **Händelseformuläret** har en kalenderväljare. Händelsen får kalenderns
+  färg, och färgen följer med om kalendern byts.
 - **Snabbfältet** har en kalenderväljare när det skapar en händelse, så att
   det går att placera händelser i rätt kalender direkt från tangentbordet.
 - **Legendraden** markerar standardkalendern med en stjärna.
@@ -90,7 +89,7 @@ med 403.
 - [x] Användaren kan skapa flera kalendrar, utan gräns för antalet.
 - [x] Varje kalender har en egen färg.
 - [x] Händelser i en kalender visas i kalenderns färg.
-- [x] En händelse kan ha en egen färg som vinner över kalenderns.
+- [x] En händelse kan inte ha en egen färg.
 - [x] En kalender kan döljas och visas i tidslinjen.
 - [x] Händelser kan flyttas mellan kalendrar.
 - [x] En borttagen kalender lämnar händelserna kvar utan kalender.

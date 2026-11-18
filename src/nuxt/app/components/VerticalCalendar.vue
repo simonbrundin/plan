@@ -153,11 +153,8 @@ const draftEvent = reactive({
   goalId: '',
   recurrenceRule: '',
   icon: '',
-  color: '#6366f1',
   // Vilken kalender händelsen ligger i. Tomt betyder "ingen kalender".
   calendarId: '',
-  // Sant om händelsen har en egen färg. Annars ärver den kalenderns färg.
-  hasColorOverride: false,
 })
 const iconPickerOpen = ref(false)
 const goals = ref<Goal[]>([])
@@ -449,7 +446,7 @@ const eventStyle = (event: CalendarEvent, index: number) => {
     height: `${height}%`,
     '--lane': `${placement.lane}`,
     '--lanes': `${placement.lanes}`,
-    '--event-color': event.color || '#6366f1',
+    '--event-color': event.color || DEFAULT_EVENT_COLOR,
   }
 }
 
@@ -606,7 +603,7 @@ const markerStyle = (marker: RenderedMarker) => {
   return {
     top: `${timeToPosition(center)}%`,
     '--lane': `${marker.lane}`,
-    '--event-color': marker.color || '#6366f1',
+    '--event-color': marker.color || DEFAULT_EVENT_COLOR,
     // Intensiteten visar hur många händelser som ligger i perioden. Den
     // appliceras som ett filter så att opaciteten är fri för in-animationen,
     // annan hoppar pricken tillbaka till sitt gamla utseende efteråt.
@@ -716,35 +713,9 @@ const toLocalInput = (date: Date) => {
 }
 
 /**
- * Färgen som visas i formuläret. En händelse har antingen en egen färg
- * eller ärver kalenderns färg.
+ * Färgen som visas i formuläret. En händelse har alltid kalenderns färg,
+ * så det finns inget eget färgval att göra.
  */
-const calendarColor = (calendarId: string) => {
-  if (!calendarId) return DEFAULT_EVENT_COLOR
-
-  const calendar = calendars.value.find((candidate) => candidate.id === Number(calendarId))
-  return calendar?.color || DEFAULT_EVENT_COLOR
-}
-
-const setDraftColor = (color: string) => {
-  draftEvent.color = color
-  draftEvent.hasColorOverride = true
-}
-
-// När kalendern byts och händelsen inte har en egen färg ska färgen följa
-// den nya kalendern.
-const onCalendarChange = () => {
-  if (draftEvent.hasColorOverride) return
-
-  draftEvent.color = calendarColor(draftEvent.calendarId)
-}
-
-// "Följ kalendern" tar bort händelsens egen färg, så att den ärver
-// kalenderns färg igen.
-const followCalendarColor = () => {
-  draftEvent.hasColorOverride = false
-  draftEvent.color = calendarColor(draftEvent.calendarId)
-}
 
 const openCreateEvent = () => {
   const start = new Date(Date.now() + 60 * 60 * 1000)
@@ -757,8 +728,6 @@ const openCreateEvent = () => {
   // Standardkalendern är förvald, så att det bara är att skriva. Händelsen
   // ärver kalenderns färg.
   draftEvent.calendarId = defaultCalendarId.value ? String(defaultCalendarId.value) : ''
-  draftEvent.hasColorOverride = false
-  draftEvent.color = calendarColor(draftEvent.calendarId)
   draftEvent.startAt = toLocalInput(start)
   draftEvent.endAt = toLocalInput(end)
   showCreateEvent.value = true
@@ -773,10 +742,6 @@ const openEditEvent = (event: CalendarEvent) => {
   draftEvent.recurrenceRule = event.recurrence_rule || ''
   draftEvent.icon = event.icon || ''
   draftEvent.calendarId = event.calendar_id ? String(event.calendar_id) : ''
-  // En händelse som har en egen färg behåller den. Annars ärver den
-  // kalenderns färg.
-  draftEvent.hasColorOverride = Boolean(event.color)
-  draftEvent.color = event.color || calendarColor(draftEvent.calendarId)
   draftEvent.startAt = toLocalInput(new Date(event.start_at))
   draftEvent.endAt = toLocalInput(new Date(event.end_at))
 }
@@ -795,9 +760,6 @@ const saveEditedEvent = async () => {
     description: draftEvent.description.trim(),
     // En tom sträng tömmer ikonen, så den skickas alltid med.
     icon: draftEvent.icon,
-    // En tom färg tar bort händelsens egen färg, så att den ärver
-    // kalenderns färg.
-    color: draftEvent.hasColorOverride ? draftEvent.color : '',
     // 0 betyder "ingen kalender".
     calendar_id: draftEvent.calendarId ? Number(draftEvent.calendarId) : 0,
     start_at: new Date(draftEvent.startAt).toISOString(),
@@ -840,8 +802,6 @@ const saveEvent = async () => {
       title: draftEvent.title.trim(),
       description: draftEvent.description.trim(),
       icon: draftEvent.icon,
-      // Utan egen färg ärver händelsen kalenderns färg.
-      ...(draftEvent.hasColorOverride ? { color: draftEvent.color } : {}),
       ...(draftEvent.calendarId ? { calendar_id: Number(draftEvent.calendarId) } : {}),
       start_at: new Date(draftEvent.startAt).toISOString(),
       end_at: new Date(draftEvent.endAt).toISOString(),
@@ -988,25 +948,12 @@ onUnmounted(() => {
         </button>
         <EventIconPicker v-model="draftEvent.icon" :open="iconPickerOpen" @update:open="iconPickerOpen = $event" />
       </div>
-      <label class="color-field">
-        <span>Färg</span>
-        <input :value="draftEvent.color" type="color" aria-label="Händelsefärg" @input="setDraftColor(($event.target as HTMLInputElement).value)" />
-      </label>
-      <select v-model="draftEvent.calendarId" aria-label="Kalender" @change="onCalendarChange">
+      <select v-model="draftEvent.calendarId" aria-label="Kalender">
         <option value="">Utan kalender</option>
         <option v-for="calendar in calendars" :key="calendar.id" :value="String(calendar.id)">
           {{ calendar.name }}
         </option>
       </select>
-      <button
-        v-if="draftEvent.hasColorOverride"
-        type="button"
-        class="now-button"
-        title="Låt händelsen ärva kalenderns färg"
-        @click="followCalendarColor"
-      >
-        Följ kalendern
-      </button>
       <input v-model="draftEvent.startAt" required type="datetime-local" aria-label="Starttid" />
       <input v-model="draftEvent.endAt" required type="datetime-local" aria-label="Sluttid" />
       <input v-model="draftEvent.description" placeholder="Beskrivning" aria-label="Beskrivning" class="field-wide" />
@@ -1028,25 +975,12 @@ onUnmounted(() => {
         </button>
         <EventIconPicker v-model="draftEvent.icon" :open="iconPickerOpen" @update:open="iconPickerOpen = $event" />
       </div>
-      <label class="color-field">
-        <span>Färg</span>
-        <input :value="draftEvent.color" type="color" aria-label="Händelsefärg" @input="setDraftColor(($event.target as HTMLInputElement).value)" />
-      </label>
-      <select v-model="draftEvent.calendarId" aria-label="Kalender" @change="onCalendarChange">
+      <select v-model="draftEvent.calendarId" aria-label="Kalender">
         <option value="">Utan kalender</option>
         <option v-for="calendar in calendars" :key="calendar.id" :value="String(calendar.id)">
           {{ calendar.name }}
         </option>
       </select>
-      <button
-        v-if="draftEvent.hasColorOverride"
-        type="button"
-        class="now-button"
-        title="Låt händelsen ärva kalenderns färg"
-        @click="followCalendarColor"
-      >
-        Följ kalendern
-      </button>
       <input v-model="draftEvent.startAt" required type="datetime-local" aria-label="Starttid" />
       <input v-model="draftEvent.endAt" required type="datetime-local" aria-label="Sluttid" />
       <input v-model="draftEvent.description" placeholder="Beskrivning (valfritt)" aria-label="Beskrivning" class="field-wide" />
@@ -1110,7 +1044,9 @@ onUnmounted(() => {
             <span v-if="entry.recurring" class="marker-detail-icon" aria-hidden="true">↻</span>
             <span class="marker-detail-title">{{ entry.title }}</span>
             <span class="marker-detail-count">{{ entry.count }}</span>
-            <span v-if="entry.weight > 1" class="marker-detail-sampled">urval</span>
+            <span v-if="entry.weight > 1" class="marker-detail-sampled">
+              visar 1 av {{ entry.weight }} per {{ entry.period === 'month' ? 'månad' : 'dag' }}
+            </span>
           </button>
         </li>
       </ul>
@@ -1524,24 +1460,6 @@ onUnmounted(() => {
 .icon-preview {
   font-size: 1rem;
   line-height: 1;
-}
-
-.color-field {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--color-ink-muted);
-  font-size: 0.78rem;
-}
-
-.color-field input {
-  width: 2.2rem;
-  height: 2rem;
-  padding: 0.15rem;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 0.55rem;
-  background: var(--color-surface);
-  cursor: pointer;
 }
 
 /* Kalendern ligger direkt på sidans bakgrund - ingen ram, ingen egen

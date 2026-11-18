@@ -223,12 +223,6 @@ export interface CalendarMarkerEntry {
    */
   count: number;
   /**
-   * Antal förekomster som faktiskt visas i markören.
-   *
-   * Om det är färre än `count` visas ett urval, och det ska framgå.
-   */
-  shown: number;
-  /**
    * Hur många verkliga förekomster en visad förekomst står för.
    *
    * En serie som tunnas ut behåller en förekomst per period, och den står
@@ -347,8 +341,9 @@ const describeBucket = (
  */
 const describeEntry = (entry: CalendarMarkerEntry) => {
   const count = entry.count > 1 ? ` ×${entry.count}` : "";
+  const sampling = entry.weight > 1 ? " (urval)" : "";
 
-  return `${entry.title}${count}`;
+  return `${entry.title}${count}${sampling}`;
 };
 
 /**
@@ -363,12 +358,18 @@ const samplingNote = (entries: CalendarMarkerEntry[]) => {
 
   if (sampled.length === 0) return "";
 
-  const worst = sampled.reduce((highest, entry) =>
-    entry.weight > highest.weight ? entry : highest,
-  );
-  const unit = worst.period === "month" ? "månad" : "dag";
+  // En serie kan tunnas ut på olika sätt. Då räcker det inte med en
+  // generell not, utan varje sätt beskrivs för sig.
+  const profiles = new Map<string, string>();
 
-  return ` · visar 1 av ${worst.weight} per ${unit}`;
+  for (const entry of sampled) {
+    const unit = entry.period === "month" ? "månad" : "dag";
+    profiles.set(`${entry.period}:${entry.weight}`, `visar 1 av ${entry.weight} per ${unit}`);
+  }
+
+  if (profiles.size > 2) return " · vissa serier visas som urval";
+
+  return ` · ${[...profiles.values()].join(", ")}`;
 };
 
 /**
@@ -399,7 +400,6 @@ const entriesOf = (bucket: CalendarEventLike[]): CalendarMarkerEntry[] => {
 
     if (existing) {
       existing.count += event.occurrence_weight ?? 1;
-      existing.shown += 1;
       existing.weight = Math.max(existing.weight, event.occurrence_weight ?? 1);
       existing.period = event.occurrence_period ?? existing.period;
     } else {
@@ -407,7 +407,6 @@ const entriesOf = (bucket: CalendarEventLike[]): CalendarMarkerEntry[] => {
         key,
         title: event.title,
         count: event.occurrence_weight ?? 1,
-        shown: 1,
         weight: event.occurrence_weight ?? 1,
         period: event.occurrence_period ?? null,
         recurring: seriesKey !== null,

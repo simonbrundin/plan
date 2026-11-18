@@ -16,7 +16,6 @@ type CalendarEvent struct {
 	// Icon är en emoji (t.ex. "🏃") eller ett Iconify-namn (t.ex.
 	// "heroicons:star"). Det är valfritt och används bara för visning.
 	Icon            string     `json:"icon,omitempty"`
-	Color           string     `json:"color,omitempty"`
 	StartAt         time.Time  `json:"start_at"`
 	EndAt           time.Time  `json:"end_at"`
 	TimeZone        string     `json:"time_zone"`
@@ -33,7 +32,6 @@ type CreateCalendarEventRequest struct {
 	Title          string  `json:"title" binding:"required"`
 	Description    string  `json:"description"`
 	Icon           *string `json:"icon"`
-	Color          *string `json:"color"`
 	StartAt        string  `json:"start_at" binding:"required"`
 	EndAt          string  `json:"end_at" binding:"required"`
 	TimeZone       string  `json:"time_zone"`
@@ -50,7 +48,6 @@ type UpdateCalendarEventRequest struct {
 	Title          *string `json:"title"`
 	Description    *string `json:"description"`
 	Icon           *string `json:"icon"`
-	Color          *string `json:"color"`
 	StartAt        *string `json:"start_at"`
 	EndAt          *string `json:"end_at"`
 	TimeZone       *string `json:"time_zone"`
@@ -71,7 +68,6 @@ type CreateCalendarOccurrenceRequest struct {
 	Title           string  `json:"title"`
 	Description     string  `json:"description"`
 	Icon            *string `json:"icon"`
-	Color           *string `json:"color"`
 	TimeZone        string  `json:"time_zone"`
 	AllDay          *bool   `json:"all_day"`
 	Status          string  `json:"status"`
@@ -87,7 +83,6 @@ type SplitCalendarEventRequest struct {
 	Title           *string `json:"title"`
 	Description     *string `json:"description"`
 	Icon            *string `json:"icon"`
-	Color           *string `json:"color"`
 	TimeZone        *string `json:"time_zone"`
 	AllDay          *bool   `json:"all_day"`
 	GoalID          *int64  `json:"goal_id"`

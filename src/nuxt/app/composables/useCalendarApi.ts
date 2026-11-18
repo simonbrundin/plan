@@ -13,7 +13,6 @@ export interface CalendarEvent {
    * (t.ex. "heroicons:star").
    */
   icon?: string
-  color?: string
   start_at: string
   end_at: string
   time_zone: string
@@ -71,7 +70,6 @@ export function useCalendarApi() {
     title?: string
     description?: string
     icon?: string
-    color?: string
     start_at?: string
     end_at?: string
     time_zone?: string
@@ -94,7 +92,6 @@ export function useCalendarApi() {
     title?: string
     description?: string
     icon?: string
-    color?: string
     time_zone?: string
     all_day?: boolean
     status?: 'confirmed' | 'tentative' | 'cancelled'
@@ -115,7 +112,6 @@ export function useCalendarApi() {
     title?: string
     description?: string
     icon?: string
-    color?: string
     time_zone?: string
     all_day?: boolean
     goal_id?: number
@@ -131,7 +127,6 @@ export function useCalendarApi() {
     title: string
     description?: string
     icon?: string
-    color?: string
     start_at: string
     end_at: string
     time_zone?: string

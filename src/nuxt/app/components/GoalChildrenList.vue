@@ -279,7 +279,7 @@ function dueToneClass(due: string | null): string {
               v-if="weightEditingChildId !== child.id"
               @click.stop="$emit('start-weight-edit', child)"
               :class="[
-                'flex-shrink-0 h-7 px-2 flex items-center justify-center rounded-lg bg-surface-2 text-xs font-mono tabular-nums transition-colors',
+                'flex-shrink-0 h-7 px-2.5 flex items-center justify-center rounded-full bg-surface-2 text-xs font-mono tabular-nums transition-colors',
                 isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white hover:text-ink-muted'
               ]"
               title="Ändra vikt"

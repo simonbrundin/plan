@@ -139,7 +139,6 @@ CREATE TABLE "calendar_events" (
   "title" VARCHAR(255) NOT NULL,
   "description" TEXT,
   "icon" VARCHAR(100),
-  "color" VARCHAR(7),
   "start_at" TIMESTAMPTZ NOT NULL,
   "end_at" TIMESTAMPTZ NOT NULL,
   "time_zone" VARCHAR(64) NOT NULL DEFAULT 'UTC',

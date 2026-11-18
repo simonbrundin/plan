@@ -2032,7 +2032,7 @@ watch(selectedParentIndex, async () => {
                   v-if="weightEditingChildId !== child.id"
                   @click.stop="startWeightEdit(child)"
                   :class="[
-                    'flex-shrink-0 h-7 px-2 flex items-center justify-center rounded-lg bg-elevated text-xs font-mono tabular-nums transition-colors',
+                    'flex-shrink-0 h-7 px-2.5 flex items-center justify-center rounded-full bg-elevated text-xs font-mono tabular-nums transition-colors',
                     isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-ink-muted'
                   ]"
                   title="Ändra vikt">

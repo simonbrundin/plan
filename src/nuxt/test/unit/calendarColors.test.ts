@@ -11,16 +11,7 @@ const calendars = [
 ];
 
 describe("resolveEventColor", () => {
-	it("använder händelsens egen färg när den har en", () => {
-		const color = resolveEventColor(
-			{ color: "#123456", calendar_id: 1 },
-			calendars,
-		);
-
-		expect(color).toBe("#123456");
-	});
-
-	it("ärver kalenderns färg när händelsen inte har en egen", () => {
+	it("ärver kalenderns färg", () => {
 		const color = resolveEventColor({ calendar_id: 2 }, calendars);
 
 		expect(color).toBe("#10b981");

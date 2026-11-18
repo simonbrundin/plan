@@ -272,12 +272,6 @@ func (h *CalendarEventHandler) Create(c *gin.Context) {
 		return
 	}
 	req.Icon = icon
-	color, ok := validateColor(req.Color)
-	if !ok {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "color must be a hexadecimal color, for example #6366f1"})
-		return
-	}
-	req.Color = color
 
 	if req.CalendarID != nil && *req.CalendarID == 0 {
 		// 0 betyder uttryckligen "ingen kalender".
@@ -404,12 +398,6 @@ func (h *CalendarEventHandler) Update(c *gin.Context) {
 		return
 	}
 	req.Icon = icon
-	color, ok := validateColor(req.Color)
-	if !ok {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "color must be a hexadecimal color, for example #6366f1"})
-		return
-	}
-	req.Color = color
 
 	event, err := h.repo.Update(c.Request.Context(), userID, eventID, req, startAt, endAt)
 	if err != nil {
@@ -496,12 +484,6 @@ func (h *CalendarEventHandler) CreateOccurrenceOverride(c *gin.Context) {
 		return
 	}
 	req.Icon = icon
-	color, ok := validateColor(req.Color)
-	if !ok {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "color must be a hexadecimal color, for example #6366f1"})
-		return
-	}
-	req.Color = color
 
 	event, err := h.repo.CreateOverride(c.Request.Context(), userID, parentID, req, originalStart, startAt, endAt)
 	if err == repository.ErrInvalidTimestamp {
@@ -591,12 +573,6 @@ func (h *CalendarEventHandler) SplitSeries(c *gin.Context) {
 		return
 	}
 	req.Icon = icon
-	color, ok := validateColor(req.Color)
-	if !ok {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "color must be a hexadecimal color, for example #6366f1"})
-		return
-	}
-	req.Color = color
 	created, err := h.repo.SplitSeries(c.Request.Context(), userID, parentID, req, originalStart, startAt, endAt)
 	if err == pgx.ErrNoRows {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Recurring calendar event not found"})
