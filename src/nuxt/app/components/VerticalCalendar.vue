@@ -9,20 +9,9 @@ import {
   parentEventId,
   truncateRecurrenceRule,
 } from '~/utils/calendarEvents'
-import {
-  assignClusteredLanes,
-  assignLanes,
-  describeRecurrence,
-  groupEventsByDay,
-  groupEventsByMonth,
-  groupEventsByYear,
-  recurrenceSeriesKey,
-  resolveDetailLevel,
-  resolveDetailLevelWithHysteresis,
-  type CalendarMarker,
-  type CalendarMarkerEntry,
-  type DetailLevel,
-} from '~/utils/calendarDetail'
+import { describeRecurrence, isDailyRecurrence, recurrenceSeriesKey } from '~/utils/calendarSeries'
+import { MIN_ROW_PX, layoutEventRows } from '~/utils/calendarLayout'
+import { planVisibility } from '~/utils/calendarVisibility'
 
 const MIN_DURATION = 2 * 60 * 60 * 1000
 // Date stöder ett mycket stort, men tekniskt ändligt, intervall.
@@ -67,6 +56,8 @@ interface RecurringSeriesSummary {
   label: string
   count: number
   nextAt: number | null
+  /** Sant om serien återkommer varje dag. */
+  daily: boolean
   /**
    * Sant om serien visas som ett urval av förekomster.
    *
@@ -118,6 +109,7 @@ const recurringSeries = computed<RecurringSeriesSummary[]>(() => {
         label: describeRecurrence(seriesRules.value.get(key)) || 'återkommande',
         count: weight,
         nextAt: null,
+        daily: isDailyRecurrence(seriesRules.value.get(key)),
         sampled: weight > 1,
       },
       starts: [start],
@@ -164,6 +156,8 @@ const draftEvent = reactive({
   icon: '',
   // Vilken kalender händelsen ligger i. Tomt betyder "ingen kalender".
   calendarId: '',
+  // Platser där händelsen sker. Flera platser har OR-semantik.
+  placeIds: [] as number[],
 })
 const iconPickerOpen = ref(false)
 const goals = ref<Goal[]>([])
@@ -176,6 +170,8 @@ const {
   deleteCalendarEvent,
 } = useCalendarApi()
 const { loadAllGoals } = useGoalApi()
+// Platser: händelser kan kopplas till platser, ungefär som mål.
+const { places: allPlaces, fetchPlaces, setEventPlaces } = usePlaces()
 const {
   calendars,
   hiddenCalendarIds,
@@ -214,22 +210,9 @@ const tickIntervals = [
   10 * 365 * 24 * 60 * 60 * 1000,
 ]
 
-// Detaljnivån avgör hur mycket information varje händelse får visa. Se
-// utils/calendarDetail.ts för resonemanget bakom nivåerna.
-//
-// Nivån hålls i en ref i stället för i en computed, eftersom bytet ska
-// följa hysteresis: en gräns som passeras i båda riktningar får inte
-// fladdra fram och tillbaka när användaren scrollar över den.
-const detailLevel = ref<DetailLevel>(
-  resolveDetailLevel(visibleDuration.value),
-)
-
-watch(visibleDuration, (duration) => {
-  detailLevel.value = resolveDetailLevelWithHysteresis(
-    duration,
-    detailLevel.value,
-  )
-})
+// Detaljnivåer, prickar och dolda förekomster finns inte längre. Varje
+// händelse visas som en rad med ikon, titel och starttid, och rader som
+// överlappar i tid packas i kolumner. Se utils/calendarLayout.ts.
 
 // Hur snabbt tiden komprimeras avgör hur snabbt innehållet får försvinna.
 // Vid en långsam scroll hinner en kort animation vara behaglig, vid en snabb
@@ -297,6 +280,11 @@ const formatDate = (timestamp: number) =>
     day: 'numeric',
     month: 'short',
   }).format(timestamp)
+
+// Veckodagen står till vänster om datumet på dagskalan, så att det går att
+// se direkt vilken dag en rad gäller.
+const formatWeekday = (timestamp: number) =>
+  new Intl.DateTimeFormat('sv-SE', { weekday: 'short' }).format(timestamp)
 
 const formatTick = (timestamp: number, scale: string) => {
   if (scale === 'hour') return formatTime(timestamp)
@@ -442,43 +430,14 @@ const calendarTicks = computed(() => {
 const isNowVisible = computed(() => now.value >= startTime.value && now.value <= endTime.value)
 const nowPosition = computed(() => timeToPosition(now.value))
 
-const eventStyle = (event: CalendarEvent, index: number) => {
-  const eventStart = Math.max(Date.parse(event.start_at), startTime.value)
-  const eventEnd = Math.min(Date.parse(event.end_at), endTime.value)
-  const top = timeToPosition(eventStart)
-  const height = Math.max(2, timeToPosition(eventEnd) - top)
-  const placement = eventLanes.value[index] ?? { lane: 0, lanes: 1 }
-
-  return {
-    top: `${top}%`,
-    height: `${height}%`,
-    '--lane': `${placement.lane}`,
-    '--lanes': `${placement.lanes}`,
-    '--event-color': event.color || DEFAULT_EVENT_COLOR,
-  }
+// Hoppar till en händelse som inte fick plats i tidslinjen. Vyn zoomas in
+// till dygnet och händelsen öppnas för redigering.
+const focusEvent = (event: CalendarEvent) => {
+  openClipped.value = false
+  startTime.value = Date.parse(event.start_at) - 60 * 60 * 1000
+  zoomTo(24 * 60 * 60 * 1000)
+  openEditEvent(event)
 }
-
-// Händelser som ligger nära varandra i tid läggs ovanpå varandra, med en
-// liten förskjutning åt sidan så att alla går att läsa och klicka på.
-// Förskjutningen delas bara mellan de händelser som faktiskt överlappar, så
-// att en ensam händelse får hela bredden.
-const eventLanes = computed<Array<{ lane: number; lanes: number }>>(() => {
-  if (detailLevel.value !== 'full' && detailLevel.value !== 'compact') {
-    return coloredEvents.value.map(() => ({ lane: 0, lanes: 1 }))
-  }
-
-  const intervals = coloredEvents.value.map((event): [number, number] => {
-    const start = Math.max(Date.parse(event.start_at), startTime.value)
-    const end = Math.min(Date.parse(event.end_at), endTime.value)
-    const from = timeToPosition(start)
-    // Korten har en minsta höjd, så även ett kort händelse ska rymmas.
-    const height = Math.max(timeToPosition(end) - from, markerGap.value)
-
-    return [from, from + height]
-  })
-
-  return assignClusteredLanes(intervals, cardMargin.value)
-})
 
 const loadEvents = async () => {
   const request = ++eventRequest
@@ -544,120 +503,119 @@ const panTo = (distance: number, originStart: number, originDuration: number) =>
   startTime.value = originStart + distance * originDuration / height
 }
 
-// På låg zoom räcker det inte att visa varje händelse som ett eget kort -
-// då blir de för tunna att läsa eller ens klicka på. Därför grupperas de
-// per dag, månad eller år och visas som prickar.
-type RenderedMarker = CalendarMarker & { intensity: number; lane: number }
-
-// Minsta avståndet mellan två prickar, i pixlar. Utan det skulle prickar som
-// ligger nära varandra i tid ligga ovanpå varandra. Värdet räknas om till
-// procent av tidsfönstret eftersom positionerna är relativt.
-const MARKER_MIN_GAP_PX = 22
-
+// Vyns hörd i pixlar. Den styr hur mycket utrymme en rad får, så den måste
+// hållas uppdaterad när fönstret ändras.
 const viewportHeight = ref(0)
 let viewportObserver: ResizeObserver | undefined
 
-const markerGap = computed(() => {
-  if (viewportHeight.value <= 0) return MARKER_MIN_GAP_PX
+// Händelserna packas i rader. Radens höjd följer händelsens längd, men en
+// rad får aldrig bli lägre än den lägsta höjd som går att läsa - annars
+// skulle en kort händelse försvinna när tiden komprimeras.
+//
+// Alla rader ligger i en enda kolumn. En rad som krockar med en tidigare rad
+// skjuts ned under den, så att ingen rad döljer en annan.
+//
+// När kolumnen inte ryms döljs återkommande serier, först de dagliga. Se
+// utils/calendarVisibility.ts.
+const hiddenSeries = ref<string[]>([])
 
-  return (MARKER_MIN_GAP_PX / viewportHeight.value) * 100
-})
+// Serien användaren har valt att visa ensam. Då visas bara den serien, och
+// döljningsreglerna sätts åt sidan.
+const focusedSeries = ref<string | null>(null)
 
-// Liten marginal mellan två kort som ligger bredvid varandra i tid.
-const CARD_MARGIN_PX = 2
+const { settings } = useCalendarSettings()
 
-const cardMargin = computed(() => {
-  if (viewportHeight.value <= 0) return CARD_MARGIN_PX
+// Serierna i vyn, med antalet förekomster. Det är de som planen räknar på.
+const seriesStats = computed(() =>
+  recurringSeries.value.map((series) => ({
+    key: series.key,
+    title: series.title,
+    daily: series.daily,
+    count: series.count,
+  })),
+)
 
-  return (CARD_MARGIN_PX / viewportHeight.value) * 100
-})
+// Planen räknas om när vyn, serierna eller inställningarna ändras. Den
+// läser den tidigare döljningen för att kunna hålla serier dolda när antalet
+// förekomster passerar gränsen - annars fladdrar de fram och tillbaka när
+// man scrollar.
+watch(
+  [
+    () => startTime.value,
+    () => endTime.value,
+    () => viewportHeight.value,
+    () => settings.value.dailyVisibleLimit,
+    () => settings.value.hideRecurring,
+    () => focusedSeries.value,
+    seriesStats,
+  ],
+  () => {
+    const plan = planVisibility({
+      events: coloredEvents.value.map((event) => ({
+        start: Date.parse(event.start_at),
+        end: Date.parse(event.end_at),
+        seriesKey: recurrenceSeriesKey(event),
+      })),
+      series: seriesStats.value,
+      dailyLimit: settings.value.dailyVisibleLimit,
+      hidingEnabled: settings.value.hideRecurring,
+      focusKey: focusedSeries.value,
+      hiddenBefore: hiddenSeries.value,
+      from: startTime.value,
+      to: endTime.value,
+      height: viewportHeight.value || 600,
+    })
 
-const markers = computed<RenderedMarker[]>(() => {
-  const groups = detailLevel.value === 'daily'
-    ? groupEventsByDay(coloredEvents.value)
-    : detailLevel.value === 'monthly'
-      ? groupEventsByMonth(coloredEvents.value)
-      : detailLevel.value === 'yearly'
-        ? groupEventsByYear(coloredEvents.value)
-        : []
+    const next = [...plan.hidden].sort()
+    const current = [...hiddenSeries.value].sort()
 
-  if (groups.length === 0) return groups
+    if (next.join('|') !== current.join('|')) hiddenSeries.value = next
+  },
+  { immediate: true },
+)
 
-  // Endast grupper som ligger i det synliga fönstret ska renderas.
-  const visible = groups.filter((group) => {
-    const position = timeToPosition(group.startAt)
-    return position >= -5 && position <= 105
+const eventRows = computed(() => {
+  const height = viewportHeight.value || 600
+  const hidden = new Set(hiddenSeries.value)
+
+  // Dolda serier tas bort ur tidslinjen helt. Deras förekomster listas i
+  // sammanfattningen ovanför tidslinjen i stället.
+  const events = coloredEvents.value.filter((event) => {
+    const key = recurrenceSeriesKey(event)
+    return key === null || !hidden.has(key)
   })
 
-  if (visible.length === 0) return visible
-
-  const positions = visible.map((group) =>
-    timeToPosition(group.startAt + (group.endAt - group.startAt) / 2),
-  )
-  const lanes = assignLanes(positions, markerGap.value)
-
-  return visible.map((group, index) => ({
-    ...group,
-    lane: lanes[index],
-    // Tätheten ska kännas igen utan att antalet ska läsas. Från tre
-    // händelser och uppåt är det full styrka.
-    intensity: 0.45 + 0.55 * Math.min(1, group.count / 3),
-  }))
-})
-
-const markerStyle = (marker: RenderedMarker) => {
-  const center = marker.startAt + (marker.endAt - marker.startAt) / 2
+  const rows = layoutEventRows(
+    events.map((event) => ({
+      start: Date.parse(event.start_at),
+      end: Date.parse(event.end_at),
+    })),
+    {
+      from: startTime.value,
+      to: endTime.value,
+      height,
+      minRow: MIN_ROW_PX,
+    },
+  ).map((row, index) => ({ ...row, event: events[index]! }))
 
   return {
-    top: `${timeToPosition(center)}%`,
-    '--lane': `${marker.lane}`,
-    '--event-color': marker.color || DEFAULT_EVENT_COLOR,
-    // Intensiteten visar hur många händelser som ligger i perioden. Den
-    // appliceras som ett filter så att opaciteten är fri för in-animationen,
-    // annan hoppar pricken tillbaka till sitt gamla utseende efteråt.
-    filter: `opacity(${marker.intensity})`,
+    rows: rows.filter((row) => !row.clipped),
+    // Enstaka händelser som inte hinner med i kolumnen. De får inte
+    // försvinna tyst, så de visas som ett antal i en knapp.
+    clipped: rows.filter((row) => row.clipped),
   }
+})
+
+// Visar en dold serie ensam. Klick igen går tillbaka till hela vyn.
+const toggleSeriesFocus = (key: string) => {
+  focusedSeries.value = focusedSeries.value === key ? null : key
 }
 
-// Klick på en prick hoppar in i tiden. En dag blir ett dygn, en månad blir
-// ungefär en månad och ett år blir ett år, så att man landar på rätt
-// detaljnivå.
-//
-// Innehållet i pricken sparas samtidigt, så att det går att se: en prick kan
-// samla flera serier och enstaka händelser, och då ska de gå att skilja åt
-// utan att zooma in.
-const selectedMarker = ref<RenderedMarker | null>(null)
+// De händelser som inte ryms i kolumnen. De visas i en panel när knappen
+// öppnas.
+const openClipped = ref(false)
 
-// Pricken som pekas på just nu. Den visas direkt, och den ersätter den
-// markerade pricken i panelen så länge pekaren är kvar.
-const hoveredMarker = ref<RenderedMarker | null>(null)
-
-const visibleMarker = computed(() => hoveredMarker.value ?? selectedMarker.value)
-
-const jumpToMarker = (marker: RenderedMarker) => {
-  selectedMarker.value = marker
-  startTime.value = marker.startAt
-
-  if (detailLevel.value === 'daily') {
-    zoomTo(24 * 60 * 60 * 1000)
-    return
-  }
-
-  if (detailLevel.value === 'monthly') {
-    zoomTo(30 * 24 * 60 * 60 * 1000)
-    return
-  }
-
-  zoomTo(365 * 24 * 60 * 60 * 1000)
-}
-
-// Hoppar till den förekomst som en post i markören representerar.
-const jumpToEntry = (entry: CalendarMarkerEntry) => {
-  const start = Date.parse(entry.event.start_at)
-
-  startTime.value = start - 60 * 60 * 1000
-  zoomTo(24 * 60 * 60 * 1000)
-}
+const clippedEvents = computed(() => eventRows.value.clipped.map((row) => row.event))
 
 const handleWheel = (event: WheelEvent) => {
   event.preventDefault()
@@ -736,6 +694,7 @@ const openCreateEvent = () => {
   // Standardkalendern är förvald, så att det bara är att skriva. Händelsen
   // ärver kalenderns färg.
   draftEvent.calendarId = defaultCalendarId.value ? String(defaultCalendarId.value) : ''
+  draftEvent.placeIds = []
   draftEvent.startAt = toLocalInput(start)
   draftEvent.endAt = toLocalInput(end)
   showCreateEvent.value = true
@@ -752,6 +711,7 @@ const openEditEvent = (event: CalendarEvent) => {
   draftEvent.recurrenceRule = event.recurrence_rule || ''
   draftEvent.icon = event.icon || ''
   draftEvent.calendarId = event.calendar_id ? String(event.calendar_id) : ''
+  draftEvent.placeIds = (event.places ?? []).map((place) => place.id)
   draftEvent.startAt = toLocalInput(new Date(event.start_at))
   draftEvent.endAt = toLocalInput(new Date(event.end_at))
 }
@@ -824,6 +784,9 @@ const saveEditedEvent = async () => {
         ...(draftEvent.recurrenceRule ? { recurrence_rule: draftEvent.recurrenceRule } : {}),
       })
     }
+    // Platserna sätts separat från händelsen - de ändras inte när
+    // förekomsten eller serien sparas.
+    await setEventPlaces(parentEventId(event), draftEvent.placeIds)
     closeEditEvent()
     await loadEvents()
   } finally {
@@ -955,7 +918,7 @@ const saveEvent = async () => {
 
   savingEvent.value = true
   try {
-    await createCalendarEvent({
+    const created = await createCalendarEvent({
       title: draftEvent.title.trim(),
       description: draftEvent.description.trim(),
       icon: draftEvent.icon,
@@ -966,6 +929,7 @@ const saveEvent = async () => {
       ...(draftEvent.goalId ? { goal_id: Number(draftEvent.goalId) } : {}),
       ...(draftEvent.recurrenceRule ? { recurrence_rule: draftEvent.recurrenceRule } : {}),
     })
+    await setEventPlaces(created.id, draftEvent.placeIds)
     showCreateEvent.value = false
     await loadEvents()
   } finally {
@@ -1044,6 +1008,11 @@ onMounted(async () => {
   } catch (error) {
     console.warn('Kunde inte läsa mål för kalenderhändelser:', error)
   }
+  try {
+    await fetchPlaces()
+  } catch (error) {
+    console.warn('Kunde inte läsa platser för kalenderhändelser:', error)
+  }
   window.addEventListener('keydown', handleCalendarKeydown)
 
   // Tidsfönstrets höjd styr hur mycket utrymme prickarna får, så den måste
@@ -1104,6 +1073,11 @@ onUnmounted(() => {
           {{ calendar.name }}
         </option>
       </select>
+      <select v-model="draftEvent.placeIds" multiple aria-label="Platser" class="field-wide">
+        <option v-for="place in allPlaces" :key="place.id" :value="place.id">
+          {{ place.name }}
+        </option>
+      </select>
       <input v-model="draftEvent.startAt" required type="datetime-local" aria-label="Starttid" />
       <input v-model="draftEvent.endAt" required type="datetime-local" aria-label="Sluttid" />
       <input v-model="draftEvent.description" placeholder="Beskrivning" aria-label="Beskrivning" class="field-wide" />
@@ -1147,6 +1121,11 @@ onUnmounted(() => {
           {{ goal.title }}
         </option>
       </select>
+      <select v-model="draftEvent.placeIds" multiple aria-label="Platser" class="field-wide">
+        <option v-for="place in allPlaces" :key="place.id" :value="place.id">
+          {{ place.name }}
+        </option>
+      </select>
       <select v-model="draftEvent.recurrenceRule" aria-label="Upprepning">
         <option value="">Upprepa inte</option>
         <option value="FREQ=DAILY">Varje dag</option>
@@ -1161,49 +1140,76 @@ onUnmounted(() => {
 
     <!-- Återkommande serier visas alltid, oavsett zoomnivå. Sammanfattningen
          här ersätter dold utrymme: antalet förekomster i vyn syns direkt, och
-         knappen hoppar till nästa förekomst. -->
+         knappen hoppar till nästa förekomst.
+
+         En serie som döljs i tidslinjen står också här, märkt som "dold".
+         Då syns att den finns, och den kan visas ensam genom ett klick. -->
     <div v-if="recurringSeries.length > 0" class="recurrence-summary">
-      <button
+      <div
         v-for="series in recurringSeries"
         :key="series.key"
-        type="button"
         class="recurrence-series"
-        :title="`Hoppa till nästa förekomst av ${series.title}`"
-        @click="jumpToSeries(series)"
+        :class="{ hidden: hiddenSeries.includes(series.key) }"
       >
-        <span class="recurrence-icon" aria-hidden="true">↻</span>
-        <strong>{{ series.title }}</strong>
-        <span>{{ series.label }}</span>
-        <span class="recurrence-count">{{ series.count }} i vyn</span>
-        <!-- En serie som tunnas ut visas som ett urval. Det ska stå i
-             sammanfattningen, annars ser antalet ut att vara en bild. -->
-        <span v-if="series.sampled" class="recurrence-sampled">urval</span>
+        <button
+          type="button"
+          class="recurrence-series-main"
+          :title="`Hoppa till nästa förekomst av ${series.title}`"
+          @click="jumpToSeries(series)"
+        >
+          <span class="recurrence-icon" aria-hidden="true">↻</span>
+          <strong>{{ series.title }}</strong>
+          <span>{{ series.label }}</span>
+          <span class="recurrence-count">{{ series.count }} i vyn</span>
+          <!-- En serie som tunnas ut visas som ett urval. Det ska stå i
+               sammanfattningen, annars ser antalet ut att vara en bild. -->
+          <span v-if="series.sampled" class="recurrence-sampled">urval</span>
+        </button>
+        <!-- En dold serie får en egen knapp, så att den kan visas ensam. -->
+        <button
+          v-if="hiddenSeries.includes(series.key)"
+          type="button"
+          class="recurrence-series-action"
+          :title="`Visa bara ${series.title} i tidslinjen`"
+          @click="toggleSeriesFocus(series.key)"
+        >
+          Visa ensam
+        </button>
+      </div>
+    </div>
+
+    <!-- När en serie visas ensam säger sammanfattningen det tydligt. -->
+    <div v-if="focusedSeries" class="focus-notice">
+      <span>Visar bara {{ recurringSeries.find((series) => series.key === focusedSeries)?.title }}</span>
+      <button type="button" class="focus-notice-close" @click="focusedSeries = null">
+        Visa alla
       </button>
     </div>
 
-    <!-- Innehållet i en vald prick. Flera serier kan ligga under samma
-         prick, och då går de inte att skilja åt i tooltipen. Panelen listar
-         dem var för sig, med sina antal. -->
-    <div v-if="visibleMarker" class="marker-detail">
-      <div class="marker-detail-header">
-        <strong>{{ visibleMarker.label }}</strong>
-        <span>{{ visibleMarker.count }} händelser</span>
-        <button type="button" class="marker-detail-close" title="Stäng" @click="selectedMarker = null; hoveredMarker = null">×</button>
+    <!-- De händelser som inte hinner med i kolumnen. De visas som en
+         "+N"-knapp i vyn, och panelen listar dem när knappen öppnas. -->
+    <div v-if="openClipped && clippedEvents.length > 0" class="overflow-panel">
+      <div class="overflow-panel-header">
+        <strong>Dolda händelser</strong>
+        <span>{{ clippedEvents.length }} st</span>
+        <button type="button" class="overflow-panel-close" title="Stäng" @click="openClipped = false">×</button>
       </div>
-      <!-- När en serie tunnas ut visas ett urval av förekomsterna. Det ska
-           framgå, annars ser antalen ut att vara exakta. -->
-      <p v-if="visibleMarker.approximate" class="marker-detail-note">
-        Vissa serier visas som ett urval av förekomsterna. Antalet är ändå exakt.
+      <p class="overflow-panel-note">
+        De här händelserna ryms inte i kolumnen just nu. Klicka på en händelse
+        för att zooma in på den.
       </p>
-      <ul class="marker-detail-list">
-        <li v-for="entry in visibleMarker.entries" :key="entry.key">
-          <button type="button" class="marker-detail-entry" @click="jumpToEntry(entry)">
-            <span v-if="entry.recurring" class="marker-detail-icon" aria-hidden="true">↻</span>
-            <span class="marker-detail-title">{{ entry.title }}</span>
-            <span class="marker-detail-count">{{ entry.count }}</span>
-            <span v-if="entry.weight > 1" class="marker-detail-sampled">
-              visar 1 av {{ entry.weight }} per {{ entry.period === 'month' ? 'månad' : 'dag' }}
-            </span>
+      <ul class="overflow-panel-list">
+        <li v-for="event in clippedEvents" :key="event.occurrence_id || `${event.id}-${event.start_at}`">
+          <button type="button" class="overflow-panel-entry" @click="focusEvent(event)">
+            <EventIcon v-if="event.icon" :icon="event.icon" class="event-icon" />
+            <Icon
+              v-if="event.places?.length"
+              name="lucide:map-pin"
+              class="event-icon"
+              :title="`Platser: ${event.places.map((p) => p.name).join(', ')}`"
+            />
+            <span class="overflow-panel-title">{{ event.title }}</span>
+            <span class="overflow-panel-count">{{ formatTime(Date.parse(event.start_at)) }}</span>
           </button>
         </li>
       </ul>
@@ -1221,7 +1227,6 @@ onUnmounted(() => {
     >
       <div
         class="calendar-grid"
-        :data-detail="detailLevel"
         :style="{ '--detail-duration': `${detailDuration}ms` }"
         aria-label="Vertikal kalender"
       >
@@ -1237,7 +1242,8 @@ onUnmounted(() => {
               :datetime="new Date(tick.timestamp).toISOString()"
               :class="[`tick-${tick.scale}`, { hidden: tick.hidden }]"
             >
-              {{ formatTick(tick.timestamp, tick.scale) }}
+              <span v-if="tick.scale === 'day'" class="tick-weekday">{{ formatWeekday(tick.timestamp) }}</span>
+              <span class="tick-value">{{ formatTick(tick.timestamp, tick.scale) }}</span>
             </time>
             <span class="time-line" />
             <span v-if="tick.major" class="date-label">{{ tick.scale === 'hour' ? formatDate(tick.timestamp) : tick.scale }}</span>
@@ -1257,67 +1263,66 @@ onUnmounted(() => {
           </div>
         </TransitionGroup>
 
-        <!-- Timmar och dagar: varje händelse visas som ett eget kort.
-             Månader och år: prickar per dag respektive per månad.
+        <!-- Varje händelse visas som en rad med ikon, titel och starttid.
+             Alla rader ligger i en enda kolumn, och en rad som krockar med
+             en tidigare skjuts ned under den. -->
+        <div class="detail-layer">
+          <TransitionGroup name="detail-move" tag="div" class="event-layer">
+            <article
+              v-for="(row, rowIndex) in eventRows.rows"
+              :key="row.event.occurrence_id || `${row.event.id}-${row.event.start_at}`"
+              class="calendar-event"
+              :class="{ tentative: row.event.status === 'tentative' }"
+              :style="{
+                top: `${row.top}px`,
+                height: `${row.height}px`,
+                '--event-color': row.event.color || DEFAULT_EVENT_COLOR,
+                '--enter-delay': `${Math.min(rowIndex, 8) * 18}ms`,
+              }"
+              @pointerdown.stop
+              @click.stop="openEditEvent(row.event)"
+              :title="row.event.description || row.event.title"
+            >
+              <EventIcon v-if="row.event.icon" :icon="row.event.icon" class="event-icon" />
+              <Icon
+                v-if="row.event.places?.length"
+                name="lucide:map-pin"
+                class="event-icon"
+                :title="`Platser: ${row.event.places.map((p) => p.name).join(', ')}`"
+              />
+              <strong class="event-title">{{ row.event.title }}</strong>
+              <!-- Återkommande förekomster märks, så att det går att se
+                   att de hör till en serie. -->
+              <span
+                v-if="recurrenceLabel(row.event)"
+                class="event-recurrence"
+                :title="`Återkommer: ${recurrenceLabel(row.event)}`"
+              >↻</span>
+              <!-- En serie som tunnats ut visas som ett urval. Vikten gör att
+                   det går att se hur många förekomster raden räknar för. -->
+              <span
+                v-if="(row.event.occurrence_weight ?? 1) > 1"
+                class="event-multi"
+                :title="`Visar 1 av ${row.event.occurrence_weight} ${row.event.occurrence_period === 'month' ? 'per månad' : 'per dag'}`"
+              >×{{ row.event.occurrence_weight }}</span>
+              <small class="event-time">{{ formatTime(Date.parse(row.event.start_at)) }}</small>
+            </article>
+          </TransitionGroup>
 
-             Nivåväxlingen animeras, så att innehållet tonar in och ut i
-             stället för att bytas blixtsnabbt. -->
-        <Transition name="detail-swap">
-          <div :key="detailLevel" class="detail-layer">
-            <template v-if="detailLevel === 'full' || detailLevel === 'compact'">
-              <TransitionGroup name="detail-move" tag="div" class="event-layer">
-                <article
-                  v-for="(event, eventIndex) in coloredEvents"
-                  :key="event.occurrence_id || `${event.id}-${event.start_at}`"
-                  class="calendar-event"
-                  :class="[detailLevel, { tentative: event.status === 'tentative', 'has-lanes': (eventLanes[eventIndex]?.lanes ?? 1) > 1 }]"
-                  :style="{ ...eventStyle(event, eventIndex), '--enter-delay': `${Math.min(eventIndex, 8) * 18}ms` }"
-                  @pointerdown.stop
-                  @click.stop="openEditEvent(event)"
-                  :title="event.description || event.title"
-                >
-                  <span class="event-header">
-                    <span class="event-title">
-                      <EventIcon v-if="event.icon" :icon="event.icon" class="event-icon" />
-                      <strong>{{ event.title }}</strong>
-                      <!-- Återkommande förekomster märks, så att det går att se
-                           att de hör till en serie. -->
-                      <span
-                        v-if="recurrenceLabel(event)"
-                        class="event-recurrence"
-                        :title="`Återkommer: ${recurrenceLabel(event)}`"
-                      >↻</span>
-                    </span>
-                    <small class="event-time">{{ formatTime(Date.parse(event.start_at)) }}</small>
-                  </span>
-                </article>
-              </TransitionGroup>
-            </template>
-
-            <template v-else>
-              <TransitionGroup name="detail-move" tag="div" class="marker-layer">
-                <button
-                  v-for="(marker, markerIndex) in markers"
-                  :key="marker.key"
-                  type="button"
-                  class="calendar-marker"
-                  :class="[detailLevel, { tentative: marker.tentative, selected: visibleMarker?.key === marker.key }]"
-                  :style="{ ...markerStyle(marker), '--enter-delay': `${Math.min(markerIndex, 12) * 14}ms` }"
-                  :title="marker.title"
-                  :aria-label="marker.title"
-                  @pointerdown.stop
-                  @mouseenter="hoveredMarker = marker"
-                  @mouseleave="hoveredMarker = null"
-                  @focus="selectedMarker = marker"
-                  @click.stop="jumpToMarker(marker)"
-                >
-                  <!-- Antalet visas bara när det är fler än ett. Ett "1" säger ingenting. -->
-                  <span v-if="detailLevel === 'daily' && marker.count > 1" class="marker-count">{{ marker.count }}</span>
-                </button>
-              </TransitionGroup>
-            </template>
-          </div>
-        </Transition>
+          <TransitionGroup name="detail-move" tag="div" class="event-layer">
+            <button
+              v-if="eventRows.clipped.length > 0"
+              type="button"
+              class="overflow-chip"
+              :class="{ open: openClipped }"
+              :title="`${eventRows.clipped.length} händelser ryms inte`"
+              @pointerdown.stop
+              @click.stop="openClipped = !openClipped"
+            >
+              +{{ eventRows.clipped.length }} till
+            </button>
+          </TransitionGroup>
+        </div>
 
         <div v-if="isNowVisible" class="now-marker" :style="{ top: `${nowPosition}%` }">
           <span>NU</span>
@@ -1370,12 +1375,69 @@ onUnmounted(() => {
   background: var(--color-surface);
   color: var(--color-ink-muted);
   font-size: 0.72rem;
+}
+
+/* Knappen som hoppar till nästa förekomst. Den är hela seriens etikett,
+   men utan egen ram - pillen runt är seriens. */
+.recurrence-series-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
 }
 
 .recurrence-series:hover {
   color: var(--color-ink);
   border-color: var(--color-accent);
+}
+
+/* En serie som är dold i tidslinjen. Den står kvar i sammanfattningen,
+   så att det syns att den finns och kan visas igen. */
+.recurrence-series.hidden {
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+.recurrence-series-action {
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  padding: 0 0.45rem;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+
+.recurrence-series-action:hover {
+  border-color: var(--color-accent);
+}
+
+/* Notis som säger att en enda serie visas. */
+.focus-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  color: var(--color-ink-muted);
+}
+
+.focus-notice-close {
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 0.66rem;
+  cursor: pointer;
 }
 
 .recurrence-icon {
@@ -1406,7 +1468,7 @@ onUnmounted(() => {
 
 /* Panel som visar innehållet i en prick. Flera serier kan ligga under samma
    prick, och då går de inte att skilja åt i tooltipen. */
-.marker-detail {
+.overflow-panel {
   flex: 0 0 auto;
   margin: 0 0 0.45rem;
   padding: 0.45rem 0.6rem;
@@ -1417,17 +1479,17 @@ onUnmounted(() => {
   font-size: 0.74rem;
 }
 
-.marker-detail-header {
+.overflow-panel-header {
   display: flex;
   align-items: center;
   gap: 0.45rem;
 }
 
-.marker-detail-header strong {
+.overflow-panel-header strong {
   color: var(--color-ink);
 }
 
-.marker-detail-close {
+.overflow-panel-close {
   margin-left: auto;
   border: none;
   background: none;
@@ -1437,12 +1499,12 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.marker-detail-note {
+.overflow-panel-note {
   margin: 0.3rem 0 0;
   opacity: 0.8;
 }
 
-.marker-detail-list {
+.overflow-panel-list {
   margin: 0.35rem 0 0;
   padding: 0;
   list-style: none;
@@ -1451,7 +1513,7 @@ onUnmounted(() => {
   gap: 0.3rem;
 }
 
-.marker-detail-entry {
+.overflow-panel-entry {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -1464,32 +1526,18 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.marker-detail-entry:hover {
+.overflow-panel-entry:hover {
   color: var(--color-ink);
   border-color: var(--color-accent);
 }
 
-.marker-detail-icon {
-  color: var(--color-accent);
-  line-height: 1;
-}
-
-.marker-detail-title {
+.overflow-panel-title {
   color: var(--color-ink);
 }
 
-.marker-detail-count {
+.overflow-panel-count {
   opacity: 0.75;
   font-variant-numeric: tabular-nums;
-}
-
-/* En post som visas som ett urval av förekomsterna. */
-.marker-detail-sampled {
-  padding: 0 0.3rem;
-  border-radius: 999px;
-  background: rgb(129 140 248 / 0.14);
-  font-size: 0.64rem;
-  opacity: 0.9;
 }
 
 /* Verktygsrad ovanför tidslinjen. Kalendrarna ligger inte här som
@@ -1655,19 +1703,18 @@ onUnmounted(() => {
   background-size: 25% 100%;
 }
 
-/* Lager som håller korten respektive prickarna. Det ligger över samma
-   område som tidsaxeln, så att elementen kan positioneras som vanligt. */
+/* Lager som håller händelseraderna. Det ligger över samma område som
+   tidsaxeln, så att elementen kan positioneras som vanligt. */
 .detail-layer {
   position: absolute;
   inset: 0;
 }
 
-/* Lagren som håller korten och prickarna. Elementen är absolut
+/* Lagren som håller raderna och tidsaxeln. Elementen är absolut
    positionerade, så lagren behöver ingen egen storlek - men de får
    uttryckligen position: static, så att barnen positionerar sig mot
    .detail-layer och inte mot någon annan förälder. */
 .event-layer,
-.marker-layer,
 .timeline-layer {
   position: static;
 }
@@ -1696,24 +1743,6 @@ onUnmounted(() => {
   transition-property: transform;
   transition-duration: var(--detail-duration, 200ms);
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Nivåväxlingen tonar in och ut i stället för att bytas blixtsnabbt. */
-.detail-swap-enter-active {
-  transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.detail-swap-leave-active {
-  transition: opacity 0.1s ease;
-}
-
-.detail-swap-enter-from {
-  opacity: 0;
-  transform: translateY(10px) scale(0.985);
-}
-
-.detail-swap-leave-to {
-  opacity: 0;
 }
 
 /* Varje element får sin egen in- och ut-animation. Vue:s enter-klasser
@@ -1779,6 +1808,27 @@ onUnmounted(() => {
 .time-row time.tick-month,
 .time-row time.tick-year {
   width: 6.2rem;
+}
+
+/* På dagskalan står veckodagen till vänster om datumet. Den får en egen
+   smal plats så att datumet inte glider in över händelserna. */
+.time-row time.tick-day {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.time-row time .tick-value {
+  white-space: nowrap;
+}
+
+.tick-weekday {
+  width: 1.15rem;
+  color: #93c5fd;
+  opacity: 0.85;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: lowercase;
 }
 
 .time-line {
@@ -1883,6 +1933,9 @@ onUnmounted(() => {
   text-transform: capitalize;
 }
 
+/* Varje händelse är en rad: ikon, titel och starttid. Radens bredd delas
+   med de andra raderna i samma klump, så att en rad aldrig döljer en
+   annan. */
 .calendar-event {
   position: absolute;
   --timeline-left: 5.2rem;
@@ -1890,25 +1943,17 @@ onUnmounted(() => {
   left: var(--timeline-left);
   right: var(--timeline-right);
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 16px;
   overflow: hidden;
   border-left: 3px solid var(--event-color, var(--color-accent));
   border-radius: 0.35rem;
-  padding: 0.2rem 0.55rem;
+  padding: 0 0.45rem;
   color: var(--color-ink);
   background: color-mix(in srgb, var(--event-color, #6366f1) 20%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--event-color, #818cf8) 30%, transparent);
   pointer-events: auto;
-}
-
-/* Händelser som krockar i tid läggs ovanpå varandra i stället för att
-   delas upp i kolumner. Varje kort flyttas ett litet steg åt höger, så att
-   även de underliggande kortens titlar syns. Högerkanten ligger kvar på
-   samma ställe för alla kort i gruppen. */
-.calendar-event.has-lanes {
-  --lane-step: 0.9rem;
-  left: calc(var(--timeline-left) + var(--lane, 0) * var(--lane-step));
 }
 
 .calendar-event.tentative {
@@ -1923,132 +1968,79 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
+/* Titeln fyller raden, och klipps med ellips när den inte ryms. */
 .calendar-event strong {
-  font-size: 0.75rem;
-  font-weight: 650;
-}
-
-/* Rubriken ligger alltid överst i kortet: titeln till vänster och
-   starttiden alltid på samma ställe, i högra hörnet. */
-.event-header {
-  align-items: baseline;
-  display: flex;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.event-title {
-  align-items: center;
-  display: flex;
   flex: 1 1 auto;
-  gap: 0.3rem;
   min-width: 0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.3;
 }
 
 .event-icon {
   flex: 0 0 auto;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   line-height: 1;
   opacity: 0.85;
 }
 
-/* Märket på kortet visar att händelsen är en del av en återkommande serie. */
+/* Märket på raden visar att händelsen är en del av en återkommande serie. */
 .event-recurrence {
   flex: 0 0 auto;
   color: var(--color-accent);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   line-height: 1;
   opacity: 0.9;
+}
+
+/* Antalet förekomster som raden räknar för, när serien har tunnats ut. */
+.event-multi {
+  flex: 0 0 auto;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: rgb(129 140 248 / 0.18);
+  color: var(--color-ink-muted);
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
 .calendar-event .event-time {
   flex: 0 0 auto;
   color: var(--color-ink-muted);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* Dagnivå: kortet ska gå att läsa och klicka på även när det är tunt.
-   Klockslaget ligger alltid i högra hörnet, även här. */
-.calendar-event.compact {
-  min-height: 1.4rem;
-  padding: 0.1rem 0.45rem;
-}
-
-.calendar-event.compact strong {
-  font-size: 0.7rem;
-}
-
-.calendar-event.compact .event-time {
-  font-size: 0.6rem;
-}
-
-/* Månads- och årsnivå: prickar i stället för kort. Prickar som ligger nära
-   varandra i tid hamnar i olika kolumner (lanes) så att de inte överlappar. */
-.calendar-marker {
+/* Knappen för de händelser som inte fick plats i klumpen. Den står bredvid
+   klumpens sista kolumn, i marginalen höger om tidslinjen, så att den inte
+   täcker någon rad. */
+.overflow-chip {
   position: absolute;
-  left: calc(var(--marker-left, 5.2rem) + var(--lane, 0) * var(--marker-lane-step));
+  --timeline-left: 5.2rem;
+  --timeline-right: 8rem;
+  right: var(--timeline-right);
+  bottom: 0;
+  width: 4.5rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: none;
-  padding: 0;
+  min-height: 16px;
+  border: 1px dashed var(--color-line-strong);
+  border-radius: 0.35rem;
+  padding: 0 0.4rem;
+  color: var(--color-ink-muted);
+  background: var(--color-surface);
+  font-size: 0.66rem;
+  line-height: 1.3;
+  text-align: left;
+  white-space: nowrap;
   cursor: pointer;
-  pointer-events: auto;
-  background: color-mix(in srgb, var(--event-color, #818cf8) 90%, transparent);
 }
 
-.calendar-marker.daily {
-  --marker-lane-step: 2rem;
-  width: 1.85rem;
-  height: 1.15rem;
-  translate: 0 -50%;
-  border-radius: 0.3rem;
-  color: #0b1020;
-  font-size: 0.62rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.calendar-marker.monthly {
-  --marker-lane-step: 0.95rem;
-  width: 0.8rem;
-  height: 0.8rem;
-  translate: 0 -50%;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--event-color, #c4b5fd) 95%, transparent);
-}
-
-.calendar-marker.yearly {
-  --marker-lane-step: 1.15rem;
-  width: 0.95rem;
-  height: 0.95rem;
-  translate: 0 -50%;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--event-color, #f0abfc) 95%, transparent);
-}
-
-/* Osynlig yta runt pricken så att den går att klicka på även när den är
-   liten och ligger nära en granne. */
-.calendar-marker::before {
-  content: '';
-  position: absolute;
-  inset: -0.3rem;
-}
-
-.calendar-marker.tentative {
-  background: color-mix(in srgb, #f59e0b 90%, transparent);
-}
-
-.calendar-marker:hover {
-  outline: 2px solid rgb(226 232 240 / 0.7);
-  outline-offset: 1px;
-}
-
-/* Pricken som panelen visar innehållet i. */
-.calendar-marker.selected {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
+.overflow-chip:hover,
+.overflow-chip.open {
+  color: var(--color-ink);
+  border-color: var(--color-accent);
 }
 
 .now-marker {
@@ -2149,28 +2141,16 @@ onUnmounted(() => {
     font-size: 0.75rem;
   }
 
-  .calendar-event {
+  .calendar-event,
+  .overflow-chip {
     --timeline-left: 4.4rem;
-    --timeline-right: 0.5rem;
-    left: var(--timeline-left);
-    right: var(--timeline-right);
+    /* Marginalen höger om tidslinjen rymmer "+N"-knappen. */
+    --timeline-right: 4rem;
   }
 
-  .calendar-marker {
-    --marker-left: 4.4rem;
-  }
-
-  .calendar-marker.daily {
-    --marker-lane-step: 1.75rem;
-    width: 1.6rem;
-  }
-
-  .calendar-marker.monthly {
-    --marker-lane-step: 0.85rem;
-  }
-
-  .calendar-marker.yearly {
-    --marker-lane-step: 1rem;
+  .overflow-chip {
+    width: 3.5rem;
+    font-size: 0.6rem;
   }
 
   .date-label {

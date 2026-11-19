@@ -22,6 +22,14 @@ export function formatDueDate(due: string | null | undefined): string {
 	return date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" });
 }
 
+// Dagens datum som kalenderdatum ("YYYY-MM-DD") i lokal tid.
+export function todayDateString(): string {
+	const today = new Date();
+	const month = String(today.getMonth() + 1).padStart(2, "0");
+	const day = String(today.getDate()).padStart(2, "0");
+	return `${today.getFullYear()}-${month}-${day}`;
+}
+
 // Klassificerar datumet: förgått, idag eller kommande.
 export function dueTone(due: string | null | undefined): DueTone {
 	const date = parseDueDate(due);

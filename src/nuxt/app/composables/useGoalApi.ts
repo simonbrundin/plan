@@ -1,4 +1,5 @@
 import type { Goal, GoalDependency } from "~/types/goal";
+import type { RecurrenceMode } from "~/utils/recurrence";
 
 interface GoalWithWeight extends Goal {
 	weight: number;
@@ -124,6 +125,49 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter målets upprepningsregel och schemaläggningsstrategi.
+	// En nullad regel tar bort upprepningen så att målet blir vanligt igen.
+	const setGoalRecurrence = async (
+		goalId: number,
+		rule: string | null,
+		mode?: RecurrenceMode,
+		startDate?: string,
+	): Promise<Goal> => {
+		return await apiProxy<Goal>(`goals/${goalId}`, {
+			method: "PATCH",
+			body: {
+				recurrence_rule: rule,
+				recurrence_mode: mode,
+				start_date: startDate,
+			},
+		});
+	};
+
+	// Slutför den aktuella förekomsten av ett återkommande mål.
+	//
+	// occurrenceDate är den förekomst som slutförs. Skickas den samma
+	// förekomst igen ändras ingenting - anropet är en dubblett.
+	const completeGoalOccurrence = async (
+		goalId: number,
+		occurrenceDate?: string,
+		completedOn?: string,
+	): Promise<Goal> => {
+		return await apiProxy<Goal>(`goals/${goalId}/completions`, {
+			method: "POST",
+			body: {
+				occurrence_date: occurrenceDate,
+				completed_on: completedOn,
+			},
+		});
+	};
+
+	// Avbockar den senast slutförda förekomsten av ett återkommande mål.
+	const undoGoalOccurrence = async (goalId: number): Promise<Goal> => {
+		return await apiProxy<Goal>(`goals/${goalId}/completions`, {
+			method: "DELETE",
+		});
+	};
+
 	const deleteGoal = async (goalId: number) => {
 		await apiProxy(`goals/${goalId}`, {
 			method: "DELETE",
@@ -238,12 +282,21 @@ export function useGoalApi() {
 		title: string,
 		statusId?: number,
 		icon?: string,
+		recurrenceRule?: string,
 	): Promise<Goal> => {
-		const body: { title: string; status_id?: number; icon?: string } = { title };
+		const body: {
+			title: string;
+			status_id?: number;
+			icon?: string;
+			recurrence_rule?: string;
+		} = { title };
 		if (statusId) {
 			body.status_id = statusId;
 		}
 		body.icon = icon ?? await findIconForGoalTitle(title);
+		if (recurrenceRule) {
+			body.recurrence_rule = recurrenceRule;
+		}
 
 		return await apiProxy<Goal>(`goals`, {
 			method: "POST",
@@ -278,6 +331,9 @@ export function useGoalApi() {
 		toggleGoalFinished,
 		setGoalDue,
 		setGoalEternal,
+		setGoalRecurrence,
+		completeGoalOccurrence,
+		undoGoalOccurrence,
 		deleteGoal,
 		addParentRelation,
 		removeParentRelation,

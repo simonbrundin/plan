@@ -11,6 +11,14 @@ interface Goal {
 	due: string | null;
 	inbox: number;
 	eternal: boolean;
+	// Upprepningsregeln för ett återkommande mål (RRULE).
+	recurrence_rule?: string | null;
+	// Schemaläggningsstrategi: "schedule" eller "push".
+	recurrence_mode?: string | null;
+	// Datumet ("YYYY-MM-DD") för nästa förekomst som ska slutföras.
+	recurrence_next?: string | null;
+	// Antalet slutförda förekomster.
+	recurrence_count?: number;
 }
 
 interface GoalRelation {

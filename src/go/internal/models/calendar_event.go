@@ -26,6 +26,9 @@ type CalendarEvent struct {
 	OriginalStartAt *time.Time `json:"original_start_at,omitempty"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
+	// Places är de platser där händelsen sker. En händelse kan ha flera
+	// platser. Skickas alltid ut, även när listan är tom.
+	Places []Place `json:"places"`
 }
 
 type CreateCalendarEventRequest struct {

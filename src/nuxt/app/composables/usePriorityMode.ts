@@ -1,5 +1,6 @@
 import type { Goal } from "~/types/goal";
 import { matchesStartedFilter, type StartedFilter } from "~/utils/goalFilters";
+import { isDoableAtPlace } from "~/utils/places";
 import { moveChildId } from "~/utils/childOrder";
 
 interface PrioritizedGoal extends Goal {
@@ -31,6 +32,14 @@ const DEFAULT_STARTED_FILTER: StartedFilter = "started";
 
 const startedFilter = ref<StartedFilter>(DEFAULT_STARTED_FILTER);
 
+// Filter "görbar här": visa bara mål som har den plats användaren
+// befinner sig på. Flera platser på ett mål har OR-semantik - det
+// räcker att vara på någon av dem.
+const filterByCurrentPlace = useState<boolean>(
+	"priority-filter-current-place",
+	() => false,
+);
+
 let lastUpdateTime = 0;
 const UPDATE_DEBOUNCE_MS = 150;
 
@@ -41,9 +50,17 @@ function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
 export function usePriorityMode() {
 	const { isSearchOpen } = useSearchState();
 	const { setGoalWeight, reorderPriorityGoals } = useGoalApi();
+	const { currentPlaceId } = usePlaces();
+
+	function matchesCurrentPlace(goal: PrioritizedGoal): boolean {
+		if (!filterByCurrentPlace.value) return true;
+		return isDoableAtPlace(goal, currentPlaceId.value);
+	}
 
 	const visibleGoals = computed(() =>
-		prioritizedGoals.value.filter(matchesStartedFilterForGoals),
+		prioritizedGoals.value
+			.filter(matchesStartedFilterForGoals)
+			.filter(matchesCurrentPlace),
 	);
 
 	async function loadPrioritizedGoals() {
@@ -230,6 +247,18 @@ export function usePriorityMode() {
 		}
 	}
 
+	// Slår på och av filtret "görbar här".
+	function setFilterByCurrentPlace(enabled: boolean) {
+		filterByCurrentPlace.value = enabled;
+		const list = visibleGoals.value;
+		if (
+			selectedGoalId.value === null ||
+			!list.some((g) => g.id === selectedGoalId.value)
+		) {
+			selectedGoalId.value = list[0]?.id ?? null;
+		}
+	}
+
 	return {
 		isPriorityMode: readonly(isPriorityMode),
 		selectedGoalId: readonly(selectedGoalId),
@@ -237,6 +266,7 @@ export function usePriorityMode() {
 		visibleGoals,
 		isLoading: readonly(isLoading),
 		startedFilter: readonly(startedFilter),
+		filterByCurrentPlace: readonly(filterByCurrentPlace),
 		loadPrioritizedGoals,
 		updateWeight,
 		handleKeydown,
@@ -244,5 +274,6 @@ export function usePriorityMode() {
 		selectGoal,
 		getSelectedIndex,
 		setStartedFilter,
+		setFilterByCurrentPlace,
 	};
 }

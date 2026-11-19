@@ -1,11 +1,16 @@
 package handlers
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"plan-api/internal/models"
+	"plan-api/internal/recurrence"
 	"plan-api/internal/repository"
 
 	"github.com/gin-gonic/gin"
@@ -13,14 +18,48 @@ import (
 
 type GoalHandler struct {
 	repo        *repository.GoalRepository
+	places      *repository.PlaceRepository
 	dbConnected bool
 }
 
 func NewGoalHandler(dbConnected bool) *GoalHandler {
 	return &GoalHandler{
 		repo:        repository.NewGoalRepository(),
+		places:      repository.NewPlaceRepository(),
 		dbConnected: dbConnected,
 	}
+}
+
+// attachPlaces fyller i målets platser.
+//
+// Ett fel här ska inte förstöra svaret - platserna är extra information,
+// så ett fel hoppas över i stället för att returneras.
+func (h *GoalHandler) attachPlaces(ctx context.Context, goals []models.Goal) {
+	if len(goals) == 0 {
+		return
+	}
+
+	ids := make([]int64, len(goals))
+	for i, g := range goals {
+		ids[i] = g.ID
+	}
+
+	byGoal, err := h.places.GetPlacesForGoals(ctx, ids)
+	if err != nil {
+		return
+	}
+
+	for i := range goals {
+		goals[i].Places = placesOrEmpty(byGoal[goals[i].ID])
+	}
+}
+
+// placesOrEmpty gör att en tom lista alltid skickas ut som [] och inte null.
+func placesOrEmpty(places []models.Place) []models.Place {
+	if places == nil {
+		return []models.Place{}
+	}
+	return places
 }
 
 // checkDb returns error response if database is not connected
@@ -64,6 +103,7 @@ func (h *GoalHandler) GetGoals(c *gin.Context) {
 	if goals == nil {
 		goals = []models.Goal{}
 	}
+	h.attachPlaces(c.Request.Context(), goals)
 	c.JSON(http.StatusOK, goals)
 }
 
@@ -159,6 +199,23 @@ func (h *GoalHandler) GetGoal(c *gin.Context) {
 	}
 	blocking, _ := h.repo.GetBlockingGoals(c.Request.Context(), goalID)
 
+	// Platserna kopplas på efter att relationerna är hämtade, så att
+	// målet, barnen och föräldrarna kan delas i samma anrop.
+	h.attachPlaces(c.Request.Context(), allGoals)
+	h.attachPlaces(c.Request.Context(), parentGoals)
+	h.attachPlaces(c.Request.Context(), dependsOn)
+	h.attachPlaces(c.Request.Context(), blocking)
+
+	goalPlaces := []models.Goal{*goal}
+	h.attachPlaces(c.Request.Context(), goalPlaces)
+	*goal = goalPlaces[0]
+
+	for i := range children {
+		childPlaces := []models.Goal{children[i].Goal}
+		h.attachPlaces(c.Request.Context(), childPlaces)
+		children[i].Places = childPlaces[0].Places
+	}
+
 	c.JSON(http.StatusOK, models.GetGoalResponse{
 		Goal: models.GoalWithRelations{
 			Goal:            *goal,
@@ -208,13 +265,94 @@ func (h *GoalHandler) CreateGoal(c *gin.Context) {
 		icon = "heroicons:star"
 	}
 
+	// Upprepningen valideras innan målet skapas, så att en ogiltig regel
+	// inte lämnar kvar ett tomt mål.
+	recurrenceRule := ""
+	recurrenceMode := recurrence.ModeSchedule
+	recurrenceStart := time.Now().UTC()
+
+	if req.RecurrenceRule != nil {
+		recurrenceRule = strings.TrimSpace(*req.RecurrenceRule)
+
+		if err := recurrence.Validate(recurrenceRule); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: recurrenceErrorMessage(err)})
+			return
+		}
+
+		if req.RecurrenceMode != nil && *req.RecurrenceMode != "" {
+			mode := recurrence.Mode(*req.RecurrenceMode)
+			if err := recurrence.ValidateMode(mode); err != nil {
+				c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: recurrenceErrorMessage(err)})
+				return
+			}
+			recurrenceMode = mode
+		}
+
+		if req.StartDate != nil && *req.StartDate != "" {
+			parsed, err := time.Parse(models.DueDateFormat, *req.StartDate)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "start_date måste vara på formatet YYYY-MM-DD"})
+				return
+			}
+			recurrenceStart = parsed
+		}
+
+		if _, err := recurrence.FirstOccurrence(recurrenceRule, recurrenceStart); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: recurrenceErrorMessage(err)})
+			return
+		}
+	}
+
 	goal, err := h.repo.CreateGoal(c.Request.Context(), userID, req.Title, icon)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
 
+	if recurrenceRule != "" {
+		goal, err = h.repo.SetRecurrence(c.Request.Context(), goal.ID, recurrenceRule, recurrenceMode, recurrenceStart)
+		if err != nil {
+			// Målet skapades men fick ingen upprepning. Städa bort det
+			// igen, så att inget tomt mål blir kvar i listan.
+			if cleanupErr := h.repo.DeleteGoal(c.Request.Context(), goal.ID); cleanupErr != nil {
+				fmt.Printf("failed to clean up goal %d after recurrence error: %v\n", goal.ID, cleanupErr)
+			}
+			c.JSON(recurrenceErrorStatus(err), models.ErrorResponse{Message: recurrenceErrorMessage(err)})
+			return
+		}
+	}
+
 	c.JSON(http.StatusCreated, goal)
+}
+
+// recurrenceErrorStatus översätter ett upprepningsfel till en HTTP-status.
+func recurrenceErrorStatus(err error) int {
+	switch {
+	case errors.Is(err, recurrence.ErrInvalidRule),
+		errors.Is(err, recurrence.ErrInvalidMode),
+		errors.Is(err, recurrence.ErrNoOccurrence):
+		return http.StatusBadRequest
+	case errors.Is(err, repository.ErrNotRecurring):
+		return http.StatusBadRequest
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
+// recurrenceErrorMessage ger ett läsbart felmeddelande för ett upprepningsfel.
+func recurrenceErrorMessage(err error) string {
+	switch {
+	case errors.Is(err, recurrence.ErrInvalidRule):
+		return err.Error()
+	case errors.Is(err, recurrence.ErrInvalidMode):
+		return "Ogiltig schemaläggningsstrategi. Använd 'schedule' eller 'push'."
+	case errors.Is(err, recurrence.ErrNoOccurrence):
+		return "Regeln ger inga förekomster."
+	case errors.Is(err, repository.ErrNotRecurring):
+		return "Målet är inte återkommande."
+	default:
+		return err.Error()
+	}
 }
 
 // UpdateGoal godoc
@@ -284,7 +422,152 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "due-datumet måste vara på formatet YYYY-MM-DD"})
 			return
 		}
+		if errors.Is(err, recurrence.ErrInvalidRule) || errors.Is(err, recurrence.ErrInvalidMode) ||
+			errors.Is(err, recurrence.ErrNoOccurrence) || errors.Is(err, repository.ErrNotRecurring) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: recurrenceErrorMessage(err)})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, goal)
+}
+
+// CompleteGoalOccurrence godoc
+// @Summary Complete the current occurrence of a recurring goal
+// @Description Marks the current occurrence of a recurring goal as completed and moves on to the next one
+// @Tags goals
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Goal ID"
+// @Param completion body models.CompleteOccurrenceRequest true "Completion data"
+// @Success 200 {object} models.Goal
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Router /api/goals/{id}/completions [post]
+func (h *GoalHandler) CompleteGoalOccurrence(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	goalID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid goal ID"})
+		return
+	}
+
+	hasAccess, _ := h.repo.UserHasAccess(c.Request.Context(), userID, goalID)
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{Message: "Access denied"})
+		return
+	}
+
+	var req models.CompleteOccurrenceRequest
+	_ = c.ShouldBindJSON(&req)
+
+	// Förekomsten som slutförs. Utan uppgift slutförs målets aktuella
+	// förekomst.
+	var occurrenceDate *time.Time
+	if req.OccurrenceDate != "" {
+		parsed, err := time.Parse(models.DueDateFormat, req.OccurrenceDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "occurrence_date måste vara på formatet YYYY-MM-DD"})
+			return
+		}
+		occurrenceDate = &parsed
+	}
+
+	completedOn := time.Now().UTC()
+	if req.CompletedOn != "" {
+		parsed, err := time.Parse(models.DueDateFormat, req.CompletedOn)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "completed_on måste vara på formatet YYYY-MM-DD"})
+			return
+		}
+		completedOn = parsed
+	}
+
+	goal, err := h.repo.CompleteOccurrence(c.Request.Context(), goalID, occurrenceDate, completedOn)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotRecurring) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Målet är inte återkommande"})
+			return
+		}
+		if errors.Is(err, recurrence.ErrNoOccurrence) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Målet har ingen aktiv förekomst"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if goal == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Goal not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, goal)
+}
+
+// UndoGoalOccurrence godoc
+// @Summary Undo the last completed occurrence of a recurring goal
+// @Description Removes the latest completion of a recurring goal and restores that occurrence
+// @Tags goals
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Goal ID"
+// @Success 200 {object} models.Goal
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Router /api/goals/{id}/completions [delete]
+func (h *GoalHandler) UndoGoalOccurrence(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	goalID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid goal ID"})
+		return
+	}
+
+	hasAccess, _ := h.repo.UserHasAccess(c.Request.Context(), userID, goalID)
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{Message: "Access denied"})
+		return
+	}
+
+	goal, err := h.repo.UndoOccurrence(c.Request.Context(), goalID)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotRecurring) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Målet är inte återkommande"})
+			return
+		}
+		if errors.Is(err, repository.ErrNoCompletion) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Målet har ingen slutförd förekomst"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if goal == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Goal not found"})
 		return
 	}
 
@@ -365,6 +648,18 @@ func (h *GoalHandler) GetPrioritizedGoals(c *gin.Context) {
 	if goals == nil {
 		goals = []models.PrioritizedGoal{}
 	}
+
+	// Prioriterade mål är en lista av mål - de platser som hör till dem
+	// hämtas i ett svep.
+	plain := make([]models.Goal, len(goals))
+	for i, g := range goals {
+		plain[i] = g.Goal
+	}
+	h.attachPlaces(c.Request.Context(), plain)
+	for i := range goals {
+		goals[i].Places = plain[i].Places
+	}
+
 	c.JSON(http.StatusOK, goals)
 }
 

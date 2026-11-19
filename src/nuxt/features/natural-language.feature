@@ -102,6 +102,20 @@ Feature: Tolka naturlig text till kalenderhändelser och mål
     And the recurrence rule should be "FREQ=WEEKLY"
 
   @event
+  Scenario: Upprepning varannan dag
+    Given the reference time is "2026-03-10T09:00:00"
+    When the user writes "Gymma varannan dag"
+    Then the title should be "Gymma"
+    And the recurrence rule should be "FREQ=DAILY;INTERVAL=2"
+
+  @goal
+  Scenario: Ett återkommande mål i målläge
+    Given the reference time is "2026-03-10T09:00:00"
+    When the user writes "Gymma varannan dag"
+    Then the goal title should be "Gymma"
+    And the recurrence rule should be "FREQ=DAILY;INTERVAL=2"
+
+  @event
   Scenario: Varannan vecka med startdatum och intervall över midnatt
     Given the reference time is "2026-03-10T09:00:00"
     When the user writes "Jobb varannan vecka 17.00 till 17.00 dagen efter med start mån 30 nov"

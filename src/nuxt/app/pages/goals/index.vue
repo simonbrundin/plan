@@ -6,11 +6,12 @@ import { isRootGoal, isUnfinishedGoal, matchesStartedFilter } from '~/utils/goal
 import { moveChildId } from '~/utils/childOrder'
 import { sortGoalsByOrder } from '~/utils/goalOrder'
 import { descriptionPreview } from '~/utils/goalDescription'
-import { dueTone, formatDueDate } from '~/utils/dueDate'
+import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
+import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 
 const goals = ref<Goal[]>([])
@@ -221,6 +222,17 @@ async function toggleFinished(goal: Goal) {
     return
   }
 
+  // Ett återkommande mål slutförs en förekomst i taget. Målet ligger kvar
+  // i listan och väntar på nästa upprepning.
+  if (isRecurringGoal(goal)) {
+    // Förekomsten har inte kommit än - då finns inget att checka av.
+    if (isWaitingForNextOccurrence(goal)) {
+      return
+    }
+    await completeOccurrence(goal)
+    return
+  }
+
   try {
     const newFinishedValue = goal.finished ? null : new Date().toISOString()
     await toggleGoalFinished(goal.id, newFinishedValue)
@@ -232,6 +244,27 @@ async function toggleFinished(goal: Goal) {
     }
   } catch (err) {
     console.error('Failed to toggle finished:', err)
+  }
+}
+
+// Slutför den aktuella förekomsten av ett återkommande mål.
+async function completeOccurrence(goal: Goal) {
+  try {
+    const updated = await completeGoalOccurrence(goal.id, goal.recurrence_next ?? undefined, todayDateString())
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    const current = localGoals.value[idx]
+    if (idx !== -1 && current) {
+      localGoals.value[idx] = {
+        ...current,
+        recurrence_rule: updated.recurrence_rule,
+        recurrence_mode: updated.recurrence_mode,
+        recurrence_next: updated.recurrence_next,
+        recurrence_count: updated.recurrence_count,
+        finished: updated.finished,
+      }
+    }
+  } catch (err) {
+    console.error('Failed to complete occurrence:', err)
   }
 }
 
@@ -628,7 +661,10 @@ definePageMeta({
         <div
           :data-goal-index="index"
           class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 cursor-pointer"
-          :class="index === selectedIndex ? 'ring-1 ring-accent' : ''"
+          :class="[
+            index === selectedIndex ? 'ring-1 ring-accent' : '',
+            isWaitingForNextOccurrence(goal) ? 'opacity-50' : '',
+          ]"
           @click="goToGoal(goal.id)"
         >
           <span
@@ -637,6 +673,9 @@ definePageMeta({
           />
           <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 flex-shrink-0 text-ink-muted group-hover:text-ink transition-colors"
             :class="goal.eternal ? ETERNAL_TEXT : ''" />
+          <Icon v-if="goal.places?.length" name="lucide:map-pin"
+            class="w-4 h-4 flex-shrink-0 text-accent"
+            :title="`Platser: ${goal.places.map((p) => p.name).join(', ')}`" />
           <div class="flex-1 min-w-0">
             <span class="block truncate text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
             <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">
@@ -684,9 +723,16 @@ definePageMeta({
               {{ formatDueDate(goal.due) }}
             </span>
           </template>
+          <!-- Upprepningar: endast antalet slutförda förekomster -->
+          <span v-if="isRecurringGoal(goal)"
+            class="flex-shrink-0 flex items-center gap-1 text-sm tabular-nums text-ink-dim"
+            :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda`">
+            <Icon name="lucide:repeat" class="w-4 h-4" />
+            {{ recurrenceCount(goal) }}
+          </span>
           <span v-if="goal.finished" class="text-green-400 text-sm flex-shrink-0">✓ Klar</span>
           <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm flex-shrink-0'">∞</span>
-          <span v-else class="text-ink-dim text-sm tabular-nums flex-shrink-0">#{{ goal.id }}</span>
+          <span v-else-if="!isRecurringGoal(goal)" class="text-ink-dim text-sm tabular-nums flex-shrink-0">#{{ goal.id }}</span>
         </div>
 
         <!-- Redigera beskrivning (t) -->

@@ -79,6 +79,21 @@ type Goal struct {
 	// efter detta värde (stigande), och det sätts när målen flyttas med
 	// piltangenterna.
 	Order int `json:"order" example:"0"`
+	// Places är de platser där målet kan slutföras. Ett mål kan ha flera
+	// platser - då räcker det att vara på någon av dem (OR-semantik).
+	// Skickas alltid ut, även när listan är tom.
+	Places []Place `json:"places"`
+	// RecurrenceRule är upprepningsregeln för ett återkommande mål, som
+	// en RRULE-sträng. Null = målet är inte återkommande.
+	RecurrenceRule *string `json:"recurrence_rule"`
+	// RecurrenceMode är schemaläggningsstrategin: "schedule" (håll
+	// schemat) eller "push" (skjuta fram nästa förekomst).
+	RecurrenceMode *string `json:"recurrence_mode"`
+	// RecurrenceNext är datumet för nästa förekomst som ska slutföras.
+	// Null = serien är slut och målet har inget mer att göra.
+	RecurrenceNext *DueDate `json:"recurrence_next"`
+	// RecurrenceCount är antalet slutförda förekomster.
+	RecurrenceCount int `json:"recurrence_count"`
 }
 
 // Status represents a goal status
@@ -153,6 +168,14 @@ type CreateGoalRequest struct {
 	Title    string `json:"title" binding:"required" example:"New Goal"`
 	Icon     string `json:"icon" example:"heroicons:star"`
 	StatusID int    `json:"status_id" example:"1"`
+	// RecurrenceRule gör målet återkommande direkt ("FREQ=DAILY;INTERVAL=2").
+	RecurrenceRule *string `json:"recurrence_rule" example:"FREQ=DAILY;INTERVAL=2"`
+	// RecurrenceMode är schemaläggningsstrategin: "schedule" eller "push".
+	// Utan den används "schedule".
+	RecurrenceMode *string `json:"recurrence_mode" example:"schedule"`
+	// StartDate är det datum serien startar på ("YYYY-MM-DD"). Utan den
+	// används dagens datum.
+	StartDate *string `json:"start_date" example:"2026-01-05"`
 }
 
 // NullableTime is a timestamp field in an update request.
@@ -200,6 +223,13 @@ type UpdateGoalRequest struct {
 	// Eternal sätter eller tar bort evigt-flaggan på ett mål.
 	// nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
 	Eternal *bool `json:"eternal,omitempty"`
+	// RecurrenceRule sätter eller tar bort målets upprepningsregel.
+	// Utan fältet lämnas regeln oförändrad, null tar bort den.
+	RecurrenceRule NullableString `json:"recurrence_rule,omitempty"`
+	// RecurrenceMode sätter schemaläggningsstrategin ("schedule" eller "push").
+	RecurrenceMode NullableString `json:"recurrence_mode,omitempty"`
+	// StartDate är det datum serien startar på ("YYYY-MM-DD").
+	StartDate *string `json:"start_date,omitempty"`
 }
 
 // FinishesGoal returnerar true om requesten försöker markera målet som klart,
@@ -235,6 +265,46 @@ func (n *NullableDueDate) UnmarshalJSON(data []byte) error {
 	n.Value = &s
 
 	return nil
+}
+
+// NullableString sätter eller rensar en textsträng i en update-request.
+//
+// Det skiljer på tre tillstånd:
+//   - fältet saknas i request-bodyn (Set == false) → lämnas oförändrat
+//   - fältet finns med ett värde (Value != nil) → sätts till värdet
+//   - fältet finns som null (Set == true, Value == nil) → värdet rensas
+type NullableString struct {
+	Set   bool
+	Value *string
+}
+
+// UnmarshalJSON parses a string that is either en textsträng eller null.
+func (n *NullableString) UnmarshalJSON(data []byte) error {
+	n.Set = true
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		n.Value = nil
+		return nil
+	}
+
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	n.Value = &s
+
+	return nil
+}
+
+// CompleteOccurrenceRequest is the request body for completing an occurrence
+// of a recurring goal.
+type CompleteOccurrenceRequest struct {
+	// OccurrenceDate är den förekomst som slutförs ("YYYY-MM-DD"). Utan
+	// det slutförs målets aktuella förekomst. Skickas det en förekomst
+	// som redan är slutförd ändras ingenting.
+	OccurrenceDate string `json:"occurrence_date" example:"2026-01-01"`
+	// CompletedOn är det datum slutförandet skedde ("YYYY-MM-DD"). Utan
+	// det används dagens datum.
+	CompletedOn string `json:"completed_on" example:"2026-01-05"`
 }
 
 // UpdateStatusRequest is the request body for updating goal status

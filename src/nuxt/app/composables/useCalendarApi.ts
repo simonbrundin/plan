@@ -1,4 +1,5 @@
 import type { Calendar } from '~/types/calendar'
+import type { Place } from '~/types/place'
 
 export interface CalendarEvent {
   id: number
@@ -6,6 +7,11 @@ export interface CalendarEvent {
   goal_id?: number
   /** Vilken kalender händelsen ligger i. */
   calendar_id?: number
+  /**
+   * Platser där händelsen sker. Flera platser har OR-semantik: det
+   * räcker att vara på någon av dem.
+   */
+  places?: Place[]
   title: string
   description: string
   /**

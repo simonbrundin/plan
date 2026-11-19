@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Goal } from '~/types/goal'
 import { canBeFinished } from '~/utils/goalRules'
-import { dueTone, formatDueDate } from '~/utils/dueDate'
+import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
+import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_BORDER, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 definePageMeta({
@@ -9,7 +10,7 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, updateGoalDescription, deleteGoal } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, updateGoalDescription, deleteGoal, completeGoalOccurrence } = useGoalApi()
 
 function dueToneClass(due: string | null): string {
   const tone = dueTone(due)
@@ -30,10 +31,64 @@ const {
   visibleGoals,
   isLoading,
   startedFilter,
+  filterByCurrentPlace,
   loadPrioritizedGoals,
   selectGoal,
   setStartedFilter,
+  setFilterByCurrentPlace,
 } = usePriorityMode()
+
+// Platser: "jag är här"-platsen styr filtret "görbar här".
+const { places: allPlaces, currentPlaceId, fetchPlaces, fetchCurrentPlace, setCurrentPlace, findNearbyPlaces } = usePlaces()
+const gpsMessage = ref('')
+const locating = ref(false)
+
+onMounted(async () => {
+  await Promise.all([
+    fetchPlaces().catch(() => console.error('Failed to fetch places')),
+    fetchCurrentPlace().catch(() => console.error('Failed to fetch current place')),
+  ])
+})
+
+// Slår på GPS och matchar positionen mot platsernas radie.
+async function locateMe() {
+  gpsMessage.value = ''
+
+  if (!('geolocation' in navigator)) {
+    gpsMessage.value = 'GPS stöds inte i den här webbläsaren.'
+    return
+  }
+
+  locating.value = true
+  try {
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      })
+    })
+
+    const nearby = await findNearbyPlaces(position.coords.latitude, position.coords.longitude)
+    if (nearby.length === 0) {
+      gpsMessage.value = 'Ingen plats matchade din position.'
+      return
+    }
+
+    await setCurrentPlace(nearby[0].id)
+    gpsMessage.value = `Du är vid ${nearby[0].name}.`
+  } catch (error: any) {
+    gpsMessage.value = error?.code === 1
+      ? 'Platsdelning nekades - välj platsen manuellt.'
+      : 'Kunde inte hitta din position.'
+  } finally {
+    locating.value = false
+  }
+}
+
+async function selectCurrentPlace(placeId: number | null) {
+  gpsMessage.value = ''
+  await setCurrentPlace(placeId)
+}
 
 // Scrolla till markerat mål när j/k ändrar urvalet, precis som på /goals
 // och målsidorna. `nearest` gör att sidan bara flyttar sig när raden hamnar
@@ -123,6 +178,22 @@ onMounted(() => {
 async function toggleFinished(goal: PrioritizedGoalRow) {
   // Eviga mål pågår hela livet och kan inte slutföras.
   if (!canBeFinished(goal)) {
+    return
+  }
+
+  // Ett återkommande mål slutförs en förekomst i taget. Målet ligger kvar
+  // i listan och väntar på nästa upprepning.
+  if (isRecurringGoal(goal)) {
+    // Förekomsten har inte kommit än - då finns inget att checka av.
+    if (isWaitingForNextOccurrence(goal)) {
+      return
+    }
+    try {
+      await completeGoalOccurrence(goal.id, goal.recurrence_next ?? undefined, todayDateString())
+      await loadPrioritizedGoals()
+    } catch (err) {
+      console.error('Failed to complete occurrence:', err)
+    }
     return
   }
 
@@ -294,6 +365,46 @@ const filterOptions = [
       <span class="text-ink-muted">x</span> ta bort
     </div>
 
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+      <span class="text-xs text-ink-dim">Jag är här:</span>
+      <select
+        :value="currentPlaceId ?? ''"
+        class="px-2 py-1.5 rounded-lg bg-surface-2 border border-line text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+        @change="selectCurrentPlace(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
+      >
+        <option value="">Ingen plats vald</option>
+        <option v-for="place in allPlaces" :key="place.id" :value="place.id">
+          {{ place.name }}
+        </option>
+      </select>
+      <button
+        class="px-3 py-1.5 rounded-full text-sm transition-colors border border-line bg-surface-2 text-ink-muted hover:text-ink flex items-center gap-1.5"
+        :disabled="locating"
+        @click="locateMe"
+      >
+        <Icon name="lucide:locate-fixed" class="w-4 h-4" />
+        {{ locating ? 'Söker…' : 'Var jag befinner mig' }}
+      </button>
+      <button
+        class="px-3 py-1.5 rounded-full text-sm transition-colors border"
+        :class="filterByCurrentPlace
+          ? 'bg-accent-strong text-white border-accent-strong'
+          : 'bg-surface-2 text-ink-muted border-line hover:border-line-strong hover:text-ink'"
+        @click="setFilterByCurrentPlace(!filterByCurrentPlace)"
+      >
+        Görbar här
+      </button>
+    </div>
+
+    <p v-if="gpsMessage" class="text-xs text-ink-dim mb-3">{{ gpsMessage }}</p>
+
+    <p
+      v-if="filterByCurrentPlace && currentPlaceId === null"
+      class="text-xs text-ink-dim mb-3"
+    >
+      Välj en plats för att se vilka mål som är görbara där.
+    </p>
+
     <div class="flex flex-wrap items-center gap-2 mb-6">
       <button
         v-for="option in filterOptions"
@@ -342,7 +453,8 @@ const filterOptions = [
           :class="[
             getWeightBgColor(goal.weight),
             selectedGoalId === goal.id ? 'ring-1 ring-accent' : '',
-            isPriorityMode && selectedGoalId === goal.id ? 'ring-1 ring-fuchsia-500' : ''
+            isPriorityMode && selectedGoalId === goal.id ? 'ring-1 ring-fuchsia-500' : '',
+            isWaitingForNextOccurrence(goal) ? 'opacity-50' : ''
           ]"
           @click="selectGoal(goal.id)"
         >
@@ -363,6 +475,12 @@ const filterOptions = [
             >
               {{ goal.title }}
             </NuxtLink>
+            <Icon
+              v-if="goal.places?.length"
+              name="lucide:map-pin"
+              class="w-4 h-4 flex-shrink-0 text-accent"
+              :title="`Platser: ${goal.places.map((p) => p.name).join(', ')}`"
+            />
           </div>
           <div class="flex-shrink-0">
             <button
@@ -383,9 +501,9 @@ const filterOptions = [
             <button
               @click.stop="toggleFinished(goal)"
               class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors"
-              :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? ETERNAL_BORDER + ' cursor-not-allowed' : 'border-line-strong hover:border-ink-muted'"
-              :title="goal.eternal ? 'Ett evigt mål kan inte slutföras' : goal.finished ? 'Avmarkera som klar' : 'Markera som klar'"
-              :disabled="goal.eternal"
+              :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? ETERNAL_BORDER + ' cursor-not-allowed' : isWaitingForNextOccurrence(goal) ? 'border-line cursor-not-allowed' : 'border-line-strong hover:border-ink-muted'"
+              :title="goal.eternal ? 'Ett evigt mål kan inte slutföras' : isWaitingForNextOccurrence(goal) ? 'Nästa förekomst har inte kommit än' : goal.finished ? 'Avmarkera som klar' : 'Markera som klar'"
+              :disabled="goal.eternal || isWaitingForNextOccurrence(goal)"
             >
               <svg v-if="goal.finished" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -426,6 +544,12 @@ const filterOptions = [
           </div>
 
           <div class="flex items-center gap-2 flex-shrink-0">
+            <span v-if="isRecurringGoal(goal)"
+              class="flex items-center gap-1 text-xs tabular-nums text-ink-dim"
+              :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda`">
+              <Icon name="lucide:repeat" class="w-3.5 h-3.5" />
+              {{ recurrenceCount(goal) }}
+            </span>
             <span v-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-xs flex-shrink-0'">∞</span>
             <span v-if="goal.due" class="text-xs flex-shrink-0 tabular-nums" :class="dueToneClass(goal.due)">
               📅 {{ formatDueDate(goal.due) }}

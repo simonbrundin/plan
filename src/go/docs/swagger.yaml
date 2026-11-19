@@ -86,6 +86,13 @@ definitions:
         type: string
       parent_event_id:
         type: integer
+      places:
+        description: |-
+          Places är de platser där händelsen sker. En händelse kan ha flera
+          platser. Skickas alltid ut, även när listan är tom.
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Place'
+        type: array
       recurrence_rule:
         type: string
       start_at:
@@ -162,6 +169,33 @@ definitions:
         type: integer
       order:
         type: integer
+      places:
+        description: |-
+          Places är de platser där målet kan slutföras. Ett mål kan ha flera
+          platser - då räcker det att vara på någon av dem (OR-semantik).
+          Skickas alltid ut, även när listan är tom.
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Place'
+        type: array
+      recurrence_count:
+        description: RecurrenceCount är antalet slutförda förekomster.
+        type: integer
+      recurrence_mode:
+        description: |-
+          RecurrenceMode är schemaläggningsstrategin: "schedule" (håll
+          schemat) eller "push" (skjuta fram nästa förekomst).
+        type: string
+      recurrence_next:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          RecurrenceNext är datumet för nästa förekomst som ska slutföras.
+          Null = serien är slut och målet har inget mer att göra.
+      recurrence_rule:
+        description: |-
+          RecurrenceRule är upprepningsregeln för ett återkommande mål, som
+          en RRULE-sträng. Null = målet är inte återkommande.
+        type: string
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -177,6 +211,22 @@ definitions:
         type: string
       weight:
         type: integer
+    type: object
+  plan-api_internal_models.CompleteOccurrenceRequest:
+    properties:
+      completed_on:
+        description: |-
+          CompletedOn är det datum slutförandet skedde ("YYYY-MM-DD"). Utan
+          det används dagens datum.
+        example: "2026-01-05"
+        type: string
+      occurrence_date:
+        description: |-
+          OccurrenceDate är den förekomst som slutförs ("YYYY-MM-DD"). Utan
+          det slutförs målets aktuella förekomst. Skickas det en förekomst
+          som redan är slutförd ändras ingenting.
+        example: "2026-01-01"
+        type: string
     type: object
   plan-api_internal_models.CreateCalendarEventRequest:
     properties:
@@ -256,6 +306,22 @@ definitions:
       icon:
         example: heroicons:star
         type: string
+      recurrence_mode:
+        description: |-
+          RecurrenceMode är schemaläggningsstrategin: "schedule" eller "push".
+          Utan den används "schedule".
+        example: schedule
+        type: string
+      recurrence_rule:
+        description: RecurrenceRule gör målet återkommande direkt ("FREQ=DAILY;INTERVAL=2").
+        example: FREQ=DAILY;INTERVAL=2
+        type: string
+      start_date:
+        description: |-
+          StartDate är det datum serien startar på ("YYYY-MM-DD"). Utan den
+          används dagens datum.
+        example: "2026-01-05"
+        type: string
       status_id:
         example: 1
         type: integer
@@ -264,6 +330,26 @@ definitions:
         type: string
     required:
     - title
+    type: object
+  plan-api_internal_models.CreatePlaceRequest:
+    properties:
+      icon:
+        example: heroicons:map-pin
+        type: string
+      latitude:
+        example: 59.3293
+        type: number
+      longitude:
+        example: 18.0686
+        type: number
+      name:
+        example: Hem
+        type: string
+      radius_meters:
+        example: 100
+        type: integer
+    required:
+    - name
     type: object
   plan-api_internal_models.CreateRelationRequest:
     properties:
@@ -393,6 +479,33 @@ definitions:
           piltangenterna.
         example: 0
         type: integer
+      places:
+        description: |-
+          Places är de platser där målet kan slutföras. Ett mål kan ha flera
+          platser - då räcker det att vara på någon av dem (OR-semantik).
+          Skickas alltid ut, även när listan är tom.
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Place'
+        type: array
+      recurrence_count:
+        description: RecurrenceCount är antalet slutförda förekomster.
+        type: integer
+      recurrence_mode:
+        description: |-
+          RecurrenceMode är schemaläggningsstrategin: "schedule" (håll
+          schemat) eller "push" (skjuta fram nästa förekomst).
+        type: string
+      recurrence_next:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          RecurrenceNext är datumet för nästa förekomst som ska slutföras.
+          Null = serien är slut och målet har inget mer att göra.
+      recurrence_rule:
+        description: |-
+          RecurrenceRule är upprepningsregeln för ett återkommande mål, som
+          en RRULE-sträng. Null = målet är inte återkommande.
+        type: string
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -475,6 +588,33 @@ definitions:
         items:
           $ref: '#/definitions/plan-api_internal_models.Goal'
         type: array
+      places:
+        description: |-
+          Places är de platser där målet kan slutföras. Ett mål kan ha flera
+          platser - då räcker det att vara på någon av dem (OR-semantik).
+          Skickas alltid ut, även när listan är tom.
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Place'
+        type: array
+      recurrence_count:
+        description: RecurrenceCount är antalet slutförda förekomster.
+        type: integer
+      recurrence_mode:
+        description: |-
+          RecurrenceMode är schemaläggningsstrategin: "schedule" (håll
+          schemat) eller "push" (skjuta fram nästa förekomst).
+        type: string
+      recurrence_next:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          RecurrenceNext är datumet för nästa förekomst som ska slutföras.
+          Null = serien är slut och målet har inget mer att göra.
+      recurrence_rule:
+        description: |-
+          RecurrenceRule är upprepningsregeln för ett återkommande mål, som
+          en RRULE-sträng. Null = målet är inte återkommande.
+        type: string
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -496,11 +636,43 @@ definitions:
       value:
         type: string
     type: object
+  plan-api_internal_models.NullableString:
+    properties:
+      set:
+        type: boolean
+      value:
+        type: string
+    type: object
   plan-api_internal_models.NullableTime:
     properties:
       set:
         type: boolean
       value:
+        type: string
+    type: object
+  plan-api_internal_models.Place:
+    properties:
+      created_at:
+        type: string
+      icon:
+        example: heroicons:map-pin
+        type: string
+      id:
+        example: 1
+        type: integer
+      latitude:
+        example: 59.3293
+        type: number
+      longitude:
+        example: 18.0686
+        type: number
+      name:
+        example: Hem
+        type: string
+      radius_meters:
+        example: 100
+        type: integer
+      updated_at:
         type: string
     type: object
   plan-api_internal_models.PrioritizedGoal:
@@ -553,9 +725,36 @@ definitions:
         type: integer
       parentTitle:
         type: string
+      places:
+        description: |-
+          Places är de platser där målet kan slutföras. Ett mål kan ha flera
+          platser - då räcker det att vara på någon av dem (OR-semantik).
+          Skickas alltid ut, även när listan är tom.
+        items:
+          $ref: '#/definitions/plan-api_internal_models.Place'
+        type: array
       priorityOrder:
         example: 0
         type: integer
+      recurrence_count:
+        description: RecurrenceCount är antalet slutförda förekomster.
+        type: integer
+      recurrence_mode:
+        description: |-
+          RecurrenceMode är schemaläggningsstrategin: "schedule" (håll
+          schemat) eller "push" (skjuta fram nästa förekomst).
+        type: string
+      recurrence_next:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          RecurrenceNext är datumet för nästa förekomst som ska slutföras.
+          Null = serien är slut och målet har inget mer att göra.
+      recurrence_rule:
+        description: |-
+          RecurrenceRule är upprepningsregeln för ett återkommande mål, som
+          en RRULE-sträng. Null = målet är inte återkommande.
+        type: string
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -602,6 +801,13 @@ definitions:
     required:
     - childIds
     - parentId
+    type: object
+  plan-api_internal_models.SetCurrentPlaceRequest:
+    properties:
+      place_id:
+        type: integer
+    type: object
+  plan-api_internal_models.SetPlacesRequest:
     type: object
   plan-api_internal_models.SplitCalendarEventRequest:
     properties:
@@ -713,12 +919,39 @@ definitions:
         $ref: '#/definitions/plan-api_internal_models.NullableTime'
       icon:
         type: string
+      recurrence_mode:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.NullableString'
+        description: RecurrenceMode sätter schemaläggningsstrategin ("schedule" eller
+          "push").
+      recurrence_rule:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.NullableString'
+        description: |-
+          RecurrenceRule sätter eller tar bort målets upprepningsregel.
+          Utan fältet lämnas regeln oförändrad, null tar bort den.
+      start_date:
+        description: StartDate är det datum serien startar på ("YYYY-MM-DD").
+        type: string
       started:
         $ref: '#/definitions/plan-api_internal_models.NullableTime'
       status_id:
         type: integer
       title:
         type: string
+    type: object
+  plan-api_internal_models.UpdatePlaceRequest:
+    properties:
+      icon:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      radius_meters:
+        type: integer
     type: object
   plan-api_internal_models.UpdateRelationRequest:
     properties:
@@ -1378,6 +1611,83 @@ paths:
       summary: Update a goal
       tags:
       - goals
+  /api/goals/{id}/completions:
+    delete:
+      consumes:
+      - application/json
+      description: Removes the latest completion of a recurring goal and restores
+        that occurrence
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Undo the last completed occurrence of a recurring goal
+      tags:
+      - goals
+    post:
+      consumes:
+      - application/json
+      description: Marks the current occurrence of a recurring goal as completed and
+        moves on to the next one
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Completion data
+        in: body
+        name: completion
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CompleteOccurrenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Complete the current occurrence of a recurring goal
+      tags:
+      - goals
   /api/goals/{id}/status:
     get:
       consumes:
@@ -1830,6 +2140,375 @@ paths:
       summary: List all statuses
       tags:
       - statuses
+  /api/v1/calendar-events/{id}/places:
+    get:
+      consumes:
+      - application/json
+      description: Get the places linked to a calendar event
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Place'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List a calendar event's places
+      tags:
+      - places
+    put:
+      consumes:
+      - application/json
+      description: Replace the places linked to a calendar event. An empty list removes
+        all places.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Place IDs
+        in: body
+        name: places
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.SetPlacesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Place'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Replace a calendar event's places
+      tags:
+      - places
+  /api/v1/goals/{id}/places:
+    get:
+      consumes:
+      - application/json
+      description: Get the places linked to a goal
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Place'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List a goal's places
+      tags:
+      - places
+    put:
+      consumes:
+      - application/json
+      description: Replace the places linked to a goal. An empty list removes all
+        places.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Place IDs
+        in: body
+        name: places
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.SetPlacesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Place'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Replace a goal's places
+      tags:
+      - places
+  /api/v1/me/current-place:
+    get:
+      consumes:
+      - application/json
+      description: Get the place the user has chosen as "I am here"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Place'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get the current place
+      tags:
+      - places
+    put:
+      consumes:
+      - application/json
+      description: Choose the place the user is at, or clear it with null
+      parameters:
+      - description: Place ID or null
+        in: body
+        name: place
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.SetCurrentPlaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Place'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set the current place
+      tags:
+      - places
+  /api/v1/places:
+    get:
+      consumes:
+      - application/json
+      description: Get all places for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Place'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all places
+      tags:
+      - places
+    post:
+      consumes:
+      - application/json
+      description: Create a place for the authenticated user
+      parameters:
+      - description: Place data
+        in: body
+        name: place
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.CreatePlaceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Place'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a place
+      tags:
+      - places
+  /api/v1/places/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a place and its links to goals and events
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a place
+      tags:
+      - places
+    patch:
+      consumes:
+      - application/json
+      description: Update a place's name, coordinates or radius
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update data
+        in: body
+        name: place
+        required: true
+        schema:
+          $ref: '#/definitions/plan-api_internal_models.UpdatePlaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.Place'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a place
+      tags:
+      - places
+  /api/v1/places/nearby:
+    get:
+      consumes:
+      - application/json
+      description: Get the places whose radius contains the given position
+      parameters:
+      - description: Latitude
+        in: query
+        name: lat
+        required: true
+        type: number
+      - description: Longitude
+        in: query
+        name: lon
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/plan-api_internal_models.Place'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Find places near a position
+      tags:
+      - places
 schemes:
 - http
 - https

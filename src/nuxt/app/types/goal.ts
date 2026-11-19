@@ -1,3 +1,7 @@
+import type { Place } from './place';
+
+export type RecurrenceMode = 'schedule' | 'push';
+
 export interface Goal {
 	id: number;
 	title: string;
@@ -11,6 +15,9 @@ export interface Goal {
 	// Due är det datum ("YYYY-MM-DD") målet ska vara klart.
 	// Null = inget datum satt.
 	due: string | null;
+	// Platser där målet kan slutföras. Flera platser har OR-semantik:
+	// målet är görbart om man är på någon av dem.
+	places?: Place[];
 	inbox: number;
 	// Evigt mål - pågår hela livet och kan inte slutföras.
 	eternal: boolean;
@@ -21,6 +28,16 @@ export interface Goal {
 	// detta värde (stigande).
 	order?: number;
 	priorityOrder?: number;
+	// Upprepningsregeln för ett återkommande mål (RRULE).
+	// Null = målet är inte återkommande.
+	recurrence_rule?: string | null;
+	// Schemaläggningsstrategi: "schedule" (håll schemat) eller
+	// "push" (skjuta fram nästa förekomst).
+	recurrence_mode?: RecurrenceMode | null;
+	// Datumet ("YYYY-MM-DD") för nästa förekomst som ska slutföras.
+	recurrence_next?: string | null;
+	// Antalet slutförda förekomster.
+	recurrence_count?: number;
 }
 
 export interface ChildRelation {

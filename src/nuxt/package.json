@@ -9,8 +9,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test:watch": "nodemon --exec 'npx cucumber-js --import tsx --import features/step-definitions/priority.steps.ts --import features/step-definitions/natural-language.steps.ts --import features/step-definitions/icons.steps.ts --import features/step-definitions/calendar-detail.steps.ts' --ext feature,js,vue,ts",
-    "test": "cucumber-js --import tsx --import features/step-definitions/priority.steps.ts --import features/step-definitions/natural-language.steps.ts --import features/step-definitions/icons.steps.ts --import features/step-definitions/calendar-detail.steps.ts"
+    "test:watch": "nodemon --exec 'npx cucumber-js --import tsx --import features/step-definitions/priority.steps.ts --import features/step-definitions/natural-language.steps.ts --import features/step-definitions/icons.steps.ts --import features/step-definitions/calendar-rows.steps.ts --import features/step-definitions/recurring-goals.steps.ts' --ext feature,js,vue,ts",
+    "test": "cucumber-js --import tsx --import features/step-definitions/priority.steps.ts --import features/step-definitions/natural-language.steps.ts --import features/step-definitions/icons.steps.ts --import features/step-definitions/calendar-rows.steps.ts --import features/step-definitions/recurring-goals.steps.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.111",
@@ -20,6 +20,7 @@
     "@nuxtjs/tailwindcss": "7.0.0-beta.0",
     "@pinia/nuxt": "^0.9.0",
     "@tailwindcss/vite": "^4.1.13",
+    "leaflet": "^1.9.4",
     "nodemon": "^3.1.10",
     "nuxt": "^4.1.2",
     "ofetch": "^1.5.1",
@@ -46,6 +47,7 @@
     "@semantic-release/npm": "^12.0.2",
     "@semantic-release/release-notes-generator": "^12.1.0",
     "@types/bun": "^1.1.14",
+    "@types/leaflet": "^1.9.22",
     "semantic-release": "^24.2.8",
     "tsx": "^4.20.6"
   },

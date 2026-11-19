@@ -67,6 +67,10 @@ export function usePriorityToggle() {
 		const { isSearchOpen } = useSearchState();
 		if (isSearchOpen.value) return;
 
+		// På målsidan är 'p' platsväljarens tangent (platsen där målet
+		// kan slutföras). Prioritetslistan nås då via tangentmenyn.
+		if (route.path.startsWith("/goal/")) return;
+
 		// Toggle on 'p' key press (not hold)
 		if (key === "p" && !event.ctrlKey && !event.metaKey && !event.altKey) {
 			event.preventDefault();

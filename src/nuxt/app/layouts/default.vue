@@ -73,6 +73,22 @@ const links = [
       },
     },
     {
+      label: "Platser",
+      icon: "i-lucide-map-pin",
+      to: "/platser",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: "Inställningar",
+      icon: "i-lucide-settings",
+      to: "/settings",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
       label: "Login",
       icon: "i-lucide-log-in",
       to: "/login",

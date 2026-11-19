@@ -3,6 +3,7 @@ import assert from "node:assert";
 
 import {
 	describeParsedEntry,
+	goalTitle,
 	parseNaturalLanguage,
 	resolveQuickAddMode,
 	type ParsedEntry,
@@ -13,6 +14,7 @@ import {
 interface NaturalLanguageState {
 	referenceTime: Date;
 	entry: ParsedEntry | null;
+	text: string;
 }
 
 const states = new WeakMap<object, NaturalLanguageState>();
@@ -20,7 +22,7 @@ const states = new WeakMap<object, NaturalLanguageState>();
 const stateOf = (world: object): NaturalLanguageState => {
 	let state = states.get(world);
 	if (!state) {
-		state = { referenceTime: new Date("2026-03-10T09:00:00"), entry: null };
+		state = { referenceTime: new Date("2026-03-10T09:00:00"), entry: null, text: "" };
 		states.set(world, state);
 	}
 	return state;
@@ -49,6 +51,7 @@ Given(/the reference time is "([^"]+)"/, function (this: object, value: string) 
 
 When(/the user writes "([^"]*)"/, function (this: object, value: string) {
 	const state = stateOf(this);
+	state.text = value;
 	state.entry = parseNaturalLanguage(value, state.referenceTime);
 });
 
@@ -98,6 +101,11 @@ Then(/the event should be all day/, function (this: object) {
 
 Then(/the recurrence rule should be "([^"]+)"/, function (this: object, value: string) {
 	assert.equal(entryOf(this).recurrenceRule, value);
+});
+
+Then(/the goal title should be "([^"]*)"/, function (this: object, value: string) {
+	const state = stateOf(this);
+	assert.equal(goalTitle(state.text, entryOf(this)), value);
 });
 
 Then(/the date should not be explicit/, function (this: object) {

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ import (
 type CalendarEventHandler struct {
 	repo        *repository.CalendarEventRepository
 	calendars   *repository.CalendarRepository
+	places      *repository.PlaceRepository
 	dbConnected bool
 }
 
@@ -25,7 +27,35 @@ func NewCalendarEventHandler(dbConnected bool) *CalendarEventHandler {
 	return &CalendarEventHandler{
 		repo:        repository.NewCalendarEventRepository(),
 		calendars:   repository.NewCalendarRepository(),
+		places:      repository.NewPlaceRepository(),
 		dbConnected: dbConnected,
+	}
+}
+
+// attachPlaces fyller i händelsernas platser.
+//
+// Platserna är extra information - ett fel får inte förstöra svaret.
+func (h *CalendarEventHandler) attachPlaces(ctx context.Context, events []models.CalendarEvent) {
+	if len(events) == 0 {
+		return
+	}
+
+	ids := make([]int64, len(events))
+	for i, e := range events {
+		ids[i] = e.ID
+	}
+
+	byEvent, err := h.places.GetPlacesForEvents(ctx, ids)
+	if err != nil {
+		return
+	}
+
+	for i := range events {
+		places := byEvent[events[i].ID]
+		if places == nil {
+			places = []models.Place{}
+		}
+		events[i].Places = places
 	}
 }
 
@@ -159,6 +189,7 @@ func (h *CalendarEventHandler) listAll(c *gin.Context, userID int64) {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
+	h.attachPlaces(c.Request.Context(), events)
 	c.JSON(http.StatusOK, events)
 }
 
@@ -181,6 +212,7 @@ func (h *CalendarEventHandler) listInWindow(c *gin.Context, userID int64) {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
+	h.attachPlaces(c.Request.Context(), events)
 	c.JSON(http.StatusOK, events)
 }
 
@@ -220,6 +252,9 @@ func (h *CalendarEventHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Calendar event not found"})
 		return
 	}
+	events := []models.CalendarEvent{*event}
+	h.attachPlaces(c.Request.Context(), events)
+	*event = events[0]
 	c.JSON(http.StatusOK, event)
 }
 
@@ -308,6 +343,9 @@ func (h *CalendarEventHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
+	created := []models.CalendarEvent{*event}
+	h.attachPlaces(c.Request.Context(), created)
+	*event = created[0]
 	c.JSON(http.StatusCreated, event)
 }
 
@@ -424,6 +462,9 @@ func (h *CalendarEventHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Calendar event not found"})
 		return
 	}
+	updated := []models.CalendarEvent{*event}
+	h.attachPlaces(c.Request.Context(), updated)
+	*event = updated[0]
 	c.JSON(http.StatusOK, event)
 }
 

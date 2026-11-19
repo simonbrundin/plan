@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"plan-api/internal/database"
 	"plan-api/internal/models"
+	"plan-api/internal/recurrence"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,6 +22,13 @@ var ErrInvalidTimestamp = errors.New("invalid timestamp")
 // Det är samma fel som models.ErrInvalidDueDate - models-felet uppstår när
 // ett datum avkodas, repot-felet när det skrivs till databasen.
 var ErrInvalidDueDate = models.ErrInvalidDueDate
+
+// ErrNotRecurring betyder att målet inte är återkommande.
+var ErrNotRecurring = errors.New("målet är inte återkommande")
+
+// ErrNoCompletion betyder att det inte finns någon slutförd förekomst att
+// avbocka.
+var ErrNoCompletion = errors.New("målet har ingen slutförd förekomst")
 
 // dueDateFromTime omvandlar en nullable datumkolumn till ett DueDate.
 // Kolumnen är ett DATE, så tiden är alltid midnatt UTC - bara datumet
@@ -46,7 +55,9 @@ func NewGoalRepository() *GoalRepository {
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
 		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal, g."order",
-			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent
+			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent,
+			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
 		WHERE ug.user_id = $1
@@ -62,11 +73,14 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 	for rows.Next() {
 		var g models.Goal
 		var due *time.Time
-		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
+		var recurrenceNext *time.Time
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent,
+			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
 		g.Due = dueDateFromTime(due)
+		g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 		goals = append(goals, g)
 	}
 
@@ -77,13 +91,17 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
 	query := `
 		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, due, inbox, eternal, "order",
-			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent
+			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent,
+			recurrence_rule, recurrence_mode, recurrence_next,
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = goals.id) AS recurrence_count
 		FROM goals WHERE id = $1`
 
 	var g models.Goal
 	var due *time.Time
+	var recurrenceNext *time.Time
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent)
+		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal, &g.Order, &g.HasParent,
+		&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
@@ -91,6 +109,7 @@ func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models
 		return nil, fmt.Errorf("failed to get goal: %w", err)
 	}
 	g.Due = dueDateFromTime(due)
+	g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 
 	return &g, nil
 }
@@ -216,18 +235,323 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 		}
 	}
 
-	if !hasUpdate {
+	if !hasUpdate && !req.RecurrenceRule.Set && !req.RecurrenceMode.Set {
 		return r.GetGoalByID(ctx, goalID)
 	}
 
-	// Remove trailing comma and space
-	query = query[:len(query)-2]
-	query += fmt.Sprintf(" WHERE id = $%d", argNum)
-	args = append(args, goalID)
+	if hasUpdate {
+		// Remove trailing comma and space
+		query = query[:len(query)-2]
+		query += fmt.Sprintf(" WHERE id = $%d", argNum)
+		args = append(args, goalID)
 
-	_, err := r.pool.Exec(ctx, query, args...)
+		_, err := r.pool.Exec(ctx, query, args...)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update goal: %w", err)
+		}
+	}
+
+	if req.RecurrenceRule.Set || req.RecurrenceMode.Set {
+		if err := r.applyRecurrenceUpdate(ctx, goalID, req); err != nil {
+			return nil, err
+		}
+	}
+
+	return r.GetGoalByID(ctx, goalID)
+}
+
+// applyRecurrenceUpdate sätter eller tar bort målets upprepning.
+//
+// En ny regel startar en ny serie - de tidigare slutförandena hör till den
+// gamla regeln och tas därför bort. Att bara byta strategi påverkar inte den
+// aktuella förekomsten.
+func (r *GoalRepository) applyRecurrenceUpdate(ctx context.Context, goalID int64, req models.UpdateGoalRequest) error {
+	if req.RecurrenceRule.Set {
+		if req.RecurrenceRule.Value == nil {
+			return r.ClearRecurrence(ctx, goalID)
+		}
+
+		rule := strings.TrimSpace(*req.RecurrenceRule.Value)
+		if rule == "" {
+			return fmt.Errorf("%w: regeln är tom", recurrence.ErrInvalidRule)
+		}
+
+		mode := recurrence.ModeSchedule
+		if req.RecurrenceMode.Set && req.RecurrenceMode.Value != nil && *req.RecurrenceMode.Value != "" {
+			mode = recurrence.Mode(*req.RecurrenceMode.Value)
+		} else {
+			existing, err := r.GetGoalByID(ctx, goalID)
+			if err != nil {
+				return err
+			}
+			if existing != nil && existing.RecurrenceMode != nil && *existing.RecurrenceMode != "" {
+				mode = recurrence.Mode(*existing.RecurrenceMode)
+			}
+		}
+
+		start := time.Now().UTC()
+		if req.StartDate != nil && *req.StartDate != "" {
+			parsed, err := time.Parse(models.DueDateFormat, *req.StartDate)
+			if err != nil {
+				return fmt.Errorf("%w: %q", ErrInvalidDueDate, *req.StartDate)
+			}
+			start = parsed
+		}
+
+		_, err := r.SetRecurrence(ctx, goalID, rule, mode, start)
+		return err
+	}
+
+	if req.RecurrenceMode.Value == nil || *req.RecurrenceMode.Value == "" {
+		return fmt.Errorf("%w: strategin måste anges", recurrence.ErrInvalidMode)
+	}
+
+	_, err := r.SetRecurrenceMode(ctx, goalID, recurrence.Mode(*req.RecurrenceMode.Value))
+	return err
+}
+
+// SetRecurrence gör ett mål återkommande med en ny upprepningsregel.
+//
+// Serien börjar på start och nästa förekomst räknas fram därifrån. De
+// tidigare slutförandena hör till den gamla regeln och tas därför bort.
+func (r *GoalRepository) SetRecurrence(ctx context.Context, goalID int64, rule string, mode recurrence.Mode, start time.Time) (*models.Goal, error) {
+	if err := recurrence.Validate(rule); err != nil {
+		return nil, err
+	}
+	if err := recurrence.ValidateMode(mode); err != nil {
+		return nil, err
+	}
+
+	anchor := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.UTC)
+
+	first, err := recurrence.FirstOccurrence(rule, anchor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update goal: %w", err)
+		return nil, err
+	}
+
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, `
+		UPDATE goals
+		SET recurrence_rule = $1, recurrence_mode = $2, recurrence_anchor = $3, recurrence_next = $4, finished = NULL
+		WHERE id = $5`, rule, string(mode), anchor, first, goalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set recurrence: %w", err)
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM goal_completions WHERE goal_id = $1`, goalID); err != nil {
+		return nil, fmt.Errorf("failed to clear goal completions: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return r.GetGoalByID(ctx, goalID)
+}
+
+// SetRecurrenceMode byter schemaläggningsstrategi för ett återkommande mål.
+//
+// Den aktuella förekomsten påverkas inte - strategin avgör hur nästa
+// förekomst räknas när nästa förekomst slutförs.
+func (r *GoalRepository) SetRecurrenceMode(ctx context.Context, goalID int64, mode recurrence.Mode) (*models.Goal, error) {
+	if err := recurrence.ValidateMode(mode); err != nil {
+		return nil, err
+	}
+
+	result, err := r.pool.Exec(ctx, `UPDATE goals SET recurrence_mode = $1 WHERE id = $2 AND recurrence_rule IS NOT NULL`, string(mode), goalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set recurrence mode: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return nil, ErrNotRecurring
+	}
+
+	return r.GetGoalByID(ctx, goalID)
+}
+
+// ClearRecurrence tar bort upprepningen så att målet blir ett vanligt mål.
+func (r *GoalRepository) ClearRecurrence(ctx context.Context, goalID int64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, `
+		UPDATE goals
+		SET recurrence_rule = NULL, recurrence_mode = NULL, recurrence_anchor = NULL, recurrence_next = NULL
+		WHERE id = $1`, goalID)
+	if err != nil {
+		return fmt.Errorf("failed to clear recurrence: %w", err)
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM goal_completions WHERE goal_id = $1`, goalID); err != nil {
+		return fmt.Errorf("failed to clear goal completions: %w", err)
+	}
+
+	return tx.Commit(ctx)
+}
+
+// CompleteOccurrence slutför den aktuella förekomsten av ett återkommande mål.
+//
+// Förekomsten loggas i goal_completions och nästa förekomst räknas fram enligt
+// målets strategi. När serien tar slut markeras målet som klart.
+//
+// occurrenceDate anger vilken förekomst som slutförs. Utan det slutförs
+// målets aktuella förekomst. En redan slutförd förekomst ändrar ingenting -
+// anropet är då en dubblett.
+func (r *GoalRepository) CompleteOccurrence(ctx context.Context, goalID int64, occurrenceDate *time.Time, completedOn time.Time) (*models.Goal, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	var rule *string
+	var mode *string
+	var anchor *time.Time
+	var next *time.Time
+
+	err = tx.QueryRow(ctx, `
+		SELECT recurrence_rule, recurrence_mode, recurrence_anchor, recurrence_next
+		FROM goals WHERE id = $1 FOR UPDATE`, goalID).Scan(&rule, &mode, &anchor, &next)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to load goal recurrence: %w", err)
+	}
+
+	if rule == nil || mode == nil || next == nil {
+		return nil, ErrNotRecurring
+	}
+
+	occurrence := startOfDay(next.UTC())
+
+	if occurrenceDate != nil {
+		requested := startOfDay(occurrenceDate.UTC())
+		if !requested.Equal(occurrence) {
+			// En redan slutförd förekomst är en dubblett - inget ändras.
+			var completed bool
+			err := tx.QueryRow(ctx, `
+				SELECT EXISTS(SELECT 1 FROM goal_completions WHERE goal_id = $1 AND occurrence_date = $2)`,
+				goalID, requested).Scan(&completed)
+			if err != nil {
+				return nil, fmt.Errorf("failed to check goal completion: %w", err)
+			}
+			if completed {
+				if err := tx.Commit(ctx); err != nil {
+					return nil, fmt.Errorf("failed to commit transaction: %w", err)
+				}
+				return r.GetGoalByID(ctx, goalID)
+			}
+
+			return nil, fmt.Errorf("%w: %s är inte den aktuella förekomsten", recurrence.ErrNoOccurrence, requested.Format(time.DateOnly))
+		}
+		occurrence = requested
+	}
+
+	completedOn = startOfDay(completedOn)
+
+	var completionID int64
+	err = tx.QueryRow(ctx, `
+		INSERT INTO goal_completions (goal_id, occurrence_date)
+		VALUES ($1, $2)
+		ON CONFLICT (goal_id, occurrence_date) DO NOTHING
+		RETURNING id`, goalID, occurrence).Scan(&completionID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			if err := tx.Commit(ctx); err != nil {
+				return nil, fmt.Errorf("failed to commit transaction: %w", err)
+			}
+			return r.GetGoalByID(ctx, goalID)
+		}
+		return nil, fmt.Errorf("failed to log goal completion: %w", err)
+	}
+
+	seriesAnchor := occurrence
+	if anchor != nil {
+		seriesAnchor = startOfDay(anchor.UTC())
+	}
+
+	nextOccurrence, err := recurrence.NextOccurrence(*rule, recurrence.Mode(*mode), seriesAnchor, occurrence, completedOn)
+	if err != nil {
+		if !errors.Is(err, recurrence.ErrNoOccurrence) {
+			return nil, err
+		}
+
+		// Serien är slut - målet har inget mer att göra.
+		_, err = tx.Exec(ctx, `
+			UPDATE goals SET recurrence_next = NULL, finished = CURRENT_TIMESTAMP
+			WHERE id = $1`, goalID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to finish goal: %w", err)
+		}
+	} else {
+		_, err = tx.Exec(ctx, `UPDATE goals SET recurrence_next = $1 WHERE id = $2`, nextOccurrence, goalID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update recurrence: %w", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return r.GetGoalByID(ctx, goalID)
+}
+
+// UndoOccurrence avbockar den senast slutförda förekomsten.
+func (r *GoalRepository) UndoOccurrence(ctx context.Context, goalID int64) (*models.Goal, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	var rule *string
+	err = tx.QueryRow(ctx, `SELECT recurrence_rule FROM goals WHERE id = $1 FOR UPDATE`, goalID).Scan(&rule)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to load goal recurrence: %w", err)
+	}
+	if rule == nil {
+		return nil, ErrNotRecurring
+	}
+
+	var occurrence time.Time
+	err = tx.QueryRow(ctx, `
+		SELECT occurrence_date FROM goal_completions
+		WHERE goal_id = $1
+		ORDER BY completed_at DESC, id DESC
+		LIMIT 1`, goalID).Scan(&occurrence)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, ErrNoCompletion
+		}
+		return nil, fmt.Errorf("failed to load goal completion: %w", err)
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM goal_completions WHERE goal_id = $1 AND occurrence_date = $2`, goalID, occurrence); err != nil {
+		return nil, fmt.Errorf("failed to delete goal completion: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, `
+		UPDATE goals SET recurrence_next = $1, finished = NULL
+		WHERE id = $2`, occurrence, goalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to restore recurrence: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return r.GetGoalByID(ctx, goalID)
@@ -300,7 +624,9 @@ func (r *GoalRepository) GetChildRelations(ctx context.Context, parentID int64) 
 // GetParentRelations returns parent goals for a goal
 func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal,
+			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goal_relations gr
 		INNER JOIN goals g ON g.id = gr.parent_id
 		WHERE gr.child_id = $1`
@@ -315,11 +641,14 @@ func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) 
 	for rows.Next() {
 		var g models.Goal
 		var due *time.Time
+		var recurrenceNext *time.Time
 		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon,
-			&g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal); err != nil {
+			&g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal,
+			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
 		g.Due = dueDateFromTime(due)
+		g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 		goals = append(goals, g)
 	}
 
@@ -579,7 +908,9 @@ func (r *GoalRepository) GetDependencies(ctx context.Context, goalID int64) ([]m
 // GetBlockingGoals returns goals that depend on this goal
 func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.inbox, g.eternal,
+			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goal_dependencies gd
 		INNER JOIN goals g ON g.id = gd.goal_id
 		WHERE gd.depends_on_id = $1`
@@ -594,10 +925,13 @@ func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]
 	for rows.Next() {
 		var g models.Goal
 		var due *time.Time
-		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal); err != nil {
+		var recurrenceNext *time.Time
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal,
+			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, err
 		}
 		g.Due = dueDateFromTime(due)
+		g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 		goals = append(goals, g)
 	}
 
@@ -672,7 +1006,9 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 			g.priority_order,
 			COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
 			(SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
-			(SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id
+			(SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id,
+			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
 		WHERE ug.user_id = $1
@@ -692,11 +1028,14 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		var parentTitle *string
 		var parentID *int64
 		var due *time.Time
+		var recurrenceNext *time.Time
 		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &g.Inbox, &g.Eternal,
-			&g.PriorityOrder, &g.Weight, &parentTitle, &parentID); err != nil {
+			&g.PriorityOrder, &g.Weight, &parentTitle, &parentID,
+			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, err
 		}
 		g.Due = dueDateFromTime(due)
+		g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 		g.ParentTitle = parentTitle
 		g.ParentID = parentID
 		goals = append(goals, g)
@@ -782,7 +1121,6 @@ func (r *GoalRepository) UpdateGoalStatus(ctx context.Context, goalID int64, new
 		// Get from status name
 		query = `SELECT name FROM statuses WHERE id = $1`
 		_ = tx.QueryRow(ctx, query, currentID).Scan(&fromStatusName)
-		fromStatusName = fromStatusName
 	}
 
 	// Update goal status
@@ -854,4 +1192,9 @@ func (r *GoalRepository) GetStatusHistory(ctx context.Context, goalID int64) ([]
 	}
 
 	return history, nil
+}
+
+// startOfDay gör om ett klockslag till det datum det tillhör.
+func startOfDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 }

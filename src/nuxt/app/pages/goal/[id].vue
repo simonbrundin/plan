@@ -7,10 +7,13 @@ import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight } from '~/types/goal'
+import type { Place } from '~/types/place'
 import { moveChildId, nextChildOrder } from '~/utils/childOrder'
 import { canBeFinished } from '~/utils/goalRules'
 import { descriptionPreview } from '~/utils/goalDescription'
-import { dueTone, formatDueDate } from '~/utils/dueDate'
+import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
+import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
+import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
@@ -22,7 +25,7 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription } = useGoalApi();
+const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -45,6 +48,58 @@ const refresh = async (forceRefresh = false) => {
 
 // Fetch initial data
 await refresh();
+
+// Hämta användarens platser - de behövs för att kunna koppla platser
+// till mål.
+const { places: allPlaces, fetchPlaces, fetchGoalPlaces, setGoalPlaces } = usePlaces();
+await fetchPlaces().catch(() => {
+  console.error('Failed to fetch places');
+});
+
+// Målet vars platser just nu redigeras. Null = ingen öppen platsväljare.
+const placeTargetId = ref<number | null>(null);
+const placeDraft = ref<Place[]>([]);
+
+// Öppnar eller stänger platsväljaren för ett mål.
+async function togglePlacePicker(targetId: number) {
+  if (placeTargetId.value === targetId) {
+    closePlacePicker();
+    return;
+  }
+  try {
+    placeDraft.value = await fetchGoalPlaces(targetId);
+    placeTargetId.value = targetId;
+  } catch (error) {
+    console.error('Failed to load places for goal:', error);
+  }
+}
+
+function closePlacePicker() {
+  placeTargetId.value = null;
+  placeDraft.value = [];
+}
+
+// Sparar platserna på målet och uppdaterar den lokala datan.
+async function savePlaces(targetId: number) {
+  try {
+    const saved = await setGoalPlaces(targetId, placeDraft.value.map((p) => p.id));
+    applyPlaces(targetId, saved);
+    closePlacePicker();
+  } catch (error) {
+    console.error('Failed to save places for goal:', error);
+  }
+}
+
+// Skriver tillbaka platserna i den hämtade måldatan.
+function applyPlaces(targetId: number, saved: Place[]) {
+  const data = goalData.value;
+  if (!data) return;
+  if (data.goal?.id === targetId) data.goal.places = saved;
+  const child = data.children?.find((c) => c.id === targetId);
+  if (child) child.places = saved;
+  const parent = data.parents?.find((p) => p.id === targetId);
+  if (parent) parent.places = saved;
+}
 
 // Re-fetch when navigating to a different goal
 watch(
@@ -982,6 +1037,22 @@ async function toggleFinished(goalToToggle: Goal) {
     return;
   }
 
+  // Ett återkommande mål slutförs en förekomst i taget. Målet ligger kvar
+  // i listan och väntar på nästa upprepning.
+  if (isRecurringGoal(goalToToggle)) {
+    // Förekomsten har inte kommit än - då finns inget att checka av.
+    if (isWaitingForNextOccurrence(goalToToggle)) {
+      return;
+    }
+    try {
+      await completeGoalOccurrence(goalToToggle.id, goalToToggle.recurrence_next ?? undefined, todayDateString());
+      await refresh();
+    } catch (error) {
+      console.error("Failed to complete goal occurrence:", error);
+    }
+    return;
+  }
+
   try {
     const newFinishedValue = goalToToggle.finished ? null : new Date().toISOString();
 
@@ -1002,6 +1073,58 @@ async function toggleFinished(goalToToggle: Goal) {
     await refresh();
   } catch (error) {
     console.error("Failed to toggle goal finished status:", error);
+  }
+}
+
+// Upprepning för ett mål. Målets förekomster loggas var för sig, så
+// målet kan checkas av och återkomma därefter.
+const recurrenceTargetId = ref<number | null>(null);
+
+function recurrenceTarget(): Goal | null {
+  if (recurrenceTargetId.value === null) return null;
+
+  if (goalData.value?.goal && goalData.value.goal.id === recurrenceTargetId.value) {
+    return goalData.value.goal;
+  }
+
+  const child = filteredChildren.value.find((c) => c.id === recurrenceTargetId.value);
+  if (child) return child;
+
+  const parent = parents.value.find((p) => p.id === recurrenceTargetId.value);
+  return parent ?? null;
+}
+
+function openRecurrenceEditor(target: Goal) {
+  recurrenceTargetId.value = target.id;
+}
+
+function closeRecurrenceEditor() {
+  recurrenceTargetId.value = null;
+}
+
+async function saveRecurrence(rule: string, mode: RecurrenceMode) {
+  const target = recurrenceTarget();
+  if (!target) return;
+
+  try {
+    await setGoalRecurrence(target.id, rule, mode);
+    closeRecurrenceEditor();
+    await refresh();
+  } catch (error) {
+    console.error("Failed to save goal recurrence:", error);
+  }
+}
+
+async function removeRecurrence() {
+  const target = recurrenceTarget();
+  if (!target) return;
+
+  try {
+    await setGoalRecurrence(target.id, null);
+    closeRecurrenceEditor();
+    await refresh();
+  } catch (error) {
+    console.error("Failed to remove goal recurrence:", error);
   }
 }
 
@@ -1379,6 +1502,28 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
+  // Hantera 'p' för att sätta plats (var målet kan slutföras)
+  if (event.key === "p") {
+    event.preventDefault();
+    // Tangenten följer det markerade målet: förälder (parent-läge),
+    // huvudmålet eller det markerade undermålet.
+    if (isParentMode.value && parents.value.length > 0) {
+      togglePlacePicker(parents.value[selectedParentIndex.value].id);
+    } else if (isGoalSelected.value && goal.value) {
+      togglePlacePicker(goal.value.id);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      togglePlacePicker(filteredChildren.value[selectedChildIndex.value].id);
+    } else if (goal.value) {
+      // Inga undermål att markera - då gäller platsen huvudmålet.
+      togglePlacePicker(goal.value.id);
+    }
+    return;
+  }
+
   // Hantera 'c' för att sätta deadline (due-datum)
   if (event.key === "c") {
     event.preventDefault();
@@ -1394,6 +1539,25 @@ function handleKeydown(event: KeyboardEvent) {
       selectedChildIndex.value < filteredChildren.value.length
     ) {
       openDuePicker(filteredChildren.value[selectedChildIndex.value]);
+    }
+    return;
+  }
+
+  // Hantera 'r' för att sätta upprepning
+  if (event.key === "r") {
+    event.preventDefault();
+    // Tangenten följer det markerade målet: förälder (parent-läge),
+    // huvudmålet eller det markerade undermålet.
+    if (isParentMode.value && parents.value.length > 0) {
+      openRecurrenceEditor(parents.value[selectedParentIndex.value]);
+    } else if (isGoalSelected.value && goal.value) {
+      openRecurrenceEditor(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      openRecurrenceEditor(filteredChildren.value[selectedChildIndex.value]);
     }
     return;
   }
@@ -1647,6 +1811,23 @@ watch(selectedParentIndex, async () => {
                 <Icon name="lucide:calendar-clock" class="w-4 h-4"
                   :style="{ opacity: parent.due ? 1 : 0.25 }" />
               </button>
+              <!-- Platser för förälder (p) -->
+              <div class="relative flex items-center">
+                <button @click.stop="togglePlacePicker(parent.id)"
+                  class="rounded-lg p-1 transition-colors"
+                  :class="parent.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+                  :title="parent.places?.length ? `Platser: ${parent.places.map((p) => p.name).join(', ')}` : 'Sätt plats (p)'">
+                  <Icon name="lucide:map-pin" class="w-4 h-4"
+                    :style="{ opacity: parent.places?.length ? 1 : 0.25 }" />
+                </button>
+                <PlacePicker v-if="placeTargetId === parent.id"
+                  class="absolute right-0 top-full z-30 mt-1"
+                  :selected="placeDraft"
+                  :available="allPlaces"
+                  @update:selected="placeDraft = $event"
+                  @save="savePlaces(parent.id)"
+                  @cancel="closePlacePicker" />
+              </div>
             </template>
           </div>
         </div>
@@ -1720,6 +1901,27 @@ watch(selectedParentIndex, async () => {
           <Icon name="lucide:infinity" class="w-6 h-6"
             :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
         </button>
+        <!-- Upprepning: antalet slutförda förekomster (r) -->
+        <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="relative flex items-center gap-1.5 flex-shrink-0">
+          <button @click.stop="openRecurrenceEditor(goal)"
+            class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="isRecurringGoal(goal) ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+            :title="isRecurringGoal(goal) ? `Upprepas ${describeGoalRecurrence(goal.recurrence_rule)} - sätt upprepning (r)` : 'Sätt upprepning (r)'">
+            <Icon name="lucide:repeat" class="w-6 h-6"
+              :style="{ opacity: isRecurringGoal(goal) ? 1 : 0.25 }" />
+          </button>
+          <span v-if="isRecurringGoal(goal)" class="text-sm tabular-nums text-ink-dim">
+            {{ recurrenceCount(goal) }}
+          </span>
+          <RecurrenceEditor v-if="recurrenceTargetId === goal.id"
+            class="absolute right-0 top-full z-30 mt-1"
+            :rule="goal.recurrence_rule ?? null"
+            :mode="goal.recurrence_mode ?? 'schedule'"
+            @save="saveRecurrence"
+            @remove="removeRecurrence"
+            @cancel="closeRecurrenceEditor" />
+        </div>
         <!-- Due-datum / deadline (c) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="flex items-center gap-1.5 flex-shrink-0">
@@ -1747,6 +1949,27 @@ watch(selectedParentIndex, async () => {
               {{ formatDueDate(goal.due) }}
             </span>
           </template>
+        </div>
+        <!-- Platser: var målet kan slutföras (p) -->
+        <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="relative flex items-center gap-1.5 flex-shrink-0">
+          <button @click.stop="togglePlacePicker(goal.id)"
+            class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="goal.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+            :title="goal.places?.length ? `Platser: ${goal.places.map((p) => p.name).join(', ')}` : 'Sätt plats (p)'">
+            <Icon name="lucide:map-pin" class="w-6 h-6"
+              :style="{ opacity: goal.places?.length ? 1 : 0.25 }" />
+          </button>
+          <span v-if="goal.places?.length" class="text-sm text-ink-dim">
+            {{ goal.places.map((p) => p.name).join(', ') }}
+          </span>
+          <PlacePicker v-if="placeTargetId === goal.id"
+            class="absolute right-0 top-full z-30 mt-1"
+            :selected="placeDraft"
+            :available="allPlaces"
+            @update:selected="placeDraft = $event"
+            @save="savePlaces(goal.id)"
+            @cancel="closePlacePicker" />
         </div>
         <!-- Toggle dependencies visibility -->
         <button @click.stop="showDependencies = !showDependencies"
@@ -2027,6 +2250,43 @@ watch(selectedParentIndex, async () => {
                       {{ formatDueDate(child.due) }}
                     </span>
                   </template>
+                </div>
+                <!-- Upprepning för undermål -->
+                <div class="relative flex-shrink-0 flex items-center gap-1">
+                  <button @click.stop="openRecurrenceEditor(child)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+                    :class="isRecurringGoal(child) ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+                    :title="isRecurringGoal(child) ? `Upprepas ${describeGoalRecurrence(child.recurrence_rule)} - sätt upprepning (r)` : 'Sätt upprepning (r)'">
+                    <Icon name="lucide:repeat" class="w-5 h-5"
+                      :style="{ opacity: isRecurringGoal(child) ? 1 : 0.25 }" />
+                  </button>
+                  <span v-if="isRecurringGoal(child)" class="text-xs tabular-nums text-ink-dim">
+                    {{ recurrenceCount(child) }}
+                  </span>
+                  <RecurrenceEditor v-if="recurrenceTargetId === child.id"
+                    class="absolute right-0 top-full z-30 mt-1"
+                    :rule="child.recurrence_rule ?? null"
+                    :mode="child.recurrence_mode ?? 'schedule'"
+                    @save="saveRecurrence"
+                    @remove="removeRecurrence"
+                    @cancel="closeRecurrenceEditor" />
+                </div>
+                <!-- Platser för undermål (p) -->
+                <div class="relative flex-shrink-0 flex items-center gap-1">
+                  <button @click.stop="togglePlacePicker(child.id)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+                    :class="child.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+                    :title="child.places?.length ? `Platser: ${child.places.map((p) => p.name).join(', ')}` : 'Sätt plats (p)'">
+                    <Icon name="lucide:map-pin" class="w-5 h-5"
+                      :style="{ opacity: child.places?.length ? 1 : 0.25 }" />
+                  </button>
+                  <PlacePicker v-if="placeTargetId === child.id"
+                    class="absolute right-0 top-full z-30 mt-1"
+                    :selected="placeDraft"
+                    :available="allPlaces"
+                    @update:selected="placeDraft = $event"
+                    @save="savePlaces(child.id)"
+                    @cancel="closePlacePicker" />
                 </div>
                 <button
                   v-if="weightEditingChildId !== child.id"

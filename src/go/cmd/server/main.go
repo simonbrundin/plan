@@ -137,6 +137,7 @@ func main() {
 		goalHandler := handlers.NewGoalHandler(dbConnected)
 		calendarEventHandler := handlers.NewCalendarEventHandler(dbConnected)
 		calendarHandler := handlers.NewCalendarHandler(dbConnected)
+		placeHandler := handlers.NewPlaceHandler(dbConnected)
 
 		// Calendar endpoints
 		api.GET("/calendars", calendarHandler.List)
@@ -160,6 +161,8 @@ func main() {
 		api.GET("/goals/:id", goalHandler.GetGoal)
 		api.PATCH("/goals/:id", goalHandler.UpdateGoal)
 		api.DELETE("/goals/:id", goalHandler.DeleteGoal)
+		api.POST("/goals/:id/completions", goalHandler.CompleteGoalOccurrence)
+		api.DELETE("/goals/:id/completions", goalHandler.UndoGoalOccurrence)
 		api.PATCH("/goals/reorder", goalHandler.ReorderGoals)
 		api.PATCH("/goals/priority/reorder", goalHandler.ReorderPriorityGoals)
 
@@ -178,6 +181,23 @@ func main() {
 		// Dependencies endpoints
 		api.POST("/goals/dependencies", goalHandler.CreateDependency)
 		api.DELETE("/goals/dependencies", goalHandler.DeleteDependency)
+
+		// Places endpoints
+		api.GET("/places", placeHandler.List)
+		api.POST("/places", placeHandler.Create)
+		api.GET("/places/nearby", placeHandler.Nearby)
+		api.PATCH("/places/:id", placeHandler.Update)
+		api.DELETE("/places/:id", placeHandler.Delete)
+
+		// Places for goals and calendar events
+		api.GET("/goals/:id/places", placeHandler.GetGoalPlaces)
+		api.PUT("/goals/:id/places", placeHandler.SetGoalPlaces)
+		api.GET("/calendar-events/:id/places", placeHandler.GetEventPlaces)
+		api.PUT("/calendar-events/:id/places", placeHandler.SetEventPlaces)
+
+		// The user's "I am here" place
+		api.GET("/me/current-place", placeHandler.GetCurrentPlace)
+		api.PUT("/me/current-place", placeHandler.SetCurrentPlace)
 
 		// API Keys endpoints
 		apiKeyHandler := handlers.NewAPIKeyHandler()

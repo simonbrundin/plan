@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import {
 	describeParsedEntry,
+	goalTitle,
 	parseNaturalLanguage,
 	resolveQuickAddMode,
 	type ParsedEntry,
 } from "~/utils/naturalLanguage";
+import { describeGoalRecurrence } from "~/utils/recurrence";
 
 const emit = defineEmits<{
 	created: [];
@@ -45,7 +47,9 @@ const title = computed(() => {
 	if (!trimmedText.value) return "";
 	// Ett mål behåller hela texten. Mål har inget datumfält, så att
 	// tappa bort ord skulle bara förlora information.
-	if (effectiveMode.value === "goal") return trimmedText.value;
+	if (effectiveMode.value === "goal") {
+		return goalTitle(trimmedText.value, parsed.value);
+	}
 	return parsed.value.title;
 });
 
@@ -60,24 +64,7 @@ const preview = computed(() => {
 const recurrenceLabel = computed(() => {
 	const rule = parsed.value.recurrenceRule;
 	if (!rule) return "";
-	if (rule.includes("DAILY")) return "varje dag";
-	if (rule.includes("WEEKLY")) {
-		if (rule.includes("INTERVAL=2")) return "varannan vecka";
-		const day = rule.match(/BYDAY=([A-Z]{2})/);
-		const names: Record<string, string> = {
-			MO: "måndag",
-			TU: "tisdag",
-			WE: "onsdag",
-			TH: "torsdag",
-			FR: "fredag",
-			SA: "lördag",
-			SU: "söndag",
-		};
-		return day ? `varje ${names[day[1]] ?? "vecka"}` : "varje vecka";
-	}
-	if (rule.includes("MONTHLY")) return "varje månad";
-	if (rule.includes("YEARLY")) return "varje år";
-	return "";
+	return describeGoalRecurrence(rule);
 });
 
 const focusInput = () => {
@@ -99,7 +86,12 @@ const submit = async () => {
 
 	try {
 		if (effectiveMode.value === "goal") {
-			await createGoal(title.value);
+			await createGoal(
+				title.value,
+				undefined,
+				undefined,
+				parsed.value.recurrenceRule ?? undefined,
+			);
 		} else {
 			const entry = parsed.value;
 			const start = entry.startAt ?? new Date();

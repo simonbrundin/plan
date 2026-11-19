@@ -1475,6 +1475,123 @@
                 }
             }
         },
+        "/api/goals/{id}/completions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Marks the current occurrence of a recurring goal as completed and moves on to the next one",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Complete the current occurrence of a recurring goal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Completion data",
+                        "name": "completion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CompleteOccurrenceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Removes the latest completion of a recurring goal and restores that occurrence",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Undo the last completed occurrence of a recurring goal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/goals/{id}/status": {
             "get": {
                 "security": [
@@ -1698,6 +1815,582 @@
                     }
                 }
             }
+        },
+        "/api/v1/calendar-events/{id}/places": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the places linked to a calendar event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "List a calendar event's places",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Replace the places linked to a calendar event. An empty list removes all places.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Replace a calendar event's places",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Place IDs",
+                        "name": "places",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.SetPlacesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/goals/{id}/places": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the places linked to a goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "List a goal's places",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Replace the places linked to a goal. An empty list removes all places.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Replace a goal's places",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Place IDs",
+                        "name": "places",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.SetPlacesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/me/current-place": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the place the user has chosen as \"I am here\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Get the current place",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Choose the place the user is at, or clear it with null",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Set the current place",
+                "parameters": [
+                    {
+                        "description": "Place ID or null",
+                        "name": "place",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.SetCurrentPlaceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/places": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all places for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "List all places",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a place for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Create a place",
+                "parameters": [
+                    {
+                        "description": "Place data",
+                        "name": "place",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.CreatePlaceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/places/nearby": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the places whose radius contains the given position",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Find places near a position",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "Latitude",
+                        "name": "lat",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Longitude",
+                        "name": "lon",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/places/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a place and its links to goals and events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Delete a place",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a place's name, coordinates or radius",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "places"
+                ],
+                "summary": "Update a place",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update data",
+                        "name": "place",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.UpdatePlaceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1822,6 +2515,13 @@
                 "parent_event_id": {
                     "type": "integer"
                 },
+                "places": {
+                    "description": "Places är de platser där händelsen sker. En händelse kan ha flera\nplatser. Skickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                    }
+                },
                 "recurrence_rule": {
                     "type": "string"
                 },
@@ -1921,6 +2621,33 @@
                 "order": {
                     "type": "integer"
                 },
+                "places": {
+                    "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                    }
+                },
+                "recurrence_count": {
+                    "description": "RecurrenceCount är antalet slutförda förekomster.",
+                    "type": "integer"
+                },
+                "recurrence_mode": {
+                    "description": "RecurrenceMode är schemaläggningsstrategin: \"schedule\" (håll\nschemat) eller \"push\" (skjuta fram nästa förekomst).",
+                    "type": "string"
+                },
+                "recurrence_next": {
+                    "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "recurrence_rule": {
+                    "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
+                    "type": "string"
+                },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
                     "type": "string"
@@ -1935,6 +2662,21 @@
                 },
                 "weight": {
                     "type": "integer"
+                }
+            }
+        },
+        "plan-api_internal_models.CompleteOccurrenceRequest": {
+            "type": "object",
+            "properties": {
+                "completed_on": {
+                    "description": "CompletedOn är det datum slutförandet skedde (\"YYYY-MM-DD\"). Utan\ndet används dagens datum.",
+                    "type": "string",
+                    "example": "2026-01-05"
+                },
+                "occurrence_date": {
+                    "description": "OccurrenceDate är den förekomst som slutförs (\"YYYY-MM-DD\"). Utan\ndet slutförs målets aktuella förekomst. Skickas det en förekomst\nsom redan är slutförd ändras ingenting.",
+                    "type": "string",
+                    "example": "2026-01-01"
                 }
             }
         },
@@ -2052,6 +2794,21 @@
                     "type": "string",
                     "example": "heroicons:star"
                 },
+                "recurrence_mode": {
+                    "description": "RecurrenceMode är schemaläggningsstrategin: \"schedule\" eller \"push\".\nUtan den används \"schedule\".",
+                    "type": "string",
+                    "example": "schedule"
+                },
+                "recurrence_rule": {
+                    "description": "RecurrenceRule gör målet återkommande direkt (\"FREQ=DAILY;INTERVAL=2\").",
+                    "type": "string",
+                    "example": "FREQ=DAILY;INTERVAL=2"
+                },
+                "start_date": {
+                    "description": "StartDate är det datum serien startar på (\"YYYY-MM-DD\"). Utan den\nanvänds dagens datum.",
+                    "type": "string",
+                    "example": "2026-01-05"
+                },
                 "status_id": {
                     "type": "integer",
                     "example": 1
@@ -2059,6 +2816,34 @@
                 "title": {
                     "type": "string",
                     "example": "New Goal"
+                }
+            }
+        },
+        "plan-api_internal_models.CreatePlaceRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:map-pin"
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 59.3293
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 18.0686
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Hem"
+                },
+                "radius_meters": {
+                    "type": "integer",
+                    "example": 100
                 }
             }
         },
@@ -2233,6 +3018,33 @@
                     "type": "integer",
                     "example": 0
                 },
+                "places": {
+                    "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                    }
+                },
+                "recurrence_count": {
+                    "description": "RecurrenceCount är antalet slutförda förekomster.",
+                    "type": "integer"
+                },
+                "recurrence_mode": {
+                    "description": "RecurrenceMode är schemaläggningsstrategin: \"schedule\" (håll\nschemat) eller \"push\" (skjuta fram nästa förekomst).",
+                    "type": "string"
+                },
+                "recurrence_next": {
+                    "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "recurrence_rule": {
+                    "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
+                    "type": "string"
+                },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
                     "type": "string"
@@ -2328,6 +3140,33 @@
                         "$ref": "#/definitions/plan-api_internal_models.Goal"
                     }
                 },
+                "places": {
+                    "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                    }
+                },
+                "recurrence_count": {
+                    "description": "RecurrenceCount är antalet slutförda förekomster.",
+                    "type": "integer"
+                },
+                "recurrence_mode": {
+                    "description": "RecurrenceMode är schemaläggningsstrategin: \"schedule\" (håll\nschemat) eller \"push\" (skjuta fram nästa förekomst).",
+                    "type": "string"
+                },
+                "recurrence_next": {
+                    "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "recurrence_rule": {
+                    "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
+                    "type": "string"
+                },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
                     "type": "string"
@@ -2353,6 +3192,17 @@
                 }
             }
         },
+        "plan-api_internal_models.NullableString": {
+            "type": "object",
+            "properties": {
+                "set": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "plan-api_internal_models.NullableTime": {
             "type": "object",
             "properties": {
@@ -2360,6 +3210,41 @@
                     "type": "boolean"
                 },
                 "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.Place": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "heroicons:map-pin"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 59.3293
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 18.0686
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Hem"
+                },
+                "radius_meters": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -2419,9 +3304,36 @@
                 "parentTitle": {
                     "type": "string"
                 },
+                "places": {
+                    "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                    }
+                },
                 "priorityOrder": {
                     "type": "integer",
                     "example": 0
+                },
+                "recurrence_count": {
+                    "description": "RecurrenceCount är antalet slutförda förekomster.",
+                    "type": "integer"
+                },
+                "recurrence_mode": {
+                    "description": "RecurrenceMode är schemaläggningsstrategin: \"schedule\" (håll\nschemat) eller \"push\" (skjuta fram nästa förekomst).",
+                    "type": "string"
+                },
+                "recurrence_next": {
+                    "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
+                "recurrence_rule": {
+                    "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
+                    "type": "string"
                 },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
@@ -2486,6 +3398,17 @@
                     "type": "integer"
                 }
             }
+        },
+        "plan-api_internal_models.SetCurrentPlaceRequest": {
+            "type": "object",
+            "properties": {
+                "place_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "plan-api_internal_models.SetPlacesRequest": {
+            "type": "object"
         },
         "plan-api_internal_models.SplitCalendarEventRequest": {
             "type": "object",
@@ -2641,6 +3564,26 @@
                 "icon": {
                     "type": "string"
                 },
+                "recurrence_mode": {
+                    "description": "RecurrenceMode sätter schemaläggningsstrategin (\"schedule\" eller \"push\").",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.NullableString"
+                        }
+                    ]
+                },
+                "recurrence_rule": {
+                    "description": "RecurrenceRule sätter eller tar bort målets upprepningsregel.\nUtan fältet lämnas regeln oförändrad, null tar bort den.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.NullableString"
+                        }
+                    ]
+                },
+                "start_date": {
+                    "description": "StartDate är det datum serien startar på (\"YYYY-MM-DD\").",
+                    "type": "string"
+                },
                 "started": {
                     "$ref": "#/definitions/plan-api_internal_models.NullableTime"
                 },
@@ -2649,6 +3592,26 @@
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "plan-api_internal_models.UpdatePlaceRequest": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "radius_meters": {
+                    "type": "integer"
                 }
             }
         },

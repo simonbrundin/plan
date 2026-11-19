@@ -26,6 +26,8 @@ export interface ParsedEntry {
 	allDay: boolean
 	/** RRULE om texten angav upprepning. */
 	recurrenceRule: string | null
+	/** Den fras i texten som angav upprepningen, t.ex. "varannan dag". */
+	recurrencePhrase: string | null
 	/** Sant om texten innehöll ett klockslag. */
 	hasTime: boolean
 	/** Sant om texten innehöll ett datum. */
@@ -406,6 +408,19 @@ export function parseNaturalLanguage(
 				weekdayForRecurrence = weekday.index
 				buffer.take(everyWeekday)
 			}
+		}
+	}
+
+	if (!recurrenceRule) {
+		const everyOtherDay = /\b(varannan\s+dag|var\s+annan\s+dag|every\s+other\s+day|every\s+2nd\s+day)\b/i.exec(
+			buffer.text,
+		)
+		if (everyOtherDay) {
+			recurrenceRule = "FREQ=DAILY;INTERVAL=2"
+			recurrencePhrase = everyOtherDay[0]
+			buffer.take(
+				/\b(varannan\s+dag|var\s+annan\s+dag|every\s+other\s+day|every\s+2nd\s+day)\b/i,
+			)
 		}
 	}
 
@@ -800,6 +815,7 @@ export function parseNaturalLanguage(
 		endAt,
 		allDay,
 		recurrenceRule,
+		recurrencePhrase,
 		hasTime,
 		hasDate,
 		dateExplicit,
@@ -829,6 +845,22 @@ export function resolveQuickAddMode(
 		entry.eventHint
 		? "event"
 		: "goal";
+}
+
+/**
+ * Tar fram titeln på ett mål från en tolkad inmatning.
+ *
+ * Ett mål behåller hela texten - mål har inget datumfält, så att tappa
+ * bort ord bara skulle förlora information. En upprepningsfras är ett
+ * undantag: den blir regel i stället för text och ska inte stå kvar i
+ * titeln.
+ */
+export function goalTitle(text: string, entry: ParsedEntry): string {
+	const trimmed = text.trim();
+	const phrase = entry.recurrencePhrase;
+	if (!phrase) return trimmed;
+
+	return trimmed.replace(phrase, "").replace(/\s{2,}/g, " ").trim();
 }
 
 /**
