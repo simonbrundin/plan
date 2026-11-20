@@ -13,6 +13,7 @@ export function useGoalUndo() {
 		toggleGoalFinished,
 		toggleGoalStarted,
 		setGoalEternal,
+		setGoalAgent,
 		setGoalDue,
 		setGoalEstimate,
 		setGoalRecurrence,
@@ -82,6 +83,19 @@ export function useGoalUndo() {
 		});
 	}
 
+	/** Agent-märket sattes på eller togs bort. */
+	function undoAgent(goal: Goal, previousAgent: boolean) {
+		push({
+			label: previousAgent
+				? `Markerade "${goal.title}" som agent-mål`
+				: `Tog bort agent-markeringen på "${goal.title}"`,
+			undo: async () => {
+				await setGoalAgent(goal.id, previousAgent);
+				await refreshStore();
+			},
+		});
+	}
+
 	/** Due-datumet sattes eller rensades. */
 	function undoDue(goal: Goal, previousDue: string | null) {
 		push({
@@ -134,6 +148,7 @@ export function useGoalUndo() {
 		undoOccurrence,
 		undoStarted,
 		undoEternal,
+		undoAgent,
 		undoDue,
 		undoEstimate,
 		undoRecurrence,

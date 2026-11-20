@@ -12,10 +12,10 @@ import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -427,6 +427,22 @@ async function toggleEternal(goal: Goal) {
   }
 }
 
+// Toggle agent-märke på ett mål.
+async function toggleAgent(goal: Goal) {
+  const newAgent = !goal.agent
+  try {
+    const previousAgent = goal.agent ?? false
+    await setGoalAgent(goal.id, newAgent)
+    undoAgent(goal, previousAgent)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    if (idx !== -1) {
+      localGoals.value[idx] = { ...localGoals.value[idx], agent: newAgent }
+    }
+  } catch (err) {
+    console.error('Failed to toggle agent:', err)
+  }
+}
+
 // Delete goal
 async function handleDelete(goal: Goal) {
   try {
@@ -534,6 +550,15 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault()
     if (filteredGoals.value.length > 0) {
       toggleEternal(filteredGoals.value[selectedIndex.value])
+    }
+    return
+  }
+
+  // a - toggle agent-märke
+  if (event.key === 'a') {
+    event.preventDefault()
+    if (filteredGoals.value.length > 0) {
+      toggleAgent(filteredGoals.value[selectedIndex.value])
     }
     return
   }
@@ -721,7 +746,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · m tidsåtgång · t beskrivning · x ta bort
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · a agent · c deadline · m tidsåtgång · t beskrivning · x ta bort
         </span>
       </div>
     </div>
@@ -815,6 +840,8 @@ definePageMeta({
             <Icon name="lucide:infinity" class="w-5 h-5"
               :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
           </button>
+          <!-- Agent-märke (a) -->
+          <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
           <!-- Due-datum / deadline (c) -->
           <template v-if="dueGoalId === goal.id">
             <input ref="dueInputRef" v-model="dueDraft" type="date" @click.stop

@@ -11,9 +11,9 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
 
 function dueToneClass(due: string | null): string {
   const tone = dueTone(due)
@@ -251,6 +251,18 @@ async function toggleEternal(goal: PrioritizedGoalRow) {
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to toggle goal eternal:', err)
+  }
+}
+
+// Växla agent-märket på ett mål
+async function toggleAgent(goal: PrioritizedGoalRow) {
+  try {
+    const previousAgent = goal.agent ?? false
+    await setGoalAgent(goal.id, !goal.agent)
+    undoAgent(goal, previousAgent)
+    await loadPrioritizedGoals()
+  } catch (err) {
+    console.error('Failed to toggle goal agent:', err)
   }
 }
 
@@ -588,6 +600,10 @@ const filterOptions = [
                 :style="{ opacity: goal.started ? 1 : 0.25 }"
               />
             </button>
+          </div>
+
+          <div class="flex-shrink-0">
+            <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
           </div>
 
           <div class="flex-shrink-0">

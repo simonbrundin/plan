@@ -99,6 +99,15 @@ export function useGoalApi() {
 		});
 	};
 
+	// Markerar ett mål som ett mål för en agent (eller upphäver
+	// agent-flaggan).
+	const setGoalAgent = async (goalId: number, agent: boolean) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { agent },
+		});
+	};
+
 	// Sätter målets upprepningsregel och schemaläggningsstrategi.
 	// En nullad regel tar bort upprepningen så att målet blir vanligt igen.
 	const setGoalRecurrence = async (
@@ -314,6 +323,7 @@ export function useGoalApi() {
 		setGoalDue,
 		setGoalEstimate,
 		setGoalEternal,
+		setGoalAgent,
 		setGoalRecurrence,
 		completeGoalOccurrence,
 		undoGoalOccurrence,

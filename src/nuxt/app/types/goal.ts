@@ -23,6 +23,9 @@ export interface Goal {
 	inbox: number;
 	// Evigt mål - pågår hela livet och kan inte slutföras.
 	eternal: boolean;
+	// Sant om målet är avsett att arbeta på av en agent. Används för att
+	// se vilka mål som ligger för en agent att ta tag i.
+	agent?: boolean;
 	// Sant om målet har en förälder. Endast grundmål (has_parent = false)
 	// listas under /goals.
 	has_parent?: boolean;

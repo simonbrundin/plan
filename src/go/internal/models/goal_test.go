@@ -242,6 +242,50 @@ func TestUpdateGoalRequestEternalDecoding(t *testing.T) {
 	}
 }
 
+func TestUpdateGoalRequestAgentDecoding(t *testing.T) {
+	tests := []struct {
+		name      string
+		body      string
+		wantSet   bool
+		wantAgent bool
+	}{
+		{
+			name:      "true marks the goal as an agent goal",
+			body:      `{"agent": true}`,
+			wantSet:   true,
+			wantAgent: true,
+		},
+		{
+			name:      "false removes the agent mark",
+			body:      `{"agent": false}`,
+			wantSet:   true,
+			wantAgent: false,
+		},
+		{
+			name:      "a missing field leaves the goal untouched",
+			body:      `{"title": "Ny titel"}`,
+			wantSet:   false,
+			wantAgent: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req UpdateGoalRequest
+			if err := json.Unmarshal([]byte(tt.body), &req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if (req.Agent != nil) != tt.wantSet {
+				t.Fatalf("Agent set = %v, want %v", req.Agent != nil, tt.wantSet)
+			}
+			if tt.wantSet && *req.Agent != tt.wantAgent {
+				t.Errorf("Agent = %v, want %v", *req.Agent, tt.wantAgent)
+			}
+		})
+	}
+}
+
 func TestUpdateGoalRequestFinishesGoal(t *testing.T) {
 	tests := []struct {
 		name string

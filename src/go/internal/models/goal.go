@@ -76,6 +76,9 @@ type Goal struct {
 	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
 	// kan inte slutföras och markeras alltid som pågående.
 	Eternal bool `json:"eternal" example:"false"`
+	// Agent markerar ett mål som är avsett att arbeta på av en agent.
+	// Används för att filtrera fram vilka mål en agent kan ta sig an.
+	Agent bool `json:"agent" example:"false"`
 	// HasParent anger om målet har en förälder (det är child i goal_relations).
 	// Endast grundmål (utan förälder) listas på /goals.
 	HasParent bool `json:"has_parent" example:"false"`
@@ -252,6 +255,9 @@ type UpdateGoalRequest struct {
 	// Eternal sätter eller tar bort evigt-flaggan på ett mål.
 	// nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
 	Eternal *bool `json:"eternal,omitempty"`
+	// Agent sätter eller tar bort agent-flaggan på ett mål.
+	// nil = lämnas oförändrat, true = målet är för en agent, false = vanligt mål.
+	Agent *bool `json:"agent,omitempty"`
 	// RecurrenceRule sätter eller tar bort målets upprepningsregel.
 	// Utan fältet lämnas regeln oförändrad, null tar bort den.
 	RecurrenceRule NullableString `json:"recurrence_rule,omitempty"`
