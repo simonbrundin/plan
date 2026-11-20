@@ -52,6 +52,7 @@ sparar det gamla värdet innan ändringen:
 | Markera som pågående (`s`) | `PATCH goals/:id` med `started: null` |
 | Evigt-märke (`e`) | `PATCH goals/:id` med `eternal: false` |
 | Deadline (`c`) | `PATCH goals/:id` med `due: null` |
+| Startdatum (`b`) | `PATCH goals/:id` med `start_date: null` |
 | Upprepning (`r`) | `PATCH goals/:id` med `recurrence_rule: null` |
 
 Ingen backendändring behövs - API:t har redan alla anrop som krävs.
@@ -86,7 +87,7 @@ Målsidan bygger om sin data ur grafen i stället.
 - [x] Z ångrar den senaste handlingen.
 - [x] Slutförandet av ett mål (`d`) kan ångras.
 - [x] Slutförandet av en förekomst av ett återkommande mål kan ångras.
-- [x] Pågående, evigt, deadline och upprepning kan ångras.
+- [x] Pågående, evigt, deadline, startdatum och upprepning kan ångras.
 - [x] Ett ångrande syns i gränssnittet (meddelande + etikett).
 - [x] Z fungerar från alla sidor.
 - [x] Det finns enhetstester för undo-stapeln.
