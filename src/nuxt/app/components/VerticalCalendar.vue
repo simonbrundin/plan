@@ -1234,14 +1234,25 @@ const handleCalendarKeydown = (event: KeyboardEvent) => {
   // kalendersidan; annars blir j/k/h/l dubbeltolkade av mål-navigeringen.
   if (route.path !== '/calendar') return
 
+  // Escape stänger en öppen händelsedialog. Det hanteras före kollen
+  // nedan, eftersom fokus ligger i ett fält i dialogen när den öppnas -
+  // annars skulle tangenten aldrig nå fram till kalendern.
+  if (event.key === 'Escape') {
+    if (editingEvent.value) {
+      event.preventDefault()
+      closeEditEvent()
+      return
+    }
+    if (showCreateEvent.value) {
+      event.preventDefault()
+      showCreateEvent.value = false
+      return
+    }
+  }
+
   const target = event.target as HTMLElement | null
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) return
 
-  if (event.key === 'Escape') {
-    if (editingEvent.value) closeEditEvent()
-    else if (showCreateEvent.value) showCreateEvent.value = false
-    return
-  }
   if (event.key === 'n') {
     // Snabbt läggande till hanteras globalt i layouten, så att det finns
     // tillgängligt från alla sidor.
@@ -1700,6 +1711,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   position: relative;
+  /* Egen staplingskontext: händelsernas z-index (upp till 9999, eftersom
+     de staplas efter sin placering i tiden) ska inte kunna ritas över
+     appens modaler, som ligger på z-index 100. */
+  isolation: isolate;
   height: calc(100vh - 1rem);
   min-height: 38rem;
   padding: 0 1.5rem 1rem;

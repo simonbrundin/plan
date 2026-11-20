@@ -59,6 +59,12 @@ function close() {
 // Escape stänger popupen - tangenten ska inte också nå sidans egna
 // tangentbevakare (t.ex. för att stänga en dialogruta).
 function handleKeydown(event: KeyboardEvent) {
+	// Lyssnaren sitter i capture-fasen, så den körs före alla andra
+	// tangentbevakare. Därför får den bara svälja Escape när popupen
+	// faktiskt är öppen - annars skulle Escape aldrig nå fram till
+	// t.ex. hjälpmodalen eller snabbfältet.
+	if (!props.open) return;
+
 	if (event.key === "Escape") {
 		event.preventDefault();
 		event.stopPropagation();
