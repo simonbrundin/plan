@@ -23,6 +23,7 @@ const consumedEvents = new WeakSet<Event>();
 
 export function useLeaderKey() {
 	const router = useRouter();
+	const { toggleSidebar } = useSidebarState();
 
 	const globalCommands: LeaderCommand[] = [
 		{
@@ -54,6 +55,12 @@ export function useLeaderKey() {
 			label: "G+S",
 			title: "Gå till Inställningar",
 			run: () => router.push("/settings"),
+		},
+		{
+			keys: "m",
+			label: "G+M",
+			title: "Visa eller dölj menyn",
+			run: toggleSidebar,
 		},
 	];
 

@@ -4,7 +4,7 @@ import type { NavigationMenuItem } from "@nuxt/ui";
 const route = useRoute();
 const { loggedIn } = useUserSession();
 
-const open = ref(false);
+const { isSidebarOpen: open } = useSidebarState();
 const showHelpModal = ref(false);
 const showPriorityIndicator = ref(false);
 const { isSearchOpen, openSearch, closeSearch } = useSearchState();
@@ -302,10 +302,16 @@ onUnmounted(() => {
     <UDashboardSidebar
       id="default"
       v-model:open="open"
+      mode="slideover"
       collapsible
       resizable
       class="bg-surface/80 backdrop-blur-xl border-r border-line"
-      :ui="{ footer: 'lg:border-t lg:border-line' }"
+      :ui="{
+        root: '!hidden',
+        content: '!flex',
+        overlay: '!block',
+        footer: 'lg:border-t lg:border-line',
+      }"
     >
       <template #default="{ collapsed }">
         <UNavigationMenu
@@ -367,14 +373,13 @@ onUnmounted(() => {
     <!-- Kalendern ska ligga direkt på sidans bakgrund, så panelens egen
          yta sätts av på den sidan. -->
     <UDashboardPanel
-      class="!overflow-y-auto !h-screen"
+      class="!overflow-y-auto !h-screen min-w-0"
       :class="route.path === '/calendar' ? 'bg-transparent' : 'bg-canvas'"
     >
-      <UDashboardNavbar v-if="route.path !== '/calendar'" class="hidden lg:flex">
+      <UDashboardNavbar class="hidden bg-transparent lg:flex">
         <template #toggle>
-          <UDashboardSidebarToggle />
+          <UDashboardSidebarToggle class="!flex" />
         </template>
-
       </UDashboardNavbar>
 
       <div class="pb-20 lg:pb-0">
@@ -387,6 +392,20 @@ onUnmounted(() => {
         <UDashboardSidebarToggle />
       </div>
     </UDashboardPanel>
+
+    <!-- På större skärmar är kalendern en permanent högerspalt. Den hålls
+         smal nog för att kännas som en mobilkalender, medan huvudinnehållet
+         får resten av bredden. På små skärmar visas kalendern via /calendar
+         i stället, så att layouten inte blir för trång. -->
+    <aside
+      v-if="loggedIn && route.path !== '/login' && route.path !== '/signup'"
+      class="hidden min-w-0 shrink-0 flex-col border-l border-line bg-canvas lg:flex lg:w-[24rem] xl:w-[26rem]"
+      aria-label="Kalender"
+    >
+      <div class="min-h-0 w-full flex-1">
+        <VerticalCalendar />
+      </div>
+    </aside>
   </UDashboardGroup>
 </template>
 
