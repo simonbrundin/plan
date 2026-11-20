@@ -32,13 +32,17 @@ func TestIconFlowIntegration(t *testing.T) {
 	end := start.Add(time.Hour)
 
 	// 1. Skapa med emoji
+	// Endast testens egna rader får raderas - aldrig hela användarens kalender.
 	icon := "🏃"
 	created, err := repo.Create(ctx, userID, models.CreateCalendarEventRequest{
-		Title: "Löpning", Icon: &icon, StartAt: start.Format(time.RFC3339), EndAt: end.Format(time.RFC3339),
+		Title: "[test] Löpning", Icon: &icon, StartAt: start.Format(time.RFC3339), EndAt: end.Format(time.RFC3339),
 	}, start, end)
 	if err != nil {
 		t.Fatal("create:", err)
 	}
+	defer func() {
+		_, _ = database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1 OR parent_event_id = $1`, created.ID)
+	}()
 	t.Log("created icon:", created.Icon)
 	if created.Icon != "🏃" {
 		t.Fatalf("created icon = %q", created.Icon)
@@ -81,13 +85,15 @@ func TestIconFlowIntegration(t *testing.T) {
 	seriesIcon := "🎉"
 	rule := "FREQ=WEEKLY;COUNT=3"
 	series, err := repo.Create(ctx, userID, models.CreateCalendarEventRequest{
-		Title: "Fest", Icon: &seriesIcon, StartAt: start.Format(time.RFC3339), EndAt: end.Format(time.RFC3339),
+		Title: "[test] Fest", Icon: &seriesIcon, StartAt: start.Format(time.RFC3339), EndAt: end.Format(time.RFC3339),
 		RecurrenceRule: &rule,
 	}, start, end)
 	if err != nil {
 		t.Fatal("series:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE user_id=$1`, userID)
+	defer func() {
+		_, _ = database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1 OR parent_event_id = $1`, series.ID)
+	}()
 
 	original := start
 	occStart := start.Add(7 * 24 * time.Hour)
@@ -115,6 +121,9 @@ func TestIconFlowIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("split:", err)
 	}
+	defer func() {
+		_, _ = database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1 OR parent_event_id = $1`, split.ID)
+	}()
 	t.Log("split icon (ska ärva 🎉):", split.Icon)
 	if split.Icon != "🎉" {
 		t.Fatalf("split icon = %q, want inherited", split.Icon)
