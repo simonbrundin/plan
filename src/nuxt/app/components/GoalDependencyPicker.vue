@@ -12,7 +12,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  select: [goalId: number]
+  add: [goalId: number]
+  remove: [goalId: number]
   close: []
 }>()
 
@@ -57,7 +58,24 @@ const blockedIds = computed(() => {
   return blocked
 })
 
-// Alla mål som matchar sökningen, sorterade på titel.
+// Beroenden som redan finns för målet. De visas alltid överst, även när
+// sökfältet är tomt, så att de snabbt kan tas bort.
+const existingDependencies = computed<Goal[]>(() => {
+  const targetId = props.targetId
+  if (targetId === null) return []
+
+  const dependencyIds = new Set(
+    goalsStore.dependencies
+      .filter((dependency) => dependency.goal_id === targetId)
+      .map((dependency) => dependency.depends_on_id),
+  )
+
+  return goalsStore.goals
+    .filter((goal) => dependencyIds.has(goal.id))
+    .sort((a, b) => a.title.localeCompare(b.title, 'sv'))
+})
+
+// Alla nya mål som matchar sökningen, sorterade på titel.
 const results = computed<Goal[]>(() => {
   const needle = query.value.trim().toLowerCase()
   const matched = goalsStore.goals.filter((goal) => {
@@ -80,8 +98,12 @@ function close() {
   emit('close')
 }
 
-function select(goalId: number) {
-  emit('select', goalId)
+function add(goalId: number) {
+  emit('add', goalId)
+}
+
+function remove(goalId: number) {
+  emit('remove', goalId)
 }
 
 function handleKeydown(event: KeyboardEvent) {
@@ -103,7 +125,7 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault()
     const goal = results.value[selectedIndex.value]
     if (goal) {
-      select(goal.id)
+      add(goal.id)
     }
     return
   }
@@ -152,6 +174,30 @@ watch(results, () => {
         </p>
       </div>
 
+      <div v-if="existingDependencies.length > 0" class="px-3 pt-3">
+        <h3 class="px-1 mb-1 text-xs font-medium uppercase tracking-wide text-ink-dim">
+          Befintliga beroenden
+        </h3>
+        <ul class="space-y-1">
+          <li
+            v-for="dependency in existingDependencies"
+            :key="dependency.id"
+            class="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-orange-500/10 px-3 py-2"
+          >
+            <Icon name="lucide:clock" class="w-4 h-4 text-orange-400 flex-shrink-0" />
+            <span class="text-ink text-sm truncate flex-1">{{ dependency.title }}</span>
+            <button
+              type="button"
+              class="rounded-md p-1 text-ink-dim transition-colors hover:bg-red-500/20 hover:text-red-400"
+              title="Ta bort beroende"
+              @click.stop="remove(dependency.id)"
+            >
+              <Icon name="lucide:x" class="w-4 h-4" />
+            </button>
+          </li>
+        </ul>
+      </div>
+
       <div class="p-3">
         <input
           ref="searchInput"
@@ -167,7 +213,7 @@ watch(results, () => {
         <li v-for="(goal, index) in results" :key="goal.id">
           <button
             type="button"
-            @click="select(goal.id)"
+            @click.prevent.stop="add(goal.id)"
             @mouseenter="selectedIndex = index"
             class="w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 border"
             :class="index === selectedIndex ? 'bg-elevated border-accent' : 'border-transparent hover:bg-elevated'"

@@ -12,7 +12,7 @@ import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency, removeDependency } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
@@ -55,6 +55,20 @@ async function addDependencyFromPicker(dependsOnId: number) {
   } catch (e: any) {
     console.error('Failed to add dependency:', e)
     alert(e?.data?.message || e?.message || 'Kunde inte lägga till beroende')
+  }
+}
+
+async function removeDependencyFromPicker(dependsOnId: number) {
+  const targetId = dependencyPickerTargetId.value
+  if (targetId === null) return
+
+  try {
+    await removeDependency(targetId, dependsOnId)
+    await goalsStore.loadGraph(true)
+    goals.value = await loadAllGoals()
+  } catch (e: any) {
+    console.error('Failed to remove dependency:', e)
+    alert(e?.data?.message || e?.message || 'Kunde inte ta bort beroende')
   }
 }
 
@@ -1120,7 +1134,8 @@ definePageMeta({
       :open="dependencyPickerOpen"
       :target-id="dependencyPickerTargetId"
       :target-title="dependencyPickerTargetTitle"
-      @select="addDependencyFromPicker"
+      @add="addDependencyFromPicker"
+      @remove="removeDependencyFromPicker"
       @close="dependencyPickerOpen = false" />
   </div>
 </template>

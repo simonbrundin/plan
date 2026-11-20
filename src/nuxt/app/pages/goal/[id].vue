@@ -377,6 +377,19 @@ async function addDependencyFromPicker(dependsOnId: number) {
   }
 }
 
+async function removeDependencyFromPicker(dependsOnId: number) {
+  const targetId = dependencyPickerTargetId.value;
+  if (targetId === null) return;
+
+  try {
+    await removeDependency(targetId, dependsOnId);
+    await refresh();
+  } catch (error: any) {
+    console.error("Failed to remove dependency:", error);
+    alert(error?.data?.message || error?.message || "Kunde inte ta bort beroende");
+  }
+}
+
 
 // Visa/dölj avklarade mål
 const showCompleted = ref(false);
@@ -2489,9 +2502,9 @@ watch(selectedParentIndex, async () => {
       </div>
 
       <!-- Dependencies-sektion -->
-      <div v-if="showDependencies" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-1 flex-shrink-0">
+      <div v-if="showDependencies && (dependsOn.length > 0 || blocking.length > 0)" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-1 flex-shrink-0">
         <!-- Väntar på -->
-        <div class="mb-4">
+        <div v-if="dependsOn.length > 0" class="mb-4">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-sm font-medium text-ink-muted flex items-center gap-2">
               <Icon name="lucide:clock" class="w-4 h-4" />
@@ -2538,9 +2551,6 @@ watch(selectedParentIndex, async () => {
                 <Icon name="lucide:x" class="w-3 h-3" />
               </button>
             </div>
-          </div>
-          <div v-else class="text-sm text-ink-dim px-2">
-            Inga beroenden. Lägg till mål som måste göras först.
           </div>
         </div>
 
@@ -2908,7 +2918,8 @@ watch(selectedParentIndex, async () => {
       :open="dependencyPickerOpen"
       :target-id="dependencyPickerTargetId"
       :target-title="dependencyPickerTargetTitle"
-      @select="addDependencyFromPicker"
+      @add="addDependencyFromPicker"
+      @remove="removeDependencyFromPicker"
       @close="dependencyPickerOpen = false" />
   </div>
   <div v-else class="max-w-4xl mx-auto px-6 py-8">
