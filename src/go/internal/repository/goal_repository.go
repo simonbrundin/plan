@@ -993,6 +993,48 @@ func mergeOrder(existing []int64, requested []int64) []int64 {
 	return ordered
 }
 
+// UpdateRelationWeights replaces all weights for a parent in one transaction.
+func (r *GoalRepository) UpdateRelationWeights(ctx context.Context, parentID int64, weights []models.RelationWeight) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin weight update: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	for _, relation := range weights {
+		if relation.Weight < 0 || relation.Weight > 100 {
+			return fmt.Errorf("weight must be between 0 and 100")
+		}
+		result, err := tx.Exec(ctx, `
+			UPDATE goal_relations
+			SET weight = $1
+			WHERE parent_id = $2 AND child_id = $3`,
+			relation.Weight, parentID, relation.ChildID)
+		if err != nil {
+			return fmt.Errorf("failed to update relation weight: %w", err)
+		}
+		if result.RowsAffected() != 1 {
+			return fmt.Errorf("relation does not belong to parent")
+		}
+	}
+
+	var total int
+	if err := tx.QueryRow(ctx,
+		`SELECT COALESCE(SUM(weight), 0) FROM goal_relations WHERE parent_id = $1`,
+		parentID,
+	).Scan(&total); err != nil {
+		return fmt.Errorf("failed to verify relation weights: %w", err)
+	}
+	if total != 100 {
+		return fmt.Errorf("relation weights must total 100")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit relation weights: %w", err)
+	}
+	return nil
+}
+
 // DeleteRelation deletes a parent-child relation
 func (r *GoalRepository) DeleteRelation(ctx context.Context, parentID, childID int64) error {
 	_, err := r.pool.Exec(ctx, `DELETE FROM goal_relations WHERE parent_id = $1 AND child_id = $2`, parentID, childID)

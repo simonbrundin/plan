@@ -79,7 +79,7 @@ type Goal struct {
 	// Null = ingen uppskattning satt. Skickas alltid ut, även när den är
 	// null - samma resonemang som för started/finished.
 	EstimatedMinutes *int `json:"estimated_minutes"`
-	Inbox int     `json:"inbox" example:"0"`
+	Inbox            int  `json:"inbox" example:"0"`
 	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
 	// kan inte slutföras och markeras alltid som pågående.
 	Eternal bool `json:"eternal" example:"false"`
@@ -403,6 +403,18 @@ type UpdateRelationRequest struct {
 	ParentID int64 `json:"parentId" binding:"required"`
 	Order    *int  `json:"order,omitempty"`
 	Weight   *int  `json:"weight,omitempty"`
+}
+
+// RelationWeight is one child's share of its parent's total weight.
+type RelationWeight struct {
+	ChildID int64 `json:"childId" binding:"required"`
+	Weight  int   `json:"weight"`
+}
+
+// UpdateRelationWeightsRequest replaces all weights for one parent atomically.
+type UpdateRelationWeightsRequest struct {
+	ParentID int64            `json:"parentId" binding:"required"`
+	Weights  []RelationWeight `json:"weights" binding:"required,min=1"`
 }
 
 // ReorderRelationsRequest is the request body for reordering the children of a goal.

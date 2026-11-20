@@ -49,6 +49,12 @@ function handleLeaderKeydown(event: KeyboardEvent): boolean {
     goalDates.close();
     return true;
   }
+  if (isQuickAddOpen.value && event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    closeQuickAdd();
+    return true;
+  }
   return handleLeaderKeydownBase(event);
 }
 

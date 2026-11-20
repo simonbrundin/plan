@@ -7,6 +7,7 @@ import {
 	type ParsedEntry,
 } from "~/utils/naturalLanguage";
 import { describeGoalRecurrence } from "~/utils/recurrence";
+import type { Goal } from "~/types/goal";
 
 const emit = defineEmits<{
 	created: [];
@@ -14,9 +15,10 @@ const emit = defineEmits<{
 }>();
 
 const { createCalendarEvent } = useCalendarApi();
-const { createGoal } = useGoalApi();
+const { createGoal, addParentRelation } = useGoalApi();
 const { isOpen, mode, close, markCreated } = useQuickAdd();
 const { calendars, load: loadCalendars, defaultCalendarId } = useCalendars();
+const goalsStore = useGoalsStore();
 
 /**
  * Vilken kalender den nya händelsen ska ligga i. Tomt betyder "ingen
@@ -28,6 +30,10 @@ const text = ref("");
 const saving = ref(false);
 const errorMessage = ref("");
 const inputRef = ref<HTMLInputElement | null>(null);
+const parentSearchInput = ref<HTMLInputElement | null>(null);
+const panelRef = ref<HTMLDivElement | null>(null);
+const parentSearchQuery = ref("");
+const selectedParent = ref<Goal | null>(null);
 
 const parsed = computed<ParsedEntry>(() => parseNaturalLanguage(text.value));
 const trimmedText = computed(() => text.value.trim());
@@ -53,6 +59,16 @@ const title = computed(() => {
 	return parsed.value.title;
 });
 
+const parentSearchResults = computed(() => {
+	const query = parentSearchQuery.value.trim().toLowerCase();
+	if (!query || selectedParent.value) return [];
+
+	return goalsStore.goals
+		.filter((goal) => goal.id !== selectedParent.value?.id)
+		.filter((goal) => goal.title.toLowerCase().includes(query))
+		.slice(0, 8);
+});
+
 const canSubmit = computed(() => title.value.length > 0 && !saving.value);
 
 const preview = computed(() => {
@@ -71,11 +87,62 @@ const focusInput = () => {
 	nextTick(() => inputRef.value?.focus());
 };
 
+const focusParentSearch = () => {
+	nextTick(() => parentSearchInput.value?.focus());
+};
+
+const handleMainInputBlur = () => {
+	if (effectiveMode.value === "goal" && trimmedText.value) {
+		focusParentSearch();
+	}
+};
+
+const closePopup = () => {
+	reset();
+	close();
+	emit("closed");
+};
+
+const handleEscape = (event: KeyboardEvent) => {
+	event.preventDefault();
+	event.stopPropagation();
+	closePopup();
+};
+
+const handleParentSearchKeydown = async (event: KeyboardEvent) => {
+	if (event.key === "Enter") {
+		event.preventDefault();
+		event.stopPropagation();
+		const firstResult = parentSearchResults.value[0];
+		if (firstResult) {
+			selectParent(firstResult);
+			await submit();
+		}
+		return;
+	}
+	if (event.key === "Escape") handleEscape(event);
+};
+
 const reset = () => {
 	text.value = "";
 	mode.value = "auto";
 	errorMessage.value = "";
 	calendarId.value = "";
+	parentSearchQuery.value = "";
+	selectedParent.value = null;
+};
+
+const selectParent = (goal: Goal) => {
+	selectedParent.value = goal;
+	parentSearchQuery.value = "";
+	// Förhindra att Enter-eventet aktiverar knappen när sökfältet försvinner.
+	// Fokusera popupens panel i stället; målet sparas först med ett musklick.
+	nextTick(() => panelRef.value?.focus());
+};
+
+const clearParent = () => {
+	selectedParent.value = null;
+	parentSearchQuery.value = "";
 };
 
 const submit = async () => {
@@ -86,12 +153,20 @@ const submit = async () => {
 
 	try {
 		if (effectiveMode.value === "goal") {
-			await createGoal(
+			const newGoal = await createGoal(
 				title.value,
 				undefined,
 				undefined,
 				parsed.value.recurrenceRule ?? undefined,
 			);
+			goalsStore.addGoal({
+				...newGoal,
+				has_parent: Boolean(selectedParent.value),
+			});
+			if (selectedParent.value) {
+				await addParentRelation(newGoal.id, selectedParent.value.id);
+				goalsStore.addRelation(newGoal.id, selectedParent.value.id);
+			}
 		} else {
 			const entry = parsed.value;
 			const start = entry.startAt ?? new Date();
@@ -114,9 +189,9 @@ const submit = async () => {
 			});
 		}
 
+		markCreated();
 		reset();
 		close();
-		markCreated();
 		emit("created");
 	} catch (error) {
 		console.error("Kunde inte skapa innehållet:", error);
@@ -129,24 +204,34 @@ const submit = async () => {
 const handleKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Enter") {
 		event.preventDefault();
+		if (effectiveMode.value === "goal") {
+			if (!selectedParent.value && trimmedText.value) focusParentSearch();
+			return;
+		}
 		submit();
 		return;
 	}
-	if (event.key === "Escape") {
-		event.preventDefault();
-		event.stopPropagation();
-		reset();
-		close();
-		emit("closed");
-	}
+	if (event.key === "Escape") handleEscape(event);
 };
 
 watch(isOpen, async (open) => {
+	if (!open) {
+		reset();
+		return;
+	}
+
 	if (open) {
 		focusInput();
 		// Kalendrarna behövs för att välja vilken kalender händelsen
 		// ska ligga i.
-		await loadCalendars();
+		await Promise.all([
+			loadCalendars(),
+			goalsStore.loadGraph(true).catch((error) => {
+				// Händelser ska fortfarande kunna skapas om målgraphen tillfälligt
+				// inte går att hämta.
+				console.error("Kunde inte hämta mål för föräldrasökning:", error);
+			}),
+		]);
 		// Standardkalendern är förvald, så att det bara är att skriva.
 		calendarId.value = defaultCalendarId.value
 			? String(defaultCalendarId.value)
@@ -154,8 +239,17 @@ watch(isOpen, async (open) => {
 	}
 });
 
+const handleWindowKeydown = (event: KeyboardEvent) => {
+	if (isOpen.value && event.key === "Escape") handleEscape(event);
+};
+
 onMounted(() => {
+	window.addEventListener("keydown", handleWindowKeydown, true);
 	if (isOpen.value) focusInput();
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("keydown", handleWindowKeydown, true);
 });
 
 defineExpose({ focusInput });
@@ -163,8 +257,25 @@ defineExpose({ focusInput });
 
 <template>
 	<Teleport to="body">
-		<div v-if="isOpen" class="quick-add-backdrop" @click.self="close(); emit('closed')">
-			<div class="quick-add-panel" role="dialog" aria-label="Lägg till">
+		<div v-if="isOpen" class="quick-add-backdrop" @click.self="closePopup">
+			<div
+				ref="panelRef"
+				class="quick-add-panel"
+				role="dialog"
+				aria-label="Lägg till"
+				tabindex="-1"
+				@keydown.esc="handleEscape"
+				@keydown.enter.stop.prevent
+			>
+				<div class="quick-add-header">
+					<div>
+						<div class="quick-add-eyebrow">Snabbtillägg</div>
+						<h2>Vad vill du få gjort?</h2>
+					</div>
+					<button type="button" class="quick-add-close" aria-label="Stäng" @click="closePopup">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
 				<input
 					ref="inputRef"
 					v-model="text"
@@ -172,7 +283,8 @@ defineExpose({ focusInput });
 					class="quick-add-input"
 					placeholder="Lunch med Anna imorgon kl 12"
 					aria-label="Skriv naturlig text"
-					@keydown="handleKeydown"
+					@keydown.stop="handleKeydown"
+					@blur="handleMainInputBlur"
 				/>
 
 				<div class="quick-add-footer">
@@ -201,6 +313,34 @@ defineExpose({ focusInput });
 						>
 							Mål
 						</button>
+					</div>
+
+					<div v-if="effectiveMode === 'goal'" class="quick-add-parent">
+						<div v-if="selectedParent" class="quick-add-parent-selected">
+							<span>Förälder: {{ selectedParent.title }}</span>
+							<button type="button" @click="clearParent">Byt</button>
+						</div>
+						<template v-else>
+							<input
+								ref="parentSearchInput"
+								v-model="parentSearchQuery"
+								type="search"
+								class="quick-add-parent-input"
+								placeholder="Sök föräldramål · Enter väljer och lägger till"
+								aria-label="Sök föräldramål"
+								@keydown.stop="handleParentSearchKeydown"
+							/>
+							<div v-if="parentSearchResults.length" class="quick-add-parent-results">
+								<button
+									v-for="goal in parentSearchResults"
+									:key="goal.id"
+									type="button"
+									@click="selectParent(goal)"
+								>
+									{{ goal.title }}
+								</button>
+							</div>
+						</template>
 					</div>
 
 					<p v-if="trimmedText" class="quick-add-preview">
@@ -249,29 +389,89 @@ defineExpose({ focusInput });
 	inset: 0;
 	z-index: 100;
 	display: flex;
+	align-items: center;
 	justify-content: center;
-	padding: 12vh 1rem 1rem;
-	background: rgb(4 6 14 / 0.55);
-	backdrop-filter: blur(3px);
+	padding: 1rem;
+	background: rgb(3 5 15 / 0.68);
+	backdrop-filter: blur(12px);
+	animation: quick-add-fade 0.18s ease-out;
 }
 
 .quick-add-panel {
-	width: min(34rem, 100%);
-	border: 1px solid var(--color-line-strong);
-	border-radius: 0.9rem;
-	padding: 0.75rem;
-	background: var(--color-surface);
-	box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.45);
+	width: min(40rem, 100%);
+	overflow: visible;
+	border: 1px solid rgb(148 163 184 / 0.2);
+	border-radius: 1.25rem;
+	padding: 1.25rem;
+	background:
+		radial-gradient(circle at 100% 0%, rgb(99 102 241 / 0.16), transparent 34%),
+		linear-gradient(145deg, var(--color-surface), var(--color-surface-2));
+	box-shadow: 0 1.5rem 5rem rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.03) inset;
+	animation: quick-add-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.quick-add-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.8rem;
+}
+
+.quick-add-eyebrow {
+	margin-bottom: 0.2rem;
+	color: #a5b4fc;
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.quick-add-header h2 {
+	margin: 0;
+	color: var(--color-ink);
+	font-size: 1.35rem;
+	font-weight: 650;
+	letter-spacing: -0.025em;
+}
+
+.quick-add-close {
+	display: grid;
+	width: 2rem;
+	height: 2rem;
+	place-items: center;
+	border: 1px solid rgb(148 163 184 / 0.18);
+	border-radius: 0.65rem;
+	color: var(--color-ink-dim);
+	background: rgb(15 23 42 / 0.28);
+	font-size: 1.35rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.quick-add-close:hover {
+	color: var(--color-ink);
+	background: rgb(129 140 248 / 0.18);
+	transform: rotate(4deg);
 }
 
 .quick-add-input {
 	width: 100%;
-	border: 0;
-	padding: 0.65rem 0.4rem;
+	border: 1px solid rgb(148 163 184 / 0.15);
+	border-radius: 0.85rem;
+	padding: 0.95rem 1rem;
 	color: var(--color-ink);
-	background: transparent;
-	font-size: 1.05rem;
+	background: rgb(2 6 23 / 0.28);
+	font-size: 1.08rem;
 	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.quick-add-input:focus {
+	border-color: rgb(129 140 248 / 0.75);
+	background: rgb(2 6 23 / 0.42);
+	box-shadow: 0 0 0 4px rgb(99 102 241 / 0.12);
 }
 
 .quick-add-input::placeholder {
@@ -282,16 +482,16 @@ defineExpose({ focusInput });
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.6rem;
-	border-top: 1px solid var(--color-line);
-	padding-top: 0.6rem;
+	gap: 0.75rem;
+	margin-top: 0.85rem;
 }
 
 .quick-add-modes {
 	display: flex;
-	border: 1px solid var(--color-line);
-	border-radius: 0.5rem;
+	border: 1px solid rgb(148 163 184 / 0.18);
+	border-radius: 0.65rem;
 	overflow: hidden;
+	background: rgb(15 23 42 / 0.26);
 }
 
 /* Kalenderväljaren i snabbfältet. Den visas bara för händelser, eftersom
@@ -307,10 +507,10 @@ defineExpose({ focusInput });
 
 .quick-add-mode {
 	border: 0;
-	padding: 0.28rem 0.5rem;
+	padding: 0.42rem 0.7rem;
 	color: var(--color-ink-dim);
 	background: transparent;
-	font-size: 0.68rem;
+	font-size: 0.7rem;
 	cursor: pointer;
 	transition: color 0.15s ease, background 0.15s ease;
 }
@@ -320,18 +520,100 @@ defineExpose({ focusInput });
 }
 
 .quick-add-mode.active {
+	color: #eef2ff;
+	background: linear-gradient(135deg, rgb(99 102 241 / 0.45), rgb(129 140 248 / 0.2));
+	box-shadow: 0 0 0 1px rgb(165 180 252 / 0.18) inset;
+}
+
+.quick-add-parent {
+	position: relative;
+	flex: 1 1 100%;
+	min-width: 12rem;
+}
+
+.quick-add-parent-input {
+	width: 100%;
+	border: 1px solid rgb(129 140 248 / 0.42);
+	border-radius: 0.7rem;
+	padding: 0.62rem 0.75rem;
 	color: var(--color-ink);
-	background: rgb(129 140 248 / 0.2);
+	background: var(--color-surface-2);
+	font-size: 0.78rem;
+}
+
+.quick-add-parent-input:focus {
+	border-color: rgb(165 180 252 / 0.9);
+	outline: none;
+	box-shadow: 0 0 0 4px rgb(99 102 241 / 0.12);
+}
+
+.quick-add-parent-results {
+	position: absolute;
+	z-index: 1;
+	top: calc(100% + 0.25rem);
+	left: 0;
+	right: 0;
+	max-height: 10rem;
+	overflow-y: auto;
+	border: 1px solid var(--color-line-strong);
+	border-radius: 0.5rem;
+	padding: 0.2rem;
+	background: var(--color-surface);
+	box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 0.35);
+}
+
+.quick-add-parent-results button {
+	display: block;
+	width: 100%;
+	border: 0;
+	border-radius: 0.3rem;
+	padding: 0.35rem 0.45rem;
+	color: var(--color-ink);
+	background: transparent;
+	text-align: left;
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+
+.quick-add-parent-results button:hover {
+	background: var(--color-surface-2);
+}
+
+.quick-add-parent-selected {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	border: 1px solid rgb(74 222 128 / 0.32);
+	border-radius: 0.7rem;
+	padding: 0.62rem 0.75rem;
+	color: #bbf7d0;
+	background: rgb(34 197 94 / 0.08);
+	font-size: 0.78rem;
+}
+
+.quick-add-parent-selected button {
+	border: 0;
+	padding: 0;
+	color: var(--color-accent);
+	background: transparent;
+	font-size: 0.72rem;
+	cursor: pointer;
 }
 
 .quick-add-preview {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.4rem;
+	gap: 0.45rem;
 	flex: 1;
+	min-width: 12rem;
 	margin: 0;
+	padding: 0.55rem 0.7rem;
+	border: 1px solid rgb(148 163 184 / 0.12);
+	border-radius: 0.7rem;
 	color: var(--color-ink-muted);
+	background: rgb(15 23 42 / 0.2);
 	font-size: 0.75rem;
 }
 
@@ -361,14 +643,21 @@ defineExpose({ focusInput });
 
 .quick-add-submit {
 	border: 0;
-	border-radius: 0.5rem;
-	padding: 0.4rem 0.8rem;
+	border-radius: 0.7rem;
+	padding: 0.62rem 1rem;
 	color: #fff;
-	background: var(--color-accent-strong);
+	background: linear-gradient(135deg, #6366f1, #8b5cf6);
 	font-size: 0.78rem;
 	font-weight: 600;
 	cursor: pointer;
-	transition: opacity 0.15s ease;
+	box-shadow: 0 0.45rem 1rem rgb(99 102 241 / 0.25);
+	cursor: pointer;
+	transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quick-add-submit:hover:not(:disabled) {
+	box-shadow: 0 0.65rem 1.25rem rgb(99 102 241 / 0.35);
+	transform: translateY(-1px);
 }
 
 .quick-add-submit:disabled {
@@ -383,12 +672,26 @@ defineExpose({ focusInput });
 }
 
 @media (max-width: 640px) {
-	.quick-add-backdrop {
-		padding: 6vh 0.6rem 0.6rem;
+	.quick-add-panel {
+		padding: 1rem;
+	}
+
+	.quick-add-header h2 {
+		font-size: 1.15rem;
 	}
 
 	.quick-add-input {
 		font-size: 1rem;
 	}
+}
+
+@keyframes quick-add-fade {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes quick-add-rise {
+	from { opacity: 0; transform: translateY(0.7rem) scale(0.98); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
 }
 </style>

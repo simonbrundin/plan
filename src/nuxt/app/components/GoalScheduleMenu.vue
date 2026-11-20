@@ -15,6 +15,13 @@ const emit = defineEmits<{
 }>();
 
 const customDraft = ref("");
+const inputRef = ref<HTMLInputElement | null>(null);
+
+onMounted(() => {
+	// Menyn skapas först efter drop-eventet. Fokusera därför uttryckligen
+	// efter mount i stället för att förlita oss enbart på autofocus-attributet.
+	nextTick(() => inputRef.value?.focus());
+});
 
 const customMinutes = computed(() => parseEstimateMinutes(customDraft.value));
 const customValid = computed(() => customMinutes.value !== null && customMinutes.value > 0);
@@ -35,6 +42,7 @@ function chooseCustom() {
 		@keydown.esc.stop.prevent="emit('cancel')"
 	>
 		<input
+			ref="inputRef"
 			v-model="customDraft"
 			type="text"
 			inputmode="text"

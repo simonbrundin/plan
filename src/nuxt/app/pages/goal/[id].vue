@@ -3,6 +3,7 @@ import LeaderKeyModal from '~/components/LeaderKeyModal.vue'
 import GoalHeader from '~/components/GoalHeader.vue'
 import GoalParentSection from '~/components/GoalParentSection.vue'
 import GoalChildrenList from '~/components/GoalChildrenList.vue'
+import GoalWeightSlider from '~/components/GoalWeightSlider.vue'
 import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
@@ -28,11 +29,13 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeights, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 const { startDrag: startGoalDrag } = useGoalDrag();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
+// Snabbtillägget kan skapa ett nytt barn från vilken sida som helst.
+const { revision: quickAddRevision } = useQuickAdd();
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo();
 const goalDates = useGoalDatesModal();
 
@@ -117,6 +120,13 @@ const refresh = async (force = true) => {
     isLoading.value = false;
   }
 };
+
+// Ett mål som skapats i snabbfältet och fått denna sida som förälder finns
+// redan i den lokala grafen. Visa det direkt och synka sedan mot servern.
+watch(quickAddRevision, () => {
+  hydrate();
+  void refresh(true);
+});
 
 // Sidans data byggs ur grafen. Layouten laddar grafen redan vid start,
 // så här är det oftast ingenting att hämta.
@@ -421,9 +431,6 @@ const showIconPicker = ref(false);
 const editingIconGoalId = ref<number | null>(null);
 const editingIconGoalIcon = ref<string>('');
 
-// Weight editing state
-const weightEditingChildId = ref<number | null>(null);
-const tempWeight = ref(10);
 
 // Dependency drag state (mouse-based for simpler handling)
 const depDragChildId = ref<number | null>(null);
@@ -606,9 +613,12 @@ async function addExistingChild(childId: number) {
   try {
     await addChildAtPosition(childId);
     goalsStore.addRelation(childId, goalId.value);
-    await refresh();
+    // Bygg om sidan från den lokala grafen direkt. Servern verifieras sedan
+    // i bakgrunden, men användaren ska inte behöva vänta på eller uppdatera sidan.
+    hydrate();
     showChildSearch.value = false;
     childSearchQuery.value = "";
+    void refresh(true);
   } catch (error) {
     console.error("Failed to add child:", error);
   }
@@ -621,10 +631,14 @@ async function addExistingChild(childId: number) {
     try {
       const newGoal = await createGoal(childSearchQuery.value.trim());
       await addChildAtPosition(newGoal.id);
-      goalsStore.addGoal(newGoal);
+      goalsStore.addGoal({ ...newGoal, has_parent: true });
       goalsStore.addRelation(newGoal.id, goalId.value);
-      await goalsStore.loadGoals();
-      await refresh();
+      // Visa det nya barnet från den lokala grafen direkt. En bakgrundsrefresh
+      // synkroniserar sedan ordning och övriga fält mot servern.
+      hydrate();
+      showChildSearch.value = false;
+      childSearchQuery.value = "";
+      void refresh(true);
       // Markera det nya målet direkt
       await nextTick();
       const newChildIndex = filteredChildren.value.findIndex(c => c.id === newGoal.id);
@@ -633,8 +647,6 @@ async function addExistingChild(childId: number) {
         isGoalSelected.value = false;
         isParentMode.value = false;
       }
-      showChildSearch.value = false;
-      childSearchQuery.value = "";
     } catch (error) {
       console.error("Failed to create new child:", error);
     }
@@ -642,6 +654,9 @@ async function addExistingChild(childId: number) {
 
   // Hantera Enter-tangent för undermål
   function handleChildSearchKeydown(event: KeyboardEvent) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    event.stopPropagation();
     if (childSearchResults.value.length === 0) {
       // Skapa nytt mål om inga resultat
       createNewChild();
@@ -1601,30 +1616,31 @@ async function updateGoalIcon(newIcon: string) {
   }
 }
 
-// Weight editing functions
 function getWeightStyle(weight: number): { color: string; opacity: number; fontWeight?: string } {
   return { color: '#FFFFFF', opacity: 1 }
 }
 
-function startWeightEdit(child: GoalWithWeight) {
-  weightEditingChildId.value = child.id
-  tempWeight.value = child.weight
-}
+function previewWeights(weights: Array<{ childId: number; weight: number }>) {
+  const data = goalData.value
+  if (!data) return
 
-async function saveWeight() {
-  if (weightEditingChildId.value !== null) {
-    try {
-      await updateGoalWeight(goalId.value, weightEditingChildId.value, tempWeight.value)
-      await refresh()
-    } catch (error) {
-      console.error("Failed to update weight:", error)
-    }
-    weightEditingChildId.value = null
+  for (const weight of weights) {
+    const child = data.children.find((item) => item.id === weight.childId)
+    if (child) child.weight = weight.weight
+
+    const relation = data.goal.childRelations.find((item) => item.child_id === weight.childId)
+    if (relation) relation.weight = weight.weight
   }
 }
 
-function cancelWeightEdit() {
-  weightEditingChildId.value = null
+async function saveWeights(weights: Array<{ childId: number; weight: number }>) {
+  try {
+    await updateGoalWeights(goalId.value, weights)
+    await refresh()
+  } catch (error) {
+    console.error("Failed to update goal weights:", error)
+    await refresh()
+  }
 }
 
 // Öppna ikonväljaren för det som är markerat (mål, förälder eller barn)
@@ -2596,6 +2612,12 @@ watch(selectedParentIndex, async () => {
                     {{ descriptionPreview(child.description, 80) }}
                   </p>
                 </NuxtLink>
+                <GoalWeightSlider
+                  :children="children"
+                  :child-id="child.id"
+                  @update="previewWeights"
+                  @commit="saveWeights"
+                />
                  <!-- Started-toggle (s) -->
                  <button
                    @click.stop="toggleStarted(child)"
@@ -2689,24 +2711,6 @@ watch(selectedParentIndex, async () => {
                     @update:selected="placeDraft = $event"
                     @save="savePlaces(child.id)"
                     @cancel="closePlacePicker" />
-                </div>
-                <button
-                  v-if="weightEditingChildId !== child.id"
-                  @click.stop="startWeightEdit(child)"
-                  :class="[
-                    'flex-shrink-0 h-7 px-2.5 flex items-center justify-center rounded-full bg-elevated text-xs font-mono tabular-nums transition-colors',
-                    isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-ink-muted'
-                  ]"
-                  title="Ändra vikt">
-                  {{ child.weight }}
-                </button>
-                <div v-if="weightEditingChildId === child.id" class="px-4 pb-4">
-                  <div class="flex items-center gap-2">
-                    <input v-model.number="tempWeight" type="range" min="1" max="200" step="1" class="flex-1 accent-accent" />
-                    <span class="text-sm text-ink-muted w-8 tabular-nums">{{ tempWeight }}</span>
-                    <button @click="saveWeight" class="text-green-400 hover:text-green-300">✓</button>
-                    <button @click="cancelWeightEdit" class="text-red-400 hover:text-red-300">✗</button>
-                  </div>
                 </div>
               </div>
             </div>

@@ -242,6 +242,16 @@ export function useGoalApi() {
 		});
 	};
 
+	const updateGoalWeights = async (
+		parentId: number,
+		weights: Array<{ childId: number; weight: number }>,
+	) => {
+		await apiProxy(`goals/relations/weights`, {
+			method: "PATCH",
+			body: { parentId, weights },
+		});
+	};
+
 	const setGoalWeight = async (
 		childId: number,
 		parentId: number,
@@ -349,6 +359,7 @@ export function useGoalApi() {
 		reorderGoals,
 		reorderPriorityGoals,
 		updateGoalWeight,
+		updateGoalWeights,
 		setGoalWeight,
 		createGoal,
 		loadAllGoals,

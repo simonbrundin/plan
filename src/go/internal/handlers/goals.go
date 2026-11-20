@@ -732,6 +732,65 @@ func (h *GoalHandler) UpdateRelation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"updated": true})
 }
 
+// UpdateRelationWeights godoc
+// @Summary Update all child goal weights
+// @Description Replaces all weights for a parent atomically. Weights must total 100.
+// @Tags relations
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param relation body models.UpdateRelationWeightsRequest true "Relation weights"
+// @Success 200 {object} map[string]bool
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Router /api/goals/relations/weights [patch]
+func (h *GoalHandler) UpdateRelationWeights(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	var req models.UpdateRelationWeightsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "parentId and weights are required"})
+		return
+	}
+
+	hasAccess, _ := h.repo.UserHasAccess(c.Request.Context(), userID, req.ParentID)
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{Message: "Access denied"})
+		return
+	}
+
+	total := 0
+	seen := make(map[int64]bool, len(req.Weights))
+	for _, weight := range req.Weights {
+		if seen[weight.ChildID] || weight.Weight < 0 || weight.Weight > 100 {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "weights must be unique and between 0 and 100"})
+			return
+		}
+		seen[weight.ChildID] = true
+		total += weight.Weight
+	}
+	if total != 100 {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "weights must total 100"})
+		return
+	}
+
+	if err := h.repo.UpdateRelationWeights(c.Request.Context(), req.ParentID, req.Weights); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"updated": true})
+}
+
 // DeleteRelation godoc
 // @Summary Delete a relation
 // @Description Delete a parent-child relation
