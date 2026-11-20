@@ -2650,6 +2650,14 @@ const docTemplate = `{
                     "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
                     "type": "string"
                 },
+                "start_date": {
+                    "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
                     "type": "string"
@@ -2806,8 +2814,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "FREQ=DAILY;INTERVAL=2"
                 },
+                "recurrence_start_date": {
+                    "description": "RecurrenceStartDate är det datum serien startar på (\"YYYY-MM-DD\").\nUtan den används dagens datum.",
+                    "type": "string",
+                    "example": "2026-01-05"
+                },
                 "start_date": {
-                    "description": "StartDate är det datum serien startar på (\"YYYY-MM-DD\"). Utan den\nanvänds dagens datum.",
+                    "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan (\"YYYY-MM-DD\"). Utan det får målet synas direkt.",
                     "type": "string",
                     "example": "2026-01-05"
                 },
@@ -3047,6 +3060,14 @@ const docTemplate = `{
                     "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
                     "type": "string"
                 },
+                "start_date": {
+                    "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
+                },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
                     "type": "string"
@@ -3168,6 +3189,14 @@ const docTemplate = `{
                 "recurrence_rule": {
                     "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
                     "type": "string"
+                },
+                "start_date": {
+                    "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
                 },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
@@ -3336,6 +3365,14 @@ const docTemplate = `{
                 "recurrence_rule": {
                     "description": "RecurrenceRule är upprepningsregeln för ett återkommande mål, som\nen RRULE-sträng. Null = målet är inte återkommande.",
                     "type": "string"
+                },
+                "start_date": {
+                    "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                        }
+                    ]
                 },
                 "started": {
                     "description": "Started och Finished skickas alltid ut, även när de är null.\nMed omitempty skulle fältet försvinna ur JSON-svaret och klienten\nfick undefined i stället för null - vilket gjorde att filter som\n\"started !== null\" felaktigt matchade mål utan startdatum.",
@@ -3582,9 +3619,17 @@ const docTemplate = `{
                         }
                     ]
                 },
-                "start_date": {
-                    "description": "StartDate är det datum serien startar på (\"YYYY-MM-DD\").",
+                "recurrence_start_date": {
+                    "description": "RecurrenceStartDate är det datum serien startar på (\"YYYY-MM-DD\").",
                     "type": "string"
+                },
+                "start_date": {
+                    "description": "StartDate sätter eller rensar målets startdatum (\"YYYY-MM-DD\" eller\nnull). Startdatumet avgör från vilket datum målet får dyka upp i\nprioriteringslistan.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/plan-api_internal_models.NullableDueDate"
+                        }
+                    ]
                 },
                 "started": {
                     "$ref": "#/definitions/plan-api_internal_models.NullableTime"

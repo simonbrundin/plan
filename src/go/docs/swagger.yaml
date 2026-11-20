@@ -196,6 +196,16 @@ definitions:
           RecurrenceRule är upprepningsregeln för ett återkommande mål, som
           en RRULE-sträng. Null = målet är inte återkommande.
         type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          StartDate är det datum målet tidigast får dyka upp i
+          prioriteringslistan. Null = målet får synas direkt.
+
+          Det är ett annat datum än started: started säger att arbetet har
+          börjat, startDate säger att målet inte får prioriteras ännu.
+          Skickas alltid ut, även när det är null.
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -316,10 +326,16 @@ definitions:
         description: RecurrenceRule gör målet återkommande direkt ("FREQ=DAILY;INTERVAL=2").
         example: FREQ=DAILY;INTERVAL=2
         type: string
+      recurrence_start_date:
+        description: |-
+          RecurrenceStartDate är det datum serien startar på ("YYYY-MM-DD").
+          Utan den används dagens datum.
+        example: "2026-01-05"
+        type: string
       start_date:
         description: |-
-          StartDate är det datum serien startar på ("YYYY-MM-DD"). Utan den
-          används dagens datum.
+          StartDate är det datum målet tidigast får dyka upp i
+          prioriteringslistan ("YYYY-MM-DD"). Utan det får målet synas direkt.
         example: "2026-01-05"
         type: string
       status_id:
@@ -506,6 +522,16 @@ definitions:
           RecurrenceRule är upprepningsregeln för ett återkommande mål, som
           en RRULE-sträng. Null = målet är inte återkommande.
         type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          StartDate är det datum målet tidigast får dyka upp i
+          prioriteringslistan. Null = målet får synas direkt.
+
+          Det är ett annat datum än started: started säger att arbetet har
+          börjat, startDate säger att målet inte får prioriteras ännu.
+          Skickas alltid ut, även när det är null.
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -615,6 +641,16 @@ definitions:
           RecurrenceRule är upprepningsregeln för ett återkommande mål, som
           en RRULE-sträng. Null = målet är inte återkommande.
         type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          StartDate är det datum målet tidigast får dyka upp i
+          prioriteringslistan. Null = målet får synas direkt.
+
+          Det är ett annat datum än started: started säger att arbetet har
+          börjat, startDate säger att målet inte får prioriteras ännu.
+          Skickas alltid ut, även när det är null.
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -755,6 +791,16 @@ definitions:
           RecurrenceRule är upprepningsregeln för ett återkommande mål, som
           en RRULE-sträng. Null = målet är inte återkommande.
         type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        description: |-
+          StartDate är det datum målet tidigast får dyka upp i
+          prioriteringslistan. Null = målet får synas direkt.
+
+          Det är ett annat datum än started: started säger att arbetet har
+          börjat, startDate säger att målet inte får prioriteras ännu.
+          Skickas alltid ut, även när det är null.
       started:
         description: |-
           Started och Finished skickas alltid ut, även när de är null.
@@ -930,9 +976,16 @@ definitions:
         description: |-
           RecurrenceRule sätter eller tar bort målets upprepningsregel.
           Utan fältet lämnas regeln oförändrad, null tar bort den.
-      start_date:
-        description: StartDate är det datum serien startar på ("YYYY-MM-DD").
+      recurrence_start_date:
+        description: RecurrenceStartDate är det datum serien startar på ("YYYY-MM-DD").
         type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/plan-api_internal_models.NullableDueDate'
+        description: |-
+          StartDate sätter eller rensar målets startdatum ("YYYY-MM-DD" eller
+          null). Startdatumet avgör från vilket datum målet får dyka upp i
+          prioriteringslistan.
       started:
         $ref: '#/definitions/plan-api_internal_models.NullableTime'
       status_id:
