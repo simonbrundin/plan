@@ -28,7 +28,6 @@ interface GoalPageCallbacks {
 	onEdit?: (atBeginning: boolean) => void;
 	onToggleParentSearch?: () => void;
 	onToggleChildSearch?: () => void;
-	onLeaderModeChange?: (isLeader: boolean) => void;
 }
 
 const currentPage = ref<PageType>("other");
@@ -41,9 +40,6 @@ const navigationState = ref<NavigationState>({
 });
 
 const isEnabled = ref(false);
-const isLeaderMode = ref(false);
-const leaderTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
-const leaderFirstKey = ref("");
 
 let goalPageCallbacks: GoalPageCallbacks | null = null;
 
@@ -137,53 +133,10 @@ export function useGlobalNavigation() {
 
 		const key = event.key.toLowerCase();
 
-		if (event.key === "Escape") {
-			if (isLeaderMode.value) {
-				event.preventDefault();
-				isLeaderMode.value = false;
-				leaderFirstKey.value = "";
-				goalPageCallbacks?.onLeaderModeChange?.(false);
-				return;
-			}
-		}
-
-		// Mellanslag ska fungera normalt i textarea/input. Kontrollera detta
-		// innan leader-mode hanterar mellanslag och gör preventDefault().
+		// Mellanslag ska fungera normalt i textarea/input.
 		if (isInputFocused()) return;
 
-		if (event.key === " ") {
-			event.preventDefault();
-			isLeaderMode.value = true;
-			leaderFirstKey.value = "";
-			if (leaderTimeout.value) clearTimeout(leaderTimeout.value);
-			leaderTimeout.value = setTimeout(() => {
-				isLeaderMode.value = false;
-				leaderFirstKey.value = "";
-				goalPageCallbacks?.onLeaderModeChange?.(false);
-			}, 1000);
-			goalPageCallbacks?.onLeaderModeChange?.(true);
-			return;
-		}
-
-		if (isLeaderMode.value) {
-			event.preventDefault();
-			if (leaderTimeout.value) clearTimeout(leaderTimeout.value);
-			leaderTimeout.value = setTimeout(() => {
-				isLeaderMode.value = false;
-				leaderFirstKey.value = "";
-				goalPageCallbacks?.onLeaderModeChange?.(false);
-			}, 1000);
-
-			if (key === leaderFirstKey.value) {
-				leaderFirstKey.value = "";
-				return;
-			}
-
-			leaderFirstKey.value = key;
-			return;
-		}
-
-		if (isInputFocused() || isSearchFieldFocused(isSearchOpen)) return;
+		if (isSearchFieldFocused(isSearchOpen)) return;
 
 		if (currentPage.value !== "goal") return;
 		if (!goalPageCallbacks) return;
@@ -303,20 +256,11 @@ export function useGlobalNavigation() {
 		}
 	}
 
-	function handleKeyup(event: KeyboardEvent) {
-		if (event.key === " ") {
-			isLeaderMode.value = false;
-			leaderFirstKey.value = "";
-		}
-	}
-
 	return {
 		currentPage: readonly(currentPage),
 		currentGoalId: readonly(currentGoalId),
 		navigationState: readonly(navigationState),
 		isEnabled: readonly(isEnabled),
-		isLeaderMode: readonly(isLeaderMode),
-		leaderFirstKey: readonly(leaderFirstKey),
 		enableNavigation,
 		disableNavigation,
 		setPage,
@@ -327,6 +271,5 @@ export function useGlobalNavigation() {
 		registerGoalPageCallbacks,
 		unregisterGoalPageCallbacks,
 		handleKeydown,
-		handleKeyup,
 	};
 }

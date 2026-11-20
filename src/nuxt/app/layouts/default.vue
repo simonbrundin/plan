@@ -27,9 +27,15 @@ const {
   enableNavigation,
   disableNavigation,
   handleKeydown: handleNavigationKeydown,
-  handleKeyup: handleNavigationKeyup,
-  isLeaderMode,
 } = useGlobalNavigation();
+
+const {
+  isLeaderOpen,
+  pendingKeys: leaderPendingKeys,
+  commands: leaderCommands,
+  handleKeydown: handleLeaderKeydown,
+  executeCommand: executeLeaderCommand,
+} = useLeaderKey();
 
 const { isOpen: isQuickAddOpen, open: openQuickAdd, close: closeQuickAdd } = useQuickAdd();
 
@@ -131,6 +137,10 @@ const groups = computed(() => {
 });
 
 function handleGlobalKeydown(event: KeyboardEvent) {
+  // Leader-läget hanteras i en capture-listener (se onMounted) så att det
+  // hinner före sidornas egna tangentbevakare.
+  if (isLeaderConsumed(event)) return;
+
   const target = event.target as HTMLElement;
   const isInInput =
     target.tagName === "INPUT" ||
@@ -147,7 +157,7 @@ function handleGlobalKeydown(event: KeyboardEvent) {
     !event.defaultPrevented &&
     !isInInput &&
     !isSearchOpen.value &&
-    !isLeaderMode.value &&
+    !isLeaderOpen.value &&
     !isQuickAddOpen.value
   ) {
     event.preventDefault();
@@ -207,7 +217,6 @@ function handleGlobalKeydown(event: KeyboardEvent) {
 
 function handleGlobalKeyup(event: KeyboardEvent) {
   handlePriorityKeyup(event);
-  handleNavigationKeyup(event);
 }
 
 function updateSearchOpen(open: boolean) {
@@ -219,6 +228,9 @@ function updateSearchOpen(open: boolean) {
 }
 
 onMounted(() => {
+  // Capture-fasen gör att leader-läget vinner över sidornas egna
+  // tangentbevakare, oavsett i vilken ordning lyssnarna registrerades.
+  window.addEventListener("keydown", handleLeaderKeydown, true);
   window.addEventListener("keydown", handleGlobalKeydown);
   window.addEventListener("keyup", handleGlobalKeyup);
   loadPrioritizedGoals();
@@ -226,6 +238,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener("keydown", handleLeaderKeydown, true);
   window.removeEventListener("keydown", handleGlobalKeydown);
   window.removeEventListener("keyup", handleGlobalKeyup);
   disableNavigation();
@@ -260,6 +273,13 @@ onUnmounted(() => {
     <UDashboardSearch :open="isSearchOpen" :groups="groups" @update:open="updateSearchOpen" />
 
     <HelpModal v-model:open="showHelpModal" />
+
+    <LeaderKeyModal
+      :open="isLeaderOpen"
+      :commands="leaderCommands"
+      :pending="leaderPendingKeys"
+      @execute-command="executeLeaderCommand($event)"
+    />
 
     <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />
 

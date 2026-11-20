@@ -884,11 +884,6 @@ const showDeleteConfirmation = ref(false);
 const goalToDelete = ref<{ id: number; title: string } | null>(null);
 const deleteDialogSelection = ref<"cancel" | "confirm">("cancel");
 
-// Leader key state
-const isLeaderModalOpen = ref(false);
-let leaderModalJustOpened = false;
-let leaderFirstKey = "";
-
 // Gå in i insert mode för att redigera ett mål
 async function enterInsertMode(
   goalId: number,
@@ -1355,63 +1350,48 @@ function cancelWeightEdit() {
   weightEditingChildId.value = null
 }
 
-// Exekvera leader key kommando
-function executeLeaderCommand(key: string): boolean {
-  // Hantera kombinerade tangentsekvenser från modal (t.ex. "fd", "gi", "gg")
-  if (key === "fd") {
-    showCompleted.value = !showCompleted.value;
-    isLeaderModalOpen.value = false;
-    return true;
-  } else if (key === "gi") {
-    isLeaderModalOpen.value = false;
-    router.push('/');
-    return true;
-  } else if (key === "gg") {
-    isLeaderModalOpen.value = false;
-    router.push('/goals');
-    return true;
+// Öppna ikonväljaren för det som är markerat (mål, förälder eller barn)
+function openIconPickerForSelection() {
+  if (isGoalSelected.value && goal.value) {
+    editingIconGoalId.value = null;
+    showIconPicker.value = true;
+  } else if (isParentMode.value && parents.value.length > 0) {
+    editingIconGoalId.value = parents.value[selectedParentIndex.value].id;
+    showIconPicker.value = true;
+  } else if (filteredChildren.value.length > 0) {
+    editingIconGoalId.value = filteredChildren.value[selectedChildIndex.value].id;
+    showIconPicker.value = true;
   }
-
-  if (key === "f") {
-    leaderFirstKey = "f";
-    return false;
-  } else if (key === "d" && leaderFirstKey === "f") {
-    showCompleted.value = !showCompleted.value;
-    leaderFirstKey = "";
-    isLeaderModalOpen.value = false;
-    return true;
-  } else if (key === "g") {
-    leaderFirstKey = "g";
-    return false;
-  } else if (key === "i" && leaderFirstKey === "g") {
-    isLeaderModalOpen.value = false;
-    router.push('/');
-    leaderFirstKey = "";
-    return true;
-  } else if (key === "g" && leaderFirstKey === "g") {
-    isLeaderModalOpen.value = false;
-    router.push('/goals');
-    leaderFirstKey = "";
-    return true;
-  } else if (key === "i") {
-    isLeaderModalOpen.value = false;
-    if (isGoalSelected.value && goal.value) {
-      editingIconGoalId.value = null;
-      showIconPicker.value = true;
-    } else if (isParentMode.value && parents.value.length > 0) {
-      editingIconGoalId.value = parents.value[selectedParentIndex.value].id;
-      showIconPicker.value = true;
-    } else if (filteredChildren.value.length > 0) {
-      editingIconGoalId.value = filteredChildren.value[selectedChildIndex.value].id;
-      showIconPicker.value = true;
-    }
-    leaderFirstKey = "";
-    return true;
-  }
-
-  leaderFirstKey = "";
-  return true;
 }
+
+// Kommandon som bara finns på målsidan registreras i det globala
+// leader-läget, så att samma tangentsekvenser fungerar överallt.
+const { registerPageCommands } = useLeaderKey();
+let unregisterLeaderCommands: (() => void) | null = null;
+
+onMounted(() => {
+  unregisterLeaderCommands = registerPageCommands([
+    {
+      keys: "fd",
+      label: "F+D",
+      title: "Toggle completed goals",
+      run: () => {
+        showCompleted.value = !showCompleted.value;
+      },
+    },
+    {
+      keys: "i",
+      label: "I",
+      title: "Change icon",
+      run: openIconPickerForSelection,
+    },
+  ]);
+});
+
+onUnmounted(() => {
+  unregisterLeaderCommands?.();
+  unregisterLeaderCommands = null;
+});
 
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
@@ -1444,32 +1424,10 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   // ===============================================
-  // LEADER MODE CHECKS - PRIORITERA FÖRE ALLT ANNAT
+  // LEADER MODE - hanteras globalt, här bara ignorerar tangenten
   // ===============================================
 
-  // Hantera ESC för att stänga leader mode
-  if (event.key === "Escape" && isLeaderModalOpen.value) {
-    event.preventDefault();
-    isLeaderModalOpen.value = false;
-    return;
-  }
-
-  // Hantera leader commands när i leader mode
-  if (isLeaderModalOpen.value) {
-    event.preventDefault();
-    const key = event.key.toLowerCase();
-    executeLeaderCommand(key);
-    return;
-  }
-
-  // Hantera leader key (space) - enter leader mode
-  if (event.key === " ") {
-    // En fokuserad knapp ska aktiveras med mellanslag, inte öppna leader mode
-    if (eventTarget?.tagName === "BUTTON") {
-      return;
-    }
-    event.preventDefault();
-    isLeaderModalOpen.value = true;
+  if (isLeaderConsumed(event)) {
     return;
   }
 
@@ -1747,17 +1705,6 @@ watch(filteredChildren, () => {
     selectedChildIndex.value = Math.max(0, filteredChildren.value.length - 1);
   }
 });
-
-// Debug: Log när isLeaderModalOpen ändras
-watch(
-  isLeaderModalOpen,
-  (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-      console.log('🔴 isLeaderModalOpen changed from', oldVal, 'to', newVal);
-      console.trace('Stack trace of who changed it:');
-    }
-  }
-);
 
 // Återställ parent mode när målet ändras
 watch(
@@ -2431,12 +2378,6 @@ watch(selectedParentIndex, async () => {
           editingIconGoalId = null;
         }
       }" @update:modelValue="updateGoalIcon" />
-
-    <!-- Leader Key Modal -->
-    <LeaderKeyModal
-      :open="isLeaderModalOpen"
-      @execute-command="executeLeaderCommand($event)"
-    />
   </div>
   <div v-else class="max-w-4xl mx-auto px-6 py-8">
     <div class="text-center">
