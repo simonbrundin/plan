@@ -6,9 +6,10 @@ import GoalChildrenList from '~/components/GoalChildrenList.vue'
 import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
-import type { Goal, GoalWithWeight } from '~/types/goal'
+import type { Goal, GoalWithWeight, GetGoalResponse } from '~/types/goal'
 import type { Place } from '~/types/place'
 import { moveChildId, nextChildOrder } from '~/utils/childOrder'
+import { buildGoalData } from '~/utils/goalGraph'
 import { canBeFinished } from '~/utils/goalRules'
 import { descriptionPreview } from '~/utils/goalDescription'
 import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
@@ -25,19 +26,48 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { fetchGoalData, updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+
+// Använd goals store
+const goalsStore = useGoalsStore();
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 
-const refresh = async (forceRefresh = false) => {
+// Sätter sidans data ur grafen.
+function hydrate() {
+  const data = buildGoalData(
+    {
+      goals: goalsStore.goals,
+      relations: goalsStore.relations,
+      dependencies: goalsStore.dependencies,
+    },
+    goalId.value,
+  );
+  if (!data) {
+    goalData.value = null;
+    error.value = "Målet hittades inte";
+    return;
+  }
+
+  goalData.value = data;
+  error.value = null;
+}
+
+// Hämtar grafen och bygger om sidans data.
+//
+// force = true hämtar alltid om från servern - det används efter en
+// ändring. Annars används den graf som redan finns, vilket går på
+// millisekunder.
+const refresh = async (force = true) => {
   isLoading.value = true;
   error.value = null;
 
   try {
-    goalData.value = await fetchGoalData(goalId.value, forceRefresh);
+    await goalsStore.loadGraph(force);
+    hydrate();
   } catch (err) {
     console.error("Fetch goal error:", err);
     error.value = err instanceof Error ? err.message : "Unknown error";
@@ -46,8 +76,26 @@ const refresh = async (forceRefresh = false) => {
   }
 };
 
-// Fetch initial data
-await refresh();
+// Sidans data byggs ur grafen. Layouten laddar grafen redan vid start,
+// så här är det oftast ingenting att hämta.
+await refresh(false);
+
+// Hämtar om grafen i bakgrunden om den börjar bli gammal.
+//
+// Det håller data färska om något ändrats i en annan webbläsare, utan att
+// navigeringen behöver vänta på servern.
+function scheduleRevalidate() {
+  if (Date.now() - goalsStore.loadedAt < 15000) {
+    return;
+  }
+
+  void goalsStore
+    .loadGraph(true)
+    .then(() => hydrate())
+    .catch(() => {
+      // Tyst - navigeringen fungerar ändå med den data vi redan har.
+    });
+}
 
 // Hämta användarens platser - de behövs för att kunna koppla platser
 // till mål.
@@ -101,11 +149,13 @@ function applyPlaces(targetId: number, saved: Place[]) {
   if (parent) parent.places = saved;
 }
 
-// Re-fetch when navigating to a different goal
+// Byt målsida när ett nytt mål väljs - utan serverfråga, grafen räcker.
 watch(
   () => route.params.id,
   async () => {
-    await refresh();
+    hydrate();
+    isLoading.value = false;
+    scheduleRevalidate();
   }
 );
 
@@ -306,18 +356,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleDepMouseMove);
   window.removeEventListener('mouseup', handleDepMouseUp);
-});
-
-// Använd goals store
-const goalsStore = useGoalsStore();
-
-// Ladda goals om de inte är laddade
-onMounted(async () => {
-  // Populate store with goals from the allGoals data we already fetched
-  if (goalData.value?.allGoals && goalsStore.goals.length === 0) {
-    goalData.value.allGoals.forEach(g => goalsStore.addGoal(g));
-    goalsStore.isLoaded = true;
-  }
 });
 
 // Visa/dölj avklarade mål
@@ -734,6 +772,10 @@ function applyLocalOrder(ids: number[]) {
   });
 
   data.children = reordered;
+
+  // Grafen håller den nya ordningen, så att sidan inte hoppar tillbaka
+  // till den gamla ordningen innan servern svarat.
+  goalsStore.setChildOrder(goalId.value, ids);
 }
 
 // Sparar ordningen till servern. Anropen körs i kedjan och senaste ordningen

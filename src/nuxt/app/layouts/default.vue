@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
-import type { Goal } from "~/types/goal";
 
 const route = useRoute();
 const { loggedIn } = useUserSession();
@@ -99,31 +98,23 @@ const links = [
   ],
 ] satisfies NavigationMenuItem[][];
 
-const goalsData = ref<Goal[] | null>(null);
-const { loadAllGoals } = useGoalApi();
-
-const fetchGoals = async () => {
-  try {
-    goalsData.value = await loadAllGoals();
-  } catch (error) {
-    // Silently fail for navigation - goals are optional there
-    goalsData.value = null;
-  }
-};
+const goalsStore = useGoalsStore();
 
 onMounted(() => {
-  fetchGoals();
+  // Grafen laddas direkt vid start, så att byten mellan målsidor inte
+  // behöver vänta på servern. Ett fel ignoreras - menyn fungerar ändå.
+  goalsStore.loadGraph().catch(() => {});
 });
 
 const groups = computed(() => {
   const goalItems =
-    goalsData.value?.map((goal) => ({
+    goalsStore.goals.map((goal) => ({
       id: `goal-${goal.id}`,
       label: goal.title,
       icon: goal.finished ? "i-lucide-check-circle" : "i-lucide-circle",
       to: `/goal/${goal.id}`,
       suffix: goal.finished ? "Klar" : undefined,
-    })) ?? [];
+    }));
 
   return [
     {

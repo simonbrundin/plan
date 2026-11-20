@@ -1,31 +1,5 @@
-import type { Goal, GoalDependency } from "~/types/goal";
+import type { Goal, GoalDependency, GoalGraphResponse } from "~/types/goal";
 import type { RecurrenceMode } from "~/utils/recurrence";
-
-interface GoalWithWeight extends Goal {
-	weight: number;
-	order: number;
-}
-
-interface GoalData {
-	goal: Goal;
-	children: GoalWithWeight[];
-	parents: Goal[];
-	allGoals: Goal[];
-	dependencies: GoalDependency[];
-	dependsOn: Goal[];
-	blocking: Goal[];
-	statusHistory?: StatusUpdate[];
-}
-
-interface StatusUpdate {
-	id: number;
-	goal_id: number;
-	from_status_id?: number;
-	to_status_id: number;
-	changed_at: string;
-	from_status_name?: string;
-	to_status_name: string;
-}
 
 // Custom error for authentication failures
 export class AuthenticationError extends Error {
@@ -51,14 +25,6 @@ const apiProxy = async <T>(path: string, options: RequestInit = {}): Promise<T> 
 };
 
 export function useGoalApi() {
-	const fetchGoalData = async (
-		goalId: number,
-		forceRefresh = false,
-	): Promise<GoalData> => {
-		const query = forceRefresh ? `?_=${Date.now()}` : '';
-		return await apiProxy<GoalData>(`goals/${goalId}${query}`);
-	};
-
 	const updateGoalTitle = async (goalId: number, title: string) => {
 		await apiProxy(`goals/${goalId}`, {
 			method: "PATCH",
@@ -262,6 +228,15 @@ export function useGoalApi() {
 		return await apiProxy<Goal[]>(`goals`);
 	};
 
+	// Hämta hela målgraphen: målen, relationerna och beroendena.
+	//
+	// Grafen räcker för att bygga varje målsida - barn, föräldrar och
+	// beroenden räknas ut lokalt. Därför behövs bara en fråga när man
+	// navigerar mellan mål.
+	const loadGoalGraph = async (): Promise<GoalGraphResponse> => {
+		return await apiProxy<GoalGraphResponse>(`goals/graph`);
+	};
+
 	const findIconForGoalTitle = async (title: string): Promise<string | undefined> => {
 		const query = title.trim();
 		if (query.length < 2) return undefined;
@@ -322,7 +297,6 @@ export function useGoalApi() {
 	};
 
 	return {
-		fetchGoalData,
 		updateGoalTitle,
 		updateGoalIcon,
 		updateGoalDescription,
@@ -346,6 +320,7 @@ export function useGoalApi() {
 		setGoalWeight,
 		createGoal,
 		loadAllGoals,
+		loadGoalGraph,
 		addDependency,
 		removeDependency,
 	};

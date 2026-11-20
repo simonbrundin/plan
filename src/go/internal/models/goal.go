@@ -134,6 +134,28 @@ type GoalWithRelations struct {
 	ParentRelations []Goal          `json:"parentRelations"`
 }
 
+// GoalRelation binds a child goal to a parent goal.
+//
+// Order och Weight hör till relationen, inte till målet - samma mål kan
+// ligga under olika föräldrar med olika ordning.
+type GoalRelation struct {
+	ParentID int64 `json:"parent_id"`
+	ChildID  int64 `json:"child_id"`
+	Order    int   `json:"order"`
+	Weight   int   `json:"weight"`
+}
+
+// GoalGraphResponse är en användares hela målgraph: målen, relationerna
+// mellan dem och beroendena mellan dem.
+//
+// Klienten hämtar grafen en gång och räknar själv ut barn, föräldrar och
+// beroenden - i stället för att fråga servern om varje målsida.
+type GoalGraphResponse struct {
+	Goals        []Goal           `json:"goals"`
+	Relations    []GoalRelation   `json:"relations"`
+	Dependencies []GoalDependency `json:"dependencies"`
+}
+
 // GoalDependency represents a dependency between goals
 type GoalDependency struct {
 	ID          int64     `json:"id" example:"1"`

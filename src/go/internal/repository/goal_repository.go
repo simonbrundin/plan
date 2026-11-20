@@ -600,6 +600,62 @@ func (r *GoalRepository) UserHasAccess(ctx context.Context, userID, goalID int64
 	return exists, nil
 }
 
+// GetAllRelations returns every parent-child relation among a user's goals.
+//
+// Alla relationer hämtas i en fråga, så att klienten kan räkna ut barn och
+// föräldrar lokalt i stället för att fråga per mål.
+func (r *GoalRepository) GetAllRelations(ctx context.Context, userID int64) ([]models.GoalRelation, error) {
+	query := `
+		SELECT gr.parent_id, gr.child_id, gr."order", gr.weight
+		FROM goal_relations gr
+		INNER JOIN user_goals ug ON ug.goal_id = gr.child_id
+		WHERE ug.user_id = $1
+		ORDER BY gr."order" ASC`
+
+	rows, err := r.pool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get relations: %w", err)
+	}
+	defer rows.Close()
+
+	var relations []models.GoalRelation
+	for rows.Next() {
+		var rel models.GoalRelation
+		if err := rows.Scan(&rel.ParentID, &rel.ChildID, &rel.Order, &rel.Weight); err != nil {
+			return nil, fmt.Errorf("failed to scan relation: %w", err)
+		}
+		relations = append(relations, rel)
+	}
+
+	return relations, rows.Err()
+}
+
+// GetAllDependencies returns every dependency among a user's goals.
+func (r *GoalRepository) GetAllDependencies(ctx context.Context, userID int64) ([]models.GoalDependency, error) {
+	query := `
+		SELECT gd.id, gd.goal_id, gd.depends_on_id, gd.created
+		FROM goal_dependencies gd
+		INNER JOIN user_goals ug ON ug.goal_id = gd.goal_id
+		WHERE ug.user_id = $1`
+
+	rows, err := r.pool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get dependencies: %w", err)
+	}
+	defer rows.Close()
+
+	var deps []models.GoalDependency
+	for rows.Next() {
+		var d models.GoalDependency
+		if err := rows.Scan(&d.ID, &d.GoalID, &d.DependsOnID, &d.Created); err != nil {
+			return nil, fmt.Errorf("failed to scan dependency: %w", err)
+		}
+		deps = append(deps, d)
+	}
+
+	return deps, rows.Err()
+}
+
 // GetChildRelations returns child relations for a goal
 func (r *GoalRepository) GetChildRelations(ctx context.Context, parentID int64) ([]models.ChildRelation, error) {
 	query := `SELECT child_id, "order", weight FROM goal_relations WHERE parent_id = $1 ORDER BY "order" ASC`

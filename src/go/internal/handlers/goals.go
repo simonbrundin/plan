@@ -138,93 +138,37 @@ func (h *GoalHandler) GetGoal(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := h.repo.UserHasAccess(c.Request.Context(), userID, goalID)
+	// Hela grafen hämtas med fyra frågor i stället för en fråga per mål och
+	// relation. Det är den skillnad som gör målsidan snabb: en målsida med
+	// många undermål kostade tidigare 30+ rundturer till databasen.
+	graph, err := h.loadGraph(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
-		return
-	}
-	if !hasAccess {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{Message: "Access denied"})
 		return
 	}
 
-	goal, err := h.repo.GetGoalByID(c.Request.Context(), goalID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
-		return
-	}
-	if goal == nil {
+	goal, ok := graph.goal(goalID)
+	if !ok {
+		// Målet tillhör inte användaren - det finns inte att hämta.
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Goal not found"})
 		return
 	}
 
-	allGoals, _ := h.repo.GetAllGoals(c.Request.Context(), userID)
-	if allGoals == nil {
-		allGoals = []models.Goal{}
-	}
-
-	childRelations, _ := h.repo.GetChildRelations(c.Request.Context(), goalID)
-	var children []models.ChildWithDeps
-	for _, cr := range childRelations {
-		childGoal, _ := h.repo.GetGoalByID(c.Request.Context(), cr.ChildID)
-		if childGoal != nil {
-			dependsOn, _ := h.repo.GetDependencies(c.Request.Context(), cr.ChildID)
-			var depGoals []models.Goal
-			for _, d := range dependsOn {
-				if g, _ := h.repo.GetGoalByID(c.Request.Context(), d.DependsOnID); g != nil {
-					depGoals = append(depGoals, *g)
-				}
-			}
-			blocking, _ := h.repo.GetBlockingGoals(c.Request.Context(), cr.ChildID)
-			children = append(children, models.ChildWithDeps{
-				Goal:      *childGoal,
-				Order:     cr.Order,
-				Weight:    cr.Weight,
-				DependsOn: depGoals,
-				Blocking:  blocking,
-			})
-		}
-	}
-
-	parentGoals, _ := h.repo.GetParentRelations(c.Request.Context(), goalID)
-	if parentGoals == nil {
-		parentGoals = []models.Goal{}
-	}
-	dependencies, _ := h.repo.GetDependencies(c.Request.Context(), goalID)
-	var dependsOn []models.Goal
-	for _, d := range dependencies {
-		if g, _ := h.repo.GetGoalByID(c.Request.Context(), d.DependsOnID); g != nil {
-			dependsOn = append(dependsOn, *g)
-		}
-	}
-	blocking, _ := h.repo.GetBlockingGoals(c.Request.Context(), goalID)
-
-	// Platserna kopplas på efter att relationerna är hämtade, så att
-	// målet, barnen och föräldrarna kan delas i samma anrop.
-	h.attachPlaces(c.Request.Context(), allGoals)
-	h.attachPlaces(c.Request.Context(), parentGoals)
-	h.attachPlaces(c.Request.Context(), dependsOn)
-	h.attachPlaces(c.Request.Context(), blocking)
-
-	goalPlaces := []models.Goal{*goal}
-	h.attachPlaces(c.Request.Context(), goalPlaces)
-	*goal = goalPlaces[0]
-
-	for i := range children {
-		childPlaces := []models.Goal{children[i].Goal}
-		h.attachPlaces(c.Request.Context(), childPlaces)
-		children[i].Places = childPlaces[0].Places
-	}
+	children := graph.children(goalID)
+	parentGoals := graph.parents(goalID)
+	dependencies := graph.dependenciesOf(goalID)
+	dependsOn := graph.dependsOnOf(goalID)
+	blocking := graph.blockingOf(goalID)
 
 	c.JSON(http.StatusOK, models.GetGoalResponse{
 		Goal: models.GoalWithRelations{
-			Goal:            *goal,
-			ChildRelations:  childRelations,
+			Goal:            goal,
+			ChildRelations:  graph.childRelations(goalID),
 			ParentRelations: parentGoals,
 		},
 		Children:     children,
 		Parents:      parentGoals,
-		AllGoals:     allGoals,
+		AllGoals:     graph.goals,
 		Dependencies: dependencies,
 		DependsOn:    dependsOn,
 		Blocking:     blocking,

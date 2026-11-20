@@ -46,13 +46,10 @@ export interface ChildRelation {
 	weight: number;
 }
 
-export interface ParentRelation {
-	goalByParentId: Goal;
-}
-
 export interface GoalWithRelations extends Goal {
 	childRelations: ChildRelation[];
-	parentRelations: ParentRelation[];
+	// Föräldrarna skickas som vanliga mål - samma form som i "parents".
+	parentRelations: Goal[];
 }
 
 export interface GoalWithWeight extends Goal {
@@ -67,9 +64,33 @@ export interface GoalDependency {
 	created: string;
 }
 
+// Relationen mellan ett barn och en förälder. Ordning och vikt hör till
+// relationen, inte till målet.
+export interface GoalRelation {
+	parent_id: number;
+	child_id: number;
+	order: number;
+	weight: number;
+}
+
+// Hela målgraphen: målen, relationerna mellan dem och beroendena.
+// Klienten räknar ut barn, föräldrar och beroenden lokalt ur grafen.
+export interface GoalGraphResponse {
+	goals: Goal[];
+	relations: GoalRelation[];
+	dependencies: GoalDependency[];
+}
+
+// Ett undermål med sin ordning, vikt och beroenden.
+export interface ChildWithDeps extends GoalWithWeight {
+	dependsOn?: Goal[];
+	blocking?: Goal[];
+}
+
 export interface GetGoalResponse {
 	goal: GoalWithRelations;
-	children: GoalWithWeight[];
+	children: ChildWithDeps[];
+	parents: Goal[];
 	allGoals: Goal[];
 	dependencies: GoalDependency[];
 	dependsOn: Goal[];

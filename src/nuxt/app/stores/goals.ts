@@ -1,30 +1,9 @@
 import { defineStore } from "pinia";
+import type { Goal, GoalDependency, GoalRelation } from "~/types/goal";
 
-interface Goal {
-	id: number;
-	title: string;
-	description: string;
-	icon: string;
-	created: string;
-	finished: string | null;
-	// Due är det datum ("YYYY-MM-DD") målet ska vara klart.
-	due: string | null;
-	inbox: number;
-	eternal: boolean;
-	// Upprepningsregeln för ett återkommande mål (RRULE).
-	recurrence_rule?: string | null;
-	// Schemaläggningsstrategi: "schedule" eller "push".
-	recurrence_mode?: string | null;
-	// Datumet ("YYYY-MM-DD") för nästa förekomst som ska slutföras.
-	recurrence_next?: string | null;
-	// Antalet slutförda förekomster.
-	recurrence_count?: number;
-}
-
-interface GoalRelation {
-	child_id: number;
-	parent_id: number;
-}
+// Ett pågående anrop mot servern. Det ligger utanför state eftersom en
+// Promise inte hör hemma i en serialiserbar store.
+let inflightLoad: Promise<void> | null = null;
 
 export const useGoalsStore = defineStore("goals", {
 	// Skip hydration is enforced globally by the pinia-hydration plugin.
@@ -32,7 +11,11 @@ export const useGoalsStore = defineStore("goals", {
 	state: () => ({
 		goals: [] as Goal[],
 		relations: [] as GoalRelation[],
+		dependencies: [] as GoalDependency[],
 		isLoaded: false,
+		// När grafen senast hämtades (ms sedan epoch). Används för att
+		// veta om data är färsk nog eller måste hämtas om.
+		loadedAt: 0,
 		error: null as string | null,
 	}),
 
@@ -69,7 +52,7 @@ export const useGoalsStore = defineStore("goals", {
 			return state.goals.filter((g) => childIds.includes(g.id));
 		},
 
-		// Hämta grundmål (mål utan föräldrar)
+		// Hämta grundmål (mål utan förälder)
 		getRootGoals: (state) => {
 			const childIds = new Set(state.relations.map((r) => r.child_id));
 			return state.goals.filter((g) => !childIds.has(g.id));
@@ -82,6 +65,57 @@ export const useGoalsStore = defineStore("goals", {
 	},
 
 	actions: {
+		// Ladda hela målgraphen från servern.
+		//
+		// force = true hämtar alltid om. Annars hoppas hämtningen över
+		// om grafen redan är laddad - det gör att byten mellan målsidor
+		// inte kräver en serverfråga.
+		async loadGraph(force = false) {
+			if (!force && this.isLoaded) {
+				return;
+			}
+
+			// Ett anrop pågår redan - dela det i stället för att köra två.
+			if (inflightLoad) {
+				return inflightLoad;
+			}
+
+			inflightLoad = (async () => {
+				try {
+					const { loadGoalGraph } = useGoalApi();
+					const graph = await loadGoalGraph();
+
+					this.goals = graph.goals ?? [];
+					this.relations = graph.relations ?? [];
+					this.dependencies = graph.dependencies ?? [];
+					this.isLoaded = true;
+					this.loadedAt = Date.now();
+					this.error = null;
+				} catch (error: any) {
+					this.error =
+						error?.data?.message || error?.message || "Kunde inte hämta målen";
+					throw error;
+				} finally {
+					inflightLoad = null;
+				}
+			})();
+
+			return inflightLoad;
+		},
+
+		// Sätter en ny ordning på ett måls barn (lokalt, utan serverfråga).
+		setChildOrder(parentId: number, childIds: number[]) {
+			const orderById = new Map(childIds.map((id, index) => [id, index]));
+
+			this.relations = this.relations.map((relation) => {
+				if (relation.parent_id !== parentId) {
+					return relation;
+				}
+				const order = orderById.get(relation.child_id);
+				return order === undefined ? relation : { ...relation, order };
+			});
+		},
+
 		// Ladda alla mål och relationer
 		async loadGoals() {
 			// This method is now handled in components
@@ -113,6 +147,9 @@ export const useGoalsStore = defineStore("goals", {
 			this.relations = this.relations.filter(
 				(r) => r.child_id !== id && r.parent_id !== id,
 			);
+			this.dependencies = this.dependencies.filter(
+				(d) => d.goal_id !== id && d.depends_on_id !== id,
+			);
 		},
 
 		// Lägg till en relation
@@ -123,7 +160,12 @@ export const useGoalsStore = defineStore("goals", {
 			);
 
 			if (!exists) {
-				this.relations.push({ child_id: childId, parent_id: parentId });
+				this.relations.push({
+					parent_id: parentId,
+					child_id: childId,
+					order: 0,
+					weight: 0,
+				});
 			}
 		},
 
@@ -151,7 +193,9 @@ export const useGoalsStore = defineStore("goals", {
 		reset() {
 			this.goals = [];
 			this.relations = [];
+			this.dependencies = [];
 			this.isLoaded = false;
+			this.loadedAt = 0;
 			this.error = null;
 		},
 	},
