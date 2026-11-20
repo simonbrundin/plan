@@ -51,6 +51,12 @@ export function useLeaderKey() {
 			run: () => router.push("/calendar"),
 		},
 		{
+			keys: "gd",
+			label: "G+D",
+			title: "Gå till Avslutade mål",
+			run: () => router.push("/completed"),
+		},
+		{
 			keys: "gs",
 			label: "G+S",
 			title: "Gå till Inställningar",

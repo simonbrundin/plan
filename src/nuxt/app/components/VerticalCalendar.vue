@@ -14,7 +14,6 @@ import { MIN_ROW_PX, layoutEventRows } from '~/utils/calendarLayout'
 import { planVisibility } from '~/utils/calendarVisibility'
 import {
   carriesGoal,
-  durationOptions,
   GOAL_DRAG_MIME,
   millisecondsPerPixel,
   parseGoalDrag,
@@ -45,13 +44,35 @@ const now = ref(Date.now())
 // lokalt till det tidsfönster som syns, så att scrollning och zoom inte
 // kräver nya anrop till servern.
 const allEvents = ref<CalendarEvent[]>([])
+const goalsStore = useGoalsStore()
 const expander = new CalendarExpander()
+
+// Ett event som är kopplat till ett färdigt mål ska inte längre synas i
+// tidslinjen. Målgrafen ligger i Pinia så att kalendern reagerar direkt när
+// målet markeras som klart på en annan vy.
+const completedGoalIds = computed(() => {
+  // Använd den kompletta listan från /goals som bas. Graph-endpointen kan
+  // filtrera bort färdiga mål, och får därför inte ersätta den listan.
+  const completed = new Set(
+    goals.value.filter((goal) => !!goal.finished).map((goal) => goal.id),
+  )
+
+  // Store-statusen gör att kalendern även reagerar direkt när ett mål
+  // färdigmarkeras medan kalendern redan är öppen.
+  for (const goal of goalsStore.goals) {
+    if (goal.finished) completed.add(goal.id)
+  }
+
+  return completed
+})
+
 // Händelser i dolda kalendrar tas bort ur vyn, så att det går att fokusera
 // en enda kalender - till exempel bara jobbet.
 const visibleEvents = computed(() =>
   expander
     .visible(allEvents.value, startTime.value, endTime.value)
-    .filter((event) => !isEventHidden(event, hiddenCalendarIds.value)),
+    .filter((event) => !isEventHidden(event, hiddenCalendarIds.value))
+    .filter((event) => !event.goal_id || !completedGoalIds.value.has(event.goal_id)),
 )
 // Färgen löses upp här, så att kort och prickar alltid visar samma färg:
 // händelsens egen färg, annars kalenderns färg.
@@ -581,11 +602,6 @@ const pendingGoalDrop = ref<{
   left: number
   top: number
 } | null>(null)
-
-// Tidsalternativen som visas för det släppta målet.
-const scheduleOptions = computed(() =>
-  durationOptions(pendingGoalDrop.value?.goal.estimated_minutes),
-)
 
 /**
  * Tiden som en pekarposition i vyn motsvarar.
@@ -1272,6 +1288,9 @@ onMounted(async () => {
   loadCalendars()
   try {
     goals.value = await loadAllGoals()
+    // Håll den delade grafen aktuell så att färdigmarkeringar på andra
+    // målsidor omedelbart kan dölja kopplade kalenderhändelser.
+    await goalsStore.loadGraph(false)
   } catch (error) {
     console.warn('Kunde inte läsa mål för kalenderhändelser:', error)
   }
@@ -1334,45 +1353,122 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <form v-if="editingEvent" class="event-form edit-form" @submit.prevent="saveEditedEvent">
-      <strong>Redigera händelse</strong>
-      <input v-model="draftEvent.title" required maxlength="255" placeholder="Titel" aria-label="Titel" class="field-wide" />
-      <div class="icon-field">
-        <button type="button" class="icon-button" @click="iconPickerOpen = true">
-          <EventIcon :icon="draftEvent.icon" class="icon-preview" />
-          <span>{{ draftEvent.icon ? 'Byt ikon' : 'Lägg till ikon' }}</span>
-        </button>
-        <EventIconPicker v-model="draftEvent.icon" :open="iconPickerOpen" @update:open="iconPickerOpen = $event" />
+    <Teleport to="body">
+      <div
+        v-if="editingEvent"
+        class="event-modal-backdrop"
+        role="presentation"
+        @click.self="closeEditEvent"
+      >
+        <form
+          class="event-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="event-modal-title"
+          @submit.prevent="saveEditedEvent"
+        >
+          <header class="event-modal-header">
+            <div>
+              <span class="event-modal-kicker">KALENDERHÄNDELSE</span>
+              <h2 id="event-modal-title">Redigera händelse</h2>
+            </div>
+            <button
+              type="button"
+              class="event-modal-close"
+              aria-label="Stäng"
+              @click="closeEditEvent"
+            >
+              <Icon name="lucide:x" class="h-5 w-5" />
+            </button>
+          </header>
+
+          <div class="event-modal-body">
+            <label class="event-field event-field-wide">
+              <span>Titel</span>
+              <input v-model="draftEvent.title" required maxlength="255" aria-label="Titel" autofocus />
+            </label>
+
+            <div class="event-field">
+              <span>Ikon</span>
+              <div class="icon-field">
+                <button type="button" class="icon-button" @click="iconPickerOpen = true">
+                  <EventIcon :icon="draftEvent.icon" class="icon-preview" />
+                  <span>{{ draftEvent.icon ? 'Byt ikon' : 'Lägg till ikon' }}</span>
+                </button>
+                <EventIconPicker v-model="draftEvent.icon" :open="iconPickerOpen" @update:open="iconPickerOpen = $event" />
+              </div>
+            </div>
+
+            <label class="event-field">
+              <span>Kalender</span>
+              <select v-model="draftEvent.calendarId" aria-label="Kalender">
+                <option value="">Utan kalender</option>
+                <option v-for="calendar in calendars" :key="calendar.id" :value="String(calendar.id)">
+                  {{ calendar.name }}
+                </option>
+              </select>
+            </label>
+
+            <label class="event-field event-field-wide">
+              <span>Kopplat mål</span>
+              <select v-model="draftEvent.goalId" aria-label="Kopplat mål">
+                <option value="">Inget kopplat mål</option>
+                <option v-for="goal in goals" :key="goal.id" :value="String(goal.id)">
+                  {{ goal.title }}
+                </option>
+              </select>
+            </label>
+
+            <label class="event-field">
+              <span>Start</span>
+              <input v-model="draftEvent.startAt" required type="datetime-local" aria-label="Starttid" />
+            </label>
+            <label class="event-field">
+              <span>Slut</span>
+              <input v-model="draftEvent.endAt" required type="datetime-local" aria-label="Sluttid" />
+            </label>
+
+            <label class="event-field event-field-wide">
+              <span>Beskrivning</span>
+              <textarea v-model="draftEvent.description" aria-label="Beskrivning" rows="3" />
+            </label>
+
+            <label class="event-field event-field-wide">
+              <span>Platser</span>
+              <select v-model="draftEvent.placeIds" multiple aria-label="Platser" class="event-places">
+                <option v-for="place in allPlaces" :key="place.id" :value="place.id">
+                  {{ place.name }}
+                </option>
+              </select>
+            </label>
+
+            <label v-if="editingIsSeriesOccurrence" class="event-field event-field-wide">
+              <span>Ändra serie</span>
+              <select v-model="editScope" aria-label="Ändra serie">
+                <option value="occurrence">Bara denna förekomst</option>
+                <option value="following">Denna och följande</option>
+                <option value="series">Hela serien</option>
+              </select>
+            </label>
+          </div>
+
+          <footer class="event-modal-footer">
+            <button type="button" class="event-action event-action-danger" :disabled="deletingEvent" @click="deleteEvent">
+              {{ deletingEvent ? 'Tar bort…' : 'Ta bort' }}
+            </button>
+            <button type="button" class="event-action" :disabled="duplicatingEvent" @click="duplicateEvent">
+              {{ duplicatingEvent ? 'Duplicerar…' : 'Duplicera' }}
+            </button>
+            <span class="event-modal-spacer" />
+            <button type="button" class="event-action" @click="closeEditEvent">Avbryt</button>
+            <button type="submit" class="event-action event-action-primary" :disabled="savingEvent">
+              {{ savingEvent ? 'Sparar…' : 'Spara ändringar' }}
+            </button>
+          </footer>
+          <p v-if="errorMessage" class="form-error" role="status">{{ errorMessage }}</p>
+        </form>
       </div>
-      <select v-model="draftEvent.calendarId" aria-label="Kalender">
-        <option value="">Utan kalender</option>
-        <option v-for="calendar in calendars" :key="calendar.id" :value="String(calendar.id)">
-          {{ calendar.name }}
-        </option>
-      </select>
-      <select v-model="draftEvent.placeIds" multiple aria-label="Platser" class="field-wide">
-        <option v-for="place in allPlaces" :key="place.id" :value="place.id">
-          {{ place.name }}
-        </option>
-      </select>
-      <input v-model="draftEvent.startAt" required type="datetime-local" aria-label="Starttid" />
-      <input v-model="draftEvent.endAt" required type="datetime-local" aria-label="Sluttid" />
-      <input v-model="draftEvent.description" placeholder="Beskrivning" aria-label="Beskrivning" class="field-wide" />
-      <select v-if="editingIsSeriesOccurrence" v-model="editScope" aria-label="Ändra serie">
-        <option value="occurrence">Bara denna förekomst</option>
-        <option value="following">Denna och följande</option>
-        <option value="series">Hela serien</option>
-      </select>
-      <button type="submit" class="now-button primary-button" :disabled="savingEvent">Spara</button>
-      <button type="button" class="now-button" :disabled="duplicatingEvent" @click="duplicateEvent">
-        {{ duplicatingEvent ? 'Duplicerar…' : 'Duplicera' }}
-      </button>
-      <button type="button" class="now-button danger-button" :disabled="deletingEvent" @click="deleteEvent">
-        {{ deletingEvent ? 'Tar bort…' : 'Ta bort' }}
-      </button>
-      <button type="button" class="now-button" @click="closeEditEvent">Avbryt</button>
-      <p v-if="errorMessage" class="form-error" role="status">{{ errorMessage }}</p>
-    </form>
+    </Teleport>
 
     <form v-if="showCreateEvent" class="event-form" @submit.prevent="saveEvent">
       <input v-model="draftEvent.title" required maxlength="255" placeholder="Titel" aria-label="Titel" class="field-wide" />
@@ -1587,9 +1683,6 @@ onUnmounted(() => {
          där pekaren släppte. -->
     <GoalScheduleMenu
       v-if="pendingGoalDrop"
-      :title="pendingGoalDrop.goal.title"
-      :start-at="pendingGoalDrop.startAt"
-      :options="scheduleOptions"
       :style="{
         left: `${pendingGoalDrop.left}px`,
         top: `${pendingGoalDrop.top}px`,
@@ -1789,6 +1882,222 @@ onUnmounted(() => {
 .event-form select:focus {
   border-color: var(--color-accent);
   outline: none;
+}
+
+.event-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgb(3 6 18 / 0.72);
+  backdrop-filter: blur(12px) saturate(120%);
+  animation: event-modal-fade-in 160ms ease-out;
+}
+
+.event-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(44rem, 100%);
+  max-height: min(45rem, calc(100vh - 2rem));
+  overflow: hidden;
+  border: 1px solid rgb(148 163 184 / 0.2);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgb(24 31 56 / 0.98), rgb(13 18 36 / 0.98));
+  box-shadow: 0 2rem 6rem rgb(0 0 0 / 0.5), 0 0 0 1px rgb(99 102 241 / 0.08);
+  color: var(--color-ink);
+  animation: event-modal-rise-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.event-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem 1.1rem;
+  border-bottom: 1px solid rgb(148 163 184 / 0.12);
+}
+
+.event-modal-kicker {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--color-accent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.event-modal h2 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.event-modal-close {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  color: var(--color-ink-dim);
+  background: transparent;
+  cursor: pointer;
+}
+
+.event-modal-close:hover {
+  border-color: rgb(148 163 184 / 0.2);
+  color: var(--color-ink);
+  background: rgb(148 163 184 / 0.1);
+}
+
+.event-modal-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  overflow-y: auto;
+  padding: 1.35rem 1.5rem;
+}
+
+.event-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.event-field-wide {
+  grid-column: 1 / -1;
+}
+
+.event-field > span {
+  color: var(--color-ink-dim);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.event-modal input,
+.event-modal select,
+.event-modal textarea {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid rgb(148 163 184 / 0.2);
+  border-radius: 0.65rem;
+  padding: 0.7rem 0.8rem;
+  color: var(--color-ink);
+  background: rgb(15 23 42 / 0.72);
+  font: inherit;
+  font-size: 0.84rem;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.event-modal textarea {
+  resize: vertical;
+}
+
+.event-modal input:focus,
+.event-modal select:focus,
+.event-modal textarea:focus {
+  border-color: var(--color-accent);
+  outline: none;
+  background: rgb(15 23 42 / 0.95);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.16);
+}
+
+.event-modal select[multiple] {
+  min-height: 5.5rem;
+}
+
+.event-modal .icon-field {
+  min-height: 2.55rem;
+}
+
+.event-modal .icon-button {
+  width: 100%;
+  justify-content: flex-start;
+  border: 1px solid rgb(148 163 184 / 0.2);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.7rem;
+  color: var(--color-ink-muted);
+  background: rgb(15 23 42 / 0.72);
+}
+
+.event-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border-top: 1px solid rgb(148 163 184 / 0.12);
+}
+
+.event-modal-spacer {
+  flex: 1;
+}
+
+.event-action {
+  border: 1px solid rgb(148 163 184 / 0.2);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  color: var(--color-ink-muted);
+  background: rgb(148 163 184 / 0.08);
+  font-size: 0.76rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.event-action:hover:not(:disabled) {
+  border-color: rgb(148 163 184 / 0.35);
+  color: var(--color-ink);
+  background: rgb(148 163 184 / 0.15);
+  transform: translateY(-1px);
+}
+
+.event-action-primary {
+  border-color: rgb(129 140 248 / 0.65);
+  color: white;
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  box-shadow: 0 0.35rem 1rem rgb(99 102 241 / 0.24);
+}
+
+.event-action-primary:hover:not(:disabled) {
+  border-color: rgb(165 180 252 / 0.9);
+  background: linear-gradient(135deg, #818cf8, #8b5cf6);
+}
+
+.event-action-danger {
+  color: #fca5a5;
+}
+
+.event-action-danger:hover:not(:disabled) {
+  border-color: rgb(248 113 113 / 0.45);
+  color: #fecaca;
+  background: rgb(127 29 29 / 0.3);
+}
+
+.event-action:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.event-modal .form-error {
+  margin: 0 1.5rem 1.25rem;
+}
+
+@keyframes event-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes event-modal-rise-in {
+  from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .icon-field {
@@ -2305,6 +2614,44 @@ onUnmounted(() => {
   .event-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .event-modal-backdrop {
+    padding: 0.6rem;
+  }
+
+  .event-modal {
+    max-height: calc(100dvh - 1.2rem);
+    border-radius: 1rem;
+  }
+
+  .event-modal-header,
+  .event-modal-body,
+  .event-modal-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .event-modal-body {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .event-field-wide {
+    grid-column: auto;
+  }
+
+  .event-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .event-modal-spacer {
+    display: none;
+  }
+
+  .event-action-primary {
+    order: -1;
+    width: 100%;
   }
 
   .event-form .field-wide,

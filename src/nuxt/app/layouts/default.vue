@@ -128,6 +128,14 @@ const links = [
       },
     },
     {
+      label: "Avslutade",
+      icon: "i-lucide-check-circle-2",
+      to: "/completed",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
       label: "Platser",
       icon: "i-lucide-map-pin",
       to: "/platser",

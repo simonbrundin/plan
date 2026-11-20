@@ -757,8 +757,16 @@ let dragLeaveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function handleDragStart(event: DragEvent, childId: number) {
   draggedChildId.value = childId;
+
+  // Samma dragning kan både användas för att sortera/reparenta barnet på
+  // målsidan och för att släppa barnet i kalendern.
+  const child = children.value.find((candidate) => candidate.id === childId);
+  if (child) {
+    startGoalDrag(event, child);
+  }
+
   if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.effectAllowed = "copyMove";
   }
 }
 
@@ -2209,15 +2217,18 @@ watch(selectedParentIndex, async () => {
           Enter för att spara, Escape för att avbryta
         </div>
       </div>
-      <div v-else class="flex items-center gap-3 flex-shrink-0">
+      <div
+        v-else
+        data-goal-row
+        :draggable="!!goal"
+        @dragstart.stop="goal && startGoalDrag($event, goal)"
+        class="goal-drag-row flex items-center gap-3 flex-shrink-0 cursor-grab active:cursor-grabbing"
+      >
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-ink" />
         </button>
         <h1
-          data-goal-row
-          :draggable="!!goal"
-          @dragstart="goal && startGoalDrag($event, goal)"
           :class="['text-3xl font-bold tracking-tight transition-colors px-3 py-2 rounded-xl flex-1 border',
             isGoalSelected ? 'border-accent bg-accent/10' : 'border-transparent',
             goal?.eternal ? ETERNAL_TEXT : 'text-ink'

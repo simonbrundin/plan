@@ -280,6 +280,17 @@ onUnmounted(() => {
               >
               <kbd
                 class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-green-400 font-mono font-bold min-w-[2rem] text-center"
+                >d</kbd
+              >
+              <span class="text-ink-muted">Gå till avslutade mål</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <kbd
+                class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-green-400 font-mono font-bold min-w-[2rem] text-center"
+                >g</kbd
+              >
+              <kbd
+                class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-green-400 font-mono font-bold min-w-[2rem] text-center"
                 >s</kbd
               >
               <span class="text-ink-muted">Gå till inställningar</span>
