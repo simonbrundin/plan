@@ -12,7 +12,7 @@ import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
@@ -24,6 +24,39 @@ const goals = ref<Goal[]>([])
 const pending = ref(false)
 const error = ref<Error | null>(null)
 const authError = ref(false)
+
+// Hela målgraphen - beroendeväljaren söker bland alla mål, inte bara
+// bland de grundmål som listas här.
+const goalsStore = useGoalsStore()
+
+// Beroendeväljaren (kortkommandot 'w').
+const dependencyPickerOpen = ref(false)
+const dependencyPickerTargetId = ref<number | null>(null)
+const dependencyPickerTargetTitle = ref('')
+
+async function openDependencyPicker(goal: Goal | null) {
+  if (!goal) return
+  // Grafen kan vara stale - hämta den så att listan är komplett.
+  await goalsStore.loadGraph(false).catch(() => {})
+  dependencyPickerTargetId.value = goal.id
+  dependencyPickerTargetTitle.value = goal.title
+  dependencyPickerOpen.value = true
+}
+
+async function addDependencyFromPicker(dependsOnId: number) {
+  const targetId = dependencyPickerTargetId.value
+  dependencyPickerOpen.value = false
+  if (targetId === null) return
+
+  try {
+    await addDependency(targetId, dependsOnId)
+    await goalsStore.loadGraph(true)
+    goals.value = await loadAllGoals()
+  } catch (e: any) {
+    console.error('Failed to add dependency:', e)
+    alert(e?.data?.message || e?.message || 'Kunde inte lägga till beroende')
+  }
+}
 
 onMounted(async () => {
   pending.value = true
@@ -657,6 +690,13 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
+  // w - gör det markerade målet beroende av ett annat mål
+  if (event.key === 'w') {
+    event.preventDefault()
+    void openDependencyPicker(filteredGoals.value[selectedIndex.value] ?? null)
+    return
+  }
+
   // j - nästa mål
   if (event.key === 'j') {
     event.preventDefault()
@@ -868,7 +908,7 @@ definePageMeta({
           :data-goal-index="index"
           data-goal-row
           draggable="true"
-          class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 cursor-pointer"
+          class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 cursor-pointer opt-row"
           :class="[
             index === selectedIndex ? 'ring-1 ring-accent' : '',
             isWaitingForNextOccurrence(goal) ? 'opacity-50' : '',
@@ -891,24 +931,32 @@ definePageMeta({
               {{ descriptionPreview(goal.description) }}
             </p>
           </div>
+          <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
+          <div class="flex items-center gap-1 flex-shrink-0">
           <!-- Started (klicka eller s) -->
-          <button @click.stop="toggleStarted(goal)"
-            class="flex-shrink-0 p-1 rounded transition-colors"
-            :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
-            :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
-            <Icon name="lucide:circle-play" class="w-5 h-5"
-              :style="{ opacity: goal.started ? 1 : 0.25 }" />
-          </button>
+          <span class="opt-icon" :class="{ 'is-on': !!goal.started }">
+            <button @click.stop="toggleStarted(goal)"
+              class="flex-shrink-0 p-1 rounded transition-colors"
+              :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+              <Icon name="lucide:circle-play" class="w-5 h-5"
+                :style="{ opacity: goal.started ? 1 : 0.25 }" />
+            </button>
+          </span>
           <!-- Evigt mål (e) -->
-          <button @click.stop="toggleEternal(goal)"
-            class="flex-shrink-0 p-1 rounded transition-colors"
-            :class="goal.eternal ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER : 'text-ink-dim hover:text-ink-muted'"
-            :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
-            <Icon name="lucide:infinity" class="w-5 h-5"
-              :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
-          </button>
+          <span class="opt-icon" :class="{ 'is-on': !!goal.eternal }">
+            <button @click.stop="toggleEternal(goal)"
+              class="flex-shrink-0 p-1 rounded transition-colors"
+              :class="goal.eternal ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
+              <Icon name="lucide:infinity" class="w-5 h-5"
+                :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
+            </button>
+          </span>
           <!-- Agent-märke (a) -->
-          <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
+          <span class="opt-icon" :class="{ 'is-on': !!goal.agent }">
+            <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
+          </span>
           <!-- Due-datum / deadline (c) -->
           <template v-if="dueGoalId === goal.id">
             <input ref="dueInputRef" v-model="dueDraft" type="date" @click.stop
@@ -923,13 +971,15 @@ definePageMeta({
             </button>
           </template>
           <template v-else>
-            <button @click.stop="openDuePicker(goal)"
-              class="flex-shrink-0 p-1 rounded transition-colors"
-              :class="goal.due ? dueToneClass(goal.due) : 'text-ink-dim hover:text-ink-muted'"
-              :title="goal.due ? `Deadline: ${formatDueDate(goal.due)}` : 'Sätt deadline (c)'">
-              <Icon name="lucide:calendar-clock" class="w-5 h-5"
-                :style="{ opacity: goal.due ? 1 : 0.25 }" />
-            </button>
+            <span class="opt-icon" :class="{ 'is-on': !!goal.due }">
+              <button @click.stop="openDuePicker(goal)"
+                class="flex-shrink-0 p-1 rounded transition-colors"
+                :class="goal.due ? dueToneClass(goal.due) : 'text-ink-dim hover:text-ink-muted'"
+                :title="goal.due ? `Deadline: ${formatDueDate(goal.due)}` : 'Sätt deadline (c)'">
+                <Icon name="lucide:calendar-clock" class="w-5 h-5"
+                  :style="{ opacity: goal.due ? 1 : 0.25 }" />
+              </button>
+            </span>
             <span v-if="goal.due" class="text-sm tabular-nums flex-shrink-0" :class="dueToneClass(goal.due)">
               {{ formatDueDate(goal.due) }}
             </span>
@@ -948,27 +998,32 @@ definePageMeta({
             </button>
           </template>
           <template v-else>
-            <button @click.stop="openStartPicker(goal)"
-              class="flex-shrink-0 p-1 rounded transition-colors"
-              :class="goal.start_date ? (isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-muted') : 'text-ink-dim hover:text-ink-muted'"
-              :title="goal.start_date ? `Startdatum: ${formatDueDate(goal.start_date)} - målet syns i prioriteringslistan från detta datum` : 'Sätt startdatum (b)'">
-              <Icon name="lucide:calendar-days" class="w-5 h-5"
-                :style="{ opacity: goal.start_date ? 1 : 0.25 }" />
-            </button>
+            <span class="opt-icon" :class="{ 'is-on': !!goal.start_date }">
+              <button @click.stop="openStartPicker(goal)"
+                class="flex-shrink-0 p-1 rounded transition-colors"
+                :class="goal.start_date ? (isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-muted') : 'text-ink-dim hover:text-ink-muted'"
+                :title="goal.start_date ? `Startdatum: ${formatDueDate(goal.start_date)} - målet syns i prioriteringslistan från detta datum` : 'Sätt startdatum (b)'">
+                <Icon name="lucide:calendar-days" class="w-5 h-5"
+                  :style="{ opacity: goal.start_date ? 1 : 0.25 }" />
+              </button>
+            </span>
             <span v-if="goal.start_date" class="text-sm tabular-nums flex-shrink-0"
               :class="isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-dim'">
               {{ formatDueDate(goal.start_date) }}
             </span>
           </template>
-          <EstimateBadge
-            :goal="goal"
-            size="sm"
-            :editor-open="estimateTargetId === goal.id"
-            @open="openEstimateEditor(goal)"
-            @save="saveEstimate(goal, $event)"
-            @cancel="closeEstimateEditor" />
+          <span class="opt-icon" :class="{ 'is-on': !!goal.estimated_minutes || estimateTargetId === goal.id }">
+            <EstimateBadge
+              :goal="goal"
+              size="sm"
+              :editor-open="estimateTargetId === goal.id"
+              @open="openEstimateEditor(goal)"
+              @save="saveEstimate(goal, $event)"
+              @cancel="closeEstimateEditor" />
+          </span>
           <!-- Upprepningar: endast antalet slutförda förekomster -->
-          <div class="relative flex-shrink-0 flex items-center gap-1">
+          <div v-if="isRecurringGoal(goal) || recurrenceTargetId === goal.id"
+            class="relative flex-shrink-0 flex items-center gap-1">
             <button v-if="isRecurringGoal(goal)" @click.stop="openRecurrenceEditor(goal)"
               class="flex items-center gap-1 text-sm tabular-nums text-ink-dim transition-colors hover:text-ink-muted"
               :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda (r)`">
@@ -984,6 +1039,8 @@ definePageMeta({
                 @cancel="closeRecurrenceEditor" />
             </div>
           </div>
+          </div>
+
           <span v-if="goal.finished" class="text-green-400 text-sm flex-shrink-0">✓ Klar</span>
           <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm flex-shrink-0'">∞</span>
           <span v-else-if="!isRecurringGoal(goal)" class="text-ink-dim text-sm tabular-nums flex-shrink-0">#{{ goal.id }}</span>
@@ -1057,5 +1114,13 @@ definePageMeta({
         </p>
       </div>
     </div>
+
+    <!-- Beroendeväljare (w) -->
+    <GoalDependencyPicker
+      :open="dependencyPickerOpen"
+      :target-id="dependencyPickerTargetId"
+      :target-title="dependencyPickerTargetTitle"
+      @select="addDependencyFromPicker"
+      @close="dependencyPickerOpen = false" />
   </div>
 </template>

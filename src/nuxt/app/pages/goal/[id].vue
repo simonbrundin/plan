@@ -19,7 +19,7 @@ import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, re
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { useGoalDrag } from '~/composables/useGoalDrag'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
-import { normalizeGoalWeights, redistributeGoalWeights } from '~/utils/goalWeights'
+import { normalizeGoalWeights } from '~/utils/goalWeights'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -345,83 +345,38 @@ function handleDependencySearchKeydown(event: KeyboardEvent) {
   }
 }
 
-// Dependency drag functions (mouse-based)
-function handleDepMouseDown(event: MouseEvent, childId: number) {
-  // Endast hantera vänster musknapp
-  if (event.button !== 0) return;
-  event.preventDefault();
-  event.stopPropagation();
-  depDragChildId.value = childId;
-  isDepDragging.value = true;
+// Beroendeväljaren (kortkommandot 'w').
+//
+// Den gör det markerade målet (förälder, huvudmål eller undermål)
+// beroende av ett annat mål i systemet. Sökningen sker bland alla
+// mål i grafen - inte bara bland målets egna barn.
+const dependencyPickerOpen = ref(false);
+const dependencyPickerTargetId = ref<number | null>(null);
+const dependencyPickerTargetTitle = ref("");
+
+function openDependencyPicker(target: Goal | null) {
+  if (!target) return;
+  dependencyPickerTargetId.value = target.id;
+  dependencyPickerTargetTitle.value = target.title;
+  dependencyPickerOpen.value = true;
 }
 
-function handleDepMouseMove(event: MouseEvent) {
-  if (!isDepDragging.value || !depDragChildId.value) return;
-  
-  // Hitta elementet under muspekaren
-  const target = document.elementFromPoint(event.clientX, event.clientY);
-  if (!target) {
-    depDragOverChildId.value = null;
-    return;
-  }
-  
-  // Hitta närmaste li-element (barnrad)
-  const li = target.closest('li[data-child-index]') as HTMLElement;
-  if (li) {
-    const index = parseInt(li.dataset.childIndex || '0');
-    const child = filteredChildren.value[index];
-    if (child && child.id !== depDragChildId.value) {
-      depDragOverChildId.value = child.id;
-    } else {
-      depDragOverChildId.value = null;
-    }
-  } else {
-    depDragOverChildId.value = null;
+async function addDependencyFromPicker(dependsOnId: number) {
+  const targetId = dependencyPickerTargetId.value;
+  dependencyPickerOpen.value = false;
+  if (targetId === null) return;
+
+  try {
+    await addDependency(targetId, dependsOnId);
+    await refresh();
+    // Visa beroendesektionen så att resultatet syns direkt.
+    showDependencies.value = true;
+  } catch (error: any) {
+    console.error("Failed to add dependency:", error);
+    alert(error?.data?.message || error?.message || "Kunde inte lägga till beroende");
   }
 }
 
-function handleDepMouseUp(_event: MouseEvent) {
-  if (!isDepDragging.value) return;
-  
-  // Skapa eller ta bort dependency beroende på om den redan finns
-  if (depDragOverChildId.value && depDragChildId.value !== depDragOverChildId.value) {
-    const childInfo = childDependencies.value[depDragChildId.value];
-    // dependsOn är nu array av Goals, inte {depends_on_id} objekter
-    const existingDep = childInfo?.dependsOn?.find(
-      (d: any) => d.id === depDragOverChildId.value
-    );
-    
-    if (existingDep) {
-      // Ta bort beroendet om det redan finns
-      console.log('Removing dependency:', depDragChildId.value, '->', depDragOverChildId.value);
-      removeDependency(depDragChildId.value, depDragOverChildId.value).then(() => {
-        refresh();
-      });
-    } else {
-      // Skapa beroendet om det inte finns
-      console.log('Creating dependency:', depDragChildId.value, '->', depDragOverChildId.value);
-      addDependency(depDragChildId.value, depDragOverChildId.value).then(() => {
-        refresh();
-      });
-    }
-  }
-  
-  // Nollställ state
-  depDragChildId.value = null;
-  depDragOverChildId.value = null;
-  isDepDragging.value = false;
-}
-
-// Globala mus-event listeners för dependency drag
-onMounted(() => {
-  window.addEventListener('mousemove', handleDepMouseMove);
-  window.addEventListener('mouseup', handleDepMouseUp);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('mousemove', handleDepMouseMove);
-  window.removeEventListener('mouseup', handleDepMouseUp);
-});
 
 // Visa/dölj avklarade mål
 const showCompleted = ref(false);
@@ -436,10 +391,6 @@ const editingIconGoalId = ref<number | null>(null);
 const editingIconGoalIcon = ref<string>('');
 
 
-// Dependency drag state (mouse-based for simpler handling)
-const depDragChildId = ref<number | null>(null);
-const depDragOverChildId = ref<number | null>(null);
-const isDepDragging = ref(false);
 
 // Undermål som syns, filtrerade på showCompleted och showStarted.
 const visibleChildren = computed(() => {
@@ -828,14 +779,19 @@ async function handleDrop(event: DragEvent, dropChildId: number) {
     return;
   }
 
+  // Släppet öppnar ett val: byta förälder eller skapa ett beroende.
   const draggedId = draggedChildId.value;
+  draggedChildId.value = null;
+  dropChoice.value = { draggedId, targetId: dropChildId };
+}
 
-  // Reparent: ta bort från nuvarande förälder och lägg till som barn till dropChildId
+// Reparent: ta bort från nuvarande förälder och lägg till som barn till targetId
+async function reparentChild(draggedId: number, targetId: number) {
   try {
     // Ta bort relation med nuvarande förälder
     await removeParentRelation(draggedId, goalId.value);
     goalsStore.removeRelation(draggedId, goalId.value);
-    
+
     // Räkna befintliga barn till dropTargetChild för att bestämma ordning
     const targetChildrenCount = children.value.filter(c => {
       const hasRelation = goalData.value?.goal?.childRelations?.some(
@@ -843,17 +799,60 @@ async function handleDrop(event: DragEvent, dropChildId: number) {
       );
       return hasRelation;
     }).length;
-    
-    await addChildRelation(draggedId, dropChildId, targetChildrenCount);
-    goalsStore.addRelation(draggedId, dropChildId);
-    
+
+    await addChildRelation(draggedId, targetId, targetChildrenCount);
+    goalsStore.addRelation(draggedId, targetId);
+
     await refresh();
   } catch (error) {
     console.error("Failed to reparent goal:", error);
     await refresh();
   }
+}
 
-  draggedChildId.value = null;
+// Skapa eller ta bort beroendet mellan två barnmål.
+async function toggleDependency(draggedId: number, targetId: number) {
+  const childInfo = childDependencies.value[draggedId];
+  const existingDep = childInfo?.dependsOn?.find((d: any) => d.id === targetId);
+
+  if (existingDep) {
+    await removeDependency(draggedId, targetId);
+  } else {
+    await addDependency(draggedId, targetId);
+  }
+  await refresh();
+}
+
+// Valet efter ett släpp: byta förälder eller skapa beroende.
+const dropChoice = ref<{ draggedId: number; targetId: number } | null>(null);
+
+const dropChoiceTarget = computed(() => {
+  if (!dropChoice.value) return null;
+  return children.value.find((c) => c.id === dropChoice.value!.targetId) ?? null;
+});
+
+const dropChoiceHasDependency = computed(() => {
+  if (!dropChoice.value) return false;
+  const info = childDependencies.value[dropChoice.value.draggedId];
+  return !!info?.dependsOn?.some((d: any) => d.id === dropChoice.value!.targetId);
+});
+
+function cancelDropChoice() {
+  dropChoice.value = null;
+}
+
+async function applyDropAsChild() {
+  const choice = dropChoice.value;
+  if (!choice) return;
+  dropChoice.value = null;
+  await reparentChild(choice.draggedId, choice.targetId);
+}
+
+async function applyDropAsDependency() {
+  const choice = dropChoice.value;
+  if (!choice) return;
+  dropChoice.value = null;
+  await toggleDependency(choice.draggedId, choice.targetId);
 }
 
 // Flytta det markerade barnet upp eller ner i listan.
@@ -1685,17 +1684,6 @@ async function saveWeights(weights: Array<{ childId: number; weight: number }>) 
   await persistWeights(persisted)
 }
 
-function adjustSelectedWeight(delta: number) {
-  const selected = weightChildren.value[weightSelectedIndex.value]
-  if (!selected) return
-
-  const current = normalizeGoalWeights(weightChildren.value)
-  const currentWeight = current.find((item) => item.childId === selected.id)?.weight ?? 0
-  const next = redistributeGoalWeights(current, selected.id, currentWeight + delta)
-  previewWeights(next)
-  void saveWeights(next)
-}
-
 function toggleWeightMode() {
   weightMode.value = !weightMode.value
   if (weightMode.value) {
@@ -1785,6 +1773,9 @@ function handleKeydown(event: KeyboardEvent) {
   // Ignorera om sökfält eller ikonväljare är aktiva
   if (showParentSearch.value || showChildSearch.value || showIconPicker.value) return;
 
+  // Beroendeväljaren hanterar sina egna tangenter.
+  if (dependencyPickerOpen.value) return;
+
   // Insert mode - ignorera alla tangenter (hanteras direkt på input-elementet)
   if (mode.value === "insert") {
     return;
@@ -1798,27 +1789,6 @@ function handleKeydown(event: KeyboardEvent) {
       eventTarget.isContentEditable);
   if (isFormField) {
     return;
-  }
-
-  if (weightMode.value) {
-    const key = event.key.toLowerCase();
-    if (key === 'j') {
-      event.preventDefault();
-      weightSelectedIndex.value = Math.min(weightSelectedIndex.value + 1, weightChildren.value.length - 1);
-    } else if (key === 'k') {
-      event.preventDefault();
-      weightSelectedIndex.value = Math.max(weightSelectedIndex.value - 1, 0);
-    } else if (key === 'h') {
-      event.preventDefault();
-      adjustSelectedWeight(-1);
-    } else if (key === 'l') {
-      event.preventDefault();
-      adjustSelectedWeight(1);
-    } else if (key === 'escape') {
-      event.preventDefault();
-      weightMode.value = false;
-    }
-    if (['j', 'k', 'h', 'l', 'escape'].includes(key)) return;
   }
 
   // ===============================================
@@ -1998,6 +1968,14 @@ function handleKeydown(event: KeyboardEvent) {
       // Inget undermål är markerat - då gäller upprepningen huvudmålet.
       openRecurrenceEditor(goal.value);
     }
+    return;
+  }
+
+  // Hantera 'w' för att göra det markerade målet beroende av ett annat mål
+  if (event.key === "w") {
+    event.preventDefault();
+    // Inget markerat -> sidans eget mål.
+    openDependencyPicker(agentTarget() ?? goal.value ?? null);
     return;
   }
 
@@ -2321,7 +2299,7 @@ watch(selectedParentIndex, async () => {
         data-goal-row
         :draggable="!!goal"
         @dragstart.stop="goal && startGoalDrag($event, goal)"
-        class="goal-drag-row flex items-center gap-3 flex-shrink-0 cursor-grab active:cursor-grabbing"
+        class="goal-drag-row flex items-center gap-3 flex-shrink-0 cursor-grab active:cursor-grabbing opt-row"
       >
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)" @click.stop="showIconPicker = true"
           class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
@@ -2333,32 +2311,41 @@ watch(selectedParentIndex, async () => {
             goal?.eternal ? ETERNAL_TEXT : 'text-ink'
           ]"
         >{{ goal?.title }}</h1>
+        <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
+        <div class="flex items-center gap-1 flex-shrink-0">
         <!-- Started-toggle (s) -->
-        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          @click.stop="toggleStarted(goal)"
-          class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
-          :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
-          :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
-          <Icon name="lucide:circle-play" class="w-6 h-6"
-            :style="{ opacity: goal.started ? 1 : 0.25 }" />
-        </button>
+        <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="opt-icon" :class="{ 'is-on': !!goal.started }">
+          <button @click.stop="toggleStarted(goal)"
+            class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
+            :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+            <Icon name="lucide:circle-play" class="w-6 h-6"
+              :style="{ opacity: goal.started ? 1 : 0.25 }" />
+          </button>
+        </span>
         <!-- Evigt mål-toggle (e) -->
-        <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          @click.stop="toggleEternal(goal)"
-          class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
-          :class="goal.eternal
-            ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER
-            : ''"
-          :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
-          <Icon name="lucide:infinity" class="w-6 h-6"
-            :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
-        </button>
+        <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="opt-icon" :class="{ 'is-on': !!goal.eternal }">
+          <button @click.stop="toggleEternal(goal)"
+            class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="goal.eternal
+              ? ETERNAL_ACCENT + ' ' + ETERNAL_ACCENT_HOVER
+              : ''"
+            :title="goal.eternal ? 'Ta bort evigt-märket (e)' : 'Markera som evigt mål (e)'">
+            <Icon name="lucide:infinity" class="w-6 h-6"
+              :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
+          </button>
+        </span>
         <!-- Agent-märke -->
-        <AgentBadge v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          :active="!!goal.agent" @toggle="toggleAgent(goal)" />
+        <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="opt-icon" :class="{ 'is-on': !!goal.agent }">
+          <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
+        </span>
         <!-- Upprepning: antalet slutförda förekomster (r) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          class="relative flex items-center gap-1.5 flex-shrink-0" @click.stop>
+          class="opt-icon relative flex items-center gap-1.5 flex-shrink-0"
+          :class="{ 'is-on': isRecurringGoal(goal) || recurrenceTargetId === goal.id }" @click.stop>
           <button @click.stop="openRecurrenceEditor(goal)"
             class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
             :class="isRecurringGoal(goal) ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
@@ -2379,7 +2366,8 @@ watch(selectedParentIndex, async () => {
         </div>
         <!-- Due-datum / deadline (c) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          class="flex items-center gap-1.5 flex-shrink-0">
+          class="opt-icon flex items-center gap-1.5 flex-shrink-0"
+          :class="{ 'is-on': !!goal.due || dueTargetId === goal.id }">
           <template v-if="dueTargetId === goal.id">
             <input ref="dueInputRef" :data-due-input="goal.id" v-model="dueDraft" type="date"
               class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
@@ -2407,7 +2395,8 @@ watch(selectedParentIndex, async () => {
         </div>
         <!-- Startdatum: tidigast målet får dyka upp i /priority (b) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          class="flex items-center gap-1.5 flex-shrink-0">
+          class="opt-icon flex items-center gap-1.5 flex-shrink-0"
+          :class="{ 'is-on': !!goal.start_date || startTargetId === goal.id }">
           <template v-if="startTargetId === goal.id">
             <input :data-start-input="goal.id" v-model="startDraft" type="date"
               class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
@@ -2434,16 +2423,19 @@ watch(selectedParentIndex, async () => {
             </span>
           </template>
         </div>
-        <EstimateBadge
-          v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          :goal="goal"
-          :editor-open="estimateTargetId === goal.id"
-          @open="openEstimateEditor(goal)"
-          @save="saveEstimate(goal, $event)"
-          @cancel="closeEstimateEditor" />
+        <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="opt-icon" :class="{ 'is-on': !!goal.estimated_minutes || estimateTargetId === goal.id }">
+          <EstimateBadge
+            :goal="goal"
+            :editor-open="estimateTargetId === goal.id"
+            @open="openEstimateEditor(goal)"
+            @save="saveEstimate(goal, $event)"
+            @cancel="closeEstimateEditor" />
+        </span>
         <!-- Platser: var målet kan slutföras (p) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          class="relative flex items-center gap-1.5 flex-shrink-0">
+          class="opt-icon relative flex items-center gap-1.5 flex-shrink-0"
+          :class="{ 'is-on': !!goal.places?.length || placeTargetId === goal.id }">
           <button @click.stop="togglePlacePicker(goal.id)"
             class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
             :class="goal.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
@@ -2469,6 +2461,7 @@ watch(selectedParentIndex, async () => {
           title="Beroenden (blockerade mål)">
           <Icon name="lucide:git-branch" class="w-6 h-6" />
         </button>
+        </div>
       </div>
 
       <!-- Beskrivning -->
@@ -2627,16 +2620,7 @@ watch(selectedParentIndex, async () => {
           </div>
         </div>
 
-        <GoalWeightVerticalEditor
-          v-if="weightMode && weightChildren.length > 1"
-          :children="weightChildren"
-          :selected-index="weightSelectedIndex"
-          @select="weightSelectedIndex = $event"
-          @update="previewWeights"
-          @commit="saveWeights"
-        />
-
-        <ul v-else-if="filteredChildren.length > 0" class="space-y-2" :class="{ 'select-none': isDepDragging }">
+        <ul v-else-if="filteredChildren.length > 0" class="space-y-2">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
             @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
             @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
@@ -2644,21 +2628,13 @@ watch(selectedParentIndex, async () => {
             :style="childIndentStyle(child.id)"
             :class="[
               dragOverChildId === child.id ? 'ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-canvas' : 'opacity-100',
-              draggedChildId === child.id ? 'opacity-30' : '',
-              depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-canvas' : ''
+              draggedChildId === child.id ? 'opacity-30' : ''
             ]">
-            <!-- Reparent indicator -->
+            <!-- Indicator när något släpps här - valet (flytta eller beroende) görs efteråt -->
             <div v-if="dragOverChildId === child.id && draggedChildId !== child.id"
               class="absolute inset-0 bg-fuchsia-500/20 flex items-center justify-center z-10 rounded-2xl">
               <div class="bg-fuchsia-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                Flytta in i detta mål
-              </div>
-            </div>
-            <!-- Dependency indicator -->
-            <div v-if="depDragOverChildId === child.id && depDragChildId !== child.id"
-              class="absolute inset-0 bg-orange-500/20 flex items-center justify-center z-10 rounded-2xl">
-              <div class="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                🔗 Skapa beroende
+                Släpp för att välja
               </div>
             </div>
             <!-- Swipe bakgrund -->
@@ -2668,7 +2644,7 @@ watch(selectedParentIndex, async () => {
             </div>
 
             <!-- Huvudinnehåll -->
-            <div class="relative rounded-2xl border transition-all bg-surface hover:bg-surface-2" :class="{
+            <div class="relative rounded-2xl border transition-all bg-surface hover:bg-surface-2 group opt-row" :class="{
               'border-accent shadow-[0_0_0_1px_rgb(129_140_248/0.35)]': selectedChildIndex === index,
               'border-line': selectedChildIndex !== index
             }" :style="{
@@ -2713,29 +2689,25 @@ watch(selectedParentIndex, async () => {
                     </p>
                   </NuxtLink>
                 </div>
+                <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
+                <div class="flex items-center gap-0.5 flex-shrink-0">
                  <!-- Started-toggle (s) -->
-                 <button
-                   @click.stop="toggleStarted(child)"
-                   :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
-                   :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
-                   <Icon name="lucide:circle-play" class="w-5 h-5"
-                     :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
-                 </button>
+                 <span class="opt-icon" :class="{ 'is-on': !!child.started }">
+                   <button
+                     @click.stop="toggleStarted(child)"
+                     :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
+                     :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+                     <Icon name="lucide:circle-play" class="w-5 h-5"
+                       :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
+                   </button>
+                 </span>
                  <!-- Agent-märke -->
-                 <AgentBadge :active="!!child.agent" @toggle="toggleAgent(child)" />
-                 <!-- Dependency-drag handle -->
-                 <button
-                   @mousedown.stop="handleDepMouseDown($event, child.id)"
-                   :class="[
-                     'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-elevated',
-                     isDepDragging && depDragChildId === child.id ? 'cursor-grabbing' : 'cursor-grab',
-                     isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink hover:text-orange-400'
-                   ]"
-                   title="Dra för att skapa beroende">
-                   <Icon name="lucide:link" class="w-5 h-5" />
-                 </button>
+                 <span class="opt-icon" :class="{ 'is-on': !!child.agent }">
+                   <AgentBadge :active="!!child.agent" @toggle="toggleAgent(child)" />
+                 </span>
                 <!-- Deadline för undermål (c) -->
-                <div class="flex-shrink-0 flex items-center gap-1">
+                <div class="opt-icon flex-shrink-0 flex items-center gap-1"
+                  :class="{ 'is-on': !!child.due || dueTargetId === child.id }">
                   <template v-if="dueTargetId === child.id">
                     <input :data-due-input="child.id" :value="dueDraft" type="date" autofocus draggable="false"
                       class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
@@ -2757,20 +2729,20 @@ watch(selectedParentIndex, async () => {
                       <Icon name="lucide:calendar-clock" class="w-5 h-5"
                         :style="{ opacity: child.due ? 1 : 0.25 }" />
                     </button>
-                    <span v-if="child.due" class="text-xs tabular-nums" :class="dueToneClass(child.due)">
-                      {{ formatDueDate(child.due) }}
-                    </span>
                   </template>
                 </div>
-                <EstimateBadge
-                  :goal="child"
-                  size="sm"
-                  :editor-open="estimateTargetId === child.id"
-                  @open="openEstimateEditor(child)"
-                  @save="saveEstimate(child, $event)"
-                  @cancel="closeEstimateEditor" />
+                <span class="opt-icon" :class="{ 'is-on': !!child.estimated_minutes || estimateTargetId === child.id }">
+                  <EstimateBadge
+                    :goal="child"
+                    size="sm"
+                    :editor-open="estimateTargetId === child.id"
+                    @open="openEstimateEditor(child)"
+                    @save="saveEstimate(child, $event)"
+                    @cancel="closeEstimateEditor" />
+                </span>
                 <!-- Upprepning för undermål -->
-                <div class="relative flex-shrink-0 flex items-center gap-1">
+                <div class="opt-icon relative flex-shrink-0 flex items-center gap-1"
+                  :class="{ 'is-on': isRecurringGoal(child) || recurrenceTargetId === child.id }">
                   <button @click.stop="openRecurrenceEditor(child)"
                     class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
                     :class="isRecurringGoal(child) ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
@@ -2791,7 +2763,8 @@ watch(selectedParentIndex, async () => {
                   </div>
                 </div>
                 <!-- Platser för undermål (p) -->
-                <div class="relative flex-shrink-0 flex items-center gap-1">
+                <div class="opt-icon relative flex-shrink-0 flex items-center gap-1"
+                  :class="{ 'is-on': !!child.places?.length || placeTargetId === child.id }">
                   <button @click.stop="togglePlacePicker(child.id)"
                     class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
                     :class="child.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
@@ -2806,6 +2779,7 @@ watch(selectedParentIndex, async () => {
                     @update:selected="placeDraft = $event"
                     @save="savePlaces(child.id)"
                     @cancel="closePlacePicker" />
+                </div>
                 </div>
               </div>
             </div>
@@ -2846,6 +2820,7 @@ watch(selectedParentIndex, async () => {
           :children="weightChildren"
           :selected-index="weightSelectedIndex"
           @select="weightSelectedIndex = $event"
+          @close="weightMode = false"
           @update="previewWeights"
           @commit="saveWeights"
         />
@@ -2880,6 +2855,28 @@ watch(selectedParentIndex, async () => {
       </template>
     </UModal>
 
+    <!-- Val efter att ett barnmål släppts över ett annat -->
+    <UModal :open="dropChoice !== null" title="Vad vill du göra?"
+      @update:open="(value) => { if (!value) cancelDropChoice(); }">
+      <p v-if="dropChoiceTarget" class="text-ink-muted">
+        <strong>{{ dropChoiceTarget.title }}</strong>
+      </p>
+
+      <template #footer="{ close }">
+        <div class="flex justify-end gap-2">
+          <UButton color="gray" variant="ghost" @click="cancelDropChoice">
+            Avbryt
+          </UButton>
+          <UButton color="gray" @click="applyDropAsChild">
+            Flytta in som undermål
+          </UButton>
+          <UButton color="primary" @click="applyDropAsDependency">
+            {{ dropChoiceHasDependency ? 'Ta bort beroendet' : 'Skapa beroende' }}
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
     <!-- Modal för att bekräfta borttagning av mål -->
     <UModal v-model:open="showDeleteConfirmation" title="Ta bort mål?">
       <template #footer="{ close }">
@@ -2905,6 +2902,14 @@ watch(selectedParentIndex, async () => {
           editingIconGoalId = null;
         }
       }" @update:modelValue="updateGoalIcon" />
+
+    <!-- Beroendeväljare (w) -->
+    <GoalDependencyPicker
+      :open="dependencyPickerOpen"
+      :target-id="dependencyPickerTargetId"
+      :target-title="dependencyPickerTargetTitle"
+      @select="addDependencyFromPicker"
+      @close="dependencyPickerOpen = false" />
   </div>
   <div v-else class="max-w-4xl mx-auto px-6 py-8">
     <div class="text-center">

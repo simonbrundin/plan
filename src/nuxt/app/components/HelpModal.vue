@@ -107,6 +107,10 @@ const sections = computed<Section[]>(() => {
         { keys: ["i"], description: "Redigera titel (i början)" },
         { keys: ["a"], description: "Redigera titel (i slutet)" },
         { keys: ["p"], description: "Sätt plats (var målet kan slutföras)" },
+        {
+          keys: ["w"],
+          description: "Gör markerat mål beroende av ett annat mål (sök bland alla mål)",
+        },
         ...goalActionShortcuts,
       ],
     },
@@ -125,6 +129,10 @@ const sections = computed<Section[]>(() => {
         { keys: ["/"], description: "Sök i mållistan" },
         { keys: ["↑"], description: "Flytta markerat mål upp" },
         { keys: ["↓"], description: "Flytta markerat mål ner" },
+        {
+          keys: ["w"],
+          description: "Gör markerat mål beroende av ett annat mål (sök bland alla mål)",
+        },
         ...goalActionShortcuts,
       ],
     },

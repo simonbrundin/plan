@@ -97,3 +97,23 @@
     outline-offset: 2px;
   }
 }
+
+/*
+ * Valfria ikoner i en rad (agent, deadline, plats, tidsåtgång, upprepning,
+ * start, evigt).
+ *
+ * En ikon visas bara om målet faktiskt använder funktionen - en rad utan
+ * plats ska inte ha någon plats-ikon. Dolda ikoner tar ingen plats, så raden
+ * blir ren och de ikoner som finns packas till höger.
+ *
+ * När raden svävas över visas de dolda ikonerna ändå, så att alla funktioner
+ * går att nå med musen också.
+ */
+.opt-icon {
+  display: none;
+}
+
+.opt-icon.is-on,
+.opt-row:hover .opt-icon {
+  display: inline-flex;
+}

@@ -640,7 +640,7 @@ const filterOptions = [
         <div
           data-goal-row
           draggable="true"
-          class="rounded-2xl border border-line transition-colors hover:border-line-strong flex items-center gap-4 px-4 py-3.5 cursor-pointer"
+          class="rounded-2xl border border-line transition-colors hover:border-line-strong flex items-center gap-4 px-4 py-3.5 cursor-pointer opt-row"
           :class="[
             getWeightBgColor(goal.weight),
             selectedGoalId === goal.id ? 'ring-1 ring-accent' : '',
@@ -674,7 +674,9 @@ const filterOptions = [
               :title="`Platser: ${goal.places.map((p) => p.name).join(', ')}`"
             />
           </div>
-          <div class="flex-shrink-0">
+          <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
+          <div class="flex items-center gap-1 flex-shrink-0">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.started }">
             <button
               @click.stop="toggleStarted(goal)"
               class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
@@ -687,13 +689,13 @@ const filterOptions = [
                 :style="{ opacity: goal.started ? 1 : 0.25 }"
               />
             </button>
-          </div>
+          </span>
 
-          <div class="flex-shrink-0">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.agent }">
             <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
-          </div>
+          </span>
 
-          <div class="flex-shrink-0">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.due || dueGoalId === goal.id }">
             <template v-if="dueGoalId === goal.id">
               <input
                 ref="dueInputRef"
@@ -723,9 +725,9 @@ const filterOptions = [
             >
               <Icon name="lucide:calendar-clock" class="w-5 h-5" :style="{ opacity: goal.due ? 1 : 0.25 }" />
             </button>
-          </div>
+          </span>
 
-          <div class="flex-shrink-0">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.start_date || startGoalId === goal.id }">
             <template v-if="startGoalId === goal.id">
               <input
                 :data-start-input="goal.id"
@@ -752,16 +754,19 @@ const filterOptions = [
             >
               <Icon name="lucide:calendar-days" class="w-5 h-5" :style="{ opacity: goal.start_date ? 1 : 0.25 }" />
             </button>
-          </div>
+          </span>
 
-          <EstimateBadge
-            :goal="goal"
-            size="sm"
-            :editor-open="estimateGoalId === goal.id"
-            @open="openEstimateEditor(goal)"
-            @save="saveEstimate(goal, $event)"
-            @cancel="closeEstimateEditor" />
-          <div class="relative flex items-center gap-2 flex-shrink-0">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.estimated_minutes || estimateGoalId === goal.id }">
+            <EstimateBadge
+              :goal="goal"
+              size="sm"
+              :editor-open="estimateGoalId === goal.id"
+              @open="openEstimateEditor(goal)"
+              @save="saveEstimate(goal, $event)"
+              @cancel="closeEstimateEditor" />
+          </span>
+          <div v-if="isRecurringGoal(goal) || recurrenceTargetId === goal.id || goal.eternal || goal.due || goal.start_date"
+            class="relative flex items-center gap-2 flex-shrink-0">
             <button v-if="isRecurringGoal(goal)" @click.stop="openRecurrenceEditor(goal)"
               class="flex items-center gap-1 text-xs tabular-nums text-ink-dim transition-colors hover:text-ink-muted"
               :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda (r)`">
@@ -784,6 +789,7 @@ const filterOptions = [
               :class="isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-dim'">
               🗓 {{ formatDueDate(goal.start_date) }}
             </span>
+          </div>
           </div>
 
           <div class="flex-shrink-0 text-right">
