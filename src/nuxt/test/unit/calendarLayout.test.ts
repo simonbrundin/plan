@@ -53,10 +53,28 @@ describe("layoutEventRows", () => {
 		expect(rows[0].height).toBe(50);
 	});
 
-	it("begränsar en lång händelse så att den inte tar över kolumnen", () => {
+	it("begränsar inte en lång händelses höjd", () => {
 		const rows = layout([[0, 20 * HOUR]], { height: 600 });
 
-		expect(rows[0].height).toBeLessThanOrEqual(150);
+		// 20 timmar av ett dygn är 500 pixlar i en vy som är 600 pixlar
+		// hög. Höjden ska följa tidsaxeln, inte ha någon egen gräns.
+		expect(rows[0].height).toBe(500);
+	});
+
+	it("gör långa händelser proportionellt olika höga", () => {
+		const rows = layout(
+			[
+				[0, 6 * HOUR],
+				[0, 12 * HOUR],
+			],
+			{ height: 600 },
+		);
+
+		// Sex timmar är 150 pixlar, tolv timmar 300 pixlar. Utan någon
+		// övre gräns ska de skilja sig åt lika mycket som de skiljer sig i
+		// tid.
+		expect(rows[0].height).toBe(150);
+		expect(rows[1].height).toBe(300);
 	});
 
 	it("skjuter en rad som krockar ned under den som redan står", () => {

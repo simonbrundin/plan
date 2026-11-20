@@ -9,8 +9,11 @@
  *
  * Alla rader ligger i en enda kolumn. Två rader kan inte ligga ovanpå varandra,
  * så en rad som krockar med en tidigare rad skjuts ned tills den inte gör
- * det. Radens höjd följer händelsens längd, men begränsas så att en lång
- * händelse inte tar över hela kolumnen.
+ * det. Radens höjd följer händelsens längd, exakt proportionellt mot tidsaxeln
+ * i vyn - ingen övre gräns. En tidigare version begränsade höjden till en
+ * fjärdedel av vyn, och då såg en sex timmars lång händelse lika lång ut som
+ * en tolftimmars händelse. Längden stämde då inte med det som visades på
+ * axeln, och det blev omöjligt att läsa av hur lång händelsen var.
  *
  * Bara etikettbandet - de översta pixlarna där titeln står - reserverar plats.
  * Annars skulle en lång händelse skjuta undan alla andra händelser som ligger
@@ -38,7 +41,12 @@ export interface EventRowInput {
 export interface EventRow {
   /** Övre kanten, i pixlar från toppen av vyn. */
   top: number;
-  /** Höjden, i pixlar. */
+  /**
+   * Höjden, i pixlar.
+   *
+   * Följer händelsens längd i förhållande till hela tidsfönstret, men är
+   * aldrig lägre än `MIN_ROW_PX`.
+   */
   height: number;
   /**
    * Sant om radens titelband inte ryms i vyn.
@@ -82,9 +90,6 @@ export function layoutEventRows(
   const gap = options.gap ?? ROW_GAP_PX;
   const span = Math.max(1, to - from);
   const scale = height / span;
-  // En rad får aldrig ta mer än en fjärdedel av vyn, så att en lång händelse
-  // inte ska ut hela kolumnen.
-  const maxRow = Math.max(minRow * 4, height / 4);
 
   const order = items
     .map((_, index) => index)
@@ -110,11 +115,14 @@ export function layoutEventRows(
     // Raden börjar på sin tid, men skjuts ned om den skulle hamna under en
     // tidigare rad.
     let top = Math.max(timeTop, cursor);
-    const rowHeight = Math.min(Math.max(duration, minRow), maxRow);
+    // Höjden följer händelsens längd, proportionellt mot tidsaxeln. Det finns
+    // ingen övre gräns - en lång händelse ska se ut att vara lång. Den får
+    // bara aldrig bli lägre än den lästa lägsta höjden.
+    const rowHeight = Math.max(duration, minRow);
     // Bara etikettbandet reserverar plats. Titeln står i bandets översta
     // pixlar, så en rad som ligger längre ned i tiden får ligga ovanpå en
     // lång händelses tomma yta.
-    const band = Math.min(rowHeight, minRow);
+    const band = minRow;
     // En rad vid fönstrets kant flyttas upp en aning, så att titelbandet
     // syns. Den flyttas inte före en tidigare rad.
     if (top < height && top + band > height) {

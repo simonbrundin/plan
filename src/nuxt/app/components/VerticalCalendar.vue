@@ -271,15 +271,9 @@ const formatTime = (timestamp: number) =>
     minute: '2-digit',
   }).format(timestamp)
 
-const formatDate = (timestamp: number) =>
-  new Intl.DateTimeFormat('sv-SE', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  }).format(timestamp)
-
 // Veckodagen står till vänster om datumet på dagskalan, så att det går att
-// se direkt vilken dag en rad gäller.
+// se direkt vilken dag en rad gäller. Samma gäller på timskalan, där dagsnamnet
+// står på den rad som inleder det nya dygnet.
 const formatWeekday = (timestamp: number) =>
   new Intl.DateTimeFormat('sv-SE', { weekday: 'short' }).format(timestamp)
 
@@ -311,7 +305,13 @@ const timeToPosition = (timestamp: number) =>
 const ticks = computed(() => {
   const interval = tickInterval.value
   const firstTick = Math.floor(startTime.value / interval) * interval
-  const result: Array<{ timestamp: number; position: number; major: boolean }> = []
+  const result: Array<{
+    timestamp: number
+    position: number
+    major: boolean
+    /** Sant för raden som inleder ett nytt dygn på timskalan. */
+    dayStart: boolean
+  }> = []
 
   const scale = interval < 24 * 60 * 60 * 1000
     ? 'hour'
@@ -330,6 +330,7 @@ const ticks = computed(() => {
       timestamp,
       position,
       major: interval >= 24 * 60 * 60 * 1000 || date.getHours() === 0,
+      dayStart: scale === 'hour' && date.getHours() === 0,
       scale,
     })
   }
@@ -352,6 +353,7 @@ const ticks = computed(() => {
           timestamp,
           position: timeToPosition(timestamp),
           major: true,
+          dayStart: true,
           scale,
         })
       }
@@ -1577,15 +1579,17 @@ onUnmounted(() => {
             :class="{ major: tick.major }"
             :style="{ top: `${tick.position}%` }"
           >
+            <!-- På timskalan står dagsnamnet till vänster på den rad som
+                 inleder det nya dygnet - på samma sätt som på dagskalan. -->
             <time
               :datetime="new Date(tick.timestamp).toISOString()"
-              :class="[`tick-${tick.scale}`, { hidden: tick.hidden }]"
+              :class="[`tick-${tick.scale}`, { 'tick-daystart': tick.dayStart, hidden: tick.hidden }]"
             >
-              <span v-if="tick.scale === 'day'" class="tick-weekday">{{ formatWeekday(tick.timestamp) }}</span>
-              <span class="tick-value">{{ formatTick(tick.timestamp, tick.scale) }}</span>
+              <span v-if="tick.scale === 'day' || tick.dayStart" class="tick-weekday">{{ formatWeekday(tick.timestamp) }}</span>
+              <span class="tick-value">{{ formatTick(tick.timestamp, tick.dayStart ? 'day' : tick.scale) }}</span>
             </time>
             <span class="time-line" />
-            <span v-if="tick.major" class="date-label">{{ tick.scale === 'hour' ? formatDate(tick.timestamp) : tick.scale }}</span>
+            <span v-if="tick.major && tick.scale !== 'hour'" class="date-label">{{ tick.scale }}</span>
           </div>
         </TransitionGroup>
 
@@ -2340,6 +2344,20 @@ onUnmounted(() => {
 .tick-day { color: #60a5fa; }
 .tick-month { color: #a78bfa; }
 .tick-year { color: #f472b6; }
+
+/* På timskalan inleder en rad det nya dygnet. Då står dagsnamnet till
+   vänster om datumet, precis som på dagskalan. */
+.time-row time.tick-daystart {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+.time-row:has(.tick-daystart) .time-line {
+  background: rgb(96 165 250 / 0.38);
+}
 
 .time-row time.hidden {
   visibility: hidden;
