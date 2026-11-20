@@ -1,5 +1,9 @@
 # Agent Preferences
 
+> **Obs:** den här filen är föråldrad. Läs `AGENTS.md` i stället - den
+> innehåller den aktuella informationen, bl.a. regeln att kortkommandon alltid
+> ska synas i `src/nuxt/app/components/HelpModal.vue` (kortkommando-hjälpen).
+
 This file contains preferences and requirements for AI coding agents working on this project.
 
 ## Runtime Preferences

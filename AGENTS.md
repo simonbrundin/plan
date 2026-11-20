@@ -85,6 +85,40 @@ db, _ := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 ## Development
 
+### Kortkommandon - uppdatera ALLTID hjälpmodalen (viktigt)
+
+**Varje gång ett kortkommando läggs till, tas bort eller ändras måste
+`src/nuxt/app/components/HelpModal.vue` uppdateras i samma PR.** Hjälpmodalen
+är det enda stället där användaren kan se vilka tangenter som fungerar, så en
+ny tangent som inte finns i modalen är osynlig för användaren.
+
+Var tangenterna ligger just nu:
+
+| Tangenter | Fil |
+| --- | --- |
+| Globala (`?`, `Ctrl+K`, `n`, `z`, `p`, `Space`) | `app/layouts/default.vue` |
+| Leader-läge + globala leader-kommandon | `app/composables/useLeaderKey.ts` |
+| Leader-kommandon per sida | `app/pages/goal/[id].vue`, `app/pages/goals/index.vue`, `app/pages/priority.vue` |
+| Målsidan (d, s, e, t, c, b, m, r, x, p, i, a, j, k, h, l) | `app/pages/goal/[id].vue` + `app/composables/useGlobalNavigation.ts` |
+| Mållistan (/goals) | `app/pages/goals/index.vue` |
+| Prioritetslistan (/priority) | `app/pages/priority.vue` + `app/composables/usePriorityMode.ts` |
+| Sidorbyte till prioritetssidan (`p`) | `app/composables/usePriorityToggle.ts` |
+| Kalendern (t, r, j/k, h/l, +/−) | `app/components/VerticalCalendar.vue` |
+| Bekräftelsedialog (h/l/Enter/Esc) | `app/components/ConfirmDeleteGoalModal.vue` |
+
+Att verifiera ändringen:
+
+```bash
+cd src/nuxt && bun run build
+```
+
+Öppna modalen med `?` och jämför mot listan ovan. Hittar du en tangent i
+koden som saknas i modalen - eller tvärtom - är de ur synk.
+
+Modalen är **data-driven**: nya tangenter läggs in i `sections` (script-blocket),
+inte i markupen. Sökfiltret i modalen filtrerar automatiskt utifrån samma
+data - inget extra att göra där.
+
 ### Run locally
 
 ```bash
