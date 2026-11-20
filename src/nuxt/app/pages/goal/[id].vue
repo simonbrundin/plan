@@ -1265,6 +1265,27 @@ async function toggleAgent(goalToToggle: Goal) {
   }
 }
 
+// Det mål som tangenterna och leader-kommandona gäller.
+//
+// Samma prioritet som övriga tangenter: föräldraläge först, sedan det
+// markerade huvudmålet, annars det markerade undermålet.
+function agentTarget(): Goal | null {
+  if (isParentMode.value && parents.value.length > 0) {
+    return parents.value[selectedParentIndex.value] ?? null;
+  }
+  if (isGoalSelected.value && goal.value) {
+    return goal.value;
+  }
+  if (
+    filteredChildren.value.length > 0 &&
+    selectedChildIndex.value >= 0 &&
+    selectedChildIndex.value < filteredChildren.value.length
+  ) {
+    return filteredChildren.value[selectedChildIndex.value] ?? null;
+  }
+  return null;
+}
+
 // Due-datum (deadline) för ett mål. Datumet är ett kalenderdatum
 // ("YYYY-MM-DD") - tom sträng rensar det.
 //
@@ -1486,6 +1507,17 @@ onMounted(() => {
       label: "I",
       title: "Change icon",
       run: openIconPickerForSelection,
+    },
+    {
+      keys: "a",
+      label: "A",
+      title: "Växla agent-märke",
+      run: () => {
+        const target = agentTarget();
+        if (target) {
+          toggleAgent(target);
+        }
+      },
     },
   ]);
 });

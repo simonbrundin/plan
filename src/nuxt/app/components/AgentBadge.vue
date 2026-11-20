@@ -20,11 +20,11 @@ const toggle = () => {
   <button
     type="button"
     @click.stop="toggle"
-    class="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-xs font-bold transition-colors"
-    :class="props.active ? 'text-blue-400 bg-blue-500/15' : 'text-ink-dim hover:text-ink-muted'"
+    class="flex-shrink-0 w-6 h-6 rounded flex items-center justify-center transition-colors"
+    :class="props.active ? 'text-blue-500 hover:text-blue-400' : 'text-ink-dim hover:text-ink-muted'"
     :title="props.active ? 'Ta bort agent-markeringen' : 'Markera som agent-mål'"
     :aria-pressed="props.active"
   >
-    A
+    <Icon name="lucide:bot" class="w-4 h-4" />
   </button>
 </template>

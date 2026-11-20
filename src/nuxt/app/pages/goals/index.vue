@@ -43,6 +43,10 @@ onMounted(async () => {
   }
 })
 
+// Leader-läget: tangentsekvenser som bara finns på den här sidan.
+const { registerPageCommands } = useLeaderKey()
+let unregisterLeaderCommands: (() => void) | null = null
+
 const selectedIndex = ref(0)
 const mode = ref<'normal' | 'insert'>('normal')
 
@@ -554,15 +558,6 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
-  // a - toggle agent-märke
-  if (event.key === 'a') {
-    event.preventDefault()
-    if (filteredGoals.value.length > 0) {
-      toggleAgent(filteredGoals.value[selectedIndex.value])
-    }
-    return
-  }
-
   // t - redigera beskrivning för det markerade målet
   if (event.key === 't') {
     event.preventDefault()
@@ -683,9 +678,26 @@ function handleKeydown(event: KeyboardEvent) {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
+
+  // Leader + a växlar agent-märket på det markerade målet.
+  unregisterLeaderCommands = registerPageCommands([
+    {
+      keys: 'a',
+      label: 'A',
+      title: 'Växla agent-märke',
+      run: () => {
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) {
+          toggleAgent(goal)
+        }
+      },
+    },
+  ])
 })
 
 onUnmounted(() => {
+  unregisterLeaderCommands?.()
+  unregisterLeaderCommands = null
   window.removeEventListener('keydown', handleKeydown)
 })
 
@@ -746,7 +758,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · a agent · c deadline · m tidsåtgång · t beskrivning · x ta bort
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · m tidsåtgång · t beskrivning · x ta bort · space+a agent
         </span>
       </div>
     </div>

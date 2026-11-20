@@ -266,6 +266,31 @@ async function toggleAgent(goal: PrioritizedGoalRow) {
   }
 }
 
+// Leader + a växlar agent-märket på det markerade målet.
+const { registerPageCommands } = useLeaderKey()
+let unregisterLeaderCommands: (() => void) | null = null
+
+onMounted(() => {
+  unregisterLeaderCommands = registerPageCommands([
+    {
+      keys: 'a',
+      label: 'A',
+      title: 'Växla agent-märke',
+      run: () => {
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) {
+          toggleAgent(goal)
+        }
+      },
+    },
+  ])
+})
+
+onUnmounted(() => {
+  unregisterLeaderCommands?.()
+  unregisterLeaderCommands = null
+})
+
 // Upprepning (r). Editorn visas i raden för det mål den öppnades för.
 const recurrenceTargetId = ref<number | null>(null)
 
