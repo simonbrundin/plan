@@ -94,6 +94,7 @@ kalendern bara behöver hantera själva interaktionen.
   HTML5-dragning, så en händelse flytts där genom formuläret.
 - Målet kopplas till händelsen, men kopplingen är inte synlig i vyn - den
   finns i händelsens formulär under "Kopplat mål".
+- När det kopplade målet markeras som färdigt döljs händelsen i kalendern.
 - Menyn för tidsalternativ visas bara för den händelse som skapas just nu.
   Det finns ingen lista över "planerade mål" i kalendern.
 
@@ -104,6 +105,7 @@ kalendern bara behöver hantera själva interaktionen.
 - [x] Målets uppskattade tidsåtgång ligger först i menyn.
 - [x] Ett eget tidsvärde kan skrivas in.
 - [x] Vald tid skapar en händelse med målets titel, ikon och koppling.
+- [x] Ett kopplat event döljs när målet markeras som färdigt.
 - [x] Escape avbryter menyn utan att skapa något.
 - [x] En händelse kan flyttas genom att dra den.
 - [x] Händelsens längd behålls vid flytt.
