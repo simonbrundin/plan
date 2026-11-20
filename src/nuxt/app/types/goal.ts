@@ -15,6 +15,8 @@ export interface Goal {
 	// Due är det datum ("YYYY-MM-DD") målet ska vara klart.
 	// Null = inget datum satt.
 	due: string | null;
+	// Uppskattad tidsåtgång i minuter. Null = ingen uppskattning satt.
+	estimated_minutes?: number | null;
 	// Platser där målet kan slutföras. Flera platser har OR-semantik:
 	// målet är görbart om man är på någon av dem.
 	places?: Place[];

@@ -26,11 +26,11 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoRecurrence } = useGoalUndo();
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoEstimate, undoRecurrence } = useGoalUndo();
 
 // Använd goals store
 const goalsStore = useGoalsStore();
@@ -1292,6 +1292,33 @@ function applyDue(id: number, due: string | null) {
 	}
 }
 
+// Uppskattad tidsåtgång för ett mål.
+//
+// estimateTargetId anger VILKET mål fältet är öppet för, så att tangenten
+// 'm' kan följa det markerade målet (förälder, huvudmål eller undermål).
+const estimateTargetId = ref<number | null>(null);
+
+function openEstimateEditor(target: Goal) {
+	estimateTargetId.value = target.id;
+}
+
+function closeEstimateEditor() {
+	estimateTargetId.value = null;
+}
+
+async function saveEstimate(target: Goal, minutes: number | null) {
+	try {
+		const previous = target.estimated_minutes ?? null;
+		await setGoalEstimate(target.id, minutes);
+		undoEstimate(target, previous);
+		goalsStore.updateGoal(target.id, { estimated_minutes: minutes });
+		closeEstimateEditor();
+		await refresh();
+	} catch (error) {
+		console.error('Failed to save goal estimate:', error);
+	}
+}
+
 // Toggla started status på ett mål
 async function toggleStarted(goalToToggle: Goal) {
   try {
@@ -1562,6 +1589,25 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
+  // Hantera 'm' för att sätta uppskattad tidsåtgång
+  if (event.key === "m") {
+    event.preventDefault();
+    // Tangenten följer det markerade målet: förälder (parent-läge),
+    // huvudmålet eller det markerade undermålet.
+    if (isParentMode.value && parents.value.length > 0) {
+      openEstimateEditor(parents.value[selectedParentIndex.value]);
+    } else if (isGoalSelected.value && goal.value) {
+      openEstimateEditor(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      openEstimateEditor(filteredChildren.value[selectedChildIndex.value]);
+    }
+    return;
+  }
+
   // Hantera 'r' för att sätta upprepning
   if (event.key === "r") {
     event.preventDefault();
@@ -1828,6 +1874,13 @@ watch(selectedParentIndex, async () => {
                 <Icon name="lucide:calendar-clock" class="w-4 h-4"
                   :style="{ opacity: parent.due ? 1 : 0.25 }" />
               </button>
+              <EstimateBadge
+                :goal="parent"
+                size="sm"
+                :editor-open="estimateTargetId === parent.id"
+                @open="openEstimateEditor(parent)"
+                @save="saveEstimate(parent, $event)"
+                @cancel="closeEstimateEditor" />
               <!-- Platser för förälder (p) -->
               <div class="relative flex items-center">
                 <button @click.stop="togglePlacePicker(parent.id)"
@@ -1967,6 +2020,13 @@ watch(selectedParentIndex, async () => {
             </span>
           </template>
         </div>
+        <EstimateBadge
+          v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          :goal="goal"
+          :editor-open="estimateTargetId === goal.id"
+          @open="openEstimateEditor(goal)"
+          @save="saveEstimate(goal, $event)"
+          @cancel="closeEstimateEditor" />
         <!-- Platser: var målet kan slutföras (p) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="relative flex items-center gap-1.5 flex-shrink-0">
@@ -2268,6 +2328,13 @@ watch(selectedParentIndex, async () => {
                     </span>
                   </template>
                 </div>
+                <EstimateBadge
+                  :goal="child"
+                  size="sm"
+                  :editor-open="estimateTargetId === child.id"
+                  @open="openEstimateEditor(child)"
+                  @save="saveEstimate(child, $event)"
+                  @cancel="closeEstimateEditor" />
                 <!-- Upprepning för undermål -->
                 <div class="relative flex-shrink-0 flex items-center gap-1">
                   <button @click.stop="openRecurrenceEditor(child)"

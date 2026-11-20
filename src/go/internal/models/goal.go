@@ -68,6 +68,10 @@ type Goal struct {
 	// Due är det datum målet ska vara klart. Skickas alltid ut, även när
 	// det är null - samma resonemang som för started/finished.
 	Due  *DueDate `json:"due"`
+	// EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.
+	// Null = ingen uppskattning satt. Skickas alltid ut, även när den är
+	// null - samma resonemang som för started/finished.
+	EstimatedMinutes *int `json:"estimated_minutes"`
 	Inbox int     `json:"inbox" example:"0"`
 	// Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
 	// kan inte slutföras och markeras alltid som pågående.
@@ -242,6 +246,9 @@ type UpdateGoalRequest struct {
 	Finished    NullableTime `json:"finished,omitempty"`
 	// Due sätter eller rensar målets due-datum ("YYYY-MM-DD" eller null).
 	Due NullableDueDate `json:"due,omitempty"`
+	// EstimatedMinutes sätter eller rensar målets uppskattade tidsåtgång
+	// (antal minuter eller null).
+	EstimatedMinutes NullableInt `json:"estimated_minutes,omitempty"`
 	// Eternal sätter eller tar bort evigt-flaggan på ett mål.
 	// nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
 	Eternal *bool `json:"eternal,omitempty"`
@@ -285,6 +292,34 @@ func (n *NullableDueDate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.Value = &s
+
+	return nil
+}
+
+// NullableInt sätter eller rensar ett heltal i en update-request.
+//
+// Det skiljer på tre tillstånd:
+//   - fältet saknas i request-bodyn (Set == false) → lämnas oförändrat
+//   - fältet finns med ett värde (Value != nil) → sätts till talet
+//   - fältet finns som null (Set == true, Value == nil) → värdet rensas
+type NullableInt struct {
+	Set   bool
+	Value *int
+}
+
+// UnmarshalJSON parses an integer that is either ett tal eller null.
+func (n *NullableInt) UnmarshalJSON(data []byte) error {
+	n.Set = true
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		n.Value = nil
+		return nil
+	}
+
+	var i int
+	if err := json.Unmarshal(data, &i); err != nil {
+		return err
+	}
+	n.Value = &i
 
 	return nil
 }

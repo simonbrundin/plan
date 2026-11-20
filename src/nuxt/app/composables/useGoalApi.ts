@@ -82,6 +82,14 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter målets uppskattade tidsåtgång i minuter. Null rensar den.
+	const setGoalEstimate = async (goalId: number, minutes: number | null) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { estimated_minutes: minutes },
+		});
+	};
+
 	// Markerar ett mål som evigt (eller upphäver evigt-flaggan).
 	// Ett evigt mål kan inte slutföras - API:t avvisar det.
 	const setGoalEternal = async (goalId: number, eternal: boolean) => {
@@ -304,6 +312,7 @@ export function useGoalApi() {
 		toggleGoalStarted,
 		toggleGoalFinished,
 		setGoalDue,
+		setGoalEstimate,
 		setGoalEternal,
 		setGoalRecurrence,
 		completeGoalOccurrence,

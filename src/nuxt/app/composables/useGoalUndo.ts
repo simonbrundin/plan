@@ -14,6 +14,7 @@ export function useGoalUndo() {
 		toggleGoalStarted,
 		setGoalEternal,
 		setGoalDue,
+		setGoalEstimate,
 		setGoalRecurrence,
 		undoGoalOccurrence,
 	} = useGoalApi();
@@ -94,6 +95,19 @@ export function useGoalUndo() {
 		});
 	}
 
+	/** Den uppskattade tidsåtgången sattes eller rensades. */
+	function undoEstimate(goal: Goal, previousMinutes: number | null) {
+		push({
+			label: previousMinutes
+				? `Satte tidsåtgång ${previousMinutes} min på "${goal.title}"`
+				: `Tog bort tidsåtgången på "${goal.title}"`,
+			undo: async () => {
+				await setGoalEstimate(goal.id, previousMinutes);
+				await refreshStore();
+			},
+		});
+	}
+
 	/** Upprepningen sattes eller togs bort. */
 	function undoRecurrence(
 		goal: Goal,
@@ -121,6 +135,7 @@ export function useGoalUndo() {
 		undoStarted,
 		undoEternal,
 		undoDue,
+		undoEstimate,
 		undoRecurrence,
 	};
 }

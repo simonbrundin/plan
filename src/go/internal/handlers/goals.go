@@ -366,6 +366,10 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "due-datumet måste vara på formatet YYYY-MM-DD"})
 			return
 		}
+		if errors.Is(err, repository.ErrInvalidEstimate) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "tidsåtgången måste vara ett positivt antal minuter"})
+			return
+		}
 		if errors.Is(err, recurrence.ErrInvalidRule) || errors.Is(err, recurrence.ErrInvalidMode) ||
 			errors.Is(err, recurrence.ErrNoOccurrence) || errors.Is(err, repository.ErrNotRecurring) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: recurrenceErrorMessage(err)})

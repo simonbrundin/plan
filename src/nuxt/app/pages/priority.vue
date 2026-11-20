@@ -11,9 +11,9 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
 
 function dueToneClass(due: string | null): string {
   const tone = dueTone(due)
@@ -162,6 +162,12 @@ onMounted(() => {
     if (e.key === 'c' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault()
       if (goal) openDuePicker(goal)
+      return
+    }
+
+    if (e.key === 'm' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault()
+      if (goal) openEstimateEditor(goal)
       return
     }
 
@@ -326,6 +332,28 @@ async function saveDue(goal: PrioritizedGoalRow, value: string) {
   }
 }
 
+// Uppskattad tidsåtgång inline i raden.
+const estimateGoalId = ref<number | null>(null)
+
+function openEstimateEditor(goal: PrioritizedGoalRow) {
+  estimateGoalId.value = goal.id
+}
+
+function closeEstimateEditor() {
+  estimateGoalId.value = null
+}
+
+async function saveEstimate(goal: PrioritizedGoalRow, minutes: number | null) {
+  try {
+    const previous = goal.estimated_minutes ?? null
+    await setGoalEstimate(goal.id, minutes)
+    undoEstimate(goal, previous)
+    estimateGoalId.value = null
+    await loadPrioritizedGoals()
+  } catch (err) {
+    console.error('Failed to save estimate:', err)
+  }
+}
 // Beskrivningsredigering inline i raden (Ctrl+Enter sparar, Esc avbryter)
 const editingDescriptionGoalId = ref<number | null>(null)
 const descriptionDraft = ref('')
@@ -608,6 +636,13 @@ const filterOptions = [
             </button>
           </div>
 
+          <EstimateBadge
+            :goal="goal"
+            size="sm"
+            :editor-open="estimateGoalId === goal.id"
+            @open="openEstimateEditor(goal)"
+            @save="saveEstimate(goal, $event)"
+            @cancel="closeEstimateEditor" />
           <div class="relative flex items-center gap-2 flex-shrink-0">
             <button v-if="isRecurringGoal(goal)" @click.stop="openRecurrenceEditor(goal)"
               class="flex items-center gap-1 text-xs tabular-nums text-ink-dim transition-colors hover:text-ink-muted"

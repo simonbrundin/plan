@@ -167,6 +167,13 @@ onUnmounted(() => {
             <div class="flex items-center gap-4">
               <kbd
                 class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-accent font-mono font-bold min-w-[2rem] text-center"
+                >m</kbd
+              >
+              <span class="text-ink-muted">Sätt uppskattad tidsåtgång</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <kbd
+                class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-accent font-mono font-bold min-w-[2rem] text-center"
                 >x</kbd
               >
               <span class="text-ink-muted">Ta bort mål</span>

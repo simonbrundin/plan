@@ -12,10 +12,10 @@ import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -382,6 +382,35 @@ async function saveDue(goal: Goal, value: string) {
   }
 }
 
+// Uppskattad tidsåtgång för ett grundmål.
+//
+// estimateTargetId anger vilket grundmål fältet är öppet för.
+const estimateTargetId = ref<number | null>(null)
+
+function openEstimateEditor(goal: Goal) {
+  estimateTargetId.value = goal.id
+}
+
+function closeEstimateEditor() {
+  estimateTargetId.value = null
+}
+
+async function saveEstimate(goal: Goal, minutes: number | null) {
+  try {
+    const previous = goal.estimated_minutes ?? null
+    await setGoalEstimate(goal.id, minutes)
+    undoEstimate(goal, previous)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    const current = localGoals.value[idx]
+    if (idx !== -1 && current) {
+      localGoals.value[idx] = { ...current, estimated_minutes: minutes }
+    }
+    closeEstimateEditor()
+  } catch (err) {
+    console.error('Failed to save estimate:', err)
+  }
+}
+
 // Toggle evigt-märke
 async function toggleEternal(goal: Goal) {
   const newEternal = !goal.eternal
@@ -537,6 +566,16 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
+  // m - sätt uppskattad tidsåtgång för det markerade målet
+  if (event.key === 'm') {
+    event.preventDefault()
+    const goal = filteredGoals.value[selectedIndex.value]
+    if (goal) {
+      openEstimateEditor(goal)
+    }
+    return
+  }
+
   // r - sätt upprepning för det markerade målet
   if (event.key === 'r') {
     event.preventDefault()
@@ -682,7 +721,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · t beskrivning · x ta bort
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · m tidsåtgång · t beskrivning · x ta bort
         </span>
       </div>
     </div>
@@ -801,6 +840,13 @@ definePageMeta({
               {{ formatDueDate(goal.due) }}
             </span>
           </template>
+          <EstimateBadge
+            :goal="goal"
+            size="sm"
+            :editor-open="estimateTargetId === goal.id"
+            @open="openEstimateEditor(goal)"
+            @save="saveEstimate(goal, $event)"
+            @cancel="closeEstimateEditor" />
           <!-- Upprepningar: endast antalet slutförda förekomster -->
           <div class="relative flex-shrink-0 flex items-center gap-1">
             <button v-if="isRecurringGoal(goal)" @click.stop="openRecurrenceEditor(goal)"
