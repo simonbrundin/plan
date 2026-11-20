@@ -39,7 +39,7 @@ const {
 
 const { isOpen: isQuickAddOpen, open: openQuickAdd, close: closeQuickAdd } = useQuickAdd();
 
-const { canUndo, nextLabel: undoLabel, undoLast } = useUndoStack();
+const { undoLast } = useUndoStack();
 const toast = useToast();
 
 // Ångra den senaste handlingen. Den kan påverka alla sidor, så den
@@ -340,20 +340,6 @@ onUnmounted(() => {
     />
 
     <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />
-
-    <!-- Visar vilken handling "z" skulle ångra -->
-    <Transition name="fade">
-      <div
-        v-if="canUndo && undoLabel"
-        class="fixed bottom-4 left-4 z-50 hidden items-center gap-2 rounded-xl border border-line bg-surface/90 px-3 py-2 text-xs text-ink-muted shadow-lg backdrop-blur-xl lg:flex"
-      >
-        <kbd
-          class="rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 font-mono font-bold text-accent"
-          >Z</kbd
-        >
-        <span class="max-w-[16rem] truncate">Ångra: {{ undoLabel }}</span>
-      </div>
-    </Transition>
 
     <Transition name="fade">
       <div
