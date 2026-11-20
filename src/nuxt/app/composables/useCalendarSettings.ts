@@ -8,10 +8,11 @@
 
 export interface CalendarSettings {
   /**
-   * Hur många förekomster av en daglig serie som får synas i vyn innan
-   * serien döljs.
+   * Hur många förekomster av en återkommande serie som får synas i vyn.
+   *
+   * Har serien fler, döljs hela serien i tidslinjen.
    */
-  dailyVisibleLimit: number;
+  maxInstances: number;
   /**
    * Om återkommande serier får döljas när de inte får plats.
    *
@@ -21,7 +22,7 @@ export interface CalendarSettings {
 }
 
 export const DEFAULT_CALENDAR_SETTINGS: CalendarSettings = {
-  dailyVisibleLimit: 7,
+  maxInstances: 7,
   hideRecurring: true,
 };
 
@@ -35,13 +36,20 @@ const readStored = (): CalendarSettings | null => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
 
-    const parsed = JSON.parse(raw) as Partial<CalendarSettings>;
-    const limit = Number(parsed.dailyVisibleLimit);
+    const parsed = JSON.parse(raw) as Partial<CalendarSettings> & {
+      // Äldre sparade inställningar hette dailyVisibleLimit.
+      dailyVisibleLimit?: number;
+    };
+
+    // Den gamla inställningen är samma sak i nytt namn, så den läses in
+    // när den finns kvar.
+    const rawLimit = parsed.maxInstances ?? parsed.dailyVisibleLimit;
+    const limit = Number(rawLimit);
 
     return {
-      dailyVisibleLimit: Number.isFinite(limit)
+      maxInstances: Number.isFinite(limit)
         ? Math.min(100, Math.max(1, Math.round(limit)))
-        : DEFAULT_CALENDAR_SETTINGS.dailyVisibleLimit,
+        : DEFAULT_CALENDAR_SETTINGS.maxInstances,
       hideRecurring:
         typeof parsed.hideRecurring === "boolean"
           ? parsed.hideRecurring

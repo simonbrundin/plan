@@ -65,9 +65,9 @@ describe("layoutEventRows", () => {
 			[10 * HOUR, 11 * HOUR],
 		]);
 
-		// Den andra raden får inte ligga ovanpå den första.
-		expect(rows[1].top).toBeGreaterThanOrEqual(rows[0].top + rows[0].height);
-		expect(rows[1].top).toBe(rows[0].top + rows[0].height + ROW_GAP_PX);
+		// Den andra raden får inte ligga ovanpå den första. Bara
+		// etikettbandet reserverar plats, så den hamnar strax under.
+		expect(rows[1].top).toBe(rows[0].top + MIN_ROW_PX + ROW_GAP_PX);
 	});
 
 	it("lägger en rad under den som redan står, även utan överlapp", () => {
@@ -76,7 +76,46 @@ describe("layoutEventRows", () => {
 			[10 * HOUR + 30 * 60 * 1000, 11 * HOUR + 30 * 60 * 1000],
 		]);
 
-		expect(rows[1].top).toBe(rows[0].top + rows[0].height + ROW_GAP_PX);
+		expect(rows[1].top).toBe(rows[0].top + MIN_ROW_PX + ROW_GAP_PX);
+	});
+
+	it("behåller en händelse på sin tid inne i en lång händelse", () => {
+		const rows = layout([
+			[9 * HOUR, 16 * HOUR],
+			[12 * HOUR, 13 * HOUR],
+		]);
+
+		// 12:00 är 300 pixlar ned i en vy som är 600 pixlar hög.
+		expect(rows[1].top).toBe(300);
+	});
+
+	it("behåller en händelse på sin tid efter en lång händelse", () => {
+		const rows = layout([
+			[9 * HOUR, 16 * HOUR],
+			[18 * HOUR, 19 * HOUR],
+		]);
+
+		expect(rows[1].top).toBe(450);
+	});
+
+	it("låter etikettbanden aldrig överlappa", () => {
+		const rows = layout([
+			[9 * HOUR, 16 * HOUR],
+			[12 * HOUR, 13 * HOUR],
+			[12 * HOUR, 13 * HOUR],
+			[12 * HOUR, 13 * HOUR],
+		]);
+
+		const sorted = [...rows].sort((left, right) => left.top - right.top);
+
+		for (let i = 1; i < sorted.length; i += 1) {
+			const previous = sorted[i - 1]!;
+			const current = sorted[i]!;
+
+			expect(current.top).toBeGreaterThanOrEqual(
+				previous.top + Math.min(previous.height, MIN_ROW_PX),
+			);
+		}
 	});
 
 	it("behåller radernas ordning i tiden", () => {

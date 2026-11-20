@@ -3,8 +3,8 @@
 ## Problem
 
 Kalendern har några beteenden som är svåra att avgöra i förväg. Framför allt
-hur många förekomster av en daglig serie som får synas innan serien döljs.
-En gräns på sju är ett bra utgångsläge, men den är beroende av hur kalendern
+hur många förekomster av en återkommande serie som får synas samtidigt. En
+gräns på sju är ett bra utgångsläge, men den är beroende av hur kalendern
 används: den som har ett dagligt möte varje morgon vill se alla, den som har
 en träningsrutin varje dag vill se dagsformen och inte alla sju.
 
@@ -18,8 +18,9 @@ redan dit, så sidan fyller en lucka som redan fanns.
 
 Inställningarna:
 
-- **Dagliga serier** - hur många förekomster av en daglig serie som får synas
-  i vyn innan serien döljs. Standard är sju.
+- **Max antal instanser per serie** - hur många förekomster av en återkommande
+  serie som får synas samtidigt i vyn. Så snart det blir en till, döljs hela
+  serien. Standard är sju.
 - **Dölj återkommande serier** - en strömbrytare. Med avstängd döljning visas
   alla serier, och kolumnen kan bli full.
 
@@ -46,8 +47,8 @@ Go-API:t.
 ## Acceptance Criteria
 
 - [x] Sidan `/settings` går att nå från sidomenyn och från användarmenu.
-- [x] Gränsen för dagliga serier går att ändra, och ändringen gäller direkt
-      i kalendern.
+- [x] Gränsen för antalet instanser per serie går att ändra, och ändringen
+      gäller direkt i kalendern.
 - [x] Döljningen av återkommande serier går att stänga av.
 - [x] Inställningarna överlever en omladdning av sidan.
 

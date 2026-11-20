@@ -2,8 +2,7 @@
  * Återkommande serier i kalendern.
  *
  * Serier identifieras av master-id, och deras upprepningsregel beskrivs med
- * en kort etikett på svenska. De här hjälparna används både i tidslinjen och
- * i sammanfattningen av serierna ovanför den.
+ * ett kort etikett på svenska. De här hjälparna används i tidslinjen.
  */
 
 export interface CalendarEventLike {

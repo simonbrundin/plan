@@ -2,6 +2,7 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import assert from "node:assert";
 
 import {
+	MIN_ROW_PX,
 	layoutEventRows,
 	type EventRow,
 } from "../../app/utils/calendarLayout.ts";
@@ -20,9 +21,8 @@ interface CalendarRowsState {
 	height: number;
 	events: Array<{ start: number; end: number; seriesKey: string | null }>;
 	rows: EventRow[];
-	dailyLimit: number;
+	maxInstances: number;
 	hidingEnabled: boolean;
-	focusKey: string | null;
 	hiddenBefore: string[];
 	series: VisibilitySeries[];
 	hidden: string[];
@@ -38,9 +38,8 @@ const stateOf = (world: object): CalendarRowsState => {
 			height: 600,
 			events: [],
 			rows: [],
-			dailyLimit: 7,
+			maxInstances: 7,
 			hidingEnabled: true,
-			focusKey: null,
 			hiddenBefore: [],
 			series: [],
 			hidden: [],
@@ -149,8 +148,9 @@ Then(
 );
 
 /**
- * Två rader får inte ligga ovanpå varandra. Alla rader ligger i samma
- * kolumn, så en rad som krockar skjuts ned under den som redan står.
+ * Två raders etikettband får inte ligga ovanpå varandra. Bandet är de
+ * översta pixlarna, där titeln står. Banden kan överlappa en lång händelses
+ * tomma yta - det är därför bandet, och inte hela raden, jämförs.
  */
 Then(/the rows should not overlap/, function (this: object) {
 	const rows = [...stateOf(this).rows].sort((left, right) => left.top - right.top);
@@ -158,12 +158,11 @@ Then(/the rows should not overlap/, function (this: object) {
 	for (let i = 1; i < rows.length; i += 1) {
 		const previous = rows[i - 1]!;
 		const current = rows[i]!;
+		const band = Math.min(previous.height, MIN_ROW_PX);
 
 		assert.ok(
-			current.top >= previous.top + previous.height,
-			`Rad ${i} börjar på ${current.top} pixlar, men raden ovanför slutar på ${
-				previous.top + previous.height
-			}`,
+			current.top >= previous.top + band,
+			`Rad ${i} börjar på ${current.top} pixlar, men raden ovanför har sitt etikettband ${previous.top} - ${previous.top + band}`,
 		);
 	}
 });
@@ -179,9 +178,9 @@ Then(/(\d+) rows should be clipped/, function (this: object, expected: string) {
 });
 
 Given(
-	/the daily visibility limit is (\d+)/,
+	/the max instances per series is (\d+)/,
 	function (this: object, limit: string) {
-		stateOf(this).dailyLimit = Number(limit);
+		stateOf(this).maxInstances = Number(limit);
 	},
 );
 
@@ -192,16 +191,34 @@ Given(
 		const series: VisibilitySeries[] = [];
 
 		for (let i = 1; i < rows.length; i++) {
-			const [key, count, daily] = rows[i];
+			const [key, count] = rows[i];
 			series.push({
 				key: (key ?? "").trim(),
 				title: (key ?? "").trim(),
 				count: Number(count),
-				daily: (daily ?? "").trim().toLowerCase() === "yes",
 			});
 		}
 
 		stateOf(this).series = series;
+	},
+);
+
+/**
+ * Lägger till ett antal samtidiga förekomster av en serie.
+ */
+Given(
+	/the series "([^"]*)" occurs (\d+) times at (\d\d):(\d\d)/,
+	function (this: object, key: string, count: string, hours: string, minutes: string) {
+		const state = stateOf(this);
+		const start = Number(hours) * HOUR + Number(minutes) * 60 * 1000;
+
+		for (let i = 0; i < Number(count); i++) {
+			state.events.push({
+				start,
+				end: start + 30 * 60 * 1000,
+				seriesKey: key,
+			});
+		}
 	},
 );
 
@@ -216,22 +233,14 @@ Given(/hiding of recurring series is off/, function (this: object) {
 	stateOf(this).hidingEnabled = false;
 });
 
-Given(
-	/the series "([^"]*)" is focused/,
-	function (this: object, key: string) {
-		stateOf(this).focusKey = key;
-	},
-);
-
 When(/the visibility is planned/, function (this: object) {
 	const state = stateOf(this);
 
 	const plan = planVisibility({
 		events: state.events,
 		series: state.series,
-		dailyLimit: state.dailyLimit,
+		maxInstances: state.maxInstances,
 		hidingEnabled: state.hidingEnabled,
-		focusKey: state.focusKey,
 		hiddenBefore: state.hiddenBefore,
 		from: 0,
 		to: state.duration,
@@ -247,16 +256,6 @@ Then(
 		assert.ok(
 			stateOf(this).hidden.includes(key),
 			`Serien ${key} borde vara dold, men dolda är ${stateOf(this).hidden.join(", ")}`,
-		);
-	},
-);
-
-Then(
-	/the series "([^"]*)" should be visible/,
-	function (this: object, key: string) {
-		assert.ok(
-			!stateOf(this).hidden.includes(key),
-			`Serien ${key} borde vara synlig, men dolda är ${stateOf(this).hidden.join(", ")}`,
 		);
 	},
 );

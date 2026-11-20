@@ -28,8 +28,15 @@ Varje händelse visas alltid som en rad, på alla zoomnivåer:
   den inte ryms.
 - Alla rader ligger i **en enda kolumn**, så att varje rad får hela bredden
   och titeln går att läsa. Rader som överlappar i tid kan inte ligga ovanpå
-  varandra, så en rad skjuts ned under den som redan står. Tidsaxeln blir
-  då ungefärlig, men raden visar sin exakta tid.
+  varandra, så en rad skjuts ned under den som redan står.
+- Bara **etikettbandet** - de översta pixlarna där titeln står - reserverar
+  plats. En lång händelse ska inte skjuta undan alla andra händelser som
+  ligger inne i den; de behåller sina egna tider och ritas ovanpå den långa
+  radens tomma yta. Rader som ligger längre ned ritas ovanpå, så att ingen
+  titel döljs.
+- Tidsaxeln är därför så exakt som den kan vara. Den blir *ungefärlig* bara
+  för händelser som startar inom några minuter av varandra - de staplas då
+  under varandra. Radens etikett visar den exakta tiden.
 - En händelse som inte hinner med i kolumnen får inte försvinna tyst. Den
   visas som en "+N till"-knapp, och knappen öppnar en panel där de går att se
   och klicka på.
@@ -45,22 +52,19 @@ läsa.
 
 Då döljs återkommande serier, i en bestämd ordning:
 
-1. **Dagliga serier** döljs när de har fler förekomster i vyn än gränsen.
-   Gränsen är inställbar och ligger som standard på sju.
+1. **Antal.** En serie visas med högst ett bestämt antal förekomster i vyn.
+   Gränsen är inställbar och ligger som standard på sju. Så snart den åttonde
+   förekomsten syns, döljs hela serien - den visas som vanligt fram till dess.
 2. Om kolumnen ändå inte ryms döljs den serie som har flest förekomster i vyn.
    En serie med en enda förekomst döljs inte - den är ju inte brusan, bara
-   olycklig.
+   olycklig. Vid lika många förekomster döljs den som var dold sist, så att
+   det är samma serie som försvinner och kommer tillbaka.
 3. **Enstaka händelser döljs aldrig.** De kan i stället hamna i "+N till".
 
-Döljningen är aldrig tyst:
-
-- En dold serie står kvar i sammanfattningen ovanför tidslinjen, märkt som
-  "dold", med sitt antal förekomster.
-- Klick på "Visa ensam" visar bara den serien. Då sätts döljningsreglerna åt
-  sidan, så att även en viktig daglig rutin går att se.
-- Döljningen har **hysteresis**: en serie som varit dold förblir dold tills
-  antalet förekomster faller *under* gränsen. Annars fladdrar serier fram och
-  tillbaka när man scrollar över gränsen.
+Döljningen är tyst: en dold serie syns inte i tidslinjen. Det är ett medvetet
+val - sammanfattningen av serierna ovanför tidslinjen togs bort, eftersom den
+skräpade ner vyn. Vill man se serien får man zooma in på den, så att den syns
+som vanligt igen.
 
 ## Implementation
 
@@ -68,10 +72,9 @@ Döljningen är aldrig tyst:
    Allt räknas i pixlar, eftersom bara pixlarna kan avgöra om en rad hinner
    rymmas under en annan. Funktionen är ren och testad separat.
 2. `app/utils/calendarVisibility.ts` planerar vilka serier som ska döljas.
-   Planen är ren och tar den tidigare döljningen som input, så att
-   hysteresen kan räknas utan att planen blir stateful.
-3. `VerticalCalendar.vue` renderar raderna, märker dolda serier i
-   sammanfattningen och visar de händelser som inte ryms i en panel.
+   Planen är ren och testad separat.
+3. `VerticalCalendar.vue` renderar raderna och visar de händelser som inte ryms
+   i en panel. Serierna räknas bara - de visas inte i en egen sammanfattning.
 4. `app/composables/useCalendarSettings.ts` läser och sparar inställningarna i
    webbläsaren.
 5. Detaljnivåerna (full, compact, daily, monthly, yearly) försvinner, eftersom
@@ -93,13 +96,15 @@ Döljningen är aldrig tyst:
 - [x] Varje händelse visas som en rad med ikon, titel och starttid.
 - [x] Ingen rad är lägre än 16 pixlar, oavsett zoomnivå.
 - [x] Alla rader ligger i en enda kolumn, och ingen rad döljer en annan.
+- [x] En lång händelse skjuter inte undan händelser som ligger inne i den -
+      de behåller sina egna tider.
+- [x] Etikettbanden överlappar aldrig, så ingen titel döljs.
 - [x] Det finns inga prickar: inga händelser visas som en punkt.
-- [x] Dagliga serier döljs när de har fler förekomster i vyn än gränsen, och
-      gränsen går att ändra i inställningarna.
-- [x] En dold serie listas i sammanfattningen, märkt som "dold", och kan
-      visas ensam.
-- [x] En dold serie förblir dold tills antalet förekomster faller under
-      gränsen.
+- [x] Varje återkommande serie visas med högst sju förekomster i vyn. Så snart
+      den åttonde syns, döljs hela serien, och gränsen går att ändra i
+      inställningarna.
+- [x] En dold serie visas inte i tidslinjen, och syns inte i någon
+      sammanfattning - vyn ska vara ren.
 - [x] Enstaka händelser döljs aldrig utan att det syns i "+N till".
 - [x] Klick på en rad öppnar händelsen för redigering.
 

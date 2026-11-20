@@ -12,6 +12,10 @@
  * det. Radens höjd följer händelsens längd, men begränsas så att en lång
  * händelse inte tar över hela kolumnen.
  *
+ * Bara etikettbandet - de översta pixlarna där titeln står - reserverar plats.
+ * Annars skulle en lång händelse skjuta undan alla andra händelser som ligger
+ * inne i den, och de skulle hamna långt nedanför sin egen tid.
+ *
  * Allt räknas i pixlar, inte i procent. En rad har ett absolut höjdbehov i
  * pixlar, och bara pixlarna kan avgöra om en rad hinner rymmas under en annan.
  */
@@ -36,8 +40,20 @@ export interface EventRow {
   top: number;
   /** Höjden, i pixlar. */
   height: number;
-  /** Sant om raden inte ryms i vyn. */
+  /**
+   * Sant om radens titelband inte ryms i vyn.
+   *
+   * Då visas raden inte i tidslinjen, utan i listan över de händelser som
+   * inte hinner med.
+   */
   clipped: boolean;
+  /**
+   * Sant om raden har trängts ut ur vyn av att andra rader ligger ovanför.
+   *
+   * Det betyder att kolumnen är full. En rad vid fönstrets kant är däremot
+   * inte trängd ut - den ligger där den ligger, och syns bara delvis.
+   */
+  overflow: boolean;
 }
 
 /**
@@ -93,17 +109,32 @@ export function layoutEventRows(
 
     // Raden börjar på sin tid, men skjuts ned om den skulle hamna under en
     // tidigare rad.
-    const top = Math.max(timeTop, cursor);
+    let top = Math.max(timeTop, cursor);
     const rowHeight = Math.min(Math.max(duration, minRow), maxRow);
-    const bottom = top + rowHeight;
+    // Bara etikettbandet reserverar plats. Titeln står i bandets översta
+    // pixlar, så en rad som ligger längre ned i tiden får ligga ovanpå en
+    // lång händelses tomma yta.
+    const band = Math.min(rowHeight, minRow);
+    // En rad vid fönstrets kant flyttas upp en aning, så att titelbandet
+    // syns. Den flyttas inte före en tidigare rad.
+    if (top < height && top + band > height) {
+      top = Math.max(cursor, height - band);
+    }
+    // Radens titelband måste rymmas i vyn, annars är raden inte läsbar.
+    const clipped = top + band > height;
+    // Raden har trängts ut ur vyn om en tidigare rad tog all plats. Det är
+    // det som gör att kolumnen är full - inte att raden ligger vid
+    // fönstrets kant.
+    const overflow = top >= height;
 
     rows[index] = {
       top,
-      height: rowHeight,
-      clipped: bottom > height,
+      height: Math.min(rowHeight, Math.max(band, height - top)),
+      clipped,
+      overflow,
     };
 
-    cursor = bottom + gap;
+    cursor = top + band + gap;
   }
 
   return rows;

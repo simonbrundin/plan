@@ -5,12 +5,12 @@ definePageMeta({
 
 const { settings, update } = useCalendarSettings();
 
-const dailyLimit = computed({
-  get: () => settings.value.dailyVisibleLimit,
+const maxInstances = computed({
+  get: () => settings.value.maxInstances,
   set: (value: number | undefined) => {
     if (typeof value !== "number" || !Number.isFinite(value)) return;
 
-    update({ dailyVisibleLimit: Math.min(100, Math.max(1, Math.round(value))) });
+    update({ maxInstances: Math.min(100, Math.max(1, Math.round(value))) });
   },
 });
 
@@ -33,19 +33,19 @@ const hideRecurring = computed({
       <div>
         <h2 class="text-lg font-semibold text-ink">Kalender</h2>
         <p class="text-sm text-ink-muted mt-1">
-          Tidslinjen visar varje händelse som en rad. Ibland ryms inte alla
-          rader, och då döljs återkommande serier så att de enskilda
-          händelserna går att läsa.
+          Tidslinjen visar varje händelse som en rad. En återkommande serie
+          visas som vanligt så länge den ryms. När den har fler förekomster i
+          vyn än talet nedan, döljs hela serien.
         </p>
       </div>
 
       <UFormField
-        label="Dagliga serier"
-        description="En serie som återkommer varje dag döljs när den har fler förekomster i vyn än det här talet."
+        label="Max antal instanser per serie"
+        description="En återkommande serie visas med högst så här många förekomster i vyn. Har den fler, döljs hela serien."
         :ui="{ description: 'text-ink-muted' }"
       >
         <UInputNumber
-          v-model="dailyLimit"
+          v-model="maxInstances"
           :min="1"
           :max="100"
           :step="1"
@@ -62,8 +62,8 @@ const hideRecurring = computed({
       />
 
       <p class="text-xs text-ink-muted">
-        En dold serie listas alltid i sammanfattningen ovanför tidslinjen, och
-        du kan visa den ensam genom att klicka på den.
+        En dold serie syns inte i tidslinjen. Zooma in på den, så syns den
+        som vanligt igen.
       </p>
     </section>
   </div>

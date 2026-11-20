@@ -76,6 +76,15 @@ Feature: Händelserader i den vertikala kalendern
     Then the rows should not overlap
     And the rows should be 2
 
+  Scenario: En lång händelse skjuter inte undan de som ligger inuti den
+    Given the calendar view is 600 pixels tall
+    And the following calendar events exist:
+      | title | start | end   |
+      | Arbete | 09:00 | 16:00 |
+      | Planering | 12:00 | 13:00 |
+    When the events are laid out
+    Then the second row should start 300 pixels from the top
+
   Scenario: Raderna behåller sin ordning i tiden
     Given the calendar view is 600 pixels tall
     And the following calendar events exist:
@@ -102,55 +111,51 @@ Feature: Händelserader i den vertikala kalendern
     Then 6 rows should be clipped
     And the rows should not overlap
 
-  Scenario: En daglig serie döljs när den har fler förekomster än gränsen
-    Given the daily visibility limit is 7
+  Scenario: En serie med fler förekomster än gränsen döljs
+    Given the max instances per series is 7
     And the following calendar series exist:
-      | key   | count | daily |
-      | daily | 8     | yes   |
+      | key   | count |
+      | daily | 8     |
     When the visibility is planned
     Then the series "daily" should be hidden
 
-  Scenario: En daglig serie med få förekomster döljs inte
-    Given the daily visibility limit is 7
+  Scenario: En serie med högst så många förekomster som gränsen döljs inte
+    Given the max instances per series is 7
     And the following calendar series exist:
-      | key   | count | daily |
-      | daily | 7     | yes   |
+      | key   | count |
+      | daily | 7     |
     When the visibility is planned
     Then no series should be hidden
 
   Scenario: Gränsen kan ändras
-    Given the daily visibility limit is 3
+    Given the max instances per series is 3
     And the following calendar series exist:
-      | key   | count | daily |
-      | daily | 4     | yes   |
+      | key   | count |
+      | daily | 4     |
     When the visibility is planned
     Then the series "daily" should be hidden
 
-  Scenario: En serie som var dold förblir dold vid gränsen
-    Given the daily visibility limit is 7
-    And the series "daily" was hidden before
+  Scenario: En serie som inte ryms i vyn döljs
+    Given the series "daily" occurs 40 times at 09:00
     And the following calendar series exist:
-      | key   | count | daily |
-      | daily | 7     | yes   |
+      | key   | count |
+      | daily | 40    |
     When the visibility is planned
     Then the series "daily" should be hidden
 
-  Scenario: Döljning kan stängas av
-    Given the daily visibility limit is 7
-    And hiding of recurring series is off
+  Scenario: En serie som ryms döljs inte
+    Given the series "daily" occurs 5 times at 09:00
     And the following calendar series exist:
-      | key   | count | daily |
-      | daily | 30    | yes   |
+      | key   | count |
+      | daily | 5     |
     When the visibility is planned
     Then no series should be hidden
 
-  Scenario: En serie kan visas ensam
-    Given the daily visibility limit is 7
-    And the series "weekly" is focused
+  Scenario: Döljning kan stängas av
+    Given hiding of recurring series is off
+    And the series "daily" occurs 40 times at 09:00
     And the following calendar series exist:
-      | key    | count | daily |
-      | daily  | 8     | yes   |
-      | weekly | 2     | no    |
+      | key   | count |
+      | daily | 40    |
     When the visibility is planned
-    Then the series "daily" should be hidden
-    And the series "weekly" should be visible
+    Then no series should be hidden

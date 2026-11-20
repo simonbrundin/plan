@@ -9,7 +9,7 @@ import {
   parentEventId,
   truncateRecurrenceRule,
 } from '~/utils/calendarEvents'
-import { describeRecurrence, isDailyRecurrence, recurrenceSeriesKey } from '~/utils/calendarSeries'
+import { describeRecurrence, recurrenceSeriesKey } from '~/utils/calendarSeries'
 import { MIN_ROW_PX, layoutEventRows } from '~/utils/calendarLayout'
 import { planVisibility } from '~/utils/calendarVisibility'
 
@@ -46,25 +46,14 @@ const coloredEvents = computed<CalendarEvent[]>(() =>
   visibleEvents.value.map((event) => ({ ...event, color: resolveColor(event) })),
 )
 
-// Återkommande serier döljs aldrig för att zoomnivån är låg. I stället
-// sammanfattas de ovanför tidslinjen, med antalet förekomster i den synliga
-// vyn och en knapp som hoppar till nästa förekomst. En tät rutin ska synas
-// på tidslinjen, inte försvinna ur den.
-interface RecurringSeriesSummary {
+// En återkommande serie i vyn. Serierna räknas bara - de syns inte i en egen
+// sammanfattning, utan används av döljningsreglerna för att se vilken serie
+// som är för brusan för att få plats.
+interface RecurringSeriesStats {
   key: string
   title: string
-  label: string
+  /** Antalet förekomster i vyn. */
   count: number
-  nextAt: number | null
-  /** Sant om serien återkommer varje dag. */
-  daily: boolean
-  /**
-   * Sant om serien visas som ett urval av förekomster.
-   *
-   * Då står varje visad förekomst för flera verkliga, och det ska framgå i
-   * sammanfattningen.
-   */
-  sampled: boolean
 }
 
 // Regeln för varje serie i vyn. Override-rader bär inte själva regeln, så
@@ -82,53 +71,27 @@ const seriesRules = computed(() => {
   return rules
 })
 
-const recurringSeries = computed<RecurringSeriesSummary[]>(() => {
-  const series = new Map<string, { summary: RecurringSeriesSummary; starts: number[] }>()
+const recurringSeries = computed<RecurringSeriesStats[]>(() => {
+  const series = new Map<string, RecurringSeriesStats>()
 
   for (const event of visibleEvents.value) {
     const key = recurrenceSeriesKey(event)
     if (!key) continue
 
-    const start = Date.parse(event.start_at)
+    // Vikten räknas in, så att antalet stämmer även när serien visas som
+    // ett urval av förekomster.
     const weight = event.occurrence_weight ?? 1
     const existing = series.get(key)
 
     if (existing) {
-      // Vikten räknas in, så att antalet stämmer även när serien visas som
-      // ett urval av förekomster.
-      existing.summary.count += weight
-      existing.summary.sampled = existing.summary.sampled || weight > 1
-      existing.starts.push(start)
+      existing.count += weight
       continue
     }
 
-    series.set(key, {
-      summary: {
-        key,
-        title: event.title,
-        label: describeRecurrence(seriesRules.value.get(key)) || 'återkommande',
-        count: weight,
-        nextAt: null,
-        daily: isDailyRecurrence(seriesRules.value.get(key)),
-        sampled: weight > 1,
-      },
-      starts: [start],
-    })
+    series.set(key, { key, title: event.title, count: weight })
   }
 
-  return [...series.values()].map(({ summary, starts }) => {
-    // Nästa förekomst är den första som ligger vid eller efter toppen av
-    // vyn. Finns ingen tränas kalendern tillbaka till seriens första
-    // förekomst i vyn.
-    const upcoming = starts.filter((start) => start >= startTime.value)
-    const next = upcoming.length > 0
-      ? Math.min(...upcoming)
-      : starts.length > 0
-        ? Math.min(...starts)
-        : null
-
-    return { ...summary, nextAt: next }
-  })
+  return [...series.values()]
 })
 
 // Etiketten som visas på kortet för en återkommande förekomst.
@@ -484,15 +447,6 @@ const zoomBy = (distance: number) => {
   zoomTo(targetDuration.value * Math.exp(distance / ZOOM_SENSITIVITY))
 }
 
-// Hoppar till nästa förekomst av en serie och zoomar in till det dygn
-// förekomsten ligger i.
-const jumpToSeries = (series: RecurringSeriesSummary) => {
-  if (series.nextAt === null) return
-
-  startTime.value = series.nextAt - 60 * 60 * 1000
-  zoomTo(24 * 60 * 60 * 1000)
-}
-
 const panBy = (distance: number) => {
   const height = viewport.value?.clientHeight || 600
   startTime.value += distance * visibleDuration.value / height
@@ -515,39 +469,23 @@ let viewportObserver: ResizeObserver | undefined
 // Alla rader ligger i en enda kolumn. En rad som krockar med en tidigare rad
 // skjuts ned under den, så att ingen rad döljer en annan.
 //
-// När kolumnen inte ryms döljs återkommande serier, först de dagliga. Se
-// utils/calendarVisibility.ts.
+// När kolumnen inte ryms döljs återkommande serier, först den som har flest
+// förekomster. Se utils/calendarVisibility.ts.
 const hiddenSeries = ref<string[]>([])
-
-// Serien användaren har valt att visa ensam. Då visas bara den serien, och
-// döljningsreglerna sätts åt sidan.
-const focusedSeries = ref<string | null>(null)
 
 const { settings } = useCalendarSettings()
 
-// Serierna i vyn, med antalet förekomster. Det är de som planen räknar på.
-const seriesStats = computed(() =>
-  recurringSeries.value.map((series) => ({
-    key: series.key,
-    title: series.title,
-    daily: series.daily,
-    count: series.count,
-  })),
-)
-
 // Planen räknas om när vyn, serierna eller inställningarna ändras. Den
-// läser den tidigare döljningen för att kunna hålla serier dolda när antalet
-// förekomster passerar gränsen - annars fladdrar de fram och tillbaka när
-// man scrollar.
+// läser den tidigare döljningen, så att samma serie förblir dold när antalet
+// förekomster ändras - annars fladdrar de fram och tillbaka när man scrollar.
 watch(
   [
     () => startTime.value,
     () => endTime.value,
     () => viewportHeight.value,
-    () => settings.value.dailyVisibleLimit,
+    () => settings.value.maxInstances,
     () => settings.value.hideRecurring,
-    () => focusedSeries.value,
-    seriesStats,
+    recurringSeries,
   ],
   () => {
     const plan = planVisibility({
@@ -556,10 +494,9 @@ watch(
         end: Date.parse(event.end_at),
         seriesKey: recurrenceSeriesKey(event),
       })),
-      series: seriesStats.value,
-      dailyLimit: settings.value.dailyVisibleLimit,
+      series: recurringSeries.value,
+      maxInstances: settings.value.maxInstances,
       hidingEnabled: settings.value.hideRecurring,
-      focusKey: focusedSeries.value,
       hiddenBefore: hiddenSeries.value,
       from: startTime.value,
       to: endTime.value,
@@ -580,10 +517,17 @@ const eventRows = computed(() => {
 
   // Dolda serier tas bort ur tidslinjen helt. Deras förekomster listas i
   // sammanfattningen ovanför tidslinjen i stället.
-  const events = coloredEvents.value.filter((event) => {
-    const key = recurrenceSeriesKey(event)
-    return key === null || !hidden.has(key)
-  })
+  const events = coloredEvents.value
+    .filter((event) => {
+      const key = recurrenceSeriesKey(event)
+      return key === null || !hidden.has(key)
+    })
+    // Sorteras efter tid, så att en rad som ligger längre ned i vyn ritas
+    // ovanpå en rad som börjar tidigare. Då syns titeln på båda.
+    .sort(
+      (left, right) =>
+        Date.parse(left.start_at) - Date.parse(right.start_at),
+    )
 
   const rows = layoutEventRows(
     events.map((event) => ({
@@ -605,11 +549,6 @@ const eventRows = computed(() => {
     clipped: rows.filter((row) => row.clipped),
   }
 })
-
-// Visar en dold serie ensam. Klick igen går tillbaka till hela vyn.
-const toggleSeriesFocus = (key: string) => {
-  focusedSeries.value = focusedSeries.value === key ? null : key
-}
 
 // De händelser som inte ryms i kolumnen. De visas i en panel när knappen
 // öppnas.
@@ -1138,54 +1077,6 @@ onUnmounted(() => {
       <button type="button" class="now-button" @click="showCreateEvent = false">Avbryt</button>
     </form>
 
-    <!-- Återkommande serier visas alltid, oavsett zoomnivå. Sammanfattningen
-         här ersätter dold utrymme: antalet förekomster i vyn syns direkt, och
-         knappen hoppar till nästa förekomst.
-
-         En serie som döljs i tidslinjen står också här, märkt som "dold".
-         Då syns att den finns, och den kan visas ensam genom ett klick. -->
-    <div v-if="recurringSeries.length > 0" class="recurrence-summary">
-      <div
-        v-for="series in recurringSeries"
-        :key="series.key"
-        class="recurrence-series"
-        :class="{ hidden: hiddenSeries.includes(series.key) }"
-      >
-        <button
-          type="button"
-          class="recurrence-series-main"
-          :title="`Hoppa till nästa förekomst av ${series.title}`"
-          @click="jumpToSeries(series)"
-        >
-          <span class="recurrence-icon" aria-hidden="true">↻</span>
-          <strong>{{ series.title }}</strong>
-          <span>{{ series.label }}</span>
-          <span class="recurrence-count">{{ series.count }} i vyn</span>
-          <!-- En serie som tunnas ut visas som ett urval. Det ska stå i
-               sammanfattningen, annars ser antalet ut att vara en bild. -->
-          <span v-if="series.sampled" class="recurrence-sampled">urval</span>
-        </button>
-        <!-- En dold serie får en egen knapp, så att den kan visas ensam. -->
-        <button
-          v-if="hiddenSeries.includes(series.key)"
-          type="button"
-          class="recurrence-series-action"
-          :title="`Visa bara ${series.title} i tidslinjen`"
-          @click="toggleSeriesFocus(series.key)"
-        >
-          Visa ensam
-        </button>
-      </div>
-    </div>
-
-    <!-- När en serie visas ensam säger sammanfattningen det tydligt. -->
-    <div v-if="focusedSeries" class="focus-notice">
-      <span>Visar bara {{ recurringSeries.find((series) => series.key === focusedSeries)?.title }}</span>
-      <button type="button" class="focus-notice-close" @click="focusedSeries = null">
-        Visa alla
-      </button>
-    </div>
-
     <!-- De händelser som inte hinner med i kolumnen. De visas som en
          "+N"-knapp i vyn, och panelen listar dem när knappen öppnas. -->
     <div v-if="openClipped && clippedEvents.length > 0" class="overflow-panel">
@@ -1276,6 +1167,10 @@ onUnmounted(() => {
               :style="{
                 top: `${row.top}px`,
                 height: `${row.height}px`,
+                // Rader som ligger längre ned i vyn ritas ovanpå. Då kan en
+                // kort händelse ligga ovanpå en lång utan att dölja dess
+                // titel.
+                'z-index': Math.round(row.top),
                 '--event-color': row.event.color || DEFAULT_EVENT_COLOR,
                 '--enter-delay': `${Math.min(rowIndex, 8) * 18}ms`,
               }"
@@ -1298,13 +1193,6 @@ onUnmounted(() => {
                 class="event-recurrence"
                 :title="`Återkommer: ${recurrenceLabel(row.event)}`"
               >↻</span>
-              <!-- En serie som tunnats ut visas som ett urval. Vikten gör att
-                   det går att se hur många förekomster raden räknar för. -->
-              <span
-                v-if="(row.event.occurrence_weight ?? 1) > 1"
-                class="event-multi"
-                :title="`Visar 1 av ${row.event.occurrence_weight} ${row.event.occurrence_period === 'month' ? 'per månad' : 'per dag'}`"
-              >×{{ row.event.occurrence_weight }}</span>
               <small class="event-time">{{ formatTime(Date.parse(row.event.start_at)) }}</small>
             </article>
           </TransitionGroup>
@@ -1349,121 +1237,6 @@ onUnmounted(() => {
   height: calc(100vh - 1rem);
   min-height: 38rem;
   padding: 0 1.5rem 1rem;
-}
-
-/* Sammanfattning av de återkommande serierna i vyn. Den ersätter den
-   gamla notisen om dolda förekomster: ingenting döljs, men serierna syns
-   här med sitt antal och går att klicka för att hoppa till nästa
-   förekomst. */
-.recurrence-summary {
-  flex: 0 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  margin: 0 0 0.45rem;
-}
-
-.recurrence-series {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 999px;
-  padding: 0.2rem 0.6rem;
-  background: var(--color-surface);
-  color: var(--color-ink-muted);
-  font-size: 0.72rem;
-}
-
-/* Knappen som hoppar till nästa förekomst. Den är hela seriens etikett,
-   men utan egen ram - pillen runt är seriens. */
-.recurrence-series-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border: none;
-  padding: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.recurrence-series:hover {
-  color: var(--color-ink);
-  border-color: var(--color-accent);
-}
-
-/* En serie som är dold i tidslinjen. Den står kvar i sammanfattningen,
-   så att det syns att den finns och kan visas igen. */
-.recurrence-series.hidden {
-  border-style: dashed;
-  opacity: 0.75;
-}
-
-.recurrence-series-action {
-  border: 1px solid var(--color-line-strong);
-  border-radius: 999px;
-  padding: 0 0.45rem;
-  background: none;
-  color: var(--color-accent);
-  font: inherit;
-  font-size: 0.66rem;
-  cursor: pointer;
-}
-
-.recurrence-series-action:hover {
-  border-color: var(--color-accent);
-}
-
-/* Notis som säger att en enda serie visas. */
-.focus-notice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  margin: 0 0 0.45rem;
-  font-size: 0.72rem;
-  color: var(--color-ink-muted);
-}
-
-.focus-notice-close {
-  border: 1px solid var(--color-line-strong);
-  border-radius: 999px;
-  padding: 0.1rem 0.55rem;
-  background: none;
-  color: var(--color-accent);
-  font: inherit;
-  font-size: 0.66rem;
-  cursor: pointer;
-}
-
-.recurrence-icon {
-  color: var(--color-accent);
-  line-height: 1;
-}
-
-.recurrence-series strong {
-  color: var(--color-ink);
-  font-weight: 650;
-}
-
-.recurrence-count {
-  opacity: 0.75;
-  font-variant-numeric: tabular-nums;
-}
-
-/* En serie som tunnas ut visas som ett urval av förekomsterna. Det ska
-   framgå i sammanfattningen, annars ser antalet ut att vara en bild. */
-.recurrence-sampled {
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background: var(--color-surface-raised, rgb(129 140 248 / 0.12));
-  font-size: 0.66rem;
-  letter-spacing: 0.02em;
-  opacity: 0.9;
 }
 
 /* Panel som visar innehållet i en prick. Flera serier kan ligga under samma
@@ -1943,7 +1716,10 @@ onUnmounted(() => {
   left: var(--timeline-left);
   right: var(--timeline-right);
   display: flex;
-  align-items: center;
+  /* Titeln står i radens översta band, så att den ligger på händelsens
+     starttid. En kort rad som ligger ovanpå en lång träffar då inte
+     titeln. */
+  align-items: flex-start;
   gap: 0.35rem;
   min-height: 16px;
   overflow: hidden;
@@ -1951,7 +1727,8 @@ onUnmounted(() => {
   border-radius: 0.35rem;
   padding: 0 0.45rem;
   color: var(--color-ink);
-  background: color-mix(in srgb, var(--event-color, #6366f1) 20%, transparent);
+  /* Bakgrunden är sluten, så att en rad ovanpå en annan rad går att läsa. */
+  background: color-mix(in srgb, var(--event-color, #6366f1) 18%, var(--color-surface));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--event-color, #818cf8) 30%, transparent);
   pointer-events: auto;
 }
@@ -1991,18 +1768,6 @@ onUnmounted(() => {
   font-size: 0.68rem;
   line-height: 1;
   opacity: 0.9;
-}
-
-/* Antalet förekomster som raden räknar för, när serien har tunnats ut. */
-.event-multi {
-  flex: 0 0 auto;
-  padding: 0 0.25rem;
-  border-radius: 999px;
-  background: rgb(129 140 248 / 0.18);
-  color: var(--color-ink-muted);
-  font-size: 0.6rem;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
 }
 
 .calendar-event .event-time {
