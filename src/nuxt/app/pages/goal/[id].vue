@@ -3,7 +3,7 @@ import LeaderKeyModal from '~/components/LeaderKeyModal.vue'
 import GoalHeader from '~/components/GoalHeader.vue'
 import GoalParentSection from '~/components/GoalParentSection.vue'
 import GoalChildrenList from '~/components/GoalChildrenList.vue'
-import GoalWeightSlider from '~/components/GoalWeightSlider.vue'
+import GoalWeightVerticalEditor from '~/components/GoalWeightVerticalEditor.vue'
 import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
@@ -19,6 +19,7 @@ import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, re
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { useGoalDrag } from '~/composables/useGoalDrag'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
+import { normalizeGoalWeights, redistributeGoalWeights } from '~/utils/goalWeights'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -425,6 +426,9 @@ onUnmounted(() => {
 // Visa/dölj avklarade mål
 const showCompleted = ref(false);
 const showStarted = ref(false);
+const weightMode = ref(false);
+const weightSelectedIndex = ref(0);
+let weightSaveChain: Promise<void> = Promise.resolve();
 
 // Icon picker state
 const showIconPicker = ref(false);
@@ -457,6 +461,10 @@ const visibleTree = computed(() => buildDependencyTree(visibleChildren.value));
 
 // Undermålen i den ordning de visas: trädets ordning.
 const filteredChildren = computed(() => visibleTree.value.map((item) => item.child));
+
+// Viktläget arbetar bara med pågående undermål. Slutförda mål ska inte
+// ta plats i fördelningsvyn.
+const weightChildren = computed(() => children.value.filter((child) => !child.finished));
 
 // Nivå i trädet per undermål - styr indenteringen i listan.
 //
@@ -1620,7 +1628,31 @@ function getWeightStyle(weight: number): { color: string; opacity: number; fontW
   return { color: '#FFFFFF', opacity: 1 }
 }
 
-function previewWeights(weights: Array<{ childId: number; weight: number }>) {
+function weightsForPersistence(activeWeights: Array<{ childId: number; weight: number }>) {
+  const allWeights = normalizeGoalWeights(children.value)
+  const activeIds = new Set(activeWeights.map((item) => item.childId))
+  const hidden = allWeights.filter((item) => !activeIds.has(item.childId))
+  const available = 100 - hidden.reduce((sum, item) => sum + item.weight, 0)
+  const raw = activeWeights.map((item) => (item.weight / 100) * available)
+  const scaled = raw.map(Math.floor)
+  let remainder = available - scaled.reduce((sum, weight) => sum + weight, 0)
+
+  raw
+    .map((value, index) => ({ index, fraction: value - scaled[index] }))
+    .sort((a, b) => b.fraction - a.fraction)
+    .forEach(({ index }) => {
+      if (remainder <= 0) return
+      scaled[index] += 1
+      remainder -= 1
+    })
+
+  return [
+    ...hidden,
+    ...activeWeights.map((item, index) => ({ childId: item.childId, weight: scaled[index] })),
+  ]
+}
+
+function applyWeights(weights: Array<{ childId: number; weight: number }>) {
   const data = goalData.value
   if (!data) return
 
@@ -1633,13 +1665,43 @@ function previewWeights(weights: Array<{ childId: number; weight: number }>) {
   }
 }
 
+function previewWeights(weights: Array<{ childId: number; weight: number }>) {
+  applyWeights(weightMode.value ? weightsForPersistence(weights) : weights)
+}
+
+function persistWeights(weights: Array<{ childId: number; weight: number }>) {
+  weightSaveChain = weightSaveChain
+    .then(() => updateGoalWeights(goalId.value, weights))
+    .catch(async (error) => {
+      console.error("Failed to update goal weights:", error)
+      await refresh()
+    })
+  return weightSaveChain
+}
+
 async function saveWeights(weights: Array<{ childId: number; weight: number }>) {
-  try {
-    await updateGoalWeights(goalId.value, weights)
-    await refresh()
-  } catch (error) {
-    console.error("Failed to update goal weights:", error)
-    await refresh()
+  const persisted = weightMode.value ? weightsForPersistence(weights) : weights
+  applyWeights(persisted)
+  await persistWeights(persisted)
+}
+
+function adjustSelectedWeight(delta: number) {
+  const selected = weightChildren.value[weightSelectedIndex.value]
+  if (!selected) return
+
+  const current = normalizeGoalWeights(weightChildren.value)
+  const currentWeight = current.find((item) => item.childId === selected.id)?.weight ?? 0
+  const next = redistributeGoalWeights(current, selected.id, currentWeight + delta)
+  previewWeights(next)
+  void saveWeights(next)
+}
+
+function toggleWeightMode() {
+  weightMode.value = !weightMode.value
+  if (weightMode.value) {
+    const selectedId = filteredChildren.value[selectedChildIndex.value]?.id
+    const index = weightChildren.value.findIndex((child) => child.id === selectedId)
+    weightSelectedIndex.value = index >= 0 ? index : 0
   }
 }
 
@@ -1736,6 +1798,27 @@ function handleKeydown(event: KeyboardEvent) {
       eventTarget.isContentEditable);
   if (isFormField) {
     return;
+  }
+
+  if (weightMode.value) {
+    const key = event.key.toLowerCase();
+    if (key === 'j') {
+      event.preventDefault();
+      weightSelectedIndex.value = Math.min(weightSelectedIndex.value + 1, weightChildren.value.length - 1);
+    } else if (key === 'k') {
+      event.preventDefault();
+      weightSelectedIndex.value = Math.max(weightSelectedIndex.value - 1, 0);
+    } else if (key === 'h') {
+      event.preventDefault();
+      adjustSelectedWeight(-1);
+    } else if (key === 'l') {
+      event.preventDefault();
+      adjustSelectedWeight(1);
+    } else if (key === 'escape') {
+      event.preventDefault();
+      weightMode.value = false;
+    }
+    if (['j', 'k', 'h', 'l', 'escape'].includes(key)) return;
   }
 
   // ===============================================
@@ -2108,12 +2191,12 @@ watch(selectedParentIndex, async () => {
 </script>
 
 <template>
-  <div v-if="user" class="max-w-4xl mx-auto px-6 py-6 h-screen flex flex-col overflow-hidden">
+  <div v-if="user" class="h-screen flex flex-col overflow-hidden" :class="weightMode ? '' : 'max-w-4xl mx-auto px-6 py-6'">
     <div v-if="!goal" class="text-center py-12">
       <p class="text-ink-dim">Laddar mål...</p>
     </div>
 
-    <div v-else class="flex flex-col h-full gap-5">
+    <div v-else-if="!weightMode" class="flex flex-col h-full gap-5">
       <!-- Breadcrumb / Föräldrar -->
       <div class="flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-1.5 text-sm flex-wrap">
@@ -2497,6 +2580,13 @@ watch(selectedParentIndex, async () => {
               class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" :title="showCompleted ? 'Dölj avklarade mål' : 'Visa avklarade mål'">
               <Icon :name="showCompleted ? 'lucide:eye' : 'lucide:eye-off'" class="h-5 w-5" />
             </button>
+            <!-- Viktläge -->
+            <button @click="toggleWeightMode"
+              class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+              :class="weightMode ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+              :title="weightMode ? 'Stäng viktning' : 'Ändra viktning'">
+              <Icon name="lucide:scale" class="h-5 w-5" />
+            </button>
             <!-- Visa endast påbörjade -->
             <button @click="showStarted = !showStarted"
               class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
@@ -2537,7 +2627,16 @@ watch(selectedParentIndex, async () => {
           </div>
         </div>
 
-        <ul v-if="filteredChildren.length > 0" class="space-y-2" :class="{ 'select-none': isDepDragging }">
+        <GoalWeightVerticalEditor
+          v-if="weightMode && weightChildren.length > 1"
+          :children="weightChildren"
+          :selected-index="weightSelectedIndex"
+          @select="weightSelectedIndex = $event"
+          @update="previewWeights"
+          @commit="saveWeights"
+        />
+
+        <ul v-else-if="filteredChildren.length > 0" class="space-y-2" :class="{ 'select-none': isDepDragging }">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
             @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
             @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
@@ -2600,24 +2699,20 @@ watch(selectedParentIndex, async () => {
                    title="Ändra ikon">
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#63708a' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
-                 <NuxtLink :to="`/goal/${child.id}`" class="flex-1 min-w-0 py-1.5 block cursor-pointer">
-                  <h3 class="text-base font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
-                    {{ child.title }}
-                  </h3>
-                  <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-0.5">
-                    🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
-                  </p>
-                  <p v-if="child.description && editingDescriptionId !== child.id"
-                    class="text-xs text-ink-dim mt-0.5 truncate">
-                    {{ descriptionPreview(child.description, 80) }}
-                  </p>
-                </NuxtLink>
-                <GoalWeightSlider
-                  :children="children"
-                  :child-id="child.id"
-                  @update="previewWeights"
-                  @commit="saveWeights"
-                />
+                 <div class="flex-1 min-w-0">
+                  <NuxtLink :to="`/goal/${child.id}`" class="py-1.5 block cursor-pointer">
+                    <h3 class="text-base font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
+                      {{ child.title }}
+                    </h3>
+                    <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-0.5">
+                      🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
+                    </p>
+                    <p v-if="child.description && editingDescriptionId !== child.id"
+                      class="text-xs text-ink-dim mt-0.5 truncate">
+                      {{ descriptionPreview(child.description, 80) }}
+                    </p>
+                  </NuxtLink>
+                </div>
                  <!-- Started-toggle (s) -->
                  <button
                    @click.stop="toggleStarted(child)"
@@ -2740,6 +2835,21 @@ watch(selectedParentIndex, async () => {
           Inga undermål ännu. Skapa ett för att dela upp detta mål i mindre
           delar.
         </div>
+      </div>
+    </div>
+
+    <!-- Viktläge: använd hela viewporten och dölj övrig målnavigering. -->
+    <div v-else class="fixed inset-0 z-[60] flex flex-col bg-canvas">
+      <div class="flex min-h-0 flex-1 items-center justify-center">
+        <GoalWeightVerticalEditor
+          v-if="weightChildren.length > 1"
+          :children="weightChildren"
+          :selected-index="weightSelectedIndex"
+          @select="weightSelectedIndex = $event"
+          @update="previewWeights"
+          @commit="saveWeights"
+        />
+        <p v-else class="text-sm text-ink-dim">Det behövs minst två pågående undermål för att ändra viktning.</p>
       </div>
     </div>
 
