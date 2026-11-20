@@ -10,6 +10,9 @@ export class AuthenticationError extends Error {
 }
 
 // Proxy API calls through our server route which attaches session cookie
+const FALLBACK_GOAL_ICON = "lucide:check-square";
+const ICON_LOOKUP_TIMEOUT_MS = 5000;
+
 const apiProxy = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
 	try {
 		const response = await $fetch<T>(`/api/proxy/${path}`, {
@@ -283,12 +286,15 @@ export function useGoalApi() {
 		try {
 			const response = await $fetch<{ results?: Array<{ full?: string }> }>("/api/icons", {
 				query: { q: query, translate: "true" },
+				timeout: ICON_LOOKUP_TIMEOUT_MS,
 			});
 			return response.results?.[0]?.full || undefined;
 		} catch (error) {
-			// Ikonvalet får inte hindra att målet skapas om översättning eller Iconify är otillgängligt.
+			// Ikonvalet får inte hindra att målet skapas om översättning, MiniMax
+			// eller Iconify är otillgängligt. En checkbox visar samtidigt att
+			// målet saknar en semantiskt vald ikon.
 			console.warn("Kunde inte hitta en ikon för målet:", error);
-			return undefined;
+			return FALLBACK_GOAL_ICON;
 		}
 	};
 
