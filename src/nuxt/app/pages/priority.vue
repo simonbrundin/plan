@@ -3,6 +3,7 @@ import type { Goal } from '~/types/goal'
 import { canBeFinished } from '~/utils/goalRules'
 import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
+import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_BORDER, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 definePageMeta({
@@ -10,7 +11,7 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, updateGoalDescription, deleteGoal, completeGoalOccurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
 
 function dueToneClass(due: string | null): string {
   const tone = dueTone(due)
@@ -163,6 +164,13 @@ onMounted(() => {
       return
     }
 
+    // r = upprepning
+    if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault()
+      if (goal) openRecurrenceEditor(goal)
+      return
+    }
+
     if (e.key === 'x' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault()
       if (goal) {
@@ -223,6 +231,41 @@ async function toggleEternal(goal: PrioritizedGoalRow) {
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to toggle goal eternal:', err)
+  }
+}
+
+// Upprepning (r). Editorn visas i raden för det mål den öppnades för.
+const recurrenceTargetId = ref<number | null>(null)
+
+function openRecurrenceEditor(goal: PrioritizedGoalRow) {
+  recurrenceTargetId.value = goal.id
+}
+
+function closeRecurrenceEditor() {
+  recurrenceTargetId.value = null
+}
+
+async function saveRecurrence(rule: string, mode: RecurrenceMode) {
+  const goal = visibleGoals.value.find(g => g.id === recurrenceTargetId.value)
+  if (!goal) return
+  try {
+    await setGoalRecurrence(goal.id, rule, mode)
+    await loadPrioritizedGoals()
+    closeRecurrenceEditor()
+  } catch (err) {
+    console.error('Failed to save goal recurrence:', err)
+  }
+}
+
+async function removeRecurrence() {
+  const goal = visibleGoals.value.find(g => g.id === recurrenceTargetId.value)
+  if (!goal) return
+  try {
+    await setGoalRecurrence(goal.id, null)
+    await loadPrioritizedGoals()
+    closeRecurrenceEditor()
+  } catch (err) {
+    console.error('Failed to remove goal recurrence:', err)
   }
 }
 
@@ -543,13 +586,21 @@ const filterOptions = [
             </button>
           </div>
 
-          <div class="flex items-center gap-2 flex-shrink-0">
-            <span v-if="isRecurringGoal(goal)"
-              class="flex items-center gap-1 text-xs tabular-nums text-ink-dim"
-              :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda`">
+          <div class="relative flex items-center gap-2 flex-shrink-0">
+            <button v-if="isRecurringGoal(goal)" @click.stop="openRecurrenceEditor(goal)"
+              class="flex items-center gap-1 text-xs tabular-nums text-ink-dim transition-colors hover:text-ink-muted"
+              :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda (r)`">
               <Icon name="lucide:repeat" class="w-3.5 h-3.5" />
               {{ recurrenceCount(goal) }}
-            </span>
+            </button>
+            <div v-if="recurrenceTargetId === goal.id"
+              class="absolute right-0 top-full z-30 mt-1" @click.stop @keydown.stop>
+              <RecurrenceEditor :rule="goal.recurrence_rule ?? null"
+                :mode="goal.recurrence_mode ?? 'schedule'"
+                @save="saveRecurrence"
+                @remove="removeRecurrence"
+                @cancel="closeRecurrenceEditor" />
+            </div>
             <span v-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-xs flex-shrink-0'">∞</span>
             <span v-if="goal.due" class="text-xs flex-shrink-0 tabular-nums" :class="dueToneClass(goal.due)">
               📅 {{ formatDueDate(goal.due) }}

@@ -8,10 +8,11 @@ import { sortGoalsByOrder } from '~/utils/goalOrder'
 import { descriptionPreview } from '~/utils/goalDescription'
 import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
+import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 
 const goals = ref<Goal[]>([])
@@ -268,6 +269,53 @@ async function completeOccurrence(goal: Goal) {
   }
 }
 
+// Upprepning (r). Editorn visas i listan för det mål den öppnades för.
+const recurrenceTargetId = ref<number | null>(null)
+
+function openRecurrenceEditor(goal: Goal) {
+  recurrenceTargetId.value = goal.id
+}
+
+function closeRecurrenceEditor() {
+  recurrenceTargetId.value = null
+}
+
+function updateLocalRecurrence(goal: Goal) {
+  const idx = localGoals.value.findIndex(g => g.id === goal.id)
+  const current = localGoals.value[idx]
+  if (idx === -1 || !current) return
+  localGoals.value[idx] = {
+    ...current,
+    recurrence_rule: goal.recurrence_rule,
+    recurrence_mode: goal.recurrence_mode,
+    recurrence_next: goal.recurrence_next,
+    recurrence_count: goal.recurrence_count,
+    finished: goal.finished,
+  }
+}
+
+async function saveRecurrence(rule: string, mode: RecurrenceMode) {
+  const goal = localGoals.value.find(g => g.id === recurrenceTargetId.value)
+  if (!goal) return
+  try {
+    updateLocalRecurrence(await setGoalRecurrence(goal.id, rule, mode))
+    closeRecurrenceEditor()
+  } catch (err) {
+    console.error('Failed to save goal recurrence:', err)
+  }
+}
+
+async function removeRecurrence() {
+  const goal = localGoals.value.find(g => g.id === recurrenceTargetId.value)
+  if (!goal) return
+  try {
+    updateLocalRecurrence(await setGoalRecurrence(goal.id, null))
+    closeRecurrenceEditor()
+  } catch (err) {
+    console.error('Failed to remove goal recurrence:', err)
+  }
+}
+
 // Toggle started
 async function toggleStarted(goal: Goal) {
   try {
@@ -465,6 +513,16 @@ function handleKeydown(event: KeyboardEvent) {
     const goal = filteredGoals.value[selectedIndex.value]
     if (goal) {
       openDuePicker(goal)
+    }
+    return
+  }
+
+  // r - sätt upprepning för det markerade målet
+  if (event.key === 'r') {
+    event.preventDefault()
+    const goal = filteredGoals.value[selectedIndex.value]
+    if (goal) {
+      openRecurrenceEditor(goal)
     }
     return
   }
@@ -724,12 +782,22 @@ definePageMeta({
             </span>
           </template>
           <!-- Upprepningar: endast antalet slutförda förekomster -->
-          <span v-if="isRecurringGoal(goal)"
-            class="flex-shrink-0 flex items-center gap-1 text-sm tabular-nums text-ink-dim"
-            :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda`">
-            <Icon name="lucide:repeat" class="w-4 h-4" />
-            {{ recurrenceCount(goal) }}
-          </span>
+          <div class="relative flex-shrink-0 flex items-center gap-1">
+            <button v-if="isRecurringGoal(goal)" @click.stop="openRecurrenceEditor(goal)"
+              class="flex items-center gap-1 text-sm tabular-nums text-ink-dim transition-colors hover:text-ink-muted"
+              :title="`${describeGoalRecurrence(goal.recurrence_rule)} - ${recurrenceCount(goal)} slutförda (r)`">
+              <Icon name="lucide:repeat" class="w-4 h-4" />
+              {{ recurrenceCount(goal) }}
+            </button>
+            <div v-if="recurrenceTargetId === goal.id"
+              class="absolute right-0 top-full z-30 mt-1" @click.stop @keydown.stop>
+              <RecurrenceEditor :rule="goal.recurrence_rule ?? null"
+                :mode="goal.recurrence_mode ?? 'schedule'"
+                @save="saveRecurrence"
+                @remove="removeRecurrence"
+                @cancel="closeRecurrenceEditor" />
+            </div>
+          </div>
           <span v-if="goal.finished" class="text-green-400 text-sm flex-shrink-0">✓ Klar</span>
           <span v-else-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-sm flex-shrink-0'">∞</span>
           <span v-else-if="!isRecurringGoal(goal)" class="text-ink-dim text-sm tabular-nums flex-shrink-0">#{{ goal.id }}</span>

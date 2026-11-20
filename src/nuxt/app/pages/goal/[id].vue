@@ -1558,6 +1558,9 @@ function handleKeydown(event: KeyboardEvent) {
       selectedChildIndex.value < filteredChildren.value.length
     ) {
       openRecurrenceEditor(filteredChildren.value[selectedChildIndex.value]);
+    } else if (goal.value) {
+      // Inget undermål är markerat - då gäller upprepningen huvudmålet.
+      openRecurrenceEditor(goal.value);
     }
     return;
   }
@@ -1892,7 +1895,7 @@ watch(selectedParentIndex, async () => {
         </button>
         <!-- Upprepning: antalet slutförda förekomster (r) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          class="relative flex items-center gap-1.5 flex-shrink-0">
+          class="relative flex items-center gap-1.5 flex-shrink-0" @click.stop>
           <button @click.stop="openRecurrenceEditor(goal)"
             class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
             :class="isRecurringGoal(goal) ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
@@ -2252,13 +2255,14 @@ watch(selectedParentIndex, async () => {
                   <span v-if="isRecurringGoal(child)" class="text-xs tabular-nums text-ink-dim">
                     {{ recurrenceCount(child) }}
                   </span>
-                  <RecurrenceEditor v-if="recurrenceTargetId === child.id"
-                    class="absolute right-0 top-full z-30 mt-1"
-                    :rule="child.recurrence_rule ?? null"
-                    :mode="child.recurrence_mode ?? 'schedule'"
-                    @save="saveRecurrence"
-                    @remove="removeRecurrence"
-                    @cancel="closeRecurrenceEditor" />
+                  <div v-if="recurrenceTargetId === child.id"
+                    class="absolute right-0 top-full z-30 mt-1" @click.stop @keydown.stop>
+                    <RecurrenceEditor :rule="child.recurrence_rule ?? null"
+                      :mode="child.recurrence_mode ?? 'schedule'"
+                      @save="saveRecurrence"
+                      @remove="removeRecurrence"
+                      @cancel="closeRecurrenceEditor" />
+                  </div>
                 </div>
                 <!-- Platser för undermål (p) -->
                 <div class="relative flex-shrink-0 flex items-center gap-1">
