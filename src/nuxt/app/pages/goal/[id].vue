@@ -28,6 +28,10 @@ const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
 const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 
+// Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
+const { revision: undoRevision } = useUndoStack();
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoRecurrence } = useGoalUndo();
+
 // Använd goals store
 const goalsStore = useGoalsStore();
 
@@ -1083,6 +1087,7 @@ async function toggleFinished(goalToToggle: Goal) {
     }
     try {
       await completeGoalOccurrence(goalToToggle.id, goalToToggle.recurrence_next ?? undefined, todayDateString());
+      undoOccurrence(goalToToggle);
       await refresh();
     } catch (error) {
       console.error("Failed to complete goal occurrence:", error);
@@ -1091,9 +1096,11 @@ async function toggleFinished(goalToToggle: Goal) {
   }
 
   try {
-    const newFinishedValue = goalToToggle.finished ? null : new Date().toISOString();
+    const previousFinished = goalToToggle.finished;
+    const newFinishedValue = previousFinished ? null : new Date().toISOString();
 
     await toggleGoalFinished(goalToToggle.id, newFinishedValue);
+    undoFinished(goalToToggle, previousFinished);
     goalsStore.updateGoal(goalToToggle.id, { finished: newFinishedValue });
 
     // Uppdatera lokal state i component
@@ -1144,7 +1151,10 @@ async function saveRecurrence(rule: string, mode: RecurrenceMode) {
   if (!target) return;
 
   try {
+    const previousRule = target.recurrence_rule;
+    const previousMode = target.recurrence_mode;
     await setGoalRecurrence(target.id, rule, mode);
+    undoRecurrence(target, previousRule, previousMode);
     closeRecurrenceEditor();
     await refresh();
   } catch (error) {
@@ -1157,7 +1167,10 @@ async function removeRecurrence() {
   if (!target) return;
 
   try {
+    const previousRule = target.recurrence_rule;
+    const previousMode = target.recurrence_mode;
     await setGoalRecurrence(target.id, null);
+    undoRecurrence(target, previousRule, previousMode);
     closeRecurrenceEditor();
     await refresh();
   } catch (error) {
@@ -1171,7 +1184,9 @@ async function toggleEternal(goalToToggle: Goal) {
   const newEternal = !goalToToggle.eternal;
 
   try {
+    const previousEternal = goalToToggle.eternal;
     await setGoalEternal(goalToToggle.id, newEternal);
+    undoEternal(goalToToggle, previousEternal);
     goalsStore.updateGoal(goalToToggle.id, { eternal: newEternal });
 
     // Uppdatera lokal state i component
@@ -1240,7 +1255,9 @@ async function saveDue(target: Goal, value: string) {
 	const due = value ? value : null;
 
 	try {
+		const previousDue = target.due;
 		await setGoalDue(target.id, due);
+		undoDue(target, previousDue);
 		applyDue(target.id, due);
 		closeDuePicker();
 		await refresh();
@@ -1278,8 +1295,10 @@ function applyDue(id: number, due: string | null) {
 // Toggla started status på ett mål
 async function toggleStarted(goalToToggle: Goal) {
   try {
-    const newStartedValue = goalToToggle.started ? null : new Date().toISOString();
+    const previousStarted = goalToToggle.started;
+    const newStartedValue = previousStarted ? null : new Date().toISOString();
     await toggleGoalStarted(goalToToggle.id, newStartedValue);
+    undoStarted(goalToToggle, previousStarted);
     goalsStore.updateGoal(goalToToggle.id, { started: newStartedValue });
     if (goalData.value?.allGoals) {
       const goalIndex = goalData.value.allGoals.findIndex((g) => g.id === goalToToggle.id);
@@ -1719,6 +1738,12 @@ watch(
     selectedParentIndex.value = 0;
   }
 );
+
+// När något har ångras kan målen ha ändrats - bygg om sidans data ur
+// grafen (store är redan uppdaterad av ångrandet).
+watch(undoRevision, () => {
+  hydrate();
+});
 
 // Scrolla till markerat child när selectedChildIndex ändras
 watch(selectedChildIndex, async () => {

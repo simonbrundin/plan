@@ -96,7 +96,7 @@ export function useGoalApi() {
 	const setGoalRecurrence = async (
 		goalId: number,
 		rule: string | null,
-		mode?: RecurrenceMode,
+		mode?: RecurrenceMode | null,
 		startDate?: string,
 	): Promise<Goal> => {
 		return await apiProxy<Goal>(`goals/${goalId}`, {

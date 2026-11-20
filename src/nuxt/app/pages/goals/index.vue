@@ -14,6 +14,8 @@ import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eter
 const router = useRouter()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
+const { revision: undoRevision } = useUndoStack()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoRecurrence } = useGoalUndo()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -157,6 +159,9 @@ async function refreshGoals() {
 // Ett mål som skapats via det globala snabbfältet ska synas direkt.
 watch(quickAddRevision, refreshGoals)
 
+// När något har ångras kan listan ha ändrats - hämta om den.
+watch(undoRevision, refreshGoals)
+
 // Navigera till mål
 function goToGoal(goalId: number) {
   router.push(`/goal/${goalId}`)
@@ -235,8 +240,10 @@ async function toggleFinished(goal: Goal) {
   }
 
   try {
-    const newFinishedValue = goal.finished ? null : new Date().toISOString()
+    const previousFinished = goal.finished
+    const newFinishedValue = previousFinished ? null : new Date().toISOString()
     await toggleGoalFinished(goal.id, newFinishedValue)
+    undoFinished(goal, previousFinished)
     
     // Uppdatera lokal state
     const idx = localGoals.value.findIndex(g => g.id === goal.id)
@@ -252,6 +259,7 @@ async function toggleFinished(goal: Goal) {
 async function completeOccurrence(goal: Goal) {
   try {
     const updated = await completeGoalOccurrence(goal.id, goal.recurrence_next ?? undefined, todayDateString())
+    undoOccurrence(goal)
     const idx = localGoals.value.findIndex(g => g.id === goal.id)
     const current = localGoals.value[idx]
     if (idx !== -1 && current) {
@@ -298,7 +306,10 @@ async function saveRecurrence(rule: string, mode: RecurrenceMode) {
   const goal = localGoals.value.find(g => g.id === recurrenceTargetId.value)
   if (!goal) return
   try {
+    const previousRule = goal.recurrence_rule
+    const previousMode = goal.recurrence_mode
     updateLocalRecurrence(await setGoalRecurrence(goal.id, rule, mode))
+    undoRecurrence(goal, previousRule, previousMode)
     closeRecurrenceEditor()
   } catch (err) {
     console.error('Failed to save goal recurrence:', err)
@@ -309,7 +320,10 @@ async function removeRecurrence() {
   const goal = localGoals.value.find(g => g.id === recurrenceTargetId.value)
   if (!goal) return
   try {
+    const previousRule = goal.recurrence_rule
+    const previousMode = goal.recurrence_mode
     updateLocalRecurrence(await setGoalRecurrence(goal.id, null))
+    undoRecurrence(goal, previousRule, previousMode)
     closeRecurrenceEditor()
   } catch (err) {
     console.error('Failed to remove goal recurrence:', err)
@@ -319,8 +333,10 @@ async function removeRecurrence() {
 // Toggle started
 async function toggleStarted(goal: Goal) {
   try {
-    const newStartedValue = goal.started ? null : new Date().toISOString()
+    const previousStarted = goal.started
+    const newStartedValue = previousStarted ? null : new Date().toISOString()
     await toggleGoalStarted(goal.id, newStartedValue)
+    undoStarted(goal, previousStarted)
     const idx = localGoals.value.findIndex(g => g.id === goal.id)
     if (idx !== -1) {
       localGoals.value[idx] = { ...localGoals.value[idx], started: newStartedValue }
@@ -352,7 +368,9 @@ function openDuePicker(goal: Goal) {
 async function saveDue(goal: Goal, value: string) {
   const due = value ? value : null
   try {
+    const previousDue = goal.due
     await setGoalDue(goal.id, due)
+    undoDue(goal, previousDue)
     const idx = localGoals.value.findIndex(g => g.id === goal.id)
     const current = localGoals.value[idx]
     if (idx !== -1 && current) {
@@ -368,7 +386,9 @@ async function saveDue(goal: Goal, value: string) {
 async function toggleEternal(goal: Goal) {
   const newEternal = !goal.eternal
   try {
+    const previousEternal = goal.eternal
     await setGoalEternal(goal.id, newEternal)
+    undoEternal(goal, previousEternal)
     const idx = localGoals.value.findIndex(g => g.id === goal.id)
     if (idx !== -1) {
       localGoals.value[idx] = { ...localGoals.value[idx], eternal: newEternal }

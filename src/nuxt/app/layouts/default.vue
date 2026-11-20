@@ -39,6 +39,41 @@ const {
 
 const { isOpen: isQuickAddOpen, open: openQuickAdd, close: closeQuickAdd } = useQuickAdd();
 
+const { canUndo, nextLabel: undoLabel, undoLast } = useUndoStack();
+const toast = useToast();
+
+// Ångra den senaste handlingen. Den kan påverka alla sidor, så den
+// hanteras här och inte i sidornas egna tangentbevakare.
+async function undoLastAction() {
+  try {
+    const label = await undoLast();
+    if (!label) {
+      toast.add({
+        title: "Inget att ångra",
+        description: "Det finns ingen ångrbar handling.",
+        color: "neutral",
+        icon: "i-lucide-undo-2",
+      });
+      return;
+    }
+
+    toast.add({
+      title: "Ångrade",
+      description: label,
+      color: "success",
+      icon: "i-lucide-undo-2",
+    });
+  } catch (error) {
+    console.error("Failed to undo last action:", error);
+    toast.add({
+      title: "Kunde inte ångra",
+      description: "Handlingen kunde inte återställas.",
+      color: "error",
+      icon: "i-lucide-undo-2",
+    });
+  }
+}
+
 watch(isPriorityMode, (val) => {
   showPriorityIndicator.value = val;
 });
@@ -199,6 +234,23 @@ function handleGlobalKeydown(event: KeyboardEvent) {
     }
   }
 
+  // "z" ångra den senaste handlingen
+  if (
+    event.key.toLowerCase() === "z" &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey &&
+    !isInInput &&
+    !isSearchOpen.value &&
+    !isLeaderOpen.value &&
+    !isQuickAddOpen.value &&
+    !event.defaultPrevented
+  ) {
+    event.preventDefault();
+    void undoLastAction();
+    return;
+  }
+
   if (event.key === "?" && !event.ctrlKey && !event.metaKey && !event.altKey && !isInInput) {
     event.preventDefault();
     showHelpModal.value = true;
@@ -282,6 +334,20 @@ onUnmounted(() => {
     />
 
     <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />
+
+    <!-- Visar vilken handling "z" skulle ångra -->
+    <Transition name="fade">
+      <div
+        v-if="canUndo && undoLabel"
+        class="fixed bottom-4 left-4 z-50 hidden items-center gap-2 rounded-xl border border-line bg-surface/90 px-3 py-2 text-xs text-ink-muted shadow-lg backdrop-blur-xl lg:flex"
+      >
+        <kbd
+          class="rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 font-mono font-bold text-accent"
+          >Z</kbd
+        >
+        <span class="max-w-[16rem] truncate">Ångra: {{ undoLabel }}</span>
+      </div>
+    </Transition>
 
     <Transition name="fade">
       <div

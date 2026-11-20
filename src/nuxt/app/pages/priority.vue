@@ -12,6 +12,8 @@ definePageMeta({
 
 const { user } = useUserSession()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
+const { revision: undoRevision } = useUndoStack()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoRecurrence } = useGoalUndo()
 
 function dueToneClass(due: string | null): string {
   const tone = dueTone(due)
@@ -108,6 +110,11 @@ watch(selectedGoalId, async () => {
   })
 })
 
+// När något har ångras kan listan ha ändrats - hämta om den.
+watch(undoRevision, () => {
+  loadPrioritizedGoals()
+})
+
 onMounted(() => {
   loadPrioritizedGoals()
 
@@ -198,6 +205,7 @@ async function toggleFinished(goal: PrioritizedGoalRow) {
     }
     try {
       await completeGoalOccurrence(goal.id, goal.recurrence_next ?? undefined, todayDateString())
+      undoOccurrence(goal)
       await loadPrioritizedGoals()
     } catch (err) {
       console.error('Failed to complete occurrence:', err)
@@ -206,8 +214,10 @@ async function toggleFinished(goal: PrioritizedGoalRow) {
   }
 
   try {
-    const newFinishedValue = goal.finished ? null : new Date().toISOString()
+    const previousFinished = goal.finished
+    const newFinishedValue = previousFinished ? null : new Date().toISOString()
     await toggleGoalFinished(goal.id, newFinishedValue)
+    undoFinished(goal, previousFinished)
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to toggle goal finished:', err)
@@ -216,8 +226,10 @@ async function toggleFinished(goal: PrioritizedGoalRow) {
 
 async function toggleStarted(goal: PrioritizedGoalRow) {
   try {
-    const newStartedValue = goal.started ? null : new Date().toISOString()
+    const previousStarted = goal.started
+    const newStartedValue = previousStarted ? null : new Date().toISOString()
     await toggleGoalStarted(goal.id, newStartedValue)
+    undoStarted(goal, previousStarted)
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to toggle goal started:', err)
@@ -227,7 +239,9 @@ async function toggleStarted(goal: PrioritizedGoalRow) {
 // Växla evigt-märket på ett mål
 async function toggleEternal(goal: PrioritizedGoalRow) {
   try {
+    const previousEternal = goal.eternal
     await setGoalEternal(goal.id, !goal.eternal)
+    undoEternal(goal, previousEternal)
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to toggle goal eternal:', err)
@@ -249,7 +263,10 @@ async function saveRecurrence(rule: string, mode: RecurrenceMode) {
   const goal = visibleGoals.value.find(g => g.id === recurrenceTargetId.value)
   if (!goal) return
   try {
+    const previousRule = goal.recurrence_rule
+    const previousMode = goal.recurrence_mode
     await setGoalRecurrence(goal.id, rule, mode)
+    undoRecurrence(goal, previousRule, previousMode)
     await loadPrioritizedGoals()
     closeRecurrenceEditor()
   } catch (err) {
@@ -261,7 +278,10 @@ async function removeRecurrence() {
   const goal = visibleGoals.value.find(g => g.id === recurrenceTargetId.value)
   if (!goal) return
   try {
+    const previousRule = goal.recurrence_rule
+    const previousMode = goal.recurrence_mode
     await setGoalRecurrence(goal.id, null)
+    undoRecurrence(goal, previousRule, previousMode)
     await loadPrioritizedGoals()
     closeRecurrenceEditor()
   } catch (err) {
@@ -296,7 +316,9 @@ function openDuePicker(goal: PrioritizedGoalRow) {
 async function saveDue(goal: PrioritizedGoalRow, value: string) {
   const due = value ? value : null
   try {
+    const previousDue = goal.due
     await setGoalDue(goal.id, due)
+    undoDue(goal, previousDue)
     dueGoalId.value = null
     await loadPrioritizedGoals()
   } catch (err) {
