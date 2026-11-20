@@ -122,6 +122,62 @@ func TestUpdateGoalRequestDueDecoding(t *testing.T) {
 	}
 }
 
+func TestUpdateGoalRequestStartDateDecoding(t *testing.T) {
+	tests := []struct {
+		name      string
+		body      string
+		wantSet   bool
+		wantValue *string
+	}{
+		{
+			name:      "null clears the start date",
+			body:      `{"start_date": null}`,
+			wantSet:   true,
+			wantValue: nil,
+		},
+		{
+			name:      "a date sets the start date",
+			body:      `{"start_date": "2027-01-01"}`,
+			wantSet:   true,
+			wantValue: strPtr("2027-01-01"),
+		},
+		{
+			name:      "an empty string clears the start date",
+			body:      `{"start_date": ""}`,
+			wantSet:   true,
+			wantValue: strPtr(""),
+		},
+		{
+			name:      "a missing field leaves the start date untouched",
+			body:      `{"title": "Ny titel"}`,
+			wantSet:   false,
+			wantValue: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req UpdateGoalRequest
+			if err := json.Unmarshal([]byte(tt.body), &req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if req.StartDate.Set != tt.wantSet {
+				t.Errorf("StartDate.Set = %v, want %v", req.StartDate.Set, tt.wantSet)
+			}
+
+			switch {
+			case tt.wantValue == nil && req.StartDate.Value != nil:
+				t.Errorf("StartDate.Value = %q, want nil", *req.StartDate.Value)
+			case tt.wantValue != nil && req.StartDate.Value == nil:
+				t.Errorf("StartDate.Value = nil, want %q", *tt.wantValue)
+			case tt.wantValue != nil && *req.StartDate.Value != *tt.wantValue:
+				t.Errorf("StartDate.Value = %q, want %q", *req.StartDate.Value, *tt.wantValue)
+			}
+		})
+	}
+}
+
 func TestDueDateMarshalsAsCalendarDate(t *testing.T) {
 	due, err := time.Parse(DueDateFormat, "2026-11-20")
 	if err != nil {
@@ -339,7 +395,7 @@ func TestGoalMarshalsNullTimestamps(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	for _, field := range []string{"started", "finished", "due"} {
+	for _, field := range []string{"started", "finished", "due", "start_date"} {
 		value, ok := raw[field]
 		if !ok {
 			t.Errorf("fältet %q saknas i JSON-svaret", field)

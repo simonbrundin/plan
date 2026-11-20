@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { dueTone, formatDueDate, parseDueDate } from "../../app/utils/dueDate";
+import { dueTone, formatDueDate, isFutureDate, parseDueDate } from "../../app/utils/dueDate";
 
 describe("parseDueDate", () => {
 	it("tolkar datumet lokalt, utan tidszon", () => {
@@ -43,5 +43,32 @@ describe("dueTone", () => {
 		const tomorrow = new Date(today);
 		tomorrow.setDate(today.getDate() + 1);
 		expect(dueTone(iso(tomorrow))).toBe("upcoming");
+	});
+});
+
+describe("isFutureDate", () => {
+	const iso = (date: Date) =>
+		`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+	it("räknar bara datum efter idag som framtid", () => {
+		const today = new Date();
+
+		const yesterday = new Date(today);
+		yesterday.setDate(today.getDate() - 1);
+		expect(isFutureDate(iso(yesterday))).toBe(false);
+
+		// Idag räknas inte som framtid - målet syns i listan från idag.
+		expect(isFutureDate(iso(today))).toBe(false);
+
+		const tomorrow = new Date(today);
+		tomorrow.setDate(today.getDate() + 1);
+		expect(isFutureDate(iso(tomorrow))).toBe(true);
+	});
+
+	it("returnerar false när datumet saknas eller är ogiltigt", () => {
+		expect(isFutureDate(null)).toBe(false);
+		expect(isFutureDate(undefined)).toBe(false);
+		expect(isFutureDate("")).toBe(false);
+		expect(isFutureDate("inte ett datum")).toBe(false);
 	});
 });
