@@ -889,7 +889,14 @@ const resetCalendarView = () => {
   resetToNow()
 }
 
+const route = useRoute()
+
 const handleCalendarKeydown = (event: KeyboardEvent) => {
+  // Kalendern ligger kvar i layouten även när användaren arbetar med mål.
+  // Dess globala tangentlyssnare får därför bara styra tidslinjen på själva
+  // kalendersidan; annars blir j/k/h/l dubbeltolkade av mål-navigeringen.
+  if (route.path !== '/calendar') return
+
   const target = event.target as HTMLElement | null
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) return
 
