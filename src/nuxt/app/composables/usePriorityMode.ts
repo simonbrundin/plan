@@ -156,8 +156,11 @@ export function usePriorityMode() {
 			return;
 		}
 
-		heldKeys.value.add(key);
-		isPriorityMode.value = heldKeys.value.has("p");
+		// Viktläget aktiveras med Shift+P (håll ned). Ett vanligt "p"
+		// växlar i stället mellan prioritetssidan och föregående sida,
+		// så de två tangenterna får inte krocka.
+		heldKeys.value.add(event.key);
+		isPriorityMode.value = heldKeys.value.has("P");
 
 		const target = event.target as HTMLElement;
 		if (
@@ -176,8 +179,6 @@ export function usePriorityMode() {
 			} else if (key === "j" && selectedGoalId.value !== null) {
 				event.preventDefault();
 				updateWeight(selectedGoalId.value, -1);
-			} else if (key === "p") {
-				isPriorityMode.value = false;
 			}
 		} else {
 			if (key === "arrowup" || key === "arrowdown") {
@@ -220,12 +221,12 @@ export function usePriorityMode() {
 			return;
 		}
 
-		const key = event.key.toLowerCase();
-		heldKeys.value.delete(key);
-
-		if (key === "p") {
-			isPriorityMode.value = false;
-		}
+		// Tangenter kan released med olika modifier-tillstånd, så både
+		// "p" och "P" tas bort ur listan över nedtryckta tangenter.
+		heldKeys.value.delete(event.key);
+		heldKeys.value.delete(event.key.toLowerCase());
+		heldKeys.value.delete(event.key.toUpperCase());
+		isPriorityMode.value = heldKeys.value.has("P");
 	}
 
 	function selectGoal(goalId: number) {

@@ -71,8 +71,15 @@ export function usePriorityToggle() {
 		// kan slutföras). Prioritetslistan nås då via tangentmenyn.
 		if (route.path.startsWith("/goal/")) return;
 
-		// Toggle on 'p' key press (not hold)
-		if (key === "p" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+		// Toggle on 'p' key press (not hold). Shift+P används för
+		// viktläget på prioritetssidan och ska inte växla sida.
+		if (
+			key === "p" &&
+			!event.shiftKey &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.altKey
+		) {
 			event.preventDefault();
 			togglePriority();
 		}

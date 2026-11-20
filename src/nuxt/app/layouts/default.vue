@@ -390,7 +390,7 @@ onUnmounted(() => {
           <span class="text-fuchsia-100 text-sm font-medium">Prioriteringsläge</span>
           <div class="flex items-center gap-2 text-xs">
             <span class="text-fuchsia-200">j/k: navigera</span>
-            <span class="text-fuchsia-200">P+K/J: ändra vikt</span>
+            <span class="text-fuchsia-200">Shift+P + J/K: ändra vikt</span>
           </div>
         </div>
       </div>
