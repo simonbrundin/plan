@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { moveChildId, nextChildOrder } from "../../app/utils/childOrder";
+import {
+	insertChildId,
+	moveChildId,
+	newChildInsertIndex,
+	nextChildOrder,
+} from "../../app/utils/childOrder";
 
 describe("moveChildId", () => {
 	it("flyttar ett undermål ett steg upp", () => {
@@ -28,6 +33,47 @@ describe("moveChildId", () => {
 
 	it("returnerar null när målet inte finns", () => {
 		expect(moveChildId([1, 2], [1, 2], 99, "up")).toBeNull();
+	});
+});
+
+describe("newChildInsertIndex", () => {
+	it("lägger det nya målet under det markerade undermålet", () => {
+		expect(newChildInsertIndex([1, 2, 3], [1, 2, 3], 0, false)).toBe(1);
+		expect(newChildInsertIndex([1, 2, 3], [1, 2, 3], 1, false)).toBe(2);
+		expect(newChildInsertIndex([1, 2, 3], [1, 2, 3], 2, false)).toBe(3);
+	});
+
+	it("lägger det nya målet först när huvudmålet är markerat", () => {
+		expect(newChildInsertIndex([1, 2, 3], [1, 2, 3], 0, true)).toBe(0);
+	});
+
+	it("räknar rätt när listan är filtrerad", () => {
+		// 2 är dolt (klart) och visas inte i listan
+		expect(newChildInsertIndex([1, 2, 3], [1, 3], 1, false)).toBe(3);
+		expect(newChildInsertIndex([1, 2, 3], [1, 3], 0, false)).toBe(1);
+	});
+
+	it("lägger målet sist när inget undermål är markerat", () => {
+		expect(newChildInsertIndex([1, 2, 3], [1, 2, 3], -1, false)).toBe(3);
+	});
+});
+
+describe("insertChildId", () => {
+	it("insätter det nya målet på given plats", () => {
+		expect(insertChildId([1, 2, 3], 1, 9)).toEqual([1, 9, 2, 3]);
+		expect(insertChildId([1, 2, 3], 0, 9)).toEqual([9, 1, 2, 3]);
+		expect(insertChildId([1, 2, 3], 3, 9)).toEqual([1, 2, 3, 9]);
+	});
+
+	it("klampar in indexet inom listan", () => {
+		expect(insertChildId([1, 2, 3], 99, 9)).toEqual([1, 2, 3, 9]);
+		expect(insertChildId([1, 2, 3], -5, 9)).toEqual([9, 1, 2, 3]);
+	});
+
+	it("muterar inte originalet", () => {
+		const all = [1, 2, 3];
+		insertChildId(all, 1, 9);
+		expect(all).toEqual([1, 2, 3]);
 	});
 });
 

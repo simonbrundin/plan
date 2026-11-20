@@ -8,7 +8,7 @@ import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight, GetGoalResponse } from '~/types/goal'
 import type { Place } from '~/types/place'
-import { moveChildId, nextChildOrder } from '~/utils/childOrder'
+import { insertChildId, moveChildId, newChildInsertIndex, nextChildOrder } from '~/utils/childOrder'
 import { buildGoalData } from '~/utils/goalGraph'
 import { canBeFinished } from '~/utils/goalRules'
 import { descriptionPreview } from '~/utils/goalDescription'
@@ -26,11 +26,11 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalDue, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoDue, undoEstimate, undoRecurrence } = useGoalUndo();
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoEstimate, undoRecurrence } = useGoalUndo();
 
 // Använd goals store
 const goalsStore = useGoalsStore();
@@ -499,11 +499,40 @@ function nextChildOrderNumber(): number {
   return nextChildOrder(children.value.map((c) => c.order ?? 0));
 }
 
+// Var ett nytt undermål ska placeras i listan.
+//
+// Det läggs under det markerade undermålet. Om huvudmålet är markerat
+// läggs det först i listan - alltså som barn nr 1.
+function newChildInsertIndexNumber(): number {
+  return newChildInsertIndex(
+    children.value.map((c) => c.id),
+    filteredChildren.value.map((c) => c.id),
+    selectedChildIndex.value,
+    isGoalSelected.value,
+  );
+}
+
+// Lägg till ett undermål på rätt plats i listan.
+//
+// Relationen får först ett unikt ordningsnummer (så att den inte krockar
+// med ett befintligt barn), och sedan sätts hela ordningen om i ett svep -
+// då hamnar det nya målet under det markerade målet.
+async function addChildAtPosition(childId: number): Promise<void> {
+  const insertIndex = newChildInsertIndexNumber();
+  const order = insertChildId(
+    children.value.map((c) => c.id),
+    insertIndex,
+    childId,
+  );
+
+  await addChildRelation(childId, goalId.value, nextChildOrderNumber());
+  await reorderChildren(goalId.value, order);
+}
+
 // Lägg till befintligt mål som barn
 async function addExistingChild(childId: number) {
   try {
-    const nextOrder = nextChildOrderNumber();
-    await addChildRelation(childId, goalId.value, nextOrder);
+    await addChildAtPosition(childId);
     goalsStore.addRelation(childId, goalId.value);
     await refresh();
     showChildSearch.value = false;
@@ -519,8 +548,7 @@ async function addExistingChild(childId: number) {
 
     try {
       const newGoal = await createGoal(childSearchQuery.value.trim());
-      const nextOrder = nextChildOrderNumber();
-      await addChildRelation(newGoal.id, goalId.value, nextOrder);
+      await addChildAtPosition(newGoal.id);
       goalsStore.addGoal(newGoal);
       goalsStore.addRelation(newGoal.id, goalId.value);
       await goalsStore.loadGoals();
@@ -1206,6 +1234,34 @@ async function toggleEternal(goalToToggle: Goal) {
     await refresh();
   } catch (error) {
     console.error("Failed to toggle eternal status:", error);
+  }
+}
+
+// Markera ett mål som ett mål för en agent (eller upphäva agent-flaggan).
+async function toggleAgent(goalToToggle: Goal) {
+  const newAgent = !goalToToggle.agent;
+
+  try {
+    const previousAgent = goalToToggle.agent ?? false;
+    await setGoalAgent(goalToToggle.id, newAgent);
+    undoAgent(goalToToggle, previousAgent);
+    goalsStore.updateGoal(goalToToggle.id, { agent: newAgent });
+
+    if (goalData.value?.allGoals) {
+      const goalIndex = goalData.value.allGoals.findIndex(
+        (g) => g.id === goalToToggle.id
+      );
+      if (goalIndex !== -1) {
+        goalData.value.allGoals[goalIndex].agent = newAgent;
+      }
+    }
+    if (goalData.value?.goal && goalData.value.goal.id === goalToToggle.id) {
+      goalData.value.goal.agent = newAgent;
+    }
+
+    await refresh();
+  } catch (error) {
+    console.error("Failed to toggle agent status:", error);
   }
 }
 
@@ -1971,6 +2027,9 @@ watch(selectedParentIndex, async () => {
           <Icon name="lucide:infinity" class="w-6 h-6"
             :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
         </button>
+        <!-- Agent-märke -->
+        <AgentBadge v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          :active="!!goal.agent" @toggle="toggleAgent(goal)" />
         <!-- Upprepning: antalet slutförda förekomster (r) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="relative flex items-center gap-1.5 flex-shrink-0" @click.stop>
@@ -2156,7 +2215,7 @@ watch(selectedParentIndex, async () => {
       </div>
 
       <!-- Undermål - scrollbar container -->
-      <div class="flex-1 overflow-y-auto min-h-0">
+      <div class="flex-1 overflow-y-auto min-h-0 pb-6">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-semibold uppercase tracking-wider text-ink-dim">
             Undermål
@@ -2289,6 +2348,8 @@ watch(selectedParentIndex, async () => {
                    <Icon name="lucide:circle-play" class="w-5 h-5"
                      :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
                  </button>
+                 <!-- Agent-märke -->
+                 <AgentBadge :active="!!child.agent" @toggle="toggleAgent(child)" />
                  <!-- Dependency-drag handle -->
                  <button
                    @mousedown.stop="handleDepMouseDown($event, child.id)"

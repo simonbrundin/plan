@@ -52,3 +52,51 @@ export function nextChildOrder(orders: number[]): number {
 	const highest = orders.reduce((acc, order) => Math.max(acc, order), -1);
 	return highest + 1;
 }
+
+/**
+ * Returnerar den plats i listan där ett nytt undermål ska läggas in.
+ *
+ * Det nya målet läggs under det markerade undermålet. Om huvudmålet är
+ * markerat läggs det först i listan (alltså som barn nr 1). Finns inget
+ * markerat undermål läggs det sist.
+ *
+ * allIds = alla undermål i sparad ordning
+ * visibleIds = de undermål som syns i listan (kan vara filtrerade)
+ * selectedIndex = index i visibleIds för det markerade undermålet
+ */
+export function newChildInsertIndex(
+	allIds: number[],
+	visibleIds: number[],
+	selectedIndex: number,
+	goalSelected: boolean,
+): number {
+	if (goalSelected) {
+		return 0;
+	}
+
+	const selectedId = visibleIds[selectedIndex];
+	if (selectedId === undefined) {
+		return allIds.length;
+	}
+
+	const position = allIds.indexOf(selectedId);
+	if (position === -1) {
+		return allIds.length;
+	}
+
+	return position + 1;
+}
+
+/**
+ * Returnerar listan med ett nytt undermål insatt på en given plats.
+ */
+export function insertChildId(
+	allIds: number[],
+	insertIndex: number,
+	newId: number,
+): number[] {
+	const ids = [...allIds];
+	const index = Math.max(0, Math.min(insertIndex, ids.length));
+	ids.splice(index, 0, newId);
+	return ids;
+}
