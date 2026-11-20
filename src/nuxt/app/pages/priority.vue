@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import type { Goal } from '~/types/goal'
 import { canBeFinished } from '~/utils/goalRules'
-import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
+import { dueTone, formatDueDate, isFutureDate, todayDateString } from '~/utils/dueDate'
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import type { RecurrenceMode } from '~/utils/recurrence'
-import { ETERNAL_ACCENT, ETERNAL_BORDER, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
+import { ETERNAL_ACCENT, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 definePageMeta({
   ssr: false,
 })
 
 const { user } = useUserSession()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
+const goalDates = useGoalDatesModal()
+// Målet kan dras in i kalendern för att schemaläggas.
+const { startDrag } = useGoalDrag()
 
 function dueToneClass(due: string | null): string {
   const tone = dueTone(due)
@@ -114,6 +117,9 @@ watch(selectedGoalId, async () => {
 watch(undoRevision, () => {
   loadPrioritizedGoals()
 })
+watch(goalDates.savedRevision, () => {
+  loadPrioritizedGoals()
+})
 
 onMounted(() => {
   loadPrioritizedGoals()
@@ -162,6 +168,12 @@ onMounted(() => {
     if (e.key === 'c' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault()
       if (goal) openDuePicker(goal)
+      return
+    }
+
+    if (e.key === 'b' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault()
+      if (goal) openStartPicker(goal)
       return
     }
 
@@ -283,6 +295,17 @@ onMounted(() => {
         }
       },
     },
+    {
+      keys: 'd',
+      label: 'D',
+      title: 'Sätt startdatum och deadline',
+      run: () => {
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) {
+          goalDates.openFor(goal)
+        }
+      },
+    },
   ])
 })
 
@@ -366,6 +389,41 @@ async function saveDue(goal: PrioritizedGoalRow, value: string) {
     await loadPrioritizedGoals()
   } catch (err) {
     console.error('Failed to save due date:', err)
+  }
+}
+
+// Startdatum-väljare inline i raden. Datumet anger från vilket datum
+// målet får dyka upp i prioriteringslistan - tom sträng rensar det.
+const startGoalId = ref<number | null>(null)
+const startDraft = ref('')
+
+function openStartPicker(goal: PrioritizedGoalRow) {
+  startDraft.value = goal.start_date ?? ''
+  startGoalId.value = goal.id
+  nextTick(() => {
+    const input = document.querySelector(
+      `[data-start-input="${goal.id}"]`,
+    ) as (HTMLInputElement & { showPicker?: () => void }) | null
+
+    input?.focus()
+    try {
+      input?.showPicker?.()
+    } catch {
+      // Fokus fungerar som fallback i webbläsare som nekar showPicker().
+    }
+  })
+}
+
+async function saveStartDate(goal: PrioritizedGoalRow, value: string) {
+  const startDate = value ? value : null
+  try {
+    const previousStartDate = goal.start_date ?? null
+    await setGoalStartDate(goal.id, startDate)
+    undoStartDate(goal, previousStartDate)
+    startGoalId.value = null
+    await loadPrioritizedGoals()
+  } catch (err) {
+    console.error('Failed to save start date:', err)
   }
 }
 
@@ -491,6 +549,7 @@ const filterOptions = [
       <span class="text-ink-muted">d</span> klar &nbsp;|&nbsp;
       <span class="text-ink-muted">e</span> evigt &nbsp;|&nbsp;
       <span class="text-ink-muted">c</span> deadline &nbsp;|&nbsp;
+      <span class="text-ink-muted">b</span> startdatum &nbsp;|&nbsp;
       <span class="text-ink-muted">t</span> beskrivning &nbsp;|&nbsp;
       <span class="text-ink-muted">x</span> ta bort
     </div>
@@ -579,6 +638,8 @@ const filterOptions = [
         :data-goal-id="goal.id"
       >
         <div
+          data-goal-row
+          draggable="true"
           class="rounded-2xl border border-line transition-colors hover:border-line-strong flex items-center gap-4 px-4 py-3.5 cursor-pointer"
           :class="[
             getWeightBgColor(goal.weight),
@@ -586,6 +647,7 @@ const filterOptions = [
             isPriorityMode && selectedGoalId === goal.id ? 'ring-1 ring-fuchsia-500' : '',
             isWaitingForNextOccurrence(goal) ? 'opacity-50' : ''
           ]"
+          @dragstart="startDrag($event, goal)"
           @click="selectGoal(goal.id)"
         >
           <div class="flex-shrink-0 w-8 text-center">
@@ -632,20 +694,6 @@ const filterOptions = [
           </div>
 
           <div class="flex-shrink-0">
-            <button
-              @click.stop="toggleFinished(goal)"
-              class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors"
-              :class="goal.finished ? 'bg-green-600 border-green-600' : goal.eternal ? ETERNAL_BORDER + ' cursor-not-allowed' : isWaitingForNextOccurrence(goal) ? 'border-line cursor-not-allowed' : 'border-line-strong hover:border-ink-muted'"
-              :title="goal.eternal ? 'Ett evigt mål kan inte slutföras' : isWaitingForNextOccurrence(goal) ? 'Nästa förekomst har inte kommit än' : goal.finished ? 'Avmarkera som klar' : 'Markera som klar'"
-              :disabled="goal.eternal || isWaitingForNextOccurrence(goal)"
-            >
-              <svg v-if="goal.finished" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="flex-shrink-0">
             <template v-if="dueGoalId === goal.id">
               <input
                 ref="dueInputRef"
@@ -677,6 +725,35 @@ const filterOptions = [
             </button>
           </div>
 
+          <div class="flex-shrink-0">
+            <template v-if="startGoalId === goal.id">
+              <input
+                :data-start-input="goal.id"
+                v-model="startDraft"
+                type="date"
+                class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                @click.stop
+                @change="saveStartDate(goal, startDraft)"
+                @keydown.enter.prevent="saveStartDate(goal, startDraft)"
+                @keydown.esc.prevent="startGoalId = null"
+              />
+              <button @click.stop="saveStartDate(goal, '')"
+                class="rounded p-1 text-ink-dim transition-colors hover:text-ink-muted"
+                title="Rensa startdatum">
+                <Icon name="lucide:x" class="w-4 h-4" />
+              </button>
+            </template>
+            <button
+              v-else
+              @click.stop="openStartPicker(goal)"
+              class="rounded p-1 transition-colors"
+              :class="goal.start_date ? (isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-muted') : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.start_date ? `Startdatum: ${formatDueDate(goal.start_date)} - målet syns i listan från detta datum` : 'Sätt startdatum (b)'"
+            >
+              <Icon name="lucide:calendar-days" class="w-5 h-5" :style="{ opacity: goal.start_date ? 1 : 0.25 }" />
+            </button>
+          </div>
+
           <EstimateBadge
             :goal="goal"
             size="sm"
@@ -702,6 +779,10 @@ const filterOptions = [
             <span v-if="goal.eternal" :class="ETERNAL_ACCENT + ' text-xs flex-shrink-0'">∞</span>
             <span v-if="goal.due" class="text-xs flex-shrink-0 tabular-nums" :class="dueToneClass(goal.due)">
               📅 {{ formatDueDate(goal.due) }}
+            </span>
+            <span v-if="goal.start_date" class="text-xs flex-shrink-0 tabular-nums"
+              :class="isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-dim'">
+              🗓 {{ formatDueDate(goal.start_date) }}
             </span>
           </div>
 

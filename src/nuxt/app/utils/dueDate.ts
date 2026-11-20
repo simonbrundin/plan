@@ -30,6 +30,19 @@ export function todayDateString(): string {
 	return `${today.getFullYear()}-${month}-${day}`;
 }
 
+// Sant om datumet ligger efter idag. Ett startdatum i framtiden betyder
+// att målet inte får dyka upp i prioriteringslistan ännu - dagens datum
+// räknas alltså inte som framtid, då målet syns från och med idag.
+export function isFutureDate(date: string | null | undefined): boolean {
+	const parsed = parseDueDate(date);
+	if (!parsed) return false;
+
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	return parsed.getTime() > today.getTime();
+}
+
 // Klassificerar datumet: förgått, idag eller kommande.
 export function dueTone(due: string | null | undefined): DueTone {
 	const date = parseDueDate(due);

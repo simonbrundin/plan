@@ -232,10 +232,10 @@ func (h *GoalHandler) CreateGoal(c *gin.Context) {
 			recurrenceMode = mode
 		}
 
-		if req.StartDate != nil && *req.StartDate != "" {
-			parsed, err := time.Parse(models.DueDateFormat, *req.StartDate)
+		if req.RecurrenceStartDate != nil && *req.RecurrenceStartDate != "" {
+			parsed, err := time.Parse(models.DueDateFormat, *req.RecurrenceStartDate)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "start_date måste vara på formatet YYYY-MM-DD"})
+				c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "recurrence_start_date måste vara på formatet YYYY-MM-DD"})
 				return
 			}
 			recurrenceStart = parsed
@@ -245,6 +245,17 @@ func (h *GoalHandler) CreateGoal(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: recurrenceErrorMessage(err)})
 			return
 		}
+	}
+
+	// Startdatumet valideras innan målet skapas, så att ett ogiltigt datum
+	// inte lämnar kvar ett mål utan startdatum.
+	goalStartDate := ""
+	if req.StartDate != nil && *req.StartDate != "" {
+		if _, err := time.Parse(models.DueDateFormat, *req.StartDate); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "start_date måste vara på formatet YYYY-MM-DD"})
+			return
+		}
+		goalStartDate = *req.StartDate
 	}
 
 	goal, err := h.repo.CreateGoal(c.Request.Context(), userID, req.Title, icon)
@@ -262,6 +273,22 @@ func (h *GoalHandler) CreateGoal(c *gin.Context) {
 				fmt.Printf("failed to clean up goal %d after recurrence error: %v\n", goal.ID, cleanupErr)
 			}
 			c.JSON(recurrenceErrorStatus(err), models.ErrorResponse{Message: recurrenceErrorMessage(err)})
+			return
+		}
+	}
+
+	// Startdatumet sätts efter att målet skapats - det är ett vanligt
+	// målsfält, och UpdateGoal skriver det till databasen.
+	if goalStartDate != "" {
+		goal, err = h.repo.UpdateGoal(c.Request.Context(), goal.ID, models.UpdateGoalRequest{
+			StartDate: models.NullableDueDate{Set: true, Value: &goalStartDate},
+		})
+		if err != nil {
+			if errors.Is(err, repository.ErrInvalidStartDate) {
+				c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "start_date måste vara på formatet YYYY-MM-DD"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 			return
 		}
 	}
@@ -364,6 +391,10 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 		}
 		if errors.Is(err, repository.ErrInvalidDueDate) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "due-datumet måste vara på formatet YYYY-MM-DD"})
+			return
+		}
+		if errors.Is(err, repository.ErrInvalidStartDate) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "startdatumet måste vara på formatet YYYY-MM-DD"})
 			return
 		}
 		if errors.Is(err, repository.ErrInvalidEstimate) {

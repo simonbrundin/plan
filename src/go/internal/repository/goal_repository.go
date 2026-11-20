@@ -23,6 +23,10 @@ var ErrInvalidTimestamp = errors.New("invalid timestamp")
 // ett datum avkodas, repot-felet när det skrivs till databasen.
 var ErrInvalidDueDate = models.ErrInvalidDueDate
 
+// ErrInvalidStartDate betyder att ett startdatum inte kunde tolkas som
+// "YYYY-MM-DD".
+var ErrInvalidStartDate = errors.New("ogiltigt startdatum")
+
 // ErrInvalidEstimate betyder att den uppskattade tidsåtgången inte är ett
 // positivt antal minuter.
 var ErrInvalidEstimate = errors.New("ogiltig tidsåtgång")
@@ -58,7 +62,7 @@ func NewGoalRepository() *GoalRepository {
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.estimated_minutes, g.inbox, g.eternal, g.agent, g."order",
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g."order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
@@ -77,14 +81,16 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 	for rows.Next() {
 		var g models.Goal
 		var due *time.Time
+		var startDate *time.Time
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
-		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Order, &g.HasParent,
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Order, &g.HasParent,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
 		g.Due = dueDateFromTime(due)
+		g.StartDate = dueDateFromTime(startDate)
 		g.EstimatedMinutes = estimatedMinutes
 		g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 		goals = append(goals, g)
@@ -96,7 +102,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 // GetGoalByID returns a single goal by ID
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
 	query := `
-		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, due, estimated_minutes, inbox, eternal, agent, "order",
+		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, due, start_date, estimated_minutes, inbox, eternal, agent, "order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent,
 			recurrence_rule, recurrence_mode, recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = goals.id) AS recurrence_count
@@ -104,10 +110,11 @@ func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models
 
 	var g models.Goal
 	var due *time.Time
+	var startDate *time.Time
 	var estimatedMinutes *int
 	var recurrenceNext *time.Time
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Order, &g.HasParent,
+		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Order, &g.HasParent,
 		&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -116,6 +123,7 @@ func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models
 		return nil, fmt.Errorf("failed to get goal: %w", err)
 	}
 	g.Due = dueDateFromTime(due)
+	g.StartDate = dueDateFromTime(startDate)
 	g.EstimatedMinutes = estimatedMinutes
 	g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 
@@ -251,6 +259,23 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 		}
 	}
 
+	// Startdatumet anger från vilket datum målet får dyka upp i
+	// prioriteringslistan. Null = målet får synas direkt.
+	if req.StartDate.Set {
+		hasUpdate = true
+		if req.StartDate.Value == nil || *req.StartDate.Value == "" {
+			query += "start_date = NULL, "
+		} else {
+			t, err := time.Parse(models.DueDateFormat, *req.StartDate.Value)
+			if err != nil {
+				return nil, fmt.Errorf("%w: %q", ErrInvalidStartDate, *req.StartDate.Value)
+			}
+			query += fmt.Sprintf("start_date = $%d, ", argNum)
+			args = append(args, t)
+			argNum++
+		}
+	}
+
 	// Den uppskattade tidsåtgången sätts i minuter. Null rensar den,
 	// och negativa värden avvisas - en uppskattning kan inte vara negativ.
 	if req.EstimatedMinutes.Set {
@@ -322,10 +347,10 @@ func (r *GoalRepository) applyRecurrenceUpdate(ctx context.Context, goalID int64
 		}
 
 		start := time.Now().UTC()
-		if req.StartDate != nil && *req.StartDate != "" {
-			parsed, err := time.Parse(models.DueDateFormat, *req.StartDate)
+		if req.RecurrenceStartDate != nil && *req.RecurrenceStartDate != "" {
+			parsed, err := time.Parse(models.DueDateFormat, *req.RecurrenceStartDate)
 			if err != nil {
-				return fmt.Errorf("%w: %q", ErrInvalidDueDate, *req.StartDate)
+				return fmt.Errorf("%w: %q", ErrInvalidDueDate, *req.RecurrenceStartDate)
 			}
 			start = parsed
 		}
@@ -1094,7 +1119,7 @@ func (r *GoalRepository) CheckForCycle(ctx context.Context, goalID, dependsOnID 
 func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) ([]models.PrioritizedGoal, error) {
 	query := `
 		SELECT
-			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.estimated_minutes, g.inbox, g.eternal, g.agent,
+			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent,
 			g.priority_order,
 			COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
 			(SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
@@ -1106,6 +1131,7 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		WHERE ug.user_id = $1
 		  AND g.finished IS NULL
 		  AND g.id <> 1
+		  AND (g.start_date IS NULL OR g.start_date <= CURRENT_DATE)
 		ORDER BY g.priority_order ASC, weight DESC, g.created DESC`
 
 	rows, err := r.pool.Query(ctx, query, userID)
@@ -1120,14 +1146,16 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		var parentTitle *string
 		var parentID *int64
 		var due *time.Time
+		var startDate *time.Time
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
-		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent,
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent,
 			&g.PriorityOrder, &g.Weight, &parentTitle, &parentID,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, err
 		}
 		g.Due = dueDateFromTime(due)
+		g.StartDate = dueDateFromTime(startDate)
 		g.EstimatedMinutes = estimatedMinutes
 		g.RecurrenceNext = dueDateFromTime(recurrenceNext)
 		g.ParentTitle = parentTitle

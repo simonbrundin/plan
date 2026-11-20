@@ -33,9 +33,24 @@ const {
   isLeaderOpen,
   pendingKeys: leaderPendingKeys,
   commands: leaderCommands,
-  handleKeydown: handleLeaderKeydown,
+  handleKeydown: handleLeaderKeydownBase,
   executeCommand: executeLeaderCommand,
 } = useLeaderKey();
+
+// Popupen som sätter startdatum och due-datum (leader + d).
+const goalDates = useGoalDatesModal();
+
+// Leader-listenern körs i capture-fasen och kan annars konsumera Escape
+// innan datum-popupens egen listener hinner få tangenten.
+function handleLeaderKeydown(event: KeyboardEvent): boolean {
+  if (goalDates.isOpen.value && event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    goalDates.close();
+    return true;
+  }
+  return handleLeaderKeydownBase(event);
+}
 
 const { isOpen: isQuickAddOpen, open: openQuickAdd, close: closeQuickAdd } = useQuickAdd();
 
@@ -337,6 +352,17 @@ onUnmounted(() => {
       :commands="leaderCommands"
       :pending="leaderPendingKeys"
       @execute-command="executeLeaderCommand($event)"
+    />
+
+    <!-- Popupen för startdatum och due-datum (leader + d). Den renderas
+         här så att den kan öppnas från alla sidor. -->
+    <GoalDatesModal
+      :open="goalDates.isOpen.value"
+      :goal-title="goalDates.target.value?.title"
+      :start-date="goalDates.target.value?.start_date ?? null"
+      :due-date="goalDates.target.value?.due ?? null"
+      @save="goalDates.save"
+      @close="goalDates.close"
     />
 
     <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />

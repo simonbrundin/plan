@@ -167,6 +167,13 @@ onUnmounted(() => {
             <div class="flex items-center gap-4">
               <kbd
                 class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-accent font-mono font-bold min-w-[2rem] text-center"
+                >b</kbd
+              >
+              <span class="text-ink-muted">Sätt startdatum (syns i /priority först när datumet passerat)</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <kbd
+                class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-accent font-mono font-bold min-w-[2rem] text-center"
                 >m</kbd
               >
               <span class="text-ink-muted">Sätt uppskattad tidsåtgång</span>
@@ -294,6 +301,13 @@ onUnmounted(() => {
                 >i</kbd
               >
               <span class="text-ink-muted">Byt ikon för markerat mål</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <kbd
+                class="px-2 py-1 bg-surface-2 border border-line-strong rounded text-green-400 font-mono font-bold min-w-[2rem] text-center"
+                >d</kbd
+              >
+              <span class="text-ink-muted">Sätt både startdatum och deadline för markerat mål</span>
             </div>
           </div>
         </div>

@@ -12,6 +12,18 @@ import {
 import { describeRecurrence, recurrenceSeriesKey } from '~/utils/calendarSeries'
 import { MIN_ROW_PX, layoutEventRows } from '~/utils/calendarLayout'
 import { planVisibility } from '~/utils/calendarVisibility'
+import {
+  carriesGoal,
+  durationOptions,
+  GOAL_DRAG_MIME,
+  millisecondsPerPixel,
+  parseGoalDrag,
+  shiftEventTimes,
+  snapStepMs,
+  snapTimestamp,
+  timeAtOffset,
+  type GoalDragPayload,
+} from '~/utils/calendarScheduling'
 
 const MIN_DURATION = 2 * 60 * 60 * 1000
 // Date stöder ett mycket stort, men tekniskt ändligt, intervall.
@@ -20,6 +32,7 @@ const DEFAULT_DURATION = 24 * 60 * 60 * 1000
 const ZOOM_SENSITIVITY = 650
 
 const viewport = ref<HTMLElement | null>(null)
+const shell = ref<HTMLElement | null>(null)
 const startTime = ref(Date.now())
 const visibleDuration = ref(DEFAULT_DURATION)
 const targetDuration = ref(DEFAULT_DURATION)
@@ -556,6 +569,314 @@ const openClipped = ref(false)
 
 const clippedEvents = computed(() => eventRows.value.clipped.map((row) => row.event))
 
+// --- Schemaläggning av mål genom att släppa dem i kalendern ---
+
+// Tiden som drop-markören visar just nu, eller null om inget dras över.
+const dropPreviewTime = ref<number | null>(null)
+
+// Ett mål som har släppts och väntar på att en tid väljs.
+const pendingGoalDrop = ref<{
+  goal: GoalDragPayload
+  startAt: number
+  left: number
+  top: number
+} | null>(null)
+
+// Tidsalternativen som visas för det släppta målet.
+const scheduleOptions = computed(() =>
+  durationOptions(pendingGoalDrop.value?.goal.estimated_minutes),
+)
+
+/**
+ * Tiden som en pekarposition i vyn motsvarar.
+ *
+ * Pekaren räknas relativt vyn, så att tiden följer tidsaxeln oavsett
+ * var i sidan vyn ligger.
+ */
+const timeAtClientY = (clientY: number): number => {
+  const rect = viewport.value?.getBoundingClientRect()
+  if (!rect || rect.height <= 0) return startTime.value
+
+  return timeAtOffset({
+    offsetY: clientY - rect.top,
+    height: rect.height,
+    startTime: startTime.value,
+    visibleDuration: visibleDuration.value,
+  })
+}
+
+/**
+ * Tiden som pekaren pekar på, avrundad till en rimlig upplösning.
+ */
+const snappedTimeAtClientY = (clientY: number): number =>
+  snapTimestamp(timeAtClientY(clientY), snapStepMs(visibleDuration.value))
+
+/**
+ * Handlar det om att ett mål dras över kalendern?
+ *
+ * Kalendern ska inte reagera på annat som dras i sidan.
+ */
+const handleDragOver = (event: DragEvent) => {
+  if (!carriesGoal(event)) return
+
+  // Utan preventDefault släpps ingenting - webbläsaren vägrar då
+  // att markera platsen som ett giltig släppmål.
+  event.preventDefault()
+
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
+
+  dropPreviewTime.value = snappedTimeAtClientY(event.clientY)
+}
+
+const handleDragLeave = (event: DragEvent) => {
+  // Markören ska bara försvinna när pekaren lämnar vyn helt. När den
+  // går över ett barnelement brinner "dragleave", utan att pekaren
+  // faktiskt har lämnat vyn.
+  const related = event.relatedTarget as Node | null
+  if (related && viewport.value?.contains(related)) return
+
+  dropPreviewTime.value = null
+}
+
+const handleDrop = (event: DragEvent) => {
+  if (!carriesGoal(event)) return
+
+  event.preventDefault()
+  dropPreviewTime.value = null
+
+  const goal = parseGoalDrag(event.dataTransfer?.getData(GOAL_DRAG_MIME))
+  if (!goal) return
+
+  const shellRect = shell.value?.getBoundingClientRect()
+
+  // Menyn ska rymmas inom kalendern, så den placeras inte utanför
+  // kanterna.
+  const menuWidth = 220
+  const menuHeight = 320
+  const left = shellRect
+    ? Math.min(
+        Math.max(event.clientX - shellRect.left - menuWidth / 2, 0),
+        Math.max(shellRect.width - menuWidth, 0),
+      )
+    : 0
+  const top = shellRect
+    ? Math.min(
+        Math.max(event.clientY - shellRect.top, 0),
+        Math.max(shellRect.height - menuHeight, 0),
+      )
+    : 0
+
+  pendingGoalDrop.value = {
+    goal,
+    startAt: snappedTimeAtClientY(event.clientY),
+    left,
+    top,
+  }
+}
+
+const cancelGoalDrop = () => {
+  pendingGoalDrop.value = null
+}
+
+// Escape stänger menyn. Menyn kan visas på alla sidor - målet dras
+// från en lista, medan kalendern ligger i sidopanelen - så lyssnaren
+// sitter på fönstret.
+const handleDropKeydown = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape') return
+  if (!pendingGoalDrop.value) return
+
+  event.preventDefault()
+  cancelGoalDrop()
+}
+
+/**
+ * Skapar händelsen för ett släppt mål.
+ *
+ * Händelsen får målets titel, ikon och koppling. Tiden är den valda
+ * längden, räknad från den tidpunkten målet släppetes på.
+ */
+const scheduleGoal = async (minutes: number) => {
+  const drop = pendingGoalDrop.value
+  if (!drop || minutes <= 0) return
+
+  savingEvent.value = true
+  errorMessage.value = ''
+
+  try {
+    await createCalendarEvent({
+      title: drop.goal.title,
+      icon: drop.goal.icon || '',
+      goal_id: drop.goal.id,
+      start_at: new Date(drop.startAt).toISOString(),
+      end_at: new Date(drop.startAt + minutes * 60 * 1000).toISOString(),
+      time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ...(defaultCalendarId.value ? { calendar_id: defaultCalendarId.value } : {}),
+    })
+    cancelGoalDrop()
+    await loadEvents()
+  } catch (error) {
+    console.error('Kunde inte schemalägga målet:', error)
+    errorMessage.value = 'Kunde inte schemalägga målet. Försök igen.'
+  } finally {
+    savingEvent.value = false
+  }
+}
+
+// --- Flytta en händelse genom att dra den ---
+
+// En händelse som dras just nu.
+const eventDrag = ref<{
+  key: string
+  event: CalendarEvent
+  startY: number
+  deltaMs: number
+  moved: boolean
+} | null>(null)
+
+// Ett klick strax efter ett drag ska inte öppna formuläret - raden har
+// redan flyttats. Tiden sparas, så att ett klick som kommer en stund
+// senare ändå öppnar händelsen.
+let suppressClickUntil = 0
+
+/**
+ * Startar en dragning av en händelse.
+ *
+ * Inget händer förrän pekaren rör sig - ett klick ska fortfarande
+ * öppna händelsen i formuläret.
+ */
+const startEventDrag = (event: PointerEvent, calendarEvent: CalendarEvent) => {
+  if (event.button !== 0) return
+
+  eventDrag.value = {
+    key: calendarEvent.occurrence_id || `${calendarEvent.id}-${calendarEvent.start_at}`,
+    event: calendarEvent,
+    startY: event.clientY,
+    deltaMs: 0,
+    moved: false,
+  }
+}
+
+/**
+ * Flyttar den händelse som dras.
+ *
+ * Förflyttningen räknas i pixlar och omvandlas till tid, så att
+ * händelsen flyttas lika långt i tiden som pekaren rör sig.
+ */
+const moveEventDrag = (event: PointerEvent) => {
+  const drag = eventDrag.value
+  if (!drag) return
+
+  const deltaY = event.clientY - drag.startY
+
+  if (!drag.moved && Math.abs(deltaY) < 4) return
+
+  drag.moved = true
+  drag.deltaMs = snapTimestamp(
+    deltaY * millisecondsPerPixel(visibleDuration.value, viewport.value?.clientHeight || 600),
+    snapStepMs(visibleDuration.value),
+  )
+}
+
+/**
+ * Slutför dragningen, om händelsen faktiskt flyttades.
+ */
+const endEventDrag = async () => {
+  const drag = eventDrag.value
+  eventDrag.value = null
+
+  if (!drag || !drag.moved) return
+
+  // Klicket som följer efteråt ska inte öppna formuläret - händelsen
+  // har redan flyttats.
+  suppressClickUntil = Date.now() + 250
+
+  const start = Date.parse(drag.event.start_at)
+  const end = Date.parse(drag.event.end_at)
+  const moved = shiftEventTimes({ start, end, deltaMs: drag.deltaMs })
+
+  if (moved.start === start) return
+
+  try {
+    await persistEventMove(drag.event, moved.start, moved.end)
+    await loadEvents()
+  } catch (error) {
+    console.error('Kunde inte flytta händelsen:', error)
+    errorMessage.value = 'Kunde inte flytta händelsen. Försök igen.'
+  }
+}
+
+/**
+ * Sparar en flyttad händelse.
+ *
+ * En förekomst i en serie flyttas med en override-rad, så att bara
+ * just den förekomsten flyttas. En händelse med egen rad, eller en
+ * vanlig händelse, uppdateras direkt.
+ */
+const persistEventMove = async (
+  calendarEvent: CalendarEvent,
+  start: number,
+  end: number,
+) => {
+  const startAt = new Date(start).toISOString()
+  const endAt = new Date(end).toISOString()
+
+  if (isSeriesOccurrence(calendarEvent) && !calendarEvent.parent_event_id) {
+    // Förekomsten har ingen egen rad - servern lägger till en.
+    await createCalendarOccurrenceOverride(parentEventId(calendarEvent), {
+      original_start_at: calendarEvent.original_start_at || calendarEvent.start_at,
+      start_at: startAt,
+      end_at: endAt,
+      title: calendarEvent.title,
+      icon: calendarEvent.icon || '',
+      time_zone: calendarEvent.time_zone,
+    })
+    return
+  }
+
+  await updateCalendarEvent(calendarEvent.id, {
+    start_at: startAt,
+    end_at: endAt,
+  })
+}
+
+const handleEventClick = (calendarEvent: CalendarEvent) => {
+  if (Date.now() < suppressClickUntil) {
+    suppressClickUntil = 0
+    return
+  }
+
+  openEditEvent(calendarEvent)
+}
+
+/**
+ * Sant om just den händelsen dras just nu.
+ */
+const isDraggedEvent = (calendarEvent: CalendarEvent): boolean => {
+  const drag = eventDrag.value
+  if (!drag) return false
+
+  return (
+    drag.key === (calendarEvent.occurrence_id || `${calendarEvent.id}-${calendarEvent.start_at}`)
+  )
+}
+
+/**
+ * Förflyttningen av en händelse som dras, i pixlar.
+ *
+ * Raden flyttas med pekaren, så att det går att se vart den hamnar.
+ */
+const eventDragOffset = (calendarEvent: CalendarEvent): string | undefined => {
+  const drag = eventDrag.value
+  if (!drag || !drag.moved || !isDraggedEvent(calendarEvent)) return undefined
+
+  const pixels = drag.deltaMs / millisecondsPerPixel(
+    visibleDuration.value,
+    viewport.value?.clientHeight || 600,
+  )
+
+  return `translateY(${pixels}px)`
+}
+
 const handleWheel = (event: WheelEvent) => {
   event.preventDefault()
   // Trackpad och mushjul skickar olika delta-enheter. Normalisera dem först.
@@ -960,6 +1281,12 @@ onMounted(async () => {
     console.warn('Kunde inte läsa platser för kalenderhändelser:', error)
   }
   window.addEventListener('keydown', handleCalendarKeydown)
+  window.addEventListener('keydown', handleDropKeydown)
+  // Dragningen av en händelse följer pekaren även när den lämnar raden,
+  // så lyssnarna sitter på fönstret.
+  window.addEventListener('pointermove', moveEventDrag)
+  window.addEventListener('pointerup', endEventDrag)
+  window.addEventListener('pointercancel', endEventDrag)
 
   // Tidsfönstrets höjd styr hur mycket utrymme prickarna får, så den måste
   // hållas uppdaterad när fönstret ändras.
@@ -981,11 +1308,15 @@ onUnmounted(() => {
   if (speedTimer) clearTimeout(speedTimer)
   viewportObserver?.disconnect()
   window.removeEventListener('keydown', handleCalendarKeydown)
+  window.removeEventListener('keydown', handleDropKeydown)
+  window.removeEventListener('pointermove', moveEventDrag)
+  window.removeEventListener('pointerup', endEventDrag)
+  window.removeEventListener('pointercancel', endEventDrag)
 })
 </script>
 
 <template>
-  <section class="calendar-shell">
+  <section ref="shell" class="calendar-shell">
     <!-- Kalendrarna ligger i en lista som öppnas med en knapp, i stället för
          att ligga som etiketter över tidslinjen. -->
     <div class="calendar-toolbar">
@@ -1122,6 +1453,9 @@ onUnmounted(() => {
       @pointermove="handlePointerMove"
       @pointerup="handlePointerUp"
       @pointercancel="handlePointerUp"
+      @dragover="handleDragOver"
+      @dragleave="handleDragLeave"
+      @drop="handleDrop"
     >
       <div
         class="calendar-grid"
@@ -1170,19 +1504,25 @@ onUnmounted(() => {
               v-for="(row, rowIndex) in eventRows.rows"
               :key="row.event.occurrence_id || `${row.event.id}-${row.event.start_at}`"
               class="calendar-event"
-              :class="{ tentative: row.event.status === 'tentative' }"
+              :class="{
+                tentative: row.event.status === 'tentative',
+                dragging: isDraggedEvent(row.event),
+              }"
               :style="{
                 top: `${row.top}px`,
                 height: `${row.height}px`,
                 // Rader som ligger längre ned i vyn ritas ovanpå. Då kan en
                 // kort händelse ligga ovanpå en lång utan att dölja dess
                 // titel.
-                'z-index': Math.round(row.top),
+                // En rad som dras lyfts över alla andra, så att den
+                // går att se när den flyttas.
+                'z-index': isDraggedEvent(row.event) ? 9999 : Math.round(row.top),
                 '--event-color': row.event.color || DEFAULT_EVENT_COLOR,
                 '--enter-delay': `${Math.min(rowIndex, 8) * 18}ms`,
+                transform: eventDragOffset(row.event),
               }"
-              @pointerdown.stop
-              @click.stop="openEditEvent(row.event)"
+              @pointerdown.stop="startEventDrag($event, row.event)"
+              @click.stop="handleEventClick(row.event)"
               :title="row.event.description || row.event.title"
             >
               <EventIcon v-if="row.event.icon" :icon="row.event.icon" class="event-icon" />
@@ -1224,6 +1564,16 @@ onUnmounted(() => {
           <i />
         </div>
 
+        <!-- Markören som visar var ett släppt mål skulle hamna. -->
+        <div
+          v-if="dropPreviewTime !== null"
+          class="drop-marker"
+          :style="{ top: `${timeToPosition(dropPreviewTime)}%` }"
+          aria-hidden="true"
+        >
+          <span>släpp här</span>
+        </div>
+
         <div v-if="coloredEvents.length === 0" class="empty-state" aria-hidden="true">
           <span class="empty-icon">◷</span>
           <p>Din tidslinje</p>
@@ -1231,6 +1581,22 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Menyn med tidsalternativ visas när ett mål släppts i kalendern.
+         Den ligger i kalenderns egen koordinatsystem, så att den hamnar
+         där pekaren släppte. -->
+    <GoalScheduleMenu
+      v-if="pendingGoalDrop"
+      :title="pendingGoalDrop.goal.title"
+      :start-at="pendingGoalDrop.startAt"
+      :options="scheduleOptions"
+      :style="{
+        left: `${pendingGoalDrop.left}px`,
+        top: `${pendingGoalDrop.top}px`,
+      }"
+      @select="scheduleGoal"
+      @cancel="cancelGoalDrop"
+    />
 
     <CalendarManager v-model:open="managerOpen" />
   </section>
@@ -1743,6 +2109,50 @@ onUnmounted(() => {
 .calendar-event.tentative {
   border-left-color: #f59e0b;
   background: rgb(245 158 11 / 0.14);
+}
+
+/* En händelse som dras lyfts över de andra raderna, så att det går att
+   se vilken rad som flyttas. Animationen stängs av - raden ska följa
+   pekaren direkt, inte hinna ikapp. */
+.calendar-event.dragging {
+  cursor: grabbing;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+  opacity: 0.9;
+  transition: none;
+}
+
+/* Markören som visar var i tiden ett släppt mål skulle hamna. */
+.drop-marker {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 0;
+  translate: 0 -50%;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.drop-marker span {
+  z-index: 1;
+  border-radius: 999px;
+  padding: 0.14rem 0.4rem;
+  color: white;
+  background: var(--color-accent-strong);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.drop-marker::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px rgb(129 140 248 / 0.8);
 }
 
 .calendar-event strong,

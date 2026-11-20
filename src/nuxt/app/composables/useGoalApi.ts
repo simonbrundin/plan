@@ -82,6 +82,15 @@ export function useGoalApi() {
 		});
 	};
 
+	// Sätter målets startdatum ("YYYY-MM-DD") - det datum då målet tidigast
+	// får dyka upp i prioriteringslistan. Null rensar datumet.
+	const setGoalStartDate = async (goalId: number, startDate: string | null) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { start_date: startDate },
+		});
+	};
+
 	// Sätter målets uppskattade tidsåtgång i minuter. Null rensar den.
 	const setGoalEstimate = async (goalId: number, minutes: number | null) => {
 		await apiProxy(`goals/${goalId}`, {
@@ -110,6 +119,9 @@ export function useGoalApi() {
 
 	// Sätter målets upprepningsregel och schemaläggningsstrategi.
 	// En nullad regel tar bort upprepningen så att målet blir vanligt igen.
+	//
+	// startDate är det datum serien startar på - det är INTE målets
+	// startdatum (det sätts med setGoalStartDate).
 	const setGoalRecurrence = async (
 		goalId: number,
 		rule: string | null,
@@ -121,7 +133,7 @@ export function useGoalApi() {
 			body: {
 				recurrence_rule: rule,
 				recurrence_mode: mode,
-				start_date: startDate,
+				recurrence_start_date: startDate,
 			},
 		});
 	};
@@ -321,6 +333,7 @@ export function useGoalApi() {
 		toggleGoalStarted,
 		toggleGoalFinished,
 		setGoalDue,
+		setGoalStartDate,
 		setGoalEstimate,
 		setGoalEternal,
 		setGoalAgent,

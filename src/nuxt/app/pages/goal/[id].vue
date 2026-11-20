@@ -8,13 +8,15 @@ import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { Goal, GoalWithWeight, GetGoalResponse } from '~/types/goal'
 import type { Place } from '~/types/place'
-import { insertChildId, moveChildId, newChildInsertIndex, nextChildOrder } from '~/utils/childOrder'
+import { insertChildId, newChildInsertIndex, nextChildOrder } from '~/utils/childOrder'
+import { buildDependencyTree, moveChildInTree } from '~/utils/childDependencyOrder'
 import { buildGoalData } from '~/utils/goalGraph'
 import { canBeFinished } from '~/utils/goalRules'
 import { descriptionPreview } from '~/utils/goalDescription'
-import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
+import { dueTone, formatDueDate, isFutureDate, todayDateString } from '~/utils/dueDate'
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import type { RecurrenceMode } from '~/utils/recurrence'
+import { useGoalDrag } from '~/composables/useGoalDrag'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
@@ -26,14 +28,24 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeight, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { startDrag: startGoalDrag } = useGoalDrag();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoEstimate, undoRecurrence } = useGoalUndo();
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo();
+const goalDates = useGoalDatesModal();
 
 // Använd goals store
 const goalsStore = useGoalsStore();
+
+// Ordningen som ska sparas till servern.
+//
+// Deklareras här (inte vid persistChildOrder) eftersom hydrate() kör under
+// setup och kan behöva spara en ny ordning direkt.
+let orderSaveChain: Promise<void> = Promise.resolve();
+let pendingOrder: number[] | null = null;
+let isSavingOrder = false;
 
 // Hämta målet med dess relationer
 const goalData = ref<GetGoalResponse | null>(null);
@@ -58,6 +70,32 @@ function hydrate() {
 
   goalData.value = data;
   error.value = null;
+
+  // Ordningen i listan ska följa beroendena - ett undermål som väntar på
+  // ett annat undermål i samma lista ligger direkt under det.
+  enforceDependencyOrder();
+}
+
+// Skriver om ordningen så att ett undermål som väntar på ett annat
+// undermål i samma lista ligger direkt under det.
+//
+// Listan visar order-fältet, så ordningen måste ändras i fältet - annars
+// skulle listan visa en ordning som inte gäller när den sparas.
+function enforceDependencyOrder() {
+  const list = goalData.value?.children;
+  if (!list || list.length < 2) {
+    return;
+  }
+
+  const currentIds = list.map((c) => c.id);
+  const nextIds = buildDependencyTree(list).map((item) => item.child.id);
+
+  if (currentIds.every((id, index) => id === nextIds[index])) {
+    return;
+  }
+
+  applyLocalOrder(nextIds);
+  persistChildOrder();
 }
 
 // Hämtar grafen och bygger om sidans data.
@@ -170,7 +208,11 @@ const parents = computed(
   () => goalData.value?.parents || []
 );
 
-// Barn med vikt och ordning (REST API returnerar detta direkt)
+// Barn med vikt och ordning (REST API returnerar detta direkt).
+//
+// Listan visar order-fältet - den sorteras inte om i vyn. Beroenden
+// påverkar i stället order-fältet (se enforceDependencyOrder), så att
+// piltangenternas flyttar och det som sparas alltid är samma sak.
 const children = computed(() => {
   return goalData.value?.children || [];
 });
@@ -217,6 +259,14 @@ function isChildBlocked(childId: number): boolean {
   const info = childDependencies.value[childId];
   if (!info || info.dependsOn.length === 0) return false;
   return info.dependsOn.some((d: any) => !d.finished);
+}
+
+// Indenteringen kommer från trädet: ett undermål som väntar på ett annat
+// undermål ligger direkt under det, och indenteras en nivå djupare.
+function childIndentStyle(childId: number): Record<string, string> {
+  const level = childLevels.value[childId] ?? 0;
+  if (level === 0) return {};
+  return { marginLeft: `${level}rem`, paddingLeft: '0.75rem' };
 }
 
 function getChildWaitingForTitle(childId: number): string | null {
@@ -380,10 +430,8 @@ const depDragChildId = ref<number | null>(null);
 const depDragOverChildId = ref<number | null>(null);
 const isDepDragging = ref(false);
 
-// Filtrerade undermål baserat på showCompleted och showStarted.
-// Ordningen kommer från servern (fältet "order") - den är det användaren
-// styr med piltangenterna, så den får inte sorteras om här.
-const filteredChildren = computed(() => {
+// Undermål som syns, filtrerade på showCompleted och showStarted.
+const visibleChildren = computed(() => {
   let result = children.value;
   if (!showCompleted.value) {
     result = result.filter((c) => !c.finished);
@@ -392,6 +440,30 @@ const filteredChildren = computed(() => {
     result = result.filter((c) => c.started !== null);
   }
   return result;
+});
+
+// Trädet av de synliga undermålen.
+//
+// Ett undermål som väntar på ett annat undermål i samma lista ligger
+// direkt under det - som ett underelement. Då hänger indenteringen ihop.
+const visibleTree = computed(() => buildDependencyTree(visibleChildren.value));
+
+// Undermålen i den ordning de visas: trädets ordning.
+const filteredChildren = computed(() => visibleTree.value.map((item) => item.child));
+
+// Nivå i trädet per undermål - styr indenteringen i listan.
+//
+// Ett undermål som väntar på ett mål utanför listan får en nivå, så att
+// det fortfarande syns att det väntar på något.
+const childLevels = computed(() => {
+  const levels: Record<number, number> = {};
+
+  for (const item of visibleTree.value) {
+    const blocked = isChildBlocked(item.child.id);
+    levels[item.child.id] = item.depth > 0 ? item.depth : blocked ? 1 : 0;
+  }
+
+  return levels;
 });
 
 // Sökfunktion för att lägga till föräldrar
@@ -755,6 +827,10 @@ async function handleDrop(event: DragEvent, dropChildId: number) {
 
 // Flytta det markerade barnet upp eller ner i listan.
 //
+// Ett mål på översta nivån flyttas tillsammans med sina undermål - de
+// hör ihop. Ett undermål flyttas bara inom sin grupp, så att det aldrig
+// hamnar utanför det mål det väntar på.
+//
 // Ordningen uppdateras lokalt först (optimistiskt) så att tangenttryck
 // direkt ger respons, och sparas sedan till servern. Sparandet serialiseras
 // och slås ihop, så att snabba tangenttryck inte skriver över varandra.
@@ -774,8 +850,7 @@ function moveChild(direction: "up" | "down") {
   const targetIndex = direction === "up" ? index - 1 : index + 1;
 
   const allIds = children.value.map((c) => c.id);
-  const visibleIds = visible.map((c) => c.id);
-  const reordered = moveChildId(allIds, visibleIds, movingChild.id, direction);
+  const reordered = moveChildInTree(allIds, visibleTree.value, movingChild.id, direction);
 
   if (!reordered) {
     return;
@@ -812,12 +887,8 @@ function applyLocalOrder(ids: number[]) {
 
 // Sparar ordningen till servern. Anropen körs i kedjan och senaste ordningen
 // vinner - flera snabba tangenttryck slås ihop till ett anrop.
-let orderSaveChain: Promise<void> = Promise.resolve();
-let pendingOrder: number[] | null = null;
-let isSavingOrder = false;
-
 function persistChildOrder() {
-  pendingOrder = children.value.map((c) => c.id);
+  pendingOrder = goalData.value?.children?.map((c) => c.id) ?? [];
 
   if (isSavingOrder) {
     return;
@@ -1369,6 +1440,81 @@ function applyDue(id: number, due: string | null) {
 	}
 }
 
+// Startdatum för ett mål - det datum då målet tidigast får dyka upp i
+// prioriteringslistan. Det är ett kalenderdatum ("YYYY-MM-DD") - tom
+// sträng rensar det.
+//
+// startTargetId anger VILKET mål väljaren är öppen för, så att tangenten
+// 'b' kan följa det markerade målet (förälder, huvudmål eller undermål).
+const startTargetId = ref<number | null>(null);
+const startDraft = ref('');
+
+function openStartPicker(target: Goal) {
+  startDraft.value = target.start_date ?? '';
+  startTargetId.value = target.id;
+
+  nextTick(() => {
+    const input = document.querySelector(
+      `[data-start-input="${target.id}"]`,
+    ) as (HTMLInputElement & { showPicker?: () => void }) | null;
+
+    input?.focus();
+    // showPicker öppnar den inbyggda kalender-popupen direkt. Äldre
+    // webbläsare saknar API:t, så fokus är fallback där.
+    try {
+      input?.showPicker?.();
+    } catch {
+      // Webbläsaren kan neka showPicker utan user activation.
+    }
+  });
+}
+
+function closeStartPicker() {
+  startTargetId.value = null;
+  startDraft.value = '';
+}
+
+async function saveStartDate(target: Goal, value: string) {
+  const startDate = value ? value : null;
+
+  try {
+    const previousStartDate = target.start_date ?? null;
+    await setGoalStartDate(target.id, startDate);
+    undoStartDate(target, previousStartDate);
+    applyStartDate(target.id, startDate);
+    closeStartPicker();
+    await refresh();
+  } catch (error) {
+    console.error('Failed to save goal start date:', error);
+  }
+}
+
+function applyStartDate(id: number, startDate: string | null) {
+  goalsStore.updateGoal(id, { start_date: startDate });
+
+  if (goalData.value?.allGoals) {
+    const goalIndex = goalData.value.allGoals.findIndex((g: Goal) => g.id === id);
+    if (goalIndex !== -1) {
+      goalData.value.allGoals[goalIndex].start_date = startDate;
+    }
+  }
+  if (goalData.value?.goal && goalData.value.goal.id === id) {
+    goalData.value.goal.start_date = startDate;
+  }
+  if (goalData.value?.children) {
+    const childIndex = goalData.value.children.findIndex((c) => c.id === id);
+    if (childIndex !== -1) {
+      goalData.value.children[childIndex].start_date = startDate;
+    }
+  }
+  if (goalData.value?.parents) {
+    const parentIndex = goalData.value.parents.findIndex((p) => p.id === id);
+    if (parentIndex !== -1) {
+      goalData.value.parents[parentIndex].start_date = startDate;
+    }
+  }
+}
+
 // Uppskattad tidsåtgång för ett mål.
 //
 // estimateTargetId anger VILKET mål fältet är öppet för, så att tangenten
@@ -1516,6 +1662,17 @@ onMounted(() => {
         const target = agentTarget();
         if (target) {
           toggleAgent(target);
+        }
+      },
+    },
+    {
+      keys: "d",
+      label: "D",
+      title: "Sätt startdatum och deadline",
+      run: () => {
+        const target = agentTarget();
+        if (target) {
+          goalDates.openFor(target);
         }
       },
     },
@@ -1673,6 +1830,25 @@ function handleKeydown(event: KeyboardEvent) {
       selectedChildIndex.value < filteredChildren.value.length
     ) {
       openDuePicker(filteredChildren.value[selectedChildIndex.value]);
+    }
+    return;
+  }
+
+  // Hantera 'b' för att sätta startdatum (tidigast synligt i /priority)
+  if (event.key === "b") {
+    event.preventDefault();
+    // Tangenten följer det markerade målet: förälder (parent-läge),
+    // huvudmålet eller det markerade undermålet.
+    if (isParentMode.value && parents.value.length > 0) {
+      openStartPicker(parents.value[selectedParentIndex.value]);
+    } else if (isGoalSelected.value && goal.value) {
+      openStartPicker(goal.value);
+    } else if (
+      filteredChildren.value.length > 0 &&
+      selectedChildIndex.value >= 0 &&
+      selectedChildIndex.value < filteredChildren.value.length
+    ) {
+      openStartPicker(filteredChildren.value[selectedChildIndex.value]);
     }
     return;
   }
@@ -1878,6 +2054,9 @@ watch(
 watch(undoRevision, () => {
   hydrate();
 });
+watch(goalDates.savedRevision, () => {
+  hydrate();
+});
 
 // Scrolla till markerat child när selectedChildIndex ändras
 watch(selectedChildIndex, async () => {
@@ -2035,10 +2214,15 @@ watch(selectedParentIndex, async () => {
           class="rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-elevated hover:text-ink" title="Ändra ikon">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-8 h-8 text-ink" />
         </button>
-        <h1 :class="['text-3xl font-bold tracking-tight transition-colors px-3 py-2 rounded-xl flex-1 border',
-          isGoalSelected ? 'border-accent bg-accent/10' : 'border-transparent',
-          goal?.eternal ? ETERNAL_TEXT : 'text-ink'
-        ]">{{ goal?.title }}</h1>
+        <h1
+          data-goal-row
+          :draggable="!!goal"
+          @dragstart="goal && startGoalDrag($event, goal)"
+          :class="['text-3xl font-bold tracking-tight transition-colors px-3 py-2 rounded-xl flex-1 border',
+            isGoalSelected ? 'border-accent bg-accent/10' : 'border-transparent',
+            goal?.eternal ? ETERNAL_TEXT : 'text-ink'
+          ]"
+        >{{ goal?.title }}</h1>
         <!-- Started-toggle (s) -->
         <button v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           @click.stop="toggleStarted(goal)"
@@ -2108,6 +2292,35 @@ watch(selectedParentIndex, async () => {
             </button>
             <span v-if="goal.due" class="text-sm tabular-nums" :class="dueToneClass(goal.due)">
               {{ formatDueDate(goal.due) }}
+            </span>
+          </template>
+        </div>
+        <!-- Startdatum: tidigast målet får dyka upp i /priority (b) -->
+        <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="flex items-center gap-1.5 flex-shrink-0">
+          <template v-if="startTargetId === goal.id">
+            <input :data-start-input="goal.id" v-model="startDraft" type="date"
+              class="rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+              @change="saveStartDate(goal, startDraft)"
+              @keydown.enter.prevent="saveStartDate(goal, startDraft)"
+              @keydown.esc.prevent="closeStartPicker" />
+            <button @click.stop="saveStartDate(goal, '')"
+              class="rounded-lg p-1 text-ink-dim transition-colors hover:bg-elevated hover:text-ink"
+              title="Rensa startdatum">
+              <Icon name="lucide:x" class="w-4 h-4" />
+            </button>
+          </template>
+          <template v-else>
+            <button @click.stop="openStartPicker(goal)"
+              class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+              :class="goal.start_date ? (isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-muted') : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.start_date ? `Startdatum: ${formatDueDate(goal.start_date)} - målet syns i prioriteringslistan från detta datum` : 'Sätt startdatum (b)'">
+              <Icon name="lucide:calendar-days" class="w-6 h-6"
+                :style="{ opacity: goal.start_date ? 1 : 0.25 }" />
+            </button>
+            <span v-if="goal.start_date" class="text-sm tabular-nums"
+              :class="isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-dim'">
+              {{ formatDueDate(goal.start_date) }}
             </span>
           </template>
         </div>
@@ -2302,8 +2515,8 @@ watch(selectedParentIndex, async () => {
             @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
             @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
             class="relative overflow-hidden rounded-2xl transition-opacity"
+            :style="childIndentStyle(child.id)"
             :class="[
-              isChildBlocked(child.id) ? 'ml-4 pl-3' : '',
               dragOverChildId === child.id ? 'ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-canvas' : 'opacity-100',
               draggedChildId === child.id ? 'opacity-30' : '',
               depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-canvas' : ''

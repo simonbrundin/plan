@@ -6,16 +6,19 @@ import { isRootGoal, isUnfinishedGoal, matchesStartedFilter } from '~/utils/goal
 import { moveChildId } from '~/utils/childOrder'
 import { sortGoalsByOrder } from '~/utils/goalOrder'
 import { descriptionPreview } from '~/utils/goalDescription'
-import { dueTone, formatDueDate, todayDateString } from '~/utils/dueDate'
+import { dueTone, formatDueDate, isFutureDate, todayDateString } from '~/utils/dueDate'
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoEstimate, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
+const goalDates = useGoalDatesModal()
+// Målet kan dras in i kalendern för att schemaläggas.
+const { startDrag } = useGoalDrag()
 
 const goals = ref<Goal[]>([])
 const pending = ref(false)
@@ -163,8 +166,9 @@ async function refreshGoals() {
 // Ett mål som skapats via det globala snabbfältet ska synas direkt.
 watch(quickAddRevision, refreshGoals)
 
-// När något har ångras kan listan ha ändrats - hämta om den.
+// När något har ångras eller datum-popupen sparats kan listan ha ändrats - hämta om den.
 watch(undoRevision, refreshGoals)
+watch(goalDates.savedRevision, refreshGoals)
 
 // Navigera till mål
 function goToGoal(goalId: number) {
@@ -386,6 +390,33 @@ async function saveDue(goal: Goal, value: string) {
   }
 }
 
+// Startdatum för ett grundmål - det datum då målet tidigast får dyka
+// upp i prioriteringslistan.
+const startGoalId = ref<number | null>(null)
+const startDraft = ref('')
+
+function openStartPicker(goal: Goal) {
+  startDraft.value = goal.start_date ?? ''
+  startGoalId.value = goal.id
+}
+
+async function saveStartDate(goal: Goal, value: string) {
+  const startDate = value ? value : null
+  try {
+    const previousStartDate = goal.start_date ?? null
+    await setGoalStartDate(goal.id, startDate)
+    undoStartDate(goal, previousStartDate)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    const current = localGoals.value[idx]
+    if (idx !== -1 && current) {
+      localGoals.value[idx] = { ...current, start_date: startDate }
+    }
+    startGoalId.value = null
+  } catch (err) {
+    console.error('Failed to save start date:', err)
+  }
+}
+
 // Uppskattad tidsåtgång för ett grundmål.
 //
 // estimateTargetId anger vilket grundmål fältet är öppet för.
@@ -586,6 +617,16 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
+  // b - sätt startdatum (tidigast synligt i /priority)
+  if (event.key === 'b') {
+    event.preventDefault()
+    const goal = filteredGoals.value[selectedIndex.value]
+    if (goal) {
+      openStartPicker(goal)
+    }
+    return
+  }
+
   // m - sätt uppskattad tidsåtgång för det markerade målet
   if (event.key === 'm') {
     event.preventDefault()
@@ -692,6 +733,17 @@ onMounted(() => {
         }
       },
     },
+    {
+      keys: 'd',
+      label: 'D',
+      title: 'Sätt startdatum och deadline',
+      run: () => {
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) {
+          goalDates.openFor(goal)
+        }
+      },
+    },
   ])
 })
 
@@ -758,7 +810,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · m tidsåtgång · t beskrivning · x ta bort · space+a agent
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent
         </span>
       </div>
     </div>
@@ -814,11 +866,14 @@ definePageMeta({
       >
         <div
           :data-goal-index="index"
+          data-goal-row
+          draggable="true"
           class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 cursor-pointer"
           :class="[
             index === selectedIndex ? 'ring-1 ring-accent' : '',
             isWaitingForNextOccurrence(goal) ? 'opacity-50' : '',
           ]"
+          @dragstart="startDrag($event, goal)"
           @click="goToGoal(goal.id)"
         >
           <span
@@ -877,6 +932,32 @@ definePageMeta({
             </button>
             <span v-if="goal.due" class="text-sm tabular-nums flex-shrink-0" :class="dueToneClass(goal.due)">
               {{ formatDueDate(goal.due) }}
+            </span>
+          </template>
+          <!-- Startdatum: tidigast målet får dyka upp i /priority (b) -->
+          <template v-if="startGoalId === goal.id">
+            <input v-model="startDraft" type="date" @click.stop
+              class="flex-shrink-0 rounded-lg border border-line bg-surface-2 px-2 py-1 text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+              @change="saveStartDate(goal, startDraft)"
+              @keydown.enter.prevent="saveStartDate(goal, startDraft)"
+              @keydown.esc.prevent="startGoalId = null" />
+            <button @click.stop="saveStartDate(goal, '')"
+              class="flex-shrink-0 p-1 rounded text-ink-dim transition-colors hover:text-ink-muted"
+              title="Rensa startdatum">
+              <Icon name="lucide:x" class="w-4 h-4" />
+            </button>
+          </template>
+          <template v-else>
+            <button @click.stop="openStartPicker(goal)"
+              class="flex-shrink-0 p-1 rounded transition-colors"
+              :class="goal.start_date ? (isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-muted') : 'text-ink-dim hover:text-ink-muted'"
+              :title="goal.start_date ? `Startdatum: ${formatDueDate(goal.start_date)} - målet syns i prioriteringslistan från detta datum` : 'Sätt startdatum (b)'">
+              <Icon name="lucide:calendar-days" class="w-5 h-5"
+                :style="{ opacity: goal.start_date ? 1 : 0.25 }" />
+            </button>
+            <span v-if="goal.start_date" class="text-sm tabular-nums flex-shrink-0"
+              :class="isFutureDate(goal.start_date) ? 'text-sky-300' : 'text-ink-dim'">
+              {{ formatDueDate(goal.start_date) }}
             </span>
           </template>
           <EstimateBadge

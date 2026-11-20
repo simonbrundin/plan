@@ -15,6 +15,9 @@ export interface Goal {
 	// Due är det datum ("YYYY-MM-DD") målet ska vara klart.
 	// Null = inget datum satt.
 	due: string | null;
+	// StartDate är det datum ("YYYY-MM-DD") målet tidigast får dyka upp
+	// i prioriteringslistan. Null = målet får synas direkt.
+	start_date?: string | null;
 	// Uppskattad tidsåtgång i minuter. Null = ingen uppskattning satt.
 	estimated_minutes?: number | null;
 	// Platser där målet kan slutföras. Flera platser har OR-semantik:

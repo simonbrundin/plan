@@ -15,6 +15,7 @@ export function useGoalUndo() {
 		setGoalEternal,
 		setGoalAgent,
 		setGoalDue,
+		setGoalStartDate,
 		setGoalEstimate,
 		setGoalRecurrence,
 		undoGoalOccurrence,
@@ -109,6 +110,35 @@ export function useGoalUndo() {
 		});
 	}
 
+	/** Startdatumet sattes eller rensades. */
+	function undoStartDate(goal: Goal, previousStartDate: string | null) {
+		push({
+			label: previousStartDate
+				? `Satte startdatum ${previousStartDate} på "${goal.title}"`
+				: `Tog bort startdatumet på "${goal.title}"`,
+			undo: async () => {
+				await setGoalStartDate(goal.id, previousStartDate);
+				await refreshStore();
+			},
+		});
+	}
+
+	/** Start- och due-datum ändrades i samma datum-popup. */
+	function undoDates(
+		goal: Goal,
+		previousStartDate: string | null,
+		previousDue: string | null,
+	) {
+		push({
+			label: `Ångra datum på "${goal.title}"`,
+			undo: async () => {
+				await setGoalStartDate(goal.id, previousStartDate);
+				await setGoalDue(goal.id, previousDue);
+				await refreshStore();
+			},
+		});
+	}
+
 	/** Den uppskattade tidsåtgången sattes eller rensades. */
 	function undoEstimate(goal: Goal, previousMinutes: number | null) {
 		push({
@@ -150,6 +180,8 @@ export function useGoalUndo() {
 		undoEternal,
 		undoAgent,
 		undoDue,
+		undoStartDate,
+		undoDates,
 		undoEstimate,
 		undoRecurrence,
 	};

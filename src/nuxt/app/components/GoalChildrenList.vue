@@ -23,6 +23,7 @@ const props = defineProps<{
   weightEditingChildId: number | null
   tempWeight: number
   childDependencies: Record<number, { dependsOn: any[]; blocking: any[] }>
+  childLevels: Record<number, number>
   depDragChildId: number | null
   depDragOverChildId: number | null
   isDepDragging: boolean
@@ -57,6 +58,14 @@ function isChildBlocked(childId: number): boolean {
   const info = props.childDependencies[childId]
   if (!info || info.dependsOn.length === 0) return false
   return info.dependsOn.some((d: any) => !d.finished)
+}
+
+// Indenteringen kommer från trädet: ett undermål som väntar på ett annat
+// undermål ligger direkt under det, och indenteras en nivå djupare.
+function childIndentStyle(childId: number): Record<string, string> {
+  const level = props.childLevels[childId] ?? 0
+  if (level === 0) return {}
+  return { marginLeft: `${level}rem`, paddingLeft: '0.75rem' }
 }
 
 function getChildWaitingForTitle(childId: number): string | null {
@@ -133,8 +142,8 @@ function dueToneClass(due: string | null): string {
         :data-child-index="index"
         draggable="true"
         class="relative overflow-hidden rounded-lg transition-opacity"
+        :style="childIndentStyle(child.id)"
         :class="[
-          isChildBlocked(child.id) ? 'ml-4 pl-3' : '',
           dragOverChildId === child.id ? 'ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-canvas' : '',
           draggedChildId === child.id ? 'opacity-30' : '',
           depDragOverChildId === child.id && depDragChildId !== child.id ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-canvas' : ''

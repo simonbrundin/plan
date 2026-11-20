@@ -67,7 +67,14 @@ type Goal struct {
 	Finished *time.Time `json:"finished"`
 	// Due är det datum målet ska vara klart. Skickas alltid ut, även när
 	// det är null - samma resonemang som för started/finished.
-	Due  *DueDate `json:"due"`
+	Due *DueDate `json:"due"`
+	// StartDate är det datum målet tidigast får dyka upp i
+	// prioriteringslistan. Null = målet får synas direkt.
+	//
+	// Det är ett annat datum än started: started säger att arbetet har
+	// börjat, startDate säger att målet inte får prioriteras ännu.
+	// Skickas alltid ut, även när det är null.
+	StartDate *DueDate `json:"start_date"`
 	// EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.
 	// Null = ingen uppskattning satt. Skickas alltid ut, även när den är
 	// null - samma resonemang som för started/finished.
@@ -202,9 +209,12 @@ type CreateGoalRequest struct {
 	// RecurrenceMode är schemaläggningsstrategin: "schedule" eller "push".
 	// Utan den används "schedule".
 	RecurrenceMode *string `json:"recurrence_mode" example:"schedule"`
-	// StartDate är det datum serien startar på ("YYYY-MM-DD"). Utan den
-	// används dagens datum.
+	// StartDate är det datum målet tidigast får dyka upp i
+	// prioriteringslistan ("YYYY-MM-DD"). Utan det får målet synas direkt.
 	StartDate *string `json:"start_date" example:"2026-01-05"`
+	// RecurrenceStartDate är det datum serien startar på ("YYYY-MM-DD").
+	// Utan den används dagens datum.
+	RecurrenceStartDate *string `json:"recurrence_start_date" example:"2026-01-05"`
 }
 
 // NullableTime is a timestamp field in an update request.
@@ -249,6 +259,10 @@ type UpdateGoalRequest struct {
 	Finished    NullableTime `json:"finished,omitempty"`
 	// Due sätter eller rensar målets due-datum ("YYYY-MM-DD" eller null).
 	Due NullableDueDate `json:"due,omitempty"`
+	// StartDate sätter eller rensar målets startdatum ("YYYY-MM-DD" eller
+	// null). Startdatumet avgör från vilket datum målet får dyka upp i
+	// prioriteringslistan.
+	StartDate NullableDueDate `json:"start_date,omitempty"`
 	// EstimatedMinutes sätter eller rensar målets uppskattade tidsåtgång
 	// (antal minuter eller null).
 	EstimatedMinutes NullableInt `json:"estimated_minutes,omitempty"`
@@ -263,8 +277,8 @@ type UpdateGoalRequest struct {
 	RecurrenceRule NullableString `json:"recurrence_rule,omitempty"`
 	// RecurrenceMode sätter schemaläggningsstrategin ("schedule" eller "push").
 	RecurrenceMode NullableString `json:"recurrence_mode,omitempty"`
-	// StartDate är det datum serien startar på ("YYYY-MM-DD").
-	StartDate *string `json:"start_date,omitempty"`
+	// RecurrenceStartDate är det datum serien startar på ("YYYY-MM-DD").
+	RecurrenceStartDate *string `json:"recurrence_start_date,omitempty"`
 }
 
 // FinishesGoal returnerar true om requesten försöker markera målet som klart,
