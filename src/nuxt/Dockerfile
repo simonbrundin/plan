@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # ==============================
 # Build Stage
 # ==============================
@@ -15,13 +17,15 @@ RUN apk add --no-cache python3 make g++ gcc
 COPY package.json bun.lock* ./
 
 # Installera Bun (globalt)
-RUN npm install -g bun
+RUN --mount=type=cache,target=/root/.npm \
+    npm install -g bun
 
 # Installera beroenden (cache-vänligt)
 # --omit=peer: peer-dependencies (t.ex. better-sqlite3) auto-installeras av
 # bun och kräver en nativ kompilering som är skör över Node-versioner.
 # Appen använder dem inte.
-RUN bun install --frozen-lockfile --omit=peer
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile --omit=peer
 
 # Kopiera källkod (efter install för bättre cache)
 COPY . .

@@ -1,0 +1,23 @@
+# Lokala/generatede artefakter – ska aldrig skickas i Docker-build context
+node_modules
+.nuxt
+.output
+.git
+.gitignore
+
+# Lokala miljöer och editor-/OS-filer
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# Test- och utvecklingsfiler som inte behövs för produktionsbygget
+features
+test
+coverage
+.vscode
+.idea
+
+# Alternativ låsfil – Docker-installationen använder bun.lock
+package-lock.json
