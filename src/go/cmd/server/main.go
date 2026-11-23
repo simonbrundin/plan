@@ -210,6 +210,12 @@ func main() {
 		api.PUT("/goals/:id/tags", tagHandler.SetGoalTags)
 		api.DELETE("/goals/:id/tags/:name", tagHandler.DeleteGoalTag)
 
+		// Agent run endpoints
+		agentRunHandler := handlers.NewAgentRunHandler(dbConnected)
+		api.GET("/agent-runs", agentRunHandler.ListAgentRuns)
+		api.POST("/agent-runs", agentRunHandler.CreateAgentRun)
+		api.PATCH("/agent-runs/:id", agentRunHandler.UpdateAgentRun)
+
 		// API Keys endpoints
 		apiKeyHandler := handlers.NewAPIKeyHandler()
 		api.GET("/api-keys", apiKeyHandler.ListAPIKeys)
