@@ -27,13 +27,26 @@ This file contains preferences and requirements for AI coding agents working on 
 - GitHub Actions cache causing stale builds with missing dependencies
 
 ## Secrets
-- SESSION_SECRET: `3eDqjso1WefD4doxeG2nR4ZQvg4SjOMe669ac4B8UQE=`
-- Zitadel CLIENT_SECRET: `pba!gvj5dqk7hut@NYR` (in 1Password item "Auth - Zitadel")
+- Inga credentials i detta repo. Hemligheter krypteras med **SOPS + age**
+  och dekrypteras av Flux (`spec.decryption.provider: sops`).
+- `environments/prod/secrets/*.enc.yaml` - krypterade, appliceras av Flux.
+- `environments/base/sops-public-key.yaml` - publika age-nyckeln (samma som
+  `infrastructure-flux/components/secrets/sops.age.pub`).
+- Privata nyckeln ligger lokalt i `~/.config/sops-age/keys.txt` (aldrig commit).
+- Övriga hemligheter (Zitadel CLIENT_SECRET, SESSION_SECRET) finns i
+  1Password - hämta med `op read "op://Private/<item>/<field>"`.
 
 ## Cluster Access
-- Use certificate login: `KUBECONFIG=/tmp/kubeconfig-certificate kubectl...`
-- Vault is down (no pods in vault namespace) - ESO can't sync secrets
-- Auth secret patched manually as workaround
+- Kubectl: `kubectl --context admin@cluster1-2 ...` (kubeconfig i
+  `~/.kube/config`). `/tmp/kubeconfig-certificate` fungerar inte - det
+  pekar mot en gammal CA.
+- `talosctl`: `talosctl -n <nod-ip> ...` med `~/.talos/config`.
+- **Ingen Vault och ingen ESO (External Secrets Operator)** i klustret - det
+  var en ArgoCD-era-modell. SOPS via Flux är enda secret-väg. Se
+  `~/wiki/wiki/concepts/sops.md`.
+- Klustret (Talos) byggdes om 2026-11-23: FluxOperator måste installeras
+  manuellt i ett nytt kluster, och noder med trasig pod-nätverk
+  (controlplane-2, worker-8) har taint `node.kubernetes.io/broken`.
 
 ## Stack
 
