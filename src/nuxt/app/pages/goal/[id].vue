@@ -23,6 +23,8 @@ import { useGoalDrag } from '~/composables/useGoalDrag'
 import type { TagTarget } from '~/composables/useGoalTagPicker'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 import { normalizeGoalWeights } from '~/utils/goalWeights'
+import type { AgentRun } from '~/types/agent'
+import { useAgentApi } from '~/composables/useAgentApi'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -58,6 +60,33 @@ let isSavingOrder = false;
 const goalData = ref<GetGoalResponse | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
+
+// Agentkörningen för målet - chatten och godkännandena hänger på den.
+const { fetchAgentRuns } = useAgentApi();
+const agentRun = ref<AgentRun | null>(null);
+
+async function loadAgentRun() {
+  try {
+    const runs = await fetchAgentRuns(goalId.value);
+    agentRun.value = runs.length ? runs[0] : null;
+  } catch {
+    agentRun.value = null;
+  }
+}
+
+// Spara konversations-id:t så att chatten hittas igen nästa gång.
+async function saveConversationId(conversationId: string) {
+  if (!agentRun.value) return;
+  try {
+    await $fetch(`/api/proxy/agent-runs/${agentRun.value.id}`, {
+      method: 'PATCH',
+      body: { conversation_id: conversationId },
+    });
+    agentRun.value.conversation_id = conversationId;
+  } catch (err) {
+    console.error('Failed to save conversation id:', err);
+  }
+}
 
 // Sätter sidans data ur grafen.
 function hydrate() {
@@ -1720,6 +1749,12 @@ async function saveEstimate(target: Goal, minutes: number | null) {
 }
 
 // Toggla started status på ett mål
+function updateGoalPhase(goalToUpdate: Goal | null | undefined, statusId: number) {
+  if (!goalToUpdate) return
+  goalToUpdate.status_id = statusId
+  goalsStore.updateGoal(goalToUpdate.id, { status_id: statusId })
+}
+
 async function toggleStarted(goalToToggle: Goal) {
   try {
     const previousStarted = goalToToggle.started;
@@ -2284,6 +2319,7 @@ function handleKeydown(event: KeyboardEvent) {
 // Lägg till och ta bort event listener
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
+  loadAgentRun();
 });
 
 onUnmounted(() => {
@@ -2528,6 +2564,9 @@ watch(selectedParentIndex, async () => {
               :style="{ opacity: goal.eternal ? 1 : 0.25 }" />
           </button>
         </span>
+        <GoalPhaseBadge v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          :goal-id="goal.id" :status-id="goal.status_id"
+          @updated="statusId => updateGoalPhase(goal, statusId)" />
         <!-- Agent-märke -->
         <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="opt-icon" :class="{ 'is-on': !!goal.agent }">
@@ -2697,6 +2736,15 @@ watch(selectedParentIndex, async () => {
         <p v-else-if="goal.description" class="text-sm text-ink-muted whitespace-pre-wrap">
           {{ goal.description }}
         </p>
+      </div>
+
+      <!-- Agentchatt - Plan är agentens gränssnitt -->
+      <div v-if="goal?.agent" class="flex-shrink-0">
+        <AgentChatPanel
+          :goal-id="goal.id"
+          :goal-title="goal.title || ''"
+          :run="agentRun"
+          @conversation-started="saveConversationId" />
       </div>
 
       <!-- Dependencies-sektion -->
@@ -2925,6 +2973,8 @@ watch(selectedParentIndex, async () => {
                        :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
                    </button>
                  </span>
+                 <GoalPhaseBadge :goal-id="child.id" :status-id="child.status_id"
+                   @updated="statusId => updateGoalPhase(child, statusId)" />
                  <!-- Agent-märke -->
                  <span class="opt-icon" :class="{ 'is-on': !!child.agent }">
                    <AgentBadge :active="!!child.agent" @toggle="toggleAgent(child)" />

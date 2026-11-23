@@ -89,6 +89,10 @@ export default defineNuxtConfig({
 		// Used by the API proxy and the auth routes. Falls back to the
 		// public URL when not set.
 		goApiInternalUrl: process.env.NUXT_GO_API_INTERNAL_URL || "",
+		// Agent-API:t (~/repos/agents) - chatt och godkännanden. Anropas
+		// server till server, aldrig från webbläsaren.
+		agentApiInternalUrl: process.env.NUXT_AGENT_API_INTERNAL_URL || "",
+		agentApiKey: process.env.NUXT_AGENT_API_KEY || "",
 		public: {
 			appUrl: process.env.NUXT_PUBLIC_APP_URL || "",
 			goApiUrl: process.env.NUXT_PUBLIC_GO_API_URL || "http://localhost:8080/api/v1",
