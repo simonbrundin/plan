@@ -12,6 +12,7 @@ definePageMeta({
 
 const { user } = useUserSession()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
+const goalsStore = useGoalsStore()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
 const goalDates = useGoalDatesModal()
@@ -246,6 +247,11 @@ async function toggleFinished(goal: PrioritizedGoalRow) {
   } catch (err) {
     console.error('Failed to toggle goal finished:', err)
   }
+}
+
+function updateGoalPhase(goal: PrioritizedGoalRow, statusId: number) {
+  goal.status_id = statusId
+  goalsStore.updateGoal(goal.id, { status_id: statusId })
 }
 
 async function toggleStarted(goal: PrioritizedGoalRow) {
@@ -777,6 +783,8 @@ const filterOptions = [
             </button>
           </span>
 
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
+            @updated="statusId => updateGoalPhase(goal, statusId)" />
           <span class="opt-icon" :class="{ 'is-on': !!goal.agent }">
             <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
           </span>

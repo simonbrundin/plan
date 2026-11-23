@@ -10,13 +10,14 @@ definePageMeta({
 });
 
 const { fetchAgentGoals, fetchAgentRuns } = useAgentApi();
+const goalsStore = useGoalsStore();
 
 const goals = ref<Goal[]>([]);
 const runs = ref<AgentRun[]>([]);
 const pending = ref(true);
 const errorMessage = ref("");
 
-// Fasen visas som ord - den är agentens livscykel, inte målets status.
+// Agentkörningens fas visar samma arbetsfas som målets status.
 const phaseLabels: Record<AgentRunPhase, string> = {
   define: "Specificerar",
   plan: "Planerar",
@@ -59,6 +60,11 @@ const latestRun = computed(() => {
   }
   return byGoal;
 });
+
+function updateGoalPhase(goal: Goal, statusId: number) {
+  goal.status_id = statusId;
+  goalsStore.updateGoal(goal.id, { status_id: statusId });
+}
 
 function formatUpdated(value: string): string {
   return new Intl.DateTimeFormat("sv-SE", {
@@ -116,10 +122,10 @@ onMounted(async () => {
         {{ goals.length }} agentmål
       </div>
       <ul class="divide-y divide-line">
-        <li v-for="goal in goals" :key="goal.id">
+        <li v-for="goal in goals" :key="goal.id" class="flex items-start gap-3 px-5 py-4">
           <NuxtLink
             :to="`/goal/${goal.id}`"
-            class="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-surface-2"
+            class="flex min-w-0 flex-1 items-start gap-4 transition-colors hover:bg-surface-2"
           >
             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-2 text-ink-muted">
               <Icon :name="goal.icon || 'heroicons:star'" class="h-5 w-5" />
@@ -149,6 +155,8 @@ onMounted(async () => {
             </span>
             <Icon name="i-lucide-chevron-right" class="mt-1 h-5 w-5 shrink-0 text-ink-dim" />
           </NuxtLink>
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
+            @updated="statusId => updateGoalPhase(goal, statusId)" />
         </li>
       </ul>
     </div>

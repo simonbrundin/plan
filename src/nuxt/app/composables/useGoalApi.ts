@@ -1,4 +1,4 @@
-import type { Goal, GoalDependency, GoalGraphResponse } from "~/types/goal";
+import type { Goal, GoalDependency, GoalGraphResponse, GoalStatus } from "~/types/goal";
 import type { RecurrenceMode } from "~/utils/recurrence";
 
 // Custom error for authentication failures
@@ -58,6 +58,10 @@ export function useGoalApi() {
 			method: "PATCH",
 			body: { status_id: statusId },
 		});
+	};
+
+	const loadGoalStatuses = async (): Promise<GoalStatus[]> => {
+		return await apiProxy<GoalStatus[]>("statuses");
 	};
 
 	const toggleGoalStarted = async (goalId: number, started: string | null) => {
@@ -355,6 +359,7 @@ export function useGoalApi() {
 		updateGoalIcon,
 		updateGoalDescription,
 		updateGoalStatus,
+		loadGoalStatuses,
 		toggleGoalStarted,
 		toggleGoalFinished,
 		setGoalDue,

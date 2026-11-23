@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
-import type { Goal, GoalDependency, GoalRelation } from "~/types/goal";
+import type { Goal, GoalDependency, GoalRelation, GoalStatus } from "~/types/goal";
 
 // Ett pågående anrop mot servern. Det ligger utanför state eftersom en
 // Promise inte hör hemma i en serialiserbar store.
 let inflightLoad: Promise<void> | null = null;
+let inflightStatusLoad: Promise<void> | null = null;
 
 export const useGoalsStore = defineStore("goals", {
 	// Skip hydration is enforced globally by the pinia-hydration plugin.
@@ -12,6 +13,8 @@ export const useGoalsStore = defineStore("goals", {
 		goals: [] as Goal[],
 		relations: [] as GoalRelation[],
 		dependencies: [] as GoalDependency[],
+		statuses: [] as GoalStatus[],
+		statusesLoaded: false,
 		isLoaded: false,
 		// När grafen senast hämtades (ms sedan epoch). Används för att
 		// veta om data är färsk nog eller måste hämtas om.
@@ -90,6 +93,23 @@ export const useGoalsStore = defineStore("goals", {
 	},
 
 	actions: {
+		async loadStatuses() {
+			if (this.statusesLoaded) return;
+			if (inflightStatusLoad) return inflightStatusLoad;
+
+			inflightStatusLoad = (async () => {
+				try {
+					const { loadGoalStatuses } = useGoalApi();
+					this.statuses = await loadGoalStatuses();
+					this.statusesLoaded = true;
+				} finally {
+					inflightStatusLoad = null;
+				}
+			})();
+
+			return inflightStatusLoad;
+		},
+
 		// Ladda hela målgraphen från servern.
 		//
 		// force = true hämtar alltid om. Annars hoppas hämtningen över

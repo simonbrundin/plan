@@ -9,6 +9,7 @@ export interface Goal {
 	// får plats för allt som inte passar i titeln.
 	description: string;
 	icon: string;
+	status_id: number;
 	created: string;
 	started: string | null;
 	finished: string | null;
@@ -50,6 +51,12 @@ export interface Goal {
 	recurrence_next?: string | null;
 	// Antalet slutförda förekomster.
 	recurrence_count?: number;
+}
+
+export interface GoalStatus {
+	id: number;
+	name: string;
+	label: string;
 }
 
 export interface ChildRelation {
