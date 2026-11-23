@@ -191,6 +191,10 @@ const sections = computed<Section[]>(() => {
           keys: ["d"],
           description: "Sätt startdatum och deadline (målsidan, /goals, /now)",
         },
+        {
+          keys: ["t"],
+          description: "Sätt taggar på markerat mål (målsidan, /goals, /now)",
+        },
         { keys: ["Esc"], description: "Avbryt leader-läget" },
       ],
     },

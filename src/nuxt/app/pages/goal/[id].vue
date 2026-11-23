@@ -18,6 +18,7 @@ import { dueTone, formatDueDate, isFutureDate, todayDateString } from '~/utils/d
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { useGoalDrag } from '~/composables/useGoalDrag'
+import type { TagTarget } from '~/composables/useGoalTagPicker'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 import { normalizeGoalWeights } from '~/utils/goalWeights'
 
@@ -157,6 +158,16 @@ await fetchPlaces().catch(() => {
   console.error('Failed to fetch places');
 });
 
+// Hämta användarens taggar - de behövs för taggväljaren.
+const { fetchTags } = useTags();
+await fetchTags().catch(() => {
+  console.error('Failed to fetch tags');
+});
+
+// Taggväljaren (leader + t) delas mellan alla sidor och renderas i
+// layouten - här öppnas den bara för det markerade målet.
+const tagPicker = useGoalTagPicker();
+
 // Målet vars platser just nu redigeras. Null = ingen öppen platsväljare.
 const placeTargetId = ref<number | null>(null);
 const placeDraft = ref<Place[]>([]);
@@ -201,6 +212,45 @@ function applyPlaces(targetId: number, saved: Place[]) {
   const parent = data.parents?.find((p) => p.id === targetId);
   if (parent) parent.places = saved;
 }
+
+// Det mål som taggarna sätts på. Det följer det markerade målet:
+// förälder (parent-läge), huvudmålet eller det markerade undermålet.
+// Utan undermål gäller taggarna huvudmålet.
+function tagTarget(): TagTarget | null {
+  if (isParentMode.value && parents.value.length > 0) {
+    return parents.value[selectedParentIndex.value] ?? null;
+  }
+  if (isGoalSelected.value && goal.value) {
+    return goal.value;
+  }
+  if (
+    filteredChildren.value.length > 0 &&
+    selectedChildIndex.value >= 0 &&
+    selectedChildIndex.value < filteredChildren.value.length
+  ) {
+    return filteredChildren.value[selectedChildIndex.value] ?? null;
+  }
+  return goal.value ?? null;
+}
+
+// Öppnar taggväljaren för ett mål.
+function openTagPicker(target: TagTarget | null) {
+  if (!target) return;
+  void tagPicker.openFor(target);
+}
+
+// När taggar har sparats skrivs de tillbaka i den hämtade måldatan.
+watch(tagPicker.savedRevision, () => {
+  const saved = tagPicker.lastSaved.value;
+  if (!saved) return;
+  const data = goalData.value;
+  if (!data) return;
+  if (data.goal?.id === saved.id) data.goal.tags = saved.tags;
+  const child = data.children?.find((c) => c.id === saved.id);
+  if (child) child.tags = saved.tags;
+  const parent = data.parents?.find((p) => p.id === saved.id);
+  if (parent) parent.tags = saved.tags;
+});
 
 // Byt målsida när ett nytt mål väljs - utan serverfråga, grafen räcker.
 watch(
@@ -1802,6 +1852,14 @@ onMounted(() => {
         }
       },
     },
+    {
+      keys: "t",
+      label: "T",
+      title: "Sätt taggar",
+      run: () => {
+        openTagPicker(tagTarget());
+      },
+    },
   ]);
 });
 
@@ -2285,6 +2343,16 @@ watch(selectedParentIndex, async () => {
                 @open="openEstimateEditor(parent)"
                 @save="saveEstimate(parent, $event)"
                 @cancel="closeEstimateEditor" />
+              <!-- Taggar för förälder (leader + t) -->
+              <div class="relative flex items-center">
+                <button @click.stop="openTagPicker(parent)"
+                  class="rounded-lg p-1 transition-colors"
+                  :class="parent.tags?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+                  :title="parent.tags?.length ? `Taggar: ${parent.tags.join(', ')}` : 'Sätt taggar (leader + t)'">
+                  <Icon name="lucide:tag" class="w-4 h-4"
+                    :style="{ opacity: parent.tags?.length ? 1 : 0.25 }" />
+                </button>
+              </div>
               <!-- Platser för förälder (p) -->
               <div class="relative flex items-center">
                 <button @click.stop="togglePlacePicker(parent.id)"
@@ -2510,6 +2578,21 @@ watch(selectedParentIndex, async () => {
             @update:selected="placeDraft = $event"
             @save="savePlaces(goal.id)"
             @cancel="closePlacePicker" />
+        </div>
+        <!-- Taggar (leader + t) -->
+        <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="opt-icon relative flex items-center gap-1.5 flex-shrink-0"
+          :class="{ 'is-on': !!goal.tags?.length || tagPicker.target.value?.id === goal.id }">
+          <button @click.stop="openTagPicker(goal)"
+            class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="goal.tags?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+            :title="goal.tags?.length ? `Taggar: ${goal.tags.join(', ')}` : 'Sätt taggar (leader + t)'">
+            <Icon name="lucide:tag" class="w-6 h-6"
+              :style="{ opacity: goal.tags?.length ? 1 : 0.25 }" />
+          </button>
+          <span v-if="goal.tags?.length" class="text-sm text-ink-dim">
+            {{ goal.tags.join(', ') }}
+          </span>
         </div>
         <!-- Toggle dependencies visibility -->
         <button @click.stop="showDependencies = !showDependencies"
@@ -2828,6 +2911,17 @@ watch(selectedParentIndex, async () => {
                       @remove="removeRecurrence"
                       @cancel="closeRecurrenceEditor" />
                   </div>
+                </div>
+                <!-- Taggar för undermål (leader + t) -->
+                <div class="opt-icon relative flex-shrink-0 flex items-center gap-1"
+                  :class="{ 'is-on': !!child.tags?.length || tagPicker.target.value?.id === child.id }">
+                  <button @click.stop="openTagPicker(child)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+                    :class="child.tags?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+                    :title="child.tags?.length ? `Taggar: ${child.tags.join(', ')}` : 'Sätt taggar (leader + t)'">
+                    <Icon name="lucide:tag" class="w-5 h-5"
+                      :style="{ opacity: child.tags?.length ? 1 : 0.25 }" />
+                  </button>
                 </div>
                 <!-- Platser för undermål (p) -->
                 <div class="opt-icon relative flex-shrink-0 flex items-center gap-1"

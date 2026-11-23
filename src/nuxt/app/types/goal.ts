@@ -23,6 +23,8 @@ export interface Goal {
 	// Platser där målet kan slutföras. Flera platser har OR-semantik:
 	// målet är görbart om man är på någon av dem.
 	places?: Place[];
+	// Taggar på målet ("ute", "hem"). Tom lista = inga taggar.
+	tags?: string[];
 	inbox: number;
 	// Evigt mål - pågår hela livet och kan inte slutföras.
 	eternal: boolean;

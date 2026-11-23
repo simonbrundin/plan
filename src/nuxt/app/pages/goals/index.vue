@@ -17,6 +17,9 @@ const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
 const goalDates = useGoalDatesModal()
+// Taggväljaren (leader + t) renderas i layouten - här öppnas den för det
+// markerade målet.
+const tagPicker = useGoalTagPicker()
 // Målet kan dras in i kalendern för att schemaläggas.
 const { startDrag } = useGoalDrag()
 
@@ -216,6 +219,16 @@ watch(quickAddRevision, refreshGoals)
 // När något har ångras eller datum-popupen sparats kan listan ha ändrats - hämta om den.
 watch(undoRevision, refreshGoals)
 watch(goalDates.savedRevision, refreshGoals)
+
+// När taggar har sparats skrivs de tillbaka i listan.
+watch(tagPicker.savedRevision, () => {
+  const saved = tagPicker.lastSaved.value
+  if (!saved) return
+  const idx = goals.value.findIndex(g => g.id === saved.id)
+  if (idx !== -1) {
+    goals.value[idx] = { ...goals.value[idx], tags: saved.tags }
+  }
+})
 
 // Navigera till mål
 function goToGoal(goalId: number) {
@@ -825,6 +838,17 @@ onMounted(() => {
         }
       },
     },
+    {
+      keys: 't',
+      label: 'T',
+      title: 'Sätt taggar',
+      run: () => {
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) {
+          void tagPicker.openFor(goal)
+        }
+      },
+    },
   ])
 })
 
@@ -891,7 +915,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent · space+t taggar
         </span>
       </div>
     </div>
@@ -974,6 +998,10 @@ definePageMeta({
             <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">
               {{ descriptionPreview(goal.description) }}
             </p>
+            <span v-if="goal.tags?.length" class="flex items-center gap-1 text-xs text-accent mt-0.5">
+              <Icon name="lucide:tag" class="w-3 h-3 flex-shrink-0" />
+              {{ goal.tags.join(', ') }}
+            </span>
           </div>
           <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
           <div class="flex items-center gap-1 flex-shrink-0">

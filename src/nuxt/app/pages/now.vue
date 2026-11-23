@@ -15,6 +15,9 @@ const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, set
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
 const goalDates = useGoalDatesModal()
+// Taggväljaren (leader + t) renderas i layouten - här öppnas den för det
+// markerade målet.
+const tagPicker = useGoalTagPicker()
 // Målet kan dras in i kalendern för att schemaläggas.
 const { startDrag } = useGoalDrag()
 
@@ -41,6 +44,7 @@ const {
   filterByCurrentPlace,
   loadPrioritizedGoals,
   selectGoal,
+  updateTags,
   setNowFilter,
   setFilterByCurrentPlace,
 } = usePriorityMode()
@@ -120,6 +124,12 @@ watch(undoRevision, () => {
 })
 watch(goalDates.savedRevision, () => {
   loadPrioritizedGoals()
+})
+// När taggar har sparats skrivs de tillbaka i listan.
+watch(tagPicker.savedRevision, () => {
+  const saved = tagPicker.lastSaved.value
+  if (!saved) return
+  updateTags(saved.id, saved.tags)
 })
 
 onMounted(() => {
@@ -327,6 +337,17 @@ onMounted(() => {
         const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
         if (goal) {
           goalDates.openFor(goal)
+        }
+      },
+    },
+    {
+      keys: 't',
+      label: 'T',
+      title: 'Sätt taggar',
+      run: () => {
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) {
+          void tagPicker.openFor(goal)
         }
       },
     },

@@ -293,6 +293,16 @@ export function usePriorityMode() {
 		selectedGoalId.value = goalId;
 	}
 
+	/**
+	 * Skriver tillbaka sparade taggar på ett mål i prioritetslistan.
+	 *
+	 * Listan som exponeras är readonly, så ändringen måste göras här inne.
+	 */
+	function updateTags(goalId: number, tags: string[]) {
+		const goal = prioritizedGoals.value.find((g) => g.id === goalId);
+		if (goal) goal.tags = tags;
+	}
+
 	function getSelectedIndex(): number {
 		return visibleGoals.value.findIndex((g) => g.id === selectedGoalId.value);
 	}
@@ -333,6 +343,7 @@ export function usePriorityMode() {
 		handleKeydown,
 		handleKeyup,
 		selectGoal,
+		updateTags,
 		getSelectedIndex,
 		setNowFilter,
 		setFilterByCurrentPlace,

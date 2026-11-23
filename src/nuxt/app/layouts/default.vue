@@ -40,6 +40,10 @@ const {
 // Popupen som sätter startdatum och due-datum (leader + d).
 const goalDates = useGoalDatesModal();
 
+// Taggväljaren (leader + t). Den renderas här så att den kan öppnas
+// från alla sidor där ett mål är markerat.
+const tagPicker = useGoalTagPicker();
+
 // Leader-listenern körs i capture-fasen och kan annars konsumera Escape
 // innan datum-popupens egen listener hinner få tangenten.
 function handleLeaderKeydown(event: KeyboardEvent): boolean {
@@ -389,6 +393,15 @@ onUnmounted(() => {
       @save="goalDates.save"
       @close="goalDates.close"
     />
+
+    <!-- Taggväljaren (leader + t). -->
+    <GoalTagPicker
+      :open="tagPicker.isOpen.value"
+      :target-title="tagPicker.target.value?.title ?? ''"
+      :selected="tagPicker.draft.value"
+      :available="tagPicker.available.value"
+      @update:selected="tagPicker.save($event)"
+      @close="tagPicker.close()" />
 
     <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />
 
