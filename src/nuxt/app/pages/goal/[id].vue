@@ -2506,7 +2506,7 @@ watch(selectedParentIndex, async () => {
         <div class="flex items-center gap-1 flex-shrink-0">
         <!-- Started-toggle (leader + s) -->
         <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          class="opt-icon" :class="{ 'is-on': !!goal.started }">
+          class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">
           <button @click.stop="toggleStarted(goal)"
             class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
             :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
@@ -2916,7 +2916,7 @@ watch(selectedParentIndex, async () => {
                 <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
                 <div class="flex items-center gap-0.5 flex-shrink-0">
                  <!-- Started-toggle (leader + s) -->
-                 <span class="opt-icon" :class="{ 'is-on': !!child.started }">
+                 <span class="opt-icon" :class="{ 'is-on': !!child.started && !child.finished }">
                    <button
                      @click.stop="toggleStarted(child)"
                      :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"

@@ -106,14 +106,15 @@
  * plats ska inte ha någon plats-ikon. Dolda ikoner tar ingen plats, så raden
  * blir ren och de ikoner som finns packas till höger.
  *
- * När raden svävas över visas de dolda ikonerna ändå, så att alla funktioner
- * går att nå med musen också.
+ * En inaktiv ikon visas aldrig - inte ens som en gråad variant när raden
+ * svävas över. En gråad ikon lästes som "på" och gjorde raden ruskig, så
+ * funktioner som inte används är helt dolda. Funktionerna läggs till med
+ * tangenterna (c, r, b, m, p, a, s, e, leader + t).
  */
 .opt-icon {
   display: none;
 }
 
-.opt-icon.is-on,
-.opt-row:hover .opt-icon {
+.opt-icon.is-on {
   display: inline-flex;
 }

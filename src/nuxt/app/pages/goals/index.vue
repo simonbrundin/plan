@@ -1008,7 +1008,7 @@ definePageMeta({
           <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
           <div class="flex items-center gap-1 flex-shrink-0">
           <!-- Started (klicka eller s) -->
-          <span class="opt-icon" :class="{ 'is-on': !!goal.started }">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">
             <button @click.stop="toggleStarted(goal)"
               class="flex-shrink-0 p-1 rounded transition-colors"
               :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"

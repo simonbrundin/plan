@@ -762,7 +762,7 @@ const filterOptions = [
           </div>
           <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
           <div class="flex items-center gap-1 flex-shrink-0">
-          <span class="opt-icon" :class="{ 'is-on': !!goal.started }">
+          <span class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">
             <button
               @click.stop="toggleStarted(goal)"
               class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
