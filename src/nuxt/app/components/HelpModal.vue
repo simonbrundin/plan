@@ -100,7 +100,13 @@ const sections = computed<Section[]>(() => {
         },
         {
           keys: ["Enter"],
-          description: "Sök och lägg till undermål (i förälder-läge: förälder)",
+          description:
+            "Lägg till undermål (i förälder-läge: förälder) - skapar ett nytt mål",
+        },
+        {
+          keys: ["↑", "↓"],
+          description:
+            "Markera ett befintligt mål i sökfältet (tryck sedan Enter för att använda det)",
         },
         { keys: ["↑"], description: "Flytta markerat undermål upp" },
         { keys: ["↓"], description: "Flytta markerat undermål ner" },
@@ -234,6 +240,11 @@ const sections = computed<Section[]>(() => {
     container: "border-line bg-surface-2/40",
     shortcuts: [
       { keys: ["Enter"], description: "Bekräfta val i sökfält och redigering" },
+      {
+        keys: ["↑", "↓"],
+        description:
+          "Markera ett befintligt mål i sökfält (Enter skapar annars ett nytt mål)",
+      },
       {
         keys: ["Ctrl", "Enter"],
         description: "Spara beskrivningen (Cmd+Enter på Mac)",

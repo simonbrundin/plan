@@ -7,6 +7,7 @@ import {
 	type ParsedEntry,
 } from "~/utils/naturalLanguage";
 import { describeGoalRecurrence } from "~/utils/recurrence";
+import { moveSearchHighlight } from "~/utils/searchHighlight";
 import type { Goal } from "~/types/goal";
 
 const emit = defineEmits<{
@@ -34,6 +35,14 @@ const parentSearchInput = ref<HTMLInputElement | null>(null);
 const panelRef = ref<HTMLDivElement | null>(null);
 const parentSearchQuery = ref("");
 const selectedParent = ref<Goal | null>(null);
+
+// Markerat föräldramål i söklistan. -1 betyder att inget är markerat.
+//
+// Enter skapar alltid ett nytt mål så länge inget föräldramål är markerat.
+// Ett befintligt mål väljs bara när användaren har markerat det med
+// piltangenterna - annars går det inte att skapa ett mål som har samma
+// namn som ett som redan finns.
+const parentSearchIndex = ref(-1);
 
 const parsed = computed<ParsedEntry>(() => parseNaturalLanguage(text.value));
 const trimmedText = computed(() => text.value.trim());
@@ -110,18 +119,37 @@ const handleEscape = (event: KeyboardEvent) => {
 };
 
 const handleParentSearchKeydown = async (event: KeyboardEvent) => {
+	if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+		event.preventDefault();
+		event.stopPropagation();
+		moveParentHighlight(event.key === "ArrowDown" ? 1 : -1);
+		return;
+	}
 	if (event.key === "Enter") {
 		event.preventDefault();
 		event.stopPropagation();
-		const firstResult = parentSearchResults.value[0];
-		if (firstResult) {
-			selectParent(firstResult);
-			await submit();
-		}
+		const highlighted = parentSearchResults.value[parentSearchIndex.value];
+		// Ett markerat föräldramål används som förälder till det nya målet.
+		if (highlighted) selectParent(highlighted);
+		await submit();
 		return;
 	}
 	if (event.key === "Escape") handleEscape(event);
 };
+
+// Flytta markeringen i listan med föräldramål.
+const moveParentHighlight = (step: number) => {
+	parentSearchIndex.value = moveSearchHighlight(
+		parentSearchIndex.value,
+		parentSearchResults.value.length,
+		step,
+	);
+};
+
+// När söktexten ändras gäller markeringen inte längre något resultat.
+watch(parentSearchQuery, () => {
+	parentSearchIndex.value = -1;
+});
 
 const reset = () => {
 	text.value = "";
@@ -130,6 +158,7 @@ const reset = () => {
 	calendarId.value = "";
 	parentSearchQuery.value = "";
 	selectedParent.value = null;
+	parentSearchIndex.value = -1;
 };
 
 const selectParent = (goal: Goal) => {
@@ -205,7 +234,13 @@ const handleKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Enter") {
 		event.preventDefault();
 		if (effectiveMode.value === "goal") {
-			if (!selectedParent.value && trimmedText.value) focusParentSearch();
+			// En föräldrasökning som redan har text ska avslutas i
+			// sökfältet, så att föräldern kan markeras med piltangenterna.
+			if (parentSearchQuery.value.trim()) {
+				focusParentSearch();
+				return;
+			}
+			submit();
 			return;
 		}
 		submit();
@@ -326,21 +361,26 @@ defineExpose({ focusInput });
 								v-model="parentSearchQuery"
 								type="search"
 								class="quick-add-parent-input"
-								placeholder="Sök föräldramål · Enter väljer och lägger till"
+								placeholder="Sök föräldramål · ↑↓ markerar · Enter lägger till"
 								aria-label="Sök föräldramål"
 								@keydown.stop="handleParentSearchKeydown"
 							/>
 							<div v-if="parentSearchResults.length" class="quick-add-parent-results">
 								<button
-									v-for="goal in parentSearchResults"
+									v-for="(goal, index) in parentSearchResults"
 									:key="goal.id"
 									type="button"
+									:class="{ 'quick-add-parent-result-active': parentSearchIndex === index }"
 									@click="selectParent(goal)"
 								>
 									{{ goal.title }}
 									<ChildCountBadge :goal-id="goal.id" />
 								</button>
 							</div>
+							<p class="quick-add-parent-hint">
+								Enter lägger till målet. Markera ett befintligt mål med ↑ och ↓ för
+								att använda det som förälder.
+							</p>
 						</template>
 					</div>
 
@@ -578,6 +618,19 @@ defineExpose({ focusInput });
 
 .quick-add-parent-results button:hover {
 	background: var(--color-surface-2);
+}
+
+/* Det föräldramål som är markerat med piltangenterna. */
+.quick-add-parent-results .quick-add-parent-result-active {
+	background: rgb(129 140 248 / 0.18);
+	box-shadow: inset 0 0 0 1px rgb(129 140 248 / 0.55);
+}
+
+.quick-add-parent-hint {
+	margin: 0.35rem 0 0;
+	color: var(--color-ink-dim);
+	font-size: 0.68rem;
+	line-height: 1.35;
 }
 
 .quick-add-parent-selected {

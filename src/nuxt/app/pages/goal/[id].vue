@@ -7,10 +7,12 @@ import GoalWeightVerticalEditor from '~/components/GoalWeightVerticalEditor.vue'
 import GoalChildSearch from '~/components/GoalChildSearch.vue'
 import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { Goal, GoalWithWeight, GetGoalResponse } from '~/types/goal'
 import type { Place } from '~/types/place'
 import { insertChildId, newChildInsertIndex, nextChildOrder } from '~/utils/childOrder'
 import { buildDependencyTree, moveChildInTree } from '~/utils/childDependencyOrder'
+import { moveSearchHighlight } from '~/utils/searchHighlight'
 import { buildGoalData } from '~/utils/goalGraph'
 import { canBeFinished } from '~/utils/goalRules'
 import { descriptionPreview } from '~/utils/goalDescription'
@@ -500,14 +502,38 @@ const showParentSearch = ref(false);
 const parentSearchQuery = ref("");
 const parentSearchInput = ref<HTMLInputElement | null>(null);
 
+// Markerat sökresultat. -1 betyder att inget är markerat.
+//
+// Enter skapar alltid ett nytt mål så länge inget resultat är markerat.
+// Ett befintligt mål väljs bara när användaren har markerat det med
+// piltangenterna - annars går det inte att skapa ett mål som har samma
+// namn som ett som redan finns.
+const parentSearchIndex = ref(-1);
+const childSearchIndex = ref(-1);
+
+// Flytta markeringen i en sökresultatlista.
+function moveHighlight(
+  index: Ref<number>,
+  results: ComputedRef<Goal[]>,
+  step: number
+) {
+  index.value = moveSearchHighlight(index.value, results.value.length, step);
+}
+
 // Fokusera input när plus-knappen klickas
 async function toggleParentSearch() {
   showParentSearch.value = !showParentSearch.value;
   if (showParentSearch.value) {
+    parentSearchIndex.value = -1;
     await nextTick();
     parentSearchInput.value?.focus();
   }
 }
+
+// När söktexten ändras gäller markeringen inte längre något resultat.
+watch(parentSearchQuery, () => {
+  parentSearchIndex.value = -1;
+});
 
 // Sök i lokal state istället för GraphQL
 const searchResults = computed(() => {
@@ -552,16 +578,28 @@ async function createNewParent() {
   }
 }
 
-// Hantera Enter-tangent
+// Hantera tangenttryck i sökfältet för föräldrar
 function handleSearchKeydown(event: KeyboardEvent) {
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    moveHighlight(
+      parentSearchIndex,
+      searchResults,
+      event.key === "ArrowDown" ? 1 : -1
+    );
+    return;
+  }
+
   if (event.key === "Enter") {
-    if (searchResults.value.length === 0) {
-      // Skapa nytt mål om inga resultat
-      createNewParent();
-    } else {
-      // Välj första resultatet
-      addExistingParent(searchResults.value[0].id);
+    event.preventDefault();
+    const highlighted = searchResults.value[parentSearchIndex.value];
+    if (highlighted) {
+      // Ett markerat befintligt mål används som förälder.
+      addExistingParent(highlighted.id);
+      return;
     }
+    // Inget markerat - skapa ett nytt mål med söktexten som namn.
+    createNewParent();
   } else if (event.key === "Escape") {
     showParentSearch.value = false;
     parentSearchQuery.value = "";
@@ -577,10 +615,16 @@ const childSearchInput = ref<HTMLInputElement | null>(null);
   async function toggleChildSearch() {
     showChildSearch.value = !showChildSearch.value;
     if (showChildSearch.value) {
+      childSearchIndex.value = -1;
       await nextTick();
       childSearchInput.value?.focus();
     }
   }
+
+// När söktexten ändras gäller markeringen inte längre något resultat.
+watch(childSearchQuery, () => {
+  childSearchIndex.value = -1;
+});
 
 // Sök för undermål
 const childSearchResults = computed(() => {
@@ -674,18 +718,30 @@ async function addExistingChild(childId: number) {
     }
   }
 
-  // Hantera Enter-tangent för undermål
+  // Hantera tangenttryck i sökfältet för undermål
   function handleChildSearchKeydown(event: KeyboardEvent) {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      event.stopPropagation();
+      moveHighlight(
+        childSearchIndex,
+        childSearchResults,
+        event.key === "ArrowDown" ? 1 : -1
+      );
+      return;
+    }
+
     if (event.key !== "Enter") return;
     event.preventDefault();
     event.stopPropagation();
-    if (childSearchResults.value.length === 0) {
-      // Skapa nytt mål om inga resultat
-      createNewChild();
-    } else {
-      // Välj första resultatet
-      addExistingChild(childSearchResults.value[0].id);
+    const highlighted = childSearchResults.value[childSearchIndex.value];
+    if (highlighted) {
+      // Ett markerat befintligt mål används som undermål.
+      addExistingChild(highlighted.id);
+      return;
     }
+    // Inget markerat - skapa ett nytt undermål med söktexten som namn.
+    createNewChild();
   }
 
 // Long-press för att ta bort föräldrarelation
@@ -2391,8 +2447,9 @@ watch(selectedParentIndex, async () => {
 
         <!-- Sökresultat -->
         <div v-if="searchResults.length > 0" class="space-y-1 mt-2">
-          <button v-for="result in searchResults" :key="result.id" @click="addExistingParent(result.id)"
-            class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors">
+          <button v-for="(result, index) in searchResults" :key="result.id" @click="addExistingParent(result.id)"
+            :class="['w-full text-left px-4 py-2 rounded-lg transition-colors',
+              parentSearchIndex === index ? 'bg-elevated ring-1 ring-accent' : 'hover:bg-elevated']">
             <div class="font-medium text-ink">{{ result.title }}</div>
             <div class="text-xs text-ink-dim">
               {{ new Date(result.created).toLocaleDateString("sv-SE") }}
@@ -2403,6 +2460,12 @@ watch(selectedParentIndex, async () => {
         <!-- Meddelande när inga resultat -->
         <div v-else-if="parentSearchQuery.trim()" class="text-sm text-ink-dim px-4 py-2">
           Tryck Enter för att skapa "{{ parentSearchQuery }}" som nytt mål
+        </div>
+
+        <!-- Så fungerar sökfältet -->
+        <div class="text-xs text-ink-dim px-4 pt-2">
+          Enter skapar ett nytt mål. Använd ↑ och ↓ för att markera ett
+          befintligt mål innan du trycker Enter.
         </div>
       </div>
 
@@ -2737,7 +2800,7 @@ watch(selectedParentIndex, async () => {
         <!-- Sökfält för undermål -->
         <div v-if="showChildSearch" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-4">
           <div class="mb-2">
-            <input ref="childSearchInput" v-model="childSearchQuery" @keydown.enter.prevent="handleChildSearchKeydown" @keydown.escape.prevent="showChildSearch = false; childSearchQuery = ''" type="text"
+            <input ref="childSearchInput" v-model="childSearchQuery" @keydown.enter.prevent="handleChildSearchKeydown" @keydown.arrow-up.prevent="handleChildSearchKeydown" @keydown.arrow-down.prevent="handleChildSearchKeydown" @keydown.escape.prevent="showChildSearch = false; childSearchQuery = ''" type="text"
               placeholder="Sök efter mål eller skapa nytt (tryck Enter)"
               class="rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 w-full"
               autofocus />
@@ -2745,8 +2808,9 @@ watch(selectedParentIndex, async () => {
 
           <!-- Sökresultat -->
           <div v-if="childSearchResults.length > 0" class="space-y-1 mt-2">
-            <button v-for="result in childSearchResults" :key="result.id" @click="addExistingChild(result.id)"
-              class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors">
+            <button v-for="(result, index) in childSearchResults" :key="result.id" @click="addExistingChild(result.id)"
+              :class="['w-full text-left px-4 py-2 rounded-lg transition-colors',
+                childSearchIndex === index ? 'bg-elevated ring-1 ring-accent' : 'hover:bg-elevated']">
               <div class="flex items-center gap-2">
                 <span class="font-medium text-ink">{{ result.title }}</span>
                 <ChildCountBadge :goal-id="result.id" />
@@ -2760,6 +2824,12 @@ watch(selectedParentIndex, async () => {
           <!-- Meddelande när inga resultat -->
           <div v-else-if="childSearchQuery.trim()" class="text-sm text-ink-dim px-4 py-2">
             Tryck Enter för att skapa "{{ childSearchQuery }}" som nytt undermål
+          </div>
+
+          <!-- Så fungerar sökfältet -->
+          <div class="text-xs text-ink-dim px-4 pt-2">
+            Enter skapar ett nytt undermål. Använd ↑ och ↓ för att markera
+            ett befintligt mål innan du trycker Enter.
           </div>
         </div>
 
