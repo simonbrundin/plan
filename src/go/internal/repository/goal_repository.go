@@ -62,17 +62,38 @@ func NewGoalRepository() *GoalRepository {
 
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
+	return r.GetGoalsFiltered(ctx, userID, models.GoalFilter{})
+}
+
+// GetGoalsFiltered returnerar användarens mål, filtrerade på agent-flagga
+// och status.
+//
+// Ett tomt filter (inga satta fält) ger alla mål. Agent-fältet är en
+// pekare så att false kan skiljas från "ingen filtrering".
+func (r *GoalRepository) GetGoalsFiltered(ctx context.Context, userID int64, filter models.GoalFilter) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now, g."order",
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.status_id, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now, g."order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
-		WHERE ug.user_id = $1
-		ORDER BY g.created DESC`
+		WHERE ug.user_id = $1`
 
-	rows, err := r.pool.Query(ctx, query, userID)
+	args := []interface{}{userID}
+
+	if filter.Agent != nil {
+		args = append(args, *filter.Agent)
+		query += fmt.Sprintf(" AND g.agent = $%d", len(args))
+	}
+	if filter.StatusID != nil {
+		args = append(args, *filter.StatusID)
+		query += fmt.Sprintf(" AND g.status_id = $%d", len(args))
+	}
+
+	query += ` ORDER BY g.created DESC`
+
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query goals: %w", err)
 	}
@@ -85,7 +106,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 		var startDate *time.Time
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
-		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now, &g.Order, &g.HasParent,
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.StatusID, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now, &g.Order, &g.HasParent,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)

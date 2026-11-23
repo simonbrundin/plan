@@ -32,6 +32,32 @@ func NewGoalHandler(dbConnected bool) *GoalHandler {
 	}
 }
 
+// goalFilterFromQuery läser filterparametrarna för mållistan.
+//
+// Saknas parametern filtreras det inte alls. "agent=false" är däremot
+// ett filter - det som skiljer filtret från "ingen filtrering".
+func goalFilterFromQuery(c *gin.Context) (models.GoalFilter, error) {
+	var filter models.GoalFilter
+
+	if raw := c.Query("agent"); raw != "" {
+		agent, err := strconv.ParseBool(raw)
+		if err != nil {
+			return filter, fmt.Errorf("invalid agent filter: %q", raw)
+		}
+		filter.Agent = &agent
+	}
+
+	if raw := c.Query("status"); raw != "" {
+		statusID, err := strconv.Atoi(raw)
+		if err != nil {
+			return filter, fmt.Errorf("invalid status filter: %q", raw)
+		}
+		filter.StatusID = &statusID
+	}
+
+	return filter, nil
+}
+
 // attachPlaces fyller i målets platser.
 //
 // Ett fel här ska inte förstöra svaret - platserna är extra information,
@@ -114,7 +140,10 @@ func (h *GoalHandler) checkDb(c *gin.Context) bool {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
+// @Param agent query bool false "Filtrera på agent-flaggan (true = bara agentmål)"
+// @Param status query int false "Filtrera på status-id"
 // @Success 200 {array} models.Goal
+// @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Router /api/goals [get]
 func (h *GoalHandler) GetGoals(c *gin.Context) {
@@ -128,7 +157,13 @@ func (h *GoalHandler) GetGoals(c *gin.Context) {
 		return
 	}
 
-	goals, err := h.repo.GetAllGoals(c.Request.Context(), userID)
+	filter, err := goalFilterFromQuery(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	goals, err := h.repo.GetGoalsFiltered(c.Request.Context(), userID, filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
