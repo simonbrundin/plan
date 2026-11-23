@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -12,6 +13,94 @@ import (
 
 // TestGoalDueDateIntegration verifierar att ett due-datum kan sättas,
 // läsas tillbaka och rensas på ett riktigt mål.
+func TestGoalStatusPhaseIntegration(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("no DATABASE_URL")
+	}
+	ctx := context.Background()
+	if err := database.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewGoalRepository()
+	var userID int64
+	if err := database.GetPool().QueryRow(ctx, `SELECT id FROM users ORDER BY id LIMIT 1`).Scan(&userID); err != nil {
+		t.Skip("no users")
+	}
+
+	statuses, err := repo.GetAllStatuses(ctx)
+	if err != nil {
+		t.Fatal("get statuses:", err)
+	}
+	statusIDs := make(map[string]int64, len(statuses))
+	for _, status := range statuses {
+		statusIDs[status.Name] = status.ID
+	}
+	phases := []string{"define", "plan", "execute", "verify", "completed"}
+	for _, phase := range phases {
+		if statusIDs[phase] == 0 {
+			t.Fatalf("missing status %q", phase)
+		}
+	}
+
+	goal, err := repo.CreateGoal(ctx, userID, fmt.Sprintf("[test] goal phase %d", time.Now().UnixNano()), "lucide:check-square")
+	if err != nil {
+		t.Fatal("create test goal:", err)
+	}
+	defer func() {
+		if err := repo.DeleteGoal(ctx, goal.ID); err != nil {
+			t.Errorf("delete test goal: %v", err)
+		}
+	}()
+
+	if goal.StatusID != int(statusIDs["define"]) {
+		t.Fatalf("new goal status_id = %d, want define (%d)", goal.StatusID, statusIDs["define"])
+	}
+
+	prioritized, err := repo.GetPrioritizedGoals(ctx, userID)
+	if err != nil {
+		t.Fatal("get prioritized goals:", err)
+	}
+	found := false
+	for _, prioritizedGoal := range prioritized {
+		if prioritizedGoal.ID == goal.ID {
+			found = true
+			if prioritizedGoal.StatusID != goal.StatusID {
+				t.Fatalf("prioritized status_id = %d, want %d", prioritizedGoal.StatusID, goal.StatusID)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("new test goal missing from prioritized goals")
+	}
+
+	for _, phase := range phases[1:] {
+		if _, err := repo.UpdateGoalStatus(ctx, goal.ID, statusIDs[phase]); err != nil {
+			t.Fatalf("update phase to %s: %v", phase, err)
+		}
+	}
+
+	history, err := repo.GetStatusHistory(ctx, goal.ID)
+	if err != nil {
+		t.Fatal("get status history:", err)
+	}
+	if len(history) != len(phases)-1 {
+		t.Fatalf("status history has %d entries, want %d", len(history), len(phases)-1)
+	}
+
+	completed, err := repo.GetGoalByID(ctx, goal.ID)
+	if err != nil {
+		t.Fatal("get completed-phase goal:", err)
+	}
+	if completed.StatusID != int(statusIDs["completed"]) {
+		t.Fatalf("completed phase status_id = %d, want %d", completed.StatusID, statusIDs["completed"])
+	}
+	if completed.Finished != nil {
+		t.Fatalf("finished = %v, want nil when only phase is completed", completed.Finished)
+	}
+}
+
 func TestGoalDueDateIntegration(t *testing.T) {
 	if os.Getenv("DATABASE_URL") == "" {
 		t.Skip("no DATABASE_URL")

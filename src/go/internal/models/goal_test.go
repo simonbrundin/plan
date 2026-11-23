@@ -6,6 +6,21 @@ import (
 	"time"
 )
 
+func TestGoalJSONIncludesStatusID(t *testing.T) {
+	encoded, err := json.Marshal(Goal{ID: 42, StatusID: 3})
+	if err != nil {
+		t.Fatalf("marshal goal: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(encoded, &payload); err != nil {
+		t.Fatalf("unmarshal goal: %v", err)
+	}
+	if got := payload["status_id"]; got != float64(3) {
+		t.Fatalf("status_id = %v, want 3", got)
+	}
+}
+
 func TestUpdateGoalRequestStartedDecoding(t *testing.T) {
 	tests := []struct {
 		name      string
