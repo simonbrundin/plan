@@ -945,19 +945,43 @@ func (r *GoalRepository) ReorderPriorityGoals(ctx context.Context, userID int64,
 		return fmt.Errorf("failed to read priority goals: %w", err)
 	}
 
-	for i, goalID := range mergeOrder(existing, goalIDs) {
-		if _, err := tx.Exec(ctx, `
-			UPDATE goals SET priority_order = $1
-			WHERE id = $2 AND id IN (SELECT goal_id FROM user_goals WHERE user_id = $3)
-				AND finished IS NULL AND id <> 1`, i, goalID, userID); err != nil {
-			return fmt.Errorf("failed to update priority order for goal %d: %w", goalID, err)
-		}
+	order := mergeOrder(existing, goalIDs)
+	if err := setPriorityOrder(ctx, tx, userID, order); err != nil {
+		return fmt.Errorf("failed to update priority order: %w", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("failed to commit priority reorder: %w", err)
 	}
 	return nil
+}
+
+// setPriorityOrder sparar en ny ordning för prioriteringslistan med EN
+// bulk-update.
+//
+// En update per mål betydde en round-trip till databasen per mål. Med ett
+// par hundra mål tog det runt tio sekunder över internet, och en
+// omsortering som fortfarande var på väg när sidan laddades om såg ut som
+// att den aldrig hade sparats.
+func setPriorityOrder(ctx context.Context, tx pgx.Tx, userID int64, goalIDs []int64) error {
+	if len(goalIDs) == 0 {
+		return nil
+	}
+
+	orders := make([]int64, len(goalIDs))
+	for i := range orders {
+		orders[i] = int64(i)
+	}
+
+	_, err := tx.Exec(ctx, `
+		UPDATE goals g
+		SET priority_order = v.ord
+		FROM (SELECT * FROM UNNEST($1::bigint[], $2::bigint[]) AS t(id, ord)) AS v(id, ord)
+		WHERE g.id = v.id::int
+			AND g.id IN (SELECT goal_id FROM user_goals WHERE user_id = $3)
+			AND g.finished IS NULL
+			AND g.id <> 1`, goalIDs, orders, userID)
+	return err
 }
 
 // mergeOrder combines the requested order with the items that exist on the

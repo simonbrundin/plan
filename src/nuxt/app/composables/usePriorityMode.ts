@@ -43,6 +43,34 @@ const filterByCurrentPlace = useState<boolean>(
 let lastUpdateTime = 0;
 const UPDATE_DEBOUNCE_MS = 150;
 
+// Den ordning som ska sparas och om ett sparande pågår. Detta ligger på
+// modulnivå så att alla som anropar composablen delar samma kö - annars
+// kan en instans spara en äldre ordning efter att en annan sparat en
+// nyare, och det är den sista sparade ordningen som gäller.
+let pendingOrder: number[] | null = null;
+let orderSaveInFlight = false;
+let orderSaver: ((ids: number[]) => Promise<unknown>) | null = null;
+let unloadListenerRegistered = false;
+
+// Sidor kan laddas om direkt efter att ordningen ändrats. Då måste den
+// sista ordningen hinna sparas, annars ser det ut som att omsorteringen
+// aldrig sparades. keepalive låter förfrågan klart även om sidan stängs.
+function flushOrderOnUnload() {
+	if (pendingOrder === null || !orderSaver) return;
+
+	const ids = pendingOrder;
+	pendingOrder = null;
+
+	void fetch("/api/proxy/goals/priority/reorder", {
+		method: "PATCH",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ goalIds: ids }),
+		keepalive: true,
+	}).catch(() => {
+		// Sidan stängs - det finns inget att rapportera.
+	});
+}
+
 function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
 	return matchesStartedFilter(goal, startedFilter.value);
 }
@@ -51,6 +79,15 @@ export function usePriorityMode() {
 	const { isSearchOpen } = useSearchState();
 	const { setGoalWeight, reorderPriorityGoals } = useGoalApi();
 	const { currentPlaceId } = usePlaces();
+	// Spara-funktionen sätts på modulnivå så att sidans pagehide-handler
+	// kan spara den sista ordningen även om sidan laddas om direkt.
+	orderSaver = reorderPriorityGoals;
+
+	if (import.meta.client && !unloadListenerRegistered) {
+		unloadListenerRegistered = true;
+		window.addEventListener("pagehide", flushOrderOnUnload);
+	}
+
 
 	function matchesCurrentPlace(goal: PrioritizedGoal): boolean {
 		if (!filterByCurrentPlace.value) return true;
@@ -114,7 +151,31 @@ export function usePriorityMode() {
 		}
 	}
 
-	let prioritySaveChain: Promise<void> = Promise.resolve();
+	// Sparar ordningen. Endast den SENASTE ordningen sparas - om flera
+	// tangenttryck kommer i rad ska vi inte skicka en request per tryck,
+	// utan den sista ordningen vinner. Annars hamnar en kö av requests
+	// efter varandra, och den som sparar sist kan vara en gammal
+	// ordning från flera tangenttryck tidigare.
+	async function savePendingOrder() {
+		if (orderSaveInFlight || pendingOrder === null || !orderSaver) return;
+
+		const ids = pendingOrder;
+		pendingOrder = null;
+		orderSaveInFlight = true;
+		try {
+			await orderSaver(ids);
+		} catch (err) {
+			console.error("Failed to save priority order:", err);
+			// Listan i gränssnittet är då inte längre i synk med servern.
+			await loadPrioritizedGoals();
+		} finally {
+			orderSaveInFlight = false;
+			// En ny ordning kan ha kommit in under spartiden.
+			if (pendingOrder !== null) {
+				void savePendingOrder();
+			}
+		}
+	}
 
 	function moveGoal(direction: "up" | "down") {
 		const movingId = selectedGoalId.value;
@@ -138,10 +199,8 @@ export function usePriorityMode() {
 			.filter((goal): goal is PrioritizedGoal => goal !== undefined);
 		selectedGoalId.value = movingId;
 
-		const ids = reordered;
-		prioritySaveChain = prioritySaveChain
-			.then(() => reorderPriorityGoals(ids))
-			.catch((err) => console.error("Failed to save priority order:", err));
+		pendingOrder = [...reordered];
+		void savePendingOrder();
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
