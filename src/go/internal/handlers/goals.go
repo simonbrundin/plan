@@ -19,6 +19,7 @@ import (
 type GoalHandler struct {
 	repo        *repository.GoalRepository
 	places      *repository.PlaceRepository
+	tags        *repository.TagRepository
 	dbConnected bool
 }
 
@@ -26,6 +27,7 @@ func NewGoalHandler(dbConnected bool) *GoalHandler {
 	return &GoalHandler{
 		repo:        repository.NewGoalRepository(),
 		places:      repository.NewPlaceRepository(),
+		tags:        repository.NewTagRepository(),
 		dbConnected: dbConnected,
 	}
 }
@@ -60,6 +62,38 @@ func placesOrEmpty(places []models.Place) []models.Place {
 		return []models.Place{}
 	}
 	return places
+}
+
+// attachTags fyller i målens taggar.
+//
+// Taggarna hämtas samlat för alla mål - en fråga i stället för en per mål.
+// Ett fel här ska inte förstöra svaret - taggarna är extra information.
+func (h *GoalHandler) attachTags(ctx context.Context, goals []models.Goal) {
+	if len(goals) == 0 {
+		return
+	}
+
+	ids := make([]int64, len(goals))
+	for i, g := range goals {
+		ids[i] = g.ID
+	}
+
+	byGoal, err := h.tags.TagsForGoals(ctx, ids)
+	if err != nil {
+		return
+	}
+
+	for i := range goals {
+		goals[i].Tags = tagsOrEmpty(byGoal[goals[i].ID])
+	}
+}
+
+// tagsOrEmpty gör att en tom lista alltid skickas ut som [] och inte null.
+func tagsOrEmpty(tags []string) []string {
+	if tags == nil {
+		return []string{}
+	}
+	return tags
 }
 
 // checkDb returns error response if database is not connected
@@ -104,6 +138,7 @@ func (h *GoalHandler) GetGoals(c *gin.Context) {
 		goals = []models.Goal{}
 	}
 	h.attachPlaces(c.Request.Context(), goals)
+	h.attachTags(c.Request.Context(), goals)
 	c.JSON(http.StatusOK, goals)
 }
 
@@ -635,8 +670,10 @@ func (h *GoalHandler) GetPrioritizedGoals(c *gin.Context) {
 		plain[i] = g.Goal
 	}
 	h.attachPlaces(c.Request.Context(), plain)
+	h.attachTags(c.Request.Context(), plain)
 	for i := range goals {
 		goals[i].Places = plain[i].Places
+		goals[i].Tags = plain[i].Tags
 	}
 
 	c.JSON(http.StatusOK, goals)

@@ -138,6 +138,7 @@ func main() {
 		calendarEventHandler := handlers.NewCalendarEventHandler(dbConnected)
 		calendarHandler := handlers.NewCalendarHandler(dbConnected)
 		placeHandler := handlers.NewPlaceHandler(dbConnected)
+		tagHandler := handlers.NewTagHandler(dbConnected)
 
 		// Calendar endpoints
 		api.GET("/calendars", calendarHandler.List)
@@ -200,6 +201,14 @@ func main() {
 		// The user's "I am here" place
 		api.GET("/me/current-place", placeHandler.GetCurrentPlace)
 		api.PUT("/me/current-place", placeHandler.SetCurrentPlace)
+
+		// Tags endpoints
+		api.GET("/tags", tagHandler.List)
+
+		// Tags for goals
+		api.GET("/goals/:id/tags", tagHandler.GetGoalTags)
+		api.PUT("/goals/:id/tags", tagHandler.SetGoalTags)
+		api.DELETE("/goals/:id/tags/:name", tagHandler.DeleteGoalTag)
 
 		// API Keys endpoints
 		apiKeyHandler := handlers.NewAPIKeyHandler()

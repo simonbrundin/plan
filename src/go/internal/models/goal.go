@@ -100,6 +100,10 @@ type Goal struct {
 	// platser - då räcker det att vara på någon av dem (OR-semantik).
 	// Skickas alltid ut, även när listan är tom.
 	Places []Place `json:"places"`
+	// Tags är etiketter på målet ("ute", "hem", "vinter"). Taggarna
+	// hör till användaren och skapas på demand när man skriver in ett
+	// nytt namn. Skickas alltid ut, även när listan är tom.
+	Tags []string `json:"tags"`
 	// RecurrenceRule är upprepningsregeln för ett återkommande mål, som
 	// en RRULE-sträng. Null = målet är inte återkommande.
 	RecurrenceRule *string `json:"recurrence_rule"`

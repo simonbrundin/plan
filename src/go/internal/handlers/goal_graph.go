@@ -86,6 +86,8 @@ func (h *GoalHandler) loadGraph(ctx context.Context, userID int64) (*goalGraph, 
 
 	// Platser hämtas samlat för alla mål - en fråga i stället för en per mål.
 	h.attachPlaces(ctx, goals)
+	// Samma sak gäller taggarna.
+	h.attachTags(ctx, goals)
 
 	graph := &goalGraph{
 		goals:        goals,
