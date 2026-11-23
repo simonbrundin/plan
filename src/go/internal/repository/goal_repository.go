@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -62,7 +63,7 @@ func NewGoalRepository() *GoalRepository {
 // GetAllGoals returns all goals for a user
 func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g."order",
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now, g."order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
@@ -84,7 +85,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 		var startDate *time.Time
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
-		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Order, &g.HasParent,
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now, &g.Order, &g.HasParent,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
@@ -102,7 +103,7 @@ func (r *GoalRepository) GetAllGoals(ctx context.Context, userID int64) ([]model
 // GetGoalByID returns a single goal by ID
 func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models.Goal, error) {
 	query := `
-		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, due, start_date, estimated_minutes, inbox, eternal, agent, "order",
+		SELECT id, title, COALESCE(description, ''), icon, created, started, finished, due, start_date, estimated_minutes, inbox, eternal, agent, now, "order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent,
 			recurrence_rule, recurrence_mode, recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = goals.id) AS recurrence_count
@@ -114,7 +115,7 @@ func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models
 	var estimatedMinutes *int
 	var recurrenceNext *time.Time
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
-		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Order, &g.HasParent,
+		&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now, &g.Order, &g.HasParent,
 		&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -149,9 +150,9 @@ func (r *GoalRepository) CreateGoal(ctx context.Context, userID int64, title, ic
 				  FROM goals g2
 				  INNER JOIN user_goals ug2 ON g2.id = ug2.goal_id
 				  WHERE ug2.user_id = $3), 0)
-			  RETURNING id, title, COALESCE(description, ''), icon, status_id, created, started, finished, due, estimated_minutes, inbox, eternal, agent, "order"`
+			  RETURNING id, title, COALESCE(description, ''), icon, status_id, created, started, finished, due, estimated_minutes, inbox, eternal, agent, now, "order"`
 	err = tx.QueryRow(ctx, query, title, icon, userID).Scan(
-		&goal.ID, &goal.Title, &goal.Description, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &due, &estimatedMinutes, &goal.Inbox, &goal.Eternal, &goal.Agent, &goal.Order)
+		&goal.ID, &goal.Title, &goal.Description, &goal.Icon, &goal.StatusID, &goal.Created, &goal.Started, &goal.Finished, &due, &estimatedMinutes, &goal.Inbox, &goal.Eternal, &goal.Agent, &goal.Now, &goal.Order)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create goal: %w", err)
 	}
@@ -242,6 +243,12 @@ func (r *GoalRepository) UpdateGoal(ctx context.Context, goalID int64, req model
 		hasUpdate = true
 		query += fmt.Sprintf("agent = $%d, ", argNum)
 		args = append(args, *req.Agent)
+		argNum++
+	}
+	if req.Now != nil {
+		hasUpdate = true
+		query += fmt.Sprintf("now = $%d, ", argNum)
+		args = append(args, *req.Now)
 		argNum++
 	}
 	if req.Due.Set {
@@ -737,7 +744,7 @@ func (r *GoalRepository) GetChildRelations(ctx context.Context, parentID int64) 
 // GetParentRelations returns parent goals for a goal
 func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.estimated_minutes, g.inbox, g.eternal, g.agent,
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goal_relations gr
@@ -757,7 +764,7 @@ func (r *GoalRepository) GetParentRelations(ctx context.Context, childID int64) 
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
 		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon,
-			&g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent,
+			&g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
@@ -1089,7 +1096,7 @@ func (r *GoalRepository) GetDependencies(ctx context.Context, goalID int64) ([]m
 // GetBlockingGoals returns goals that depend on this goal
 func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]models.Goal, error) {
 	query := `
-		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.estimated_minutes, g.inbox, g.eternal, g.agent,
+		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goal_dependencies gd
@@ -1108,7 +1115,7 @@ func (r *GoalRepository) GetBlockingGoals(ctx context.Context, goalID int64) ([]
 		var due *time.Time
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
-		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent,
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, err
 		}
@@ -1185,11 +1192,21 @@ func (r *GoalRepository) CheckForCycle(ctx context.Context, goalID, dependsOnID 
 func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) ([]models.PrioritizedGoal, error) {
 	query := `
 		SELECT
-			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent,
+			g.id, g.title, COALESCE(g.description, ''), g.icon, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now,
 			g.priority_order,
 			COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
 			(SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
 			(SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id,
+			-- Alla föräldrar som målet ligger under, sorterade på vikt.
+			COALESCE(
+				(
+					SELECT json_agg(json_build_object('id', p.id, 'title', p.title) ORDER BY gr.weight DESC)
+					FROM goal_relations gr
+					INNER JOIN goals p ON p.id = gr.parent_id
+					WHERE gr.child_id = g.id
+				),
+				'[]'::json
+			) AS parents,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
 			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
 		FROM goals g
@@ -1198,6 +1215,14 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		  AND g.finished IS NULL
 		  AND g.id <> 1
 		  AND (g.start_date IS NULL OR g.start_date <= CURRENT_DATE)
+		  -- Ett mål är inte görbart förrän alla direkta beroenden är klara.
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM goal_dependencies gd
+			INNER JOIN goals dependency ON dependency.id = gd.depends_on_id
+			WHERE gd.goal_id = g.id
+			  AND dependency.finished IS NULL
+		  )
 		ORDER BY g.priority_order ASC, weight DESC, g.created DESC`
 
 	rows, err := r.pool.Query(ctx, query, userID)
@@ -1215,11 +1240,13 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 		var startDate *time.Time
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
-		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent,
-			&g.PriorityOrder, &g.Weight, &parentTitle, &parentID,
+		var parentsJSON []byte
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now,
+			&g.PriorityOrder, &g.Weight, &parentTitle, &parentID, &parentsJSON,
 			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount); err != nil {
 			return nil, err
 		}
+		g.Parents = parseGoalParents(parentsJSON)
 		g.Due = dueDateFromTime(due)
 		g.StartDate = dueDateFromTime(startDate)
 		g.EstimatedMinutes = estimatedMinutes
@@ -1230,6 +1257,19 @@ func (r *GoalRepository) GetPrioritizedGoals(ctx context.Context, userID int64) 
 	}
 
 	return goals, nil
+}
+
+// parseGoalParents tolkar JSON-listan med föräldrar som kommer från
+// frågan. En tom lista betyder att målet inte ligger under någon förälder.
+func parseGoalParents(raw []byte) []models.GoalParent {
+	parents := []models.GoalParent{}
+	if len(raw) == 0 {
+		return parents
+	}
+	if err := json.Unmarshal(raw, &parents); err != nil {
+		return []models.GoalParent{}
+	}
+	return parents
 }
 
 // GetAllStatuses returns all available statuses

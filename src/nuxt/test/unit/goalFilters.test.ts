@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
 	isRootGoal,
 	isUnfinishedGoal,
+	matchesNowFilter,
 	matchesStartedFilter,
 } from "../../app/utils/goalFilters";
 
@@ -34,6 +35,28 @@ describe("matchesStartedFilter", () => {
 		expect(
 			matchesStartedFilter({ started: "2026-01-01T10:00:00Z" }, "not_started"),
 		).toBe(false);
+	});
+});
+
+describe("matchesNowFilter", () => {
+	it("visar endast mål med nu-märke när filtret är 'now'", () => {
+		expect(matchesNowFilter({ now: true }, "now")).toBe(true);
+		expect(matchesNowFilter({ now: false }, "now")).toBe(false);
+		expect(matchesNowFilter({}, "now")).toBe(false);
+	});
+
+	it("visar mål med nu-märke även om de inte är påbörjade", () => {
+		expect(matchesNowFilter({ now: true, started: null }, "now")).toBe(true);
+	});
+
+	it("faller tillbaka på startfiltret för övriga filter", () => {
+		expect(matchesNowFilter({ now: true, started: null }, "all")).toBe(true);
+		expect(
+			matchesNowFilter({ now: true, started: "2026-01-01T10:00:00Z" }, "started"),
+		).toBe(true);
+		expect(matchesNowFilter({ now: false, started: null }, "not_started")).toBe(
+			true,
+		);
 	});
 });
 

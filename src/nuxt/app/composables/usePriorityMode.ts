@@ -1,5 +1,5 @@
-import type { Goal } from "~/types/goal";
-import { matchesStartedFilter, type StartedFilter } from "~/utils/goalFilters";
+import type { Goal, GoalParent } from "~/types/goal";
+import { matchesNowFilter, type NowFilter } from "~/utils/goalFilters";
 import { isDoableAtPlace } from "~/utils/places";
 import { moveChildId } from "~/utils/childOrder";
 
@@ -7,6 +7,8 @@ interface PrioritizedGoal extends Goal {
 	weight: number;
 	parentTitle: string | null;
 	parentId: number | null;
+	// Alla föräldrar som målet ligger under.
+	parents: GoalParent[];
 }
 
 const ROOT_GOAL_ID = 1;
@@ -27,16 +29,16 @@ const isPriorityMode = ref(false);
 const selectedGoalId = ref<number | null>(null);
 const prioritizedGoals = ref<PrioritizedGoal[]>([]);
 const isLoading = ref(false);
-// Default: visa endast mål som är påbörjade.
-const DEFAULT_STARTED_FILTER: StartedFilter = "started";
+// Default: visa de mål som är markerade med nu-märket.
+const DEFAULT_NOW_FILTER: NowFilter = "now";
 
-const startedFilter = ref<StartedFilter>(DEFAULT_STARTED_FILTER);
+const nowFilter = ref<NowFilter>(DEFAULT_NOW_FILTER);
 
 // Filter "görbar här": visa bara mål som har den plats användaren
 // befinner sig på. Flera platser på ett mål har OR-semantik - det
 // räcker att vara på någon av dem.
 const filterByCurrentPlace = useState<boolean>(
-	"priority-filter-current-place",
+	"now-filter-current-place",
 	() => false,
 );
 
@@ -71,14 +73,15 @@ function flushOrderOnUnload() {
 	});
 }
 
-function matchesStartedFilterForGoals(goal: PrioritizedGoal): boolean {
-	return matchesStartedFilter(goal, startedFilter.value);
+function matchesNowFilterForGoals(goal: PrioritizedGoal): boolean {
+	return matchesNowFilter(goal, nowFilter.value);
 }
 
 export function usePriorityMode() {
 	const { isSearchOpen } = useSearchState();
 	const { setGoalWeight, reorderPriorityGoals } = useGoalApi();
 	const { currentPlaceId } = usePlaces();
+
 	// Spara-funktionen sätts på modulnivå så att sidans pagehide-handler
 	// kan spara den sista ordningen även om sidan laddas om direkt.
 	orderSaver = reorderPriorityGoals;
@@ -88,7 +91,6 @@ export function usePriorityMode() {
 		window.addEventListener("pagehide", flushOrderOnUnload);
 	}
 
-
 	function matchesCurrentPlace(goal: PrioritizedGoal): boolean {
 		if (!filterByCurrentPlace.value) return true;
 		return isDoableAtPlace(goal, currentPlaceId.value);
@@ -96,7 +98,7 @@ export function usePriorityMode() {
 
 	const visibleGoals = computed(() =>
 		prioritizedGoals.value
-			.filter(matchesStartedFilterForGoals)
+			.filter(matchesNowFilterForGoals)
 			.filter(matchesCurrentPlace),
 	);
 
@@ -206,17 +208,16 @@ export function usePriorityMode() {
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toLowerCase();
 
-		// Prioritetslägets tangenthantering ska ENDAST vara aktiv på
-		// prioritetssidan. På andra sidor (t.ex. goal-sidan) har sidan
-		// sin egen vim-hantering och den globala hanteraren ska inte
-		// fånga l/j/k och navigera till prioriterade mål.
+		// Ordningens tangenthantering ska ENDAST vara aktiv på Gör nu-sidan.
+		// På andra sidor har sidan sin egen vim-hantering och den globala
+		// hanteraren ska inte fånga l/j/k.
 		const route = useRoute();
-		if (route.path !== "/priority") {
+		if (route.path !== "/now") {
 			return;
 		}
 
-		// Viktläget aktiveras med Shift+P (håll ned). Ett vanligt "p"
-		// växlar i stället mellan prioritetssidan och föregående sida,
+		// Ordningens läge aktiveras med Shift+P (håll ned). Ett vanligt "p"
+		// växlar i stället mellan Gör nu och föregående sida,
 		// så de två tangenterna får inte krocka.
 		heldKeys.value.add(event.key);
 		isPriorityMode.value = heldKeys.value.has("P");
@@ -276,7 +277,7 @@ export function usePriorityMode() {
 
 	function handleKeyup(event: KeyboardEvent) {
 		const route = useRoute();
-		if (route.path !== "/priority") {
+		if (route.path !== "/now") {
 			return;
 		}
 
@@ -296,8 +297,8 @@ export function usePriorityMode() {
 		return visibleGoals.value.findIndex((g) => g.id === selectedGoalId.value);
 	}
 
-	function setStartedFilter(filter: "all" | "started" | "not_started") {
-		startedFilter.value = filter;
+	function setNowFilter(filter: NowFilter) {
+		nowFilter.value = filter;
 		const list = visibleGoals.value;
 		if (
 			selectedGoalId.value === null ||
@@ -325,7 +326,7 @@ export function usePriorityMode() {
 		prioritizedGoals: readonly(prioritizedGoals),
 		visibleGoals,
 		isLoading: readonly(isLoading),
-		startedFilter: readonly(startedFilter),
+		nowFilter: readonly(nowFilter),
 		filterByCurrentPlace: readonly(filterByCurrentPlace),
 		loadPrioritizedGoals,
 		updateWeight,
@@ -333,7 +334,7 @@ export function usePriorityMode() {
 		handleKeyup,
 		selectGoal,
 		getSelectedIndex,
-		setStartedFilter,
+		setNowFilter,
 		setFilterByCurrentPlace,
 	};
 }

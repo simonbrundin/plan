@@ -29,6 +29,8 @@ export interface Goal {
 	// Sant om målet är avsett att arbeta på av en agent. Används för att
 	// se vilka mål som ligger för en agent att ta tag i.
 	agent?: boolean;
+	// Sant om målet ska göras nu. Sådana mål syns på "Gör nu"-sidan.
+	now?: boolean;
 	// Sant om målet har en förälder. Endast grundmål (has_parent = false)
 	// listas under /goals.
 	has_parent?: boolean;
@@ -52,6 +54,13 @@ export interface ChildRelation {
 	child_id: number;
 	order: number;
 	weight: number;
+}
+
+// En förälder till ett mål - används när listor ska visa vilket mål
+// ett annat mål ligger under.
+export interface GoalParent {
+	id: number;
+	title: string;
 }
 
 export interface GoalWithRelations extends Goal {

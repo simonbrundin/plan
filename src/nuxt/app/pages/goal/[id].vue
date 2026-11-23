@@ -30,14 +30,14 @@ const route = useRoute();
 const router = useRouter();
 const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
-const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeights, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
+const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeights, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 const { startDrag: startGoalDrag } = useGoalDrag();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
 // Snabbtillägget kan skapa ett nytt barn från vilken sida som helst.
 const { revision: quickAddRevision } = useQuickAdd();
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo();
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo();
 const goalDates = useGoalDatesModal();
 
 // Använd goals store
@@ -1379,6 +1379,34 @@ async function toggleAgent(goalToToggle: Goal) {
   }
 }
 
+// Markera ett mål som ett mål som ska göras nu (eller upphäva nu-flaggan).
+async function toggleNow(goalToToggle: Goal) {
+  const newNow = !goalToToggle.now;
+
+  try {
+    const previousNow = goalToToggle.now ?? false;
+    await setGoalNow(goalToToggle.id, newNow);
+    undoNow(goalToToggle, previousNow);
+    goalsStore.updateGoal(goalToToggle.id, { now: newNow });
+
+    if (goalData.value?.allGoals) {
+      const goalIndex = goalData.value.allGoals.findIndex(
+        (g) => g.id === goalToToggle.id
+      );
+      if (goalIndex !== -1) {
+        goalData.value.allGoals[goalIndex].now = newNow;
+      }
+    }
+    if (goalData.value?.goal && goalData.value.goal.id === goalToToggle.id) {
+      goalData.value.goal.now = newNow;
+    }
+
+    await refresh();
+  } catch (error) {
+    console.error("Failed to toggle now status:", error);
+  }
+}
+
 // Det mål som tangenterna och leader-kommandona gäller.
 //
 // Samma prioritet som övriga tangenter: föräldraläge först, sedan det
@@ -1749,6 +1777,17 @@ onMounted(() => {
         const target = agentTarget();
         if (target) {
           toggleAgent(target);
+        }
+      },
+    },
+    {
+      keys: "n",
+      label: "N",
+      title: "Växla nu-märke",
+      run: () => {
+        const target = agentTarget();
+        if (target) {
+          toggleNow(target);
         }
       },
     },
@@ -2355,6 +2394,11 @@ watch(selectedParentIndex, async () => {
           class="opt-icon" :class="{ 'is-on': !!goal.agent }">
           <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
         </span>
+        <!-- Nu-märke -->
+        <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
+          class="opt-icon" :class="{ 'is-on': !!goal.now }">
+          <NowBadge :active="!!goal.now" @toggle="toggleNow(goal)" />
+        </span>
         <!-- Upprepning: antalet slutförda förekomster (r) -->
         <div v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="opt-icon relative flex items-center gap-1.5 flex-shrink-0"
@@ -2528,6 +2572,7 @@ watch(selectedParentIndex, async () => {
                 class="w-full text-left px-3 py-2 hover:bg-elevated rounded-lg transition-colors flex items-center gap-2">
                 <Icon :name="result.icon || 'heroicons:star'" class="w-4 h-4 text-ink-muted" />
                 <span class="text-ink text-sm">{{ result.title }}</span>
+                <ChildCountBadge :goal-id="result.id" />
                 <span v-if="result.finished" class="text-xs text-green-400 ml-auto">Klar</span>
               </button>
             </div>
@@ -2544,6 +2589,7 @@ watch(selectedParentIndex, async () => {
               <NuxtLink :to="`/goal/${dep.depends_on_id}`" class="flex-1 text-sm text-ink hover:text-white truncate">
                 {{ dep.title }}
               </NuxtLink>
+              <ChildCountBadge :goal-id="dep.depends_on_id" />
               <span v-if="dep.finished" class="text-xs text-green-400">Klar</span>
               <span v-else class="text-xs text-orange-400">Väntar...</span>
               <button @click.stop="removeExistingDependency(dep.depends_on_id)"
@@ -2567,6 +2613,7 @@ watch(selectedParentIndex, async () => {
               <NuxtLink :to="`/goal/${block.goal_id}`" class="flex-1 text-sm text-ink hover:text-white truncate">
                 {{ block.title }}
               </NuxtLink>
+              <ChildCountBadge :goal-id="block.goal_id" />
             </div>
           </div>
         </div>
@@ -2617,7 +2664,10 @@ watch(selectedParentIndex, async () => {
           <div v-if="childSearchResults.length > 0" class="space-y-1 mt-2">
             <button v-for="result in childSearchResults" :key="result.id" @click="addExistingChild(result.id)"
               class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors">
-              <div class="font-medium text-ink">{{ result.title }}</div>
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-ink">{{ result.title }}</span>
+                <ChildCountBadge :goal-id="result.id" />
+              </div>
               <div class="text-xs text-ink-dim">
                 {{ new Date(result.created).toLocaleDateString("sv-SE") }}
               </div>
@@ -2687,9 +2737,12 @@ watch(selectedParentIndex, async () => {
                  </button>
                  <div class="flex-1 min-w-0">
                   <NuxtLink :to="`/goal/${child.id}`" class="py-1.5 block cursor-pointer">
-                    <h3 class="text-base font-normal select-none" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
-                      {{ child.title }}
-                    </h3>
+                    <div class="flex items-center gap-2 min-w-0">
+                      <h3 class="text-base font-normal select-none truncate min-w-0" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
+                        {{ child.title }}
+                      </h3>
+                      <ChildCountBadge :goal-id="child.id" />
+                    </div>
                     <p v-if="getChildWaitingForTitle(child.id)" class="text-xs text-ink-dim mt-0.5">
                       🔗 Väntar på: {{ getChildWaitingForTitle(child.id) }}
                     </p>
@@ -2714,6 +2767,10 @@ watch(selectedParentIndex, async () => {
                  <!-- Agent-märke -->
                  <span class="opt-icon" :class="{ 'is-on': !!child.agent }">
                    <AgentBadge :active="!!child.agent" @toggle="toggleAgent(child)" />
+                 </span>
+                 <!-- Nu-märke -->
+                 <span class="opt-icon" :class="{ 'is-on': !!child.now }">
+                   <NowBadge :active="!!child.now" @toggle="toggleNow(child)" />
                  </span>
                 <!-- Deadline för undermål (c) -->
                 <div class="opt-icon flex-shrink-0 flex items-center gap-1"

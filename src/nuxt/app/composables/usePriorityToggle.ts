@@ -1,7 +1,7 @@
 const LAST_PAGE_KEY = "plan-priority-toggle-last-page";
 
 const lastVisitedPage = ref<string | null>(null);
-const priorityPage = "/priority";
+const nowPage = "/now";
 
 function getStoredLastPage(): string | null {
 	if (typeof window === "undefined") return null;
@@ -21,7 +21,7 @@ export function usePriorityToggle() {
 	watch(
 		() => route.path,
 		(newPath) => {
-			if (newPath !== priorityPage) {
+			if (newPath !== nowPage) {
 				lastVisitedPage.value = newPath;
 				setStoredLastPage(newPath);
 			}
@@ -39,15 +39,15 @@ export function usePriorityToggle() {
 
 	function togglePriority() {
 		const currentPath = route.path;
-		const isOnPriorityPage = currentPath === priorityPage;
+		const isOnNowPage = currentPath === nowPage;
 
-		if (isOnPriorityPage) {
+		if (isOnNowPage) {
 			// Go back to last visited page
 			const target = lastVisitedPage.value || "/";
 			router.push(target);
 		} else {
-			// Go to priority page
-			router.push(priorityPage);
+			// Go to the actionable goals page
+			router.push(nowPage);
 		}
 	}
 
@@ -68,11 +68,11 @@ export function usePriorityToggle() {
 		if (isSearchOpen.value) return;
 
 		// På målsidan är 'p' platsväljarens tangent (platsen där målet
-		// kan slutföras). Prioritetslistan nås då via tangentmenyn.
+		// kan slutföras). Gör nu nås då via tangentmenyn.
 		if (route.path.startsWith("/goal/")) return;
 
 		// Toggle on 'p' key press (not hold). Shift+P används för
-		// viktläget på prioritetssidan och ska inte växla sida.
+		// ordningsläget på Gör nu och ska inte växla sida.
 		if (
 			key === "p" &&
 			!event.shiftKey &&

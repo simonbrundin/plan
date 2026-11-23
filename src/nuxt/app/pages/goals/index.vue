@@ -12,10 +12,10 @@ import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 
 const router = useRouter()
-const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency, removeDependency } = useGoalApi()
+const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency, removeDependency } = useGoalApi()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
-const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
+const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
 const goalDates = useGoalDatesModal()
 // Målet kan dras in i kalendern för att schemaläggas.
 const { startDrag } = useGoalDrag()
@@ -525,6 +525,22 @@ async function toggleAgent(goal: Goal) {
   }
 }
 
+// Toggle nu-märke på ett mål. Målet dyker då upp på "Gör nu"-sidan.
+async function toggleNow(goal: Goal) {
+  const newNow = !goal.now
+  try {
+    const previousNow = goal.now ?? false
+    await setGoalNow(goal.id, newNow)
+    undoNow(goal, previousNow)
+    const idx = localGoals.value.findIndex(g => g.id === goal.id)
+    if (idx !== -1) {
+      localGoals.value[idx] = { ...localGoals.value[idx], now: newNow }
+    }
+  } catch (err) {
+    console.error('Failed to toggle now:', err)
+  }
+}
+
 // Delete goal
 async function handleDelete(goal: Goal) {
   try {
@@ -788,6 +804,17 @@ onMounted(() => {
       },
     },
     {
+      keys: 'n',
+      label: 'N',
+      title: 'Växla nu-märke',
+      run: () => {
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) {
+          toggleNow(goal)
+        }
+      },
+    },
+    {
       keys: 'd',
       label: 'D',
       title: 'Sätt startdatum och deadline',
@@ -973,6 +1000,10 @@ definePageMeta({
           <!-- Agent-märke (a) -->
           <span class="opt-icon" :class="{ 'is-on': !!goal.agent }">
             <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
+          </span>
+          <!-- Nu-märke (n) -->
+          <span class="opt-icon" :class="{ 'is-on': !!goal.now }">
+            <NowBadge :active="!!goal.now" @toggle="toggleNow(goal)" />
           </span>
           <!-- Due-datum / deadline (c) -->
           <template v-if="dueGoalId === goal.id">

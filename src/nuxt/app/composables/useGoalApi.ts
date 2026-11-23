@@ -120,6 +120,15 @@ export function useGoalApi() {
 		});
 	};
 
+	// Markerar ett mål som ett mål som ska göras nu (eller upphäver
+	// nu-flaggan). Sådana mål syns på "Gör nu"-sidan.
+	const setGoalNow = async (goalId: number, now: boolean) => {
+		await apiProxy(`goals/${goalId}`, {
+			method: "PATCH",
+			body: { now },
+		});
+	};
+
 	// Sätter målets upprepningsregel och schemaläggningsstrategi.
 	// En nullad regel tar bort upprepningen så att målet blir vanligt igen.
 	//
@@ -353,6 +362,7 @@ export function useGoalApi() {
 		setGoalEstimate,
 		setGoalEternal,
 		setGoalAgent,
+		setGoalNow,
 		setGoalRecurrence,
 		completeGoalOccurrence,
 		undoGoalOccurrence,

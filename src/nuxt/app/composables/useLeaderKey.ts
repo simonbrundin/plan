@@ -39,10 +39,10 @@ export function useLeaderKey() {
 			run: () => router.push("/goals"),
 		},
 		{
-			keys: "gp",
-			label: "G+P",
-			title: "Gå till Prioritet",
-			run: () => router.push("/priority"),
+			keys: "gn",
+			label: "G+N",
+			title: "Gå till Gör nu",
+			run: () => router.push("/now"),
 		},
 		{
 			keys: "gc",

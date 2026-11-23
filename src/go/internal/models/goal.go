@@ -86,6 +86,9 @@ type Goal struct {
 	// Agent markerar ett mål som är avsett att arbeta på av en agent.
 	// Används för att filtrera fram vilka mål en agent kan ta sig an.
 	Agent bool `json:"agent" example:"false"`
+	// Now markerar ett mål som ska göras nu. Målet dyker då upp på
+	// "Gör nu"-sidan (i stället för de mål som bara är påbörjade).
+	Now bool `json:"now" example:"false"`
 	// HasParent anger om målet har en förälder (det är child i goal_relations).
 	// Endast grundmål (utan förälder) listas på /goals.
 	HasParent bool `json:"has_parent" example:"false"`
@@ -272,6 +275,9 @@ type UpdateGoalRequest struct {
 	// Agent sätter eller tar bort agent-flaggan på ett mål.
 	// nil = lämnas oförändrat, true = målet är för en agent, false = vanligt mål.
 	Agent *bool `json:"agent,omitempty"`
+	// Now sätter eller tar bort nu-flaggan på ett mål.
+	// nil = lämnas oförändrat, true = målet ska göras nu, false = vanligt mål.
+	Now *bool `json:"now,omitempty"`
 	// RecurrenceRule sätter eller tar bort målets upprepningsregel.
 	// Utan fältet lämnas regeln oförändrad, null tar bort den.
 	RecurrenceRule NullableString `json:"recurrence_rule,omitempty"`
@@ -453,6 +459,13 @@ type DeleteDependencyRequest struct {
 	DependsOnID int64 `json:"dependsOnId" binding:"required"`
 }
 
+// GoalParent är en förälder till ett mål, med tillräckligt mycket
+// information för att visas i gränssnittet.
+type GoalParent struct {
+	ID    int64  `json:"id" example:"1"`
+	Title string `json:"title" example:"Hälsa"`
+}
+
 // PrioritizedGoal represents a goal with priority information
 type PrioritizedGoal struct {
 	Goal
@@ -460,6 +473,9 @@ type PrioritizedGoal struct {
 	ParentTitle   *string `json:"parentTitle,omitempty"`
 	ParentID      *int64  `json:"parentId,omitempty"`
 	PriorityOrder int     `json:"priorityOrder" example:"0"`
+	// Alla föräldrar som målet ligger under. ParentTitle/ParentID
+	// pekar ut den förälder med högst vikt.
+	Parents []GoalParent `json:"parents"`
 }
 
 // ErrorResponse represents an API error

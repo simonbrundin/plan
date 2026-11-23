@@ -118,9 +118,9 @@ const links = [
       },
     },
     {
-      label: "Prioritet",
+      label: "Gör nu",
       icon: "i-lucide-sort-desc",
-      to: "/priority",
+      to: "/now",
       onSelect: () => {
         open.value = false;
       },
@@ -398,10 +398,10 @@ onUnmounted(() => {
         class="fixed top-4 right-4 z-50 px-4 py-2.5 bg-fuchsia-600/90 backdrop-blur-sm rounded-xl shadow-lg border border-fuchsia-400/30"
       >
         <div class="flex items-center gap-3">
-          <span class="text-fuchsia-100 text-sm font-medium">Prioriteringsläge</span>
+          <span class="text-fuchsia-100 text-sm font-medium">Ordna framsteg</span>
           <div class="flex items-center gap-2 text-xs">
             <span class="text-fuchsia-200">j/k: navigera</span>
-            <span class="text-fuchsia-200">Shift+P + J/K: ändra vikt</span>
+            <span class="text-fuchsia-200">Shift+P + J/K: justera ordning</span>
           </div>
         </div>
       </div>

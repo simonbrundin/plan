@@ -14,6 +14,7 @@ export function useGoalUndo() {
 		toggleGoalStarted,
 		setGoalEternal,
 		setGoalAgent,
+		setGoalNow,
 		setGoalDue,
 		setGoalStartDate,
 		setGoalEstimate,
@@ -92,6 +93,19 @@ export function useGoalUndo() {
 				: `Tog bort agent-markeringen på "${goal.title}"`,
 			undo: async () => {
 				await setGoalAgent(goal.id, previousAgent);
+				await refreshStore();
+			},
+		});
+	}
+
+	/** Nu-märket sattes på eller togs bort. */
+	function undoNow(goal: Goal, previousNow: boolean) {
+		push({
+			label: previousNow
+				? `Markerade "${goal.title}" som nu-mål`
+				: `Tog bort nu-markeringen på "${goal.title}"`,
+			undo: async () => {
+				await setGoalNow(goal.id, previousNow);
 				await refreshStore();
 			},
 		});
@@ -179,6 +193,7 @@ export function useGoalUndo() {
 		undoStarted,
 		undoEternal,
 		undoAgent,
+		undoNow,
 		undoDue,
 		undoStartDate,
 		undoDates,

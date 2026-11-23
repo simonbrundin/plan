@@ -3,6 +3,16 @@ import type { Goal } from "~/types/goal";
 export type StartedFilter = "all" | "started" | "not_started";
 
 /**
+ * Filtret på "Gör nu"-sidan.
+ *
+ * - "now"         → endast mål som är markerade med nu-märket
+ * - "all"         → alla mål visas
+ * - "started"     → endast mål med en satt started-tidsstämpel
+ * - "not_started" → endast mål där started är null
+ */
+export type NowFilter = "now" | StartedFilter;
+
+/**
  * Ett måls starttidstämpel. Fältet kan saknas helt i ett API-svar,
  * vilket betyder samma sak som null - målet är inte påbörjat.
  */
@@ -25,6 +35,20 @@ export function matchesStartedFilter(
 	if (filter === "all") return true;
 	if (filter === "started") return started !== null;
 	return started === null;
+}
+
+/**
+ * Avgör om ett mål ska visas i "Gör nu"-listan givet det aktuella filtret.
+ *
+ * Nu-märket styr vilka mål som ligger i "Gör nu" - mål som bara är
+ * påbörjade visas inte längre automatiskt.
+ */
+export function matchesNowFilter(
+	goal: { now?: boolean | null; started?: string | null },
+	filter: NowFilter,
+): boolean {
+	if (filter === "now") return goal.now === true;
+	return matchesStartedFilter(goal, filter);
 }
 
 /**

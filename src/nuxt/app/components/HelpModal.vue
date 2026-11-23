@@ -73,7 +73,7 @@ const sections = computed<Section[]>(() => {
         {
           keys: ["p"],
           description:
-            "Växla till/från prioritetssidan (på målsidan används p för plats)",
+            "Växla till/från Gör nu (på målsidan används p för plats)",
         },
         { keys: ["Space"], description: "Leader-läge (se nedan)" },
         { keys: ["Esc"], description: "Stäng modal / avbryt" },
@@ -137,8 +137,8 @@ const sections = computed<Section[]>(() => {
       ],
     },
     {
-      id: "priority",
-      title: "Prioritetslistan",
+      id: "now",
+      title: "Gör nu",
       accent: "text-accent",
       shortcuts: [
         { keys: ["j"], description: "Nästa mål" },
@@ -166,7 +166,7 @@ const sections = computed<Section[]>(() => {
         { keys: ["Space"], description: "Öppna leader-läget" },
         { keys: ["g", "i"], description: "Gå till inkorgen" },
         { keys: ["g", "g"], description: "Gå till mållistan" },
-        { keys: ["g", "p"], description: "Gå till prioritetslistan" },
+        { keys: ["g", "n"], description: "Gå till Gör nu" },
         { keys: ["g", "c"], description: "Gå till kalendern" },
         { keys: ["g", "d"], description: "Gå till avslutade mål" },
         { keys: ["g", "s"], description: "Gå till inställningar" },
@@ -184,8 +184,12 @@ const sections = computed<Section[]>(() => {
           description: "Växla agent-märke för markerat mål",
         },
         {
+          keys: ["n"],
+          description: "Växla nu-märke för markerat mål (syns i Gör nu)",
+        },
+        {
           keys: ["d"],
-          description: "Sätt startdatum och deadline (målsidan, /goals, /priority)",
+          description: "Sätt startdatum och deadline (målsidan, /goals, /now)",
         },
         { keys: ["Esc"], description: "Avbryt leader-läget" },
       ],

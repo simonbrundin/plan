@@ -37,9 +37,9 @@ definePageMeta({
                 Gå till mål
               </UButton>
             </NuxtLink>
-            <NuxtLink to="/priority">
+            <NuxtLink to="/now">
               <UButton size="lg" color="neutral" variant="outline" icon="material-symbols:sort">
-                Prioriteringslista
+                Gör nu
               </UButton>
             </NuxtLink>
           </div>

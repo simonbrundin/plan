@@ -98,10 +98,10 @@ Var tangenterna ligger just nu:
 | --- | --- |
 | Globala (`?`, `Ctrl+K`, `n`, `z`, `p`, `Space`) | `app/layouts/default.vue` |
 | Leader-läge + globala leader-kommandon | `app/composables/useLeaderKey.ts` |
-| Leader-kommandon per sida | `app/pages/goal/[id].vue`, `app/pages/goals/index.vue`, `app/pages/priority.vue` |
-| Målsidan (d, s, e, t, c, b, m, r, x, p, i, a, j, k, h, l) | `app/pages/goal/[id].vue` + `app/composables/useGlobalNavigation.ts` |
-| Mållistan (/goals) | `app/pages/goals/index.vue` |
-| Prioritetslistan (/priority) | `app/pages/priority.vue` + `app/composables/usePriorityMode.ts` |
+| Leader-kommandon per sida | `app/pages/goal/[id].vue`, `app/pages/goals/index.vue`, `app/pages/now.vue` |
+| Målsidan (d, s, e, t, c, b, m, r, x, p, i, a, n, j, k, h, l) | `app/pages/goal/[id].vue` + `app/composables/useGlobalNavigation.ts` |
+| Mållistan (/goals) (leader + a/n) | `app/pages/goals/index.vue` |
+| Gör nu-listan (/now) (leader + a/n) | `app/pages/now.vue` + `app/composables/usePriorityMode.ts` |
 | Sidorbyte till prioritetssidan (`p`) | `app/composables/usePriorityToggle.ts` |
 | Kalendern (t, r, j/k, h/l, +/−) | `app/components/VerticalCalendar.vue` |
 | Bekräftelsedialog (h/l/Enter/Esc) | `app/components/ConfirmDeleteGoalModal.vue` |
