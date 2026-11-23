@@ -940,7 +940,10 @@ definePageMeta({
             class="w-4 h-4 flex-shrink-0 text-accent"
             :title="`Platser: ${goal.places.map((p) => p.name).join(', ')}`" />
           <div class="flex-1 min-w-0">
-            <span class="block truncate text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="truncate min-w-0 text-ink" :class="goal.eternal ? ETERNAL_TEXT : ''">{{ goal.title }}</span>
+              <ChildCountBadge :goal-id="goal.id" />
+            </div>
             <p v-if="goal.description" class="text-xs text-ink-dim truncate mt-0.5">
               {{ descriptionPreview(goal.description) }}
             </p>

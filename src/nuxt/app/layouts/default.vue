@@ -177,14 +177,25 @@ onMounted(() => {
 });
 
 const groups = computed(() => {
+  const childStats = goalsStore.childStats;
   const goalItems =
-    goalsStore.goals.map((goal) => ({
-      id: `goal-${goal.id}`,
-      label: goal.title,
-      icon: goal.finished ? "i-lucide-check-circle" : "i-lucide-circle",
-      to: `/goal/${goal.id}`,
-      suffix: goal.finished ? "Klar" : undefined,
-    }));
+    goalsStore.goals.map((goal) => {
+      const children = childStats.get(goal.id)?.total ?? 0;
+      const suffix = [
+        goal.finished ? "Klar" : undefined,
+        children > 0 ? `${children} undermål` : undefined,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+
+      return {
+        id: `goal-${goal.id}`,
+        label: goal.title,
+        icon: goal.finished ? "i-lucide-check-circle" : "i-lucide-circle",
+        to: `/goal/${goal.id}`,
+        suffix: suffix || undefined,
+      };
+    });
 
   return [
     {

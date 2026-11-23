@@ -239,13 +239,16 @@ function dueToneClass(due: string | null): string {
               class="flex-1 min-w-0 py-1.5 block cursor-pointer"
               @click="$emit('select-child', index)"
             >
-              <h3
-                class="text-base font-normal select-none"
-                :class="child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'"
-                :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)"
-              >
-                {{ child.title }}
-              </h3>
+              <div class="flex items-center gap-2 min-w-0">
+                <h3
+                  class="text-base font-normal select-none truncate min-w-0"
+                  :class="child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-white'"
+                  :style="child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)"
+                >
+                  {{ child.title }}
+                </h3>
+                <ChildCountBadge :goal-id="child.id" />
+              </div>
               <p v-if="child.due" class="text-xs mt-0.5 tabular-nums" :class="dueToneClass(child.due)">
                 📅 {{ formatDueDate(child.due) }}
               </p>

@@ -51,7 +51,10 @@ watch(
         @click="$emit('add-existing-child', result.id)"
         class="w-full text-left px-4 py-2 hover:bg-elevated rounded-lg transition-colors"
       >
-        <div class="font-medium text-ink">{{ result.title }}</div>
+        <div class="flex items-center gap-2">
+          <span class="font-medium text-ink">{{ result.title }}</span>
+          <ChildCountBadge :goal-id="result.id" />
+        </div>
         <div class="text-xs text-ink-dim">
           {{ new Date(result.created).toLocaleDateString("sv-SE") }}
         </div>

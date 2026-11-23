@@ -52,6 +52,31 @@ export const useGoalsStore = defineStore("goals", {
 			return state.goals.filter((g) => childIds.includes(g.id));
 		},
 
+		// Antalet undermål per mål, räknat ur relationerna.
+		//
+		// Används för att visa hur många barn ett mål har utan att varje
+		// rad behöver fråga servern. "finished" är antalet klara barn.
+		childStats: (state) => {
+			const finishedById = new Map(
+				state.goals.map((goal) => [goal.id, !!goal.finished]),
+			);
+			const stats = new Map<number, { total: number; finished: number }>();
+
+			for (const relation of state.relations) {
+				const current = stats.get(relation.parent_id) ?? {
+					total: 0,
+					finished: 0,
+				};
+				current.total += 1;
+				if (finishedById.get(relation.child_id)) {
+					current.finished += 1;
+				}
+				stats.set(relation.parent_id, current);
+			}
+
+			return stats;
+		},
+
 		// Hämta grundmål (mål utan förälder)
 		getRootGoals: (state) => {
 			const childIds = new Set(state.relations.map((r) => r.child_id));

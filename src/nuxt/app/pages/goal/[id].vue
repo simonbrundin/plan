@@ -2323,7 +2323,7 @@ watch(selectedParentIndex, async () => {
             isGoalSelected ? 'border-accent bg-accent/10' : 'border-transparent',
             goal?.eternal ? ETERNAL_TEXT : 'text-ink'
           ]"
-        >{{ goal?.title }}</h1>
+        >{{ goal?.title }}<ChildCountBadge v-if="goal" :goal-id="goal.id" size="md" class="ml-2 align-middle" /></h1>
         <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
         <div class="flex items-center gap-1 flex-shrink-0">
         <!-- Started-toggle (s) -->

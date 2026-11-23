@@ -32,6 +32,7 @@ const moveFromInbox = async (goalId: number) => {
         <div class="flex items-center space-x-3 min-w-0">
           <Icon :name="goal.icon || 'heroicons:star'" class="w-6 h-6 text-ink-muted flex-shrink-0" />
           <span class="text-ink truncate">{{ goal.title }}</span>
+          <ChildCountBadge :goal-id="goal.id" />
         </div>
 
         <button

@@ -186,6 +186,7 @@ watch(results, () => {
           >
             <Icon name="lucide:clock" class="w-4 h-4 text-orange-400 flex-shrink-0" />
             <span class="text-ink text-sm truncate flex-1">{{ dependency.title }}</span>
+            <ChildCountBadge :goal-id="dependency.id" />
             <button
               type="button"
               class="rounded-md p-1 text-ink-dim transition-colors hover:bg-red-500/20 hover:text-red-400"
@@ -220,6 +221,7 @@ watch(results, () => {
           >
             <Icon :name="goal.icon || 'heroicons:star'" class="w-4 h-4 text-ink-muted flex-shrink-0" />
             <span class="text-ink text-sm truncate">{{ goal.title }}</span>
+            <ChildCountBadge :goal-id="goal.id" />
             <span v-if="parentPath(goal.id)" class="text-xs text-ink-dim truncate max-w-[40%]">
               {{ parentPath(goal.id) }}
             </span>

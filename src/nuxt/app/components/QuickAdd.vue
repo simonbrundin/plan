@@ -338,6 +338,7 @@ defineExpose({ focusInput });
 									@click="selectParent(goal)"
 								>
 									{{ goal.title }}
+									<ChildCountBadge :goal-id="goal.id" />
 								</button>
 							</div>
 						</template>

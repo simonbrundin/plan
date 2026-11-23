@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Goal } from "~/types/goal";
 import { AuthenticationError, useGoalApi } from "~/composables/useGoalApi";
+import { useGoalsStore } from "~/stores/goals";
 
 // Avslutade mål behöver inte SSR eftersom sidan hämtar användarens mål efter
 // att sessionen etablerats i webbläsaren.
@@ -11,7 +12,7 @@ definePageMeta({
 type Interval = "today" | "week" | "month" | "all";
 
 const router = useRouter();
-const { loadGoalGraph } = useGoalApi();
+const goalsStore = useGoalsStore();
 const goals = ref<Goal[]>([]);
 const parentTitles = ref(new Map<number, string[]>());
 const interval = ref<Interval>("today");
@@ -55,12 +56,12 @@ function formatFinished(value: string): string {
 
 onMounted(async () => {
   try {
-    const graph = await loadGoalGraph();
-    goals.value = graph.goals;
+    await goalsStore.loadGraph(true);
+    goals.value = goalsStore.goals;
 
-    const titlesById = new Map(graph.goals.map((goal) => [goal.id, goal.title]));
+    const titlesById = new Map(goalsStore.goals.map((goal) => [goal.id, goal.title]));
     const titlesByChild = new Map<number, string[]>();
-    for (const relation of graph.relations) {
+    for (const relation of goalsStore.relations) {
       const title = titlesById.get(relation.parent_id);
       if (!title) continue;
       const titles = titlesByChild.get(relation.child_id) ?? [];
@@ -131,7 +132,10 @@ onMounted(async () => {
               <Icon :name="goal.icon || 'heroicons:star'" class="h-5 w-5" />
             </span>
             <span class="min-w-0 flex-1">
-              <span class="block truncate font-medium text-ink">{{ goal.title }}</span>
+              <span class="flex items-center gap-2">
+                <span class="block truncate font-medium text-ink">{{ goal.title }}</span>
+                <ChildCountBadge :goal-id="goal.id" />
+              </span>
               <span class="mt-1 block text-sm text-ink-muted">{{ formatFinished(goal.finished!) }}</span>
               <span class="mt-1 block truncate text-sm text-ink-dim">
                 {{ parentTitles.get(goal.id)?.join(", ") || "Ingen" }}

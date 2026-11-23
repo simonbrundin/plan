@@ -45,6 +45,7 @@ const emit = defineEmits<{
       ]"
     >
       {{ goal?.title }}
+      <ChildCountBadge v-if="goal" :goal-id="goal.id" size="md" class="ml-2 align-middle" />
     </h1>
 
     <!-- Started-toggle (s) -->
