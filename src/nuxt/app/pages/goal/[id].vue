@@ -1854,6 +1854,27 @@ function openIconPickerForSelection() {
   }
 }
 
+// Toggle "påbörjat" på det markerade målet. Tangenten följer det
+// markerade målet: förälder (parent-läge), huvudmålet eller det
+// markerade undermålet.
+function toggleStartedForSelection() {
+  if (isParentMode.value && parents.value.length > 0) {
+    toggleStarted(parents.value[selectedParentIndex.value]);
+    return;
+  }
+  if (isGoalSelected.value && goal.value) {
+    toggleStarted(goal.value);
+    return;
+  }
+  if (
+    filteredChildren.value.length > 0 &&
+    selectedChildIndex.value >= 0 &&
+    selectedChildIndex.value < filteredChildren.value.length
+  ) {
+    toggleStarted(filteredChildren.value[selectedChildIndex.value]);
+  }
+}
+
 // Kommandon som bara finns på målsidan registreras i det globala
 // leader-läget, så att samma tangentsekvenser fungerar överallt.
 const { registerPageCommands } = useLeaderKey();
@@ -1915,6 +1936,12 @@ onMounted(() => {
       run: () => {
         openTagPicker(tagTarget());
       },
+    },
+    {
+      keys: "s",
+      label: "S",
+      title: "Toggle påbörjat",
+      run: toggleStartedForSelection,
     },
   ]);
 });
@@ -2013,25 +2040,6 @@ function handleKeydown(event: KeyboardEvent) {
       selectedChildIndex.value < filteredChildren.value.length
     ) {
       startEditDescription(filteredChildren.value[selectedChildIndex.value]);
-    }
-    return;
-  }
-
-  // Hantera 's' för att toggla started status
-  if (event.key === "s") {
-    event.preventDefault();
-    if (isParentMode.value && parents.value.length > 0) {
-      const parent = parents.value[selectedParentIndex.value];
-      toggleStarted(parent);
-    } else if (isGoalSelected.value && goal.value) {
-      toggleStarted(goal.value);
-    } else if (
-      filteredChildren.value.length > 0 &&
-      selectedChildIndex.value >= 0 &&
-      selectedChildIndex.value < filteredChildren.value.length
-    ) {
-      const child = filteredChildren.value[selectedChildIndex.value];
-      toggleStarted(child);
     }
     return;
   }
@@ -2496,13 +2504,13 @@ watch(selectedParentIndex, async () => {
         >{{ goal?.title }}<ChildCountBadge v-if="goal" :goal-id="goal.id" size="md" class="ml-2 align-middle" /></h1>
         <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
         <div class="flex items-center gap-1 flex-shrink-0">
-        <!-- Started-toggle (s) -->
+        <!-- Started-toggle (leader + s) -->
         <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="opt-icon" :class="{ 'is-on': !!goal.started }">
           <button @click.stop="toggleStarted(goal)"
             class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
             :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
-            :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+            :title="goal.started ? 'Avbörja (leader + s)' : 'Påbörja (leader + s)'">
             <Icon name="lucide:circle-play" class="w-6 h-6"
               :style="{ opacity: goal.started ? 1 : 0.25 }" />
           </button>
@@ -2907,12 +2915,12 @@ watch(selectedParentIndex, async () => {
                 </div>
                 <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
                 <div class="flex items-center gap-0.5 flex-shrink-0">
-                 <!-- Started-toggle (s) -->
+                 <!-- Started-toggle (leader + s) -->
                  <span class="opt-icon" :class="{ 'is-on': !!child.started }">
                    <button
                      @click.stop="toggleStarted(child)"
                      :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-ink hover:text-ink-muted']"
-                     :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+                     :title="child.started ? 'Avbörja (leader + s)' : 'Påbörja (leader + s)'">
                      <Icon name="lucide:circle-play" class="w-5 h-5"
                        :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
                    </button>
@@ -3142,6 +3150,7 @@ watch(selectedParentIndex, async () => {
       @add="addDependencyFromPicker"
       @remove="removeDependencyFromPicker"
       @close="dependencyPickerOpen = false" />
+
   </div>
   <div v-else class="max-w-4xl mx-auto px-6 py-8">
     <div class="text-center">

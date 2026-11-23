@@ -49,7 +49,6 @@ const handleKeydown = (event: KeyboardEvent) => {
 // vad varje tangent gör.
 const goalActionShortcuts: Shortcut[] = [
   { keys: ["d"], description: "Toggle slutfört" },
-  { keys: ["s"], description: "Toggle påbörjat" },
   { keys: ["e"], description: "Toggle evigt-märke" },
   { keys: ["t"], description: "Redigera beskrivning" },
   { keys: ["c"], description: "Sätt deadline (due-datum)" },
@@ -200,6 +199,10 @@ const sections = computed<Section[]>(() => {
         {
           keys: ["t"],
           description: "Sätt taggar på markerat mål (målsidan, /goals, /now)",
+        },
+        {
+          keys: ["s"],
+          description: "Toggle påbörjat på markerat mål (målsidan, /goals, /now)",
         },
         { keys: ["Esc"], description: "Avbryt leader-läget" },
       ],

@@ -257,14 +257,14 @@ function dueToneClass(due: string | null): string {
               </p>
             </NuxtLink>
 
-            <!-- Started-toggle (s) -->
+            <!-- Started-toggle (leader + s) -->
             <button
               @click.stop="$emit('toggle-started', child)"
               :class="[
                 'flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors',
                 isChildBlocked(child.id) || child.finished ? 'text-ink-dim' : child.started ? 'text-yellow-400 hover:text-yellow-300' : 'text-white hover:text-ink-muted'
               ]"
-              :title="child.started ? 'Avbörja (s)' : 'Påbörja (s)'"
+              :title="child.started ? 'Avbörja (leader + s)' : 'Påbörja (leader + s)'"
             >
               <Icon
                 name="lucide:circle-play"

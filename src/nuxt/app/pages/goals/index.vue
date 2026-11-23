@@ -674,15 +674,6 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
-  // s - toggle started
-  if (event.key === 's') {
-    event.preventDefault()
-    if (filteredGoals.value.length > 0) {
-      toggleStarted(filteredGoals.value[selectedIndex.value])
-    }
-    return
-  }
-
   // c - sätt deadline (due-datum)
   if (event.key === 'c') {
     event.preventDefault()
@@ -828,6 +819,17 @@ onMounted(() => {
       },
     },
     {
+      keys: 's',
+      label: 'S',
+      title: 'Toggle påbörjat',
+      run: () => {
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) {
+          toggleStarted(goal)
+        }
+      },
+    },
+    {
       keys: 'd',
       label: 'D',
       title: 'Sätt startdatum och deadline',
@@ -915,7 +917,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent · space+t taggar
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent · space+s påbörjat · space+t taggar
         </span>
       </div>
     </div>
@@ -1010,7 +1012,7 @@ definePageMeta({
             <button @click.stop="toggleStarted(goal)"
               class="flex-shrink-0 p-1 rounded transition-colors"
               :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
-              :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'">
+              :title="goal.started ? 'Avbörja (leader + s)' : 'Påbörja (leader + s)'">
               <Icon name="lucide:circle-play" class="w-5 h-5"
                 :style="{ opacity: goal.started ? 1 : 0.25 }" />
             </button>

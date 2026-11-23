@@ -48,7 +48,7 @@ const emit = defineEmits<{
       <ChildCountBadge v-if="goal" :goal-id="goal.id" size="md" class="ml-2 align-middle" />
     </h1>
 
-    <!-- Started-toggle (s) -->
+    <!-- Started-toggle (leader + s) -->
     <button
       v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
       @click.stop="$emit('toggle-started')"
@@ -58,7 +58,7 @@ const emit = defineEmits<{
           ? 'text-yellow-400 hover:text-yellow-300'
           : 'text-ink-dim hover:text-ink-muted'
       "
-      :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'"
+      :title="goal.started ? 'Avbörja (leader + s)' : 'Påbörja (leader + s)'"
     >
       <Icon
         name="lucide:circle-play"

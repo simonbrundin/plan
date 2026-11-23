@@ -157,12 +157,6 @@ onMounted(() => {
 
     const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
 
-    if (e.key === 's' && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault()
-      if (goal) toggleStarted(goal)
-      return
-    }
-
     // Samma tangentkommandon som på målsidan och /goals:
     // d = klar, e = evigt, c = deadline, t = beskrivning, x = ta bort
     if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
@@ -327,6 +321,17 @@ onMounted(() => {
         const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
         if (goal) {
           toggleNow(goal)
+        }
+      },
+    },
+    {
+      keys: 's',
+      label: 'S',
+      title: 'Toggle påbörjat',
+      run: () => {
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) {
+          toggleStarted(goal)
         }
       },
     },
@@ -762,7 +767,7 @@ const filterOptions = [
               @click.stop="toggleStarted(goal)"
               class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
               :class="goal.started ? 'text-yellow-400' : 'text-ink-dim hover:text-ink-muted'"
-              :title="goal.started ? 'Avbörja (s)' : 'Påbörja (s)'"
+              :title="goal.started ? 'Avbörja (leader + s)' : 'Påbörja (leader + s)'"
             >
               <Icon
                 name="lucide:circle-play"
