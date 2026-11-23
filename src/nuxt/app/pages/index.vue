@@ -42,6 +42,11 @@ definePageMeta({
                 Gör nu
               </UButton>
             </NuxtLink>
+            <NuxtLink to="/agent">
+              <UButton size="lg" color="neutral" variant="outline" icon="material-symbols:smart-toy-outline">
+                Agentmål
+              </UButton>
+            </NuxtLink>
           </div>
         </div>
 
