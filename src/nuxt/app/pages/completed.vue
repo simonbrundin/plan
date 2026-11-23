@@ -9,33 +9,30 @@ definePageMeta({
   ssr: false,
 });
 
-type Interval = "today" | "week" | "month" | "all";
+type Interval = "day" | "week" | "month" | "all";
 
 const router = useRouter();
 const goalsStore = useGoalsStore();
 const goals = ref<Goal[]>([]);
 const parentTitles = ref(new Map<number, string[]>());
-const interval = ref<Interval>("today");
+const interval = ref<Interval>("day");
 const pending = ref(true);
 const errorMessage = ref("");
 
 const intervals: Array<{ value: Interval; label: string }> = [
-  { value: "today", label: "Idag" },
+  { value: "day", label: "Senaste 24 timmarna" },
   { value: "week", label: "Senaste veckan" },
   { value: "month", label: "Senaste 30 dagarna" },
   { value: "all", label: "Alla avslutade" },
 ];
 
-function startOfToday(): Date {
-  const today = new Date();
-  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
-}
+const DAY = 24 * 60 * 60 * 1000;
 
 function intervalStart(value: Interval): Date | null {
-  const today = startOfToday();
-  if (value === "today") return today;
-  if (value === "week") return new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
-  if (value === "month") return new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  if (value === "day") return new Date(now.getTime() - DAY);
+  if (value === "week") return new Date(now.getTime() - 6 * DAY);
+  if (value === "month") return new Date(now.getTime() - 29 * DAY);
   return null;
 }
 
