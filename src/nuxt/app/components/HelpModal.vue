@@ -150,8 +150,8 @@ const sections = computed<Section[]>(() => {
         { keys: ["j"], description: "Nästa mål" },
         { keys: ["k"], description: "Föregående mål" },
         { keys: ["l"], description: "Öppna markerat mål" },
-        { keys: ["↑"], description: "Flytta upp i prioritetsordningen" },
-        { keys: ["↓"], description: "Flytta ner i prioritetsordningen" },
+        { keys: ["↑"], description: "Flytta upp i prioritetsordningen (barnmål sorteras bara under föräldern)" },
+        { keys: ["↓"], description: "Flytta ner i prioritetsordningen (barnmål sorteras bara under föräldern)" },
         {
           keys: ["Shift+P", "J"],
           description: "Minska vikten (håll Shift+P nedtryckt)",

@@ -1,7 +1,11 @@
 import type { Goal, GoalParent } from "~/types/goal";
 import { matchesNowFilter, type NowFilter } from "~/utils/goalFilters";
 import { isDoableAtPlace } from "~/utils/places";
-import { moveChildId } from "~/utils/childOrder";
+import {
+	buildDisplayTree,
+	buildHierarchy,
+	swapIds,
+} from "~/utils/nowHierarchy";
 
 interface PrioritizedGoal extends Goal {
 	weight: number;
@@ -9,6 +13,17 @@ interface PrioritizedGoal extends Goal {
 	parentId: number | null;
 	// Alla föräldrar som målet ligger under.
 	parents: GoalParent[];
+}
+
+// En rad i "Gör nu"-listan: målet, hur djupt det ligger i hierarkin och
+// vilken förälder det visas under.
+export interface DisplayGoalRow {
+	goal: PrioritizedGoal;
+	depth: number;
+	parentId: number | null;
+	// Numret på toppnivåmålet. Barnmål har inget nummer - de ligger
+	// indenterade under föräldern.
+	number: number | null;
 }
 
 const ROOT_GOAL_ID = 1;
@@ -102,6 +117,35 @@ export function usePriorityMode() {
 			.filter(matchesCurrentPlace),
 	);
 
+	// Trädet över alla mål i listan. Det bestämmmer vilka mål som ligger
+	// under varandra - oberoende av vilket filter som är aktivt.
+	const hierarchy = computed(() => buildHierarchy(prioritizedGoals.value));
+
+	// Den lista som faktiskt visas: målen under sina föräldrar, indenterade.
+	const displayTree = computed(() =>
+		buildDisplayTree(visibleGoals.value.map((goal) => goal.id), hierarchy.value),
+	);
+
+	const displayRows = computed<DisplayGoalRow[]>(() => {
+		const byId = new Map(prioritizedGoals.value.map((goal) => [goal.id, goal]));
+
+		let topLevelNumber = 0;
+		return displayTree.value.rows.map((row) => {
+			const goal = byId.get(row.id);
+			if (!goal) return null;
+			if (row.depth === 0) topLevelNumber += 1;
+			return {
+				goal,
+				depth: row.depth,
+				parentId: row.parentId,
+				number: row.depth === 0 ? topLevelNumber : null,
+			};
+		}).filter((row): row is DisplayGoalRow => row !== null);
+	});
+
+	// Raderna i den ordning de visas - används av j/k-navigeringen.
+	const displayOrder = computed(() => displayRows.value.map((row) => row.goal.id));
+
 	async function loadPrioritizedGoals() {
 		if (isLoading.value) return;
 		isLoading.value = true;
@@ -118,10 +162,10 @@ export function usePriorityMode() {
 			if (selectedGoalId.value !== null) {
 				const stillExists = goals.some((g) => g.id === selectedGoalId.value);
 				if (!stillExists) {
-					selectedGoalId.value = visibleGoals.value[0]?.id ?? null;
+					selectedGoalId.value = displayOrder.value[0] ?? null;
 				}
-			} else if (visibleGoals.value.length > 0) {
-				selectedGoalId.value = visibleGoals.value[0]?.id ?? null;
+			} else if (displayOrder.value.length > 0) {
+				selectedGoalId.value = displayOrder.value[0] ?? null;
 			}
 		} catch (err) {
 			console.error("Failed to load prioritized goals:", err);
@@ -183,11 +227,21 @@ export function usePriorityMode() {
 		const movingId = selectedGoalId.value;
 		if (movingId === null) return;
 
-		const reordered = moveChildId(
+		// Ett mål sorteras bara bland sina syskon - alltså bland de mål
+		// som visas under samma förälder. Ett barnmål kan alltså aldrig
+		// flytta sig ut ur förälderns grupp, medan föräldern sorteras
+		// bland toppnivåmålen.
+		const siblings = displayTree.value.siblingsOf.get(movingId);
+		if (!siblings) return;
+
+		const position = siblings.indexOf(movingId);
+		const targetPosition = direction === "up" ? position - 1 : position + 1;
+		if (targetPosition < 0 || targetPosition >= siblings.length) return;
+
+		const reordered = swapIds(
 			prioritizedGoals.value.map((goal) => goal.id),
-			visibleGoals.value.map((goal) => goal.id),
 			movingId,
-			direction,
+			siblings[targetPosition],
 		);
 		if (!reordered) return;
 
@@ -249,26 +303,22 @@ export function usePriorityMode() {
 				navigateTo(`/goal/${selectedGoalId.value}`);
 			} else if (key === "j") {
 				event.preventDefault();
-				const list = visibleGoals.value;
-				const currentIndex = list.findIndex(
-					(g) => g.id === selectedGoalId.value,
-				);
+				const list = displayOrder.value;
+				const currentIndex = list.indexOf(selectedGoalId.value);
 				if (currentIndex < list.length - 1) {
 					const nextGoal = list[currentIndex + 1];
 					if (nextGoal) {
-						selectedGoalId.value = nextGoal.id;
+						selectedGoalId.value = nextGoal;
 					}
 				}
 			} else if (key === "k") {
 				event.preventDefault();
-				const list = visibleGoals.value;
-				const currentIndex = list.findIndex(
-					(g) => g.id === selectedGoalId.value,
-				);
+				const list = displayOrder.value;
+				const currentIndex = list.indexOf(selectedGoalId.value);
 				if (currentIndex > 0) {
 					const prevGoal = list[currentIndex - 1];
 					if (prevGoal) {
-						selectedGoalId.value = prevGoal.id;
+						selectedGoalId.value = prevGoal;
 					}
 				}
 			}
@@ -304,29 +354,29 @@ export function usePriorityMode() {
 	}
 
 	function getSelectedIndex(): number {
-		return visibleGoals.value.findIndex((g) => g.id === selectedGoalId.value);
+		return displayOrder.value.indexOf(selectedGoalId.value);
 	}
 
 	function setNowFilter(filter: NowFilter) {
 		nowFilter.value = filter;
-		const list = visibleGoals.value;
+		const list = displayOrder.value;
 		if (
 			selectedGoalId.value === null ||
-			!list.some((g) => g.id === selectedGoalId.value)
+			!list.includes(selectedGoalId.value)
 		) {
-			selectedGoalId.value = list[0]?.id ?? null;
+			selectedGoalId.value = list[0] ?? null;
 		}
 	}
 
 	// Slår på och av filtret "görbar här".
 	function setFilterByCurrentPlace(enabled: boolean) {
 		filterByCurrentPlace.value = enabled;
-		const list = visibleGoals.value;
+		const list = displayOrder.value;
 		if (
 			selectedGoalId.value === null ||
-			!list.some((g) => g.id === selectedGoalId.value)
+			!list.includes(selectedGoalId.value)
 		) {
-			selectedGoalId.value = list[0]?.id ?? null;
+			selectedGoalId.value = list[0] ?? null;
 		}
 	}
 
@@ -335,6 +385,7 @@ export function usePriorityMode() {
 		selectedGoalId: readonly(selectedGoalId),
 		prioritizedGoals: readonly(prioritizedGoals),
 		visibleGoals,
+		displayRows,
 		isLoading: readonly(isLoading),
 		nowFilter: readonly(nowFilter),
 		filterByCurrentPlace: readonly(filterByCurrentPlace),

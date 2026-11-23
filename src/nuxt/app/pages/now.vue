@@ -39,6 +39,7 @@ const {
   selectedGoalId,
   prioritizedGoals,
   visibleGoals,
+  displayRows,
   isLoading,
   nowFilter,
   filterByCurrentPlace,
@@ -679,10 +680,13 @@ const filterOptions = [
 
     <div v-else class="space-y-2">
       <div
-        v-for="(goal, index) in visibleGoals"
+        v-for="({ goal, depth, number }, index) in displayRows"
         :key="goal.id"
         :data-index="index"
         :data-goal-id="goal.id"
+        :data-depth="depth"
+        class="transition-[margin] duration-150"
+        :style="{ marginLeft: `${depth * 1.5}rem` }"
       >
         <div
           data-goal-row
@@ -698,9 +702,11 @@ const filterOptions = [
           @click="selectGoal(goal.id)"
         >
           <div class="flex-shrink-0 w-8 text-center">
-            <span class="text-lg font-bold tabular-nums" :class="getWeightColor(goal.weight)">
-              {{ index + 1 }}
+            <span v-if="number !== null" class="text-lg font-bold tabular-nums" :class="getWeightColor(goal.weight)">
+              {{ number }}
             </span>
+            <!-- Barnmål markeras med en vinkel så att hierarkin syns direkt. -->
+            <span v-else class="text-sm text-ink-dim" aria-hidden="true">↳</span>
           </div>
 
           <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -740,6 +746,14 @@ const filterOptions = [
               class="w-4 h-4 flex-shrink-0 text-accent"
               :title="`Platser: ${goal.places.map((p) => p.name).join(', ')}`"
             />
+            <span
+              v-if="goal.tags?.length"
+              class="flex items-center gap-1 text-xs text-accent flex-shrink-0"
+              :title="`Taggar: ${goal.tags.join(', ')}`"
+            >
+              <Icon name="lucide:tag" class="w-3.5 h-3.5" />
+              {{ goal.tags.join(', ') }}
+            </span>
           </div>
           <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
           <div class="flex items-center gap-1 flex-shrink-0">
