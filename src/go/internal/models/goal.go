@@ -131,7 +131,7 @@ type StatusUpdate struct {
 	GoalID         int64  `json:"goal_id"`
 	FromStatusID   *int64 `json:"from_status_id,omitempty"`
 	ToStatusID     int64  `json:"to_status_id"`
-	ChangedAt      string `json:"changed_at"`
+	ChangedAt      time.Time `json:"changed_at"`
 	FromStatusName string `json:"from_status_name,omitempty"`
 	ToStatusName   string `json:"to_status_name,omitempty"`
 }
