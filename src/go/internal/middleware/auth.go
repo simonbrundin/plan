@@ -139,6 +139,14 @@ type ZitadelClaims struct {
 // AuthMiddleware validates the Bearer token and extracts user ID
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// API-nyckelautentisering har redan kört och satt userID - då är
+		// sessionen inte relevant. Utan det här avbröt varje anrop med
+		// en nyckel på "Authorization header required".
+		if userID, ok := c.Get("userID"); ok && userID != nil {
+			c.Next()
+			return
+		}
+
 		// Development mode: skip authentication
 		if os.Getenv("AUTH_DISABLED") == "true" {
 			// Default to user 4 (simonbrundin@gmail.com) who has test data
