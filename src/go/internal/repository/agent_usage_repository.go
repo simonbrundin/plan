@@ -57,12 +57,23 @@ func (r *AgentUsageRepository) Record(ctx context.Context, userID, runID int64, 
 		toolNames = []string{}
 	}
 
+	// Agentens uppgifter vinner över körningens - de kommer från den
+	// som faktiskt körde. Körningens uppgifter används som reserv.
+	provider := run.Provider
+	if req.Provider != "" {
+		provider = req.Provider
+	}
+	model := run.Model
+	if req.Model != "" {
+		model = req.Model
+	}
+
 	tokens := pricing.Tokens{
 		Input:     req.InputTokens,
 		Output:    req.OutputTokens,
 		CacheRead: req.CacheReadTokens,
 	}
-	result := r.prices.Cost(run.Provider, run.Model, tokens)
+	result := r.prices.Cost(provider, model, tokens)
 
 	query := `INSERT INTO agent_run_usage (agent_run_id, goal_id, agent_id, provider, model, model_version,
 		input_tokens, output_tokens, cache_read_tokens, tool_calls, tool_names,
@@ -92,7 +103,7 @@ func (r *AgentUsageRepository) Record(ctx context.Context, userID, runID int64, 
 
 	var usage models.AgentRunUsage
 	err = r.pool.QueryRow(ctx, query,
-		runID, run.GoalID, req.AgentID, run.Provider, run.Model, req.ModelVersion,
+		runID, run.GoalID, req.AgentID, provider, model, req.ModelVersion,
 		req.InputTokens, req.OutputTokens, req.CacheReadTokens, req.ToolCalls, toolNames,
 		result.CostUSD, result.Currency, result.PriceListVersion, result.Source,
 		models.AgentUsageStatusReported, req.StartedAt, req.FinishedAt,
@@ -249,7 +260,9 @@ func (r *AgentUsageRepository) runInfo(ctx context.Context, userID, runID int64)
 	query := `SELECT ar.id, ar.goal_id, ar.phase, ar.status, COALESCE(ar.trigger, 'user'),
 		COALESCE(ar.initiator, ''), COALESCE(ar.agent_profile, 'coding'),
 		COALESCE(ar.summary, ''), COALESCE(ar.result, ''), ar.artifact_url, ar.cost_usd,
-		ar.conversation_id, ar.started_at, ar.finished_at, ar.created_at, ar.updated_at
+		ar.conversation_id, ar.started_at, ar.finished_at, ar.created_at, ar.updated_at,
+		COALESCE(ar.agent_id, ''), COALESCE(ar.provider, ''), COALESCE(ar.model, ''),
+		COALESCE(ar.model_version, ''), COALESCE(ar.reserved_cost_usd, 0)
 		FROM agent_runs ar
 		WHERE ar.id = $1
 			AND ar.goal_id IN (SELECT goal_id FROM user_goals WHERE user_id = $2)`
@@ -257,7 +270,8 @@ func (r *AgentUsageRepository) runInfo(ctx context.Context, userID, runID int64)
 	var run models.AgentRun
 	err := r.pool.QueryRow(ctx, query, runID, userID).Scan(&run.ID, &run.GoalID, &run.Phase, &run.Status,
 		&run.Trigger, &run.Initiator, &run.AgentProfile, &run.Summary, &run.Result, &run.ArtifactURL,
-		&run.CostUSD, &run.ConversationID, &run.StartedAt, &run.FinishedAt, &run.CreatedAt, &run.UpdatedAt)
+		&run.CostUSD, &run.ConversationID, &run.StartedAt, &run.FinishedAt, &run.CreatedAt, &run.UpdatedAt,
+		&run.AgentID, &run.Provider, &run.Model, &run.ModelVersion, &run.ReservedCostUSD)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
