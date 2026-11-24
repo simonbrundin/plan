@@ -7,9 +7,9 @@ import {
 } from "h3";
 
 /**
- * Agent-API:t är en egen tjänst (~/repos/agents) som håller agentens
- * konversationer och körningar. Plan proxar till den - Slack används inte,
- * all kommunikation med agenten sker i Plan.
+ * Agent-API:t är en separat tjänst från samma repository (src/agent) som
+ * håller agentens konversationer och körningar. Plan proxar till den - Slack
+ * används inte, all kommunikation med agenten sker i Plan.
  */
 
 // agentApiBase returns the server-side URL to the agent API.

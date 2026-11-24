@@ -1,4 +1,4 @@
-import type { AgentRun } from '~/types/agent';
+import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent';
 import type { Goal } from '~/types/goal';
 
 // Alla anrop går via serverns proxy, som skickar med sessioncookien.
@@ -23,8 +23,22 @@ export function useAgentApi() {
     return runs ?? [];
   };
 
+  const fetchAgentRunEvents = async (runId: number): Promise<AgentRunEvent[]> => {
+    const events = await apiProxy<AgentRunEvent[]>(`agent-runs/${runId}/events`);
+    return events ?? [];
+  };
+
+  // Godkännandena för en körning - de som väntar på en människa.
+  const fetchAgentApprovals = async (runId?: number): Promise<AgentApproval[]> => {
+    if (runId === undefined) return [];
+    const approvals = await apiProxy<AgentApproval[]>(`agent-runs/${runId}/approvals`);
+    return approvals ?? [];
+  };
+
   return {
     fetchAgentGoals,
     fetchAgentRuns,
+    fetchAgentRunEvents,
+    fetchAgentApprovals,
   };
 }

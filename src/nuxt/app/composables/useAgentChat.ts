@@ -35,6 +35,8 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
   };
 
   // Hämtar ett förslag som väntar på beslut.
+  //
+  // Godkännandena ligger i Plan - därför läses de därifrån.
   const loadApproval = async () => {
     if (!goalId.value) return;
     try {
@@ -44,7 +46,7 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
       );
       approval.value = match ?? null;
     } catch {
-      // Ingen agent-API - inget att godkänna.
+      // Plan svarar inte - inget att godkänna.
       approval.value = null;
     }
   };
@@ -66,7 +68,10 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
   };
 
   // Skickar ett meddelande och strömmar svaret in i chatten.
-  const send = async (text: string) => {
+  const send = async (
+    text: string,
+    goalContext?: { id: number; title: string; description?: string },
+  ) => {
     const content = text.trim();
     if (!content || streaming.value) return;
 
@@ -89,7 +94,7 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({ content, goal_context: goalContext }),
         },
       );
 
@@ -176,10 +181,14 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
   };
 
   // Godkänner eller avvisar ett förslag.
+  //
+  // Beslutet tas i Plan av en människa - agenten kan inte godkänna sig
+  // själv, och det tekniska hindret ligger i Plan, inte i prompten.
   const decide = async (decision: 'approve' | 'reject', feedback = '') => {
-    if (!goalId.value) return;
+    const pending = approval.value;
+    if (!pending) return;
     try {
-      await $fetch(`/api/agent/approvals/${goalId.value}/decision`, {
+      await $fetch(`/api/agent/approvals/${pending.id}/decision`, {
         method: 'POST',
         body: { decision, feedback },
       });

@@ -23,7 +23,7 @@ import { useGoalDrag } from '~/composables/useGoalDrag'
 import type { TagTarget } from '~/composables/useGoalTagPicker'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 import { normalizeGoalWeights } from '~/utils/goalWeights'
-import type { AgentRun } from '~/types/agent'
+import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent'
 import { useAgentApi } from '~/composables/useAgentApi'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
@@ -62,13 +62,19 @@ const isLoading = ref(true);
 const error = ref<string | null>(null);
 
 // Agentkörningen för målet - chatten och godkännandena hänger på den.
-const { fetchAgentRuns } = useAgentApi();
+const { fetchAgentRuns, fetchAgentRunEvents, fetchAgentApprovals } = useAgentApi();
 const agentRun = ref<AgentRun | null>(null);
+const agentRunEvents = ref<AgentRunEvent[]>([]);
+const agentApprovals = ref<AgentApproval[]>([]);
 
 async function loadAgentRun() {
   try {
     const runs = await fetchAgentRuns(goalId.value);
     agentRun.value = runs.length ? runs[0] : null;
+    agentRunEvents.value = agentRun.value
+      ? await fetchAgentRunEvents(agentRun.value.id)
+      : [];
+    agentApprovals.value = await fetchAgentApprovals(agentRun.value?.id);
   } catch {
     agentRun.value = null;
   }
@@ -1111,6 +1117,11 @@ const isGoalSelected = ref(false);
 // Redigera beskrivning (t)
 const editingDescriptionId = ref<number | null>(null);
 const descriptionDraft = ref("");
+const descriptionExpanded = ref(false);
+
+watch(goalId, () => {
+  descriptionExpanded.value = false;
+});
 
 function startEditDescription(target: { id: number; description?: string }) {
   editingDescriptionId.value = target.id;
@@ -2733,9 +2744,14 @@ watch(selectedParentIndex, async () => {
             </div>
           </div>
         </div>
-        <p v-else-if="goal.description" class="text-sm text-ink-muted whitespace-pre-wrap">
+        <button v-else-if="goal.description" type="button"
+          class="block w-full text-left text-sm text-ink-muted transition-colors hover:text-ink"
+          :class="descriptionExpanded ? 'whitespace-pre-wrap break-words' : 'truncate whitespace-nowrap'"
+          :aria-expanded="descriptionExpanded"
+          :title="descriptionExpanded ? 'Dölj beskrivningen' : 'Visa hela beskrivningen'"
+          @click="descriptionExpanded = !descriptionExpanded">
           {{ goal.description }}
-        </p>
+        </button>
       </div>
 
       <!-- Agentchatt - Plan är agentens gränssnitt -->
@@ -2743,8 +2759,16 @@ watch(selectedParentIndex, async () => {
         <AgentChatPanel
           :goal-id="goal.id"
           :goal-title="goal.title || ''"
+          :goal-description="goal.description || ''"
           :run="agentRun"
           @conversation-started="saveConversationId" />
+        <AgentRunHistory
+          :events="agentRunEvents"
+          :run="agentRun"
+          :approvals="agentApprovals"
+          class="mt-3"
+          @decided="loadAgentRun"
+        />
       </div>
 
       <!-- Dependencies-sektion -->

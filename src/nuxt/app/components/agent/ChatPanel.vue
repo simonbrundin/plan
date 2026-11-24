@@ -5,6 +5,7 @@ import type { AgentRun } from '~/types/agent';
 const props = defineProps<{
   goalId: number;
   goalTitle: string;
+  goalDescription?: string;
   run?: AgentRun | null;
 }>();
 
@@ -63,7 +64,11 @@ const submit = async () => {
 
   draft.value = '';
   await ensureConversation();
-  await send(text);
+  await send(text, {
+    id: props.goalId,
+    title: props.goalTitle,
+    description: props.goalDescription,
+  });
 };
 
 const approve = async () => {
