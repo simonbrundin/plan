@@ -19,7 +19,7 @@ const errorMessage = ref<string | null>(null);
 const pendingApproval = computed<AgentApproval | null>(() => {
   const list = props.approvals ?? [];
   const pending = list.filter((item) => item.status === 'pending');
-  return pending.length ? pending[0] : null;
+  return pending[0] ?? null;
 });
 
 // Föreslagna ändringar - exakt det som kommer att skrivas.

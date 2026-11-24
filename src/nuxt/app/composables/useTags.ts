@@ -1,4 +1,7 @@
+import type { FetchOptions } from "ofetch";
+
 import type { Tag } from "~/types/tag";
+import { apiProxy as proxy } from "~/utils/apiProxy";
 
 /**
  * apiProxy skickar requesten till Go API:t via Nuxt:s proxy.
@@ -8,11 +11,9 @@ import type { Tag } from "~/types/tag";
  */
 const apiProxy = async <T>(
 	path: string,
-	options: RequestInit = {},
+	options: FetchOptions = {},
 ): Promise<T> => {
-	return await $fetch<T>(`/api/proxy/${path}`, {
-		...options,
-	});
+	return await proxy<T>(path, options);
 };
 
 /**

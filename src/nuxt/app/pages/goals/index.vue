@@ -535,8 +535,9 @@ async function toggleAgent(goal: Goal) {
     await setGoalAgent(goal.id, newAgent)
     undoAgent(goal, previousAgent)
     const idx = localGoals.value.findIndex(g => g.id === goal.id)
-    if (idx !== -1) {
-      localGoals.value[idx] = { ...localGoals.value[idx], agent: newAgent }
+    const current = localGoals.value[idx]
+    if (idx !== -1 && current) {
+      localGoals.value[idx] = { ...current, agent: newAgent }
     }
   } catch (err) {
     console.error('Failed to toggle agent:', err)

@@ -1,30 +1,19 @@
+import type { FetchOptions } from "ofetch";
+
 import type { Goal, GoalDependency, GoalGraphResponse, GoalStatus } from "~/types/goal";
+import { apiProxyWithAuth } from "~/utils/apiProxy";
 import type { RecurrenceMode } from "~/utils/recurrence";
 
-// Custom error for authentication failures
-export class AuthenticationError extends Error {
-	constructor(message = "Authentication required") {
-		super(message);
-		this.name = "AuthenticationError";
-	}
-}
+// Sessionens fel delas med resten av appen - sidorna fångar samma typ.
+export { AuthenticationError } from "~/utils/apiProxy";
 
 // Proxy API calls through our server route which attaches session cookie
 const FALLBACK_GOAL_ICON = "lucide:check-square";
 const ICON_LOOKUP_TIMEOUT_MS = 5000;
 
-const apiProxy = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-	try {
-		const response = await $fetch<T>(`/api/proxy/${path}`, {
-			...options,
-		});
-		return response;
-	} catch (error: any) {
-		if (error?.statusCode === 401) {
-			throw new AuthenticationError("Sessionen har gått ut. Vänligen logga in igen.");
-		}
-		throw error;
-	}
+// Alla anrop går via serverns proxy, som skickar med sessioncookien.
+const apiProxy = async <T>(path: string, options: FetchOptions = {}): Promise<T> => {
+	return await apiProxyWithAuth<T>(path, options);
 };
 
 export function useGoalApi() {

@@ -70,7 +70,7 @@ const agentApprovals = ref<AgentApproval[]>([]);
 async function loadAgentRun() {
   try {
     const runs = await fetchAgentRuns(goalId.value);
-    agentRun.value = runs.length ? runs[0] : null;
+    agentRun.value = runs[0] ?? null;
     agentRunEvents.value = agentRun.value
       ? await fetchAgentRunEvents(agentRun.value.id)
       : [];

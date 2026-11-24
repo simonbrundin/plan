@@ -1,12 +1,15 @@
+import type { FetchOptions } from 'ofetch';
+
 import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent';
 import type { Goal } from '~/types/goal';
+import { apiProxy as proxy } from '~/utils/apiProxy';
 
 // Alla anrop går via serverns proxy, som skickar med sessioncookien.
-const apiProxy = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-  const response = await $fetch<T>(`/api/proxy/${path}`, {
-    ...options,
-  });
-  return response;
+const apiProxy = async <T>(
+  path: string,
+  options: FetchOptions = {}
+): Promise<T> => {
+  return await proxy<T>(path, options);
 };
 
 export function useAgentApi() {
