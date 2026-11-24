@@ -1,0 +1,23 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: plan-agent-db
+  namespace: plan
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: agent
+      owner: agent
+      secret:
+        name: plan-agent-db-app
+  storage:
+    storageClass: cnpg
+    size: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m

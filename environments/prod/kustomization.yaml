@@ -12,3 +12,6 @@ patches:
   - path: patches/deployment.yaml
   - path: patches/http-route.yaml
   - path: patches/db-instances-patch.yaml
+  # Agenten körs inte i prod ännu - se patcherna.
+  - path: patches/agent-deployment.yaml
+  - path: patches/agent-db-patch.yaml

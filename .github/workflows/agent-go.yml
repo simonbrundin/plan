@@ -1,0 +1,82 @@
+name: Go CI för agenten
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/agent/**'
+      - '.github/workflows/agent-go.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/agent/**'
+      - '.github/workflows/agent-go.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+          cache-dependency-path: src/agent/go.sum
+
+      - name: Download dependencies
+        run: |
+          cd src/agent
+          go mod download
+
+      - name: Run go vet
+        run: |
+          cd src/agent
+          go vet ./...
+
+      - name: Run tests
+        run: |
+          cd src/agent
+          # features_test körs också (feature-filen ligger i .features/).
+          go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Build
+        run: |
+          cd src/agent
+          go build -o /tmp/agent-worker ./cmd/agentworker
+
+      - name: Upload coverage
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-coverage
+          path: src/agent/coverage.out
+
+      - name: Coverage report
+        if: success()
+        run: |
+          cd src/agent
+          go tool cover -func=coverage.out | tail -5
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+          cache-dependency-path: src/agent/go.sum
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: src/agent

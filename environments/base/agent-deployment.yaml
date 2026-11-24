@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-api
+  namespace: plan
+  labels:
+    app: agent-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-api
+  template:
+    metadata:
+      labels:
+        app: agent-api
+    spec:
+      # API-servern behöver en token för att skapa och läsa Jobb.
+      # Rättigheterna begränsas till jobb i namespace - se agent-job.yaml.
+      serviceAccountName: plan-agent-api
+      automountServiceAccountToken: true
+      containers:
+        - name: agent-api
+          image: ghcr.io/simonbrundin/plan-agent:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-db-app
+                  key: uri
+            - name: PLAN_API_URL
+              value: "http://go-api-service.plan:8080"
+            - name: PLAN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: PLAN_API_KEY
+            # Nyckeln som Plan (Nuxt) använder mot agent-API:t. Utan den
+            # är agent-API:t öppet för alla som når det.
+            - name: AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: AGENT_API_KEY
+            - name: AGENT_WORKER_ENABLED
+              value: "false"
+            - name: AGENT_SCHEDULER_ENABLED
+              value: "false"
+            # Jobbcontrollern skapar Kubernetes Jobs för agentmål.
+            - name: AGENT_JOB_CONTROLLER_ENABLED
+              value: "true"
+            - name: AGENT_JOB_NAMESPACE
+              value: "plan"
+            # Jobben ska köra exakt samma agent-image som agent-api.
+            # Podens namn gör att controllern kan läsa sin egen image ur
+            # podens spec - annars kan jobben köra en gammal tagg.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_JOB_SERVICE_ACCOUNT
+              value: "plan-agent-worker"
+            - name: AGENT_JOB_REPO_URL
+              value: "https://github.com/simonbrundin/plan.git"
+            - name: AGENT_JOB_REPO_BRANCH
+              value: "main"
+            - name: AGENT_JOB_PLAN_API_URL
+              value: "http://go-api-service.plan:8080"
+            - name: AGENT_JOB_API_KEY_SECRET
+              value: "plan-agent-api-key"
+            - name: AGENT_JOB_LLM_SECRET
+              value: "plan-agent-llm"
+            # Git-hemligheten skapas utanför git - se docs/agent-platform.md.
+            - name: AGENT_JOB_GIT_SECRET
+              value: "plan-agent-git"
+            - name: AGENT_JOB_DEADLINE_SECONDS
+              value: "3600"
+            - name: AGENT_DATA_DIR
+              value: "/tmp/agent-data"
+            - name: GIN_MODE
+              value: release
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-api
+  namespace: plan
+spec:
+  selector:
+    app: agent-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

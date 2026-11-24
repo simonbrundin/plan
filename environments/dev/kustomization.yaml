@@ -11,6 +11,9 @@ resources:
   - db
   - pgadmin
   - secrets/auth.yaml
+  # Agentens hemligheter i dev. I prod är de SOPS-krypterade.
+  - secrets/agent-db.yaml
+  - secrets/agent-job.yaml
 
 patches:
   - path: patches/nuxt-deployment.yaml
@@ -52,3 +55,7 @@ images:
     newTag: latest
   - name: plan-go-api
     newName: plan-go-api
+  # Agent-imagen byggs av Tilt och finns i den lokala registret.
+  - name: ghcr.io/simonbrundin/plan-agent
+    newName: plan-agent
+    newTag: latest

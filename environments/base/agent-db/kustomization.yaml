@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Agentens egen databas. Den är skild från Plan-databasen så att agentens
+# samtal inte blandas med målen.
+resources:
+  - cluster.yaml

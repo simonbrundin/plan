@@ -1,0 +1,10 @@
+# Agentens databas skapas inte i prod ännu.
+#
+# Den behöver samma hemligheter som deploymenten (plan-agent-db-app),
+# och den tas bort tills agenten körs i prod.
+$patch: delete
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: plan-agent-db
+  namespace: plan

@@ -11,6 +11,14 @@ spec:
             # Lokal inloggning utan Zitadel (POST /api/v1/auth/dev-login).
             - name: DEV_AUTH_ENABLED
               value: "true"
+            # Endast för lokal dev: en nyckel som ger fullt access.
+            - name: API_KEY_BYPASS
+              value: "dev-bypass-key"
+            # Agentens nyckel mot Plan. Nyckeln har agent-scope: den får
+            # arbeta med mål och körningar men aldrig besluta om ett
+            # godkännande eller radera något.
+            - name: AGENT_API_KEY
+              value: "dev-agent-key"
             # Dev kör mot Neon (ingen Postgres i klustret).
             # Base sätter DATABASE_URL från CNPG-secreten - här pekas den
             # om till den poolade Neon-endpointen.

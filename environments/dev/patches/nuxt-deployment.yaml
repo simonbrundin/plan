@@ -20,6 +20,16 @@ spec:
             # auth-routsen inifrån clusteret).
             - name: NUXT_GO_API_INTERNAL_URL
               value: "http://go-api-service.plan:8080/api/v1"
+            # Server-side URL till agent-API:t som ligger i samma repository.
+            - name: NUXT_AGENT_API_INTERNAL_URL
+              value: "http://agent-api.plan:8080/api/v1"
+            # Nyckeln mot agent-API:t. Den skickas server-side, aldrig till
+            # webbläsaren. Utan den är agent-API:t öppet.
+            - name: NUXT_AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: AGENT_API_KEY
             # Visar dev-login-knappen på /login (ingen Zitadel behövs).
             - name: NUXT_PUBLIC_DEV_AUTH_ENABLED
               value: "true"

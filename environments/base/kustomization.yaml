@@ -10,3 +10,8 @@ resources:
   - api-service.yaml
   - api-http-route.yaml
   - db
+  # Agenten - egen tjänst i samma repo. Delar basen med Plan men har
+  # egen databas, egen uppsättning hemligheter och egna jobb.
+  - agent-db
+  - agent-deployment.yaml
+  - agent-job.yaml

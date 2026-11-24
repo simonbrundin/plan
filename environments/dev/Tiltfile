@@ -37,7 +37,7 @@ def allocate_port(service, container_port):
 default_registry("localhost:5000")
 
 # Ignorera varningar om oanvända images
-update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api"])
+update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api", "plan-agent"])
 
 # =============================================================================
 # Bygg images med docker_build
@@ -45,6 +45,7 @@ update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api"])
 
 docker_build("plan-nuxt", "../../src/nuxt")
 docker_build("plan-go-api", "../../src/go")
+docker_build("plan-agent", "../..", dockerfile="../../src/agent/Dockerfile")
 
 # =============================================================================
 # Databasen i dev är Neon (ingen Postgres i klustret)
@@ -95,6 +96,13 @@ k8s_resource(
         link("http://localhost:"+ go_port + "/health", "API Health"),
         link("http://localhost:"+ go_port + "/docs", "API Docs")
     ]
+)
+
+k8s_resource(
+    "agent-api",
+    new_name="agent",
+    resource_deps=["go-api"],
+    links=[link("http://localhost:" + go_port + "/api/v1/health", "Agent API via Plan")]
 )
 
 k8s_resource(
