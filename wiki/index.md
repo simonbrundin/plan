@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 344 |
+| Noter | 345 |
 
 ## Entiteter
 
@@ -157,6 +157,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
+- [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
 - [[notes/kunskaps-wiki]] - Så fungerar den globala kunskaps-wikin, vilka lager den har och hur agenter använder verktyget. _(uppdaterad 2026-11-17)_
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] - Under omsättningen till Karpathys tre-lagers-modell granskades varje sida mot den faktiska infrastrukturen i ~/repos/infrastructure. _(uppdaterad 2026-10-24)_

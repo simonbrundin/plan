@@ -137,6 +137,7 @@ finns i `index.md`.
 | [[notes/konventioner]] | Konventioner i repot | note | konventioner, stil, go | 2026-10-21 | 3 |
 | [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] | Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image | note | pxe, uboot, radxa, korrigering, projekt:simon | 2026-10-22 | 4 |
 | [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] | Kortkommando-hjälpen i HelpModal måste följa tangentändringar | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
+| [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-17 | 7 |
 | [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] | Kureringspasset hittade foraldrad kunskap i wikin | note | wiki, kurering, karpathy, projekt:agents | 2026-10-24 | 0 |
@@ -390,7 +391,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (14)
+- `agent` (15)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -424,6 +425,7 @@ finns i `index.md`.
 - `boot` (6)
 - `bootefi` (1)
 - `bubbletea` (1)
+- `budget` (1)
 - `bug` (87)
 - `bugg` (5)
 - `build` (2)
@@ -581,6 +583,7 @@ finns i `index.md`.
 - `konventioner` (2)
 - `korrigering` (2)
 - `kortkommandon` (4)
+- `kostnad` (1)
 - `kubeconfig` (1)
 - `kubelet` (1)
 - `kubernetes` (22)
@@ -599,7 +602,7 @@ finns i `index.md`.
 - `leaflet` (1)
 - `learn` (6)
 - `leetcode` (4)
-- `lesson` (5)
+- `lesson` (6)
 - `lets-encrypt` (1)
 - `lightcraft` (1)
 - `linkedin` (2)
@@ -695,7 +698,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (96)
+- `projekt:plan` (97)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)

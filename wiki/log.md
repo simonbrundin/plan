@@ -2554,3 +2554,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen]] — ny sida från inboxen
 - [archive] 2026-11-24-jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen.md
 
+
+## [2026-11-24] ingest | create notes/kostnad-och-budget-for-agentkorningar
+- [create] [[notes/kostnad-och-budget-for-agentkorningar]] — ny sida från inboxen
+- [archive] 2026-11-24-kostnad-och-budget-for-agentkorningar.md
+

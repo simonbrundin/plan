@@ -136,6 +136,7 @@ graph LR
   n_notes_konventioner["Konventioner i repot"]
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image["Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image"]
   n_notes_kortkommando_hjalpen_i_helpmodal_maste_folja_tangentandringar["Kortkommando-hjälpen i HelpModal måste följa tangentändringar"]
+  n_notes_kostnad_och_budget_for_agentkorningar["Kostnad och budget för agentkörningar"]
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force["Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force"]
   n_notes_kunskaps_wiki["Kunskaps-wikin"]
   n_notes_kureringspasset_hittade_foraldrad_kunskap_i_wikin["Kureringspasset hittade foraldrad kunskap i wikin"]
