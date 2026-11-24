@@ -10,6 +10,33 @@ their objectives using a modern web interface with hierarchical goal structures.
 - **Testing**: Vitest, Cucumber.js
 - **Deployment**: Kubernetes
 
+## Agentplattformen
+
+Agentplattformen hjälper användare att låta en agent arbeta med ett mål och
+samtidigt behålla kontroll över granskning och uppföljning. Den löser problemet
+med att agentarbete blir svårt att starta, följa och bedöma när det sker utan
+ett gemensamt flöde.
+
+### AgentRun
+
+En `AgentRun` skapas för ett mål och representerar en enskild agentkörning.
+Körningen startas i plattformens agentflöde och kan sedan gå igenom agentens
+faser, till exempel definiering, planering, genomförande och verifiering.
+`AgentRun` visar körningens aktuella status, sammanfattning och eventuella
+resultat.
+
+### Human gate
+
+En human gate används när agentens arbete kräver mänsklig granskning innan det
+får fortsätta. Körningen väntar då på granskning. Vid godkännande fortsätter
+agenten, medan ett avslag eller återkoppling stoppar eller justerar körningen.
+
+### Körningshistorik
+
+Körningshistoriken samlar AgentRuns för att visa status, resultat och
+uppföljning över tid. Den gör det möjligt att se vad som har körts, bedöma
+utfallet och avgöra om något behöver granskas eller göras om.
+
 ## Authentication
 
 The session lives in the **Go API** - not in Nuxt. Go creates, validates and
