@@ -3,6 +3,37 @@
 A goal management and planning application that helps users organize and track
 their objectives using a modern web interface with hierarchical goal structures.
 
+## Agentplattform
+
+### Mål och problem
+
+Agentplattformen hjälper användare att utföra arbete kopplat till sina mål
+utan att hela flödet behöver automatiseras. Den sammanför mål, agentarbete och
+mänsklig granskning så att användaren kan följa arbetet, fatta beslut och se
+resultatet av varje körning.
+
+### AgentRun
+
+En `AgentRun` skapas för ett mål och representerar en enskild agentkörning mot
+det målet. När körningen startar får den en aktuell fas och status, och den kan
+därefter gå vidare mot nästa del av arbetet. `AgentRun` är den centrala
+enheten som visar vad agenten har arbetat med och var körningen befinner sig.
+
+### Human gate
+
+En human gate används när plattformen kräver mänsklig granskning innan
+körningen får fortsätta. Vid en human gate presenteras resultatet för
+granskning; godkännande låter körningen fortsätta, medan ett underkänt eller
+ej godkänt beslut stoppar körningen. Exakt vilka steg som kräver granskning
+bestäms av den aktuella körningen.
+
+### Körningshistorik
+
+Körningshistoriken samlas i Plan så att agentens tidigare körningar och
+resultat finns tillgängliga även när en ny körning inte är aktiv. Historiken
+visas tillsammans med målet. Historiken används för att följa upp status,
+gransknings- och godkännandeslut samt eventuella misslyckanden.
+
 ## Tech Stack
 
 - **Frontend**: Nuxt 4, TypeScript, Tailwind CSS
@@ -28,7 +59,7 @@ sequenceDiagram
     N->>G: GET /api/v1/auth/login
     G-->>N: 307 to Zitadel + Set-Cookie oauth_state
     N-->>B: 307 to Zitadel (oauth_state)
-    B->>Z: GET /oauth/v2/authorize (PKCE)
+    B->>Z: GET /oauth2/authorize (PKCE)
     Z-->>B: 302 to /api/v1/auth/callback?code=...
     B->>G: GET /api/v1/auth/callback
     G->>D: create user + session
@@ -104,7 +135,8 @@ erDiagram
         TIMESTAMPTZ created
     }
     USERS ||--o{ USERGOALS : "has"
-    GOALS ||--o{ USERGOALS : "assigned to"
+    USERS ||--o{ USERGOALS : "assigned to"
+    GOALS ||--o{ USERGOALS : "has"
     GOALS ||--o{ GOALRELATIONS : "parent"
     GOALS ||--o{ GOALRELATIONS : "child"
     GOALS ||--o{ GOALDEPENDENCIES : "depends on"
