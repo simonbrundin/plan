@@ -1,0 +1,1451 @@
+{
+  "goals": [
+    {
+      "id": "root",
+      "title": "Rot",
+      "icon": "🏠",
+      "status": "execute",
+      "created": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "helix-integration-gaps",
+      "title": "Helix-integration luckor",
+      "description": "Funktionalitet som saknas för att fullt ut implementera Shopify Helix workflow. Identifierat genom video-analys.",
+      "icon": "🔍",
+      "status": "define",
+      "parent_id": "root",
+      "created": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "planner-wire-to-orchestrator",
+      "title": "Koppla LLMCheckpointPlanner till orchestrator",
+      "description": "LLMCheckpointPlanner finns men kopplas inte in i orchestrator. SmartCheckpointPlanner behöver användas istället för DefaultCheckpointPlanner. IMPLEMENTERAD: SmartCheckpointPlanner används nu automatiskt när PlannerProvider (ProviderManager) configeras.",
+      "icon": "🔗",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 1,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "I videon skapar checkpoint planner sub-agents checkpoints automatiskt. Idag finns SmartCheckpointPlanner i planner.go men orchestrator använder fortfarande DefaultCheckpointPlanner.",
+        "current": "Orchestrator.New() använder ingen CheckpointPlanner, CreatePlan() har en tom if-sats.",
+        "target": "Orchestrator ska använda SmartCheckpointPlanner som använder LLM för att generera checkpoints.",
+        "implementation": [
+          "1. Ändra workflow.InitOrchestrator() att ta emot en AgentFactory eller LLM provider",
+          "2. Skapa SmartCheckpointPlanner(llmAgent) i Init",
+          "3. Sätt orchestrator.checkpointPlanner = smartPlanner i New()",
+          "4. Testa med en feature och verifiera att LLM genererar checkpoints"
+        ],
+        "files_to_modify": [
+          "src/go/internal/core/workflow/prepare_next_turn_test.go",
+          "src/go/internal/core/orchestrator/orchestrator.go"
+        ],
+        "test": "Skapa en feature 'Add user authentication with JWT', kör CreatePlan(), verifiera att checkpoints genereras med rätt gates."
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "test-planning-as-separate-step",
+      "title": "Test planning som separat steg i workflow",
+      "description": "Test planning som separat steg i workflow. I Helix workflow planeras tester INNAN implementation börjar. IMPLEMENTERAD: TestPlanner interface, LLMTestPlanner, DefaultTestPlanner, GenerateTestFile(), Orchestrator.PlanTests(). Fundamentet är på plats.",
+      "icon": "🧪",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 2,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "Helix workflow: Tests planeras AV sub-agent INNAN implementation börjar. Testerna ska FAIL initialt och PASS när feature är klar.",
+        "current": "BehaviorGate kör tester EFTER implementation. Ingen separat test-planning fas.",
+        "target": "Lägg till TestPlanner agent som kör före checkpoint-implementation.",
+        "workflow_step_1": "Checkpoint godkänd av människa",
+        "workflow_step_2": "TestPlanner sub-agent skriver tester för checkpoint",
+        "workflow_step_3": "Testerna körs - de ska FAIL (feature finns inte än)",
+        "workflow_step_4": "Implementation sub-agent skriver koden",
+        "workflow_step_5": "Testerna körs igen - de ska PASS",
+        "workflow_step_6": "Gate är klar",
+        "implementation": [
+          "1. Skapa TestPlanner interface i orchestrator/",
+          "2. Skapa TestPlannerAgent som använder LLM för att generera Go-tester",
+          "3. Lägg till test-planning steg i executeCheckpoint()",
+          "4. TestPlanner ska generera filer i test/-mappen",
+          "5. Kör testerna före och efter implementation"
+        ],
+        "test_output_format": "Go test-filer med tabellstrukturerade tester för edge cases"
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "ui-gate-prototype-comparison",
+      "title": "UI gate - Prototype jämförelse",
+      "description": "UI gate - Prototype jämförelse. IMPLEMENTERAD: Två parallella sub-agents: LookReviewAgent (visuell jämförelse) och BehaviorReviewAgent (interaction/behavior). State-checking finns i prompts. Severity-baserad blocking (critical/high blockerar).",
+      "icon": "🎨",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 3,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "I videon används Gemini för spatial awareness - jämför skärmdumpar av prototype vs faktiskt UI. För nya features: HTML-prototyper skapas först.",
+        "current": "UIGate finns men jämför inte med prototyper.",
+        "target": "UI gate ska kunna jämföra faktiskt UI med HTML-prototyper via sub-agents.",
+        "prototype_phase": "Innan checkpoint startar: Prototype sub-agent skapar HTML-prototyp",
+        "comparison_phase": "Två sub-agents jämför: en för look, en för behavior",
+        "state_check": "Verifiera att prototype och app är i samma state (t.ex. ifylld form vs tom)",
+        "look_review_agent": "Granskar CSS, spacing, färger, positioning - jämför med design file",
+        "behavior_review_agent": "Granskar interactions, hover states, transitions - jämför med prototype events",
+        "implementation": [
+          "1. Skapa proto-generator i gate/ui.go",
+          "2. Skapa LookReviewAgent och BehaviorReviewAgent",
+          "3. UIGate.Run() kör två agents parallellt",
+          "4. Kombinera resultat och bestäm PASS/FAIL"
+        ],
+        "design_file_path": "Använd projektets design.md om det finns"
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "gate-orchestration-execution",
+      "title": "Gate orchestration i executeCheckpoint",
+      "description": "Gate orchestration i executeCheckpoint. REDAN IMPLEMENTERAD: executeCheckpoint() respekterar GateType.IsBlocking() - behavior/ui/adversarial blockerar, human blockerar inte.",
+      "icon": "⚙️",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 4,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "executeCheckpoint() kör gates sekventiellt men hanterar inte IsBlocking korrekt. Human gate ska inte blockera på samma sätt som automated gates.",
+        "current": "Gate för when gateResult.Status == GateStatusFailed men IsBlocking() respekteras inte.",
+        "target": "Varje gate-type ska ha rätt blocking behavior",
+        "behavior_gate_blocking": "BLOCKING - om testerna failar, gå inte vidare",
+        "ui_gate_blocking": "BLOCKING - om UI inte matchar, gå inte vidare",
+        "adversarial_gate_blocking": "BLOCKING - om critic hittar critical/high issues, gå inte vidare",
+        "human_gate_blocking": "NON-BLOCKING - visa för människa men fortsätt inte tills approved",
+        "implementation": [
+          "1. Läs Gate.IsBlocking() för varje gate i executeCheckpoint()",
+          "2. Om gate failar OCH IsBlocking() == true → MarkFailed() och return error",
+          "3. Om gate failar OCH IsBlocking() == false → fortsätt men logga varning",
+          "4. Human gate: sätt status till 'pending_approval', vänta på signal"
+        ],
+        "files_to_modify": [
+          "src/go/internal/core/orchestrator/orchestrator.go:executeCheckpoint()"
+        ]
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "learnings-agent-context-injection",
+      "title": "Learnings i agent context",
+      "description": "GenerateLearningsContext() ska injectas i agentens system prompt INNAN varje uppgift. Varje agent ska läsa learnings innan den startar. IMPLEMENTERAD: injectLearningsIntoPrompt() lägger till learnings i system prompt i NewAgentWithOrchestrator(). LearningsManager.GeneratePromptContext() stödjer nu filtrering per kategori.",
+      "icon": "📝",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 5,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "I videon: learnings file läses av varje agent INNAN den börjar jobba. Lärdomar från tidigare checkpoints ska påverka nya.",
+        "current": "LearningsManager finns och AddLearning() fungerar, men inget injiceras i agent-prompts.",
+        "target": "Varje agent-prompt ska inkludera relevanta learnings före execution.",
+        "learnings_structure_category": "t.ex. 'checkout-flow', 'api-design', 'testing'",
+        "learnings_structure_title": "Kort rubrik på lärdom",
+        "learnings_structure_description": "Kontext om vad som hände",
+        "learnings_structure_lesson": "Vad agenten ska göra annorlunda",
+        "implementation": [
+          "1. I Orchestrator.GetAgentConfig(), hämta learnings via GenerateLearningsContext()",
+          "2. Lägg till learnings som system-prompt-prefix till AgentLoopConfig.SystemPrompt",
+          "3. Filtrera learnings baserat på checkpoint-kategori/feature",
+          "4. Formatera learnings som: 'LEARNINGS FROM PREVIOUS WORK:' + lista"
+        ],
+        "example_output": "LEARNINGS FROM PREVIOUS WORK: - [checkout] Don't assume cart is always initialized - [api-design] Use consistent error formats"
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "viewer-real-time-integration",
+      "title": "Viewer real-time integration",
+      "description": "Viewer real-time integration. IMPLEMENTERAD: WebSocketViewer som skickar checkpoint-uppdateringar via WebSocket. ViewerHub hanterar connections. Message-typer: plan_created, checkpoint_started, checkpoint_updated, gate_started, gate_passed, gate_failed, error.",
+      "icon": "📡",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 6,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "I videon visas checkpoint-status i realtid på en webbsida. Orchestrator.Viewer() interface finns men ingen WebSocket-integration.",
+        "current": "ConsoleViewer() finns men ingen frontend-integration.",
+        "target": "Checkpoint-ändringar ska skickas via WebSocket till /api/v1/ws/checkpoints",
+        "viewer_interface_showPlan": "Visa plan för godkännande",
+        "viewer_interface_showCheckpoint": "Visa att checkpoint startar",
+        "viewer_interface_updateCheckpoint": "Uppdatera status (in_progress, passed, failed)",
+        "websocket_messages": [
+          "{type: 'plan_created', plan: {...}}",
+          "{type: 'checkpoint_started', checkpoint: {...}}",
+          "{type: 'gate_started', checkpoint_id, gate: 'behavior'}",
+          "{type: 'gate_passed', checkpoint_id, gate: 'behavior'}",
+          "{type: 'checkpoint_completed', checkpoint: {...}}"
+        ],
+        "implementation": [
+          "1. Skapa WebSocketViewer som implementerar Viewer interface",
+          "2. WebSocketViewer håller connection till frontend",
+          "3. I orchestrator.New(), sätt viewer = NewWebSocketViewer(wsHandler)",
+          "4. Varje Viewer-call skickar JSON-meddelande via WebSocket"
+        ]
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "adversarial-fix-application",
+      "title": "Adversarial gate fixer application",
+      "description": "Adversarial gate fixer application. IMPLEMENTERAD: applyFixerResponse() parser fixer response och applicerar patches till filer. parsePatches() extraherar unified diff från markdown code blocks. applyPatch() applicerar patches med gofmt-verifiering.",
+      "icon": "🔧",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 7,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "AdversarialGate.Run() loopar critic-fix-critic men fixerResponse sparas bara i variabel och används aldrig (_ = fixerResponse).",
+        "current": "Loopen fungerar men inga ändringar görs i kodbasen.",
+        "target": "Fixer-agentens output ska appliceras på faktiska filer.",
+        "fixer_loop_iteration_1": "Critic hittar issues → Fixer applicerar fixes",
+        "fixer_loop_iteration_2": "Critic granskar igen → Fixer fixar igen",
+        "fixer_loop_continue_until": "Inga critical/high issues kvar ELLER maxIterations nådd",
+        "fixer_output_format": "Fixer ska svara med: FIXES APPLIED + PATCH (diff-format)",
+        "implementation": [
+          "1. I AdversarialGate.Run(), parsea FIXES APPLIED och PATCH från fixerResponse",
+          "2. För varje fix: läs fil, applicera diff, skriv tillbaka",
+          "3. Använd existing write-tool eller skapa patch-applier",
+          "4. Efter varje fix: verifiera att filen är syntaktiskt korrekt (go fmt, go build)",
+          "5. Commit/aidestage inte - låt människa granska innan commit"
+        ],
+        "test_scenario": "Skapa kod med känd bugg, adversarial gate ska hitta och fixa den"
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "checkpoint-complexity-ordering",
+      "title": "Checkpoint complexity ordering",
+      "description": "Checkpoint complexity ordering. IMPLEMENTERAD: sortCheckpointsByComplexity() sorterar checkpoints efter complexity (low->medium->high). complexityOrder() ger numerisk vikt. LLM-promptrn har redan instruktioner om att generera i rätt ordning.",
+      "icon": "📊",
+      "status": "completed",
+      "parent_id": "helix-integration-gaps",
+      "priority": 8,
+      "created": "2026-01-20T00:00:00Z",
+      "spec": {
+        "problem": "Om fel beslut tas tidigt (high complexity först) blir det dyrt att ändra. Helix-principen: börja med låg komplexitet för att fånga fel tidigt.",
+        "current": "Checkpoints genereras i ordning men inget tvingar complexity-ordering.",
+        "target": "LLMCheckpointPlanner ska alltid generera checkpoints i complexity-ordning.",
+        "complexity_low": "Schema, databas, grundläggande modeller - dessa ändras sällan",
+        "complexity_medium": "API-endpoints, affärslogik, validering - mellannivå",
+        "complexity_high": "UI, integrationer, autentisering - komplext, ofta ändringar",
+        "example_ordering": "1: Database schema, 2: Migreringar, 3: API-endpoints, 4: Affärslogik, 5: Frontend-komponenter, 6: Integrationer",
+        "implementation": [
+          "1. I LLMCheckpointPlanner.buildPrompt(), lägg till explicit instruktion om complexity-ordering",
+          "2. I planner.go parseResponse(), sortera checkpoints efter ComplexityLevel",
+          "3. Lägg till validateOrder() som verifierar att Complexity ökar",
+          "4. Om fel ordning: logga warning men proceed ändå"
+        ],
+        "validation_rule": "checkpoint[i].complexity <= checkpoint[i+1].complexity (för alla i)"
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "migrate-goals-to-plan-api",
+      "title": "Byt JSON-goals mot Plan API",
+      "description": "När Plan-applikationen kör stabilt i Kubernetes, byt ut JSONStore mot PlanStore som pratar med Plan REST API. Skapa ny fil src/agent/internal/core/goals/plan.go med PlanStore som implementerar Store-interfacet.",
+      "icon": "🔄",
+      "status": "define",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "frontend-improvements",
+      "title": "Frontend förbättringar",
+      "description": "UI/UX-förbättringar för Nuxt frontend",
+      "icon": "🎨",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "frontend-bugs",
+      "title": "Frontend buggar",
+      "description": "Öppna buggar i Nuxt frontend",
+      "icon": "🐛",
+      "status": "define",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "bug-network-send",
+      "title": "Fix failed to send message",
+      "description": "Fix network errors when sending messages. IMPLEMENTERAD: useMessageSender composable med retry-mekanism (exponential backoff), offline queue, automatic retry när online, failed message UI med retry-knapp i toast, network state awareness (online/offline listeners).",
+      "icon": "🔌",
+      "status": "completed",
+      "parent_id": "frontend-bugs",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "bug-horizontal-scroll",
+      "title": "Fix horizontal scroll i Conversations",
+      "description": "Fix horizontal scroll i Conversations. FIXAT: Added overflow-x-hidden to main containers in conversations.vue and ConversationList.vue, added break-words and overflow-wrap to message text to prevent long words from causing horizontal scroll.",
+      "icon": "↔️",
+      "status": "completed",
+      "parent_id": "frontend-bugs",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "bug-loading-missing",
+      "title": "Loader saknas i Conversations",
+      "description": "Loader saknas i Conversations. FIXAT: Added Connection & Agent Status Bar showing: connection status (disconnected/connecting/connected), agent status (thinking/processing/typing), animated dots for thinking state, status messages. Props passed from conversations.vue to ChatInterface.",
+      "icon": "⏳",
+      "status": "completed",
+      "parent_id": "frontend-bugs",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "thinking-bubble",
+      "title": "Thinking-bubble i Conversations",
+      "description": "Visa agentens tänkande som separat bubble precis som för verktygsanrop",
+      "icon": "💭",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "frontend-improvements",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "loader-indicator",
+      "title": "Laddningsindikator i Conversations",
+      "description": "Visa att backend anropas när agenten tänker",
+      "icon": "⏳",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "frontend-improvements",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "toggle-sidebar",
+      "title": "Växla sidebar-knapp",
+      "description": "Bättre mobil-UX med kollapsbar sidebar",
+      "icon": "📱",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "frontend-improvements",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "backend-improvements",
+      "title": "Backend förbättringar",
+      "description": "Backendstabilitet och felhantering",
+      "icon": "⚙️",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "prepare-nextturn-hook",
+      "title": "PrepareNextTurn hook",
+      "description": "Hook som kan modifiera nästa turn - ändra context, model, eller thinking level mellan turns",
+      "icon": "🔄",
+      "status": "define",
+      "parent_id": "backend-improvements",
+      "priority": 4,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "thinking-extraction-anthropic",
+      "title": "Thinking extraction (Anthropic)",
+      "description": "Extrahera think-blocks från Anthropic streaming och visa dem i frontend",
+      "icon": "💭",
+      "status": "define",
+      "parent_id": "backend-improvements",
+      "priority": 5,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "temperature-per-task",
+      "title": "Utforska temperature-per-uppgift",
+      "description": "Undersök om olika temperature-värden kan förbättra resultat för olika uppgiftstyper. Låg temperature (0.0-0.3) förPrecisions-uppgifter som kodning och analys. Medel temperature (0.4-0.7) för generell konversation. Hög temperature (0.8-1.0) för kreativa uppgifter som brainstorm och storytelling. Kartlägg nuvarande användning och planera implementation av konfigurerbar temperature per task/checkpoint.",
+      "icon": "🌡️",
+      "status": "define",
+      "parent_id": "backend-improvements",
+      "priority": 6,
+      "created": "2026-03-09T12:00:00Z"
+    },
+    {
+      "id": "shouldstop-hook-test",
+      "title": "ShouldStop-hook test",
+      "description": "Testa att ShouldStop kan avbryta exekvering korrekt",
+      "icon": "🧪",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "backend-improvements",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "tool-json-schema-validation",
+      "title": "Tool JSON Schema-validering",
+      "description": "Verifiera att alla verktyg validerar input korrekt mot schema",
+      "icon": "✅",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "backend-improvements",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "automatic-provider-fallback",
+      "title": "Automatisk provider-fallback",
+      "description": "Byt till fallback-provider vid fel istället för att misslyckas",
+      "icon": "🔄",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "backend-improvements",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "secrets-hot-reload",
+      "title": "Secrets hot-reload",
+      "description": "Ladda om hemligheter utan att starta om agenten",
+      "icon": "🔐",
+      "status": "define",
+      "parent_id": "backend-improvements",
+      "priority": 4,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "orchestrator-features",
+      "title": "Orchestrator-funktioner",
+      "description": "Checkpoint-gate-arbetsflödesförbättringar. Många delar implementerade men integration och helical-features återstår.",
+      "icon": "🎯",
+      "status": "execute",
+      "completed_at": null,
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "checkpoint-gate-gates",
+      "title": "Checkpoint-Gate-implementation",
+      "description": "Implementera de fyra checkpoint-gate-typerna: beteende, ui, adversarial, human. IMPLEMENTERAD: Gate-interface och alla fyra gate-typer finns i gate/. PÅGÅR: Gate orchestration i executeCheckpoint behöver fullständig integration (se gate-orchestration-execution).",
+      "icon": "🚧",
+      "status": "execute",
+      "parent_id": "orchestrator-features",
+      "priority": 0,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "helix-checkpoints",
+      "title": "Helix-inspirerade detaljerade checkpoints",
+      "description": "Implementera detaljerade checkpoints inspirerade av Shopify Helix. Varje checkpoint ska ha tydliga deliverables, acceptance criteria och gates. ÖVERSKUGGLAD av helix-integration-gaps - denna gren är för legacy-designs.",
+      "icon": "🏗️",
+      "status": "define",
+      "parent_id": "orchestrator-features",
+      "priority": 0,
+      "created": "2026-10-19T00:00:00Z"
+    },
+    {
+      "id": "helix-checkpoint-design",
+      "title": "Designa Helix-inspirerad checkpoint-struktur",
+      "description": "Definiera vilka checkpoints som behövs (t.ex. spec, impl, test, review, deploy) och vad varje checkpoint ska innehålla: inputs, outputs, acceptance criteria, rollback-plan.",
+      "icon": "📐",
+      "status": "define",
+      "parent_id": "helix-checkpoints",
+      "priority": 1,
+      "created": "2026-10-19T00:00:00Z",
+      "spec": {
+        "superseded_by": "helix-integration-gaps - många av dessa design-frågor har nu specifikationer där",
+        "checkpoints_to_define": {
+          "spec": "Krav och design - low complexity",
+          "schema": "Databas-schema och modeller - low complexity",
+          "api": "REST/GraphQL endpoints - medium complexity",
+          "logic": "Affärslogik och validering - medium complexity",
+          "ui": "User interface komponenter - high complexity",
+          "integration": "Integration med externa tjänster - high complexity"
+        },
+        "each_checkpoint_needs": {
+          "inputs": "Vad som behövs för att starta checkpoint",
+          "outputs": "Vad som produceras när checkpoint är klar",
+          "acceptance_criteria": "Hur man verifierar att checkpoint är klar",
+          "rollback_plan": "Hur man återställer om checkpoint misslyckas"
+        }
+      }
+    },
+    {
+      "id": "helix-checkpoint-code",
+      "title": "Implementera checkpoint-typer och gates",
+      "description": "Skriv kod för nya checkpoint-typer och gates. Inkludera: CheckpointDefinition, DeliverableValidation, RollbackHandler och GateConditions.",
+      "icon": "⚙️",
+      "status": "define",
+      "parent_id": "helix-checkpoints",
+      "priority": 2,
+      "created": "2026-10-19T00:00:00Z",
+      "spec": {
+        "superseded_by": "checkpoint-gate-gates och gate-*-impl målen",
+        "types_to_implement": [
+          "CheckpointDefinition: struct med inputs, outputs, acceptance_criteria, rollback_plan",
+          "DeliverableValidation: interface för att validera checkpoint-output",
+          "RollbackHandler: interface för att hantera rollback av misslyckade checkpoints",
+          "GateConditions: definiera vilka gates som krävs för varje checkpoint-typ"
+        ]
+      }
+    },
+    {
+      "id": "helix-checkpoint-flow",
+      "title": "Implementera checkpoint-flödesorkestrering",
+      "description": "Skriv kod för hur checkpoints exekveras sekventiellt, hur data flödar mellan checkpoints och hur failures hanteras med rollback.",
+      "icon": "🔀",
+      "status": "define",
+      "parent_id": "helix-checkpoints",
+      "priority": 3,
+      "created": "2026-10-19T00:00:00Z",
+      "spec": {
+        "superseded_by": "gate-orchestration-execution",
+        "flow_implementation": [
+          "1. Sequentiell exekvering: kör en checkpoint i taget, nästa startar först när föregående passerat alla gates",
+          "2. Data flow: output från checkpoint N blir input till checkpoint N+1",
+          "3. Failure handling: om gate failar, kör RollbackHandler för aktuell checkpoint",
+          "4. State persistence: spara checkpoint state till databas efter varje gate"
+        ],
+        "data_flow_example": "checkpoint[0].output.schema -> checkpoint[1].input (API behöver veta vilken schema som används)"
+      }
+    },
+    {
+      "id": "gate-behavior-impl",
+      "title": "Beteende-gate implementation",
+      "description": "Tester skrivs först, körs före implementation. Gate verifierar att beteende matchar spec. IMPLEMENTERAD: BehaviorGate i gate/behavior.go - kör go test, lint, vet.",
+      "icon": "🧪",
+      "status": "completed",
+      "parent_id": "checkpoint-gate-gates",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-10-19T00:00:00Z"
+    },
+    {
+      "id": "gate-impl-test-run",
+      "title": "Implementation & testkörning",
+      "description": "TDD-workflow: Plan tests → Write tests → Run (expect FAIL) → Implement → Run (expect PASS). CheckpointExecutor med 5 faser: PhasePlanTests, PhaseWriteTests, PhaseRunTests, PhaseImplement, PhaseVerify. TestPlanner integration med GenerateTestFile().",
+      "icon": "⚡",
+      "status": "completed",
+      "parent_id": "checkpoint-gate-gates",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "gate-ui-impl",
+      "title": "UI-gate implementation",
+      "description": "Jämför faktiskt UI med prototype/wireframe. Gate misslyckas om avvikelser. IMPLEMENTERAD: UIGate med LookReviewAgent och BehaviorReviewAgent som kör parallellt. Sync.WaitGroup för trådsäker parallellisering. Metadata-stöd för prototype/design paths från checkpoint. OrchestratorConfig med UIGateProvider/UIGateModel. GateAgentFactory för att skapa sub-agents med LLM.",
+      "icon": "🎨",
+      "status": "completed",
+      "parent_id": "checkpoint-gate-gates",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "gate-adversarial-impl",
+      "title": "Adversarial-gate implementation",
+      "description": "Critic + Fixer-loop. Gate kör adversarial review och verifierar att kritik adresserats. IMPLEMENTERAD: AdversarialGate med critic+fixer prompts. PÅGÅR: Fixes appliceras inte faktiskt (se adversarial-fix-application).",
+      "icon": "⚔️",
+      "status": "execute",
+      "parent_id": "checkpoint-gate-gates",
+      "priority": 4,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "checkpoint-gate-documentation",
+      "title": "Dokumentera checkpoint-gate systemet",
+      "description": "Dokumentera checkpoint-gate systemet. DOKUMENTERAD: Fullständig workflow.md med Gate-typer (Behavior, UI, Adversarial, Human), TDD Execution Workflow, SubAgentManager, Context Budget Monitor, Long-Term Memory, Learnings Manager, ASCII-diagram för alla komponenter. Uppdaterad architecture.md med nya packages.",
+      "icon": "📚",
+      "status": "completed",
+      "parent_id": "orchestrator-features",
+      "priority": 4,
+      "created": "2026-10-19T00:00:00Z",
+      "spec": {
+        "purpose": "Dokumentation för att onboarda nya utvecklare till checkpoint-gate systemet",
+        "sections": [
+          {
+            "title": "Översikt",
+            "content": "Vad är checkpoint-gate workflow, varför Shopify Helix, grundläggande koncept"
+          },
+          {
+            "title": "Arkitektur",
+            "content": "Orchestrator, Checkpoints, Gates, AgentRuntime - hur de hänger ihop"
+          },
+          {
+            "title": "Checkpoints",
+            "content": "Vad är en checkpoint, complexity levels, ordering, checkpoints som bygger på varandra"
+          },
+          {
+            "title": "Gates",
+            "content": "De fyra gate-typerna: behavior, ui, adversarial, human - när och hur de används"
+          },
+          {
+            "title": "Dataflöde",
+            "content": "Hur data flödar genom systemet: feature -> planner -> checkpoints -> gates -> output"
+          },
+          {
+            "title": "Exempel",
+            "content": "Steg-för-steg genom ett komplett exempel från feature till levererat"
+          }
+        ],
+        "files_to_document": [
+          "src/go/internal/core/orchestrator/orchestrator.go",
+          "src/go/internal/core/checkpoint/checkpoint.go",
+          "src/go/internal/core/gate/gate.go",
+          "src/go/internal/core/gate/behavior.go",
+          "src/go/internal/core/gate/ui.go",
+          "src/go/internal/core/gate/adversarial.go",
+          "src/go/internal/core/gate/human.go"
+        ],
+        "output_location": "src/nuxt/content/docs/checkpoint-gate.md"
+      },
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "llm-checkpoint-planner",
+      "title": "LLM-baserad checkpoint-planner",
+      "description": "Använda LLM för att generera checkpoints automatiskt. IMPLEMENTERAD: LLMCheckpointPlanner och SmartCheckpointPlanner finns i planner.go. PÅGÅR: Koppling till orchestrator via SmartCheckpointPlanner (se planner-wire-to-orchestrator).",
+      "icon": "🤖",
+      "status": "execute",
+      "completed_at": null,
+      "parent_id": "orchestrator-features",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "real-subagent-spawning",
+      "title": "Äkta sub-agent-skapande",
+      "description": "Skapa sub-agents med fresh contexts för parallell exekvering. IMPLEMENTERAD: SubAgentManager, FreshContextAgent (fresh context utan historik), SubAgentPool (pre-warmed agent pool), SpawnMultiple() för parallell exekvering med sync.WaitGroup.",
+      "icon": "🔀",
+      "status": "completed",
+      "parent_id": "orchestrator-features",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "persistent-state-storage",
+      "title": "Beständig state-lagring",
+      "description": "Spara goals, checkpoints och checkpoint_results i databasen istället för minne",
+      "icon": "💾",
+      "status": "completed",
+      "completed_at": "2026-10-19T03:00:00Z",
+      "parent_id": "orchestrator-features",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "db-checkpoint-migrations",
+      "title": "Skapa databasmigreringar",
+      "description": "Skapa SQL-migreringar för goals, checkpoints och checkpoint_results tabeller i PostgreSQL",
+      "icon": "🗄️",
+      "status": "completed",
+      "completed_at": "2026-10-19T02:00:00Z",
+      "parent_id": "persistent-state-storage",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "db-checkpoint-store-impl",
+      "title": "Implementera CheckpointStore",
+      "description": "Skapa ny fil internal/core/orchestrator/checkpoint_store.go som implementerar StateStore-interfacet med PostgreSQL",
+      "icon": "💾",
+      "status": "completed",
+      "completed_at": "2026-10-19T02:30:00Z",
+      "parent_id": "persistent-state-storage",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "orchestrator-wire-checkpoint-store",
+      "title": "Koppla in CheckpointStore",
+      "description": "Ändra workflow.InitOrchestrator så den använder CheckpointStore istället för InMemoryStateStore när databas finns",
+      "icon": "🔌",
+      "status": "completed",
+      "completed_at": "2026-10-19T02:45:00Z",
+      "parent_id": "persistent-state-storage",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "db-checkpoint-test",
+      "title": "Testa beständig lagring",
+      "description": "Verifiera att goals, checkpoints och results överlever restart - spara, starta om, ladda och bekräfta data",
+      "icon": "🧪",
+      "status": "completed",
+      "completed_at": "2026-10-19T03:00:00Z",
+      "parent_id": "persistent-state-storage",
+      "priority": 4,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "integration-test",
+      "title": "Integrationtest för orchestrator",
+      "description": "Testa ShouldStop, PrepareNextTurn och hooks med verklig agent-exekvering",
+      "icon": "🧪",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "orchestrator-features",
+      "priority": 4,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "websocket-support",
+      "title": "WebSocket-stöd",
+      "description": "Real-time uppdateringar istället för SSE för bättre prestanda",
+      "icon": "🔌",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "orchestrator-features",
+      "priority": 5,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "git-integration",
+      "title": "Git-integration",
+      "description": "Branch-skapande och PR från orchestrator",
+      "icon": "📦",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "orchestrator-features",
+      "priority": 6,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "checkpoint-html-viewer",
+      "title": "Checkpoint HTML-visare",
+      "description": "Generera visuell checkpoint-översikt som HTML",
+      "icon": "📊",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "orchestrator-features",
+      "priority": 7,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "learnings-persistence",
+      "title": "Learnings sparas till fil",
+      "description": "Spara learnings till fil för framtida användning",
+      "icon": "📝",
+      "status": "completed",
+      "completed_at": "2026-10-19T00:00:00Z",
+      "parent_id": "orchestrator-features",
+      "priority": 8,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "infrastructure",
+      "title": "Infrastruktur",
+      "description": "Deployment och körningsmiljö",
+      "icon": "☸️",
+      "status": "define",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "kubernetes-job",
+      "title": "Kubernetes Job",
+      "description": "Agenten som Kubernetes Job. IMPLEMENTERAD: K8s Job Runner (Run, RunAndWait, WaitForJob, GetLogs, Delete), JobSpec för job-konfiguration, Watcher för job-events, JobResult med success/failure/timedout status. K8s manifests i infrastructure-flux/components/agent-job/ (namespace, serviceaccount, rolebinding, job-template).",
+      "icon": "🚀",
+      "status": "completed",
+      "parent_id": "infrastructure",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "cli-tools-access",
+      "title": "CLI verktyg",
+      "description": "Vilka verktyg ska agenten ha tillgång till och hur?",
+      "icon": "🛠️",
+      "status": "define",
+      "parent_id": "infrastructure",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "worktree-management",
+      "title": "Worktree-hantering",
+      "description": "Agenten arbetar i isolerade git worktrees",
+      "icon": "🌳",
+      "status": "define",
+      "parent_id": "infrastructure",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "auth",
+      "title": "Autentisering",
+      "description": "Användarautentisering",
+      "icon": "🔒",
+      "status": "define",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "jwt-tokens",
+      "title": "JWT tokens",
+      "description": "JWT-baserad autentisering. IMPLEMENTERAD: JWT Generator (GenerateTokenPair, RefreshTokenPair), JWT Validator (ValidateAccessToken, ValidateRefreshToken), AuthMiddleware för route-skydd, RoleMiddleware för rollbaserad åtkomst, AuthHandler (Login, Refresh, Logout, Me), TokenBlacklist för logout, RoleMiddleware (admin-only, user-owner-or-admin).",
+      "icon": "🎫",
+      "status": "completed",
+      "parent_id": "auth",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "user-management",
+      "title": "Användarhantering",
+      "description": "Admin-interface för användarhantering",
+      "icon": "👥",
+      "status": "define",
+      "parent_id": "auth",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "refresh-tokens",
+      "title": "Refresh tokens",
+      "description": "Utöka sessioner med refresh tokens",
+      "icon": "🔄",
+      "status": "define",
+      "parent_id": "auth",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "future-features",
+      "title": "Framtida features",
+      "description": "Nice-to-have features att implementera senare",
+      "icon": "✨",
+      "status": "define",
+      "parent_id": "root",
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "long-term-memory",
+      "title": "Långtidsminne",
+      "description": "Långtidsminne med 3 typer: Episodic (tidigare upplevelser), Semantic (fakta), Procedural (inlärda procedurer). MemoryStore med JSON-persistens, MemoryManager med sökning och context-generering, GenerateContextForTask() för att hämta relevanta minnen till agent-prompts.",
+      "icon": "🧠",
+      "status": "completed",
+      "parent_id": "root",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "self-improvement",
+      "title": "Self-improvement",
+      "description": "Agenten kan analysera och förbättra sin egen kod. IMPLEMENTERAD: SelfAnalyzer (AST-baserad kodanalys), ImprovementEngine (genererar och prioriterar förbättringar), SelfImprover (orkestrerar self-check), PatternDetector (detekterar vanliga mönster som error-handling, logging, context), SelfCheckReport med PrettyPrint().",
+      "icon": "🔧",
+      "status": "completed",
+      "parent_id": "root",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "context-budget-monitor",
+      "title": "Context Budget Monitor",
+      "description": "Monitor för context-användning. IMPLEMENTERAD: ContextBudget (per-konversation), ContextBudgetManager (flera conversations), BudgetStatus med Level (OK/Warning/Critical), EstimateMessageTokens(), SuggestPruning() för att föreslå vilka meddelanden som kan kapas, callbacks för warning/critical/budget-exceeded.",
+      "icon": "📊",
+      "status": "completed",
+      "parent_id": "future-features",
+      "priority": 1,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "goal-decomposition-engine",
+      "title": "Målnedbrytningsmotor",
+      "description": "Motor som bryter ner högnivå-mål i delmål automatiskt. IMPLEMENTERAD: Decomposer med LLM-baserad generering av sub-goals och tasks, DecompositionResult med timeline/resources/risks, DependencyGraph för beroendehantering, TopologicalSort för exekveringsordning, ExecutionPlan med milestones, PrettyPrint() för visuell output.",
+      "icon": "🧩",
+      "status": "completed",
+      "parent_id": "future-features",
+      "priority": 2,
+      "created": "2026-01-13T12:00:00Z",
+      "completed_at": "2026-01-20T00:00:00Z"
+    },
+    {
+      "id": "automatic-pr-description",
+      "title": "Automatisk PR-beskrivning",
+      "description": "När en branch mergas, generera automatiskt en PR-beskrivning baserat på checkpoints och learnings",
+      "icon": "📝",
+      "status": "define",
+      "parent_id": "future-features",
+      "priority": 3,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "multi-agent-coordination",
+      "title": "Multi-agent-koordinering",
+      "description": "Stöd för flera agenter som arbetar parallellt på olika delar av samma feature",
+      "icon": "🤝",
+      "status": "define",
+      "parent_id": "future-features",
+      "priority": 4,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "learned-patterns-database",
+      "title": "Inlärda mönster-databas",
+      "description": "Databas med mönster som agenten lärt sig från tidigare uppgifter",
+      "icon": "🧠",
+      "status": "define",
+      "parent_id": "future-features",
+      "priority": 5,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "voice-interface",
+      "title": "Röst-gränssnitt",
+      "description": "Stöd för röstkommandon via mikrofon",
+      "icon": "🎤",
+      "status": "define",
+      "parent_id": "future-features",
+      "priority": 6,
+      "created": "2026-01-13T12:00:00Z"
+    },
+    {
+      "id": "infrastructure-completed",
+      "title": "Ny infrastruktur (slutförd)",
+      "description": "Nyligen implementerad infrastruktur",
+      "icon": "✅",
+      "status": "completed",
+      "parent_id": "root",
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "go-ci-pipeline",
+      "title": "Go CI Pipeline",
+      "description": "GitHub Actions workflow som kör go test, go vet, och go build på varje push.",
+      "icon": "🐙",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 1,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "health-checks-api",
+      "title": "Health Check Endpoints",
+      "description": "Kubernetes probes: /healthz, /ready, /startup med databas-koll.",
+      "icon": "💓",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 2,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "provider-retry-backoff-impl",
+      "title": "Provider Retry with Exponential Backoff",
+      "description": "LLM-anrop retry:ar med exponential backoff + jitter. Retry(), RetryConfig, HTTPRetryer i provider.go.",
+      "icon": "🔁",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 3,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "structured-logging-impl",
+      "title": "Strukturerad loggning",
+      "description": "JSON-loggning med request ID, correlation ID, log levels i internal/core/logging.",
+      "icon": "📝",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 4,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "token-usage-tracking",
+      "title": "Token-räkning och kostnadsspårning",
+      "description": "Trackar tokens och kostnader per provider. API endpoints: /api/v1/usage/stats, /usage/conversation/:id, /usage/costs.",
+      "icon": "💰",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 5,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "tool-cancellation-impl",
+      "title": "Tool execution cancellation",
+      "description": "CancellationManager för att avbryta körande verktyg. API endpoints: POST /api/v1/tools/cancel, POST /tools/cancel-all, GET /tools/status.",
+      "icon": "🛑",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 6,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "tool-streaming-impl",
+      "title": "Tool output streaming",
+      "description": "Verktyg stream:ar output till frontend i realtid. Bash-verktyget stream:ar stdout/stderr med radbuffert. Ny AgentWebSocketHandler med full verktygsstöd.",
+      "icon": "📡",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 7,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "rate-limiting-impl",
+      "title": "API Rate Limiting",
+      "description": "Token bucket rate limiter per IP. Konfigurerbar via RATE_LIMIT_PER_MINUTE env. Returnerar 429 Too Many Requests vid överskridning.",
+      "icon": "🚦",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 8,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "prometheus-metrics-impl",
+      "title": "Prometheus Metrics",
+      "description": "Prometheus metrics för HTTP, agent, tools och LLM. Endpoints: GET /metrics (Prometheus format), GET /api/v1/metrics (JSON).",
+      "icon": "📊",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 9,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "usage-tracking-integration",
+      "title": "Usage Tracking Integration",
+      "description": "Kopplar usage tracker till agent-runtime via OnTurnComplete hook. Global tracker med SetGlobalTracker/GetGlobalTracker. TokenUsage sparas i databas.",
+      "icon": "💰",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 10,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "frontend-integration",
+      "title": "Frontend Tool Streaming Integration",
+      "description": "Frontend tar emot tool_output events och uppdaterar verktygsresultat i realtid. Bash-verktygets streaming syns nu i chat-gränssnittet.",
+      "icon": "🌐",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 11,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "input-sanitization",
+      "title": "Input Sanitization för Verktyg",
+      "description": "Validerar alla verktygsinput (bash-kommandon, filvägar, filinnehåll) för att förhindra injection-attacker och obehörig åtkomst.",
+      "icon": "🛡️",
+      "status": "completed",
+      "completed_at": "2026-01-14T00:00:00Z",
+      "parent_id": "infrastructure-completed",
+      "priority": 12,
+      "created": "2026-01-14T00:00:00Z"
+    },
+    {
+      "id": "pxe-worker-1-recovery",
+      "title": "worker-1 ansluter till cluster1 via PXE-boot",
+      "description": "Få worker-1 att bootas från PXE, installera Talos med rätt nodspecifik konfiguration (hostname worker-1, SD-kortet serial 0x00002039, aktuell cluster1-PKI) och därefter ansluta sig till det körande klustret så att den syns som Ready i kubectl. Första noden i en recovery-kedja som ska kunna användas för worker-2..worker-9.",
+      "icon": "🖥️",
+      "status": "execute",
+      "parent_id": "root",
+      "priority": 1,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Worker-1 (Radxa Rock 4C+, 10.10.10.21, MAC 0a:3f:39:25:2b:c8) svarar inte på Talos-API:t. Den går inte att nå via talosctl förrän den startats i maintenance mode. Nuvarande PXE-uppsättning kan inte hjälpa: profilerna pekar på en generisk worker.yaml (ingen hostname, /dev/sda, initramfs från Talos v1.9.4) och assetsen är för gamla för v1.14-klustret.",
+        "current": "health-checken säger att endast worker-9 svarar (TLS-handshake), controlplane-1..3 är Ready. På PXE-värden (10.10.10.2) kör matchbox v0.11.0 + dnsmasq. Matchbox renderar bara profilens Boot-objekt, så en MAC-grupp kan inte själv byta talos.config-URL. Repo-audit (se pxe-config-audit) visar att matchbox generiska worker.yaml installerar på /dev/sda - på worker-1/2/3/5/6/7/8 är /dev/sda USB-media som Longhorn använder.",
+        "target": "worker-1 bootar via PXE till maintenance mode (ingen disk skrivs), vi verifierar fysisk disk och Longhorn-volymernas etiketter, och installerar sedan Talos på SD-kortet (serial 0x00002039). Noden registreras i cluster1 som Ready med rätt kubelet-version.",
+        "implementation": [
+          "1. Repo-audit av alla PXE- och Talos-configs (klart, se pxe-config-audit)",
+          "2. Generera nodspecifika configs per nod: serial-selector, hostname, v1.14.1-installer, kubelet v1.37.0",
+          "3. Separat maintenance-config (utan install) + install-config per nod",
+          "4. Nodspecifika matchbox-profiler och MAC-grupper med egen talos.config-URL",
+          "5. Uppdatera assets till v1.14.1 (kernel + initramfs per maskinvara)",
+          "6. Deploya till live-PXE-värden (ingen installation)",
+          "7. Boota worker-1 till maintenance mode och inspektera disks + volumestatus",
+          "8. Installera via apply-config med verifierad disk (kräver klartecken)",
+          "9. Verifiera Ready i kubectl och i health-checken"
+        ],
+        "files_to_modify": [
+          "~/repos/infrastructure/pxe/matchbox/assets/talos-config/worker-1.yaml",
+          "~/repos/infrastructure/pxe/matchbox/profiles/rock4c-plus-1.json",
+          "~/repos/infrastructure/pxe/matchbox/groups/rock4c-plus-1.json",
+          "~/repos/infrastructure/pxe/README.md"
+        ],
+        "test": "kubectl --context admin@cluster1 get nodes → worker-1 Ready, version v1.37.0. simon cluster health --context admin@cluster1 → worker-1 reachable via TLS-handshake."
+      }
+    },
+    {
+      "id": "pxe-assets-v1411",
+      "title": "PXE-assets för Talos v1.14.1",
+      "description": "Byt ut de gamla v1.9.4-kernel/initramfs i pxe/matchbox/assets mot v1.14.1 för de maskintyper som används. Verifiera nedladdningarnas innehåll istället för SHA-256, eftersom initramfs-bilden inte är bit-reproducerbar (squashfs-tidsstämpel/UUID varierar).",
+      "icon": "📦",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 1,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "pxe/matchbox/assets/rock4c-plus/initramfs-arm64.xz är från Factory v1.9.4 (Nov 2025) och kernel-arm64 är exakt 22925824 byte (v1.9.4-signatur). Samma gäller pi4 och rock4se. Klustret kör v1.14.0/v1.14.1. Dessutom: filerna heter .xz men är zstd-komprimerade (samma som förut, matchbox serverar dem rakt av).",
+        "current": "v1.14.1-assets är nedladdade till /tmp/pxe-v1411: rock4c-plus-kernel-arm64, rock4c-plus-initramfs-arm64.xz, rock4se-kernel-arm64, rock4se-initramfs-arm64.xz, pi4-kernel-arm64, pi4-initramfs-arm64.xz, macmini-kernel-amd64, macmini-initramfs-amd64.xz. Ingen av dem ligger i repot ännu.",
+        "target": "pxe/matchbox/assets/<maskintyp>/ innehåller v1.14.1 kernel + initramfs, verifierade genom att packa upp initramfs och kontrollera att rätt Talos-version finns i bilden.",
+        "implementation": [
+          "1. Kopiera v1.14.1-filer till pxe/matchbox/assets/rock4c-plus/ (för worker-1)",
+          "2. Uppdatera rock4se, pi4 och lägg till macmini (amd64) för worker-9",
+          "3. Verifiera varje initramfs med zstd -d och kontrollera innehållet",
+          "4. Dokumentera att SHA-256 inte kan användas som expected-värde och varför"
+        ],
+        "files_to_modify": [
+          "~/repos/infrastructure/pxe/matchbox/assets/rock4c-plus/kernel-arm64",
+          "~/repos/infrastructure/pxe/matchbox/assets/rock4c-plus/initramfs-arm64.xz",
+          "~/repos/infrastructure/pxe/README.md"
+        ],
+        "test": "file -b på initramfs ska visa zstd; zstd -d ska lyckas; kernel-version i bilden ska vara 6.18.51-talos.",
+        "result": "v1.14.1-assets är på plats i repot för rock4c-plus, rock4se, pi4, pi5 och macmini (amd64). Initramfsarna är verifierade genom uppackning (zstd), inte SHA-256. Pi5-initramfsen kom från rpi_5-schematicen (a636242d) - inte längre en Pi 4-kopia."
+      }
+    },
+    {
+      "id": "pxe-node-config-worker-1",
+      "title": "Nodspecifik Talos-config för worker-1",
+      "description": "Generera worker-1-specifika maskinconfigs med aktuell cluster1-PKI, hostname worker-1, installationsdisk serial 0x00002039 (SD-kortet - INTE /dev/sda) och v1.14.1-installer. Två varianter: en maintenance-config utan install och en install-config med UnattendedInstallConfig.",
+      "icon": "⚙️",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 2,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "matchbox serverar en enda generisk worker.yaml till alla workers: ingen HostnameConfig, machine.install.disk = /dev/sda (fel disk - på flera workers USB-media som Longhorn använder), installer v1.12.5 och kubelet v1.35.2 (klustret kör v1.37.0). En nod som bootar med den configen får fel namn, installerar på fel disk och kan skriva över Longhorn-data.",
+        "current": "Nio nodspecifika configs finns redan genererade och validerade i ~/cluster-recovery-backup/worker-configs/worker-1..9.yaml (mode 600, utanför git). De har rätt hostname, rätt diskSelector (serial) och aktuell PKI, och passerar talosctl validate --mode metal. De saknar dock UserVolumeConfig, så Longhorn-diskarna monteras inte efter en reinstall.",
+        "target": "pxe/matchbox/assets/talos-config/nodes/worker-1.yaml (maintenance, utan install) och worker-1-install.yaml (med UnattendedInstallConfig, serial 0x00002039, wipe false) finns i repot, validerade med talosctl validate --mode metal.",
+        "implementation": [
+          "1. Generera från aktuell cluster1-PKI (talosctl get mc på controlplane-3)",
+          "2. machine.install bort - använd UnattendedInstallConfig i enbart install-varianten",
+          "3. Install-selector: disk.serial == 0x00002039 (aldrig /dev/sda, aldrig dev_path)",
+          "4. Installer-image: factory.talos.dev/metal-installer/<schematic>:v1.14.1",
+          "5. Kubelet-image v1.37.0, endpoint https://10.10.10.10:6443, clusterName cluster1",
+          "6. HostnameConfig hostname: worker-1",
+          "7. UserVolumeConfig från talos/patches/workers/worker-1/disks/*.yaml (utan volymdata)",
+          "8. Validera båda varianter med talosctl validate --mode metal"
+        ],
+        "files_to_modify": [
+          "~/repos/infrastructure/pxe/matchbox/assets/talos-config/worker-1.yaml"
+        ],
+        "test": "talosctl validate --config pxe/matchbox/assets/talos-config/nodes/worker-1.yaml --mode metal",
+        "result": "worker-1 har tre nodspecifika configer: maintenance (worker-1.yaml), install (worker-1-install.yaml, serial 0x00002039, wipe false, v1.14.1) och volumes (worker-1-volumes.yaml, endast UserVolumeConfig). Alla passerar talosctl validate --mode metal. De ligger i pxe/matchbox/assets/talos-config/nodes/ och versionshålls inte i Git (PKI/token)."
+      }
+    },
+    {
+      "id": "pxe-matchbox-profile-worker-1",
+      "title": "Matchbox-profil och MAC-grupp för worker-1",
+      "description": "Matchbox v0.11.0 renderar bara profilens Boot-objekt - en MAC-grupp kan inte själv byta talos.config-URL. Därför behövs en egen profil för varje nod, med egen config-URL.",
+      "icon": "🔀",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 3,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Idag pekar gruppen rock4c-plus-1 på profilen rock4c-plus, som i sin tur pekar på /assets/talos-config/worker.yaml. Alla workers på samma hårdvara får samma config, utan hostname och med fel disk.",
+        "current": "matchbox/http/ipxe.go renderar endast .Kernel, .Args och .Initrd från den valda profilen. Grupper väljer en statisk profile - det finns ingen per-grupp boot-args.",
+        "target": "rock4c-plus-1-gruppen pekar på en worker-1-specifik profil vars args innehåller talos.config=http://10.10.10.2:8080/assets/talos-config/nodes/worker-1.yaml, med kernel och initramfs från /assets/rock4c-plus/.Motsvarande profil+grupp för varje nod.",
+        "implementation": [
+          "1. Skapa pxe/matchbox/profiles/rock4c-plus-1.json (kernel, initrd, args med worker-1-config-URL)",
+          "2. Uppdatera pxe/matchbox/groups/rock4c-plus-1.json till att peka på den profilen",
+          "3. Gör motsvarande för varje nod (rock4c-plus-2/3, rock4se-1..5, pi4-1..3, worker-9)",
+          "4. Låt generic-profilerna (rock4c-plus, rock4se, pi4) peka på maintenance-configen så en    oavsiktlig boot aldrig installerar på /dev/sda"
+        ],
+        "files_to_modify": [
+          "~/repos/infrastructure/pxe/matchbox/profiles/rock4c-plus-1.json",
+          "~/repos/infrastructure/pxe/matchbox/groups/rock4c-plus-1.json"
+        ],
+        "test": "curl \"http://10.10.10.2:8080/ipxe?mac=0a:3f:39:25:2b:c8\" ska innehålla talos.config=.../worker-1.yaml",
+        "result": "Varje nod har en egen matchbox-profil (node-worker-1..9, node-controlplane-1..3) och en MAC-grupp som pekar på den. Generiska profiler pekar på generic-worker.yaml (maintenance utan installation). Controlplane-profiler pekar på den generiska controlplane.yaml."
+      }
+    },
+    {
+      "id": "pxe-deploy-pxe-host",
+      "title": "Deploya assets och profiler till live-PXE-värden",
+      "description": "Kopiera de nya v1.14.1-assetsen, configen och profilerna till PXE-värden (ssh pxe, ~/PXE) och starta om matchbox. Ingen installation och ingen PXE-boot utan ditt klartecken.",
+      "icon": "🚀",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 4,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Live-PXE-värden har ingen git-repository (NO_GIT) - distribution kan inte ske med git pull. Dessutom har värden bara 2,8 GB ledigt disk, och fyra initramfs på ~87 MB vardera är ~340 MB.",
+        "current": "ssh pxe kör matchbox (quay.io/poseidon/matchbox:v0.11.0) och dnsmasq (dockurr/dnsmasq) i ~/PXE. Matchbox-volymen är ~/PXE/matchbox.",
+        "target": "~/PXE/matchbox på värden innehåller v1.14.1-assets för rock4c-plus, worker-1-configen och den nya profilen - och matchbox serverar korrekt svar.",
+        "implementation": [
+          "1. Kolla ledigt disk på värden och städa bort gamla assets om det behövs",
+          "2. rsync/scp kernel + initramfs till ~/PXE/matchbox/assets/rock4c-plus/",
+          "3. scp worker-1.yaml till ~/PXE/matchbox/assets/talos-config/",
+          "4. scp profil- och gruppfilerna till ~/PXE/matchbox/",
+          "5. docker compose restart matchbox",
+          "6. Verifiera /ipxe?mac=... och /assets/talos-config/worker-1.yaml"
+        ],
+        "files_to_modify": [
+          "~/PXE/matchbox/assets/rock4c-plus/ (på pxe-värden)",
+          "~/PXE/matchbox/assets/talos-config/worker-1.yaml (på pxe-värden)",
+          "~/PXE/matchbox/profiles/rock4c-plus-1.json (på pxe-värden)"
+        ],
+        "test": "curl -s \"http://10.10.10.2:8080/ipxe?mac=0a:3f:39:25:2b:c8\" och curl -sI \"http://10.10.10.2:8080/assets/talos-config/worker-1.yaml\"",
+        "result": "Live-PXE-hosten är synkad mot repot: alla node-profiler och -grupper, alla 28 nodconfiger, och v1.14.1-assets. Två avvikelser åtgärdades: pi5/initramfs-arm64.xz var fortfarande Pi 4-versionen och den stale pi5-1-gruppen (samma MAC som worker-9) arkiverades till _old-groups/."
+      }
+    },
+    {
+      "id": "pxe-verify-worker-1-request",
+      "title": "Verifiera att worker-1 gör en PXE-förfrågan",
+      "description": "Kontrollera att worker-1 får DHCP-adress, att en PXE-förfrågan når matchbox och att dnsmasq/UniFi-DHCP inte blockerar vägen. Detta är förutsättningen för att steget 'boota via PXE' ska funka alls.",
+      "icon": "📡",
+      "status": "define",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 5,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Det finns ingen bekräftad ny PXE-förfrågan från worker-1 efter tidigare omstartsförsök. Historiska loggar visar dock PXE-förfrågningar från flera workers den 19 oktober, så vägen fungerade då.",
+        "current": "UniFi-DHCP för VLAN 2 är aktiverat med pool 10.10.10.210-240, separat från dnsmasqs 10.10.10.50-200. UniFi-port 21 (worker-1) har poe=auto och up=true.",
+        "target": "Matchbox-loggen visar en GET /ipxe?mac=0a:3f:39:25:2b:c8 från 10.10.10.21, och DHCP-lease för worker-1 ligger i rätt pool.",
+        "implementation": [
+          "1. Följa matchbox-loggar live under omstart av worker-1",
+          "2. Kontrollera UniFi DHCP-lease för MAC 0a:3f:39:25:2b:c8",
+          "3. Om ingen förfrågan kommer: kontrollera om noden ens försöker PXE (U-Boot bootordning)"
+        ],
+        "files_to_modify": [],
+        "test": "docker compose logs matchbox | grep 0a:3f:39:25:2b:c8",
+        "result": "Kvar att göra: power-cycle worker-1 via UniFi PoE port 21 och bekräfta en PXE-förfrågan i dnsmasq/matchbox-loggarna. Matchbox svarar korrekt på /ipxe?mac=0a:3f:39:25:2b:c8 med rätt kernel och worker-1.yaml, så vägen är verifierad från serversidan."
+      }
+    },
+    {
+      "id": "pxe-boot-worker-1",
+      "title": "Boota worker-1 via PXE",
+      "description": "Starta worker-1 så att den går in i PXE-flödet. Kräver fysisk åtgärd vid noden. TALOS-BOOT: configen innehåller UnattendedInstallConfig, så noden installerar Talos på sin egen disk och startar om - det skriver alltså till disken.",
+      "icon": "⏻",
+      "status": "define",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 6,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Worker-1 svarar inte på Talos-API:t (ingen TLS-handshake). Den behöver startas i maintenance mode för att en config ska kunna appliceras.",
+        "current": "U-Boot-binären på ROCK 4C+ har bootmål 'mmc1 mmc0 nvme scsi usb pxe dhcp spi' - lokala medier prioriteras före PXE. Om disken är trasig faller den vidare till PXE.",
+        "target": "worker-1 har startat via PXE, hämtat worker-1-configen och börjat installera Talos på serial 0x00002039.",
+        "implementation": [
+          "1. Kontrollera att live-PXE-värden har rätt assets/config före start",
+          "2. Starta om worker-1 (fysiskt, eller via PoE-port 21 i UniFi)",
+          "3. Följa bootförloppet - konsol via serie eller via matchbox-trafik",
+          "4. Bekräfta att installationen startar mot rätt disk"
+        ],
+        "files_to_modify": [],
+        "test": "Serial/console: installationen ska referera till disk med serial 0x00002039"
+      }
+    },
+    {
+      "id": "pxe-worker-1-joins-cluster",
+      "title": "worker-1 ansluter till cluster1",
+      "description": "Efter installationen ska worker-1 registrera sig i klustret med hostname worker-1, worker-roll och rätt kubelet-version, och bli Ready.",
+      "icon": "🔗",
+      "status": "define",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 7,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Tidigare PXE-bootar installerade Talos men med gammal CA och utan korrekt registrering, vilket byggde ett främmande kluster. Nu ska configen peka på den aktuella PKI:n.",
+        "current": "Controlplane-1..3 är Ready med Talos v1.14.0/v1.14.1 och Kubernetes v1.37.0. Discovery-tjänsten och clusterID/clusterSecret finns i configen.",
+        "target": "worker-1 syns i kubectl som Ready, med ROLES worker och version v1.37.0, på INTERNAL-IP 10.10.10.21.",
+        "implementation": [
+          "1. kubectl --context admin@cluster1 get nodes -o wide",
+          "2. Kontrollera ROLES=worker, INTERNAL-IP=10.10.10.21, VERSION=v1.37.0",
+          "3. Kontrollera att inga fel dyker upp i describe node",
+          "4. Kontrollera att nodens kubelet inte startar om i loop"
+        ],
+        "files_to_modify": [],
+        "test": "kubectl --context admin@cluster1 get nodes -o wide | grep worker-1"
+      }
+    },
+    {
+      "id": "pxe-health-check-worker-1",
+      "title": "Health-checken visar worker-1 som nåbar",
+      "description": "Kör simon cluster health och verifiera att worker-1 räknas som nåbar via TLS-handshake, så att health-checken inte längre ljuger om nodstatus.",
+      "icon": "💚",
+      "status": "define",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 8,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "Health-checken rapporterade tidigare alla nio workers som nåbara eftersom en ren TCP-connect lyckades även mot adresser utan nod (SD-WAN-tunneln svarar på alla SYN).",
+        "current": "Health-checken använder nu TLS-handshake och kontrollerar att peer-certifikatet presenteras. Fixen är committad i simon-cli (b90b3f4).",
+        "target": "simon cluster health --context admin@cluster1 visar worker-1 som reachable via Talos-API, och worker-2..8 som saknar API.",
+        "implementation": [
+          "1. simon cluster health --context admin@cluster1",
+          "2. Verifiera worker-1 i nodstatus-rubriken",
+          "3. Verifiera att inga fel kvarstår för worker-2..8"
+        ],
+        "files_to_modify": [],
+        "test": "simon cluster health --context admin@cluster1 | grep -A3 'Nodstatus'"
+      }
+    },
+    {
+      "id": "pxe-document-worker-1-flow",
+      "title": "Dokumentera PXE-flödet för worker-1",
+      "description": "Skriv ner hela kedjan i pxe/README.md och i wikin: matchbox-strukturen, nodspecifika configer, hur assetsen verifieras och vad som behöver göras manuellt.",
+      "icon": "📝",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 9,
+      "created": "2026-10-22T13:30:00Z",
+      "spec": {
+        "problem": "pxe/README.md beskriver fortfarande den generiska worker.yaml-modellen och saknar nodspecifika configer, v1.14.1-assets och verifieringsmetod.",
+        "current": "README har en sektion om att regenerera talos-config mot klustrets PKI, och UBOOT.md beskriver U-Boot-gränserna.",
+        "target": "README beskriver worker-1-flödet steg för steg, inklusive matchbox-strukturen, att SHA-256 inte går att lita på för initramfs, och att live-PXE-värden saknar git.",
+        "implementation": [
+          "1. Uppdatera nodtabellen i README med profil per nod",
+          "2. Dokumentera profil/gruppmönstret worker-1 som exempel",
+          "3. Dokumentera assets-version och verifiering",
+          "4. Skriva en wiki-not om recovery-flödet"
+        ],
+        "files_to_modify": [
+          "~/repos/infrastructure/pxe/README.md"
+        ],
+        "test": "Läs igenom README som en fristående operatör: kan worker-1 återställas enbart utifrån den?",
+        "result": "pxe/README.md dokumenterar hela bootkedjan per nodtyp, MAC-till-profil, maintenance/install/volym-flödet och skillnaden firmware/bootloader. pxe/UBOOT.md beskriver U-Boot-lagret. pxe/Bootloaders/README.md beskriver rescue-kort-flödet."
+      }
+    },
+    {
+      "id": "pxe-config-audit",
+      "title": "Audit av alla PXE- och Talos-configer i infra-repot",
+      "description": "Granska alla matchbox-profiler, grupper, PXE-configer, Talos-patches och genererade configs mot de tre körande controlplanes. Dokumentera vad som stämmer och vad som är fel eller farligt.",
+      "icon": "🔍",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 0,
+      "created": "2026-10-22T14:10:00Z",
+      "finished": "2026-10-22T14:10:00Z",
+      "spec": {
+        "problem": "Repot innehåller flera configgenerationer (pxe/matchbox, talos/patches, talos/generated) som inte är synkroniserade med varandra eller med det körande klustret.",
+        "current": "Audit klar 2026-10-22. Täckning: alla 12 noder finns i matchbox-groups, dnsmasq.conf och pxe/README - de är konsistenta sinsemellan.",
+        "findings": [
+          "F1 worker-9: matchbox-gruppen heter 'Raspberry Pi 5 #1' och pekar pa pi5/arm64, men talos/nodes.yaml sager MacMini/amd64. Ingen amd64-asset finns i matchbox alls.",
+          "F2 matchbox worker.yaml: install.disk /dev/sda - pa worker-1/2/3/5/6/7/8 ar /dev/sda USB-media som Longhorn anvander. Ingen HostnameConfig, inga UserVolumeConfig, installer v1.12.5, kubelet v1.35.2, k8s v1.35.2 (klustret: v1.37.0/v1.14.x).",
+          "F3 matchbox controlplane.yaml: diskSelector model YongzhenWeiye 128GB matchar ingen live-nod (cp-1 USB 3.0 Destop H, cp-2 Intenso SSD Sata, cp-3 Intenso SSD Sata 120GB). cp-1 och cp-2 har identisk selector men olika modell.",
+          "F4 PXE-assets: pi4/rock4c-plus/rock4se kernel-arm64 = 22925824 byte = Factory v1.9.4.",
+          "F5 talos/generated/: machine_config_worker-8.yaml har hostname worker-8 men serial 0x00002039 (worker-1:s SD-kort), installer v1.14.1 men kubelet v1.35.2. reference_config.yaml anvander gammal machine.network.hostname-syntax.",
+          "F6 Install-serier: worker-1/2/3/5 har 0x0000XXXX = mmc/SD-kort (repot dokumenterar mmc-asdfg_0x00000f9b for worker-3). worker-4/6/7/8 har 0x501003f2/0x5db80239/0x185a42d8/0x48500643 - inte mmc-format, 0x185a ar Kingstons USB-vendor-ID. worker-9 = model DataTraveler 3.0 = USB-sticka. Alltsa: inte allt pa SD-kort.",
+          "F7 Recovery-configer i ~/cluster-recovery-backup/worker-configs/: 0 UserVolumeConfig, sa Longhorn-diskarna monteras inte efter reinstall. Att lagga till dem naivt kan formatera om USB-diskarna (worker-7-fallgropen i docs/add-disk-to-longhorn.md).",
+          "F8 pxe/setup.nu och flash.nu refererar till ~/infrastructure/PXE - live-varden har ingen git-repo (NO_GIT), sa setup.nu fungerar inte pa live-varden."
+        ],
+        "out_of_scope": [
+          "Kontrollplanernas PXE-configar (F3) - controlplanes ar uppe och fungerar. Bor fixas men ar inte blockerande for worker-recovery.",
+          "talos/generated/ (F5) - ar utdata, borde inte committas. Separat beslut.",
+          "Sakerhetsnot: matchbox serverar kluster-PKI over oautentiserad HTTP pa LAN. Befintlig design, men vard att notera."
+        ]
+      }
+    },
+    {
+      "id": "pxe-fix-disk-selectors",
+      "title": "Byt /dev/sda mot serial i alla PXE-configer",
+      "description": "Den generiska worker.yaml installerar pa /dev/sda, vilket pa flera workers ar Longhorn-USB-media. Alla PXE-configer ska anvanda nodspecifik diskSelector (serial) sa en installation aldrig  kan traffa en datadisk.",
+      "icon": "🛡️",
+      "status": "completed",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 1,
+      "created": "2026-10-22T14:10:00Z",
+      "spec": {
+        "problem": "matchbox/assets/talos-config/worker.yaml: machine.install.disk: /dev/sda. Pa worker-1/2/3/5/6/7/8 ar /dev/sda USB-media som Longhorn anvander for lagring - en install pa /dev/sda skriver over Longhorn-data. controlplane.yaml har en selector (model YongzhenWeiye) som inte matchar nagon live-nod.",
+        "current": "Audit F2/F3. Nodspecifika patchar med korrekta serier finns i talos/patches/workers/<nod>/patch.yaml och anvands av simon talos update config - men matchbox anvander inte dem.",
+        "target": "Ingen PXE-config i repot innehaller /dev/sda eller /dev/sda-matchning. Varje config har disk.serial == <nodens serial> frAn talos/patches/workers/<nod>/patch.yaml, och worker.yaml/controlplane.yaml (om de finns kvar) har ingen install-sektion alls.",
+        "implementation": [
+          "1. Ta bort install-sektionen ur den generiska worker.yaml (gjor den till maintenance-config)",
+          "2. Ta bort/gor om install-sektionen ur generiska controlplane.yaml",
+          "3. Generera nodspecifika configs frAn patch.yaml (se pxe-node-config-worker-1)",
+          "4. Verifiera med grep att ingen /dev/sda finns kvar i pxe/"
+        ],
+        "files_to_modify": [
+          "~/repos/infrastructure/pxe/matchbox/assets/talos-config/worker.yaml",
+          "~/repos/infrastructure/pxe/matchbox/assets/talos-config/controlplane.yaml"
+        ],
+        "test": "grep -rn '/dev/sda' pxe/ ska ge noll traffar (utom dokumentation av felet)",
+        "result": "Alla nodspecifika install-configer väljer disk via diskSelector.serial (worker-1: 0x00002039, worker-4: 0x501003f2 m.fl.) eller modell+storlek för worker-9. Inga /dev/sda eller disk.dev_path finns kvar. Generiska profiler kan inte installera något."
+      }
+    },
+    {
+      "id": "pxe-maintenance-mode-inspect",
+      "title": "Inspektera worker-1:s fysiska diskar i maintenance mode",
+      "description": "Boota worker-1 till maintenance mode via PXE utan install-sektion - inga diskar skrivs. Las sedan av disks, by-id-symlinks och volumestatus for att verifiera vilken enhet som ar SD-kortet och att Longhorn-diskarna har ratt etikett. Detta avgor installationsdisken.",
+      "icon": "🔬",
+      "status": "define",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 2,
+      "created": "2026-10-22T14:10:00Z",
+      "spec": {
+        "problem": "SD-kort-vs-USB for worker-1 ar outprovat via serienamn, men for worker-4/6/7/8 tyder serierna pa USB-media. utan inspektion vet vi inte vilken fysisk enhet vi ska installera pa, och vi vet inte om USB-diskarna har ratt XFS-etikett (u-ssd-1) for Longhorn.",
+        "current": "worker-1 svarar inte pa Talos-API:t. PXE-profilen kan peka pa maintenance-configen (utan install) sa noden startar till maintenance mode och lyssnar pa port 50000.",
+        "target": "talosctl --insecure get disks visar exakt vilken enhet som har serial 0x00002039, list /dev/disk/by-id visar USB-media separat, och get volumestatus visar u-ssd-1/u-ssd-2 med filesystem xfs och phase ready.",
+        "implementation": [
+          "1. Deploya maintenance-config for worker-1 till live-PXE-varden (ingen install)",
+          "2. Boota worker-1 (fysiskt eller via PoE-port 21 i UniFi)",
+          "3. talosctl -n 10.10.10.21 --insecure get disks -o yaml",
+          "4. talosctl -n 10.10.10.21 --insecure list /dev/disk/by-id",
+          "5. talosctl -n 10.10.10.21 --insecure get volumestatus -o yaml",
+          "6. Dokumentera verklig disk-layout i pxe/README.md"
+        ],
+        "test": "get disks ska visa exakt en disk med serial 0x00002039 och storlek ~32GB"
+      }
+    },
+    {
+      "id": "pxe-longhorn-volume-recovery",
+      "title": "Återansluta Longhorn-diskarna utan att förlora data",
+      "description": "Efter att worker-1 installerats ska USB-diskarna (ssd-1 Intenso USB, ssd-2 WDC WD30EZRZ) monteras med sina befintliga XFS-partitioner och etiketten u-ssd-1/u-ssd-2, utan formattering, så att Longhorn-volymerna på noden fungerar igen.",
+      "icon": "🗄️",
+      "status": "define",
+      "parent_id": "pxe-worker-1-recovery",
+      "priority": 4,
+      "created": "2026-10-22T14:10:00Z",
+      "spec": {
+        "problem": "Talos UserVolumeConfig med provisioning formaterar om disken om etikett/partitionstabell inte stämmer (worker-7-fallgropen). Longhorn-data pa USB-diskarna kan forsvinna.",
+        "current": "worker-1 har ssd-1 = usb-Intenso_USB_3.0_device_80200000000000000CBA-0:0 och ssd-2 = ata-WDC_WD30EZRZ-00Z5HB0_WD-WCC4N4PR0Y8F enligt talos/patches/workers/worker-1/disks/.",
+        "target": "Bada volymerna har phase ready, filesystem xfs, samma UUID som i longhorn-disk.cfg, och Longhorn-node-CR:t for worker-1 listar /var/mnt/ssd-1 och /var/mnt/ssd-2.",
+        "implementation": [
+          "1. Inspektera volumestatus fore install (se pxe-maintenance-mode-inspect)",
+          "2. Applicera UserVolumeConfig utan wipe-funktion om etiketten stammer",
+          "3. Om etikett saknas: dokumentera och be om klartecken fore formattering",
+          "4. Verifiera UUID mot longhorn-disk.cfg och uppdatera vid behov",
+          "5. Lagg till i Longhorn node CR och verifiera diskStatus"
+        ],
+        "test": "talosctl get volumestatus u-ssd-1 -o yaml ska visa filesystem xfs och phase ready"
+      }
+    }
+  ],
+  "statuses": [
+    {
+      "name": "define",
+      "label": "Definierar"
+    },
+    {
+      "name": "plan",
+      "label": "Planerar"
+    },
+    {
+      "name": "execute",
+      "label": "Exekverar"
+    },
+    {
+      "name": "verify",
+      "label": "Verifierar"
+    },
+    {
+      "name": "completed",
+      "label": "Klart"
+    }
+  ]
+}
