@@ -216,6 +216,7 @@ func main() {
 		api.GET("/agent-runs", agentRunHandler.ListAgentRuns)
 		api.POST("/agent-runs", agentRunHandler.CreateAgentRun)
 		api.PATCH("/agent-runs/:id", agentRunHandler.UpdateAgentRun)
+		api.POST("/agent-runs/:id/cancel", agentRunHandler.CancelAgentRun)
 		api.GET("/agent-runs/:id/events", agentRunHandler.ListAgentRunEvents)
 		api.POST("/agent-runs/:id/events", agentRunHandler.CreateAgentRunEvent)
 

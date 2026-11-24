@@ -2768,6 +2768,7 @@ watch(selectedParentIndex, async () => {
           :approvals="agentApprovals"
           class="mt-3"
           @decided="loadAgentRun"
+          @cancelled="loadAgentRun"
         />
       </div>
 

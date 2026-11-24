@@ -37,6 +37,8 @@ const (
 	AgentRunEventRunFailed = "run_failed"
 	// AgentRunEventRunCompleted - körningen var klar.
 	AgentRunEventRunCompleted = "run_completed"
+	// AgentRunEventRunCancelled - körningen avbröts av en människa.
+	AgentRunEventRunCancelled = "run_cancelled"
 	// AgentRunEventVerificationCheckpoint - en manuell kontrollpunkt.
 	AgentRunEventVerificationCheckpoint = "verification_checkpoint"
 )
@@ -69,7 +71,8 @@ func ValidAgentRunEventType(eventType string) bool {
 		AgentRunEventSubgoalCreated, AgentRunEventApprovalRequested,
 		AgentRunEventApprovalDecided, AgentRunEventVerification,
 		AgentRunEventArtifact, AgentRunEventError, AgentRunEventRunFailed,
-		AgentRunEventRunCompleted, AgentRunEventVerificationCheckpoint:
+		AgentRunEventRunCompleted, AgentRunEventRunCancelled,
+		AgentRunEventVerificationCheckpoint:
 		return true
 	default:
 		return false

@@ -506,3 +506,42 @@ func TestJobbetAvslutasNärKörningenÄrKlar(t *testing.T) {
 		t.Errorf("fel = %v, vill ha %v", err, ErrFinished)
 	}
 }
+
+// TestAvbrutenKörningStopparWorkern verifierar att workern inte börjar
+// om en körning som en människa avbrutit.
+func TestAvbrutenKörningStopparWorkern(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/goals":
+			_ = json.NewEncoder(w).Encode([]planclient.Goal{{
+				ID: 42, Title: "Avbrutet mål", Description: "beskrivning", StatusID: 1, Agent: true,
+			}})
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/statuses":
+			_ = json.NewEncoder(w).Encode([]planclient.Status{
+				{ID: 1, Name: PhaseDefine},
+				{ID: 2, Name: PhasePlan},
+			})
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/agent-runs":
+			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{{
+				ID: 11, GoalID: 42, Phase: PhasePlan, Status: StatusCancelled,
+			}})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	t.Setenv("PLAN_API_URL", server.URL)
+	t.Setenv("PLAN_API_KEY", "test-key")
+	client, err := planclient.New()
+	if err != nil {
+		t.Fatalf("create Plan API client: %v", err)
+	}
+
+	worker := New(client, fakeDefiner{}, Config{OnlyGoalId: 42})
+	err = worker.RunOnce(context.Background())
+	if !errors.Is(err, ErrFinished) {
+		t.Errorf("fel = %v, vill ha %v", err, ErrFinished)
+	}
+}

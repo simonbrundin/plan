@@ -34,6 +34,16 @@ type Goal struct {
 	Agent bool `json:"agent,omitempty"`
 }
 
+// Körningens tillstånd - de ägs av Plan, agenten läser dem.
+const (
+	RunStatusQueued    = "queued"
+	RunStatusRunning   = "running"
+	RunStatusBlocked   = "blocked"
+	RunStatusDone      = "done"
+	RunStatusFailed    = "failed"
+	RunStatusCancelled = "cancelled"
+)
+
 // AgentRun is an agent run registered in Plan
 type AgentRun struct {
 	ID             int64     `json:"id"`

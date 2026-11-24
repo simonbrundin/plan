@@ -33,6 +33,8 @@ const (
 	StatusBlocked = "blocked"
 	// StatusQueued betyder att körningen väntar på att få ett Job.
 	StatusQueued = "queued"
+	// StatusCancelled betyder att en människa avbröt körningen.
+	StatusCancelled = planclient.RunStatusCancelled
 )
 
 // ErrFinished betyder att målet är färdigt och workern kan avslutas.
@@ -212,6 +214,13 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 		}
 
 		run, hasRun := latestRun[goal.ID]
+
+		// En avbruten körning ska inte återupptas - en människa har sagt
+		// stopp. Jobbet avslutas i stället för att börja om.
+		if hasRun && run.Status == StatusCancelled {
+			log.Printf("Run %d for goal #%d was cancelled - the worker stops", run.ID, goal.ID)
+			return ErrFinished
+		}
 
 		// En köad körning är en uttrycklig begäran om att få köras. Den
 		// tas över och arbetet utförs i den körningen.

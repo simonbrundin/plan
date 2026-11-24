@@ -9,6 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   decided: [approvalId: number];
+  cancelled: [];
 }>();
 
 const feedback = ref('');
@@ -58,6 +59,27 @@ async function decide(decision: 'approve' | 'reject') {
     emit('decided', approval.id);
   } catch {
     errorMessage.value = 'Kunde inte spara beslutet.';
+  } finally {
+    busy.value = false;
+  }
+}
+
+// Avbryter körningen. Det är ett sätt att stanna - jobbet och podden
+// städas i klustret när jobbcontrollern ser att körningen är avbruten.
+const canCancel = computed(
+  () => props.run?.status === 'running' || props.run?.status === 'blocked',
+);
+
+async function cancel() {
+  if (!props.run) return;
+
+  busy.value = true;
+  errorMessage.value = null;
+  try {
+    await $fetch(`/api/agent/runs/${props.run.id}/cancel`, { method: 'POST' });
+    emit('cancelled');
+  } catch {
+    errorMessage.value = 'Kunde inte avbryta körningen.';
   } finally {
     busy.value = false;
   }
@@ -172,6 +194,17 @@ async function decide(decision: 'approve' | 'reject') {
       <p v-if="props.run?.result" class="mt-2 text-xs text-ink-muted">
         <span class="text-ink-dim">Resultat:</span> {{ props.run.result }}
       </p>
+      <div v-if="canCancel" class="mt-3">
+        <button
+          type="button"
+          class="rounded-lg border border-error/50 px-3 py-1.5 text-xs font-medium text-error disabled:opacity-50"
+          :disabled="busy"
+          @click="cancel"
+        >
+          Avbryt körningen
+        </button>
+        <p v-if="errorMessage" class="mt-2 text-xs text-error">{{ errorMessage }}</p>
+      </div>
     </header>
     <ol class="divide-y divide-line">
       <li v-for="event in props.events" :key="event.id" class="px-4 py-3">

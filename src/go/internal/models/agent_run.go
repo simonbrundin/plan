@@ -19,11 +19,12 @@ const (
 // Agentkörningens tillstånd. "blocked" betyder att agenten väntar på
 // människan - till exempel ett godkännande.
 const (
-	AgentRunStatusQueued  = "queued"
-	AgentRunStatusRunning = "running"
-	AgentRunStatusBlocked = "blocked"
-	AgentRunStatusDone    = "done"
-	AgentRunStatusFailed  = "failed"
+	AgentRunStatusQueued    = "queued"
+	AgentRunStatusRunning   = "running"
+	AgentRunStatusBlocked   = "blocked"
+	AgentRunStatusDone      = "done"
+	AgentRunStatusFailed    = "failed"
+	AgentRunStatusCancelled = "cancelled"
 )
 
 // Agentprofiler - vilken typ av agent som utförde körningen.
@@ -150,7 +151,7 @@ func ValidAgentRunPhase(phase string) bool {
 func ValidAgentRunStatus(status string) bool {
 	switch status {
 	case AgentRunStatusQueued, AgentRunStatusRunning, AgentRunStatusBlocked,
-		AgentRunStatusDone, AgentRunStatusFailed:
+		AgentRunStatusDone, AgentRunStatusFailed, AgentRunStatusCancelled:
 		return true
 	}
 	return false
@@ -175,7 +176,8 @@ func ValidateAgentRunStatus(status string) error {
 // IsTerminalAgentRunStatus berättar om en körning är slut - då ska den
 // inte kunna återupplivas och den får en sluttid.
 func IsTerminalAgentRunStatus(status string) bool {
-	return status == AgentRunStatusDone || status == AgentRunStatusFailed
+	return status == AgentRunStatusDone || status == AgentRunStatusFailed ||
+		status == AgentRunStatusCancelled
 }
 
 // ValidateAgentRunTransition säkerställer att en körning går framåt i sin
@@ -217,8 +219,14 @@ func validAgentRunStatusTransition(current, requested string) bool {
 	if current == requested {
 		return true
 	}
-	if current == AgentRunStatusDone || current == AgentRunStatusFailed {
+	if IsTerminalAgentRunStatus(current) {
 		return false
+	}
+
+	// En körning kan alltid avbrytas - av en människa, av en budget eller
+	// av en policy. Det är ett sätt att stanna, inte ett sätt att gå vidare.
+	if requested == AgentRunStatusCancelled {
+		return true
 	}
 
 	switch current {

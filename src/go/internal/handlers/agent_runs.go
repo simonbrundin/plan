@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"plan-api/internal/models"
 	"plan-api/internal/repository"
@@ -199,6 +201,81 @@ func (h *AgentRunHandler) UpdateAgentRun(c *gin.Context) {
 	}
 	if run == nil {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, run)
+}
+
+// CancelAgentRun godoc
+// @Summary Cancel an agent run
+// @Description Cancel a running or queued agent run. The agent stops and the cluster resources are cleaned up.
+// @Tags agent-runs
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Agent run ID"
+// @Success 200 {object} models.AgentRun
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/agent-runs/{id}/cancel [post]
+func (h *AgentRunHandler) CancelAgentRun(c *gin.Context) {
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	runID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid agent run ID"})
+		return
+	}
+
+	current, err := h.repo.Get(c.Request.Context(), userID, runID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if current == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
+		return
+	}
+
+	status := models.AgentRunStatusCancelled
+	summary := "Körningen avbröts av en människa"
+	result := "Körningen avbröts innan den blev klar"
+	finishedAt := time.Now().UTC()
+
+	run, err := h.repo.Update(c.Request.Context(), userID, runID, models.UpdateAgentRunRequest{
+		Status:     &status,
+		Summary:    &summary,
+		Result:     &result,
+		FinishedAt: &finishedAt,
+	})
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidAgentRun) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if run == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
+		return
+	}
+
+	// Händelsen gör det synligt i historiken att det var en människa som
+	// avbröt - inte ett fel.
+	if _, err := h.eventRepo.Create(c.Request.Context(), userID, runID, models.CreateAgentRunEventRequest{
+		Type:  models.AgentRunEventRunCancelled,
+		Phase: run.Phase,
+		Payload: map[string]any{
+			"cancelled_by": "user",
+		},
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return
 	}
 

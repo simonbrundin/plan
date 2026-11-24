@@ -231,3 +231,30 @@ func TestReconcileStartarEttJobbPerMål(t *testing.T) {
 		t.Errorf("antal jobb = %d, vill ha 1", len(jobs.Items))
 	}
 }
+
+// TestReconcileTarBortJobbFörAvbrutenKörning kontrollerar att en
+// avbruten körning inte lämnar jobb eller podd efter sig i klustret.
+func TestReconcileTarBortJobbFörAvbrutenKörning(t *testing.T) {
+	state := &planState{
+		runs: []planclient.AgentRun{{ID: 7, GoalID: 42, Status: planclient.RunStatusCancelled}},
+	}
+	client := fake.NewSimpleClientset()
+	controller := newController(t, state, client)
+
+	// Först skapas jobbet - sedan avbryts körningen.
+	job := &batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{Name: "agent-worker-run-7", Namespace: "plan"},
+	}
+	if _, err := client.BatchV1().Jobs("plan").Create(context.Background(), job, metav1.CreateOptions{}); err != nil {
+		t.Fatalf("skapa jobb: %v", err)
+	}
+
+	if err := controller.Reconcile(context.Background()); err != nil {
+		t.Fatalf("Reconcile: %v", err)
+	}
+
+	_, err := client.BatchV1().Jobs("plan").Get(context.Background(), "agent-worker-run-7", metav1.GetOptions{})
+	if err == nil {
+		t.Error("jobbet finns kvar - det borde ha tagits bort")
+	}
+}

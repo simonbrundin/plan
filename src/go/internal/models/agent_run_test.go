@@ -33,6 +33,7 @@ func TestValidAgentRunStatus(t *testing.T) {
 		AgentRunStatusBlocked,
 		AgentRunStatusDone,
 		AgentRunStatusFailed,
+		AgentRunStatusCancelled,
 	}
 	for _, status := range valid {
 		if !ValidAgentRunStatus(status) {
@@ -123,5 +124,34 @@ func TestValidateAgentRunTransitionStopparTerminalRun(t *testing.T) {
 
 	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Status: &status}); err == nil {
 		t.Fatal("en avslutad körning ska inte kunna återupplivas")
+	}
+}
+
+// TestValidateAgentRunTransitionTillaterAvbrytning kontrollerar att en
+// körning kan avbrytas från varje tillstånd - det är ett sätt att stanna,
+// inte ett sätt att gå vidare.
+func TestValidateAgentRunTransitionTillaterAvbrytning(t *testing.T) {
+	cancelled := AgentRunStatusCancelled
+
+	for _, current := range []string{
+		AgentRunStatusQueued,
+		AgentRunStatusRunning,
+		AgentRunStatusBlocked,
+	} {
+		run := AgentRun{Phase: AgentRunPhasePlan, Status: current}
+		if err := ValidateAgentRunTransition(run, UpdateAgentRunRequest{Status: &cancelled}); err != nil {
+			t.Errorf("körning i %q ska kunna avbrytas: %v", current, err)
+		}
+	}
+}
+
+// TestValidateAgentRunTransitionStopparAvbrutenRun kontrollerar att en
+// avbruten körning inte kan återupplivas.
+func TestValidateAgentRunTransitionStopparAvbrutenRun(t *testing.T) {
+	running := AgentRunStatusRunning
+	current := AgentRun{Phase: AgentRunPhasePlan, Status: AgentRunStatusCancelled}
+
+	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Status: &running}); err == nil {
+		t.Fatal("en avbruten körning ska inte kunna återupplivas")
 	}
 }

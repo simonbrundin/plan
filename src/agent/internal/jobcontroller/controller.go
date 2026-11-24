@@ -97,6 +97,11 @@ func (c *Controller) Reconcile(ctx context.Context) error {
 func (c *Controller) reconcileRun(ctx context.Context, run planclient.AgentRun) error {
 	jobName := jobrunner.JobName(run.ID)
 
+	// En avbruten körning ska inte lämna resurser efter sig.
+	if run.Status == planclient.RunStatusCancelled {
+		return c.cleanUpCancelled(ctx, run, jobName)
+	}
+
 	job, err := c.runner.Get(ctx, jobName)
 	if err != nil {
 		// Jobbet finns inte. Bara en köad körning startar ett nytt jobb.
@@ -128,6 +133,25 @@ func (c *Controller) reconcileRun(ctx context.Context, run planclient.AgentRun) 
 
 	// Jobbet finns - för över ett misslyckande till körningen i Plan.
 	return c.reportFailure(ctx, run, job)
+}
+
+// cleanUpCancelled tar bort jobbet och podden för en avbruten körning.
+//
+// Avbrytning ska lämna klustret som det var - annars fortsätter en agent
+// att köra kod mot repot efter att en människa sagt stopp.
+func (c *Controller) cleanUpCancelled(ctx context.Context, run planclient.AgentRun, jobName string) error {
+	job, err := c.runner.Get(ctx, jobName)
+	if err != nil || job == nil {
+		// Jobbet finns redan inte - inget att städa.
+		return nil
+	}
+
+	if err := c.runner.Delete(ctx, jobName); err != nil {
+		return fmt.Errorf("failed to delete cancelled job %s: %w", jobName, err)
+	}
+
+	log.Printf("Deleted job %s - run %d was cancelled", jobName, run.ID)
+	return nil
 }
 
 // reportFailure markerar körningen som misslyckad om jobbet föll.
