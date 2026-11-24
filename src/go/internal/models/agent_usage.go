@@ -180,6 +180,12 @@ type BudgetExceededError struct {
 }
 
 func (e *BudgetExceededError) Error() string {
+	// Skälet styr budskapet - en okänd prisbild är inte samma sak som
+	// en budget som är slut.
+	if e.Status.Reason == "unknown_price" {
+		return fmt.Sprintf("budget %q kräver ett känt modellpris, men priset för modellen är okänt",
+			e.Status.Name)
+	}
 	return fmt.Sprintf("budget %q är slut: %.4f %s använd eller reserverad, gräns %.4f %s",
 		e.Status.Name, e.Status.SpentUSD+e.Status.ReservedUSD, e.Status.Currency(),
 		e.Status.HardLimitUSD, e.Status.Currency())

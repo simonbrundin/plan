@@ -134,14 +134,14 @@ func (r *AgentBudgetRepository) Delete(ctx context.Context, userID, budgetID int
 //
 // Den används för att visa budgetens läge i gränssnittet.
 func (r *AgentBudgetRepository) Status(ctx context.Context, userID int64, budget models.AgentBudget) (models.BudgetStatus, error) {
-	return budgetStatus(ctx, r.pool, userID, budget, time.Now())
+	return budgetStatus(ctx, r.pool, userID, budget, time.Now(), 0)
 }
 
 // budgetStatus räknar ut en budgets läge.
 //
 // Spent är den kostnad som redan bokförts i perioden. Reserved är den
 // kostnad som reserverats för körningar som fortfarande pågår.
-func budgetStatus(ctx context.Context, q querier, userID int64, budget models.AgentBudget, now time.Time) (models.BudgetStatus, error) {
+func budgetStatus(ctx context.Context, q querier, userID int64, budget models.AgentBudget, now time.Time, pending float64) (models.BudgetStatus, error) {
 	start := periodStart(budget.Period, now)
 
 	var spent float64
@@ -177,9 +177,11 @@ func budgetStatus(ctx context.Context, q querier, userID int64, budget models.Ag
 		SpentUSD:     spent,
 		ReservedUSD:  reserved,
 	}
-	status.Exceeded = spent+reserved >= budget.HardLimitUSD
+	// Den väntande körningens reservation räknas med - annars kan två
+	// samtidiga körningar tillsammans överskrida gränsen.
+	status.Exceeded = spent+reserved+pending >= budget.HardLimitUSD
 	if budget.WarningLimitUSD != nil {
-		status.Warning = spent+reserved >= *budget.WarningLimitUSD
+		status.Warning = spent+reserved+pending >= *budget.WarningLimitUSD
 	}
 	return status, nil
 }

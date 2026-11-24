@@ -211,10 +211,18 @@ func checkBudgets(ctx context.Context, tx pgx.Tx, userID int64, req models.Creat
 		return 0, nil, nil
 	}
 
+	// Reservationen är den största av budgetarnas - den körning som
+	// startar reserverar så mycket som den tightaste budgeten kräver.
 	reservation := 0.0
+	for _, budget := range budgets {
+		if budget.ReservationPerRunUSD > reservation {
+			reservation = budget.ReservationPerRunUSD
+		}
+	}
+
 	var warning *models.BudgetStatus
 	for _, budget := range budgets {
-		status, err := budgetStatus(ctx, tx, userID, budget, time.Now())
+		status, err := budgetStatus(ctx, tx, userID, budget, time.Now(), reservation)
 		if err != nil {
 			return 0, nil, err
 		}
@@ -236,9 +244,6 @@ func checkBudgets(ctx context.Context, tx pgx.Tx, userID int64, req models.Creat
 		if status.Warning {
 			warningCopy := status
 			warning = &warningCopy
-		}
-		if budget.ReservationPerRunUSD > reservation {
-			reservation = budget.ReservationPerRunUSD
 		}
 	}
 
