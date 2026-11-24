@@ -29,14 +29,14 @@ const MaxPlaceRadiusMeters = 100000
 // mittpunkt och RadiusMeters är dess radie. Radien används för att avgöra
 // om en GPS-position ligger inom platsen.
 type Place struct {
-	ID            int64     `json:"id" example:"1"`
-	Name          string    `json:"name" example:"Hem"`
-	Latitude      float64   `json:"latitude" example:"59.3293"`
-	Longitude     float64   `json:"longitude" example:"18.0686"`
-	RadiusMeters  int       `json:"radius_meters" example:"100"`
-	Icon          string    `json:"icon,omitempty" example:"heroicons:map-pin"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID           int64     `json:"id" example:"1"`
+	Name         string    `json:"name" example:"Hem"`
+	Latitude     float64   `json:"latitude" example:"59.3293"`
+	Longitude    float64   `json:"longitude" example:"18.0686"`
+	RadiusMeters int       `json:"radius_meters" example:"100"`
+	Icon         string    `json:"icon,omitempty" example:"heroicons:map-pin"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // DistanceMeters är avståndet från en punkt till platsens mittpunkt i meter.
@@ -69,11 +69,11 @@ func (p Place) Validate() error {
 
 // CreatePlaceRequest är request-bodyn för att skapa en plats.
 type CreatePlaceRequest struct {
-	Name         string   `json:"name" binding:"required" example:"Hem"`
-	Latitude     float64  `json:"latitude" example:"59.3293"`
-	Longitude    float64  `json:"longitude" example:"18.0686"`
-	RadiusMeters *int     `json:"radius_meters" example:"100"`
-	Icon         *string  `json:"icon" example:"heroicons:map-pin"`
+	Name         string  `json:"name" binding:"required" example:"Hem"`
+	Latitude     float64 `json:"latitude" example:"59.3293"`
+	Longitude    float64 `json:"longitude" example:"18.0686"`
+	RadiusMeters *int    `json:"radius_meters" example:"100"`
+	Icon         *string `json:"icon" example:"heroicons:map-pin"`
 }
 
 // UpdatePlaceRequest är request-bodyn för att uppdatera en plats.

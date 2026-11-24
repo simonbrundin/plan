@@ -6,9 +6,9 @@ import "testing"
 // normaliseras.
 func TestValidateColor(t *testing.T) {
 	cases := []struct {
-		name    string
-		input   string
-		want    string
+		name   string
+		input  string
+		want   string
 		wantOk bool
 	}{
 		{name: "sex siffror", input: "#6366f1", want: "#6366f1", wantOk: true},
