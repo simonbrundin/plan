@@ -16,6 +16,9 @@
 #   AGENT_GIT_HEADER    git-http-header, t.ex. "Authorization: Basic ..."
 #   AGENT_DB_PASSWORD   lösenord för agentens databasroll i prod
 #
+# Om AGENT_WORKER_KEY saknas genereras en nyckel, och hashen skrivs till
+# plan-api-key.sql. Den filen körs i Plan-databasen när Plan är igång.
+#
 # Kör:
 #   SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
 #   AGENT_PLAN_API_KEY=... AGENT_WORKER_KEY=... \
@@ -36,7 +39,6 @@ require() {
 }
 
 require AGENT_PLAN_API_KEY
-require AGENT_WORKER_KEY
 require AGENT_LLM_API_KEY
 require AGENT_GIT_HEADER
 require AGENT_DB_PASSWORD
@@ -54,6 +56,27 @@ yaml_quote() {
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
+
+# Plan sparar bara hashen av en API-nyckel. Nyckeln måste därför skapas
+# här och hashas på samma sätt som Plan gör, så att nyckeln kan skrivas
+# in i databasen senare.
+#
+# Nyckeln består av 32 alfanumeriska tecken, precis som Plan genererar.
+# cut läser hela strömmen - en pipe som avbryts i förväg ger ett
+# SIGPIPE-fel när skriptet körs med pipefail.
+generate_api_key() {
+  openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | cut -c1-32
+}
+
+api_key_hash() {
+  printf '%s' "$1" | sha256sum | cut -d' ' -f1
+}
+
+worker_key_generated=false
+if [[ -z "${AGENT_WORKER_KEY:-}" ]]; then
+  AGENT_WORKER_KEY="$(generate_api_key)"
+  worker_key_generated=true
+fi
 
 # Namnen måste stämma med dem i environments/base/agent-deployment.yaml:
 # jobbcontrollern läser hemligheterna därifrån.
@@ -113,6 +136,19 @@ for name in agent-api-key agent-llm agent-git agent-db; do
     "$tmp/$name.yaml" > "$here/$name.enc.yaml"
   echo "krypterade $here/$name.enc.yaml"
 done
+
+if [[ "$worker_key_generated" == true ]]; then
+  cat > "$here/plan-api-key.sql" <<EOF
+-- Körs i Plan-databasen (prod) när Plan är igång.
+-- Nyckeln finns krypterad i agent-api-key.enc.yaml - den här filen
+-- innehåller bara hashen, som är allt Plan behöver.
+INSERT INTO api_keys (name, key_hash, user_id, scope)
+VALUES ('agent-worker', '$(api_key_hash "$AGENT_WORKER_KEY")',
+        (SELECT id FROM users ORDER BY id LIMIT 1), 'agent')
+ON CONFLICT (key_hash) DO NOTHING;
+EOF
+  echo "skrev $here/plan-api-key.sql - kör den i Plan-databasen när Plan är igång"
+fi
 
 cat <<'EOF'
 
