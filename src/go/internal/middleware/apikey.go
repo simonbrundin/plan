@@ -111,7 +111,7 @@ func hashAPIKey(apiKey string) string {
 }
 
 // GenerateAPIKey creates a new API key and returns the raw key (only time it's visible)
-func GenerateAPIKey(name string, userID int64) (string, error) {
+func GenerateAPIKey(name string, userID int64, scope models.APIKeyScope) (string, error) {
 	pool := database.GetPool()
 	if pool == nil {
 		return "", fmt.Errorf("database not connected")
@@ -123,9 +123,9 @@ func GenerateAPIKey(name string, userID int64) (string, error) {
 
 	// Store the hash
 	_, err := pool.Exec(context.Background(), `
-		INSERT INTO api_keys (name, key_hash, user_id) 
-		VALUES ($1, $2, $3)
-	`, name, keyHash, userID)
+		INSERT INTO api_keys (name, key_hash, user_id, scope) 
+		VALUES ($1, $2, $3, $4)
+	`, name, keyHash, userID, string(scope))
 	if err != nil {
 		return "", err
 	}

@@ -19,6 +19,7 @@ type ErrorResponse = models.ErrorResponse
 type APIKey struct {
 	ID       int64      `json:"id"`
 	Name     string     `json:"name"`
+	Scope    string     `json:"scope"`
 	Created  time.Time  `json:"created"`
 	LastUsed *time.Time `json:"last_used,omitempty"`
 	Expires  *time.Time `json:"expires,omitempty"`
@@ -26,14 +27,19 @@ type APIKey struct {
 
 // APIKeyResponse is returned when creating a new API key (includes the raw key)
 type APIKeyResponse struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	Key  string `json:"key"` // Only returned once!
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Scope string `json:"scope"`
+	Key   string `json:"key"` // Only returned once!
 }
 
 // CreateAPIKeyRequest is the request body for creating an API key
 type CreateAPIKeyRequest struct {
-	Name    string `json:"name" binding:"required"`
+	Name string `json:"name" binding:"required"`
+	// Scope bestämmer vad nyckeln får göra. "full" ger samma rättigheter
+	// som en inloggad användare, "agent" begränsar nyckeln till agentens
+	// arbete med mål och körningar.
+	Scope   string `json:"scope,omitempty"`
 	Expires string `json:"expires,omitempty"` // RFC3339 format
 }
 
@@ -67,7 +73,7 @@ func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 	}
 
 	rows, err := pool.Query(context.Background(), `
-		SELECT id, name, created, last_used, expires 
+		SELECT id, name, scope, created, last_used, expires 
 		FROM api_keys 
 		WHERE user_id = $1 
 		ORDER BY created DESC
@@ -81,7 +87,7 @@ func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 	var keys []APIKey
 	for rows.Next() {
 		var key APIKey
-		if err := rows.Scan(&key.ID, &key.Name, &key.Created, &key.LastUsed, &key.Expires); err != nil {
+		if err := rows.Scan(&key.ID, &key.Name, &key.Scope, &key.Created, &key.LastUsed, &key.Expires); err != nil {
 			continue
 		}
 		keys = append(keys, key)
@@ -125,8 +131,18 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 		return
 	}
 
+	// Scopet är en teknisk gräns - en okänd scope ger inga rättigheter.
+	scope := models.APIKeyScope(req.Scope)
+	if scope == "" {
+		scope = models.ScopeFull
+	}
+	if !models.ValidAPIKeyScope(string(scope)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "okänt scope: " + req.Scope})
+		return
+	}
+
 	// Generate the API key using middleware helper
-	rawKey, err := middleware.GenerateAPIKey(req.Name, userID)
+	rawKey, err := middleware.GenerateAPIKey(req.Name, userID, scope)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create API key"})
 		return
@@ -144,9 +160,10 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, APIKeyResponse{
-		ID:   id,
-		Name: req.Name,
-		Key:  rawKey, // Only returned once!
+		ID:    id,
+		Name:  req.Name,
+		Scope: string(scope),
+		Key:   rawKey, // Only returned once!
 	})
 }
 
