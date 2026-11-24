@@ -23,6 +23,278 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/agent-runs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get agent runs for the authenticated user, optionally filtered by goal",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "List agent runs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by goal ID",
+                        "name": "goal_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentRun"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Register that an agent started working on a goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Start an agent run",
+                "parameters": [
+                    {
+                        "description": "Agent run",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRun"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/agent-runs/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update phase, status, summary, cost or artifact of an agent run",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Update an agent run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateAgentRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRun"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/agent-runs/{id}/events": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the chronological event history for an agent run",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "List AgentRun events",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentRunEvent"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Append a structured event to an agent run",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Record an AgentRun event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Agent run event",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentRunEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRunEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/api-keys": {
             "get": {
                 "security": [
@@ -44,14 +316,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_handlers.APIKey"
+                                "$ref": "#/definitions/handlers.APIKey"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -80,7 +352,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CreateAPIKeyRequest"
+                            "$ref": "#/definitions/handlers.CreateAPIKeyRequest"
                         }
                     }
                 ],
@@ -88,19 +360,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.APIKeyResponse"
+                            "$ref": "#/definitions/handlers.APIKeyResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -146,13 +418,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -202,20 +474,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                                "$ref": "#/definitions/models.CalendarEvent"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -244,7 +516,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CreateCalendarEventRequest"
+                            "$ref": "#/definitions/models.CreateCalendarEventRequest"
                         }
                     }
                 ],
@@ -252,25 +524,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                            "$ref": "#/definitions/models.CalendarEvent"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -307,25 +579,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                            "$ref": "#/definitions/models.CalendarEvent"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -363,19 +635,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -411,7 +683,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.UpdateCalendarEventRequest"
+                            "$ref": "#/definitions/models.UpdateCalendarEventRequest"
                         }
                     }
                 ],
@@ -419,31 +691,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                            "$ref": "#/definitions/models.CalendarEvent"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -481,7 +753,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CreateCalendarOccurrenceRequest"
+                            "$ref": "#/definitions/models.CreateCalendarOccurrenceRequest"
                         }
                     }
                 ],
@@ -489,31 +761,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                            "$ref": "#/definitions/models.CalendarEvent"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -551,7 +823,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.SplitCalendarEventRequest"
+                            "$ref": "#/definitions/models.SplitCalendarEventRequest"
                         }
                     }
                 ],
@@ -559,31 +831,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CalendarEvent"
+                            "$ref": "#/definitions/models.CalendarEvent"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -610,14 +882,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Calendar"
+                                "$ref": "#/definitions/models.Calendar"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -643,13 +915,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Calendar"
+                            "$ref": "#/definitions/models.Calendar"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -677,7 +949,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -703,19 +975,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Calendar"
+                            "$ref": "#/definitions/models.Calendar"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -739,20 +1011,40 @@ const docTemplate = `{
                     "goals"
                 ],
                 "summary": "List all goals",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Filtrera på agent-flaggan (true = bara agentmål)",
+                        "name": "agent",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filtrera på status-id",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Goal"
+                                "$ref": "#/definitions/models.Goal"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -781,7 +1073,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CreateGoalRequest"
+                            "$ref": "#/definitions/models.CreateGoalRequest"
                         }
                     }
                 ],
@@ -789,19 +1081,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                            "$ref": "#/definitions/models.Goal"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -832,7 +1124,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CreateDependencyRequest"
+                            "$ref": "#/definitions/models.CreateDependencyRequest"
                         }
                     }
                 ],
@@ -840,25 +1132,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.GoalDependency"
+                            "$ref": "#/definitions/models.GoalDependency"
                         }
                     },
                     "400": {
                         "description": "Invalid request or cycle detected",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -887,7 +1179,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.DeleteDependencyRequest"
+                            "$ref": "#/definitions/models.DeleteDependencyRequest"
                         }
                     }
                 ],
@@ -904,19 +1196,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -946,14 +1238,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.PrioritizedGoal"
+                                "$ref": "#/definitions/models.PrioritizedGoal"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -984,7 +1276,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ReorderPriorityGoalsRequest"
+                            "$ref": "#/definitions/models.ReorderPriorityGoalsRequest"
                         }
                     }
                 ],
@@ -999,13 +1291,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1036,7 +1328,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CreateRelationRequest"
+                            "$ref": "#/definitions/models.CreateRelationRequest"
                         }
                     }
                 ],
@@ -1044,25 +1336,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ChildRelation"
+                            "$ref": "#/definitions/models.ChildRelation"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1091,7 +1383,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.DeleteRelationRequest"
+                            "$ref": "#/definitions/models.DeleteRelationRequest"
                         }
                     }
                 ],
@@ -1108,19 +1400,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1149,7 +1441,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.UpdateRelationRequest"
+                            "$ref": "#/definitions/models.UpdateRelationRequest"
                         }
                     }
                 ],
@@ -1164,19 +1456,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1207,7 +1499,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ReorderRelationsRequest"
+                            "$ref": "#/definitions/models.ReorderRelationsRequest"
                         }
                     }
                 ],
@@ -1222,19 +1514,79 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/goals/relations/weights": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Replaces all weights for a parent atomically. Weights must total 100.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relations"
+                ],
+                "summary": "Update all child goal weights",
+                "parameters": [
+                    {
+                        "description": "Relation weights",
+                        "name": "relation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateRelationWeightsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1265,7 +1617,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ReorderGoalsRequest"
+                            "$ref": "#/definitions/models.ReorderGoalsRequest"
                         }
                     }
                 ],
@@ -1280,13 +1632,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1323,31 +1675,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.GetGoalResponse"
+                            "$ref": "#/definitions/models.GetGoalResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1391,19 +1743,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1439,7 +1791,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.UpdateGoalRequest"
+                            "$ref": "#/definitions/models.UpdateGoalRequest"
                         }
                     }
                 ],
@@ -1447,31 +1799,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                            "$ref": "#/definitions/models.Goal"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1509,7 +1861,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CompleteOccurrenceRequest"
+                            "$ref": "#/definitions/models.CompleteOccurrenceRequest"
                         }
                     }
                 ],
@@ -1517,25 +1869,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                            "$ref": "#/definitions/models.Goal"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1570,25 +1922,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Goal"
+                            "$ref": "#/definitions/models.Goal"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1625,31 +1977,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Status"
+                            "$ref": "#/definitions/models.Status"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1685,7 +2037,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.UpdateStatusRequest"
+                            "$ref": "#/definitions/models.UpdateStatusRequest"
                         }
                     }
                 ],
@@ -1693,31 +2045,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.StatusUpdate"
+                            "$ref": "#/definitions/models.StatusUpdate"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1756,26 +2108,26 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.StatusUpdate"
+                                "$ref": "#/definitions/models.StatusUpdate"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1805,14 +2157,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Status"
+                                "$ref": "#/definitions/models.Status"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1851,20 +2203,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                                "$ref": "#/definitions/models.Place"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1900,7 +2252,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.SetPlacesRequest"
+                            "$ref": "#/definitions/models.SetPlacesRequest"
                         }
                     }
                 ],
@@ -1910,26 +2262,60 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                                "$ref": "#/definitions/models.Place"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/goals/graph": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all goals, relations and dependencies in one response.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get the user's whole goal graph",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GoalGraphResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -1968,20 +2354,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                                "$ref": "#/definitions/models.Place"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2017,7 +2403,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.SetPlacesRequest"
+                            "$ref": "#/definitions/models.SetPlacesRequest"
                         }
                     }
                 ],
@@ -2027,26 +2413,190 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                                "$ref": "#/definitions/models.Place"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/goals/{id}/tags": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the tags linked to a goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "summary": "List a goal's tags",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Replace the tags linked to a goal. Tags that don't exist yet are created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Replace a goal's tags",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Tag names",
+                        "name": "tags",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SetGoalTagsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/goals/{id}/tags/{name}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Remove one tag from a goal. The tag itself is kept for other goals.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Remove a tag from a goal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tag name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2074,13 +2624,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                            "$ref": "#/definitions/models.Place"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2109,7 +2659,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.SetCurrentPlaceRequest"
+                            "$ref": "#/definitions/models.SetCurrentPlaceRequest"
                         }
                     }
                 ],
@@ -2117,19 +2667,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                            "$ref": "#/definitions/models.Place"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2159,14 +2709,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                                "$ref": "#/definitions/models.Place"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2195,7 +2745,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.CreatePlaceRequest"
+                            "$ref": "#/definitions/models.CreatePlaceRequest"
                         }
                     }
                 ],
@@ -2203,19 +2753,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                            "$ref": "#/definitions/models.Place"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2261,20 +2811,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/plan-api_internal_models.Place"
+                                "$ref": "#/definitions/models.Place"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2320,13 +2870,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2362,7 +2912,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.UpdatePlaceRequest"
+                            "$ref": "#/definitions/models.UpdatePlaceRequest"
                         }
                     }
                 ],
@@ -2370,25 +2920,62 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.Place"
+                            "$ref": "#/definitions/models.Place"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/plan-api_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tags": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all tags for the authenticated user with the number of goals using them",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "summary": "List all tags",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Tag"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -2396,7 +2983,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_handlers.APIKey": {
+        "handlers.APIKey": {
             "type": "object",
             "properties": {
                 "created": {
@@ -2416,7 +3003,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.APIKeyResponse": {
+        "handlers.APIKeyResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2431,7 +3018,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.CreateAPIKeyRequest": {
+        "handlers.CreateAPIKeyRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -2446,7 +3033,78 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.Calendar": {
+        "models.AgentRun": {
+            "type": "object",
+            "properties": {
+                "artifact_url": {
+                    "description": "ArtifactURL pekar på resultatet - en PR-länk eller ett bokningsutkast.",
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "description": "ConversationID knytar körningen till en konversation i agent-tjänsten.",
+                    "type": "string"
+                },
+                "cost_usd": {
+                    "description": "CostUSD är kostnaden för körningen hittills.",
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer",
+                    "example": 449
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "phase": {
+                    "type": "string",
+                    "example": "define"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "running"
+                },
+                "summary": {
+                    "type": "string",
+                    "example": "Agenten specificerar målet"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AgentRunEvent": {
+            "type": "object",
+            "properties": {
+                "agent_run_id": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "payload": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "phase": {
+                    "type": "string",
+                    "example": "execute"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "tool_call"
+                }
+            }
+        },
+        "models.Calendar": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2479,7 +3137,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CalendarEvent": {
+        "models.CalendarEvent": {
             "type": "object",
             "properties": {
                 "all_day": {
@@ -2521,7 +3179,7 @@ const docTemplate = `{
                     "description": "Places är de platser där händelsen sker. En händelse kan ha flera\nplatser. Skickas alltid ut, även när listan är tom.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                        "$ref": "#/definitions/models.Place"
                     }
                 },
                 "recurrence_rule": {
@@ -2547,7 +3205,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.ChildRelation": {
+        "models.ChildRelation": {
             "type": "object",
             "properties": {
                 "child_id": {
@@ -2564,13 +3222,18 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.ChildWithDeps": {
+        "models.ChildWithDeps": {
             "type": "object",
             "properties": {
+                "agent": {
+                    "description": "Agent markerar ett mål som är avsett att arbeta på av en agent.\nAnvänds för att filtrera fram vilka mål en agent kan ta sig an.",
+                    "type": "boolean",
+                    "example": false
+                },
                 "blocking": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "created": {
@@ -2579,7 +3242,7 @@ const docTemplate = `{
                 "dependsOn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "description": {
@@ -2591,9 +3254,13 @@ const docTemplate = `{
                     "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
+                },
+                "estimated_minutes": {
+                    "description": "EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.\nNull = ingen uppskattning satt. Skickas alltid ut, även när den är\nnull - samma resonemang som för started/finished.",
+                    "type": "integer"
                 },
                 "eternal": {
                     "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
@@ -2620,6 +3287,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "now": {
+                    "description": "Now markerar ett mål som ska göras nu. Målet dyker då upp på\n\"Gör nu\"-sidan (i stället för de mål som bara är påbörjade).",
+                    "type": "boolean",
+                    "example": false
+                },
                 "order": {
                     "type": "integer"
                 },
@@ -2627,7 +3299,7 @@ const docTemplate = `{
                     "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                        "$ref": "#/definitions/models.Place"
                     }
                 },
                 "recurrence_count": {
@@ -2642,7 +3314,7 @@ const docTemplate = `{
                     "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -2654,7 +3326,7 @@ const docTemplate = `{
                     "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -2666,6 +3338,13 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "tags": {
+                    "description": "Tags är etiketter på målet (\"ute\", \"hem\", \"vinter\"). Taggarna\nhör till användaren och skapas på demand när man skriver in ett\nnytt namn. Skickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "title": {
                     "type": "string",
                     "example": "My Goal"
@@ -2675,7 +3354,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CompleteOccurrenceRequest": {
+        "models.CompleteOccurrenceRequest": {
             "type": "object",
             "properties": {
                 "completed_on": {
@@ -2690,7 +3369,51 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CreateCalendarEventRequest": {
+        "models.CreateAgentRunEventRequest": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "payload": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateAgentRunRequest": {
+            "type": "object",
+            "required": [
+                "goal_id"
+            ],
+            "properties": {
+                "artifact_url": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateCalendarEventRequest": {
             "type": "object",
             "required": [
                 "end_at",
@@ -2734,7 +3457,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CreateCalendarOccurrenceRequest": {
+        "models.CreateCalendarOccurrenceRequest": {
             "type": "object",
             "required": [
                 "end_at",
@@ -2777,7 +3500,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CreateDependencyRequest": {
+        "models.CreateDependencyRequest": {
             "type": "object",
             "required": [
                 "dependsOnId",
@@ -2794,7 +3517,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CreateGoalRequest": {
+        "models.CreateGoalRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2834,7 +3557,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CreatePlaceRequest": {
+        "models.CreatePlaceRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -2862,7 +3585,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.CreateRelationRequest": {
+        "models.CreateRelationRequest": {
             "type": "object",
             "required": [
                 "childId",
@@ -2887,7 +3610,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.DeleteDependencyRequest": {
+        "models.DeleteDependencyRequest": {
             "type": "object",
             "required": [
                 "dependsOnId",
@@ -2902,7 +3625,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.DeleteRelationRequest": {
+        "models.DeleteRelationRequest": {
             "type": "object",
             "required": [
                 "childId",
@@ -2917,7 +3640,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.DueDate": {
+        "models.DueDate": {
             "type": "object",
             "properties": {
                 "time.Time": {
@@ -2925,7 +3648,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.ErrorResponse": {
+        "models.ErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -2934,59 +3657,64 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.GetGoalResponse": {
+        "models.GetGoalResponse": {
             "type": "object",
             "properties": {
                 "allGoals": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "blocking": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.ChildWithDeps"
+                        "$ref": "#/definitions/models.ChildWithDeps"
                     }
                 },
                 "dependencies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.GoalDependency"
+                        "$ref": "#/definitions/models.GoalDependency"
                     }
                 },
                 "dependsOn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "goal": {
-                    "$ref": "#/definitions/plan-api_internal_models.GoalWithRelations"
+                    "$ref": "#/definitions/models.GoalWithRelations"
                 },
                 "parents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "statusHistory": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.StatusUpdate"
+                        "$ref": "#/definitions/models.StatusUpdate"
                     }
                 }
             }
         },
-        "plan-api_internal_models.Goal": {
+        "models.Goal": {
             "type": "object",
             "properties": {
+                "agent": {
+                    "description": "Agent markerar ett mål som är avsett att arbeta på av en agent.\nAnvänds för att filtrera fram vilka mål en agent kan ta sig an.",
+                    "type": "boolean",
+                    "example": false
+                },
                 "created": {
                     "type": "string"
                 },
@@ -2999,9 +3727,13 @@ const docTemplate = `{
                     "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
+                },
+                "estimated_minutes": {
+                    "description": "EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.\nNull = ingen uppskattning satt. Skickas alltid ut, även när den är\nnull - samma resonemang som för started/finished.",
+                    "type": "integer"
                 },
                 "eternal": {
                     "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
@@ -3028,6 +3760,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "now": {
+                    "description": "Now markerar ett mål som ska göras nu. Målet dyker då upp på\n\"Gör nu\"-sidan (i stället för de mål som bara är påbörjade).",
+                    "type": "boolean",
+                    "example": false
+                },
                 "order": {
                     "description": "Order är målets placering bland grundmål. Grundmål sorteras på /goals\nefter detta värde (stigande), och det sätts när målen flyttas med\npiltangenterna.",
                     "type": "integer",
@@ -3037,7 +3774,7 @@ const docTemplate = `{
                     "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                        "$ref": "#/definitions/models.Place"
                     }
                 },
                 "recurrence_count": {
@@ -3052,7 +3789,7 @@ const docTemplate = `{
                     "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -3064,7 +3801,7 @@ const docTemplate = `{
                     "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -3076,13 +3813,20 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "tags": {
+                    "description": "Tags är etiketter på målet (\"ute\", \"hem\", \"vinter\"). Taggarna\nhör till användaren och skapas på demand när man skriver in ett\nnytt namn. Skickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "title": {
                     "type": "string",
                     "example": "My Goal"
                 }
             }
         },
-        "plan-api_internal_models.GoalDependency": {
+        "models.GoalDependency": {
             "type": "object",
             "properties": {
                 "created": {
@@ -3102,13 +3846,71 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.GoalWithRelations": {
+        "models.GoalGraphResponse": {
             "type": "object",
             "properties": {
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.GoalDependency"
+                    }
+                },
+                "goals": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Goal"
+                    }
+                },
+                "relations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.GoalRelation"
+                    }
+                }
+            }
+        },
+        "models.GoalParent": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Hälsa"
+                }
+            }
+        },
+        "models.GoalRelation": {
+            "type": "object",
+            "properties": {
+                "child_id": {
+                    "type": "integer"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "weight": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.GoalWithRelations": {
+            "type": "object",
+            "properties": {
+                "agent": {
+                    "description": "Agent markerar ett mål som är avsett att arbeta på av en agent.\nAnvänds för att filtrera fram vilka mål en agent kan ta sig an.",
+                    "type": "boolean",
+                    "example": false
+                },
                 "childRelations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.ChildRelation"
+                        "$ref": "#/definitions/models.ChildRelation"
                     }
                 },
                 "created": {
@@ -3123,9 +3925,13 @@ const docTemplate = `{
                     "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
+                },
+                "estimated_minutes": {
+                    "description": "EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.\nNull = ingen uppskattning satt. Skickas alltid ut, även när den är\nnull - samma resonemang som för started/finished.",
+                    "type": "integer"
                 },
                 "eternal": {
                     "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
@@ -3152,6 +3958,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "now": {
+                    "description": "Now markerar ett mål som ska göras nu. Målet dyker då upp på\n\"Gör nu\"-sidan (i stället för de mål som bara är påbörjade).",
+                    "type": "boolean",
+                    "example": false
+                },
                 "order": {
                     "description": "Order är målets placering bland grundmål. Grundmål sorteras på /goals\nefter detta värde (stigande), och det sätts när målen flyttas med\npiltangenterna.",
                     "type": "integer",
@@ -3160,14 +3971,14 @@ const docTemplate = `{
                 "parentRelations": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Goal"
+                        "$ref": "#/definitions/models.Goal"
                     }
                 },
                 "places": {
                     "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                        "$ref": "#/definitions/models.Place"
                     }
                 },
                 "recurrence_count": {
@@ -3182,7 +3993,7 @@ const docTemplate = `{
                     "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -3194,7 +4005,7 @@ const docTemplate = `{
                     "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -3206,13 +4017,20 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "tags": {
+                    "description": "Tags är etiketter på målet (\"ute\", \"hem\", \"vinter\"). Taggarna\nhör till användaren och skapas på demand när man skriver in ett\nnytt namn. Skickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "title": {
                     "type": "string",
                     "example": "My Goal"
                 }
             }
         },
-        "plan-api_internal_models.NullableDueDate": {
+        "models.NullableDueDate": {
             "type": "object",
             "properties": {
                 "set": {
@@ -3223,7 +4041,18 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.NullableString": {
+        "models.NullableInt": {
+            "type": "object",
+            "properties": {
+                "set": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.NullableString": {
             "type": "object",
             "properties": {
                 "set": {
@@ -3234,7 +4063,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.NullableTime": {
+        "models.NullableTime": {
             "type": "object",
             "properties": {
                 "set": {
@@ -3245,7 +4074,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.Place": {
+        "models.Place": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3280,9 +4109,14 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.PrioritizedGoal": {
+        "models.PrioritizedGoal": {
             "type": "object",
             "properties": {
+                "agent": {
+                    "description": "Agent markerar ett mål som är avsett att arbeta på av en agent.\nAnvänds för att filtrera fram vilka mål en agent kan ta sig an.",
+                    "type": "boolean",
+                    "example": false
+                },
                 "created": {
                     "type": "string"
                 },
@@ -3295,9 +4129,13 @@ const docTemplate = `{
                     "description": "Due är det datum målet ska vara klart. Skickas alltid ut, även när\ndet är null - samma resonemang som för started/finished.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
+                },
+                "estimated_minutes": {
+                    "description": "EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.\nNull = ingen uppskattning satt. Skickas alltid ut, även när den är\nnull - samma resonemang som för started/finished.",
+                    "type": "integer"
                 },
                 "eternal": {
                     "description": "Eternal marks a goal that never ends (t.ex. \"kroppen\"). Ett evigt mål\nkan inte slutföras och markeras alltid som pågående.",
@@ -3324,6 +4162,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "now": {
+                    "description": "Now markerar ett mål som ska göras nu. Målet dyker då upp på\n\"Gör nu\"-sidan (i stället för de mål som bara är påbörjade).",
+                    "type": "boolean",
+                    "example": false
+                },
                 "order": {
                     "description": "Order är målets placering bland grundmål. Grundmål sorteras på /goals\nefter detta värde (stigande), och det sätts när målen flyttas med\npiltangenterna.",
                     "type": "integer",
@@ -3335,11 +4178,18 @@ const docTemplate = `{
                 "parentTitle": {
                     "type": "string"
                 },
+                "parents": {
+                    "description": "Alla föräldrar som målet ligger under. ParentTitle/ParentID\npekar ut den förälder med högst vikt.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.GoalParent"
+                    }
+                },
                 "places": {
                     "description": "Places är de platser där målet kan slutföras. Ett mål kan ha flera\nplatser - då räcker det att vara på någon av dem (OR-semantik).\nSkickas alltid ut, även när listan är tom.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/plan-api_internal_models.Place"
+                        "$ref": "#/definitions/models.Place"
                     }
                 },
                 "priorityOrder": {
@@ -3358,7 +4208,7 @@ const docTemplate = `{
                     "description": "RecurrenceNext är datumet för nästa förekomst som ska slutföras.\nNull = serien är slut och målet har inget mer att göra.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -3370,7 +4220,7 @@ const docTemplate = `{
                     "description": "StartDate är det datum målet tidigast får dyka upp i\nprioriteringslistan. Null = målet får synas direkt.\n\nDet är ett annat datum än started: started säger att arbetet har\nbörjat, startDate säger att målet inte får prioriteras ännu.\nSkickas alltid ut, även när det är null.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.DueDate"
+                            "$ref": "#/definitions/models.DueDate"
                         }
                     ]
                 },
@@ -3382,6 +4232,13 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "tags": {
+                    "description": "Tags är etiketter på målet (\"ute\", \"hem\", \"vinter\"). Taggarna\nhör till användaren och skapas på demand när man skriver in ett\nnytt namn. Skickas alltid ut, även när listan är tom.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "title": {
                     "type": "string",
                     "example": "My Goal"
@@ -3392,7 +4249,21 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.ReorderGoalsRequest": {
+        "models.RelationWeight": {
+            "type": "object",
+            "required": [
+                "childId"
+            ],
+            "properties": {
+                "childId": {
+                    "type": "integer"
+                },
+                "weight": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ReorderGoalsRequest": {
             "type": "object",
             "required": [
                 "goalIds"
@@ -3406,7 +4277,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.ReorderPriorityGoalsRequest": {
+        "models.ReorderPriorityGoalsRequest": {
             "type": "object",
             "required": [
                 "goalIds"
@@ -3420,7 +4291,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.ReorderRelationsRequest": {
+        "models.ReorderRelationsRequest": {
             "type": "object",
             "required": [
                 "childIds",
@@ -3438,7 +4309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.SetCurrentPlaceRequest": {
+        "models.SetCurrentPlaceRequest": {
             "type": "object",
             "properties": {
                 "place_id": {
@@ -3446,10 +4317,21 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.SetPlacesRequest": {
+        "models.SetGoalTagsRequest": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.SetPlacesRequest": {
             "type": "object"
         },
-        "plan-api_internal_models.SplitCalendarEventRequest": {
+        "models.SplitCalendarEventRequest": {
             "type": "object",
             "required": [
                 "end_at",
@@ -3493,7 +4375,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.Status": {
+        "models.Status": {
             "type": "object",
             "properties": {
                 "created": {
@@ -3513,7 +4395,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.StatusUpdate": {
+        "models.StatusUpdate": {
             "type": "object",
             "properties": {
                 "changed_at": {
@@ -3539,7 +4421,44 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.UpdateCalendarEventRequest": {
+        "models.Tag": {
+            "type": "object",
+            "properties": {
+                "goal_count": {
+                    "description": "GoalCount är antalet mål som har taggen. Används för att se\nvilka taggar som faktiskt används.",
+                    "type": "integer",
+                    "example": 3
+                },
+                "name": {
+                    "type": "string",
+                    "example": "ute"
+                }
+            }
+        },
+        "models.UpdateAgentRunRequest": {
+            "type": "object",
+            "properties": {
+                "artifact_url": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "string"
+                },
+                "cost_usd": {
+                    "type": "number"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateCalendarEventRequest": {
             "type": "object",
             "properties": {
                 "all_day": {
@@ -3578,9 +4497,13 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.UpdateGoalRequest": {
+        "models.UpdateGoalRequest": {
             "type": "object",
             "properties": {
+                "agent": {
+                    "description": "Agent sätter eller tar bort agent-flaggan på ett mål.\nnil = lämnas oförändrat, true = målet är för en agent, false = vanligt mål.",
+                    "type": "boolean"
+                },
                 "description": {
                     "description": "Description sätter eller rensar målets beskrivning.\nnil = lämnas oförändrat.",
                     "type": "string"
@@ -3589,7 +4512,15 @@ const docTemplate = `{
                     "description": "Due sätter eller rensar målets due-datum (\"YYYY-MM-DD\" eller null).",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.NullableDueDate"
+                            "$ref": "#/definitions/models.NullableDueDate"
+                        }
+                    ]
+                },
+                "estimated_minutes": {
+                    "description": "EstimatedMinutes sätter eller rensar målets uppskattade tidsåtgång\n(antal minuter eller null).",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.NullableInt"
                         }
                     ]
                 },
@@ -3598,16 +4529,20 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "finished": {
-                    "$ref": "#/definitions/plan-api_internal_models.NullableTime"
+                    "$ref": "#/definitions/models.NullableTime"
                 },
                 "icon": {
                     "type": "string"
+                },
+                "now": {
+                    "description": "Now sätter eller tar bort nu-flaggan på ett mål.\nnil = lämnas oförändrat, true = målet ska göras nu, false = vanligt mål.",
+                    "type": "boolean"
                 },
                 "recurrence_mode": {
                     "description": "RecurrenceMode sätter schemaläggningsstrategin (\"schedule\" eller \"push\").",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.NullableString"
+                            "$ref": "#/definitions/models.NullableString"
                         }
                     ]
                 },
@@ -3615,7 +4550,7 @@ const docTemplate = `{
                     "description": "RecurrenceRule sätter eller tar bort målets upprepningsregel.\nUtan fältet lämnas regeln oförändrad, null tar bort den.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.NullableString"
+                            "$ref": "#/definitions/models.NullableString"
                         }
                     ]
                 },
@@ -3627,12 +4562,12 @@ const docTemplate = `{
                     "description": "StartDate sätter eller rensar målets startdatum (\"YYYY-MM-DD\" eller\nnull). Startdatumet avgör från vilket datum målet får dyka upp i\nprioriteringslistan.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/plan-api_internal_models.NullableDueDate"
+                            "$ref": "#/definitions/models.NullableDueDate"
                         }
                     ]
                 },
                 "started": {
-                    "$ref": "#/definitions/plan-api_internal_models.NullableTime"
+                    "$ref": "#/definitions/models.NullableTime"
                 },
                 "status_id": {
                     "type": "integer"
@@ -3642,7 +4577,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.UpdatePlaceRequest": {
+        "models.UpdatePlaceRequest": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -3662,7 +4597,7 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.UpdateRelationRequest": {
+        "models.UpdateRelationRequest": {
             "type": "object",
             "required": [
                 "childId",
@@ -3683,7 +4618,26 @@ const docTemplate = `{
                 }
             }
         },
-        "plan-api_internal_models.UpdateStatusRequest": {
+        "models.UpdateRelationWeightsRequest": {
+            "type": "object",
+            "required": [
+                "parentId",
+                "weights"
+            ],
+            "properties": {
+                "parentId": {
+                    "type": "integer"
+                },
+                "weights": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/models.RelationWeight"
+                    }
+                }
+            }
+        },
+        "models.UpdateStatusRequest": {
             "type": "object",
             "required": [
                 "status_id"

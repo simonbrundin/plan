@@ -129,6 +129,7 @@ func main() {
 	api := r.Group("/api/v1")
 	api.Use(middleware.APIKeyAuth())     // Try API key first
 	api.Use(middleware.AuthMiddleware()) // Fall back to session auth
+	api.Use(middleware.RestrictToAgentScope())
 	api.Use(func(c *gin.Context) {
 		c.Set("dbConnected", dbConnected)
 		c.Next()
@@ -215,6 +216,14 @@ func main() {
 		api.GET("/agent-runs", agentRunHandler.ListAgentRuns)
 		api.POST("/agent-runs", agentRunHandler.CreateAgentRun)
 		api.PATCH("/agent-runs/:id", agentRunHandler.UpdateAgentRun)
+		api.GET("/agent-runs/:id/events", agentRunHandler.ListAgentRunEvents)
+		api.POST("/agent-runs/:id/events", agentRunHandler.CreateAgentRunEvent)
+
+		agentApprovalHandler := handlers.NewAgentApprovalHandler()
+		api.GET("/agent-runs/:id/approvals", agentApprovalHandler.ListAgentApprovals)
+		api.POST("/agent-runs/:id/approvals", agentApprovalHandler.CreateAgentApproval)
+		api.GET("/agent-approvals", agentApprovalHandler.ListPendingAgentApprovals)
+		api.POST("/agent-approvals/:id/decision", agentApprovalHandler.DecideAgentApproval)
 
 		// API Keys endpoints
 		apiKeyHandler := handlers.NewAPIKeyHandler()

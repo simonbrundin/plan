@@ -13,12 +13,14 @@ import (
 // AgentRunHandler hanterar agentkörningar - kopplingen mellan ett mål
 // och det arbete en agent gör med det.
 type AgentRunHandler struct {
-	repo *repository.AgentRunRepository
+	repo      *repository.AgentRunRepository
+	eventRepo *repository.AgentRunEventRepository
 }
 
 func NewAgentRunHandler(dbConnected bool) *AgentRunHandler {
 	return &AgentRunHandler{
-		repo: repository.NewAgentRunRepository(),
+		repo:      repository.NewAgentRunRepository(),
+		eventRepo: repository.NewAgentRunEventRepository(),
 	}
 }
 
@@ -96,6 +98,18 @@ func (h *AgentRunHandler) CreateAgentRun(c *gin.Context) {
 			return
 		}
 	}
+	if req.Trigger != "" {
+		if err := models.ValidateAgentRunTrigger(req.Trigger); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+	if req.AgentProfile != "" {
+		if err := models.ValidateAgentProfile(req.AgentProfile); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
 
 	run, err := h.repo.Create(c.Request.Context(), userID, req)
 	if err != nil {
@@ -151,6 +165,32 @@ func (h *AgentRunHandler) UpdateAgentRun(c *gin.Context) {
 			return
 		}
 	}
+	if req.Trigger != nil {
+		if err := models.ValidateAgentRunTrigger(*req.Trigger); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+	if req.AgentProfile != nil {
+		if err := models.ValidateAgentProfile(*req.AgentProfile); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+
+	current, err := h.repo.Get(c.Request.Context(), userID, runID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if current == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
+		return
+	}
+	if err := models.ValidateAgentRunTransition(*current, req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+		return
+	}
 
 	run, err := h.repo.Update(c.Request.Context(), userID, runID, req)
 	if err != nil {
@@ -163,4 +203,93 @@ func (h *AgentRunHandler) UpdateAgentRun(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, run)
+}
+
+// ListAgentRunEvents godoc
+// @Summary List AgentRun events
+// @Description Get the chronological event history for an agent run
+// @Tags agent-runs
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Agent run ID"
+// @Success 200 {array} models.AgentRunEvent
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/agent-runs/{id}/events [get]
+func (h *AgentRunHandler) ListAgentRunEvents(c *gin.Context) {
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+	runID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid agent run ID"})
+		return
+	}
+
+	events, err := h.eventRepo.List(c.Request.Context(), userID, runID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if events == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
+		return
+	}
+	c.JSON(http.StatusOK, events)
+}
+
+// CreateAgentRunEvent godoc
+// @Summary Record an AgentRun event
+// @Description Append a structured event to an agent run
+// @Tags agent-runs
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Agent run ID"
+// @Param request body models.CreateAgentRunEventRequest true "Agent run event"
+// @Success 201 {object} models.AgentRunEvent
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/agent-runs/{id}/events [post]
+func (h *AgentRunHandler) CreateAgentRunEvent(c *gin.Context) {
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+	runID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid agent run ID"})
+		return
+	}
+
+	var req models.CreateAgentRunEventRequest
+	if err := c.ShouldBindJSON(&req); err != nil || req.Type == "" {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "type is required"})
+		return
+	}
+	if err := models.ValidateAgentRunEventType(req.Type); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if req.Phase != "" {
+		if err := models.ValidateAgentRunPhase(req.Phase); err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+
+	event, err := h.eventRepo.Create(c.Request.Context(), userID, runID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if event == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
+		return
+	}
+	c.JSON(http.StatusCreated, event)
 }

@@ -27,8 +27,9 @@ func NewAgentRunRepository() *AgentRunRepository {
 	}
 }
 
-const agentRunColumns = `ar.id, ar.goal_id, ar.phase, ar.status, COALESCE(ar.summary, ''),
-	ar.artifact_url, ar.cost_usd, ar.conversation_id, ar.created_at, ar.updated_at`
+const agentRunColumns = `ar.id, ar.goal_id, ar.phase, ar.status, COALESCE(ar.trigger, 'user'), COALESCE(ar.initiator, ''),
+	COALESCE(ar.agent_profile, 'coding'), COALESCE(ar.summary, ''), COALESCE(ar.result, ''),
+	ar.artifact_url, ar.cost_usd, ar.conversation_id, ar.started_at, ar.finished_at, ar.created_at, ar.updated_at`
 
 // List returnerar användarens agentkörningar, nyast först.
 //
@@ -55,8 +56,9 @@ func (r *AgentRunRepository) List(ctx context.Context, userID int64, goalID *int
 	runs := []models.AgentRun{}
 	for rows.Next() {
 		var run models.AgentRun
-		if err := rows.Scan(&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Summary,
-			&run.ArtifactURL, &run.CostUSD, &run.ConversationID, &run.CreatedAt, &run.UpdatedAt); err != nil {
+		if err := rows.Scan(&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Trigger, &run.Initiator, &run.AgentProfile,
+			&run.Summary, &run.Result, &run.ArtifactURL, &run.CostUSD, &run.ConversationID,
+			&run.StartedAt, &run.FinishedAt, &run.CreatedAt, &run.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan agent run: %w", err)
 		}
 		runs = append(runs, run)
@@ -74,8 +76,9 @@ func (r *AgentRunRepository) Get(ctx context.Context, userID, runID int64) (*mod
 
 	var run models.AgentRun
 	err := r.pool.QueryRow(ctx, query, userID, runID).Scan(
-		&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Summary,
-		&run.ArtifactURL, &run.CostUSD, &run.ConversationID, &run.CreatedAt, &run.UpdatedAt)
+		&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Trigger, &run.Initiator, &run.AgentProfile,
+		&run.Summary, &run.Result, &run.ArtifactURL, &run.CostUSD, &run.ConversationID,
+		&run.StartedAt, &run.FinishedAt, &run.CreatedAt, &run.UpdatedAt)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
@@ -107,15 +110,34 @@ func (r *AgentRunRepository) Create(ctx context.Context, userID int64, req model
 		status = models.AgentRunStatusQueued
 	}
 
-	query := `INSERT INTO agent_runs (goal_id, phase, status, summary, artifact_url, conversation_id)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, goal_id, phase, status, COALESCE(summary, ''), artifact_url, cost_usd, conversation_id, created_at, updated_at`
+	query := `INSERT INTO agent_runs (goal_id, phase, status, trigger, initiator, agent_profile, summary, result, artifact_url, conversation_id, started_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, COALESCE($11, NOW()))
+		RETURNING id, goal_id, phase, status, COALESCE(trigger, 'user'), COALESCE(initiator, ''),
+			COALESCE(agent_profile, 'coding'), COALESCE(summary, ''), COALESCE(result, ''),
+			artifact_url, cost_usd, conversation_id, started_at, finished_at, created_at, updated_at`
 
 	var run models.AgentRun
-	err = r.pool.QueryRow(ctx, query, req.GoalID, phase, status, req.Summary,
-		req.ArtifactURL, req.ConversationID).Scan(
-		&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Summary,
-		&run.ArtifactURL, &run.CostUSD, &run.ConversationID, &run.CreatedAt, &run.UpdatedAt)
+	trigger := req.Trigger
+	if trigger == "" {
+		trigger = "user"
+	}
+	if err := models.ValidateAgentRunTrigger(trigger); err != nil {
+		return nil, err
+	}
+
+	agentProfile := req.AgentProfile
+	if agentProfile == "" {
+		agentProfile = models.AgentProfileCoding
+	}
+	if err := models.ValidateAgentProfile(agentProfile); err != nil {
+		return nil, err
+	}
+
+	err = r.pool.QueryRow(ctx, query, req.GoalID, phase, status, trigger, req.Initiator, agentProfile,
+		req.Summary, req.Result, req.ArtifactURL, req.ConversationID, req.StartedAt).Scan(
+		&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Trigger, &run.Initiator, &run.AgentProfile,
+		&run.Summary, &run.Result, &run.ArtifactURL, &run.CostUSD, &run.ConversationID,
+		&run.StartedAt, &run.FinishedAt, &run.CreatedAt, &run.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create agent run: %w", err)
 	}
@@ -139,6 +161,47 @@ func (r *AgentRunRepository) Update(ctx context.Context, userID, runID int64, re
 	if req.Status != nil {
 		query += fmt.Sprintf("status = $%d, ", argNum)
 		args = append(args, *req.Status)
+		argNum++
+		// En terminal körning får en sluttid - annars går den inte att
+		// mäta hur länge den tog.
+		if req.FinishedAt == nil && models.IsTerminalAgentRunStatus(*req.Status) {
+			query += "finished_at = NOW(), "
+		}
+	}
+	if req.Trigger != nil {
+		if err := models.ValidateAgentRunTrigger(*req.Trigger); err != nil {
+			return nil, err
+		}
+		query += fmt.Sprintf("trigger = $%d, ", argNum)
+		args = append(args, *req.Trigger)
+		argNum++
+	}
+	if req.Initiator != nil {
+		query += fmt.Sprintf("initiator = $%d, ", argNum)
+		args = append(args, *req.Initiator)
+		argNum++
+	}
+	if req.AgentProfile != nil {
+		if err := models.ValidateAgentProfile(*req.AgentProfile); err != nil {
+			return nil, err
+		}
+		query += fmt.Sprintf("agent_profile = $%d, ", argNum)
+		args = append(args, *req.AgentProfile)
+		argNum++
+	}
+	if req.Result != nil {
+		query += fmt.Sprintf("result = $%d, ", argNum)
+		args = append(args, *req.Result)
+		argNum++
+	}
+	if req.StartedAt != nil {
+		query += fmt.Sprintf("started_at = $%d, ", argNum)
+		args = append(args, *req.StartedAt)
+		argNum++
+	}
+	if req.FinishedAt != nil {
+		query += fmt.Sprintf("finished_at = $%d, ", argNum)
+		args = append(args, *req.FinishedAt)
 		argNum++
 	}
 	if req.Summary != nil {
@@ -168,13 +231,14 @@ func (r *AgentRunRepository) Update(ctx context.Context, userID, runID int64, re
 
 	query += fmt.Sprintf("updated_at = NOW() WHERE id = $%d AND goal_id IN (SELECT goal_id FROM user_goals WHERE user_id = $%d)",
 		argNum, argNum+1)
-	query += " RETURNING id, goal_id, phase, status, COALESCE(summary, ''), artifact_url, cost_usd, conversation_id, created_at, updated_at"
+	query += " RETURNING id, goal_id, phase, status, COALESCE(trigger, 'user'), COALESCE(initiator, ''), COALESCE(agent_profile, 'coding'), COALESCE(summary, ''), COALESCE(result, ''), artifact_url, cost_usd, conversation_id, started_at, finished_at, created_at, updated_at"
 	args = append(args, runID, userID)
 
 	var run models.AgentRun
 	err := r.pool.QueryRow(ctx, query, args...).Scan(
-		&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Summary,
-		&run.ArtifactURL, &run.CostUSD, &run.ConversationID, &run.CreatedAt, &run.UpdatedAt)
+		&run.ID, &run.GoalID, &run.Phase, &run.Status, &run.Trigger, &run.Initiator, &run.AgentProfile,
+		&run.Summary, &run.Result, &run.ArtifactURL, &run.CostUSD, &run.ConversationID,
+		&run.StartedAt, &run.FinishedAt, &run.CreatedAt, &run.UpdatedAt)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil

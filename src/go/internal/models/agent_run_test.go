@@ -59,6 +59,34 @@ func TestValidateAgentRunPhaseReturnerarFel(t *testing.T) {
 	}
 }
 
+// TestValidAgentRunTrigger kontrollerar vilka triggrar som accepteras.
+func TestValidAgentRunTrigger(t *testing.T) {
+	valid := []string{"user", "schedule", "webhook", "agent"}
+	for _, trigger := range valid {
+		if !ValidAgentRunTrigger(trigger) {
+			t.Errorf("triggern %q ska vara giltig", trigger)
+		}
+	}
+
+	invalid := []string{"", "kokar", "User", "cron"}
+	for _, trigger := range invalid {
+		if ValidAgentRunTrigger(trigger) {
+			t.Errorf("triggern %q ska inte vara giltig", trigger)
+		}
+	}
+}
+
+// TestValidateAgentRunTriggerReturnerarFel kontrollerar att en okänd trigger
+// ger ett fel - API:t ska svara 400 på sådana.
+func TestValidateAgentRunTriggerReturnerarFel(t *testing.T) {
+	if err := ValidateAgentRunTrigger("agent"); err != nil {
+		t.Errorf("giltig trigger ska inte ge fel: %v", err)
+	}
+	if err := ValidateAgentRunTrigger("fysgodis"); err == nil {
+		t.Error("okänd trigger ska ge fel")
+	}
+}
+
 // TestValidateAgentRunStatusReturnerarFel kontrollerar att ett okänt
 // tillstånd ger ett fel.
 func TestValidateAgentRunStatusReturnerarFel(t *testing.T) {
@@ -67,5 +95,33 @@ func TestValidateAgentRunStatusReturnerarFel(t *testing.T) {
 	}
 	if err := ValidateAgentRunStatus("unknown"); err == nil {
 		t.Error("okänt tillstånd ska ge fel")
+	}
+}
+
+func TestValidateAgentRunTransitionTillaterLivscykel(t *testing.T) {
+	phase := AgentRunPhasePlan
+	status := AgentRunStatusDone
+	current := AgentRun{Phase: AgentRunPhaseDefine, Status: AgentRunStatusRunning}
+
+	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Phase: &phase, Status: &status}); err != nil {
+		t.Fatalf("giltig övergång ska tillåtas: %v", err)
+	}
+}
+
+func TestValidateAgentRunTransitionStopparBakåtgång(t *testing.T) {
+	phase := AgentRunPhasePlan
+	current := AgentRun{Phase: AgentRunPhaseExecute, Status: AgentRunStatusRunning}
+
+	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Phase: &phase}); err == nil {
+		t.Fatal("fasen ska inte kunna gå bakåt")
+	}
+}
+
+func TestValidateAgentRunTransitionStopparTerminalRun(t *testing.T) {
+	status := AgentRunStatusRunning
+	current := AgentRun{Phase: AgentRunPhasePlan, Status: AgentRunStatusDone}
+
+	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Status: &status}); err == nil {
+		t.Fatal("en avslutad körning ska inte kunna återupplivas")
 	}
 }

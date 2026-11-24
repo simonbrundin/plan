@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  internal_handlers.APIKey:
+  handlers.APIKey:
     properties:
       created:
         type: string
@@ -13,7 +13,7 @@ definitions:
       name:
         type: string
     type: object
-  internal_handlers.APIKeyResponse:
+  handlers.APIKeyResponse:
     properties:
       id:
         type: integer
@@ -23,7 +23,7 @@ definitions:
       name:
         type: string
     type: object
-  internal_handlers.CreateAPIKeyRequest:
+  handlers.CreateAPIKeyRequest:
     properties:
       expires:
         description: RFC3339 format
@@ -33,7 +33,58 @@ definitions:
     required:
     - name
     type: object
-  plan-api_internal_models.Calendar:
+  models.AgentRun:
+    properties:
+      artifact_url:
+        description: ArtifactURL pekar på resultatet - en PR-länk eller ett bokningsutkast.
+        type: string
+      conversation_id:
+        description: ConversationID knytar körningen till en konversation i agent-tjänsten.
+        type: string
+      cost_usd:
+        description: CostUSD är kostnaden för körningen hittills.
+        type: number
+      created_at:
+        type: string
+      goal_id:
+        example: 449
+        type: integer
+      id:
+        example: 1
+        type: integer
+      phase:
+        example: define
+        type: string
+      status:
+        example: running
+        type: string
+      summary:
+        example: Agenten specificerar målet
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.AgentRunEvent:
+    properties:
+      agent_run_id:
+        example: 12
+        type: integer
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      payload:
+        additionalProperties: {}
+        type: object
+      phase:
+        example: execute
+        type: string
+      type:
+        example: tool_call
+        type: string
+    type: object
+  models.Calendar:
     properties:
       color:
         type: string
@@ -57,7 +108,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  plan-api_internal_models.CalendarEvent:
+  models.CalendarEvent:
     properties:
       all_day:
         type: boolean
@@ -91,7 +142,7 @@ definitions:
           Places är de platser där händelsen sker. En händelse kan ha flera
           platser. Skickas alltid ut, även när listan är tom.
         items:
-          $ref: '#/definitions/plan-api_internal_models.Place'
+          $ref: '#/definitions/models.Place'
         type: array
       recurrence_rule:
         type: string
@@ -108,7 +159,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  plan-api_internal_models.ChildRelation:
+  models.ChildRelation:
     properties:
       child_id:
         example: 2
@@ -120,17 +171,23 @@ definitions:
         example: 10
         type: integer
     type: object
-  plan-api_internal_models.ChildWithDeps:
+  models.ChildWithDeps:
     properties:
+      agent:
+        description: |-
+          Agent markerar ett mål som är avsett att arbeta på av en agent.
+          Används för att filtrera fram vilka mål en agent kan ta sig an.
+        example: false
+        type: boolean
       blocking:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       created:
         type: string
       dependsOn:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       description:
         description: |-
@@ -140,10 +197,16 @@ definitions:
         type: string
       due:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           Due är det datum målet ska vara klart. Skickas alltid ut, även när
           det är null - samma resonemang som för started/finished.
+      estimated_minutes:
+        description: |-
+          EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.
+          Null = ingen uppskattning satt. Skickas alltid ut, även när den är
+          null - samma resonemang som för started/finished.
+        type: integer
       eternal:
         description: |-
           Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
@@ -167,6 +230,12 @@ definitions:
       inbox:
         example: 0
         type: integer
+      now:
+        description: |-
+          Now markerar ett mål som ska göras nu. Målet dyker då upp på
+          "Gör nu"-sidan (i stället för de mål som bara är påbörjade).
+        example: false
+        type: boolean
       order:
         type: integer
       places:
@@ -175,7 +244,7 @@ definitions:
           platser - då räcker det att vara på någon av dem (OR-semantik).
           Skickas alltid ut, även när listan är tom.
         items:
-          $ref: '#/definitions/plan-api_internal_models.Place'
+          $ref: '#/definitions/models.Place'
         type: array
       recurrence_count:
         description: RecurrenceCount är antalet slutförda förekomster.
@@ -187,7 +256,7 @@ definitions:
         type: string
       recurrence_next:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           RecurrenceNext är datumet för nästa förekomst som ska slutföras.
           Null = serien är slut och målet har inget mer att göra.
@@ -198,7 +267,7 @@ definitions:
         type: string
       start_date:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           StartDate är det datum målet tidigast får dyka upp i
           prioriteringslistan. Null = målet får synas direkt.
@@ -216,13 +285,21 @@ definitions:
       status_id:
         example: 1
         type: integer
+      tags:
+        description: |-
+          Tags är etiketter på målet ("ute", "hem", "vinter"). Taggarna
+          hör till användaren och skapas på demand när man skriver in ett
+          nytt namn. Skickas alltid ut, även när listan är tom.
+        items:
+          type: string
+        type: array
       title:
         example: My Goal
         type: string
       weight:
         type: integer
     type: object
-  plan-api_internal_models.CompleteOccurrenceRequest:
+  models.CompleteOccurrenceRequest:
     properties:
       completed_on:
         description: |-
@@ -238,7 +315,36 @@ definitions:
         example: "2026-01-01"
         type: string
     type: object
-  plan-api_internal_models.CreateCalendarEventRequest:
+  models.CreateAgentRunEventRequest:
+    properties:
+      payload:
+        additionalProperties: {}
+        type: object
+      phase:
+        type: string
+      type:
+        type: string
+    required:
+    - type
+    type: object
+  models.CreateAgentRunRequest:
+    properties:
+      artifact_url:
+        type: string
+      conversation_id:
+        type: string
+      goal_id:
+        type: integer
+      phase:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+    required:
+    - goal_id
+    type: object
+  models.CreateCalendarEventRequest:
     properties:
       all_day:
         type: boolean
@@ -270,7 +376,7 @@ definitions:
     - start_at
     - title
     type: object
-  plan-api_internal_models.CreateCalendarOccurrenceRequest:
+  models.CreateCalendarOccurrenceRequest:
     properties:
       all_day:
         type: boolean
@@ -299,7 +405,7 @@ definitions:
     - original_start_at
     - start_at
     type: object
-  plan-api_internal_models.CreateDependencyRequest:
+  models.CreateDependencyRequest:
     properties:
       dependsOnId:
         example: 2
@@ -311,7 +417,7 @@ definitions:
     - dependsOnId
     - goalId
     type: object
-  plan-api_internal_models.CreateGoalRequest:
+  models.CreateGoalRequest:
     properties:
       icon:
         example: heroicons:star
@@ -347,7 +453,7 @@ definitions:
     required:
     - title
     type: object
-  plan-api_internal_models.CreatePlaceRequest:
+  models.CreatePlaceRequest:
     properties:
       icon:
         example: heroicons:map-pin
@@ -367,7 +473,7 @@ definitions:
     required:
     - name
     type: object
-  plan-api_internal_models.CreateRelationRequest:
+  models.CreateRelationRequest:
     properties:
       childId:
         example: 2
@@ -385,7 +491,7 @@ definitions:
     - childId
     - parentId
     type: object
-  plan-api_internal_models.DeleteDependencyRequest:
+  models.DeleteDependencyRequest:
     properties:
       dependsOnId:
         type: integer
@@ -395,7 +501,7 @@ definitions:
     - dependsOnId
     - goalId
     type: object
-  plan-api_internal_models.DeleteRelationRequest:
+  models.DeleteRelationRequest:
     properties:
       childId:
         type: integer
@@ -405,52 +511,58 @@ definitions:
     - childId
     - parentId
     type: object
-  plan-api_internal_models.DueDate:
+  models.DueDate:
     properties:
       time.Time:
         type: string
     type: object
-  plan-api_internal_models.ErrorResponse:
+  models.ErrorResponse:
     properties:
       message:
         example: Error description
         type: string
     type: object
-  plan-api_internal_models.GetGoalResponse:
+  models.GetGoalResponse:
     properties:
       allGoals:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       blocking:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       children:
         items:
-          $ref: '#/definitions/plan-api_internal_models.ChildWithDeps'
+          $ref: '#/definitions/models.ChildWithDeps'
         type: array
       dependencies:
         items:
-          $ref: '#/definitions/plan-api_internal_models.GoalDependency'
+          $ref: '#/definitions/models.GoalDependency'
         type: array
       dependsOn:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       goal:
-        $ref: '#/definitions/plan-api_internal_models.GoalWithRelations'
+        $ref: '#/definitions/models.GoalWithRelations'
       parents:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       statusHistory:
         items:
-          $ref: '#/definitions/plan-api_internal_models.StatusUpdate'
+          $ref: '#/definitions/models.StatusUpdate'
         type: array
     type: object
-  plan-api_internal_models.Goal:
+  models.Goal:
     properties:
+      agent:
+        description: |-
+          Agent markerar ett mål som är avsett att arbeta på av en agent.
+          Används för att filtrera fram vilka mål en agent kan ta sig an.
+        example: false
+        type: boolean
       created:
         type: string
       description:
@@ -461,10 +573,16 @@ definitions:
         type: string
       due:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           Due är det datum målet ska vara klart. Skickas alltid ut, även när
           det är null - samma resonemang som för started/finished.
+      estimated_minutes:
+        description: |-
+          EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.
+          Null = ingen uppskattning satt. Skickas alltid ut, även när den är
+          null - samma resonemang som för started/finished.
+        type: integer
       eternal:
         description: |-
           Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
@@ -488,6 +606,12 @@ definitions:
       inbox:
         example: 0
         type: integer
+      now:
+        description: |-
+          Now markerar ett mål som ska göras nu. Målet dyker då upp på
+          "Gör nu"-sidan (i stället för de mål som bara är påbörjade).
+        example: false
+        type: boolean
       order:
         description: |-
           Order är målets placering bland grundmål. Grundmål sorteras på /goals
@@ -501,7 +625,7 @@ definitions:
           platser - då räcker det att vara på någon av dem (OR-semantik).
           Skickas alltid ut, även när listan är tom.
         items:
-          $ref: '#/definitions/plan-api_internal_models.Place'
+          $ref: '#/definitions/models.Place'
         type: array
       recurrence_count:
         description: RecurrenceCount är antalet slutförda förekomster.
@@ -513,7 +637,7 @@ definitions:
         type: string
       recurrence_next:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           RecurrenceNext är datumet för nästa förekomst som ska slutföras.
           Null = serien är slut och målet har inget mer att göra.
@@ -524,7 +648,7 @@ definitions:
         type: string
       start_date:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           StartDate är det datum målet tidigast får dyka upp i
           prioriteringslistan. Null = målet får synas direkt.
@@ -542,11 +666,19 @@ definitions:
       status_id:
         example: 1
         type: integer
+      tags:
+        description: |-
+          Tags är etiketter på målet ("ute", "hem", "vinter"). Taggarna
+          hör till användaren och skapas på demand när man skriver in ett
+          nytt namn. Skickas alltid ut, även när listan är tom.
+        items:
+          type: string
+        type: array
       title:
         example: My Goal
         type: string
     type: object
-  plan-api_internal_models.GoalDependency:
+  models.GoalDependency:
     properties:
       created:
         type: string
@@ -560,11 +692,52 @@ definitions:
         example: 1
         type: integer
     type: object
-  plan-api_internal_models.GoalWithRelations:
+  models.GoalGraphResponse:
     properties:
+      dependencies:
+        items:
+          $ref: '#/definitions/models.GoalDependency'
+        type: array
+      goals:
+        items:
+          $ref: '#/definitions/models.Goal'
+        type: array
+      relations:
+        items:
+          $ref: '#/definitions/models.GoalRelation'
+        type: array
+    type: object
+  models.GoalParent:
+    properties:
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Hälsa
+        type: string
+    type: object
+  models.GoalRelation:
+    properties:
+      child_id:
+        type: integer
+      order:
+        type: integer
+      parent_id:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  models.GoalWithRelations:
+    properties:
+      agent:
+        description: |-
+          Agent markerar ett mål som är avsett att arbeta på av en agent.
+          Används för att filtrera fram vilka mål en agent kan ta sig an.
+        example: false
+        type: boolean
       childRelations:
         items:
-          $ref: '#/definitions/plan-api_internal_models.ChildRelation'
+          $ref: '#/definitions/models.ChildRelation'
         type: array
       created:
         type: string
@@ -576,10 +749,16 @@ definitions:
         type: string
       due:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           Due är det datum målet ska vara klart. Skickas alltid ut, även när
           det är null - samma resonemang som för started/finished.
+      estimated_minutes:
+        description: |-
+          EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.
+          Null = ingen uppskattning satt. Skickas alltid ut, även när den är
+          null - samma resonemang som för started/finished.
+        type: integer
       eternal:
         description: |-
           Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
@@ -603,6 +782,12 @@ definitions:
       inbox:
         example: 0
         type: integer
+      now:
+        description: |-
+          Now markerar ett mål som ska göras nu. Målet dyker då upp på
+          "Gör nu"-sidan (i stället för de mål som bara är påbörjade).
+        example: false
+        type: boolean
       order:
         description: |-
           Order är målets placering bland grundmål. Grundmål sorteras på /goals
@@ -612,7 +797,7 @@ definitions:
         type: integer
       parentRelations:
         items:
-          $ref: '#/definitions/plan-api_internal_models.Goal'
+          $ref: '#/definitions/models.Goal'
         type: array
       places:
         description: |-
@@ -620,7 +805,7 @@ definitions:
           platser - då räcker det att vara på någon av dem (OR-semantik).
           Skickas alltid ut, även när listan är tom.
         items:
-          $ref: '#/definitions/plan-api_internal_models.Place'
+          $ref: '#/definitions/models.Place'
         type: array
       recurrence_count:
         description: RecurrenceCount är antalet slutförda förekomster.
@@ -632,7 +817,7 @@ definitions:
         type: string
       recurrence_next:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           RecurrenceNext är datumet för nästa förekomst som ska slutföras.
           Null = serien är slut och målet har inget mer att göra.
@@ -643,7 +828,7 @@ definitions:
         type: string
       start_date:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           StartDate är det datum målet tidigast får dyka upp i
           prioriteringslistan. Null = målet får synas direkt.
@@ -661,32 +846,47 @@ definitions:
       status_id:
         example: 1
         type: integer
+      tags:
+        description: |-
+          Tags är etiketter på målet ("ute", "hem", "vinter"). Taggarna
+          hör till användaren och skapas på demand när man skriver in ett
+          nytt namn. Skickas alltid ut, även när listan är tom.
+        items:
+          type: string
+        type: array
       title:
         example: My Goal
         type: string
     type: object
-  plan-api_internal_models.NullableDueDate:
+  models.NullableDueDate:
     properties:
       set:
         type: boolean
       value:
         type: string
     type: object
-  plan-api_internal_models.NullableString:
+  models.NullableInt:
+    properties:
+      set:
+        type: boolean
+      value:
+        type: integer
+    type: object
+  models.NullableString:
     properties:
       set:
         type: boolean
       value:
         type: string
     type: object
-  plan-api_internal_models.NullableTime:
+  models.NullableTime:
     properties:
       set:
         type: boolean
       value:
         type: string
     type: object
-  plan-api_internal_models.Place:
+  models.Place:
     properties:
       created_at:
         type: string
@@ -711,8 +911,14 @@ definitions:
       updated_at:
         type: string
     type: object
-  plan-api_internal_models.PrioritizedGoal:
+  models.PrioritizedGoal:
     properties:
+      agent:
+        description: |-
+          Agent markerar ett mål som är avsett att arbeta på av en agent.
+          Används för att filtrera fram vilka mål en agent kan ta sig an.
+        example: false
+        type: boolean
       created:
         type: string
       description:
@@ -723,10 +929,16 @@ definitions:
         type: string
       due:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           Due är det datum målet ska vara klart. Skickas alltid ut, även när
           det är null - samma resonemang som för started/finished.
+      estimated_minutes:
+        description: |-
+          EstimatedMinutes är den uppskattade tidsåtgången för målet, i minuter.
+          Null = ingen uppskattning satt. Skickas alltid ut, även när den är
+          null - samma resonemang som för started/finished.
+        type: integer
       eternal:
         description: |-
           Eternal marks a goal that never ends (t.ex. "kroppen"). Ett evigt mål
@@ -750,6 +962,12 @@ definitions:
       inbox:
         example: 0
         type: integer
+      now:
+        description: |-
+          Now markerar ett mål som ska göras nu. Målet dyker då upp på
+          "Gör nu"-sidan (i stället för de mål som bara är påbörjade).
+        example: false
+        type: boolean
       order:
         description: |-
           Order är målets placering bland grundmål. Grundmål sorteras på /goals
@@ -761,13 +979,20 @@ definitions:
         type: integer
       parentTitle:
         type: string
+      parents:
+        description: |-
+          Alla föräldrar som målet ligger under. ParentTitle/ParentID
+          pekar ut den förälder med högst vikt.
+        items:
+          $ref: '#/definitions/models.GoalParent'
+        type: array
       places:
         description: |-
           Places är de platser där målet kan slutföras. Ett mål kan ha flera
           platser - då räcker det att vara på någon av dem (OR-semantik).
           Skickas alltid ut, även när listan är tom.
         items:
-          $ref: '#/definitions/plan-api_internal_models.Place'
+          $ref: '#/definitions/models.Place'
         type: array
       priorityOrder:
         example: 0
@@ -782,7 +1007,7 @@ definitions:
         type: string
       recurrence_next:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           RecurrenceNext är datumet för nästa förekomst som ska slutföras.
           Null = serien är slut och målet har inget mer att göra.
@@ -793,7 +1018,7 @@ definitions:
         type: string
       start_date:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.DueDate'
+        - $ref: '#/definitions/models.DueDate'
         description: |-
           StartDate är det datum målet tidigast får dyka upp i
           prioriteringslistan. Null = målet får synas direkt.
@@ -811,6 +1036,14 @@ definitions:
       status_id:
         example: 1
         type: integer
+      tags:
+        description: |-
+          Tags är etiketter på målet ("ute", "hem", "vinter"). Taggarna
+          hör till användaren och skapas på demand när man skriver in ett
+          nytt namn. Skickas alltid ut, även när listan är tom.
+        items:
+          type: string
+        type: array
       title:
         example: My Goal
         type: string
@@ -818,7 +1051,16 @@ definitions:
         example: 10
         type: integer
     type: object
-  plan-api_internal_models.ReorderGoalsRequest:
+  models.RelationWeight:
+    properties:
+      childId:
+        type: integer
+      weight:
+        type: integer
+    required:
+    - childId
+    type: object
+  models.ReorderGoalsRequest:
     properties:
       goalIds:
         items:
@@ -827,7 +1069,7 @@ definitions:
     required:
     - goalIds
     type: object
-  plan-api_internal_models.ReorderPriorityGoalsRequest:
+  models.ReorderPriorityGoalsRequest:
     properties:
       goalIds:
         items:
@@ -836,7 +1078,7 @@ definitions:
     required:
     - goalIds
     type: object
-  plan-api_internal_models.ReorderRelationsRequest:
+  models.ReorderRelationsRequest:
     properties:
       childIds:
         items:
@@ -848,14 +1090,21 @@ definitions:
     - childIds
     - parentId
     type: object
-  plan-api_internal_models.SetCurrentPlaceRequest:
+  models.SetCurrentPlaceRequest:
     properties:
       place_id:
         type: integer
     type: object
-  plan-api_internal_models.SetPlacesRequest:
+  models.SetGoalTagsRequest:
+    properties:
+      tags:
+        items:
+          type: string
+        type: array
     type: object
-  plan-api_internal_models.SplitCalendarEventRequest:
+  models.SetPlacesRequest:
+    type: object
+  models.SplitCalendarEventRequest:
     properties:
       all_day:
         type: boolean
@@ -885,7 +1134,7 @@ definitions:
     - recurrence_rule
     - start_at
     type: object
-  plan-api_internal_models.Status:
+  models.Status:
     properties:
       created:
         type: string
@@ -899,7 +1148,7 @@ definitions:
         example: define
         type: string
     type: object
-  plan-api_internal_models.StatusUpdate:
+  models.StatusUpdate:
     properties:
       changed_at:
         type: string
@@ -916,7 +1165,34 @@ definitions:
       to_status_name:
         type: string
     type: object
-  plan-api_internal_models.UpdateCalendarEventRequest:
+  models.Tag:
+    properties:
+      goal_count:
+        description: |-
+          GoalCount är antalet mål som har taggen. Används för att se
+          vilka taggar som faktiskt används.
+        example: 3
+        type: integer
+      name:
+        example: ute
+        type: string
+    type: object
+  models.UpdateAgentRunRequest:
+    properties:
+      artifact_url:
+        type: string
+      conversation_id:
+        type: string
+      cost_usd:
+        type: number
+      phase:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+    type: object
+  models.UpdateCalendarEventRequest:
     properties:
       all_day:
         type: boolean
@@ -944,8 +1220,13 @@ definitions:
       title:
         type: string
     type: object
-  plan-api_internal_models.UpdateGoalRequest:
+  models.UpdateGoalRequest:
     properties:
+      agent:
+        description: |-
+          Agent sätter eller tar bort agent-flaggan på ett mål.
+          nil = lämnas oförändrat, true = målet är för en agent, false = vanligt mål.
+        type: boolean
       description:
         description: |-
           Description sätter eller rensar målets beskrivning.
@@ -953,26 +1234,37 @@ definitions:
         type: string
       due:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.NullableDueDate'
+        - $ref: '#/definitions/models.NullableDueDate'
         description: Due sätter eller rensar målets due-datum ("YYYY-MM-DD" eller
           null).
+      estimated_minutes:
+        allOf:
+        - $ref: '#/definitions/models.NullableInt'
+        description: |-
+          EstimatedMinutes sätter eller rensar målets uppskattade tidsåtgång
+          (antal minuter eller null).
       eternal:
         description: |-
           Eternal sätter eller tar bort evigt-flaggan på ett mål.
           nil = lämnas oförändrat, true = evigt mål, false = vanligt mål.
         type: boolean
       finished:
-        $ref: '#/definitions/plan-api_internal_models.NullableTime'
+        $ref: '#/definitions/models.NullableTime'
       icon:
         type: string
+      now:
+        description: |-
+          Now sätter eller tar bort nu-flaggan på ett mål.
+          nil = lämnas oförändrat, true = målet ska göras nu, false = vanligt mål.
+        type: boolean
       recurrence_mode:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.NullableString'
+        - $ref: '#/definitions/models.NullableString'
         description: RecurrenceMode sätter schemaläggningsstrategin ("schedule" eller
           "push").
       recurrence_rule:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.NullableString'
+        - $ref: '#/definitions/models.NullableString'
         description: |-
           RecurrenceRule sätter eller tar bort målets upprepningsregel.
           Utan fältet lämnas regeln oförändrad, null tar bort den.
@@ -981,19 +1273,19 @@ definitions:
         type: string
       start_date:
         allOf:
-        - $ref: '#/definitions/plan-api_internal_models.NullableDueDate'
+        - $ref: '#/definitions/models.NullableDueDate'
         description: |-
           StartDate sätter eller rensar målets startdatum ("YYYY-MM-DD" eller
           null). Startdatumet avgör från vilket datum målet får dyka upp i
           prioriteringslistan.
       started:
-        $ref: '#/definitions/plan-api_internal_models.NullableTime'
+        $ref: '#/definitions/models.NullableTime'
       status_id:
         type: integer
       title:
         type: string
     type: object
-  plan-api_internal_models.UpdatePlaceRequest:
+  models.UpdatePlaceRequest:
     properties:
       icon:
         type: string
@@ -1006,7 +1298,7 @@ definitions:
       radius_meters:
         type: integer
     type: object
-  plan-api_internal_models.UpdateRelationRequest:
+  models.UpdateRelationRequest:
     properties:
       childId:
         type: integer
@@ -1020,7 +1312,20 @@ definitions:
     - childId
     - parentId
     type: object
-  plan-api_internal_models.UpdateStatusRequest:
+  models.UpdateRelationWeightsRequest:
+    properties:
+      parentId:
+        type: integer
+      weights:
+        items:
+          $ref: '#/definitions/models.RelationWeight'
+        minItems: 1
+        type: array
+    required:
+    - parentId
+    - weights
+    type: object
+  models.UpdateStatusRequest:
     properties:
       status_id:
         example: 2
@@ -1041,6 +1346,180 @@ info:
   title: Goals Management API
   version: "1.0"
 paths:
+  /api/agent-runs:
+    get:
+      description: Get agent runs for the authenticated user, optionally filtered
+        by goal
+      parameters:
+      - description: Filter by goal ID
+        in: query
+        name: goal_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentRun'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List agent runs
+      tags:
+      - agent-runs
+    post:
+      consumes:
+      - application/json
+      description: Register that an agent started working on a goal
+      parameters:
+      - description: Agent run
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentRunRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AgentRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Start an agent run
+      tags:
+      - agent-runs
+  /api/agent-runs/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update phase, status, summary, cost or artifact of an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAgentRunRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update an agent run
+      tags:
+      - agent-runs
+  /api/agent-runs/{id}/events:
+    get:
+      description: Get the chronological event history for an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentRunEvent'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List AgentRun events
+      tags:
+      - agent-runs
+    post:
+      consumes:
+      - application/json
+      description: Append a structured event to an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Agent run event
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentRunEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AgentRunEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Record an AgentRun event
+      tags:
+      - agent-runs
   /api/api-keys:
     get:
       description: Get all API keys for the authenticated user
@@ -1051,12 +1530,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/internal_handlers.APIKey'
+              $ref: '#/definitions/handlers.APIKey'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List API keys
@@ -1072,22 +1551,22 @@ paths:
         name: key
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.CreateAPIKeyRequest'
+          $ref: '#/definitions/handlers.CreateAPIKeyRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/internal_handlers.APIKeyResponse'
+            $ref: '#/definitions/handlers.APIKeyResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create an API key
@@ -1116,11 +1595,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete an API key
@@ -1154,16 +1633,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+              $ref: '#/definitions/models.CalendarEvent'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List calendar events
@@ -1180,26 +1659,26 @@ paths:
         name: event
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CreateCalendarEventRequest'
+          $ref: '#/definitions/models.CreateCalendarEventRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+            $ref: '#/definitions/models.CalendarEvent'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a calendar event
@@ -1224,15 +1703,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete a calendar event
@@ -1254,19 +1733,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+            $ref: '#/definitions/models.CalendarEvent'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get a calendar event
@@ -1288,30 +1767,30 @@ paths:
         name: event
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.UpdateCalendarEventRequest'
+          $ref: '#/definitions/models.UpdateCalendarEventRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+            $ref: '#/definitions/models.CalendarEvent'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update a calendar event
@@ -1334,30 +1813,30 @@ paths:
         name: occurrence
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CreateCalendarOccurrenceRequest'
+          $ref: '#/definitions/models.CreateCalendarOccurrenceRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+            $ref: '#/definitions/models.CalendarEvent'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Override a single occurrence
@@ -1380,30 +1859,30 @@ paths:
         name: split
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.SplitCalendarEventRequest'
+          $ref: '#/definitions/models.SplitCalendarEventRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/plan-api_internal_models.CalendarEvent'
+            $ref: '#/definitions/models.CalendarEvent'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Split a recurring series
@@ -1419,12 +1898,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Calendar'
+              $ref: '#/definitions/models.Calendar'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List calendars
@@ -1440,11 +1919,11 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Calendar'
+            $ref: '#/definitions/models.Calendar'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create calendar
@@ -1461,7 +1940,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete calendar
@@ -1477,15 +1956,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Calendar'
+            $ref: '#/definitions/models.Calendar'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update calendar
@@ -1496,6 +1975,15 @@ paths:
       consumes:
       - application/json
       description: Get all goals for the authenticated user
+      parameters:
+      - description: Filtrera på agent-flaggan (true = bara agentmål)
+        in: query
+        name: agent
+        type: boolean
+      - description: Filtrera på status-id
+        in: query
+        name: status
+        type: integer
       produces:
       - application/json
       responses:
@@ -1503,12 +1991,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Goal'
+              $ref: '#/definitions/models.Goal'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List all goals
@@ -1524,22 +2016,22 @@ paths:
         name: goal
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CreateGoalRequest'
+          $ref: '#/definitions/models.CreateGoalRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Goal'
+            $ref: '#/definitions/models.Goal'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a new goal
@@ -1568,15 +2060,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete a goal
@@ -1598,23 +2090,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.GetGoalResponse'
+            $ref: '#/definitions/models.GetGoalResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get a goal by ID
@@ -1635,30 +2127,30 @@ paths:
         name: goal
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.UpdateGoalRequest'
+          $ref: '#/definitions/models.UpdateGoalRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Goal'
+            $ref: '#/definitions/models.Goal'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update a goal
@@ -1682,19 +2174,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Goal'
+            $ref: '#/definitions/models.Goal'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Undo the last completed occurrence of a recurring goal
@@ -1716,26 +2208,26 @@ paths:
         name: completion
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CompleteOccurrenceRequest'
+          $ref: '#/definitions/models.CompleteOccurrenceRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Goal'
+            $ref: '#/definitions/models.Goal'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Complete the current occurrence of a recurring goal
@@ -1758,23 +2250,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Status'
+            $ref: '#/definitions/models.Status'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get a goal's current status
@@ -1795,30 +2287,30 @@ paths:
         name: status
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.UpdateStatusRequest'
+          $ref: '#/definitions/models.UpdateStatusRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.StatusUpdate'
+            $ref: '#/definitions/models.StatusUpdate'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update a goal's status
@@ -1842,20 +2334,20 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.StatusUpdate'
+              $ref: '#/definitions/models.StatusUpdate'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get status change history for a goal
@@ -1872,7 +2364,7 @@ paths:
         name: dependency
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.DeleteDependencyRequest'
+          $ref: '#/definitions/models.DeleteDependencyRequest'
       produces:
       - application/json
       responses:
@@ -1885,15 +2377,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete a dependency
@@ -1909,26 +2401,26 @@ paths:
         name: dependency
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CreateDependencyRequest'
+          $ref: '#/definitions/models.CreateDependencyRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.GoalDependency'
+            $ref: '#/definitions/models.GoalDependency'
         "400":
           description: Invalid request or cycle detected
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a dependency
@@ -1946,12 +2438,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.PrioritizedGoal'
+              $ref: '#/definitions/models.PrioritizedGoal'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get prioritized goals
@@ -1968,7 +2460,7 @@ paths:
         name: goals
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.ReorderPriorityGoalsRequest'
+          $ref: '#/definitions/models.ReorderPriorityGoalsRequest'
       produces:
       - application/json
       responses:
@@ -1980,11 +2472,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Reorder the priority list
@@ -2001,7 +2493,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.DeleteRelationRequest'
+          $ref: '#/definitions/models.DeleteRelationRequest'
       produces:
       - application/json
       responses:
@@ -2014,15 +2506,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete a relation
@@ -2038,7 +2530,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.UpdateRelationRequest'
+          $ref: '#/definitions/models.UpdateRelationRequest'
       produces:
       - application/json
       responses:
@@ -2050,15 +2542,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update a relation
@@ -2074,26 +2566,26 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CreateRelationRequest'
+          $ref: '#/definitions/models.CreateRelationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ChildRelation'
+            $ref: '#/definitions/models.ChildRelation'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a parent-child relation
@@ -2110,7 +2602,7 @@ paths:
         name: relation
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.ReorderRelationsRequest'
+          $ref: '#/definitions/models.ReorderRelationsRequest'
       produces:
       - application/json
       responses:
@@ -2122,18 +2614,57 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Reorder the children of a goal
+      tags:
+      - relations
+  /api/goals/relations/weights:
+    patch:
+      consumes:
+      - application/json
+      description: Replaces all weights for a parent atomically. Weights must total
+        100.
+      parameters:
+      - description: Relation weights
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRelationWeightsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update all child goal weights
       tags:
       - relations
   /api/goals/reorder:
@@ -2148,7 +2679,7 @@ paths:
         name: goals
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.ReorderGoalsRequest'
+          $ref: '#/definitions/models.ReorderGoalsRequest'
       produces:
       - application/json
       responses:
@@ -2160,11 +2691,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Reorder the root goals
@@ -2182,12 +2713,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Status'
+              $ref: '#/definitions/models.Status'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List all statuses
@@ -2211,16 +2742,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Place'
+              $ref: '#/definitions/models.Place'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List a calendar event's places
@@ -2242,7 +2773,7 @@ paths:
         name: places
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.SetPlacesRequest'
+          $ref: '#/definitions/models.SetPlacesRequest'
       produces:
       - application/json
       responses:
@@ -2250,20 +2781,20 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Place'
+              $ref: '#/definitions/models.Place'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Replace a calendar event's places
@@ -2287,16 +2818,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Place'
+              $ref: '#/definitions/models.Place'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List a goal's places
@@ -2318,7 +2849,7 @@ paths:
         name: places
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.SetPlacesRequest'
+          $ref: '#/definitions/models.SetPlacesRequest'
       produces:
       - application/json
       responses:
@@ -2326,25 +2857,152 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Place'
+              $ref: '#/definitions/models.Place'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Replace a goal's places
       tags:
       - places
+  /api/v1/goals/{id}/tags:
+    get:
+      consumes:
+      - application/json
+      description: Get the tags linked to a goal
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List a goal's tags
+      tags:
+      - tags
+    put:
+      consumes:
+      - application/json
+      description: Replace the tags linked to a goal. Tags that don't exist yet are
+        created.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Tag names
+        in: body
+        name: tags
+        required: true
+        schema:
+          $ref: '#/definitions/models.SetGoalTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Replace a goal's tags
+      tags:
+      - tags
+  /api/v1/goals/{id}/tags/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove one tag from a goal. The tag itself is kept for other goals.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Tag name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove a tag from a goal
+      tags:
+      - tags
+  /api/v1/goals/graph:
+    get:
+      consumes:
+      - application/json
+      description: Returns all goals, relations and dependencies in one response.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GoalGraphResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get the user's whole goal graph
+      tags:
+      - goals
   /api/v1/me/current-place:
     get:
       consumes:
@@ -2356,11 +3014,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Place'
+            $ref: '#/definitions/models.Place'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get the current place
@@ -2376,22 +3034,22 @@ paths:
         name: place
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.SetCurrentPlaceRequest'
+          $ref: '#/definitions/models.SetCurrentPlaceRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Place'
+            $ref: '#/definitions/models.Place'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Set the current place
@@ -2409,12 +3067,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Place'
+              $ref: '#/definitions/models.Place'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List all places
@@ -2430,22 +3088,22 @@ paths:
         name: place
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.CreatePlaceRequest'
+          $ref: '#/definitions/models.CreatePlaceRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Place'
+            $ref: '#/definitions/models.Place'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a place
@@ -2474,11 +3132,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete a place
@@ -2499,26 +3157,26 @@ paths:
         name: place
         required: true
         schema:
-          $ref: '#/definitions/plan-api_internal_models.UpdatePlaceRequest'
+          $ref: '#/definitions/models.UpdatePlaceRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/plan-api_internal_models.Place'
+            $ref: '#/definitions/models.Place'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update a place
@@ -2547,21 +3205,45 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/plan-api_internal_models.Place'
+              $ref: '#/definitions/models.Place'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/plan-api_internal_models.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Find places near a position
       tags:
       - places
+  /api/v1/tags:
+    get:
+      consumes:
+      - application/json
+      description: Get all tags for the authenticated user with the number of goals
+        using them
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Tag'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all tags
+      tags:
+      - tags
 schemes:
 - http
 - https
