@@ -10,6 +10,52 @@ their objectives using a modern web interface with hierarchical goal structures.
 - **Testing**: Vitest, Cucumber.js
 - **Deployment**: Kubernetes
 
+## Agent Platform
+
+Plan can delegate a goal to an agent through a tracked `AgentRun`. The run and
+its lifecycle are stored in the `agent_runs` table, so the interface can show
+the agent's progress even when the agent worker is temporarily unavailable.
+
+```mermaid
+flowchart LR
+    G[Goal] --> R[AgentRun]
+    R --> A{Approval in the interface}
+    A -->|Approved| J[Worker job]
+    A -->|Rejected| B[Blocked]
+    J --> W[Changes in an isolated workspace]
+    W --> T[Tests]
+    T -->|Passed| C[Agent branch published]
+    C --> V[Verify: human review and merge]
+```
+
+### Run lifecycle
+
+1. A goal starts an `AgentRun` in the `define` phase with `queued` status.
+2. The worker starts the run and changes its status to `running`.
+3. The agent works through the `plan` and `execute` phases. If it needs human
+   input or approval, the run is marked `blocked` and the decision is made in
+   the Plan interface.
+4. After approval, a worker job such as `agent-worker-run-72` applies the
+   changes in an isolated workspace and runs the relevant tests.
+5. If the tests pass, the agent publishes a dedicated branch, for example
+   `agent/goal-540-run-72`, and marks the run `done` in the `verify` phase.
+   The run is marked `failed` if the work cannot be completed successfully.
+6. The `verify` phase requires human review and merge. Changes are never
+   applied directly to the `main` branch by the agent.
+
+The worker job is tied to the lifetime of the run and terminates when the run
+is complete. The final merge decision remains with a human reviewer.
+
+### Persisted state
+
+Each `AgentRun` belongs to a goal and records its current phase, status,
+summary, optional artifact URL, cost, conversation ID, and timestamps.
+
+| Field | Values |
+| --- | --- |
+| `phase` | `define`, `plan`, `execute`, `verify`, `completed` |
+| `status` | `queued`, `running`, `blocked`, `done`, `failed` |
+
 ## Authentication
 
 The session lives in the **Go API** - not in Nuxt. Go creates, validates and
