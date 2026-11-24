@@ -67,6 +67,30 @@ Rules:
 - **Dev login** (`POST /api/v1/auth/dev-login`) creates a session for
   `dev-user` without Zitadel. It only exists when `DEV_AUTH_ENABLED=true`.
 
+## Agent Platform
+
+The agent platform connects a goal to an **AgentRun** that can plan, implement,
+verify, and publish a code change. Plan owns the run metadata in the
+`agent_runs` table, so the interface can display agent activity even when the
+agent service is temporarily unavailable.
+
+Each AgentRun progresses through the `define`, `plan`, `execute`, and `verify`
+phases before reaching `completed`. Its status is one of `queued`, `running`,
+`blocked`, `done`, or `failed`. A run can also record a summary, artifact URL,
+cost, and conversation ID.
+
+The execution workflow provides the following controls:
+
+1. The agent works in an **isolated workspace** and may create a dedicated
+   branch for the change.
+2. A **human approval** is decided in the interface before the change is
+   applied to the target workspace.
+3. The change is applied and automated tests are run.
+4. The result enters the `verify` phase when a person must review and merge the
+   branch.
+5. The agent job ends immediately after the run is complete; the main branch is
+   not modified directly.
+
 ## Database Schema
 
 ```mermaid
