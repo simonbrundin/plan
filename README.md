@@ -167,6 +167,16 @@ A complete delivery therefore has the following chain:
 5. The relevant tests run successfully.
 6. The agent publishes its branch for human review and merge.
 
+### Verified dev flow
+
+The complete chain was verified in dev for goal #540: AgentRun #72 ran as
+Kubernetes Job `agent-worker-run-72`, approval #54 was decided in the Plan
+interface, the approved change was applied in an isolated workspace, and the
+tests passed. The agent published branch `agent/goal-540-run-72` for review and
+merge. Huvudgrennen är orörd, och jobbet avslutades direkt när körningen var
+klar. Körningen står kvar i verifyfasen eftersom en människa ska granska och
+mergea branchen.
+
 ### Cost and budgets
 
 Plan owns the cost. The agent only reports token usage, and Plan prices it from
