@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 345 |
+| Noter | 346 |
 
 ## Entiteter
 
@@ -328,6 +328,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan]] - Symtom: piltangenterna (ArrowUp/ArrowDown) som flyttar undermål fungerade ibland, ibland inte. _(uppdaterad 2026-11-16)_
 - [[notes/soulmate-teamet-i-sundsvall-importerades]] - 31 konsulter från https://soulmate.se/soulmates-sundsvall lades till i data/sundsvall-it-people.yaml och importerades till Neon. _(uppdaterad 2026-11-17)_
 - [[notes/sprint-timer-saknas]] - Sprint-läget saknar timer, så tidsåtgången går inte att mäta per session. _(uppdaterad 2026-10-21)_
+- [[notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9]] - Mac mini i datacentret (10.10.10.29, UniFi 'MinisomhorSIMON', MAC a0:ce:c8:d9:0d:02) är samma maskin som worker-9 i Talos-klustret, men ... _(uppdaterad 2026-11-24)_
 - [[notes/stabiliserat-vertikalt-viktlage]] - Fixade problem där undermål kunde försvinna vid dragning av segmentgränser. _(uppdaterad 2026-11-20)_
 - [[notes/standardkalender-i-plan]] - Användaren kan nu sätta en av sina kalendrar som standardkalender. _(uppdaterad 2026-11-18)_
 - [[notes/started-finished-kunde-inte-rensas-i-plan-null-ignorerades-i-go-api-t]] - Bug: frontend skickade {started: null} vid avmarkering, men Go-modellen UpdateGoalRequest hade Started *string med omitempty - JSON null ... _(uppdaterad 2026-11-16)_

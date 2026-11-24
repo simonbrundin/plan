@@ -307,6 +307,7 @@ graph LR
   n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan["Sortering av undermål med piltangenterna var trasig i plan"]
   n_notes_soulmate_teamet_i_sundsvall_importerades["Soulmate-teamet i Sundsvall importerades"]
   n_notes_sprint_timer_saknas["Sprint-läget saknar timer"]
+  n_notes_ssh_nyckelatkomst_till_mac_mini_10_10_10_29_worker_9["SSH-nyckelåtkomst till Mac mini 10.10.10.29 (worker-9)"]
   n_notes_stabiliserat_vertikalt_viktlage["Stabiliserat vertikalt viktläge"]
   n_notes_standardkalender_i_plan["Standardkalender i Plan"]
   n_notes_started_finished_kunde_inte_rensas_i_plan_null_ignorerades_i_go_api_t["started/finished kunde inte rensas i plan (null ignorerades i Go API:t)"]

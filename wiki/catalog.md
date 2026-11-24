@@ -308,6 +308,7 @@ finns i `index.md`.
 | [[notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan]] | Sortering av undermål med piltangenterna var trasig i plan | note | bug, plan, nuxt, go, ui, projekt:plan | 2026-11-16 | 0 |
 | [[notes/soulmate-teamet-i-sundsvall-importerades]] | Soulmate-teamet i Sundsvall importerades | note | data, sourcing, soulmate, projekt:pappa | 2026-11-17 | 0 |
 | [[notes/sprint-timer-saknas]] | Sprint-läget saknar timer | note | bug, sprint, offen, tui | 2026-10-21 | 2 |
+| [[notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9]] | SSH-nyckelåtkomst till Mac mini 10.10.10.29 (worker-9) | note | ssh, macmini, worker-9, projekt:simon | 2026-11-24 | 0 |
 | [[notes/stabiliserat-vertikalt-viktlage]] | Stabiliserat vertikalt viktläge | note | bug, feature, goals, ux, projekt:plan | 2026-11-20 | 0 |
 | [[notes/standardkalender-i-plan]] | Standardkalender i Plan | note | kalender, feature, standardkalender, projekt:plan | 2026-11-18 | 1 |
 | [[notes/started-finished-kunde-inte-rensas-i-plan-null-ignorerades-i-go-api-t]] | started/finished kunde inte rensas i plan (null ignorerades i Go API:t) | note | bug, plan, api, projekt:simon | 2026-11-16 | 0 |
@@ -612,6 +613,7 @@ finns i `index.md`.
 - `longhorn` (3)
 - `lunch` (2)
 - `lärdom` (1)
+- `macmini` (1)
 - `mail` (20)
 - `mailagent` (3)
 - `mailmaster` (8)
@@ -702,7 +704,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (71)
+- `projekt:simon` (72)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -760,7 +762,7 @@ finns i `index.md`.
 - `soulmate` (1)
 - `sourcing` (12)
 - `sprint` (1)
-- `ssh` (1)
+- `ssh` (2)
 - `ssl` (1)
 - `sso` (2)
 - `standardkalender` (1)
@@ -828,7 +830,7 @@ finns i `index.md`.
 - `worker-3` (5)
 - `worker-4` (3)
 - `worker-8` (1)
-- `worker-9` (1)
+- `worker-9` (2)
 - `workers` (1)
 - `workflow` (2)
 - `workmux` (1)

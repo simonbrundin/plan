@@ -2559,3 +2559,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/kostnad-och-budget-for-agentkorningar]] — ny sida från inboxen
 - [archive] 2026-11-24-kostnad-och-budget-for-agentkorningar.md
 
+
+## [2026-11-24] ingest | create notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9
+- [create] [[notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9]] — ny sida från inboxen
+- [archive] 2026-11-24-ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9.md
+
