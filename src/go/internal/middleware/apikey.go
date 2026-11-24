@@ -11,12 +11,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"plan-api/internal/database"
+	"plan-api/internal/models"
 )
 
 const (
 	// APIKeyHeader is the header name for API key authentication
 	APIKeyHeader = "X-API-Key"
-	
+
 	// APIKeyQueryParam is the query parameter for API key authentication
 	APIKeyQueryParam = "api_key"
 )
@@ -26,20 +27,20 @@ func APIKeyAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check for API key in header
 		apiKey := c.GetHeader(APIKeyHeader)
-		
+
 		// Fallback to query parameter
 		if apiKey == "" {
 			apiKey = c.Query(APIKeyQueryParam)
 		}
-		
+
 		if apiKey == "" {
 			// No API key provided, continue to other auth methods
 			c.Next()
 			return
 		}
-		
+
 		// Validate the API key
-		userID, err := validateAPIKey(apiKey)
+		userID, scope, err := validateAPIKey(apiKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "Invalid API key",
@@ -47,51 +48,60 @@ func APIKeyAuth() gin.HandlerFunc {
 			})
 			return
 		}
-		
+
 		if userID == 0 {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key",
 			})
 			return
 		}
-		
+
 		// Set user ID in context (similar to session auth)
 		c.Set("userID", userID)
 		c.Set("authMethod", "api_key")
-		
+		c.Set("apiKeyScope", scope)
+
 		c.Next()
 	}
 }
 
 // validateAPIKey validates an API key and returns the associated user ID
-func validateAPIKey(apiKey string) (int64, error) {
+// and scope.
+func validateAPIKey(apiKey string) (int64, string, error) {
+	// The agent key has a restricted scope. It is configured here so the
+	// limit lives in the API, not in a prompt.
+	if agentKey := os.Getenv("AGENT_API_KEY"); agentKey != "" && apiKey == agentKey {
+		return 1, string(models.ScopeAgent), nil
+	}
+
 	// Check for bypass key (development only)
 	bypassKey := os.Getenv("API_KEY_BYPASS")
 	if bypassKey != "" && apiKey == bypassKey {
 		// Return user ID 1 for bypass key
-		return 1, nil
+		return 1, string(models.ScopeFull), nil
 	}
-	
+
 	// Hash the provided key
 	keyHash := hashAPIKey(apiKey)
-	
+
 	// Look up in database
 	pool := database.GetPool()
 	if pool == nil {
-		return 0, fmt.Errorf("database not connected")
+		return 0, "", fmt.Errorf("database not connected")
 	}
-	
+
 	var userID int64
+	var scope string
 	err := pool.QueryRow(context.Background(), `
-		SELECT COALESCE(user_id, 1) FROM api_keys 
+		SELECT COALESCE(user_id, 1), COALESCE(scope, 'full') FROM api_keys 
 		WHERE key_hash = $1 
 		AND (expires IS NULL OR expires > NOW())
-	`, keyHash).Scan(&userID)
+	`, keyHash).Scan(&userID, &scope)
 	if err != nil {
-		return 0, nil // Key not found
+		return 0, "", nil // Key not found
 	}
-	
-	return userID, nil
+
+	return userID, scope, nil
 }
 
 // hashAPIKey creates a SHA-256 hash of the API key
@@ -106,11 +116,11 @@ func GenerateAPIKey(name string, userID int64) (string, error) {
 	if pool == nil {
 		return "", fmt.Errorf("database not connected")
 	}
-	
+
 	// Generate a random key
 	rawKey := generateRandomKey(32)
 	keyHash := hashAPIKey(rawKey)
-	
+
 	// Store the hash
 	_, err := pool.Exec(context.Background(), `
 		INSERT INTO api_keys (name, key_hash, user_id) 
@@ -119,7 +129,7 @@ func GenerateAPIKey(name string, userID int64) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return rawKey, nil
 }
 
@@ -144,30 +154,31 @@ func RequireAPIKey() gin.HandlerFunc {
 				return
 			}
 		}
-		
+
 		// Check for API key in header
 		apiKey := c.GetHeader(APIKeyHeader)
 		if apiKey == "" {
 			apiKey = c.Query(APIKeyQueryParam)
 		}
-		
+
 		if apiKey == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "API key required",
 			})
 			return
 		}
-		
-		userID, err := validateAPIKey(apiKey)
+
+		userID, scope, err := validateAPIKey(apiKey)
 		if err != nil || userID == 0 {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key",
 			})
 			return
 		}
-		
+
 		c.Set("userID", userID)
 		c.Set("authMethod", "api_key")
+		c.Set("apiKeyScope", scope)
 		c.Next()
 	}
 }

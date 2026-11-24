@@ -17,18 +17,18 @@ type ErrorResponse = models.ErrorResponse
 
 // APIKey represents an API key (without the actual key)
 type APIKey struct {
-	ID        int64      `json:"id"`
-	Name      string     `json:"name"`
-	Created   time.Time  `json:"created"`
-	LastUsed  *time.Time `json:"last_used,omitempty"`
-	Expires   *time.Time `json:"expires,omitempty"`
+	ID       int64      `json:"id"`
+	Name     string     `json:"name"`
+	Created  time.Time  `json:"created"`
+	LastUsed *time.Time `json:"last_used,omitempty"`
+	Expires  *time.Time `json:"expires,omitempty"`
 }
 
 // APIKeyResponse is returned when creating a new API key (includes the raw key)
 type APIKeyResponse struct {
-	ID    int64  `json:"id"`
-	Name  string `json:"name"`
-	Key   string `json:"key"` // Only returned once!
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Key  string `json:"key"` // Only returned once!
 }
 
 // CreateAPIKeyRequest is the request body for creating an API key
