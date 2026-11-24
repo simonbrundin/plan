@@ -60,6 +60,17 @@ type AgentRun struct {
 	CostUSD *float64 `json:"cost_usd"`
 	// ConversationID knytar körningen till en konversation i agent-tjänsten.
 	ConversationID *string `json:"conversation_id"`
+	// AgentID identifierar agenten som gjorde körningen.
+	AgentID string `json:"agent_id,omitempty" example:"agent-worker-run-72"`
+	// Provider och Model visar vilken modell som användes. Modellen
+	// behövs för att räkna fram kostnaden ur prislistan.
+	Provider string `json:"provider,omitempty" example:"minimax"`
+	Model    string `json:"model,omitempty" example:"MiniMax-M2.7"`
+	// ModelVersion är modellens version.
+	ModelVersion string `json:"model_version,omitempty"`
+	// ReservedCostUSD är den kostnad som reserverats för körningen så
+	// länge den pågår.
+	ReservedCostUSD float64 `json:"reserved_cost_usd" example:"1"`
 	// StartedAt sätts när körningen börjar, FinishedAt när den är klar.
 	StartedAt  *time.Time `json:"started_at"`
 	FinishedAt *time.Time `json:"finished_at"`
@@ -79,6 +90,12 @@ type CreateAgentRunRequest struct {
 	Result         string  `json:"result"`
 	ArtifactURL    *string `json:"artifact_url"`
 	ConversationID *string `json:"conversation_id"`
+	// AgentID identifierar agenten.
+	AgentID string `json:"agent_id"`
+	// Provider och Model behövs för att prissätta körningen.
+	Provider     string `json:"provider"`
+	Model        string `json:"model"`
+	ModelVersion string `json:"model_version"`
 	// StartedAt sätts när körningen börjar. Nil ger "nu".
 	StartedAt *time.Time `json:"started_at"`
 }
@@ -97,6 +114,10 @@ type UpdateAgentRunRequest struct {
 	ArtifactURL    *string    `json:"artifact_url"`
 	CostUSD        *float64   `json:"cost_usd"`
 	ConversationID *string    `json:"conversation_id"`
+	AgentID        *string    `json:"agent_id"`
+	Provider       *string    `json:"provider"`
+	Model          *string    `json:"model"`
+	ModelVersion   *string    `json:"model_version"`
 	StartedAt      *time.Time `json:"started_at"`
 	FinishedAt     *time.Time `json:"finished_at"`
 }

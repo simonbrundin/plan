@@ -22,6 +22,7 @@ import (
 	"plan-agent/internal/planclient"
 	"plan-agent/internal/profile"
 	"plan-agent/internal/proposer"
+	"plan-agent/internal/runusage"
 )
 
 func main() {
@@ -52,13 +53,20 @@ func main() {
 
 	agentProfile := profileFromEnv()
 
+	// Recordern samlar tokenanvändningen för körningen. Plan räknar
+	// sedan fram kostnaden ur sin prislista.
+	usageRecorder := runusage.New(model.Provider, model.Name)
+
 	worker := agentworker.New(planClient, goalDefiner, agentworker.Config{
 		PollInterval:     agentworker.PollIntervalFromEnv(),
 		OnlyGoalId:       goalIDFromEnv(),
 		Initiator:        initiatorFromEnv(),
 		Profile:          agentProfile,
-		CodeRunner:       codeRunnerFromEnv(planClient, llmProvider, model, agentProfile),
+		CodeRunner:       codeRunnerFromEnv(planClient, llmProvider, model, agentProfile, usageRecorder),
 		StopWhenFinished: stopWhenFinishedFromEnv(),
+		Provider:         model.Provider,
+		Model:            model.Name,
+		AgentID:          agentIDFromEnv(),
 	})
 
 	worker.Run(ctx)
@@ -68,7 +76,7 @@ func main() {
 //
 // Utan AGENT_REPO_PATH gör workern bara definitioner - kodändringar
 // kräver ett repo att arbeta i.
-func codeRunnerFromEnv(planClient *planclient.Client, llmProvider provider.LLMProvider, model provider.Model, agentProfile string) agentworker.CodeRunner {
+func codeRunnerFromEnv(planClient *planclient.Client, llmProvider provider.LLMProvider, model provider.Model, agentProfile string, usageRecorder *runusage.Recorder) agentworker.CodeRunner {
 	// Profilen avgör om körningen får röra kod - det är en teknisk gräns.
 	policy, err := profile.PolicyFor(agentProfile)
 	if err != nil {
@@ -94,7 +102,22 @@ func codeRunnerFromEnv(planClient *planclient.Client, llmProvider provider.LLMPr
 	log.Printf("Code runner enabled for repository %s", repoPath)
 	return coder.New(planClient, proposer.New(llmProvider, model), coder.Config{
 		RepoPath: repoPath,
+		Usage:    usageRecorder,
 	})
+}
+
+// agentIDFromEnv beskriver vilken agent som kör.
+//
+// Namnet används för att filtrera kostnader per agent. Det sätts på
+// jobbet, så att det går att se vilken agent som gjorde vad.
+func agentIDFromEnv() string {
+	if raw := os.Getenv("AGENT_ID"); raw != "" {
+		return raw
+	}
+	if hostname, err := os.Hostname(); err == nil && hostname != "" {
+		return "agent:" + hostname
+	}
+	return "agent:agentworker"
 }
 
 // initiatorFromEnv beskriver vem eller vad som startade körningen.

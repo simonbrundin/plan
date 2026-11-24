@@ -485,4 +485,7 @@ type PrioritizedGoal struct {
 // ErrorResponse represents an API error
 type ErrorResponse struct {
 	Message string `json:"message" example:"Error description"`
+	// Details ger mer information om felet - till exempel en budgets
+	// status när en budget stoppade en körning.
+	Details any `json:"details,omitempty"`
 }

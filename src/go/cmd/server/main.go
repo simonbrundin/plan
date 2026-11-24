@@ -213,10 +213,17 @@ func main() {
 
 		// Agent run endpoints
 		agentRunHandler := handlers.NewAgentRunHandler(dbConnected)
+		agentUsageHandler := handlers.NewAgentUsageHandler()
 		api.GET("/agent-runs", agentRunHandler.ListAgentRuns)
 		api.POST("/agent-runs", agentRunHandler.CreateAgentRun)
 		api.PATCH("/agent-runs/:id", agentRunHandler.UpdateAgentRun)
 		api.POST("/agent-runs/:id/cancel", agentRunHandler.CancelAgentRun)
+		api.GET("/agent-runs/:id/usage", agentUsageHandler.GetUsage)
+		api.POST("/agent-runs/:id/usage", agentUsageHandler.RecordUsage)
+		api.GET("/agent-usage", agentUsageHandler.ListUsage)
+		api.GET("/agent-budgets", agentUsageHandler.ListBudgets)
+		api.POST("/agent-budgets", agentUsageHandler.CreateBudget)
+		api.GET("/agent-budgets/:id/status", agentUsageHandler.BudgetStatus)
 		api.GET("/agent-runs/:id/events", agentRunHandler.ListAgentRunEvents)
 		api.POST("/agent-runs/:id/events", agentRunHandler.CreateAgentRunEvent)
 

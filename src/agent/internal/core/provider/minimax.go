@@ -182,6 +182,12 @@ func (p *MinimaxProvider) parseChunk(data []byte, partialMsg *messages.Assistant
 			Delta        map[string]any `json:"delta"`
 			FinishReason string         `json:"finish_reason"`
 		} `json:"choices"`
+		Usage *struct {
+			PromptTokens     int `json:"prompt_tokens"`
+			CompletionTokens int `json:"completion_tokens"`
+			TotalTokens      int `json:"total_tokens"`
+			CachedTokens     int `json:"cached_tokens"`
+		} `json:"usage"`
 		Error *struct {
 			Message string `json:"message"`
 		} `json:"error"`
@@ -189,6 +195,17 @@ func (p *MinimaxProvider) parseChunk(data []byte, partialMsg *messages.Assistant
 
 	if err := json.Unmarshal(data, &parsed); err != nil {
 		return nil, ""
+	}
+
+	// Användningen sparas på meddelandet, så att den kan rapporteras
+	// vidare. Utan den går det inte att räkna ut vad körningen kostade.
+	if parsed.Usage != nil {
+		partialMsg.Usage = &messages.Usage{
+			InputTokens:  parsed.Usage.PromptTokens,
+			OutputTokens: parsed.Usage.CompletionTokens,
+			TotalTokens:  parsed.Usage.TotalTokens,
+			CacheTokens:  parsed.Usage.CachedTokens,
+		}
 	}
 
 	if parsed.Error != nil {

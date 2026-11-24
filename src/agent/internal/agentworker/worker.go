@@ -16,6 +16,7 @@ import (
 	"plan-agent/internal/definer"
 	"plan-agent/internal/planclient"
 	"plan-agent/internal/profile"
+	"plan-agent/internal/runusage"
 )
 
 // Faser och tillstånd speglar agent_runs-tabellen i Plan.
@@ -59,11 +60,24 @@ type CodeRunner interface {
 	Process(ctx context.Context, run planclient.AgentRun, goal planclient.Goal) error
 }
 
+// UsageReporter kan berätta hur mycket tokens en körning har använt.
+//
+// Det är ett valfritt interface - en runner som inte kan rapportera
+// användning ska ändå fungera.
+type UsageReporter interface {
+	Usage() runusage.Snapshot
+}
+
 type Worker struct {
 	planClient   *planclient.Client
 	definer      GoalDefiner
 	codeRunner   CodeRunner
 	pollInterval time.Duration
+	// provider, model och agentID beskriver vem som kör och med vad.
+	// Plan behöver dem för att prissätta körningen.
+	provider string
+	model    string
+	agentID  string
 	// onlyGoalId begränsar workern till ett mål. Noll betyder alla.
 	onlyGoalId int64
 	// initiator beskriver vem eller vad som startade körningen.
@@ -95,6 +109,13 @@ type Config struct {
 	// Det används när workern körs i ett Kubernetes Job - jobbet ska avslutas
 	// när uppgiften är klar, inte köra i evighet.
 	StopWhenFinished bool
+	// Provider och Model beskriver vilken modell agenten använder. Plan
+	// behöver dem för att räkna fram kostnaden.
+	Provider string
+	Model    string
+	// AgentID identifierar agenten. Den gör att kostnader går att
+	// filtrera per agent.
+	AgentID string
 }
 
 // New creates a worker that defines the goals marked for agent work
@@ -127,6 +148,9 @@ func New(planClient *planclient.Client, goalDefiner GoalDefiner, cfg Config) *Wo
 		initiator:        cfg.Initiator,
 		profile:          agentProfile.Name,
 		stopWhenFinished: cfg.StopWhenFinished,
+		provider:         cfg.Provider,
+		model:            cfg.Model,
+		agentID:          cfg.AgentID,
 	}
 }
 
@@ -446,6 +470,7 @@ func (w *Worker) closeRunWithoutChanges(ctx context.Context, goal planclient.Goa
 		Payload: map[string]any{"reason": "profile does not allow code changes", "profile": w.profile},
 	})
 
+	w.reportUsage(ctx, run.ID)
 	return nil
 }
 
@@ -458,6 +483,9 @@ func (w *Worker) startCodeRun(ctx context.Context, goal planclient.Goal, hasRun 
 			GoalID:       goal.ID,
 			Phase:        PhasePlan,
 			Status:       StatusRunning,
+			AgentID:      w.agentID,
+			Provider:     w.provider,
+			Model:        w.model,
 			Trigger:      TriggerAgent,
 			Initiator:    w.initiator,
 			AgentProfile: w.profile,
@@ -498,6 +526,9 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 		created, err := w.planClient.CreateAgentRun(ctx, planclient.CreateAgentRunRequest{
 			GoalID:       goal.ID,
 			Phase:        PhaseDefine,
+			AgentID:      w.agentID,
+			Provider:     w.provider,
+			Model:        w.model,
 			Status:       StatusRunning,
 			Trigger:      TriggerAgent,
 			Initiator:    w.initiator,
@@ -605,6 +636,43 @@ func (w *Worker) syncPhase(ctx context.Context, goalID, runID int64, phase strin
 	return nil
 }
 
+// reportUsage rapporterar tokenanvändningen för en körning.
+//
+// Plan räknar fram kostnaden ur sin prislista. Agenten skickar bara
+// användningen, så att priset gäller likadant för alla körningar.
+//
+// Ett fel här ska inte stoppa arbetet - kostnaden får komma i efterhand.
+func (w *Worker) reportUsage(ctx context.Context, runID int64) {
+	reporter, ok := w.codeRunner.(UsageReporter)
+	if !ok {
+		return
+	}
+
+	snapshot := reporter.Usage()
+	startedAt := snapshot.StartedAt.UTC()
+	finishedAt := snapshot.FinishedAt.UTC()
+
+	if err := w.planClient.RecordAgentRunUsage(ctx, runID, planclient.AgentRunUsageRequest{
+		AgentID:         w.agentID,
+		Provider:        snapshot.Provider,
+		Model:           snapshot.Model,
+		ModelVersion:    snapshot.ModelVersion,
+		InputTokens:     snapshot.InputTokens,
+		OutputTokens:    snapshot.OutputTokens,
+		CacheReadTokens: snapshot.CacheReadTokens,
+		ToolCalls:       snapshot.ToolCalls,
+		ToolNames:       snapshot.ToolNames,
+		StartedAt:       &startedAt,
+		FinishedAt:      &finishedAt,
+	}); err != nil {
+		log.Printf("Failed to report usage for run %d: %v", runID, err)
+		return
+	}
+
+	log.Printf("Reported usage for run %d: %d input, %d output tokens",
+		runID, snapshot.InputTokens, snapshot.OutputTokens)
+}
+
 // failRun marks a run as failed so the goal does not get stuck
 func (w *Worker) failRun(ctx context.Context, runID int64, cause error) {
 	status := StatusFailed
@@ -626,6 +694,8 @@ func (w *Worker) failRun(ctx context.Context, runID int64, cause error) {
 			"error": cause.Error(),
 		},
 	})
+
+	w.reportUsage(ctx, runID)
 }
 
 // PollIntervalFromEnv reads the poll interval from the environment

@@ -152,6 +152,14 @@ func (p *OpenAIProvider) parseChunk(raw json.RawMessage, partialMsg *messages.As
 			Delta        map[string]any `json:"delta"`
 			FinishReason string         `json:"finish_reason"`
 		} `json:"choices"`
+		Usage *struct {
+			PromptTokens        int `json:"prompt_tokens"`
+			CompletionTokens    int `json:"completion_tokens"`
+			TotalTokens         int `json:"total_tokens"`
+			PromptTokensDetails *struct {
+				CachedTokens int `json:"cached_tokens"`
+			} `json:"prompt_tokens_details"`
+		} `json:"usage"`
 		Error *struct {
 			Message string `json:"message"`
 		} `json:"error"`
@@ -159,6 +167,21 @@ func (p *OpenAIProvider) parseChunk(raw json.RawMessage, partialMsg *messages.As
 
 	if err := json.Unmarshal(raw, &data); err != nil {
 		return nil, ""
+	}
+
+	// Användningen sparas på meddelandet, så att den kan rapporteras
+	// vidare. Utan den går det inte att räkna ut vad körningen kostade.
+	if data.Usage != nil {
+		cached := 0
+		if data.Usage.PromptTokensDetails != nil {
+			cached = data.Usage.PromptTokensDetails.CachedTokens
+		}
+		partialMsg.Usage = &messages.Usage{
+			InputTokens:  data.Usage.PromptTokens,
+			OutputTokens: data.Usage.CompletionTokens,
+			TotalTokens:  data.Usage.TotalTokens,
+			CacheTokens:  cached,
+		}
 	}
 
 	if data.Error != nil {

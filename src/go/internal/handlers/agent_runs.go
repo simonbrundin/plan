@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,12 +18,14 @@ import (
 type AgentRunHandler struct {
 	repo      *repository.AgentRunRepository
 	eventRepo *repository.AgentRunEventRepository
+	usageRepo *repository.AgentUsageRepository
 }
 
 func NewAgentRunHandler(dbConnected bool) *AgentRunHandler {
 	return &AgentRunHandler{
 		repo:      repository.NewAgentRunRepository(),
 		eventRepo: repository.NewAgentRunEventRepository(),
+		usageRepo: repository.NewAgentUsageRepository(),
 	}
 }
 
@@ -113,13 +116,32 @@ func (h *AgentRunHandler) CreateAgentRun(c *gin.Context) {
 		}
 	}
 
-	run, err := h.repo.Create(c.Request.Context(), userID, req)
+	run, warning, err := h.repo.Create(c.Request.Context(), userID, req)
 	if err != nil {
+		// En budget som är slut stoppar körningen. Då ska skälet fram,
+		// inte bara ett felmeddelande.
+		var budgetErr *models.BudgetExceededError
+		if errors.As(err, &budgetErr) {
+			c.JSON(http.StatusConflict, models.ErrorResponse{
+				Message: budgetErr.Error(),
+				Details: budgetErr.Status,
+			})
+			return
+		}
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, run)
+	c.JSON(http.StatusCreated, agentRunResponse{AgentRun: run, BudgetWarning: warning})
+}
+
+// agentRunResponse är svaret när en körning skapas.
+//
+// BudgetWarning finns med när varningsgränsen är nådd - körningen får
+// starta, men människan behöver veta att budgeten är nära slut.
+type agentRunResponse struct {
+	*models.AgentRun
+	BudgetWarning *models.BudgetStatus `json:"budget_warning,omitempty"`
 }
 
 // UpdateAgentRun godoc
@@ -203,8 +225,24 @@ func (h *AgentRunHandler) UpdateAgentRun(c *gin.Context) {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
 		return
 	}
+	if models.IsTerminalAgentRunStatus(run.Status) {
+		h.ensureUsageRow(c, userID, runID)
+	}
 
 	c.JSON(http.StatusOK, run)
+}
+
+// ensureUsageRow skapar en kostnadsrad om körningen saknar en.
+//
+// Varje avslutad körning ska ha en rad - annars ser det ut som att
+// agenten aldrig kostade något. Raden markeras som ofullständig när
+// agenten inte hann rapportera användningen.
+func (h *AgentRunHandler) ensureUsageRow(c *gin.Context, userID, runID int64) {
+	if err := h.usageRepo.EnsureRow(c.Request.Context(), userID, runID); err != nil {
+		// Körningen är sparad. Att kostnadsraden saknas får inte stoppa
+		// svaret - det loggas i stället.
+		log.Printf("Failed to ensure usage row for run %d: %v", runID, err)
+	}
 }
 
 // CancelAgentRun godoc
@@ -265,6 +303,8 @@ func (h *AgentRunHandler) CancelAgentRun(c *gin.Context) {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "Agent run not found"})
 		return
 	}
+
+	h.ensureUsageRow(c, userID, runID)
 
 	// Händelsen gör det synligt i historiken att det var en människa som
 	// avbröt - inte ett fel.

@@ -71,6 +71,10 @@ func agentScopeAllowsAgentRuns(method string, rest []string) bool {
 			return method == http.MethodGet || method == http.MethodPost
 		case "approvals":
 			return method == http.MethodGet || method == http.MethodPost
+		case "usage":
+			// Agenten rapporterar sin användning. Den får inte radera
+			// eller ändra den i efterhand.
+			return method == http.MethodGet || method == http.MethodPost
 		}
 	}
 

@@ -72,6 +72,9 @@ type AssistantMessage struct {
 	Content    []ContentBlock `json:"content"`
 	StopReason string         `json:"stopReason,omitempty"`
 	Timestamp  int64          `json:"timestamp"`
+	// Usage är tokenanvändningen för svaret. Den fylls i av
+	// providern när svaret kommer.
+	Usage *Usage `json:"usage,omitempty"`
 }
 
 func (a *AssistantMessage) GetRole() string            { return string(a.Role) }
@@ -110,4 +113,7 @@ type Usage struct {
 	InputTokens  int `json:"inputTokens,omitempty"`
 	OutputTokens int `json:"outputTokens,omitempty"`
 	TotalTokens  int `json:"totalTokens,omitempty"`
+	// CacheTokens är tokens som lästs från modellens cache. De
+	// räknas separat eftersom de har ett eget pris.
+	CacheTokens int `json:"cacheTokens,omitempty"`
 }

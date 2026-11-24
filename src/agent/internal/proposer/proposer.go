@@ -16,6 +16,7 @@ import (
 	"plan-agent/internal/core/messages"
 	"plan-agent/internal/core/provider"
 	"plan-agent/internal/executor"
+	"plan-agent/internal/runusage"
 	"plan-agent/internal/workspace"
 )
 
@@ -35,11 +36,19 @@ type Proposal struct {
 type Proposer struct {
 	provider provider.LLMProvider
 	model    provider.Model
+	// usage samlar tokenanvändningen för körningen. Den kan vara nil -
+	// då rapporteras ingen användning.
+	usage *runusage.Recorder
 }
 
 // New skapar en proposer.
 func New(provider provider.LLMProvider, model provider.Model) *Proposer {
 	return &Proposer{provider: provider, model: model}
+}
+
+// WithUsage kopplar en recorder för tokenanvändning.
+func (p *Proposer) WithUsage(recorder *runusage.Recorder) {
+	p.usage = recorder
 }
 
 // Propose läser repot och föreslår en ändring för ett mål.
@@ -92,6 +101,7 @@ func (p *Proposer) proposeOnce(ctx context.Context, ws *workspace.Workspace, goa
 		case *provider.TextDeltaEvent:
 			response.WriteString(e.Delta)
 		case *provider.DoneEvent:
+			p.recordUsage(e.Message.Usage)
 			proposal, err := parseProposal(response.String())
 			if err != nil {
 				return nil, err
@@ -104,6 +114,14 @@ func (p *Proposer) proposeOnce(ctx context.Context, ws *workspace.Workspace, goa
 	}
 
 	return nil, fmt.Errorf("stream ended without completion")
+}
+
+// recordUsage sparar tokenanvändningen om en recorder är kopplad.
+func (p *Proposer) recordUsage(usage *messages.Usage) {
+	if p.usage == nil {
+		return
+	}
+	p.usage.Record(usage)
 }
 
 // Revise rättar ett förslag vars egen verifiering inte gick igenom.
@@ -133,6 +151,7 @@ func (p *Proposer) Revise(ctx context.Context, ws *workspace.Workspace, goalTitl
 		case *provider.TextDeltaEvent:
 			response.WriteString(e.Delta)
 		case *provider.DoneEvent:
+			p.recordUsage(e.Message.Usage)
 			revised, err := parseProposal(response.String())
 			if err != nil {
 				return nil, err
@@ -174,6 +193,7 @@ func (p *Proposer) FixTest(ctx context.Context, ws *workspace.Workspace, goalTit
 		case *provider.TextDeltaEvent:
 			response.WriteString(e.Delta)
 		case *provider.DoneEvent:
+			p.recordUsage(e.Message.Usage)
 			return parseTestCommand(response.String()), nil
 		case *provider.ErrorEvent:
 			return "", e.Error

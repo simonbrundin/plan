@@ -81,6 +81,29 @@ type CreateAgentRunRequest struct {
 	Result         string  `json:"result,omitempty"`
 	ArtifactURL    *string `json:"artifact_url,omitempty"`
 	ConversationID *string `json:"conversation_id,omitempty"`
+	// AgentID identifierar agenten. Den används för att filtrera
+	// kostnader per agent.
+	AgentID string `json:"agent_id,omitempty"`
+	// Provider och Model behövs för att Plan ska kunna räkna fram
+	// kostnaden ur prislistan.
+	Provider     string `json:"provider,omitempty"`
+	Model        string `json:"model,omitempty"`
+	ModelVersion string `json:"model_version,omitempty"`
+}
+
+// AgentRunUsageRequest rapporterar tokenanvändningen för en körning.
+type AgentRunUsageRequest struct {
+	AgentID         string     `json:"agent_id,omitempty"`
+	Provider        string     `json:"provider,omitempty"`
+	Model           string     `json:"model,omitempty"`
+	ModelVersion    string     `json:"model_version,omitempty"`
+	InputTokens     int        `json:"input_tokens"`
+	OutputTokens    int        `json:"output_tokens"`
+	CacheReadTokens int        `json:"cache_read_tokens"`
+	ToolCalls       int        `json:"tool_calls"`
+	ToolNames       []string   `json:"tool_names,omitempty"`
+	StartedAt       *time.Time `json:"started_at,omitempty"`
+	FinishedAt      *time.Time `json:"finished_at,omitempty"`
 }
 
 // UpdateAgentRunRequest updates an existing agent run
@@ -379,6 +402,14 @@ func (c *Client) CreateAgentRun(ctx context.Context, req CreateAgentRunRequest) 
 		return nil, err
 	}
 	return &run, nil
+}
+
+// RecordAgentRunUsage reports the token usage of an agent run.
+//
+// Only the usage is reported - Plan calculates the cost from its versioned
+// price list, so every run uses the same prices.
+func (c *Client) RecordAgentRunUsage(ctx context.Context, id int64, req AgentRunUsageRequest) error {
+	return c.do(ctx, http.MethodPost, fmt.Sprintf("/api/v1/agent-runs/%d/usage", id), req, nil)
 }
 
 // CreateAgentRunEvent appends a structured event to an AgentRun.

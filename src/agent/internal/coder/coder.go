@@ -17,8 +17,17 @@ import (
 	"plan-agent/internal/planclient"
 	"plan-agent/internal/profile"
 	"plan-agent/internal/proposer"
+	"plan-agent/internal/runusage"
 	"plan-agent/internal/workspace"
 )
+
+// ProposerWithUsage kan ta emot en recorder för tokenanvändning.
+//
+// Det är ett valfritt interface - en proposer som inte kan samla
+// användning fungerar ändå.
+type ProposerWithUsage interface {
+	WithUsage(recorder *runusage.Recorder)
+}
 
 // Proposer föreslår kodändringar.
 type Proposer interface {
@@ -31,6 +40,8 @@ type Proposer interface {
 type Coder struct {
 	planClient *planclient.Client
 	proposer   Proposer
+	// usage samlar tokenanvändningen för körningen. Den kan vara nil.
+	usage *runusage.Recorder
 	// repoPath är repot som kodändringen görs i.
 	repoPath string
 	// maxDiffLines begränsar hur stor del av diffen som sparas i historiken.
@@ -43,6 +54,18 @@ type Config struct {
 	RepoPath string
 	// MaxDiffLines begränsar diffen som sparas i historiken.
 	MaxDiffLines int
+	// Usage samlar tokenanvändningen för körningen. Den kan vara nil.
+	Usage *runusage.Recorder
+}
+
+// Usage returnerar den samlade tokenanvändningen för körningen.
+//
+// Workern använder den för att rapportera kostnaden till Plan.
+func (c *Coder) Usage() runusage.Snapshot {
+	if c.usage == nil {
+		return runusage.Snapshot{}
+	}
+	return c.usage.Snapshot()
 }
 
 // New skapar en coder.
@@ -52,12 +75,20 @@ func New(planClient *planclient.Client, proposer Proposer, cfg Config) *Coder {
 		maxLines = 200
 	}
 
-	return &Coder{
+	coder := &Coder{
 		planClient:   planClient,
 		proposer:     proposer,
 		repoPath:     cfg.RepoPath,
 		maxDiffLines: maxLines,
 	}
+
+	// Proposern samlar användningen när den kan det.
+	if aware, ok := proposer.(ProposerWithUsage); ok && cfg.Usage != nil {
+		aware.WithUsage(cfg.Usage)
+		coder.usage = cfg.Usage
+	}
+
+	return coder
 }
 
 // Process tar hand om ett mål som är redo för kodändring.
@@ -298,6 +329,8 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 		"branch":        result.Branch,
 	})
 
+	c.reportUsage(ctx, run.ID)
+
 	log.Printf("Goal #%d executed and verified", goal.ID)
 	return nil
 }
@@ -440,6 +473,35 @@ func (c *Coder) record(ctx context.Context, runID int64, eventType string, paylo
 }
 
 // fail markerar körningen som misslyckad.
+// reportUsage rapporterar tokenanvändningen för körningen till Plan.
+//
+// Plan räknar fram kostnaden. Ett fel här får inte stoppa körningen -
+// kostnaden kan rapporteras i efterhand.
+func (c *Coder) reportUsage(ctx context.Context, runID int64) {
+	if c.usage == nil {
+		return
+	}
+
+	snapshot := c.usage.Snapshot()
+	startedAt := snapshot.StartedAt.UTC()
+	finishedAt := snapshot.FinishedAt.UTC()
+
+	if err := c.planClient.RecordAgentRunUsage(ctx, runID, planclient.AgentRunUsageRequest{
+		Provider:        snapshot.Provider,
+		Model:           snapshot.Model,
+		ModelVersion:    snapshot.ModelVersion,
+		InputTokens:     snapshot.InputTokens,
+		OutputTokens:    snapshot.OutputTokens,
+		CacheReadTokens: snapshot.CacheReadTokens,
+		ToolCalls:       snapshot.ToolCalls,
+		ToolNames:       snapshot.ToolNames,
+		StartedAt:       &startedAt,
+		FinishedAt:      &finishedAt,
+	}); err != nil {
+		log.Printf("Failed to report usage for run %d: %v", runID, err)
+	}
+}
+
 func (c *Coder) fail(ctx context.Context, runID int64, cause error) {
 	status := "failed"
 	summary := "Kodändringen misslyckades: " + cause.Error()
