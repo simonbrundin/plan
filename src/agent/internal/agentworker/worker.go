@@ -284,7 +284,45 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 		}
 	}
 
+	// Ett jobb finns för att utföra en körning. När körningen är klar är
+	// jobbet klart - det ska inte stå och vänta på en fas som aldrig
+	// kommer, som när en livsprofil lämnar målet i planfasen.
+	if w.stopWhenFinished && w.onlyGoalId != 0 {
+		done, err := w.goalRunDone(ctx, w.onlyGoalId)
+		if err != nil {
+			log.Printf("Failed to check whether goal #%d is finished: %v", w.onlyGoalId, err)
+		} else if done {
+			return ErrFinished
+		}
+	}
+
 	return nil
+}
+
+// goalRunDone berättar om den senaste körningen för målet är klar.
+func (w *Worker) goalRunDone(ctx context.Context, goalID int64) (bool, error) {
+	runs, err := w.planClient.GetAgentRuns(ctx, nil)
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch agent runs: %w", err)
+	}
+
+	var latest planclient.AgentRun
+	found := false
+	for _, run := range runs {
+		if run.GoalID != goalID {
+			continue
+		}
+		if !found || run.ID > latest.ID {
+			latest = run
+			found = true
+		}
+	}
+
+	if !found {
+		return false, nil
+	}
+
+	return latest.Status == StatusDone, nil
 }
 
 // runQueued tar över en köad körning och utför arbetet i den.
@@ -351,12 +389,17 @@ func (w *Worker) isFinished(goal planclient.Goal, run planclient.AgentRun, hasRu
 		return false
 	}
 
+	// En profil som får röra kod flyttar målet till verify när ändringen
+	// är verifierad. Då är jobbet klart.
 	verifyStatusID, err := w.planClient.GetStatusIDByName(context.Background(), PhaseVerify)
-	if err != nil {
-		return false
+	if err == nil && goal.StatusID == verifyStatusID {
+		return true
 	}
 
-	return goal.StatusID == verifyStatusID
+	// En profil som inte får röra kod lämnar målet i plan - men körningen
+	// är klar, och jobbet ska inte stå och vänta på en fas som aldrig
+	// kommer.
+	return w.codeRunner == nil
 }
 
 // closeRunWithoutChanges avslutar en körning som inte får göra

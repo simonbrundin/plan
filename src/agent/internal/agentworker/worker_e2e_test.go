@@ -3,6 +3,7 @@ package agentworker
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -464,5 +465,44 @@ func TestDefinieradKörningSlutarMedRunCompleted(t *testing.T) {
 	}
 	if !completed {
 		t.Errorf("händelser = %v, vill ha run_completed", events)
+	}
+}
+
+// TestJobbetAvslutasNärKörningenÄrKlar verifierar att en jobbworker
+// lämnar jobbet så snart körningen är klar - även om målet inte har nått
+// verifieringsfasen, som när en livsprofil lämnar målet i planfasen.
+func TestJobbetAvslutasNärKörningenÄrKlar(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/goals":
+			_ = json.NewEncoder(w).Encode([]planclient.Goal{})
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/statuses":
+			_ = json.NewEncoder(w).Encode([]planclient.Status{
+				{ID: 1, Name: PhaseDefine},
+				{ID: 2, Name: PhasePlan},
+			})
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/agent-runs":
+			// Den senaste körningen är klar.
+			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{
+				{ID: 10, GoalID: 42, Phase: PhasePlan, Status: StatusDone},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	t.Setenv("PLAN_API_URL", server.URL)
+	t.Setenv("PLAN_API_KEY", "test-key")
+	client, err := planclient.New()
+	if err != nil {
+		t.Fatalf("create Plan API client: %v", err)
+	}
+
+	worker := New(client, fakeDefiner{}, Config{OnlyGoalId: 42, Profile: "life", StopWhenFinished: true})
+	err = worker.RunOnce(context.Background())
+	if !errors.Is(err, ErrFinished) {
+		t.Errorf("fel = %v, vill ha %v", err, ErrFinished)
 	}
 }
