@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strings"
 
+	"plan-agent/internal/runusage"
 	"plan-agent/internal/workspace"
 )
 
@@ -51,6 +52,9 @@ type Result struct {
 // Executor utför kodändringar i en isolerad workspace.
 type Executor struct {
 	ws *workspace.Workspace
+	// usage registrerar vilka verktyg som användes, så att kostnadsrapporten
+	// visar vad agenten faktiskt gjorde. Den kan vara nil.
+	usage *runusage.Recorder
 }
 
 // New skapar en executor som arbetar i en kopia av source.
@@ -60,6 +64,12 @@ func New(source string) (*Executor, error) {
 		return nil, fmt.Errorf("failed to create workspace: %w", err)
 	}
 	return &Executor{ws: ws}, nil
+}
+
+// WithUsage kopplar en recorder för tokenanvändning till exekveringen.
+func (e *Executor) WithUsage(recorder *runusage.Recorder) *Executor {
+	e.usage = recorder
+	return e
 }
 
 // Workspace ger tillgång till arbetsytan - till exempel för att läsa filer.
@@ -84,6 +94,7 @@ func (e *Executor) Execute(ctx context.Context, req Request) (*Result, error) {
 		if err := e.ws.Write(change.Path, change.Content); err != nil {
 			return nil, fmt.Errorf("failed to apply change to %s: %w", change.Path, err)
 		}
+		e.recordTool("write_file")
 	}
 
 	changed, err := e.ws.ChangedFiles()
@@ -105,6 +116,7 @@ func (e *Executor) Execute(ctx context.Context, req Request) (*Result, error) {
 		return result, nil
 	}
 
+	e.recordTool("run_test")
 	output, testErr := e.ws.RunShell(req.TestCommand)
 	result.TestOutput = output
 	result.TestsPassed = testErr == nil
@@ -113,6 +125,14 @@ func (e *Executor) Execute(ctx context.Context, req Request) (*Result, error) {
 	}
 
 	return result, nil
+}
+
+// recordTool registrerar ett verktygsanrop, om en recorder är kopplad.
+func (e *Executor) recordTool(name string) {
+	if e.usage == nil {
+		return
+	}
+	e.usage.RecordTool(name)
 }
 
 // Commit lägger ändringen på en branch i källrepoet.

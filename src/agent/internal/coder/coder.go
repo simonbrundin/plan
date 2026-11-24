@@ -238,6 +238,9 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 	}
 
 	exec, err := executor.New(c.repoPath)
+	if err == nil {
+		exec.WithUsage(c.usage)
+	}
 	if err != nil {
 		c.fail(ctx, run.ID, err)
 		return fmt.Errorf("failed to create executor: %w", err)
@@ -556,6 +559,9 @@ func (c *Coder) verifyProposal(ctx context.Context, proposal *proposer.Proposal)
 	}
 
 	exec, err := executor.New(c.repoPath)
+	if err == nil {
+		exec.WithUsage(c.usage)
+	}
 	if err != nil {
 		return verification{passed: false, output: err.Error()}
 	}

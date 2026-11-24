@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"plan-agent/internal/runusage"
 	"strings"
 	"testing"
 )
@@ -195,5 +196,27 @@ func writeFile(t *testing.T, path, content string) {
 	}
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		t.Fatalf("write: %v", err)
+	}
+}
+
+// TestVerktygsanropRegistreras kontrollerar att exekveraren rapporterar
+// vilka verktyg som användes - det ska gå att se i kostnadsrapporten.
+func TestVerktygsanropRegistreras(t *testing.T) {
+	recorder := runusage.New("minimax", "MiniMax-M2.7")
+
+	executor := &Executor{usage: recorder}
+	executor.recordTool("write_file")
+	executor.recordTool("run_test")
+	executor.recordTool("write_file")
+
+	snapshot := recorder.Snapshot()
+	if snapshot.ToolCalls != 3 {
+		t.Errorf("tool calls = %d, vill ha 3", snapshot.ToolCalls)
+	}
+	if len(snapshot.ToolNames) != 2 {
+		t.Errorf("tool names = %v, vill ha två", snapshot.ToolNames)
+	}
+	if snapshot.ToolNames[0] != "run_test" || snapshot.ToolNames[1] != "write_file" {
+		t.Errorf("tool names = %v, vill ha sorterade", snapshot.ToolNames)
 	}
 }
