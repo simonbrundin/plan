@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 346 |
+| Noter | 349 |
 
 ## Entiteter
 
@@ -181,6 +181,8 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/lunchdeploy-triggas-fran-cronjob-pa-pxe]] - Veckovis deploy av lunchsidan triggas från **pxe-serven** (Raspberry Pi, _(uppdaterad 2026-11-23)_
 - [[notes/lunchmenyn-delar-en-modell-mellan-byggskript-och-webblasare]] - Hamtningen av matochmat.se ligger nu i src/nuxt/app/utils/lunchSource.ts och anvands av bade scripts/fetch-lunch.ts (byggtid, skriver app... _(uppdaterad 2026-11-06)_
 - [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]] - Efter att Neon-token hamnat i git-historiken i dotfiles (privat repo) roterades nyckeln: gammal nyckel (id 3491077) revokerad via console... _(uppdaterad 2026-11-17)_
+- [[notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24]] - ENDAST Apple-filer (EFI/APPLE/...) - ingen Talos bootloader där. _(uppdaterad 2026-11-24)_
+- [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] - 1. _(uppdaterad 2026-11-24)_
 - [[notes/mailagent-bygget-brot-pa-ofardig-kameo-integration]] - Dockerbygget för mailagent bröt eftersom en pågående Kameo-integration hade lämnat src/go/kameo/client.go med oanvänd os/exec-impor... _(uppdaterad 2026-11-16)_
 - [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]] - När inkorgen hämtas (/mail -> "Hämta mejl") expanderas nu bifogade .eml-filer _(uppdaterad 2026-11-18)_
 - [[notes/mailagenten-flyttad-fran-mailmaster-repot-in-i-pappa]] - Mailmaster-repot (~/repos/mailmaster) är nu arkiv. _(uppdaterad 2026-11-17)_
@@ -394,6 +396,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/worker-4-ateransluten-till-cluster1-via-lokalt-sd-kort]] - worker-4 bootade från sitt lokala SD-kort utan PXE. _(uppdaterad 2026-11-22)_
 - [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]] - Worker-7 (10.10.10.27) svarar på port 10250 med ett kubelet-serving-certifikat (CN=system:node:worker-7, O=system:nodes, EKU serverAuth,... _(uppdaterad 2026-11-23)_
 - [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]] - Symtom (2026-11-23): worker-8 (10.10.10.28) var medlem i Talos-klustret (talosctl get members) och svarade pa Talos-API:t, men syntes int... _(uppdaterad 2026-11-23)_
+- [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] - Noden 10.10.10.29 (MAC a0:ce:c8:d9:0d:02, UniFi 'MinisomhorSIMON') ar UP: _(uppdaterad 2026-11-24)_
 - [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] - Status 2026-11-13: PXE-servern (10.10.10.2, UniFi-switch port 8, hostname 'pxe', MAC 2c:cf:67:43:f3:b0) var igang och serverkedaan ar hel... _(uppdaterad 2026-11-20)_
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
 - [[notes/aterkommande-mal-samma-malobjekt-med-upprepningsregel]] - Återkommande mål (t.ex. _(uppdaterad 2026-11-18)_

@@ -2564,3 +2564,18 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9]] — ny sida från inboxen
 - [archive] 2026-11-24-ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9.md
 
+
+## [2026-11-24] ingest | create notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24
+- [create] [[notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24]] — ny sida från inboxen
+- [archive] 2026-11-24-mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24.md
+
+
+## [2026-11-24] ingest | create notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie
+- [create] [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] — ny sida från inboxen
+- [archive] 2026-11-24-worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie.md
+
+
+## [2026-11-24] ingest | create notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24
+- [create] [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] — ny sida från inboxen
+- [archive] 2026-11-24-mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24.md
+

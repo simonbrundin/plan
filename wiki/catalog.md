@@ -160,6 +160,8 @@ finns i `index.md`.
 | [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]] | Lösning: 1Password-backed env-variabel för MCP-tokens | note | säkerhet, dotfiles, mcp, 1password, projekt:simon | 2026-11-17 | 1 |
 | [[notes/lunchdeploy-triggas-fran-cronjob-pa-pxe]] | Lunchdeploy triggas från cronjob på pxe | note | ci, lunch, github-actions, pxe, projekt:stk | 2026-11-23 | 0 |
 | [[notes/lunchmenyn-delar-en-modell-mellan-byggskript-och-webblasare]] | Lunchmenyn delar en modell mellan byggskript och webblasare | note | lunch, arkitektur, beslut, projekt:stk | 2026-11-06 | 0 |
+| [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] | Mac mini crashar varje gang man monterar den externa USB-stickan (msdosfs) - 2026-11-24 | note | macmini, usb, crash, incident, felsokning, projekt:simon | 2026-11-24 | 0 |
+| [[notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24]] | Mac mini (worker-9) har en bootbar Talos-USB - och dog under inspektion 2026-11-24 | note | worker-9, macmini, talos, usb, incident, projekt:simon | 2026-11-24 | 0 |
 | [[notes/mailagent-bygget-brot-pa-ofardig-kameo-integration]] | Mailagent-bygget bröt på ofärdig Kameo-integration | note | bug, mailagent, go, build, projekt:pappa | 2026-11-16 | 0 |
 | [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]] | Mailagenten expanderar bifogade .eml till egna mejl | note | feature, mail, imap, projekt:pappa | 2026-11-18 | 1 |
 | [[notes/mailagenten-flyttad-fran-mailmaster-repot-in-i-pappa]] | Mailagenten flyttad från mailmaster-repot in i pappa | note | mail, flytt, kluster, nuxt, go, projekt:pappa | 2026-11-17 | 3 |
@@ -374,6 +376,7 @@ finns i `index.md`.
 | [[notes/worker-4-utan-pxe-talos-installation-pa-microsd-kortet-via-image-factory-grub-layout]] | worker-4 utan PXE: Talos-installation pa microSD-kortet via Image Factory (GRUB-layout) | note | worker-4, rock4se, talos, pxe, image-factory, beslut, projekt:infrastructure | 2026-11-22 | 0 |
 | [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]] | Worker-7:s kubeletcertifikat signerades av en gammal Kubernetes-CA som finns kvar i git-historiken | note | pki, kubernetes, talos, worker, git-historia, projekt:infrastructure | 2026-11-23 | 2 |
 | [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]] | worker-8: korrupt XFS pa EPHEMERAL-partitionen gjorde att kubelet aldrig startade - fix med mkfs.xfs | note | worker-8, talos, xfs, felsokning, pxe, projekt:infrastructure | 2026-11-23 | 2 |
+| [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] | worker-9 (Mac mini) bootade Talos fran USB men Talos-API:t (50000) startar inte - noden ar en zombie | note | worker-9, macmini, talos, usb, incident, felsokning, projekt:simon | 2026-11-24 | 0 |
 | [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] | Workers bootar inte via PXE trots fungerande PXE-server - UniFi PoE-styrning via rest/device | note | pxe, unifi, workers, felsokning, projekt:infrastructure | 2026-11-20 | 2 |
 | [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] | workmux merge misslyckas i huvud-worktree - kora kommandot i feature-worktreet | note | workmux, git, worktree, bug, projekt:agents | 2026-11-20 | 0 |
 | [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] | 16x1 HDMI KVM - RS232/LAN-protokoll | summary | kvm, rs232, protokoll, projekt:simon | 2026-11-13 | 2 |
@@ -455,6 +458,7 @@ finns i `index.md`.
 - `controlplane` (3)
 - `cookie` (1)
 - `cors` (1)
+- `crash` (1)
 - `csi` (1)
 - `csr` (1)
 - `css` (3)
@@ -502,7 +506,7 @@ finns i `index.md`.
 - `feature` (81)
 - `feedback` (1)
 - `felle` (1)
-- `felsokning` (17)
+- `felsokning` (19)
 - `figma` (1)
 - `filter` (2)
 - `fix` (1)
@@ -553,7 +557,7 @@ finns i `index.md`.
 - `image-factory` (2)
 - `imap` (11)
 - `import` (1)
-- `incident` (9)
+- `incident` (12)
 - `incidents` (1)
 - `infra` (2)
 - `infrastructure` (4)
@@ -613,7 +617,7 @@ finns i `index.md`.
 - `longhorn` (3)
 - `lunch` (2)
 - `lärdom` (1)
-- `macmini` (1)
+- `macmini` (4)
 - `mail` (20)
 - `mailagent` (3)
 - `mailmaster` (8)
@@ -704,7 +708,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (72)
+- `projekt:simon` (75)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -783,7 +787,7 @@ finns i `index.md`.
 - `säkerhet` (8)
 - `tags` (1)
 - `tailwind` (2)
-- `talos` (30)
+- `talos` (32)
 - `tangent` (1)
 - `tangentbord` (2)
 - `teknik` (1)
@@ -812,7 +816,7 @@ finns i `index.md`.
 - `unifi` (8)
 - `uppdrag` (1)
 - `urval` (1)
-- `usb` (1)
+- `usb` (4)
 - `utoipa` (1)
 - `ux` (2)
 - `v1.14` (2)
@@ -830,7 +834,7 @@ finns i `index.md`.
 - `worker-3` (5)
 - `worker-4` (3)
 - `worker-8` (1)
-- `worker-9` (2)
+- `worker-9` (4)
 - `workers` (1)
 - `workflow` (2)
 - `workmux` (1)
