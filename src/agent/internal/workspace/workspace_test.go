@@ -175,6 +175,21 @@ func run(t *testing.T, dir string, args ...string) {
 	}
 }
 
+// initRepo skapar ett git-repo med en identitet och en första commit.
+//
+// Identiteten sätts lokalt i repot - testerna ska inte kräva en global
+// git-identitet, annars faller de på en ren CI-runner.
+func initRepo(t *testing.T) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	run(t, dir, "git", "init", "--initial-branch=main")
+	run(t, dir, "git", "config", "user.email", "test@example.com")
+	run(t, dir, "git", "config", "user.name", "Test")
+	run(t, dir, "git", "commit", "--allow-empty", "-m", "start")
+	return dir
+}
+
 func writeFile(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
@@ -209,11 +224,7 @@ func TestParseGitStatusBehållerSökvägar(t *testing.T) {
 // Arbetsytan klonas lokalt - utan återställd remote når pushen aldrig
 // det riktiga repot.
 func TestWorkspaceÅterställerRemote(t *testing.T) {
-	source := t.TempDir()
-	run(t, source, "git", "init", "--initial-branch=main")
-	run(t, source, "git", "config", "user.email", "test@example.com")
-	run(t, source, "git", "config", "user.name", "Test")
-	run(t, source, "git", "commit", "--allow-empty", "-m", "start")
+	source := initRepo(t)
 	run(t, source, "git", "remote", "add", "origin", "https://github.com/simonbrundin/plan.git")
 
 	ws, err := New(source)
@@ -234,9 +245,7 @@ func TestWorkspaceÅterställerRemote(t *testing.T) {
 // TestWorkspaceSätterIdentitet kontrollerar att agentens commits kan
 // attribueras.
 func TestWorkspaceSätterIdentitet(t *testing.T) {
-	source := t.TempDir()
-	run(t, source, "git", "init", "--initial-branch=main")
-	run(t, source, "git", "commit", "--allow-empty", "--author", "Test <test@example.com>", "-m", "start")
+	source := initRepo(t)
 
 	ws, err := New(source)
 	if err != nil {
@@ -258,9 +267,7 @@ func TestWorkspaceSätterIdentitet(t *testing.T) {
 //
 // "git push -c ..." är inte giltigt - flaggan hör till git, inte till push.
 func TestPushBranchAnvänderRättFlaggor(t *testing.T) {
-	source := t.TempDir()
-	run(t, source, "git", "init", "--initial-branch=main")
-	run(t, source, "git", "commit", "--allow-empty", "--author", "Test <test@example.com>", "-m", "start")
+	source := initRepo(t)
 
 	ws, err := New(source)
 	if err != nil {
