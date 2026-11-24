@@ -1,11 +1,18 @@
 package commands
 
 import (
+	"path/filepath"
 	"testing"
 )
 
+// commandsPath pekar på kommandokatalogens som ligger i repot.
+//
+// Sökvägen räknas ut från testets egen plats - en absolut sökväg skulle
+// fungera på en maskin men inte i CI.
+var commandsPath = filepath.Join("..", "..", "..", "..", "commands")
+
 func TestLoad(t *testing.T) {
-	r, err := Load("/home/simon/repos/agents/src/commands")
+	r, err := Load(commandsPath)
 	if err != nil {
 		t.Fatalf("Load failed: %v", err)
 	}
