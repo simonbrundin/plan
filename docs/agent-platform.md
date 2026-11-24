@@ -200,6 +200,48 @@ Skriptet krypterar varje hemlighet med repoets publika age-nyckel. Tills
 det är gjort är agenten inte utplockad i prod - `environments/prod/patches`
 tar bort agentens deployment och databas.
 
+## Kostnad och budget
+
+Plan äger kostnaden. Agenten rapporterar bara tokenanvändningen - den
+räknar inte själv, så att alla körningar prissätts likadant.
+
+```text
+agent                 Plan
+  │                    │
+  │ användning         │
+  ├───────────────────►│  agent_run_usage
+  │                    │  + kostnad ur prislista
+  │                    │
+  │ ny körning         │
+  ├───────────────────►│  budgetkontroll + reservation
+  │◄───────────────────┤  409 om gränsen är nådd
+```
+
+**Prislistan** versioneras (`src/go/internal/pricing`). Varje usage-rad sparar
+prislistans version, valutan och om priset kom från listan eller från en
+schablon. En okänd modell får aldrig kostnaden noll - då används en
+dokumenterad schablonpris och raden markeras `fallback`.
+
+**Budgetar** (`agent_budgets`) har en period, en hård gräns, en
+varningsgräns och ett valfritt agent-id. Före varje ny körning kontrolleras
+den förbrukade och den reserverade kostnaden i samma transaktion som
+körningen skapas - därför kan inte två samtidiga körningar tillsammans
+överskrida gränsen. En hård gräns ger `409` med `reason=limit_reached`, en
+varningsgräns ger en varning i svaret men stoppar inte, och en okänd
+modellpris ger `reason=unknown_price`.
+
+Terminala körningar har alltid en usage-rad. Om agenten inte hann rapportera
+markeras raden `incomplete`, så att det inte ser ut att kosta noll.
+
+**Användningen måste rapporteras utan strömming.** MiniMax skickar
+användningen i ett eget stycke i det strömmade svaret, och i det vanliga
+svaret saknas den ibland helt. Därför frågar proposern efter användningen
+(`StreamingOptions.Usage`), vilket gör att leverantören svarar utan
+strömming - då kommer både tokenantal och kostnad med.
+
+Översikten finns på `/agent-cost` i gränssnittet och via
+`GET /api/v1/agent-usage` samt `GET /api/v1/agent-budgets`.
+
 ## Human gate i gränssnittet
 
 Godkännandena ligger i Plan (`agent_approvals`), inte i agentens minne. UI:t
