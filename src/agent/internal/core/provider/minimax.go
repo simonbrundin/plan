@@ -68,7 +68,10 @@ func (p *MinimaxProvider) buildRequest(
 	toolDefs []ToolDefinition,
 	opts StreamingOptions,
 ) ([]byte, string, error) {
-	stream := len(toolDefs) == 0
+	// Strömmad respons när det inte finns verktyg. När användningen
+	// efterfrågas används i stället ett vanligt svar - ett strömmat
+	// svar från MiniMax saknar användningen.
+	stream := len(toolDefs) == 0 && !opts.Usage
 
 	reqBody := map[string]any{
 		"model":    model.Name,
