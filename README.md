@@ -139,9 +139,11 @@ An agent run moves through the following phases:
 4. **verify** - run the relevant tests and present the result for human approval.
 5. **completed** - publish the verified branch for review and merge.
 
-A run has one of these statuses: `queued`, `running`, `blocked`, `done`, or
-`failed`. `blocked` means that the agent cannot continue without input or a
-decision; it is not an automatic failure.
+A run has one of these statuses: `queued`, `running`, `blocked`, `done`,
+`failed`, or `cancelled`. `blocked` means that the agent cannot continue
+without input or a decision; it is not an automatic failure. `cancelled` means
+that a human stopped the run - the run keeps its history, and the Kubernetes
+job is cleaned up.
 
 ### Approval and delivery
 
@@ -164,3 +166,13 @@ A complete delivery therefore has the following chain:
 4. The approved change is applied in an isolated workspace.
 5. The relevant tests run successfully.
 6. The agent publishes its branch for human review and merge.
+
+### Cost and budgets
+
+Plan owns the cost. The agent only reports token usage, and Plan prices it
+from a versioned price list, so that every run is priced the same way and the
+cost can be reproduced later. A budget has a period, a hard limit, an optional
+warning limit, and can be limited to a single agent. Before a run starts, the
+spent and the reserved cost are checked in the same transaction as the run is
+created - two simultaneous runs can therefore never exceed the limit together.
+The overview lives at `/agent-cost` in the interface.
