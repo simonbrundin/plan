@@ -18,14 +18,14 @@ import (
 // görs här, med en versionsstyrd prislista, så att kostnaden kan
 // reproduceras.
 type AgentUsageHandler struct {
-	usageRepo   *repository.AgentUsageRepository
+	usageRepo  *repository.AgentUsageRepository
 	budgetRepo *repository.AgentBudgetRepository
 }
 
 // NewAgentUsageHandler skapar en handler för kostnad och budgetar.
 func NewAgentUsageHandler() *AgentUsageHandler {
 	return &AgentUsageHandler{
-		usageRepo:   repository.NewAgentUsageRepository(),
+		usageRepo:  repository.NewAgentUsageRepository(),
 		budgetRepo: repository.NewAgentBudgetRepository(),
 	}
 }
@@ -225,6 +225,83 @@ func (h *AgentUsageHandler) CreateBudget(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, budget)
+}
+
+// UpdateBudget godoc
+// @Summary Update an agent budget
+// @Description Change the limits of an agent budget or pause it.
+// @Tags agent-budgets
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Budget ID"
+// @Param request body models.UpdateAgentBudgetRequest true "Changes to apply"
+// @Success 200 {object} models.AgentBudget
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/agent-budgets/{id} [patch]
+func (h *AgentUsageHandler) UpdateBudget(c *gin.Context) {
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	budgetID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid budget ID"})
+		return
+	}
+
+	var req models.UpdateAgentBudgetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid request body"})
+		return
+	}
+	if req.HardLimitUSD != nil && *req.HardLimitUSD <= 0 {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "hard_limit_usd måste vara större än noll"})
+		return
+	}
+
+	budget, err := h.budgetRepo.Update(c.Request.Context(), userID, budgetID, req)
+	if err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, budget)
+}
+
+// DeleteBudget godoc
+// @Summary Delete an agent budget
+// @Tags agent-budgets
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Budget ID"
+// @Success 204
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/agent-budgets/{id} [delete]
+func (h *AgentUsageHandler) DeleteBudget(c *gin.Context) {
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	budgetID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid budget ID"})
+		return
+	}
+
+	if err := h.budgetRepo.Delete(c.Request.Context(), userID, budgetID); err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // BudgetStatus godoc

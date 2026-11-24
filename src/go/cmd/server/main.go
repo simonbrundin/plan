@@ -224,6 +224,8 @@ func main() {
 		api.GET("/agent-budgets", agentUsageHandler.ListBudgets)
 		api.POST("/agent-budgets", agentUsageHandler.CreateBudget)
 		api.GET("/agent-budgets/:id/status", agentUsageHandler.BudgetStatus)
+		api.PATCH("/agent-budgets/:id", agentUsageHandler.UpdateBudget)
+		api.DELETE("/agent-budgets/:id", agentUsageHandler.DeleteBudget)
 		api.GET("/agent-runs/:id/events", agentRunHandler.ListAgentRunEvents)
 		api.POST("/agent-runs/:id/events", agentRunHandler.CreateAgentRunEvent)
 

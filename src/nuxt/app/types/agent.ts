@@ -160,3 +160,15 @@ export interface AgentBudget {
   active: boolean;
   created_at: string;
 }
+
+// En budgets aktuella läge.
+export interface BudgetStatus {
+  budget_id: number;
+  name: string;
+  period: string;
+  hard_limit_usd: number;
+  spent_usd: number;
+  reserved_usd: number;
+  exceeded: boolean;
+  warning: boolean;
+}

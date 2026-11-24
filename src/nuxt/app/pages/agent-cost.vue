@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import type { AgentRunUsage, AgentUsageSummary, AgentBudget } from "~/types/agent";
+import type {
+  AgentRunUsage,
+  AgentUsageSummary,
+  AgentBudget,
+  BudgetStatus,
+} from "~/types/agent";
 
 // Sidan visar vad agentkörningarna kostar och vilka budgetgränser som
 // gäller. Plan äger siffrorna - den här sidan läser bara.
@@ -14,6 +19,7 @@ interface UsageResponse {
 
 const usage = ref<UsageResponse | null>(null);
 const budgets = ref<AgentBudget[]>([]);
+const budgetStatuses = ref<Record<number, BudgetStatus>>({});
 const pending = ref(true);
 const errorMessage = ref("");
 
@@ -36,10 +42,51 @@ async function load() {
     ]);
     usage.value = usageResponse;
     budgets.value = budgetResponse;
+    await loadBudgetStatuses();
   } catch {
     errorMessage.value = "Kunde inte hämta kostnaderna.";
   } finally {
     pending.value = false;
+  }
+}
+
+// Budgetarnas läge hämtas var för sig - varje svar kan stå på sin egen.
+async function loadBudgetStatuses() {
+  const entries = await Promise.all(
+    budgets.value.map(async (budget) => {
+      try {
+        const status = await $fetch<BudgetStatus>(`/api/agent/budgets/${budget.id}/status`);
+        return [budget.id, status] as const;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  budgetStatuses.value = Object.fromEntries(
+    entries.filter((entry): entry is readonly [number, BudgetStatus] => entry !== null),
+  );
+}
+
+// En budget pausas när gränsen är nådd - annars kan agenten inte köra
+// igen förrän perioden går ut.
+async function toggleBudget(budget: AgentBudget) {
+  try {
+    await $fetch(`/api/agent/budgets/${budget.id}`, {
+      method: "PATCH",
+      body: { active: !budget.active },
+    });
+    await load();
+  } catch {
+    errorMessage.value = "Kunde inte ändra budgeten.";
+  }
+}
+
+async function removeBudget(budget: AgentBudget) {
+  try {
+    await $fetch(`/api/agent/budgets/${budget.id}`, { method: "DELETE" });
+    await load();
+  } catch {
+    errorMessage.value = "Kunde inte ta bort budgeten.";
   }
 }
 
@@ -189,18 +236,44 @@ onMounted(load);
         <li
           v-for="budget in budgets"
           :key="budget.id"
-          class="flex items-center justify-between rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm"
+          class="rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm"
         >
-          <span class="text-ink">
-            {{ budget.name }}
-            <span class="text-ink-dim">
-              · {{ periodLabels[budget.period] ?? budget.period }} ·
-              gräns {{ formatCost(budget.hard_limit_usd) }}
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-ink">
+              {{ budget.name }}
+              <span class="text-ink-dim">
+                · {{ periodLabels[budget.period] ?? budget.period }} ·
+                gräns {{ formatCost(budget.hard_limit_usd) }}
+              </span>
+              <span v-if="!budget.active" class="text-warning">(pausad)</span>
             </span>
-          </span>
-          <span class="text-ink-dim">
-            {{ budget.agent_id || "alla agenter" }}
-          </span>
+            <span class="flex items-center gap-2">
+              <button
+                type="button"
+                class="text-xs text-ink-dim underline"
+                @click="toggleBudget(budget)"
+              >
+                {{ budget.active ? "Pausa" : "Aktivera" }}
+              </button>
+              <button
+                type="button"
+                class="text-xs text-ink-dim underline"
+                @click="removeBudget(budget)"
+              >
+                Ta bort
+              </button>
+            </span>
+          </div>
+          <p v-if="budgetStatuses[budget.id]" class="mt-1 text-xs text-ink-dim">
+            Använd {{ formatCost(budgetStatuses[budget.id].spent_usd) }} ·
+            reserverat {{ formatCost(budgetStatuses[budget.id].reserved_usd) }}
+            <span v-if="budgetStatuses[budget.id].exceeded" class="text-warning">
+              · gränsen är nådd
+            </span>
+            <span v-else-if="budgetStatuses[budget.id].warning" class="text-warning">
+              · varning
+            </span>
+          </p>
         </li>
       </ul>
       <p v-else class="mt-3 text-xs text-ink-dim">Inga budgetar ännu.</p>

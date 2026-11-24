@@ -39,9 +39,9 @@ var ErrBudgetExceeded = errors.New("budget exceeded")
 // för att reproducera kostnaden: användningen, modellen, och vilken
 // prislista som räknades fram den.
 type AgentRunUsage struct {
-	ID         int64  `json:"id" example:"1"`
-	AgentRunID int64  `json:"agent_run_id" example:"12"`
-	GoalID     int64  `json:"goal_id" example:"42"`
+	ID         int64 `json:"id" example:"1"`
+	AgentRunID int64 `json:"agent_run_id" example:"12"`
+	GoalID     int64 `json:"goal_id" example:"42"`
 	// AgentID identifierar agenten som gjorde körningen.
 	AgentID string `json:"agent_id" example:"agent-worker-run-72"`
 	// Provider och Model visar vilken modell som användes.
@@ -84,9 +84,9 @@ type CreateAgentRunUsageRequest struct {
 	InputTokens  int    `json:"input_tokens"`
 	OutputTokens int    `json:"output_tokens"`
 	// CacheReadTokens är tokens som lästs från modellens cache.
-	CacheReadTokens int `json:"cache_read_tokens"`
-	ToolCalls       int `json:"tool_calls"`
-	ToolNames       []string `json:"tool_names,omitempty"`
+	CacheReadTokens int        `json:"cache_read_tokens"`
+	ToolCalls       int        `json:"tool_calls"`
+	ToolNames       []string   `json:"tool_names,omitempty"`
 	StartedAt       *time.Time `json:"started_at,omitempty"`
 	FinishedAt      *time.Time `json:"finished_at,omitempty"`
 }
@@ -123,6 +123,18 @@ type CreateAgentBudgetRequest struct {
 	WarningLimitUSD      *float64 `json:"warning_limit_usd,omitempty"`
 	ReservationPerRunUSD float64  `json:"reservation_per_run_usd,omitempty"`
 	AgentID              string   `json:"agent_id,omitempty"`
+}
+
+// UpdateAgentBudgetRequest ändrar en befintlig budget.
+//
+// Varje fält är valfritt - det som inte skickas lämnas som det är.
+type UpdateAgentBudgetRequest struct {
+	Name                 *string  `json:"name,omitempty"`
+	Period               *string  `json:"period,omitempty"`
+	HardLimitUSD         *float64 `json:"hard_limit_usd,omitempty"`
+	WarningLimitUSD      *float64 `json:"warning_limit_usd,omitempty"`
+	ReservationPerRunUSD *float64 `json:"reservation_per_run_usd,omitempty"`
+	Active               *bool    `json:"active,omitempty"`
 }
 
 // ValidateAgentBudgetPeriod kontrollerar att perioden är känd.

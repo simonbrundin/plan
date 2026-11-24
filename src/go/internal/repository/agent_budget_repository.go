@@ -81,6 +81,55 @@ func (r *AgentBudgetRepository) Create(ctx context.Context, userID int64, req mo
 	return &budget, nil
 }
 
+// Update ändrar en budget. Bara de fält som skickas ändras.
+//
+// En budget som nått sin gräns måste kunna pausas, annars kan agenten
+// inte köra igen förrän perioden går ut.
+func (r *AgentBudgetRepository) Update(ctx context.Context, userID, budgetID int64, req models.UpdateAgentBudgetRequest) (*models.AgentBudget, error) {
+	if req.Period != nil {
+		if err := models.ValidateAgentBudgetPeriod(*req.Period); err != nil {
+			return nil, err
+		}
+	}
+
+	query := `UPDATE agent_budgets SET
+		name = COALESCE($3, name),
+		period = COALESCE($4, period),
+		hard_limit_usd = COALESCE($5, hard_limit_usd),
+		warning_limit_usd = CASE WHEN $6::boolean THEN $7 ELSE warning_limit_usd END,
+		reservation_per_run_usd = COALESCE($8, reservation_per_run_usd),
+		active = COALESCE($9, active)
+		WHERE id = $1 AND user_id = $2
+		RETURNING id, name, period, hard_limit_usd, warning_limit_usd,
+			reservation_per_run_usd, agent_id, active, created_at`
+
+	var budget models.AgentBudget
+	err := r.pool.QueryRow(ctx, query, budgetID, userID, req.Name, req.Period,
+		req.HardLimitUSD, req.WarningLimitUSD != nil, req.WarningLimitUSD,
+		req.ReservationPerRunUSD, req.Active).Scan(
+		&budget.ID, &budget.Name, &budget.Period, &budget.HardLimitUSD, &budget.WarningLimitUSD,
+		&budget.ReservationPerRunUSD, &budget.AgentID, &budget.Active, &budget.CreatedAt)
+	if err != nil {
+		if pgx.ErrNoRows == err {
+			return nil, fmt.Errorf("budgeten hittades inte")
+		}
+		return nil, fmt.Errorf("failed to update agent budget: %w", err)
+	}
+	return &budget, nil
+}
+
+// Delete tar bort en budget.
+func (r *AgentBudgetRepository) Delete(ctx context.Context, userID, budgetID int64) error {
+	tag, err := r.pool.Exec(ctx, `DELETE FROM agent_budgets WHERE id = $1 AND user_id = $2`, budgetID, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete agent budget: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("budgeten hittades inte")
+	}
+	return nil
+}
+
 // Status berättar hur en budget ligger, utan att låsa något.
 //
 // Den används för att visa budgetens läge i gränssnittet.
