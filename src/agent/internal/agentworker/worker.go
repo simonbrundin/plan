@@ -194,6 +194,10 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 	// tar över den i stället för att skapa en egen.
 	queuedRun := findQueuedRun(runs)
 
+	// Mål som redan behandlats - en köad körning får inte hanteras två
+	// gånger.
+	handled := make(map[int64]bool, len(goals))
+
 	planStatusID, err := w.planClient.GetStatusIDByName(ctx, PhasePlan)
 	if err != nil {
 		return fmt.Errorf("failed to resolve plan phase: %w", err)
@@ -212,29 +216,9 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 		// En köad körning är en uttrycklig begäran om att få köras. Den
 		// tas över och arbetet utförs i den körningen.
 		if queued, found := queuedRun[goal.ID]; found {
-			if err := w.adoptRun(ctx, queued); err != nil {
-				log.Printf("Failed to adopt run %d: %v", queued.ID, err)
-				continue
-			}
-
-			if goal.StatusID == defineStatusID {
-				if err := w.processGoal(ctx, goal, true, queued); err != nil {
-					log.Printf("Failed to process goal #%d: %v", goal.ID, err)
-				}
-				continue
-			}
-
-			// En profil som inte får röra kod har ingen kodfas - körningen
-			// avslutas utan ändringar.
-			if w.codeRunner == nil {
-				if err := w.closeRunWithoutChanges(ctx, goal, queued); err != nil {
-					log.Printf("Failed to close run for goal #%d: %v", goal.ID, err)
-				}
-				continue
-			}
-
-			if err := w.startCodeRun(ctx, goal, true, queued); err != nil {
-				log.Printf("Failed to start code run for goal #%d: %v", goal.ID, err)
+			handled[goal.ID] = true
+			if err := w.runQueued(ctx, goal, queued, defineStatusID); err != nil {
+				log.Printf("Failed to run queued run %d: %v", queued.ID, err)
 			}
 			continue
 		}
@@ -278,7 +262,48 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 		}
 	}
 
+	// En köad körning är en uttrycklig begäran och ska inte glömmas bara
+	// för att målet inte är ett agentmål. Utan det här skulle jobbet köra
+	// i evighet på ett mål som aldrig behandlas.
+	for goalID, queued := range queuedRun {
+		if handled[goalID] {
+			continue
+		}
+		if w.onlyGoalId != 0 && goalID != w.onlyGoalId {
+			continue
+		}
+
+		goal, err := w.planClient.GetGoal(ctx, goalID)
+		if err != nil {
+			log.Printf("Failed to fetch goal #%d for queued run %d: %v", goalID, queued.ID, err)
+			continue
+		}
+
+		if err := w.runQueued(ctx, *goal, queued, defineStatusID); err != nil {
+			log.Printf("Failed to run queued run %d: %v", queued.ID, err)
+		}
+	}
+
 	return nil
+}
+
+// runQueued tar över en köad körning och utför arbetet i den.
+func (w *Worker) runQueued(ctx context.Context, goal planclient.Goal, queued planclient.AgentRun, defineStatusID int) error {
+	if err := w.adoptRun(ctx, queued); err != nil {
+		return err
+	}
+
+	if goal.StatusID == defineStatusID {
+		return w.processGoal(ctx, goal, true, queued)
+	}
+
+	// En profil som inte får röra kod har ingen kodfas - körningen
+	// avslutas utan ändringar.
+	if w.codeRunner == nil {
+		return w.closeRunWithoutChanges(ctx, goal, queued)
+	}
+
+	return w.startCodeRun(ctx, goal, true, queued)
 }
 
 // findQueuedRun ger de köade körningarna, per mål.
@@ -352,6 +377,17 @@ func (w *Worker) closeRunWithoutChanges(ctx context.Context, goal planclient.Goa
 	}); err != nil {
 		return fmt.Errorf("failed to close agent run: %w", err)
 	}
+
+	w.recordEvent(ctx, run.ID, planclient.CreateAgentRunEventRequest{
+		Type:  planclient.EventRunStarted,
+		Phase: run.Phase,
+		Payload: map[string]any{
+			"goal_id":       goal.ID,
+			"trigger":       run.Trigger,
+			"initiator":     w.initiator,
+			"agent_profile": w.profile,
+		},
+	})
 
 	w.recordEvent(ctx, run.ID, planclient.CreateAgentRunEventRequest{
 		Type:    planclient.EventRunCompleted,
@@ -486,6 +522,14 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 	}); err != nil {
 		return fmt.Errorf("failed to update agent run: %w", err)
 	}
+
+	// En avslutad körning ska alltid sluta med run_completed - annars ser
+	// historiken ut som om körningen bara upphörde.
+	w.recordEvent(ctx, run.ID, planclient.CreateAgentRunEventRequest{
+		Type:    planclient.EventRunCompleted,
+		Phase:   PhasePlan,
+		Payload: map[string]any{"reason": "goal defined and moved to planning"},
+	})
 
 	log.Printf("Goal #%d defined and moved to planning", goal.ID)
 	return nil
