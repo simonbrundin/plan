@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -60,11 +61,18 @@ func (h *LLMHandler) Ask(c *gin.Context) {
 		Temperature: req.Temperature,
 	}
 
-	h.client.StreamChat(c.Request.Context(), chatReq, func(chunk llm.StreamChunk) {
-		data, _ := json.Marshal(chunk)
-		c.Writer.Write([]byte("data: " + string(data) + "\n\n"))
+	if err := h.client.StreamChat(c.Request.Context(), chatReq, func(chunk llm.StreamChunk) {
+		data, err := json.Marshal(chunk)
+		if err != nil {
+			return
+		}
+		if _, err := c.Writer.Write([]byte("data: " + string(data) + "\n\n")); err != nil {
+			return
+		}
 		c.Writer.Flush()
-	})
+	}); err != nil {
+		log.Printf("failed to stream chat: %v", err)
+	}
 }
 
 // Health checks if the LLM service is configured

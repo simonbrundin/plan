@@ -123,7 +123,7 @@ func (p *MinimaxProvider) doRequest(ctx context.Context, endpoint, apiKey string
 
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, fmt.Errorf("API error: %s - %s", resp.Status, string(bodyBytes))
 	}
 
@@ -133,7 +133,9 @@ func (p *MinimaxProvider) doRequest(ctx context.Context, endpoint, apiKey string
 // streamResponse reads MiniMax's SSE streaming format ("data: {...}" per line)
 func (p *MinimaxProvider) streamResponse(body io.Reader, events chan<- StreamEvent) {
 	defer close(events)
-	defer func() { recover() }()
+	defer func() {
+		_ = recover()
+	}()
 
 	scanner := bufio.NewScanner(body)
 	buf := make([]byte, 0, 64*1024)
@@ -315,7 +317,9 @@ func normalizeStopReason(reason string) string {
 // handleNonStreamingResponse handles non-streaming JSON responses
 func (p *MinimaxProvider) handleNonStreamingResponse(body io.Reader, events chan<- StreamEvent) {
 	defer close(events)
-	defer func() { recover() }()
+	defer func() {
+		_ = recover()
+	}()
 
 	data, err := io.ReadAll(body)
 	if err != nil {

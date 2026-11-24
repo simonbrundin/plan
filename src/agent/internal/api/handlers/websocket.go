@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -50,7 +51,7 @@ func (h *WebSocketHandler) HandleChat(c *gin.Context) {
 		log.Printf("WebSocket upgrade failed: %v", err)
 		return
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// Generate conversation ID
 	convID := uuid.New().String()
@@ -105,9 +106,11 @@ func (h *WebSocketHandler) handleChat(conn *websocket.Conn, convID string, req W
 	}
 
 	// Stream response via WebSocket
-	h.client.StreamChat(nil, chatReq, func(chunk llm.StreamChunk) {
+	if err := h.client.StreamChat(context.TODO(), chatReq, func(chunk llm.StreamChunk) {
 		h.sendJSON(conn, chunk)
-	})
+	}); err != nil {
+		log.Printf("failed to stream chat: %v", err)
+	}
 
 	// Send done signal
 	h.sendJSON(conn, map[string]interface{}{

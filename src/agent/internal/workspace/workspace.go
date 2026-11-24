@@ -52,7 +52,8 @@ func New(source string) (*Workspace, error) {
 
 	ws := &Workspace{root: root, source: absSource}
 	if err := ws.copySource(); err != nil {
-		os.RemoveAll(root)
+		// Katalogen ska inte lämnas kvar - den innehåller koden.
+		_ = os.RemoveAll(root)
 		return nil, err
 	}
 
@@ -391,7 +392,7 @@ func diffTrees(source, target string) (string, error) {
 
 		original, _ := os.ReadFile(filepath.Join(source, file))
 		updated, _ := os.ReadFile(filepath.Join(target, file))
-		sb.WriteString(fmt.Sprintf("@@ original %d bytes, updated %d bytes @@\n", len(original), len(updated)))
+		_, _ = fmt.Fprintf(&sb, "@@ original %d bytes, updated %d bytes @@\n", len(original), len(updated))
 	}
 
 	return sb.String(), nil

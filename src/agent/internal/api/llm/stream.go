@@ -64,13 +64,14 @@ func (c *Client) StreamChat(ctx context.Context, req ChatRequest, writer func(St
 		// Handle different event types using AsAny()
 		switch e := event.AsAny().(type) {
 		case anthropic.ContentBlockDeltaEvent:
-			// Content delta - check if it's a text delta or thinking delta
-			if e.Delta.Type == "text_delta" {
+			// Content delta - text och tankedelar hanteras var för sig
+			switch e.Delta.Type {
+			case "text_delta":
 				writer(StreamChunk{
 					Type:    "content",
 					Content: e.Delta.Text,
 				})
-			} else if e.Delta.Type == "thinking_delta" {
+			case "thinking_delta":
 				// Send thinking block separately for display
 				writer(StreamChunk{
 					Type:     "thinking",

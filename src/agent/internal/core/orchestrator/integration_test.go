@@ -25,7 +25,9 @@ func TestShouldStopHookIntegration(t *testing.T) {
 	}
 
 	// Scenario 2: No current checkpoint → agent can stop
-	o.CreatePlan(testCtx(), "Simple feature", "")
+	if _, err := o.CreatePlan(testCtx(), "Simple feature", ""); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	if !hook.ShouldStop(nil) {
 		t.Error("Expected ShouldStop=true when no current checkpoint (plan has no checkpoints)")
 	}
@@ -37,10 +39,14 @@ func TestShouldStopHookIntegration(t *testing.T) {
 	}
 
 	plan2.Approve("user")
-	store.SavePlan(plan2)
+	if err := store.SavePlan(plan2); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	plan2.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan2.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan2.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if hook.ShouldStop(nil) {
 		t.Error("Expected ShouldStop=false when current checkpoint has pending gates")
@@ -61,7 +67,9 @@ func TestShouldStopHookIntegration(t *testing.T) {
 			Status: checkpoint.GateStatusPassed,
 		}
 	}
-	store.SaveCheckpoint(plan2.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan2.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if !hook.ShouldStop(nil) {
 		t.Error("Expected ShouldStop=true when all gates passed")
@@ -72,7 +80,9 @@ func TestShouldStopHookIntegration(t *testing.T) {
 		Status:   checkpoint.GateStatusFailed,
 		Feedback: "Tests failed: missing validation",
 	}
-	store.SaveCheckpoint(plan2.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan2.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if hook.ShouldStop(nil) {
 		t.Error("Expected ShouldStop=false when any gate has failed")
@@ -99,18 +109,24 @@ func TestShouldStopHookWithMultipleCheckpoints(t *testing.T) {
 	}
 
 	plan.Approve("user")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// First checkpoint passed
 	plan.Checkpoints[0].GateResults["behavior"] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	plan.Checkpoints[0].MarkPassed()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	hook := NewShouldStopHook(o)
 
 	// Second checkpoint is in progress with pending gates
 	plan.Checkpoints[1].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[1])
+	if err := store.SaveCheckpoint(plan.Checkpoints[1]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if hook.ShouldStop(nil) {
 		t.Error("Expected ShouldStop=false when later checkpoint has pending gates")
@@ -120,9 +136,13 @@ func TestShouldStopHookWithMultipleCheckpoints(t *testing.T) {
 	plan.Checkpoints[1].GateResults["behavior"] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	plan.Checkpoints[1].GateResults["adversarial"] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	plan.Checkpoints[1].MarkPassed()
-	store.SaveCheckpoint(plan.Checkpoints[1])
+	if err := store.SaveCheckpoint(plan.Checkpoints[1]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	plan.Complete()
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if !hook.ShouldStop(nil) {
 		t.Error("Expected ShouldStop=true when all checkpoints complete")
@@ -154,7 +174,9 @@ func TestCheckGateStatus(t *testing.T) {
 
 	// Checkpoint exists but gate not executed
 	plan.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	passed, reason = hook.CheckGateStatus("behavior")
 	if passed {
 		t.Errorf("Expected CheckGateStatus=not passed when gate not executed, got passed=%v reason=%s", passed, reason)
@@ -162,7 +184,9 @@ func TestCheckGateStatus(t *testing.T) {
 
 	// Gate passed
 	plan.Checkpoints[0].GateResults["behavior"] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	passed, reason = hook.CheckGateStatus("behavior")
 	if !passed {
 		t.Errorf("Expected CheckGateStatus=passed when gate passed, got passed=%v reason=%s", passed, reason)
@@ -179,7 +203,9 @@ func TestCheckGateStatus(t *testing.T) {
 		Status:   checkpoint.GateStatusFailed,
 		Feedback: "Security issue found",
 	}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	passed, reason = hook.CheckGateStatus("adversarial")
 	if passed {
 		t.Errorf("Expected CheckGateStatus=not passed when gate failed, got passed=%v reason=%s", passed, reason)
@@ -190,7 +216,9 @@ func TestCheckGateStatus(t *testing.T) {
 
 	// Gate skipped
 	plan.Checkpoints[0].GateResults["ui"] = &checkpoint.GateResult{Status: checkpoint.GateStatusSkipped}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	passed, reason = hook.CheckGateStatus("ui")
 	if !passed {
 		t.Errorf("Expected CheckGateStatus=passed when gate skipped, got passed=%v reason=%s", passed, reason)
@@ -216,12 +244,16 @@ func TestGetCheckpointProgress(t *testing.T) {
 	plan, _ := o.CreatePlan(testCtx(), "Build database and API", "")
 	plan.Checkpoints[0].MarkInProgress()
 	plan.Checkpoints[0].GateResults["behavior"] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if len(plan.Checkpoints) > 1 {
 		plan.Checkpoints[1].MarkInProgress()
 		// No gate results for checkpoint 1
-		store.SaveCheckpoint(plan.Checkpoints[1])
+		if err := store.SaveCheckpoint(plan.Checkpoints[1]); err != nil {
+			t.Fatalf("saving state failed: %v", err)
+		}
 	}
 
 	passed, total = o.shouldStopHook.GetCheckpointProgress()
@@ -252,9 +284,13 @@ func TestGetPendingGatesForCurrentCheckpoint(t *testing.T) {
 	// Plan with pending gates
 	plan, _ := o.CreatePlan(testCtx(), "Build database and API", "")
 	plan.Approve("user")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	plan.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	pending = o.shouldStopHook.GetPendingGatesForCurrentCheckpoint()
 	if len(pending) == 0 {
@@ -265,7 +301,9 @@ func TestGetPendingGatesForCurrentCheckpoint(t *testing.T) {
 	for _, gateType := range plan.Checkpoints[0].Gates {
 		plan.Checkpoints[0].GateResults[gateType] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	pending = o.shouldStopHook.GetPendingGatesForCurrentCheckpoint()
 	if pending != nil {
 		t.Error("Expected nil pending gates when all passed")
@@ -294,9 +332,13 @@ func TestIsCheckpointComplete(t *testing.T) {
 
 	// Checkpoint in progress, gates pending → false
 	plan.Approve("user")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	plan.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	if o.shouldStopHook.IsCheckpointComplete() {
 		t.Error("Expected IsCheckpointComplete=false with pending gates")
 	}
@@ -305,7 +347,9 @@ func TestIsCheckpointComplete(t *testing.T) {
 	for _, gateType := range plan.Checkpoints[0].Gates {
 		plan.Checkpoints[0].GateResults[gateType] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	if !o.shouldStopHook.IsCheckpointComplete() {
 		t.Error("Expected IsCheckpointComplete=true when all gates passed")
 	}
@@ -347,7 +391,9 @@ func TestAgentWithOrchestratorHooks(t *testing.T) {
 	// Create a plan
 	plan, _ := o.CreatePlan(testCtx(), "Build database", "Create user table")
 	plan.Approve("user")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// ShouldStopHookFunc returns the function
 	shouldStopFn := o.ShouldStopHookFunc()
@@ -357,7 +403,9 @@ func TestAgentWithOrchestratorHooks(t *testing.T) {
 
 	// With pending checkpoint, ShouldStop returns false
 	plan.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	if shouldStopFn(nil) {
 		t.Error("ShouldStop should return false with pending gates")
 	}
@@ -366,7 +414,9 @@ func TestAgentWithOrchestratorHooks(t *testing.T) {
 	for _, gateType := range plan.Checkpoints[0].Gates {
 		plan.Checkpoints[0].GateResults[gateType] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	if !shouldStopFn(nil) {
 		t.Error("ShouldStop should return true when all gates passed")
 	}
@@ -388,9 +438,13 @@ func TestHumanGateBlocksIntegration(t *testing.T) {
 	}
 
 	plan.Approve("user")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	plan.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// Human gate should not block stopping per design (human gates are non-blocking)
 	// But it should still be tracked
@@ -435,9 +489,13 @@ func TestConcurrentCheckpointAccess(t *testing.T) {
 
 	plan, _ := o.CreatePlan(testCtx(), "Concurrent feature", "")
 	plan.Approve("user")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	plan.Checkpoints[0].MarkInProgress()
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// Multiple goroutines checking status simultaneously
 	done := make(chan bool, 10)
@@ -507,9 +565,13 @@ func TestPlanStatusTransitions(t *testing.T) {
 	}
 	reloaded.Checkpoints[0].GateResults["behavior"] = &checkpoint.GateResult{Status: checkpoint.GateStatusPassed}
 	reloaded.Checkpoints[0].MarkPassed()
-	store.SaveCheckpoint(reloaded.Checkpoints[0])
+	if err := store.SaveCheckpoint(reloaded.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	reloaded.Complete()
-	store.SavePlan(reloaded)
+	if err := store.SavePlan(reloaded); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	reloaded2, err = store.GetPlan(plan.ID)
 	if err != nil {
 		t.Fatalf("GetPlan failed after Complete: %v", err)

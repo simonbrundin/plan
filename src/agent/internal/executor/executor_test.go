@@ -19,7 +19,7 @@ func TestExecuteApplicerarÄndring(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	result, err := exec.Execute(context.Background(), Request{
 		Changes: []Change{{
@@ -59,7 +59,7 @@ func TestExecuteKörTester(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	result, err := exec.Execute(context.Background(), Request{
 		Changes:     []Change{{Path: "fil.txt", Content: "hej igen\n"}},
@@ -87,7 +87,7 @@ func TestExecuteRapportarMisslyckatTest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	result, err := exec.Execute(context.Background(), Request{
 		Changes:     []Change{{Path: "fil.txt", Content: "hej\n"}},
@@ -115,7 +115,7 @@ func TestExecuteUtanTestKommando(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	result, err := exec.Execute(context.Background(), Request{
 		Changes: []Change{{Path: "main.go", Content: "package main // x\n"}},
@@ -139,7 +139,7 @@ func TestExecuteBlockerarAvbrutenKörning(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

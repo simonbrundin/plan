@@ -6,6 +6,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -388,12 +389,14 @@ func (e *ImprovementEngine) ApplyImprovement(imp *Improvement) error {
 	imp.AppliedAt = time.Now()
 
 	// Record the improvement in memory
-	e.store.AddProcedural(
+	if _, err := e.store.AddProcedural(
 		imp.Description,
 		fmt.Sprintf("Applied improvement: %s", imp.Description),
 		fmt.Sprintf("Priority: %d, Type: %s", imp.Priority, imp.Type),
 		[]string{"improvement", imp.Type, "applied"},
-	)
+	); err != nil {
+		log.Printf("failed to record improvement: %v", err)
+	}
 
 	return nil
 }
@@ -641,7 +644,7 @@ func (d *PatternDetector) detectContextUsage(dirPath string) []DetectedPattern {
 func (d *PatternDetector) searchFiles(dirPath string, pattern *regexp.Regexp) []string {
 	var matches []string
 
-	filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".go") {
 			return nil
 		}
@@ -665,10 +668,10 @@ func (r *SelfCheckReport) PrettyPrint() string {
 	sb.WriteString("                    SELF-IMPROVEMENT REPORT                        \n")
 	sb.WriteString("═══════════════════════════════════════════════════════════════\n\n")
 
-	sb.WriteString(fmt.Sprintf("Timestamp: %s\n\n", r.Timestamp.Format(time.RFC822)))
+	_, _ = fmt.Fprintf(&sb, "Timestamp: %s\n\n", r.Timestamp.Format(time.RFC822))
 
-	sb.WriteString(fmt.Sprintf("Total Issues Found: %d\n", len(r.Findings)))
-	sb.WriteString(fmt.Sprintf("High Priority: %d\n\n", r.HighPriority))
+	_, _ = fmt.Fprintf(&sb, "Total Issues Found: %d\n", len(r.Findings))
+	_, _ = fmt.Fprintf(&sb, "High Priority: %d\n\n", r.HighPriority)
 
 	if len(r.Findings) > 0 {
 		sb.WriteString("───────────────────────────────────────────────────────────────\n")
@@ -677,7 +680,7 @@ func (r *SelfCheckReport) PrettyPrint() string {
 
 		for i, f := range r.Findings {
 			if i >= 10 { // Show top 10
-				sb.WriteString(fmt.Sprintf("\n... and %d more findings\n", len(r.Findings)-10))
+				_, _ = fmt.Fprintf(&sb, "\n... and %d more findings\n", len(r.Findings)-10)
 				break
 			}
 
@@ -688,7 +691,7 @@ func (r *SelfCheckReport) PrettyPrint() string {
 				priority = "MED"
 			}
 
-			sb.WriteString(fmt.Sprintf("[%s] #%d: %s\n", priority, i+1, f.Description))
+			_, _ = fmt.Fprintf(&sb, "[%s] #%d: %s\n", priority, i+1, f.Description)
 		}
 	}
 

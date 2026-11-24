@@ -161,13 +161,14 @@ func WritePage(dir string, opts WriteOptions) (string, error) {
 	}
 	existing.Updated = date
 
+	// En tom body lämnar den befintliga texten orörd.
 	body := strings.TrimSpace(opts.Body)
-	if body == "" {
-		body = existing.Body
-	} else if opts.Replace {
-		existing.Body = body
-	} else {
-		existing.Body = appendUpdate(existing.Body, body, date)
+	if body != "" {
+		if opts.Replace {
+			existing.Body = body
+		} else {
+			existing.Body = appendUpdate(existing.Body, body, date)
+		}
 	}
 
 	return pageID, writeFile(path, existing.Render())

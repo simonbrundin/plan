@@ -196,8 +196,10 @@ func (s *CheckpointStore) GetCheckpoint(id string) (*checkpoint.Checkpoint, erro
 		return nil, fmt.Errorf("checkpoint not found: %s", id)
 	}
 
-	json.Unmarshal(gatesJSON, &cp.Gates)
-	json.Unmarshal(tasksJSON, &cp.Tasks)
+	// Fel i JSON ignoreras - en checkpoint med trasig JSON ska inte
+	// stoppa läsningen av resten.
+	_ = json.Unmarshal(gatesJSON, &cp.Gates)
+	_ = json.Unmarshal(tasksJSON, &cp.Tasks)
 
 	if completedAt != nil {
 		cp.CompletedAt = completedAt
@@ -233,8 +235,8 @@ func (s *CheckpointStore) GetCheckpointsByPlan(planID string) ([]*checkpoint.Che
 			return nil, err
 		}
 
-		json.Unmarshal(gatesJSON, &cp.Gates)
-		json.Unmarshal(tasksJSON, &cp.Tasks)
+		_ = json.Unmarshal(gatesJSON, &cp.Gates)
+		_ = json.Unmarshal(tasksJSON, &cp.Tasks)
 
 		if completedAt != nil {
 			cp.CompletedAt = completedAt
@@ -301,7 +303,8 @@ func (s *CheckpointStore) GetGateResult(checkpointID, gateType string) (*checkpo
 		return nil, fmt.Errorf("gate result not found: %s/%s", checkpointID, gateType)
 	}
 
-	json.Unmarshal(issuesJSON, &result.Issues)
+	// Trasig JSON ger en gate-resultat utan issues - hellre än ett fel.
+	_ = json.Unmarshal(issuesJSON, &result.Issues)
 
 	return &result, nil
 }
@@ -330,7 +333,7 @@ func (s *CheckpointStore) getGateResultsByCheckpoint(checkpointID string) ([]*ch
 			return nil, err
 		}
 
-		json.Unmarshal(issuesJSON, &result.Issues)
+		_ = json.Unmarshal(issuesJSON, &result.Issues)
 		results = append(results, &result)
 	}
 

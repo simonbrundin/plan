@@ -1,6 +1,7 @@
 package featurestest
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 
@@ -27,16 +28,18 @@ func setupTestAPI() *gin.Engine {
 }
 
 func initieraAPI(ctx *godog.ScenarioContext) {
-	ctx.BeforeScenario(func(*godog.Scenario) {
+	ctx.Before(func(c context.Context, sc *godog.Scenario) (context.Context, error) {
 		router := setupTestAPI()
 		testServer = httptest.NewServer(router)
 		apiAnropad = false
+		return c, nil
 	})
 
-	ctx.AfterScenario(func(*godog.Scenario, error) {
+	ctx.After(func(c context.Context, sc *godog.Scenario, err error) (context.Context, error) {
 		if testServer != nil {
 			testServer.Close()
 		}
+		return c, nil
 	})
 
 	ctx.Step(`^API-servern körs på port (\d+)$`, func(port int) error { return nil })

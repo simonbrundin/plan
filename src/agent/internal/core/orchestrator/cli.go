@@ -167,7 +167,8 @@ func (a *CLIAdapter) WaitForHumanGate(cp *checkpoint.Checkpoint) bool {
 			}
 		}
 		fmt.Print("\nPress Enter when ready to decide...")
-		a.reader.ReadString('\n')
+		// EOF är normalt - användaren kan avsluta med Ctrl+D.
+		_, _ = a.reader.ReadString('\n')
 		return false
 	default:
 		return false

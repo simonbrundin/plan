@@ -86,10 +86,10 @@ func (v *HTMLViewerV2) ViewPlan(plan *checkpoint.CheckpointPlan) string {
 	if total > 0 {
 		percent = (passed * 100) / total
 	}
-	sb.WriteString(fmt.Sprintf(`
+	_, _ = fmt.Fprintf(&sb, `
 		<div class="progress-bar"><div class="progress-fill" style="width: %d%%"></div></div>
 		<div class="progress-text">%d of %d checkpoints complete</div>
-`, percent, passed, total))
+`, percent, passed, total)
 
 	// Checkpoints
 	for i, cp := range plan.Checkpoints {
@@ -113,7 +113,7 @@ func (v *HTMLViewerV2) viewCheckpoint(cp *checkpoint.Checkpoint, number int) str
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf(`
+	_, _ = fmt.Fprintf(&sb, `
 		<div class="checkpoint %s">
 			<div class="checkpoint-header">
 				<div>
@@ -124,13 +124,13 @@ func (v *HTMLViewerV2) viewCheckpoint(cp *checkpoint.Checkpoint, number int) str
 				<span class="status-badge %s">%s</span>
 			</div>
 			<div class="description">%s</div>
-`, status, number, escapeHTML(cp.Name), cp.Complexity, status, status, description))
+`, status, number, escapeHTML(cp.Name), cp.Complexity, status, status, description)
 
 	// Tasks
 	if len(cp.Tasks) > 0 {
 		sb.WriteString(`<div class="tasks"><h3>Tasks</h3>`)
 		for _, task := range cp.Tasks {
-			sb.WriteString(fmt.Sprintf(`<div class="task">✓ %s</div>`, escapeHTML(task)))
+			_, _ = fmt.Fprintf(&sb, `<div class="task">✓ %s</div>`, escapeHTML(task))
 		}
 		sb.WriteString(`</div>`)
 	}
@@ -145,13 +145,13 @@ func (v *HTMLViewerV2) viewCheckpoint(cp *checkpoint.Checkpoint, number int) str
 				gateStatus = strings.ToLower(string(result.Status))
 				feedback = result.Feedback
 			}
-			sb.WriteString(fmt.Sprintf(`
+			_, _ = fmt.Fprintf(&sb, `
 				<div class="gate">
 					<span>%s</span>
 					<span class="gate-status %s">%s</span>
-				</div>`, escapeHTML(gate), gateStatus, gateStatus))
+				</div>`, escapeHTML(gate), gateStatus, gateStatus)
 			if feedback != "" {
-				sb.WriteString(fmt.Sprintf(`<div class="feedback">%s</div>`, escapeHTML(feedback)))
+				_, _ = fmt.Fprintf(&sb, `<div class="feedback">%s</div>`, escapeHTML(feedback))
 			}
 		}
 		sb.WriteString(`</div>`)

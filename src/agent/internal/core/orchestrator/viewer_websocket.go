@@ -11,7 +11,6 @@ import (
 
 // WebSocketViewer sends checkpoint updates via WebSocket
 type WebSocketViewer struct {
-	mu          sync.RWMutex
 	connections map[string]*websocket.Conn
 	hub         *ViewerHub
 }
@@ -88,16 +87,6 @@ func (h *ViewerHub) Register(conn *websocket.Conn) *ViewerConnection {
 	return connection
 }
 
-// unregister removes a connection from the hub
-func (h *ViewerHub) unregisterConn(conn *ViewerConnection) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	if _, ok := h.connections[conn.ID]; ok {
-		delete(h.connections, conn.ID)
-		close(conn.Send)
-	}
-}
-
 // run is the hub's main event loop
 func (h *ViewerHub) run() {
 	for {
@@ -130,7 +119,7 @@ func (h *ViewerHub) run() {
 			for id, conn := range h.connections {
 				if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 					// Connection is slow or closed, close it
-					conn.Close()
+					_ = conn.Close()
 					delete(h.connections, id)
 				}
 			}
@@ -142,7 +131,7 @@ func (h *ViewerHub) run() {
 // writePump handles outgoing messages for a connection
 func (h *ViewerHub) writePump(conn *ViewerConnection) {
 	defer func() {
-		conn.Conn.Close()
+		_ = conn.Conn.Close()
 	}()
 
 	for message := range conn.Send {
@@ -156,7 +145,7 @@ func (h *ViewerHub) writePump(conn *ViewerConnection) {
 func (h *ViewerHub) readPump(conn *ViewerConnection) {
 	defer func() {
 		h.unregister <- conn
-		conn.Conn.Close()
+		_ = conn.Conn.Close()
 	}()
 
 	for {
@@ -220,11 +209,12 @@ func (w *WebSocketViewer) UpdateCheckpoint(cp *checkpoint.Checkpoint) {
 // BroadcastGateUpdate sends a gate-specific update
 func (w *WebSocketViewer) BroadcastGateUpdate(cp *checkpoint.Checkpoint, gateType string, result *checkpoint.GateResult) {
 	msgType := "gate_updated"
-	if result.Status == checkpoint.GateStatusPassed {
+	switch result.Status {
+	case checkpoint.GateStatusPassed:
 		msgType = "gate_passed"
-	} else if result.Status == checkpoint.GateStatusFailed {
+	case checkpoint.GateStatusFailed:
 		msgType = "gate_failed"
-	} else if result.Status == checkpoint.GateStatusRunning {
+	case checkpoint.GateStatusRunning:
 		msgType = "gate_started"
 	}
 

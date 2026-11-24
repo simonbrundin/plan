@@ -162,21 +162,21 @@ func (s *InMemoryStateStore) GetGateResult(checkpointID, gateType string) (*chec
 func deepCopyPlan(plan *checkpoint.CheckpointPlan) *checkpoint.CheckpointPlan {
 	jsonBytes, _ := json.Marshal(plan)
 	var copy checkpoint.CheckpointPlan
-	json.Unmarshal(jsonBytes, &copy)
+	_ = json.Unmarshal(jsonBytes, &copy)
 	return &copy
 }
 
 func deepCopyCheckpoint(cp *checkpoint.Checkpoint) *checkpoint.Checkpoint {
 	jsonBytes, _ := json.Marshal(cp)
 	var copy checkpoint.Checkpoint
-	json.Unmarshal(jsonBytes, &copy)
+	_ = json.Unmarshal(jsonBytes, &copy)
 	return &copy
 }
 
 func deepCopyGateResult(r *checkpoint.GateResult) *checkpoint.GateResult {
 	jsonBytes, _ := json.Marshal(r)
 	var copy checkpoint.GateResult
-	json.Unmarshal(jsonBytes, &copy)
+	_ = json.Unmarshal(jsonBytes, &copy)
 	return &copy
 }
 
@@ -204,7 +204,9 @@ func (s *FileStateStore) SavePlan(plan *checkpoint.CheckpointPlan) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.InMemoryStateStore.SavePlan(plan)
+	if err := s.InMemoryStateStore.SavePlan(plan); err != nil {
+		return err
+	}
 	return s.persist()
 }
 
@@ -213,7 +215,9 @@ func (s *FileStateStore) SaveCheckpoint(cp *checkpoint.Checkpoint) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.InMemoryStateStore.SaveCheckpoint(cp)
+	if err := s.InMemoryStateStore.SaveCheckpoint(cp); err != nil {
+		return err
+	}
 	return s.persist()
 }
 
@@ -222,17 +226,19 @@ func (s *FileStateStore) SaveGateResult(checkpointID string, result *checkpoint.
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.InMemoryStateStore.SaveGateResult(checkpointID, result)
+	if err := s.InMemoryStateStore.SaveGateResult(checkpointID, result); err != nil {
+		return err
+	}
 	return s.persist()
 }
 
 func (s *FileStateStore) persist() error {
-	plans, _ := s.InMemoryStateStore.GetAllPlans()
+	plans, _ := s.GetAllPlans()
 
 	data, err := json.MarshalIndent(map[string]interface{}{
 		"plans":       plans,
-		"checkpoints": s.InMemoryStateStore.checkpoints,
-		"gateResults": s.InMemoryStateStore.gateResults,
+		"checkpoints": s.checkpoints,
+		"gateResults": s.gateResults,
 	}, "", "  ")
 	if err != nil {
 		return err

@@ -13,7 +13,6 @@ import (
 type BehaviorGate struct {
 	testCommand string
 	lintCommand string
-	vendorDir   string
 }
 
 // NewBehaviorGate creates a new behavior gate

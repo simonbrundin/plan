@@ -422,7 +422,9 @@ func TestResolveDirFindsWikiUpwards(t *testing.T) {
 	if err := os.Chdir(nested); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { os.Chdir(previous) })
+	t.Cleanup(func() {
+		_ = os.Chdir(previous)
+	})
 
 	dir, err := ResolveDir("")
 	if err != nil {

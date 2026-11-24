@@ -295,17 +295,17 @@ func (m *Manager) Save() error {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		os.Remove(tmpFile)
+		_ = os.Remove(tmpFile)
 		return fmt.Errorf("failed to encrypt: %s - %s", err, stderr.String())
 	}
 
 	// Write encrypted content
 	if err := os.WriteFile(m.configPath, stdout.Bytes(), 0600); err != nil {
-		os.Remove(tmpFile)
+		_ = os.Remove(tmpFile)
 		return fmt.Errorf("failed to write encrypted file: %w", err)
 	}
 
-	os.Remove(tmpFile)
+	_ = os.Remove(tmpFile)
 	return nil
 }
 

@@ -99,7 +99,11 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if req.Title != "" {
-		db.UpdateConversationTitle(c.Request.Context(), conv.ID, req.Title)
+		if err := db.UpdateConversationTitle(c.Request.Context(), conv.ID, req.Title); err != nil {
+			// Samtalet finns, men titeln sparades inte. Svara ändå ok -
+			// annars skulle samtalet försvinna bara för att titeln gick fel.
+			log.Printf("failed to update conversation title: %v", err)
+		}
 	}
 	c.JSON(http.StatusCreated, conv)
 }
@@ -248,8 +252,12 @@ func sendChunk(c *gin.Context, data interface{}) {
 	if err != nil {
 		return
 	}
-	c.Writer.Write(b)
-	c.Writer.Write([]byte("\n"))
+	if _, err := c.Writer.Write(b); err != nil {
+		return
+	}
+	if _, err := c.Writer.Write([]byte("\n")); err != nil {
+		return
+	}
 	c.Writer.Flush()
 }
 

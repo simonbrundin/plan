@@ -31,7 +31,7 @@ type Policy struct {
 	// beslut innan något skrivs.
 	NeedsHumanGate bool
 	// CPULimit och MemoryLimit sätter gränserna för jobbet.
-	CPULimit   string
+	CPULimit    string
 	MemoryLimit string
 	// MaxTurns begränsar hur många rundor modellen får köra.
 	MaxTurns int

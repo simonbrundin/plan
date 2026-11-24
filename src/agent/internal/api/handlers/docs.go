@@ -61,7 +61,7 @@ func renderRoadmap(goals *GoalsResponse) string {
 	b.WriteString("## Statusöversikt\n\n")
 	b.WriteString("| Status | Antal |\n| --- | --- |\n")
 	for _, s := range goals.Statuses {
-		b.WriteString(fmt.Sprintf("| %s | %d |\n", s.Label, counts[s.Name]))
+		_, _ = fmt.Fprintf(&b, "| %s | %d |\n", s.Label, counts[s.Name])
 	}
 	b.WriteString("\n")
 
@@ -84,7 +84,7 @@ func renderRoadmap(goals *GoalsResponse) string {
 			return section[i].Title < section[j].Title
 		})
 
-		b.WriteString(fmt.Sprintf("## %s (%d)\n\n", s.Label, len(section)))
+		_, _ = fmt.Fprintf(&b, "## %s (%d)\n\n", s.Label, len(section))
 		for _, g := range section {
 			title := g.Title
 			if g.Icon != "" {
@@ -93,7 +93,7 @@ func renderRoadmap(goals *GoalsResponse) string {
 			if desc := firstLine(g.Description); desc != "" {
 				title += " — " + desc
 			}
-			b.WriteString(fmt.Sprintf("- %s\n", title))
+			_, _ = fmt.Fprintf(&b, "- %s\n", title)
 		}
 		b.WriteString("\n")
 	}

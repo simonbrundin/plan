@@ -318,13 +318,17 @@ func (o *Orchestrator) executePlan(ctx context.Context, plan *checkpoint.Checkpo
 			return result, fmt.Errorf("checkpoint %s failed", cp.Name)
 		}
 
-		// Save state
-		o.stateStore.SaveCheckpoint(cp)
+		// Save state - ett fel loggas men stoppar inte körningen.
+		if err := o.stateStore.SaveCheckpoint(cp); err != nil {
+			log.Printf("failed to save checkpoint %s: %v", cp.ID, err)
+		}
 	}
 
 	// Mark plan as completed
 	plan.Complete()
-	o.stateStore.SavePlan(plan)
+	if err := o.stateStore.SavePlan(plan); err != nil {
+		log.Printf("failed to save plan %s: %v", plan.ID, err)
+	}
 
 	result.Status = StatusCompleted
 	result.EndTime = time.Now()
@@ -340,7 +344,9 @@ func (o *Orchestrator) executeCheckpoint(ctx context.Context, cp *checkpoint.Che
 
 	// Mark as in progress
 	cp.MarkInProgress()
-	o.stateStore.SaveCheckpoint(cp)
+	if err := o.stateStore.SaveCheckpoint(cp); err != nil {
+		log.Printf("failed to save checkpoint %s: %v", cp.ID, err)
+	}
 	o.viewer.UpdateCheckpoint(cp)
 
 	// Run gates in order
@@ -361,12 +367,16 @@ func (o *Orchestrator) executeCheckpoint(ctx context.Context, cp *checkpoint.Che
 			result.EndTime = time.Now()
 			result.Passed = false
 			cp.MarkFailed()
-			o.stateStore.SaveCheckpoint(cp)
+			if err := o.stateStore.SaveCheckpoint(cp); err != nil {
+				log.Printf("failed to save checkpoint %s: %v", cp.ID, err)
+			}
 			return result, err
 		}
 
 		cp.SetGateResult(gateType, gateResult)
-		o.stateStore.SaveCheckpoint(cp)
+		if err := o.stateStore.SaveCheckpoint(cp); err != nil {
+			log.Printf("failed to save checkpoint %s: %v", cp.ID, err)
+		}
 
 		result.GateResults = append(result.GateResults, &GateResultWrapper{
 			GateType: gateType,
@@ -382,7 +392,9 @@ func (o *Orchestrator) executeCheckpoint(ctx context.Context, cp *checkpoint.Che
 		if gateResult.Status == checkpoint.GateStatusFailed {
 			if gate.GateType(gateType).IsBlocking() {
 				cp.MarkFailed()
-				o.stateStore.SaveCheckpoint(cp)
+				if err := o.stateStore.SaveCheckpoint(cp); err != nil {
+					log.Printf("failed to save checkpoint %s: %v", cp.ID, err)
+				}
 				result.EndTime = time.Now()
 				result.Passed = false
 				return result, fmt.Errorf("gate %s failed: %s", gateType, gateResult.Feedback)
@@ -392,7 +404,9 @@ func (o *Orchestrator) executeCheckpoint(ctx context.Context, cp *checkpoint.Che
 
 	// All gates passed
 	cp.MarkPassed()
-	o.stateStore.SaveCheckpoint(cp)
+	if err := o.stateStore.SaveCheckpoint(cp); err != nil {
+		log.Printf("failed to save checkpoint %s: %v", cp.ID, err)
+	}
 
 	result.EndTime = time.Now()
 	result.Passed = cp.Status == checkpoint.CheckpointPassed

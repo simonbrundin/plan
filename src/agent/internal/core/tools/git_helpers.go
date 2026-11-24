@@ -3,15 +3,8 @@ package tools
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"os/exec"
 )
-
-// toJSON returns a JSON string representation of a value
-func toJSON(v any) string {
-	b, _ := json.MarshalIndent(v, "", "  ")
-	return string(b)
-}
 
 // CommandOutput represents the output of a shell command
 type CommandOutput struct {

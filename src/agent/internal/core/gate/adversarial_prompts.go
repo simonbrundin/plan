@@ -46,8 +46,8 @@ If issues found:
 func buildAdversarialFixerPrompt(cp *checkpoint.Checkpoint, issues []checkpoint.Issue) string {
 	var issuesList strings.Builder
 	for _, issue := range issues {
-		issuesList.WriteString(fmt.Sprintf("- [%s] %s\n  Location: %s\n  %s\n  Suggestion: %s\n\n",
-			issue.Severity, issue.Title, issue.Location, issue.Description, issue.Suggestion))
+		_, _ = fmt.Fprintf(&issuesList, "- [%s] %s\n  Location: %s\n  %s\n  Suggestion: %s\n\n",
+			issue.Severity, issue.Title, issue.Location, issue.Description, issue.Suggestion)
 	}
 
 	return fmt.Sprintf(`You are a code fixer agent. Your job is to fix the issues found by the critic.

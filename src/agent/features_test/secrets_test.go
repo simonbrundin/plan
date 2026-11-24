@@ -1,6 +1,7 @@
 package featurestest
 
 import (
+	"context"
 	"os"
 
 	"github.com/cucumber/godog"
@@ -8,8 +9,11 @@ import (
 )
 
 func initieraSecrets(ctx *godog.ScenarioContext) {
-	ctx.BeforeScenario(func(*godog.Scenario) {
-		secrets.EnsureDir()
+	ctx.Before(func(c context.Context, sc *godog.Scenario) (context.Context, error) {
+		if err := secrets.EnsureDir(); err != nil {
+			return c, err
+		}
+		return c, nil
 	})
 
 	ctx.Step(`^en krypterad secrets-fil finns$`, func() error {

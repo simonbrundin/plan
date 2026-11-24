@@ -30,7 +30,7 @@ func grepExecute(_ string, args map[string]any, signal <-chan struct{}, _ func(p
 	if err != nil {
 		return errorResult("opening file: " + err.Error()), nil
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	regexPattern := pattern
 	if ignoreCase {

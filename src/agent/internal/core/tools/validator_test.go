@@ -353,6 +353,6 @@ func BenchmarkValidate(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Validate(args, schema)
+		_ = Validate(args, schema)
 	}
 }

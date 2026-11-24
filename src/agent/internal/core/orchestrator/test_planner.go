@@ -228,15 +228,15 @@ func GenerateTestFile(cp *checkpoint.Checkpoint, tests []*TestCase) string {
 	var sb strings.Builder
 
 	// Package and imports
-	sb.WriteString(fmt.Sprintf("package %s\n\n", getPackageName(cp)))
+	_, _ = fmt.Fprintf(&sb, "package %s\n\n", getPackageName(cp))
 	sb.WriteString("import (\n")
 	sb.WriteString("\t\"testing\"\n")
 	sb.WriteString(")\n\n")
 
 	// Generate test functions
 	for _, tc := range tests {
-		sb.WriteString(fmt.Sprintf("// %s\n", tc.Description))
-		sb.WriteString(fmt.Sprintf("func %s(t *testing.T) {\n", tc.Name))
+		_, _ = fmt.Fprintf(&sb, "// %s\n", tc.Description)
+		_, _ = fmt.Fprintf(&sb, "func %s(t *testing.T) {\n", tc.Name)
 
 		if len(tc.Table) > 0 {
 			// Table-driven test
@@ -245,7 +245,7 @@ func GenerateTestFile(cp *checkpoint.Checkpoint, tests []*TestCase) string {
 			// Headers from first row
 			if len(tc.Table) > 0 {
 				for _, cell := range tc.Table[0] {
-					sb.WriteString(fmt.Sprintf("\t\t%s string\n", sanitizeName(fmt.Sprintf("%v", cell))))
+					_, _ = fmt.Fprintf(&sb, "\t\t%s string\n", sanitizeName(fmt.Sprintf("%v", cell)))
 				}
 			}
 			sb.WriteString("\t}{\n")
@@ -260,7 +260,7 @@ func GenerateTestFile(cp *checkpoint.Checkpoint, tests []*TestCase) string {
 					if j > 0 {
 						sb.WriteString(", ")
 					}
-					sb.WriteString(fmt.Sprintf("%s: %q", sanitizeName(fmt.Sprintf("%v", tc.Table[0][j])), fmt.Sprintf("%v", cell)))
+					_, _ = fmt.Fprintf(&sb, "%s: %q", sanitizeName(fmt.Sprintf("%v", tc.Table[0][j])), fmt.Sprintf("%v", cell))
 				}
 				sb.WriteString("},\n")
 			}

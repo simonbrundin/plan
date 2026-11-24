@@ -67,7 +67,9 @@ func (s *Scheduler) Run(ctx context.Context) {
 	defer ticker.Stop()
 
 	// Run once immediately
-	s.runOnce(ctx)
+	if err := s.runOnce(ctx); err != nil {
+		log.Printf("scheduler run failed: %v", err)
+	}
 
 	for {
 		select {
@@ -75,7 +77,9 @@ func (s *Scheduler) Run(ctx context.Context) {
 			log.Println("Scheduler stopping")
 			return
 		case <-ticker.C:
-			s.runOnce(ctx)
+			if err := s.runOnce(ctx); err != nil {
+				log.Printf("scheduler run failed: %v", err)
+			}
 		}
 	}
 }

@@ -235,11 +235,6 @@ func (g *Generator) RefreshTokenPair(refreshToken string) (*TokenPair, error) {
 	}
 
 	// Generate new token pair with same session
-	sessionID := claims.SessionID
-	if sessionID == "" {
-		sessionID = uuid.New().String()
-	}
-
 	return g.GenerateTokenPair(claims.Subject, claims.Email, claims.Roles)
 }
 

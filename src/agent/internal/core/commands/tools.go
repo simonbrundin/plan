@@ -58,9 +58,9 @@ func listCommandsExecute(
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Available commands (%d):\n\n", len(cmds)))
+	_, _ = fmt.Fprintf(&sb, "Available commands (%d):\n\n", len(cmds))
 	for _, cmd := range cmds {
-		sb.WriteString(fmt.Sprintf("• **%s**: %s\n", cmd.Name, cmd.Description))
+		_, _ = fmt.Fprintf(&sb, "• **%s**: %s\n", cmd.Name, cmd.Description)
 	}
 	sb.WriteString("\nUse run_command with the command name to execute one.")
 
@@ -92,11 +92,11 @@ func runCommandExecute(
 
 	// Build response: describe what the command does and the workflow
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("## Command: %s\n\n", cmd.Name))
-	sb.WriteString(fmt.Sprintf("**Description**: %s\n\n", cmd.Description))
+	_, _ = fmt.Fprintf(&sb, "## Command: %s\n\n", cmd.Name)
+	_, _ = fmt.Fprintf(&sb, "**Description**: %s\n\n", cmd.Description)
 
 	if len(cmd.AllowedTools) > 0 {
-		sb.WriteString(fmt.Sprintf("**Allowed tools**: %s\n\n", strings.Join(cmd.AllowedTools, ", ")))
+		_, _ = fmt.Fprintf(&sb, "**Allowed tools**: %s\n\n", strings.Join(cmd.AllowedTools, ", "))
 	}
 
 	sb.WriteString("## Workflow\n\n")
@@ -121,7 +121,7 @@ func runCommandExecute(
 				}
 			}
 			if step > 0 {
-				sb.WriteString(fmt.Sprintf("\n**Step %d**:\n", step))
+				_, _ = fmt.Fprintf(&sb, "\n**Step %d**:\n", step)
 			}
 			// Strip the ### prefix
 			stepText := strings.TrimPrefix(trimmed, "### ")

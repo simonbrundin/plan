@@ -107,7 +107,9 @@ func TestCurrentPlan(t *testing.T) {
 		t.Error("Expected CurrentPlan to be nil initially")
 	}
 
-	o.CreatePlan(ctx, "Test", "")
+	if _, err := o.CreatePlan(ctx, "Test", ""); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	if o.CurrentPlan() == nil {
 		t.Error("Expected CurrentPlan to be set after CreatePlan")
@@ -278,7 +280,9 @@ func TestShouldStopHook(t *testing.T) {
 	}
 
 	plan.Approve("user")
-	cfg.StateStore.SavePlan(plan)
+	if err := cfg.StateStore.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	hook := NewShouldStopHook(o)
 
@@ -289,7 +293,9 @@ func TestShouldStopHook(t *testing.T) {
 
 	// Set current checkpoint
 	plan.Checkpoints[0].MarkInProgress()
-	cfg.StateStore.SaveCheckpoint(plan.Checkpoints[0])
+	if err := cfg.StateStore.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// Has pending gates - should not allow stop
 	if hook.ShouldStop(nil) {

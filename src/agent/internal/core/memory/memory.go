@@ -402,7 +402,7 @@ func (m *MemoryManager) GenerateContextForTask(task string) string {
 	sb.WriteString("\n\n## Relevant Past Experiences\n\n")
 
 	for _, mem := range memories {
-		sb.WriteString(fmt.Sprintf("### %s (%s)\n", mem.Type, mem.CreatedAt.Format("2006-01-02")))
+		_, _ = fmt.Fprintf(&sb, "### %s (%s)\n", mem.Type, mem.CreatedAt.Format("2006-01-02"))
 		sb.WriteString(mem.Summary)
 		sb.WriteString("\n\n")
 	}

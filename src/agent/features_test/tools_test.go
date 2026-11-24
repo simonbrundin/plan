@@ -1,6 +1,7 @@
 package featurestest
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	tempDir     string
+	tempDir          string
 	verktygsResultat map[string]interface{}
 )
 
@@ -23,7 +24,7 @@ func setupTempDir() error {
 
 func cleanupTempDir() {
 	if tempDir != "" {
-		os.RemoveAll(tempDir)
+		_ = os.RemoveAll(tempDir)
 	}
 }
 
@@ -34,13 +35,17 @@ func anropaVerktyg(tool *tools.ToolDefinition, args map[string]interface{}) (int
 }
 
 func initieraTools(ctx *godog.ScenarioContext) {
-	ctx.BeforeScenario(func(*godog.Scenario) {
-		setupTempDir()
+	ctx.Before(func(c context.Context, sc *godog.Scenario) (context.Context, error) {
+		if err := setupTempDir(); err != nil {
+			return c, err
+		}
 		verktygsResultat = nil
+		return c, nil
 	})
 
-	ctx.AfterScenario(func(*godog.Scenario, error) {
+	ctx.After(func(c context.Context, sc *godog.Scenario, err error) (context.Context, error) {
 		cleanupTempDir()
+		return c, nil
 	})
 
 	ctx.Step(`^verktygsdefinitionen "([^"]*)"$`, func(toolName string) error { return nil })
@@ -64,7 +69,9 @@ func initieraTools(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^en fil "([^"]*)" med innehåll "([^"]*)"$`, func(filename, content string) error {
 		if tempDir == "" {
-			setupTempDir()
+			if err := setupTempDir(); err != nil {
+				return err
+			}
 		}
 		path := filepath.Join(tempDir, filename)
 		return os.WriteFile(path, []byte(content), 0644)
@@ -93,7 +100,9 @@ func initieraTools(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^en fil med (\d+) rader$`, func(lineCount int) error {
 		if tempDir == "" {
-			setupTempDir()
+			if err := setupTempDir(); err != nil {
+				return err
+			}
 		}
 		path := filepath.Join(tempDir, "hundred_lines.txt")
 		var b strings.Builder
@@ -143,7 +152,9 @@ func initieraTools(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^en fil med texten "([^"]*)"$`, func(content string) error {
 		if tempDir == "" {
-			setupTempDir()
+			if err := setupTempDir(); err != nil {
+				return err
+			}
 		}
 		path := filepath.Join(tempDir, "edit_test.txt")
 		return os.WriteFile(path, []byte(content), 0644)
@@ -205,7 +216,9 @@ func initieraTools(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^en fil med flera rader innehållande "([^"]*)"$`, func(pattern string) error {
 		if tempDir == "" {
-			setupTempDir()
+			if err := setupTempDir(); err != nil {
+				return err
+			}
 		}
 		path := filepath.Join(tempDir, "grep_test.txt")
 		content := "first test line\nsecond test line\nthird line\n"
@@ -242,11 +255,17 @@ func initieraTools(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^markdown-filer i alla underkataloger ska returneras$`, func() error {
 		if tempDir == "" {
-			setupTempDir()
+			if err := setupTempDir(); err != nil {
+				return err
+			}
 		}
 		subDir := filepath.Join(tempDir, "subdir")
-		os.MkdirAll(subDir, 0755)
-		os.WriteFile(filepath.Join(subDir, "test.md"), []byte("# Test"), 0644)
+		if err := os.MkdirAll(subDir, 0755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(subDir, "test.md"), []byte("# Test"), 0644); err != nil {
+			return err
+		}
 		globTool := tools.GlobTool()
 		result, err := anropaVerktyg(globTool, map[string]interface{}{
 			"pattern": "**/*.md",
@@ -262,8 +281,12 @@ func initieraTools(ctx *godog.ScenarioContext) {
 	ctx.Step(`^jag anropar read_multiple med båda sökvägarna$`, func() error {
 		path1 := filepath.Join(tempDir, "a.txt")
 		path2 := filepath.Join(tempDir, "b.txt")
-		os.WriteFile(path1, []byte("Content A"), 0644)
-		os.WriteFile(path2, []byte("Content B"), 0644)
+		if err := os.WriteFile(path1, []byte("Content A"), 0644); err != nil {
+			return err
+		}
+		if err := os.WriteFile(path2, []byte("Content B"), 0644); err != nil {
+			return err
+		}
 		readMultipleTool := tools.ReadMultipleTool()
 		result, err := anropaVerktyg(readMultipleTool, map[string]interface{}{
 			"paths": []string{path1, path2},

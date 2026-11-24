@@ -1,6 +1,7 @@
 package featurestest
 
 import (
+	"context"
 	"os"
 
 	"github.com/cucumber/godog"
@@ -9,8 +10,9 @@ import (
 var providerResultat []string
 
 func initieraProviders(ctx *godog.ScenarioContext) {
-	ctx.BeforeScenario(func(*godog.Scenario) {
+	ctx.Before(func(c context.Context, sc *godog.Scenario) (context.Context, error) {
 		providerResultat = nil
+		return c, nil
 	})
 
 	ctx.Step(`^OpenAI provider konfigurerad med API-nyckel$`, func() error {

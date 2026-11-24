@@ -69,10 +69,6 @@ func (f *Factory) CreateProviderManager() (*ProviderManager, error) {
 
 	// Add MiniMax if configured
 	if apiKey := os.Getenv("MINIMAX_API_KEY"); apiKey != "" {
-		modelName := os.Getenv("MINIMAX_MODEL")
-		if modelName == "" {
-			modelName = "MiniMax-M2.7"
-		}
 		endpoint := os.Getenv("MINIMAX_ENDPOINT")
 		if endpoint == "" {
 			endpoint = "https://api.minimax.io/v1"
@@ -86,10 +82,6 @@ func (f *Factory) CreateProviderManager() (*ProviderManager, error) {
 
 	// Add OpenAI if configured
 	if apiKey := os.Getenv("OPENAI_API_KEY"); apiKey != "" {
-		modelName := os.Getenv("OPENAI_MODEL")
-		if modelName == "" {
-			modelName = "gpt-4o"
-		}
 		endpoint := os.Getenv("OPENAI_BASE_URL")
 		if endpoint == "" {
 			endpoint = "https://api.openai.com/v1"

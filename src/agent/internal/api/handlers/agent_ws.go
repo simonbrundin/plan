@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"sync"
@@ -70,7 +71,7 @@ func (h *AgentWebSocketHandler) HandleAgentChat(c *gin.Context) {
 		log.Printf("WebSocket upgrade failed: %v", err)
 		return
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// Generate conversation ID
 	convID := uuid.New().String()
@@ -164,7 +165,7 @@ func (h *AgentWebSocketHandler) HandleAgentChat(c *gin.Context) {
 		// Handle different message types
 		switch req.Type {
 		case "chat":
-			h.handleAgentChat(convID, req, eventHandler)
+			h.handleAgentChat(req, eventHandler)
 		case "ping":
 			send(WsStreamChunk{Type: "pong", ConvID: convID})
 		default:
@@ -179,15 +180,9 @@ func (h *AgentWebSocketHandler) HandleAgentChat(c *gin.Context) {
 
 // handleAgentChat processes a chat request with full agent support
 func (h *AgentWebSocketHandler) handleAgentChat(
-	convID string,
 	req WsMessage,
 	handler core.EventHandler,
 ) {
-	// Override convID if provided
-	if req.ConvID != "" {
-		convID = req.ConvID
-	}
-
 	// Convert messages
 	var agentMessages []messages.Message
 	for _, msg := range req.Messages {
@@ -262,7 +257,7 @@ func (h *AgentWebSocketHandler) handleAgentChat(
 	})
 
 	// Run the agent with the converted messages
-	result := agent.SendMessageWithHistory(nil, agentMessages, "", handler)
+	result := agent.SendMessageWithHistory(context.TODO(), agentMessages, "", handler)
 	if result.Error != nil {
 		handler(&core.AgentEvent{
 			Type:    core.EventAgentEnd,

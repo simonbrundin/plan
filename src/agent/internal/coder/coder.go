@@ -145,7 +145,7 @@ func (c *Coder) propose(ctx context.Context, run planclient.AgentRun, goal planc
 	if err != nil {
 		return fmt.Errorf("failed to create workspace: %w", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	proposal, err := c.proposer.Propose(ctx, ws, goal.Title, goal.Description)
 	if err != nil {
@@ -245,7 +245,7 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 		c.fail(ctx, run.ID, err)
 		return fmt.Errorf("failed to create executor: %w", err)
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	result, err := exec.Execute(ctx, executor.Request{
 		Changes:     changes,
@@ -362,16 +362,6 @@ func (c *Coder) startExecuting(ctx context.Context, run planclient.AgentRun, goa
 		"status": status,
 	})
 	return nil
-}
-
-// approvedProposal ger det senaste godkända förslaget, om det finns.
-func (c *Coder) approvedProposal(ctx context.Context, runID int64) (*planclient.AgentApproval, error) {
-	approvals, err := c.planClient.GetAgentApprovals(ctx, runID)
-	if err != nil {
-		return nil, err
-	}
-
-	return findApproved(approvals), nil
 }
 
 // findApproved ger det godkända förslaget, om det finns.
@@ -565,7 +555,7 @@ func (c *Coder) verifyProposal(ctx context.Context, proposal *proposer.Proposal)
 	if err != nil {
 		return verification{passed: false, output: err.Error()}
 	}
-	defer exec.Cleanup()
+	defer func() { _ = exec.Cleanup() }()
 
 	result, err := exec.Execute(ctx, executor.Request{
 		Changes:     proposal.Changes,

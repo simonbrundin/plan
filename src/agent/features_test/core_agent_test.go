@@ -30,12 +30,14 @@ func (p *testProvider) Stream(
 
 	userMsg := ""
 	for i := len(msgs) - 1; i >= 0; i-- {
-		if um, ok := msgs[i].(*messages.UserMessage); ok {
-			for _, block := range um.Content {
-				if tb, ok := block.(*messages.TextBlock); ok {
-					userMsg = tb.Text
-					break
-				}
+		um, ok := msgs[i].(*messages.UserMessage)
+		if !ok {
+			continue
+		}
+		for _, block := range um.Content {
+			if tb, ok := block.(*messages.TextBlock); ok {
+				userMsg = tb.Text
+				break
 			}
 		}
 		break
@@ -61,10 +63,11 @@ func setupTestAgent() {
 }
 
 func initieraCoreAgent(ctx *godog.ScenarioContext) {
-	ctx.BeforeScenario(func(*godog.Scenario) {
+	ctx.Before(func(c context.Context, sc *godog.Scenario) (context.Context, error) {
 		setupTestAgent()
 		testHistory = nil
 		testEvents = nil
+		return c, nil
 	})
 
 	ctx.Step(`^en agent konfigurerad med en LLM-provider$`, func() error {
@@ -90,7 +93,7 @@ func initieraCoreAgent(ctx *godog.ScenarioContext) {
 	})
 
 	ctx.Step(`^agenten ska svara med ett meddelande$`, func() error {
-		if testHistory == nil || len(testHistory) == 0 {
+		if len(testHistory) == 0 {
 			return godog.ErrPending
 		}
 		lastMsg := testHistory[len(testHistory)-1]

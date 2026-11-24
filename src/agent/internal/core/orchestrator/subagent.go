@@ -188,7 +188,6 @@ func (a *FreshContextAgent) Run(ctx context.Context, prompt string) (string, err
 type SubAgentPool struct {
 	manager   *SubAgentManager
 	maxAgents int
-	mu        sync.Mutex
 	available chan Agent
 }
 

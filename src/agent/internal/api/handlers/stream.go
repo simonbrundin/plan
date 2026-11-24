@@ -53,8 +53,13 @@ func StreamMessages(c *gin.Context) {
 			if !ok {
 				return
 			}
-			data, _ := json.Marshal(msg)
-			c.Writer.Write([]byte("data: " + string(data) + "\n\n"))
+			data, err := json.Marshal(msg)
+			if err != nil {
+				return
+			}
+			if _, err := c.Writer.Write([]byte("data: " + string(data) + "\n\n")); err != nil {
+				return
+			}
 			c.Writer.Flush()
 		}
 	}

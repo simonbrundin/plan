@@ -103,7 +103,8 @@ func (h *WorkflowHandler) ApprovePlan(c *gin.Context) {
 	planID := c.Param("id")
 
 	var req ApprovePlanRequest
-	c.ShouldBindJSON(&req) // Optional body
+	// Kroppen är valfri - ett fel här betyder bara att den saknas.
+	_ = c.ShouldBindJSON(&req)
 
 	approvedBy := req.ApprovedBy
 	if approvedBy == "" {
@@ -192,11 +193,9 @@ func (h *WorkflowHandler) SubmitHumanDecision(c *gin.Context) {
 		return
 	}
 
-	message := "Decision recorded"
+	message := "Checkpoint rejected, changes requested"
 	if req.Approved {
 		message = "Checkpoint approved"
-	} else {
-		message = "Checkpoint rejected, changes requested"
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": message})

@@ -269,9 +269,10 @@ func buildCheckpointProgress(cp *checkpoint.Checkpoint) string {
 		lines = append(lines, "\n**Gate Status**:")
 		for gateType, result := range cp.GateResults {
 			status := fmt.Sprintf("❌ %s", result.Status)
-			if result.Status == "passed" {
+			switch result.Status {
+			case "passed":
 				status = fmt.Sprintf("✅ %s", result.Status)
-			} else if result.Status == "pending" || result.Status == "running" {
+			case "pending", "running":
 				status = fmt.Sprintf("⏳ %s", result.Status)
 			}
 			lines = append(lines, fmt.Sprintf("  - %s: %s", gateType, status))

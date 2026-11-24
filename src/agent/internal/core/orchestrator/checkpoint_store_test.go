@@ -189,7 +189,9 @@ func TestCheckpointStoreFullWorkflow(t *testing.T) {
 	// 4. Simulate gate result
 	gateResult := checkpoint.NewGateResult("behavior")
 	gateResult.Pass("Tests passing")
-	store.SaveGateResult(implCP.ID, gateResult)
+	if err := store.SaveGateResult(implCP.ID, gateResult); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// 5. Load and verify
 	loaded, err := store.GetPlan(plan.ID)

@@ -19,7 +19,7 @@ func TestNewKopierarRepot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	content, err := ws.Read("main.go")
 	if err != nil {
@@ -52,7 +52,7 @@ func TestWriteSkaparKataloger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	if err := ws.Write("pkg/sub/fil.go", "package sub\n"); err != nil {
 		t.Fatalf("Write: %v", err)
@@ -80,7 +80,7 @@ func TestWriteBlockerarUtväg(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	for _, path := range []string{"../ut.txt", "/tmp/ut.txt", "a/../../ut.txt"} {
 		if err := ws.Write(path, "x"); err == nil {
@@ -99,7 +99,7 @@ func TestChangedFilesHittarÄndringar(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	if err := ws.Write("main.go", "package main // ändrad\n"); err != nil {
 		t.Fatalf("Write: %v", err)
@@ -138,7 +138,7 @@ func TestRunKommando(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	output, err := ws.Run("cat", "fil.txt")
 	if err != nil {
@@ -157,7 +157,7 @@ func TestRunFelkommando(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	if _, err := ws.Run("cat", "saknas.txt"); err == nil {
 		t.Error("ett felande kommando ska ge ett fel")
@@ -231,7 +231,7 @@ func TestWorkspaceÅterställerRemote(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	output, err := ws.Run("git", "remote", "get-url", "origin")
 	if err != nil {
@@ -251,7 +251,7 @@ func TestWorkspaceSätterIdentitet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	email, err := ws.Run("git", "config", "user.email")
 	if err != nil {
@@ -273,7 +273,7 @@ func TestPushBranchAnvänderRättFlaggor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer ws.Cleanup()
+	defer func() { _ = ws.Cleanup() }()
 
 	t.Setenv("GIT_AUTH_HEADER", "Authorization: Basic secret")
 

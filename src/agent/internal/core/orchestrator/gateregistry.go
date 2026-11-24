@@ -27,8 +27,7 @@ func NewDefaultGateRegistry() *gate.GateRegistry {
 
 // GateAgentFactory wraps GateAgent creation for gates
 type GateAgentFactory struct {
-	provider *ProviderWrapper
-	model    string
+	model string
 }
 
 // ProviderWrapper wraps the provider manager for gate use

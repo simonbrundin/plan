@@ -516,9 +516,9 @@ func parseDuration(s string) int {
 		return (parseDuration(parts[0]) + parseDuration(parts[1])) / 2
 	}
 
-	// Extract number
+	// Extract number - om strängen inte innehåller ett tal blir num 0.
 	var num int
-	fmt.Sscanf(s, "%d", &num)
+	_, _ = fmt.Sscanf(s, "%d", &num)
 
 	if strings.Contains(s, "hour") || strings.Contains(s, "h") {
 		return num
@@ -690,18 +690,18 @@ func (r *DecompositionResult) PrettyPrint() string {
 	sb.WriteString("                    GOAL DECOMPOSITION                             \n")
 	sb.WriteString("═══════════════════════════════════════════════════════════════\n\n")
 
-	sb.WriteString(fmt.Sprintf("Main Goal: %s\n\n", r.Goal.Title))
+	_, _ = fmt.Fprintf(&sb, "Main Goal: %s\n\n", r.Goal.Title)
 
-	sb.WriteString(fmt.Sprintf("Timeline: %s\n", r.Timeline))
-	sb.WriteString(fmt.Sprintf("Sub-Goals: %d\n", len(r.SubGoals)))
-	sb.WriteString(fmt.Sprintf("Total Tasks: %d\n\n", len(r.Tasks)))
+	_, _ = fmt.Fprintf(&sb, "Timeline: %s\n", r.Timeline)
+	_, _ = fmt.Fprintf(&sb, "Sub-Goals: %d\n", len(r.SubGoals))
+	_, _ = fmt.Fprintf(&sb, "Total Tasks: %d\n\n", len(r.Tasks))
 
 	if len(r.Resources) > 0 {
 		sb.WriteString("───────────────────────────────────────────────────────────────\n")
 		sb.WriteString("Resources Needed\n")
 		sb.WriteString("───────────────────────────────────────────────────────────────\n")
 		for _, res := range r.Resources {
-			sb.WriteString(fmt.Sprintf("  • %s\n", res))
+			_, _ = fmt.Fprintf(&sb, "  • %s\n", res)
 		}
 		sb.WriteString("\n")
 	}
@@ -711,7 +711,7 @@ func (r *DecompositionResult) PrettyPrint() string {
 		sb.WriteString("Potential Risks\n")
 		sb.WriteString("───────────────────────────────────────────────────────────────\n")
 		for _, risk := range r.Risks {
-			sb.WriteString(fmt.Sprintf("  ⚠ %s\n", risk))
+			_, _ = fmt.Fprintf(&sb, "  ⚠ %s\n", risk)
 		}
 		sb.WriteString("\n")
 	}
@@ -721,13 +721,13 @@ func (r *DecompositionResult) PrettyPrint() string {
 	sb.WriteString("───────────────────────────────────────────────────────────────\n")
 
 	for i, goal := range r.SubGoals {
-		sb.WriteString(fmt.Sprintf("\n[%d] %s (%s)\n", i+1, goal.Title, goal.Complexity))
-		sb.WriteString(fmt.Sprintf("    %s\n", goal.Description))
+		_, _ = fmt.Fprintf(&sb, "\n[%d] %s (%s)\n", i+1, goal.Title, goal.Complexity)
+		_, _ = fmt.Fprintf(&sb, "    %s\n", goal.Description)
 
 		// Find tasks for this goal
 		for _, task := range r.Tasks {
 			if task.GoalID == goal.ID {
-				sb.WriteString(fmt.Sprintf("    ├── [%s] %s\n", strings.ToUpper(string(task.Type)[:4]), task.Title))
+				_, _ = fmt.Fprintf(&sb, "    ├── [%s] %s\n", strings.ToUpper(string(task.Type)[:4]), task.Title)
 			}
 		}
 	}

@@ -50,8 +50,8 @@ func New(provider, model string) *Recorder {
 		model:    model,
 		tools:    map[string]int{},
 		snapshot: Snapshot{
-			Provider: provider,
-			Model:    model,
+			Provider:  provider,
+			Model:     model,
 			StartedAt: time.Now(),
 		},
 	}

@@ -16,7 +16,7 @@ import (
 
 func main() {
 	if err := run(os.Args[1:], os.Stdout); err != nil {
-		fmt.Fprintln(os.Stderr, "fel:", err)
+		_, _ = fmt.Fprintln(os.Stderr, "fel:", err)
 		os.Exit(1)
 	}
 }
@@ -66,7 +66,7 @@ func run(args []string, out io.Writer) error {
 }
 
 func usage(out io.Writer) {
-	fmt.Fprint(out, `wikictl - hantera kunskaps-wikin
+	_, _ = fmt.Fprint(out, `wikictl - hantera kunskaps-wikin
 
 Användning:
   wikictl <kommando> [flaggor]
@@ -158,18 +158,18 @@ func runSearch(args []string, out io.Writer, wikiDir string) error {
 		}
 		shown++
 
-		fmt.Fprintf(out, "%s  (poäng %d)\n", m.Note.ID, m.Score)
+		_, _ = fmt.Fprintf(out, "%s  (poäng %d)\n", m.Note.ID, m.Score)
 		if len(m.Note.Tags) > 0 {
-			fmt.Fprintf(out, "  taggar: %s\n", strings.Join(m.Note.Tags, ", "))
+			_, _ = fmt.Fprintf(out, "  taggar: %s\n", strings.Join(m.Note.Tags, ", "))
 		}
 		for _, line := range m.Lines {
-			fmt.Fprintf(out, "  %s\n", line)
+			_, _ = fmt.Fprintf(out, "  %s\n", line)
 		}
-		fmt.Fprintln(out)
+		_, _ = fmt.Fprintln(out)
 	}
 
 	if shown == 0 {
-		fmt.Fprintln(out, "Inga träffar. Skriv en not i inboxen om detta borde finnas i grafen.")
+		_, _ = fmt.Fprintln(out, "Inga träffar. Skriv en not i inboxen om detta borde finnas i grafen.")
 	}
 	return nil
 }
@@ -186,7 +186,7 @@ func runList(args []string, out io.Writer, wikiDir string) error {
 		return err
 	}
 	if len(w.Notes) == 0 {
-		fmt.Fprintln(out, "Wikin är tom.")
+		_, _ = fmt.Fprintln(out, "Wikin är tom.")
 		return nil
 	}
 
@@ -194,7 +194,7 @@ func runList(args []string, out io.Writer, wikiDir string) error {
 		if *project != "" && !note.HasProject(*project) {
 			continue
 		}
-		fmt.Fprintf(out, "%-40s %-35s %s\n", note.ID, note.Title, strings.Join(note.Tags, ", "))
+		_, _ = fmt.Fprintf(out, "%-40s %-35s %s\n", note.ID, note.Title, strings.Join(note.Tags, ", "))
 	}
 	return nil
 }
@@ -216,7 +216,7 @@ func runShow(args []string, out io.Writer, wikiDir string) error {
 	if note == nil {
 		return fmt.Errorf("sidan %q finns inte", fs.Arg(0))
 	}
-	fmt.Fprint(out, note.Render())
+	_, _ = fmt.Fprint(out, note.Render())
 	return nil
 }
 
@@ -232,10 +232,10 @@ func runGraph(args []string, out io.Writer, wikiDir string) error {
 		return err
 	}
 	if *mermaidOnly {
-		fmt.Fprint(out, mermaidBlock(w.Graph()))
+		_, _ = fmt.Fprint(out, mermaidBlock(w.Graph()))
 		return nil
 	}
-	fmt.Fprint(out, w.Graph())
+	_, _ = fmt.Fprint(out, w.Graph())
 	return nil
 }
 
@@ -252,7 +252,7 @@ func runInbox(args []string, out io.Writer, wikiDir string) error {
 	entries, err := os.ReadDir(filepath.Join(dir, wiki.InboxDir))
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Fprintln(out, "Inboxen är tom.")
+			_, _ = fmt.Fprintln(out, "Inboxen är tom.")
 			return nil
 		}
 		return err
@@ -268,10 +268,10 @@ func runInbox(args []string, out io.Writer, wikiDir string) error {
 			continue
 		}
 		found = true
-		fmt.Fprintln(out, name)
+		_, _ = fmt.Fprintln(out, name)
 	}
 	if !found {
-		fmt.Fprintln(out, "Inboxen är tom.")
+		_, _ = fmt.Fprintln(out, "Inboxen är tom.")
 	}
 	return nil
 }
@@ -324,8 +324,8 @@ func runNote(args []string, out io.Writer, wikiDir string) error {
 		return err
 	}
 
-	fmt.Fprintf(out, "Skrev %s\n", path)
-	fmt.Fprintln(out, "Kör 'wikictl ingest' för att lägga noten i grafen.")
+	_, _ = fmt.Fprintf(out, "Skrev %s\n", path)
+	_, _ = fmt.Fprintln(out, "Kör 'wikictl ingest' för att lägga noten i grafen.")
 	return nil
 }
 
@@ -420,7 +420,7 @@ func runPage(args []string, out io.Writer, wikiDir string) error {
 		return err
 	}
 
-	fmt.Fprintf(out, "Skrev [[%s]]\n", id)
+	_, _ = fmt.Fprintf(out, "Skrev [[%s]]\n", id)
 	return nil
 }
 
@@ -480,7 +480,7 @@ func runLink(args []string, out io.Writer, wikiDir string) error {
 		return err
 	}
 
-	fmt.Fprintf(out, "%s %s -> %s\n", verb, *from, *to)
+	_, _ = fmt.Fprintf(out, "%s %s -> %s\n", verb, *from, *to)
 	return nil
 }
 
@@ -526,8 +526,8 @@ func runSource(args []string, out io.Writer, wikiDir string) error {
 		}}, nil); err != nil {
 			return err
 		}
-		fmt.Fprintf(out, "Lade in råkälla %s\n", dest)
-		fmt.Fprintln(out, "Skriv nu en sammanfattning i wikin och länka den till källan.")
+		_, _ = fmt.Fprintf(out, "Lade in råkälla %s\n", dest)
+		_, _ = fmt.Fprintln(out, "Skriv nu en sammanfattning i wikin och länka den till källan.")
 
 	case "list":
 		w, err := wiki.Open(dir)
@@ -536,7 +536,7 @@ func runSource(args []string, out io.Writer, wikiDir string) error {
 		}
 		sources := w.Sources()
 		if len(sources) == 0 {
-			fmt.Fprintln(out, "Inga råkällor.")
+			_, _ = fmt.Fprintln(out, "Inga råkällor.")
 			return nil
 		}
 		for _, source := range sources {
@@ -548,7 +548,7 @@ func runSource(args []string, out io.Writer, wikiDir string) error {
 			if origin == "" {
 				origin = "-"
 			}
-			fmt.Fprintf(out, "%-40s %-12s %-14s %s\n", source.ID, state, source.Added, origin)
+			_, _ = fmt.Fprintf(out, "%-40s %-12s %-14s %s\n", source.ID, state, source.Added, origin)
 		}
 
 	default:
@@ -591,17 +591,17 @@ func runIngest(args []string, out io.Writer, wikiDir string) error {
 	}
 
 	if *dryRun {
-		fmt.Fprintln(out, "Torrkörning - inget skrevs.")
+		_, _ = fmt.Fprintln(out, "Torrkörning - inget skrevs.")
 	}
 
-	fmt.Fprintf(out, "Skapade:     %s\n", joinOrNone(report.Created))
-	fmt.Fprintf(out, "Uppdaterade: %s\n", joinOrNone(report.Updated))
-	fmt.Fprintf(out, "Arkiverade:  %s\n", joinOrNone(report.Archived))
+	_, _ = fmt.Fprintf(out, "Skapade:     %s\n", joinOrNone(report.Created))
+	_, _ = fmt.Fprintf(out, "Uppdaterade: %s\n", joinOrNone(report.Updated))
+	_, _ = fmt.Fprintf(out, "Arkiverade:  %s\n", joinOrNone(report.Archived))
 
 	if len(report.Suggest) > 0 {
-		fmt.Fprintln(out, "\nFörslag att slå ihop (kräver agent):")
+		_, _ = fmt.Fprintln(out, "\nFörslag att slå ihop (kräver agent):")
 		for _, s := range report.Suggest {
-			fmt.Fprintf(out, "  %s\n", s)
+			_, _ = fmt.Fprintf(out, "  %s\n", s)
 		}
 	}
 	return nil
@@ -620,7 +620,7 @@ func runIndex(args []string, out io.Writer, wikiDir string) error {
 	if err := refreshIndex(dir); err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "index.md, catalog.md och graph.md är uppdaterade.")
+	_, _ = fmt.Fprintln(out, "index.md, catalog.md och graph.md är uppdaterade.")
 	return nil
 }
 
@@ -645,9 +645,9 @@ func runInit(args []string, out io.Writer) error {
 	}
 
 	if changed {
-		fmt.Fprintf(out, "Uppdaterade %s\n", filepath.Join(repoDir, wiki.AgentsFileName))
+		_, _ = fmt.Fprintf(out, "Uppdaterade %s\n", filepath.Join(repoDir, wiki.AgentsFileName))
 	} else {
-		fmt.Fprintf(out, "%s var redan uppdaterad\n", filepath.Join(repoDir, wiki.AgentsFileName))
+		_, _ = fmt.Fprintf(out, "%s var redan uppdaterad\n", filepath.Join(repoDir, wiki.AgentsFileName))
 	}
 	return nil
 }
@@ -671,13 +671,13 @@ func runLint(args []string, out io.Writer, wikiDir string) error {
 
 	findings := w.Lint(opts)
 	for _, finding := range findings {
-		fmt.Fprintln(out, finding.String())
+		_, _ = fmt.Fprintln(out, finding.String())
 	}
 
 	if len(findings) == 0 {
-		fmt.Fprintln(out, "Inga problem hittade.")
+		_, _ = fmt.Fprintln(out, "Inga problem hittade.")
 	} else {
-		fmt.Fprintf(out, "\n%d problem hittade.\n", len(findings))
+		_, _ = fmt.Fprintf(out, "\n%d problem hittade.\n", len(findings))
 	}
 	return nil
 }

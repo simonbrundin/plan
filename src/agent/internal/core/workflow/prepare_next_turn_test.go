@@ -27,7 +27,9 @@ func TestCreatePrepareNextTurnHook(t *testing.T) {
 
 	// Approve and mark checkpoint in progress
 	plan.Approve("tester")
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 	plan.Checkpoints[0].MarkInProgress()
 	// Ensure GateResults map is initialized
 	plan.Checkpoints[0].GateResults = make(map[string]*checkpoint.GateResult)
@@ -35,7 +37,9 @@ func TestCreatePrepareNextTurnHook(t *testing.T) {
 		Status:   checkpoint.GateStatusPassed,
 		Feedback: "Tests passed",
 	}
-	store.SaveCheckpoint(plan.Checkpoints[0])
+	if err := store.SaveCheckpoint(plan.Checkpoints[0]); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// Create the hook
 	hook := createPrepareNextTurnHook(o)
@@ -112,7 +116,9 @@ func TestPrepareNextTurnHookUpdatesExistingProgress(t *testing.T) {
 	}
 	plan.Approve("tester")
 	plan.Checkpoints[0].MarkInProgress()
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	hook := createPrepareNextTurnHook(o)
 
@@ -236,7 +242,9 @@ func TestPrepareNextTurnHookPreservesContext(t *testing.T) {
 	}
 	plan.Approve("tester")
 	plan.Checkpoints[0].MarkInProgress()
-	store.SavePlan(plan)
+	if err := store.SavePlan(plan); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	hook := createPrepareNextTurnHook(o)
 

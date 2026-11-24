@@ -100,9 +100,16 @@ func CreateMessage(ctx context.Context, convID uuid.UUID, role, content string, 
 		return nil, err
 	}
 
-	pool.Exec(ctx, `UPDATE conversations SET updated_at = NOW() WHERE id = $1`, convID)
+	touchConversation(ctx, convID)
 
 	return &msg, nil
+}
+
+// touchConversation sätter samtalets tidsstämpel. Felet ignoreras med
+// vetande - ett meddelande som redan sparats ska inte försvinna för att
+// stämpeln inte gick att uppdatera.
+func touchConversation(ctx context.Context, convID uuid.UUID) {
+	_, _ = pool.Exec(ctx, `UPDATE conversations SET updated_at = NOW() WHERE id = $1`, convID)
 }
 
 // CreateToolMessage creates a tool call or tool result message
@@ -118,7 +125,7 @@ func CreateToolMessage(ctx context.Context, convID uuid.UUID, role, toolName, to
 		return nil, err
 	}
 
-	pool.Exec(ctx, `UPDATE conversations SET updated_at = NOW() WHERE id = $1`, convID)
+	touchConversation(ctx, convID)
 
 	return &msg, nil
 }
@@ -136,7 +143,7 @@ func CreateThinkingMessage(ctx context.Context, convID uuid.UUID, thinking strin
 		return nil, err
 	}
 
-	pool.Exec(ctx, `UPDATE conversations SET updated_at = NOW() WHERE id = $1`, convID)
+	touchConversation(ctx, convID)
 
 	return &msg, nil
 }

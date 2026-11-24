@@ -2,7 +2,6 @@ package goals
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -213,9 +212,9 @@ func listGoalsExecute(store Store) tools.ToolFunc {
 		var sb strings.Builder
 		sb.WriteString("## Goals\n\n")
 		for _, g := range goals {
-			sb.WriteString(fmt.Sprintf("- [%s] %s (%s)", statusEmoji(g.Status), g.Title, g.Status))
+			_, _ = fmt.Fprintf(&sb, "- [%s] %s (%s)", statusEmoji(g.Status), g.Title, g.Status)
 			if g.Description != "" {
-				sb.WriteString(fmt.Sprintf("\n  %s", g.Description))
+				_, _ = fmt.Fprintf(&sb, "\n  %s", g.Description)
 			}
 			sb.WriteString("\n")
 		}
@@ -243,17 +242,17 @@ func getGoalExecute(store Store) tools.ToolFunc {
 		children, _ := store.GetChildren(ctx, id)
 
 		var sb strings.Builder
-		sb.WriteString(fmt.Sprintf("## %s %s\n\n", goal.Icon, goal.Title))
-		sb.WriteString(fmt.Sprintf("**ID:** `%s`\n", goal.ID))
-		sb.WriteString(fmt.Sprintf("**Status:** %s\n", goal.Status))
+		_, _ = fmt.Fprintf(&sb, "## %s %s\n\n", goal.Icon, goal.Title)
+		_, _ = fmt.Fprintf(&sb, "**ID:** `%s`\n", goal.ID)
+		_, _ = fmt.Fprintf(&sb, "**Status:** %s\n", goal.Status)
 		if goal.Description != "" {
-			sb.WriteString(fmt.Sprintf("**Description:** %s\n", goal.Description))
+			_, _ = fmt.Fprintf(&sb, "**Description:** %s\n", goal.Description)
 		}
 
 		if len(children) > 0 {
 			sb.WriteString("\n### Sub-goals\n")
 			for _, c := range children {
-				sb.WriteString(fmt.Sprintf("- [%s] %s (%s)\n", statusEmoji(c.Status), c.Title, c.Status))
+				_, _ = fmt.Fprintf(&sb, "- [%s] %s (%s)\n", statusEmoji(c.Status), c.Title, c.Status)
 			}
 		}
 
@@ -354,7 +353,7 @@ func listStatusesExecute(store Store) tools.ToolFunc {
 		var sb strings.Builder
 		sb.WriteString("## Available Goal Statuses\n\n")
 		for _, s := range statuses {
-			sb.WriteString(fmt.Sprintf("- `%s` - %s\n", s.Name, s.Label))
+			_, _ = fmt.Fprintf(&sb, "- `%s` - %s\n", s.Name, s.Label)
 		}
 
 		return &provider.ToolResult{
@@ -408,10 +407,4 @@ func errorResult(msg string) *provider.ToolResult {
 
 func contextTime(ctx context.Context) time.Time {
 	return time.Now()
-}
-
-// MarshalJSON for debugging
-func goalToJSON(g *Goal) string {
-	b, _ := json.MarshalIndent(g, "", "  ")
-	return string(b)
 }

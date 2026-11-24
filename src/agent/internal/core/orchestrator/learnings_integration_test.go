@@ -110,9 +110,15 @@ func TestGenerateLearningsContext(t *testing.T) {
 	o := New(cfg)
 
 	// Add some learnings
-	o.AddLearning("test1", "First", "Desc", "Lesson 1")
-	o.AddLearning("test2", "Second", "Desc", "Lesson 2")
-	o.AddLearning("test3", "Third", "Desc", "Lesson 3")
+	if err := o.AddLearning("test1", "First", "Desc", "Lesson 1"); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
+	if err := o.AddLearning("test2", "Second", "Desc", "Lesson 2"); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
+	if err := o.AddLearning("test3", "Third", "Desc", "Lesson 3"); err != nil {
+		t.Fatalf("saving state failed: %v", err)
+	}
 
 	// Generate context
 	context := o.GenerateLearningsContext()

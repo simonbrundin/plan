@@ -1,6 +1,7 @@
 package usage
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -69,7 +70,7 @@ func TestInMemoryTracker(t *testing.T) {
 	tracker := InMemoryTracker()
 
 	// Record some usage
-	tracker.Record(nil, TokenUsage{
+	if err := tracker.Record(context.TODO(), TokenUsage{
 		ConversationID: "conv-1",
 		Provider:       "minimax",
 		Model:          "MiniMax-M2.7",
@@ -77,9 +78,11 @@ func TestInMemoryTracker(t *testing.T) {
 		OutputTokens:   50,
 		LatencyMs:      100,
 		Timestamp:      time.Now(),
-	})
+	}); err != nil {
+		t.Fatalf("Record() error = %v", err)
+	}
 
-	tracker.Record(nil, TokenUsage{
+	if err := tracker.Record(context.TODO(), TokenUsage{
 		ConversationID: "conv-1",
 		Provider:       "openai",
 		Model:          "gpt-4o-mini",
@@ -87,10 +90,12 @@ func TestInMemoryTracker(t *testing.T) {
 		OutputTokens:   100,
 		LatencyMs:      150,
 		Timestamp:      time.Now(),
-	})
+	}); err != nil {
+		t.Fatalf("Record() error = %v", err)
+	}
 
 	// Get stats
-	stats, err := tracker.GetStats(nil)
+	stats, err := tracker.GetStats(context.TODO())
 	if err != nil {
 		t.Fatalf("GetStats() error = %v", err)
 	}
@@ -129,7 +134,7 @@ func TestTracker_Record(t *testing.T) {
 		Timestamp:      time.Now(),
 	}
 
-	err := tracker.Record(nil, usage)
+	err := tracker.Record(context.TODO(), usage)
 	if err != nil {
 		t.Fatalf("Record() error = %v", err)
 	}

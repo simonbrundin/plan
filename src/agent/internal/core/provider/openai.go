@@ -111,7 +111,7 @@ func (p *OpenAIProvider) doRequest(ctx context.Context, endpoint, apiKey string,
 
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, fmt.Errorf("API error: %s - %s", resp.Status, string(bodyBytes))
 	}
 
@@ -121,7 +121,9 @@ func (p *OpenAIProvider) doRequest(ctx context.Context, endpoint, apiKey string,
 // streamResponse reads OpenAI's NDJSON streaming format (one JSON object per line)
 func (p *OpenAIProvider) streamResponse(body io.Reader, events chan<- StreamEvent) {
 	defer close(events)
-	defer func() { recover() }() // Handle panic on close
+	defer func() {
+		_ = recover()
+	}() // Handle panic on close
 
 	decoder := json.NewDecoder(body)
 	partialMsg := newAssistantMessage()

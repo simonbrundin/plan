@@ -146,15 +146,15 @@ func (v *HTMLViewer) ShowPlan(plan *checkpoint.CheckpointPlan) string {
 `)
 
 	for i, cp := range plan.Checkpoints {
-		b.WriteString(fmt.Sprintf(`  <div class="checkpoint complexity-%s">
+		_, _ = fmt.Fprintf(&b, `  <div class="checkpoint complexity-%s">
     <h3>%d. %s</h3>
     <p>%s</p>
-`, cp.Complexity, i+1, cp.Name, cp.Description))
+`, cp.Complexity, i+1, cp.Name, cp.Description)
 
 		if len(cp.Gates) > 0 {
 			b.WriteString("    <div>Gates: ")
 			for _, g := range cp.Gates {
-				b.WriteString(fmt.Sprintf(`<span class="gate">%s</span>`, g))
+				_, _ = fmt.Fprintf(&b, `<span class="gate">%s</span>`, g)
 			}
 			b.WriteString("</div>\n")
 		}
@@ -200,9 +200,9 @@ func (v *HTMLViewer) UpdateCheckpoint(cp *checkpoint.Checkpoint) string {
 		statusIcon = "🔄"
 	}
 
-	b.WriteString(fmt.Sprintf(`<div class="checkpoint" id="cp-%s">
+	_, _ = fmt.Fprintf(&b, `<div class="checkpoint" id="cp-%s">
   <h3>%s %s</h3>
-`, cp.ID, statusIcon, cp.Name))
+`, cp.ID, statusIcon, cp.Name)
 
 	for _, gateType := range cp.Gates {
 		result, exists := cp.GateResults[gateType]
@@ -222,7 +222,7 @@ func (v *HTMLViewer) UpdateCheckpoint(cp *checkpoint.Checkpoint) string {
 			}
 		}
 
-		b.WriteString(fmt.Sprintf(`  <span class="gate %s">%s %s</span>`, class, icon, gateType))
+		_, _ = fmt.Fprintf(&b, `  <span class="gate %s">%s %s</span>`, class, icon, gateType)
 	}
 
 	b.WriteString("</div>\n")

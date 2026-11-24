@@ -52,10 +52,11 @@ func (h *ShouldStopHook) ShouldStop(turnCtx *core.TurnContext) bool {
 	// Gates not passed - agent must continue
 	// Build feedback message
 	h.messageBuilder.Reset()
-	h.messageBuilder.WriteString(fmt.Sprintf(
+	_, _ = fmt.Fprintf(
+		&h.messageBuilder,
 		"\n⚠️  Cannot stop - checkpoint '%s' has pending gates:\n",
 		current.Name,
-	))
+	)
 
 	for _, gateType := range pendingGates {
 		result := current.GateResults[gateType]
@@ -63,7 +64,7 @@ func (h *ShouldStopHook) ShouldStop(turnCtx *core.TurnContext) bool {
 		if result != nil {
 			status = string(result.Status)
 		}
-		h.messageBuilder.WriteString(fmt.Sprintf("  • %s: %s\n", gateType, status))
+		_, _ = fmt.Fprintf(&h.messageBuilder, "  • %s: %s\n", gateType, status)
 	}
 
 	h.messageBuilder.WriteString("\n📋 Continue working to pass these gates before stopping.\n")

@@ -214,7 +214,7 @@ func (r *Runner) GetLogs(ctx context.Context, jobName string) (string, error) {
 			if err != nil {
 				logs = fmt.Sprintf("[Error getting logs: %v]\n", err)
 			}
-			allLogs.WriteString(fmt.Sprintf("=== Pod: %s, Container: %s ===\n", pod.Name, container.Name))
+			_, _ = fmt.Fprintf(&allLogs, "=== Pod: %s, Container: %s ===\n", pod.Name, container.Name)
 			allLogs.WriteString(logs)
 			allLogs.WriteString("\n")
 		}
@@ -233,7 +233,7 @@ func (r *Runner) getPodLogs(ctx context.Context, podName, containerName string) 
 	if err != nil {
 		return "", err
 	}
-	defer logs.Close()
+	defer func() { _ = logs.Close() }()
 
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, logs)
@@ -274,7 +274,9 @@ func (r *Runner) DeleteCompleted(ctx context.Context) error {
 				if finishedTime != nil {
 					age := time.Since(finishedTime.Time)
 					if age > time.Duration(*job.Spec.TTLSecondsAfterFinished)*time.Second {
-						r.Delete(ctx, job.Name)
+						if err := r.Delete(ctx, job.Name); err != nil {
+							log.Printf("failed to delete expired job %s: %v", job.Name, err)
+						}
 					}
 				}
 			}

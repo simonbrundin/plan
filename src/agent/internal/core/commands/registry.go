@@ -107,22 +107,6 @@ func parseFrontmatter(content string) (description string, allowedTools []string
 	return description, allowedTools
 }
 
-func extractName(content string) string {
-	// Try to find H1 heading: # CommandName
-	lines := strings.SplitN(content, "\n", 20)
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "# ") && !strings.HasPrefix(line, "# ") {
-			name := strings.TrimPrefix(line, "# ")
-			name = strings.TrimSpace(name)
-			// Remove anything after the name (like ## Syfte)
-			name = strings.Split(name, " ")[0]
-			return name
-		}
-	}
-	return ""
-}
-
 // Load reads all .md files from the given directory
 func Load(dir string) (*Registry, error) {
 	if dir == "" {
