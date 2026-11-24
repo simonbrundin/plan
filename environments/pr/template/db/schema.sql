@@ -228,6 +228,7 @@ CREATE TABLE IF NOT EXISTS "agent_runs" (
   -- Vilken agent och modell som gjorde körningen. Modellen behövs för
   -- att räkna fram kostnaden ur prislistan.
   "agent_id" VARCHAR(128) NOT NULL DEFAULT '',
+  "provider" VARCHAR(64) NOT NULL DEFAULT '',
   "model" VARCHAR(64) NOT NULL DEFAULT '',
   "model_version" VARCHAR(64) NOT NULL DEFAULT '',
   -- Reserverad kostnad för körningar som pågår. Den räknas med i

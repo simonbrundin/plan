@@ -102,3 +102,61 @@ export interface AgentConversation {
   created_at?: string;
   updated_at?: string;
 }
+
+// Kostnaden för en agentkörning. Plan räknar fram den ur en
+// versionsstyrd prislista.
+export interface AgentRunUsage {
+  id: number;
+  agent_run_id: number;
+  goal_id: number;
+  agent_id?: string;
+  provider?: string;
+  model?: string;
+  model_version?: string;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  tool_calls: number;
+  tool_names?: string[];
+  cost_usd: number;
+  currency: string;
+  // Vilken prislista som räknades fram kostnaden med.
+  price_list_version: string;
+  // "price_list" eller "fallback" - fallback betyder schablonpris.
+  price_source: string;
+  // "reported" eller "incomplete".
+  status: string;
+  created_at: string;
+  started_at?: string;
+  finished_at?: string;
+}
+
+// En sammanfattad kostnad.
+export interface AgentUsageSummary {
+  runs: number;
+  total_cost_usd: number;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  tool_calls: number;
+  currency: string;
+  by_model?: Array<{
+    provider: string;
+    model: string;
+    runs: number;
+    cost_usd: number;
+  }>;
+}
+
+// En budgetgräns för agentkostnad.
+export interface AgentBudget {
+  id: number;
+  name: string;
+  period: string;
+  hard_limit_usd: number;
+  warning_limit_usd?: number;
+  reservation_per_run_usd: number;
+  agent_id?: string;
+  active: boolean;
+  created_at: string;
+}

@@ -119,6 +119,8 @@ func (p *OpenAIProvider) streamResponse(body io.Reader, events chan<- StreamEven
 
 	decoder := json.NewDecoder(body)
 	partialMsg := newAssistantMessage()
+	stopReasonSeen := ""
+	extraChunks := 0
 
 	for decoder.More() {
 		var raw json.RawMessage
@@ -133,14 +135,32 @@ func (p *OpenAIProvider) streamResponse(body io.Reader, events chan<- StreamEven
 		}
 		if stopReason != "" {
 			partialMsg.StopReason = stopReason
-			events <- &DoneEvent{Message: partialMsg}
-			return
+
+			// Användningen kommer ibland i ett eget stycke efter det
+			// sista innehållet. Därför läses streamen vidare tills
+			// användningen kommer - annars blir kostnaden noll.
+			if hasUsage(partialMsg.Usage) {
+				events <- &DoneEvent{Message: partialMsg}
+				return
+			}
+
+			stopReasonSeen = stopReason
+			extraChunks++
+			if extraChunks > maxChunksAfterStop {
+				events <- &DoneEvent{Message: partialMsg}
+				return
+			}
+			continue
 		}
 	}
 
 	// If we get here without finish_reason, send what we have
 	if len(partialMsg.Content) > 0 {
-		partialMsg.StopReason = "end_turn"
+		if stopReasonSeen != "" {
+			partialMsg.StopReason = stopReasonSeen
+		} else {
+			partialMsg.StopReason = "end_turn"
+		}
 		events <- &DoneEvent{Message: partialMsg}
 	}
 }
@@ -176,11 +196,15 @@ func (p *OpenAIProvider) parseChunk(raw json.RawMessage, partialMsg *messages.As
 		if data.Usage.PromptTokensDetails != nil {
 			cached = data.Usage.PromptTokensDetails.CachedTokens
 		}
-		partialMsg.Usage = &messages.Usage{
+		usage := &messages.Usage{
 			InputTokens:  data.Usage.PromptTokens,
 			OutputTokens: data.Usage.CompletionTokens,
 			TotalTokens:  data.Usage.TotalTokens,
 			CacheTokens:  cached,
+		}
+		// En tom användning ska inte skriva över en riktig.
+		if hasUsage(usage) || partialMsg.Usage == nil {
+			partialMsg.Usage = usage
 		}
 	}
 

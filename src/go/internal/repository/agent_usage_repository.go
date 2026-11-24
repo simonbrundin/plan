@@ -51,6 +51,12 @@ func (r *AgentUsageRepository) Record(ctx context.Context, userID, runID int64, 
 		return nil, nil
 	}
 
+	// En tom lista ska sparas som en tom array, inte som null.
+	toolNames := req.ToolNames
+	if toolNames == nil {
+		toolNames = []string{}
+	}
+
 	tokens := pricing.Tokens{
 		Input:     req.InputTokens,
 		Output:    req.OutputTokens,
@@ -87,7 +93,7 @@ func (r *AgentUsageRepository) Record(ctx context.Context, userID, runID int64, 
 	var usage models.AgentRunUsage
 	err = r.pool.QueryRow(ctx, query,
 		runID, run.GoalID, req.AgentID, run.Provider, run.Model, req.ModelVersion,
-		req.InputTokens, req.OutputTokens, req.CacheReadTokens, req.ToolCalls, req.ToolNames,
+		req.InputTokens, req.OutputTokens, req.CacheReadTokens, req.ToolCalls, toolNames,
 		result.CostUSD, result.Currency, result.PriceListVersion, result.Source,
 		models.AgentUsageStatusReported, req.StartedAt, req.FinishedAt,
 	).Scan(&usage.ID, &usage.AgentRunID, &usage.GoalID, &usage.AgentID, &usage.Provider, &usage.Model,

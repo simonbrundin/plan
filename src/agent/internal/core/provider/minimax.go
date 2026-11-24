@@ -136,6 +136,8 @@ func (p *MinimaxProvider) streamResponse(body io.Reader, events chan<- StreamEve
 
 	pendingToolCalls := make(map[string]*messages.ToolCallBlock)
 	partialMsg := newAssistantMessage()
+	stopReasonSeen := ""
+	extraChunks := 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -159,8 +161,22 @@ func (p *MinimaxProvider) streamResponse(body io.Reader, events chan<- StreamEve
 		if stopReason != "" {
 			p.finalizeToolCalls(partialMsg, pendingToolCalls)
 			partialMsg.StopReason = normalizeStopReason(stopReason)
-			events <- &DoneEvent{Message: partialMsg}
-			return
+
+			// Användningen kommer ibland i ett eget stycke efter det
+			// sista innehållet. Därför läses streamen vidare tills
+			// användningen kommer - annars blir kostnaden noll.
+			if hasUsage(partialMsg.Usage) {
+				events <- &DoneEvent{Message: partialMsg}
+				return
+			}
+
+			stopReasonSeen = stopReason
+			extraChunks++
+			if extraChunks > maxChunksAfterStop {
+				events <- &DoneEvent{Message: partialMsg}
+				return
+			}
+			continue
 		}
 	}
 
@@ -170,9 +186,23 @@ func (p *MinimaxProvider) streamResponse(body io.Reader, events chan<- StreamEve
 	}
 
 	if len(partialMsg.Content) > 0 {
-		partialMsg.StopReason = "end_turn"
+		if stopReasonSeen != "" {
+			partialMsg.StopReason = normalizeStopReason(stopReasonSeen)
+		} else {
+			partialMsg.StopReason = "end_turn"
+		}
 		events <- &DoneEvent{Message: partialMsg}
 	}
+}
+
+// maxChunksAfterStop är hur många extra stycken som läses efter att
+// modellen angett att den är klar. Det ska räcka för att användningen
+// ska hinna komma.
+const maxChunksAfterStop = 5
+
+// hasUsage berättar om användningen innehåller några tokens.
+func hasUsage(usage *messages.Usage) bool {
+	return usage != nil && (usage.TotalTokens > 0 || usage.InputTokens > 0 || usage.OutputTokens > 0)
 }
 
 func (p *MinimaxProvider) parseChunk(data []byte, partialMsg *messages.AssistantMessage, _ map[string]*messages.ToolCallBlock) (StreamEvent, string) {
@@ -200,11 +230,15 @@ func (p *MinimaxProvider) parseChunk(data []byte, partialMsg *messages.Assistant
 	// Användningen sparas på meddelandet, så att den kan rapporteras
 	// vidare. Utan den går det inte att räkna ut vad körningen kostade.
 	if parsed.Usage != nil {
-		partialMsg.Usage = &messages.Usage{
+		usage := &messages.Usage{
 			InputTokens:  parsed.Usage.PromptTokens,
 			OutputTokens: parsed.Usage.CompletionTokens,
 			TotalTokens:  parsed.Usage.TotalTokens,
 			CacheTokens:  parsed.Usage.CachedTokens,
+		}
+		// En tom användning ska inte skriva över en riktig.
+		if hasUsage(usage) || partialMsg.Usage == nil {
+			partialMsg.Usage = usage
 		}
 	}
 
