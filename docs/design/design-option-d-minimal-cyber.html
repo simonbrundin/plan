@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design D: Minimal Cyber</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              DEFAULT: '#09090b',
+              100: '#18181b',
+              200: '#27272a',
+              300: '#3f3f46',
+            },
+            accent: '#3b82f6',
+            'accent-dim': '#2563eb',
+            muted: '#a1a1aa',
+            border: '#27272a',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #09090b;
+      color: #fafafa;
+    }
+    
+    .text-accent {
+      color: #3b82f6;
+    }
+    
+    .bg-accent {
+      background-color: #3b82f6;
+    }
+    
+    .border-accent {
+      border-color: #3b82f6;
+    }
+    
+    /* Ensure body matches our design */
+    body {
+      background: #09090b;
+    }
+    
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .accent-border {
+      border-color: #3b82f633;
+    }
+    
+    .accent-glow {
+      box-shadow: 0 0 20px #3b82f615;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Minimal Header -->
+  <header class="border-b border-dark-200 sticky top-0 z-50 bg-dark/80 backdrop-blur-sm">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-dark-200 flex items-center justify-center border border-dark-300">
+          <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <span class="font-semibold">Agent System</span>
+      </div>
+      
+      <nav class="flex items-center gap-6">
+        <a href="#" class="text-sm text-accent font-medium">Home</a>
+        <a href="#" class="text-sm text-muted hover:text-white transition-colors">Goals</a>
+        <a href="#" class="text-sm text-muted hover:text-white transition-colors">Checkpoints</a>
+        <a href="#" class="text-sm text-muted hover:text-white transition-colors">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12">
+    <!-- Status Indicator -->
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+      <span class="text-xs font-mono text-muted uppercase tracking-wider">Orchestrator Active</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="mb-12">
+      <h1 class="text-4xl font-bold mb-4 leading-tight">
+        Checkpoint-Gate<br/>
+        <span class="text-accent">Workflow</span>
+      </h1>
+      <p class="text-lg text-muted max-w-xl leading-relaxed">
+        Structured AI coding inspired by Shopify Helix. Features break into verifiable checkpoints, 
+        each passing automated gates before human approval.
+      </p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-4 gap-4 mb-12">
+      <div class="p-4 rounded-xl bg-dark-100 border border-dark-200">
+        <p class="text-xs text-muted mb-1">Checkpoints</p>
+        <p class="text-2xl font-semibold">12</p>
+      </div>
+      <div class="p-4 rounded-xl bg-dark-100 border border-dark-200">
+        <p class="text-xs text-muted mb-1">Gates Passed</p>
+        <p class="text-2xl font-semibold">47</p>
+      </div>
+      <div class="p-4 rounded-xl bg-dark-100 border border-dark-200">
+        <p class="text-xs text-muted mb-1">Conversations</p>
+        <p class="text-2xl font-semibold">156</p>
+      </div>
+      <div class="p-4 rounded-xl bg-dark-100 border border-dark-200">
+        <p class="text-xs text-muted mb-1">Pass Rate</p>
+        <p class="text-2xl font-semibold text-accent">98%</p>
+      </div>
+    </div>
+
+    <!-- Three Gate Cards -->
+    <div class="grid md:grid-cols-3 gap-4 mb-12">
+      <div class="group p-6 rounded-xl bg-dark-100 border border-dark-200 hover:border-accent/30 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+          <span class="text-lg">🧪</span>
+        </div>
+        <h3 class="font-semibold mb-2">Behavior Gate</h3>
+        <p class="text-sm text-muted leading-relaxed">
+          Automated tests and linting verify every checkpoint before progression.
+        </p>
+      </div>
+
+      <div class="group p-6 rounded-xl bg-dark-100 border border-dark-200 hover:border-accent/30 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+          <span class="text-lg">🎨</span>
+        </div>
+        <h3 class="font-semibold mb-2">UI Gate</h3>
+        <p class="text-sm text-muted leading-relaxed">
+          Visual comparison against prototypes. Every interface element verified.
+        </p>
+      </div>
+
+      <div class="group p-6 rounded-xl bg-dark-100 border border-dark-200 hover:border-accent/30 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+          <span class="text-lg">🤖</span>
+        </div>
+        <h3 class="font-semibold mb-2">Adversarial Gate</h3>
+        <p class="text-sm text-muted leading-relaxed">
+          A critic agent challenges the implementation, finding edge cases.
+        </p>
+      </div>
+    </div>
+
+    <!-- Workflow Section -->
+    <div class="bg-dark-100 border border-dark-200 rounded-xl p-8 mb-12">
+      <h2 class="text-sm font-mono text-accent uppercase tracking-wider mb-6">Workflow</h2>
+      
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-dark-200 border border-dark-300 flex items-center justify-center">
+            <span class="text-accent text-sm">01</span>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Plan</p>
+            <p class="text-xs text-muted">Define checkpoints</p>
+          </div>
+        </div>
+        
+        <div class="flex-1 mx-4">
+          <div class="h-px bg-dark-300"></div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-dark-200 border border-dark-300 flex items-center justify-center">
+            <span class="text-accent text-sm">02</span>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Execute</p>
+            <p class="text-xs text-muted">Build checkpoints</p>
+          </div>
+        </div>
+        
+        <div class="flex-1 mx-4">
+          <div class="h-px bg-dark-300"></div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-dark-200 border border-dark-300 flex items-center justify-center">
+            <span class="text-accent text-sm">03</span>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Verify</p>
+            <p class="text-xs text-muted">Pass gates</p>
+          </div>
+        </div>
+        
+        <div class="flex-1 mx-4">
+          <div class="h-px bg-dark-300"></div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-accent/20 border border-accent/50 flex items-center justify-center">
+            <span class="text-accent text-sm">04</span>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Ship</p>
+            <p class="text-xs text-muted">Human approval</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gates Bar -->
+      <div class="flex items-center gap-2 p-3 rounded-lg bg-dark border border-dark-200">
+        <span class="text-xs text-muted mr-2">Gates:</span>
+        <span class="text-xs px-2 py-1 rounded bg-accent/10 text-accent border border-accent/20">Behavior</span>
+        <span class="text-xs px-2 py-1 rounded bg-dark-200 text-muted">UI</span>
+        <span class="text-xs px-2 py-1 rounded bg-dark-200 text-muted">Adversarial</span>
+        <span class="text-xs px-2 py-1 rounded bg-dark-200 text-muted">Human</span>
+      </div>
+    </div>
+
+    <!-- Two Column Grid -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Quick Links -->
+      <div class="p-6 rounded-xl bg-dark-100 border border-dark-200">
+        <h3 class="text-sm font-medium mb-4">Quick Links</h3>
+        <div class="space-y-2">
+          <a href="#" class="flex items-center justify-between p-3 rounded-lg hover:bg-dark-200 transition-colors group">
+            <div class="flex items-center gap-3">
+              <span class="text-lg">🗺️</span>
+              <span class="text-sm">Repository Map</span>
+            </div>
+            <svg class="w-4 h-4 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="#" class="flex items-center justify-between p-3 rounded-lg hover:bg-dark-200 transition-colors group">
+            <div class="flex items-center gap-3">
+              <span class="text-lg">🚩</span>
+              <span class="text-sm">Checkpoints</span>
+            </div>
+            <svg class="w-4 h-4 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="#" class="flex items-center justify-between p-3 rounded-lg hover:bg-dark-200 transition-colors group">
+            <div class="flex items-center gap-3">
+              <span class="text-lg">💬</span>
+              <span class="text-sm">Conversations</span>
+            </div>
+            <svg class="w-4 h-4 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- System Info -->
+      <div class="p-6 rounded-xl bg-dark-100 border border-dark-200">
+        <h3 class="text-sm font-medium mb-4">System</h3>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted">Orchestrator</span>
+            <span class="text-xs px-2 py-1 rounded bg-accent/10 text-accent border border-accent/20">Running</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted">Checkpoint Planner</span>
+            <span class="text-xs font-mono">LLM + Heuristic</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted">Gate Registry</span>
+            <span class="text-xs font-mono">4 Gates</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted">LLM Providers</span>
+            <span class="text-xs font-mono">4 Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Minimal Footer -->
+  <footer class="border-t border-dark-200 mt-12 py-6">
+    <div class="max-w-5xl mx-auto px-6 text-center text-xs text-muted">
+      Agent System • Checkpoint-Gate Workflow • v2.0.0
+    </div>
+  </footer>
+</body>
+</html>

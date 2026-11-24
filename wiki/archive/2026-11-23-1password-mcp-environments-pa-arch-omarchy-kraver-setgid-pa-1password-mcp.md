@@ -1,0 +1,7 @@
+---
+title: 1Password MCP (Environments) på Arch/Omarchy kräver setgid på 1password-mcp
+type: note
+tags: [1password, mcp, arch, omarchy, security, projekt:tmp]
+---
+
+1Password:s desktop-app exponerar Environments-MCP via en IPC-relay ( abstrakt unix-socket @1PASSWORD_MCP ) som bara startar när 'Settings > Labs > Enable local MCP server' är på (setting-nyckeln i ~/.config/1Password/settings/settings.json är 'developers.mcpIntegration.enabled'; värdet MÅSTE signeras av appen - direkt redigering av filen återställs: 'setting ... had an untrusted value'). Relay-klienten /opt/1Password/1password-mcp verifierar med SO_PEERCRED att peer-processens effektiva GID är gruppen 'onepassword-mcp'. AUR-paketet 1password (Arch) kör INTE vendor-skriptet after-install.sh och skippar därför setupen av gruppen + setgid-bit => appen loggar 'Rejecting MCP connection: Linux peer effective GID check failed' och MCP-serven startar aldrig. Fix (root): groupadd onepassword-mcp; chgrp onepassword-mcp /opt/1Password/1password-mcp; chmod g+s /opt/1Password/1password-mcp; (valfritt) ln -sf /opt/1Password/1password-mcp /usr/bin/1password-mcp och /opt/1Password/onepassword-mcp. VIKTIGT: pacman-uppgradering ersätter binären och tappar setgid - applicera om efter varje uppgradering (t.ex. pacman-hook i /etc/pacman.d/hooks). Felsökning: loggen för MCP-klienten ligger i ~/.config/1Password/logs/MCP/1Password_rCURRENT.log; appens IPC-start loggas i ~/.config/1Password/logs/1Password_rCURRENT.log ('MCP integration is enabled, starting IPC server').

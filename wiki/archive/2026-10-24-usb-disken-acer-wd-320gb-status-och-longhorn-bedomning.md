@@ -1,0 +1,7 @@
+---
+title: USB-disken 'ACER' (WD 320GB): status och Longhorn-bedömning
+type: note
+tags: [disk, longhorn, usb, hdd, projekt:simon]
+---
+
+Undersökning 2026-10-24. /dev/sda på Omarchy-laptopen = WD Scorpio Blue WD3200BEVT-22ZCT0 (320 GB, 2.5", 5400 rpm, ~2011) via generisk USB-SATA-brygga (Shenzhen YongzhenWeiye). SMART: PASSED, 0 reallocateda/pending/uncorrectable sektorer, 0 CRC-fel, 25 C, Power_On_Hours 4512, Load_Cycle_Count 179812 (mycket högt - USB-bryggan parkerar skivhuvudena aggressivt). smartctl kräver -d sat över USB. Disken är partitionerad: PQSERVICE (vfat), ACER (ntfs, 144 GB), DATA (ntfs, monterad). ACER-innehållet är en gammal Windows-installation från en Acer-laptop med personuppgifter (skannade dokument, sparbetyg, fakturor). Innehållet är INTE utbyttbart - ska kopieras ut före eventuell wipe. Bedömning: ska INTE användas som Longhorn-disk. Skäl: (1) HDD 5400 rpm, Longhorn vill IOPS; 320 GB / 3 replika = ~100 GB nyttig, (2) USB-brygga utan säker flush/FUA-stöd ger korruptionsrisk för Longhorn, (3) disken måste wipe:as och förstör då personuppgifter, (4) hög load-cycle-count. Talos-klustret (cluster1, 3 ARM-noder .11/.12/.13, Talos v1.14.1) har bara EN disk per nod: boot-sda (Intenso 128 GB SSD i USB-brygga, helt partitionerad EFI/BOOT/META/STATE/EPHEMERAL). Ingen reserverad Longhorn-disk finns. Rekommendation: köp USB3-SSD/NVMe (eller SATA-SSD) per nod; behåll HDD:n för backup/kyltid. Sidobservation: alla kubeconfig för cluster1 är trasiga (x509, cert-rotation) - Longhorn-status kunde ej verifieras.

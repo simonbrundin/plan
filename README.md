@@ -1,4 +1,16 @@
-# Plan - Goal Management Application
+# Plan
+
+Plan är kontrollplanet för både livsplanering och agentkörningar. Agentmotorn
+ligger i samma repository under `src/agent` och körs som en separat tjänst.
+
+| Dokument | Innehåll |
+| --- | --- |
+| [`docs/agent-platform.md`](docs/agent-platform.md) | Arkitektur, körningsflöde, säkerhetsgränser |
+| [`docs/development.md`](docs/development.md) | Utveckling i dev, Tilt, portar |
+| [`docs/checkpoint-gate-workflow.md`](docs/checkpoint-gate-workflow.md) | Arbetsflöde för stora förändringar |
+| [`docs/design/`](docs/design) | Designspråk för gränssnittet |
+
+## Goal Management Application
 
 A goal management and planning application that helps users organize and track
 their objectives using a modern web interface with hierarchical goal structures.

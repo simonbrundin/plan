@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agents — Personlig AI-Agent Harness</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-hover: #242836;
+      --border: #2e3347;
+      --text: #e4e6f0;
+      --text-muted: #8b8fa3;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --go: #00add8;
+      --vue: #42b883;
+      --postgres: #336791;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    section {
+      margin-bottom: 4rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    h2 .icon {
+      font-size: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent-hover);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Architecture Diagram */
+    .architecture {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      overflow-x: auto;
+    }
+
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      min-width: 700px;
+    }
+
+    .arch-layer {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .arch-layer-label {
+      width: 120px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .arch-nodes {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .arch-node {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .arch-node:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .arch-node.go { border-color: var(--go); }
+    .arch-node.vue { border-color: var(--vue); }
+    .arch-node.db { border-color: var(--postgres); }
+    .arch-node.core { border-color: var(--success); }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      padding-left: 120px;
+      font-size: 1.5rem;
+    }
+
+    /* Flow */
+    .flow-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .flow-step:last-child {
+      border-bottom: none;
+    }
+
+    .flow-number {
+      width: 2rem;
+      height: 2rem;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .flow-content h4 {
+      margin-bottom: 0.25rem;
+    }
+
+    .flow-content p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .flow-content code {
+      background: var(--bg);
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--accent-hover);
+    }
+
+    /* Component cards */
+    .component-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .tag-go { background: var(--go); color: #000; }
+    .tag-ts { background: var(--vue); color: #000; }
+    .tag-db { background: var(--postgres); color: #fff; }
+
+    .component-files {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .component-files code {
+      background: var(--bg);
+      padding: 0.125rem 0.25rem;
+      border-radius: 3px;
+      font-size: 0.8em;
+    }
+
+    /* Code blocks */
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    code {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .tab:hover {
+      background: var(--surface-hover);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Quick nav */
+    .quick-nav {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .quick-nav a {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .quick-nav a:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .quick-nav { display: none; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🤖 Agents</h1>
+      <p class="subtitle">En personlig AI-agent harness byggd i Go, med Nuxt-frontend och PostgreSQL-persistens. Byggd för att hjälpa dig uppnå mål — steg för steg.</p>
+    </header>
+
+    <!-- Vad är detta? -->
+    <section id="overview">
+      <h2><span class="icon">📖</span> Vad är detta?</h2>
+      <div class="card">
+        <p>
+          <strong>Agents</strong> är ett system för att köra AI-agenter som hjälper dig att utföra uppgifter.
+          Det är en <em>harness</em> — en ram som ger agenten rätt verktyg och kontext för att lösa problem.
+        </p>
+        <p style="margin-top: 1rem; color: var(--text-muted);">
+          Tänk på det som en arbetsbänk: Du ger agenten verktyg (läs filer, kör kommandon, skriv kod),
+          en uppgift, och låter den jobba. Agenten använder <strong>tool calling</strong> för att
+          interagera med omvärlden — precis som du skulle göra i en terminal.
+        </p>
+      </div>
+    </section>
+
+    <!-- Arkitektur -->
+    <section id="architecture">
+      <h2><span class="icon">🏗️</span> Arkitektur</h2>
+      <div class="architecture">
+        <div class="arch-diagram">
+          <!-- Användare -->
+          <div class="arch-layer">
+            <div class="arch-layer-label">Användare</div>
+            <div class="arch-nodes">
+              <div class="arch-node">💬 Terminal</div>
+              <div class="arch-node">🌐 Webbgränssnitt</div>
+              <div class="arch-node">📱 API</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <!-- API / CLI -->
+          <div class="arch-layer">
+            <div class="arch-layer-label">Gränssnitt</div>
+            <div class="arch-nodes">
+              <div class="arch-node go">HTTP Server (Gin)</div>
+              <div class="arch-node go">CLI Chat</div>
+              <div class="arch-node go">Streaming</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <!-- Core -->
+          <div class="arch-layer">
+            <div class="arch-layer-label">Kärna</div>
+            <div class="arch-nodes">
+              <div class="arch-node core">AgentRuntime</div>
+              <div class="arch-node core">Event Loop</div>
+              <div class="arch-node core">Tool Executor</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <!-- Providers & Tools -->
+          <div class="arch-layer">
+            <div class="arch-layer-label">Abstraktioner</div>
+            <div class="arch-nodes">
+              <div class="arch-node go">LLM Providers</div>
+              <div class="arch-node go">Tools (7 st)</div>
+              <div class="arch-node go">Secrets Manager</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <!-- Infra -->
+          <div class="arch-layer">
+            <div class="arch-layer-label">Infrastruktur</div>
+            <div class="arch-nodes">
+              <div class="arch-node db">PostgreSQL</div>
+              <div class="arch-node">OpenAI / MiniMax / Anthropic</div>
+              <div class="arch-node">Kubernetes (Flux)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tre sätt att köra -->
+    <section id="modes">
+      <h2><span class="icon">▶️</span> Tre sätt att köra</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>💬 Interaktiv Chat</h3>
+          <p>Standardläge. Starta en konversation i terminalen.</p>
+          <pre><code>./agent</code></pre>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            Du skriver, agenten svarar med verktyg.
+          </p>
+        </div>
+        <div class="card">
+          <h3>🌐 HTTP Server</h3>
+          <p>Startar en webb-API med Swagger-dokumentation.</p>
+          <pre><code>./agent --serve</code></pre>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            Frontend kan ansluta via REST + SSE.
+          </p>
+        </div>
+        <div class="card">
+          <h3>🎯 Headless</h3>
+          <p>Kör en enskild prompt utan interaktion.</p>
+          <pre><code>./agent "din prompt här"</code></pre>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            Bra för automation och scripts.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dataflöde -->
+    <section id="flow">
+      <h2><span class="icon">🔄</span> Dataflöde</h2>
+      <div class="flow-container">
+        <div class="flow-step">
+          <div class="flow-number">1</div>
+          <div class="flow-content">
+            <h4>Du skriver en prompt</h4>
+            <p>Textraden skickas till <code>AgentRuntime.SendMessage()</code></p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">2</div>
+          <div class="flow-content">
+            <h4>Agenten tänker</h4>
+            <p>Prompten + konversationshistorik skickas till LLM-providern (AgentGateway → MiniMax → OpenAI)</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">3</div>
+          <div class="flow-content">
+            <h4>Verktygsanrop</h4>
+            <p>Om modellen behöver göra något (läsa fil, köra kommando) returneras ett tool_call</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">4</div>
+          <div class="flow-content">
+            <h4>Verktyget körs</h4>
+            <p>ToolExecutor anropar rätt verktyg (bash, read, write, edit, grep, glob)</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">5</div>
+          <div class="flow-content">
+            <h4>Resultat tillbaka</h4>
+            <p>Verktygsresultatet skickas tillbaka till LLM:n för nästa tanke</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">6</div>
+          <div class="flow-content">
+            <h4>Svar till användaren</h4>
+            <p>Slutresultatet visas (text, kod, filer) och sparas i databasen</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Komponenter -->
+    <section id="components">
+      <h2><span class="icon">🧩</span> Nyckelkomponenter</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="backend">Backend (Go)</button>
+        <button class="tab" data-tab="frontend">Frontend (Nuxt)</button>
+        <button class="tab" data-tab="infra">Infrastruktur</button>
+      </div>
+
+      <div id="tab-backend" class="tab-content active">
+        <div class="grid-2">
+          <div class="card">
+            <div class="component-header">
+              <h3>AgentRuntime</h3>
+              <span class="tag tag-go">Go</span>
+            </div>
+            <p>Hjärtat av systemet. Håller agent-loop, event-system och tool execution.</p>
+            <div class="component-files">
+              <code>pkg/core/agent.go</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>CLI</h3>
+              <span class="tag tag-go">Go</span>
+            </div>
+            <p>Interaktiv chat och headless-exekvering. Väljer provider automatiskt.</p>
+            <div class="component-files">
+              <code>pkg/cli/cli.go</code> · <code>config.go</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>HTTP API</h3>
+              <span class="tag tag-go">Go</span>
+            </div>
+            <p>Gin-baserat REST API med Swagger-dokumentation. Endpoints för conversations och streaming.</p>
+            <div class="component-files">
+              <code>pkg/api/server.go</code> · <code>handlers/</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>LLM Providers</h3>
+              <span class="tag tag-go">Go</span>
+            </div>
+            <p>Abstraktion för OpenAI, MiniMax, Anthropic och AgentGateway. Tool calling-stöd.</p>
+            <div class="component-files">
+              <code>pkg/core/provider/</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>Tools</h3>
+              <span class="tag tag-go">Go</span>
+            </div>
+            <p>7 verktyg: bash, read, read_multiple, write, edit, grep, glob</p>
+            <div class="component-files">
+              <code>pkg/core/tools/</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>Database</h3>
+              <span class="tag tag-db">pgx</span>
+            </div>
+            <p>PostgreSQL-persistens för conversations, messages och API keys.</p>
+            <div class="component-files">
+              <code>pkg/api/db/</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-frontend" class="tab-content">
+        <div class="grid-2">
+          <div class="card">
+            <div class="component-header">
+              <h3>Nuxt 4 Frontend</h3>
+              <span class="tag tag-ts">Vue 3 + TS</span>
+            </div>
+            <p>Webbgränssnitt med realtidstreaming via SSE. Byggt med @nuxt/ui.</p>
+            <div class="component-files">
+              <code>src/frontend/</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>Server API</h3>
+              <span class="tag tag-ts">TypeScript</span>
+            </div>
+            <p>Nitro server routes som proxar till Go-backend. Hanterar auth och sessions.</p>
+            <div class="component-files">
+              <code>src/frontend/server/api/</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-infra" class="tab-content">
+        <div class="grid-2">
+          <div class="card">
+            <div class="component-header">
+              <h3>Docker Compose</h3>
+              <span class="tag">Dev</span>
+            </div>
+            <p>Lokal utvecklingsmiljö: PostgreSQL + Go-backend. Orchestreras via Tilt.</p>
+            <div class="component-files">
+              <code>environments/dev/docker-compose.yml</code>
+            </div>
+          </div>
+          <div class="card">
+            <div class="component-header">
+              <h3>Kubernetes + Flux</h3>
+              <span class="tag">Prod</span>
+            </div>
+            <p>Produktionsdeploy via GitOps. Flux synkar manifests från git.</p>
+            <div class="component-files">
+              <code>environments/prod/</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verktyg -->
+    <section id="tools">
+      <h2><span class="icon">🔧</span> Verktyg (Tools)</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Verktyg</th>
+              <th>Beskrivning</th>
+              <th>Användning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>bash</code></td>
+              <td>Kör godtyckliga shell-kommandon</td>
+              <td>Bygga, test, git, etc.</td>
+            </tr>
+            <tr>
+              <td><code>read</code></td>
+              <td>Läs fil(er) med offset/limit</td>
+              <td>Få kontext om kod, läsa dokument</td>
+            </tr>
+            <tr>
+              <td><code>read_multiple</code></td>
+              <td>Läs flera filer samtidigt</td>
+              <td>Jämföra filer, batch-läsning</td>
+            </tr>
+            <tr>
+              <td><code>write</code></td>
+              <td>Skriv ny fil (skapar parent dirs)</td>
+              <td>Skapa nya filer</td>
+            </tr>
+            <tr>
+              <td><code>edit</code></td>
+              <td>Editera med exakt text-replacement</td>
+              <td>Ändra befintlig kod</td>
+            </tr>
+            <tr>
+              <td><code>grep</code></td>
+              <td>Regex-sökning i filer</td>
+              <td>Hitta kod, funktioner, buggar</td>
+            </tr>
+            <tr>
+              <td><code>glob</code></td>
+              <td>Filglobbing med **-stöd</td>
+              <td>Hitta filer, import-statements</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Kommandon -->
+    <section id="commands">
+      <h2><span class="icon">📝</span> Kommandon & Skills</h2>
+      <div class="card">
+        <p>Agenten har tillgång till <strong>Markdown-kommandon</strong> som ger instruktioner för specifika uppgifter:</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <div>
+            <code style="color: var(--accent-hover);">ai-prime.md</code>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Prime — snabb kodbasöversikt</p>
+          </div>
+          <div>
+            <code style="color: var(--accent-hover);">debug-flux.md</code>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Felsök FluxCD i Kubernetes</p>
+          </div>
+          <div>
+            <code style="color: var(--accent-hover);">plan-kubernetes-debug.md</code>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Planera Kubernetes-felsökning</p>
+          </div>
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+          Kommandon definieras i <code>src/commands/</code>. Skills (pi-specifika) finns i <code>~/.pi/agent/skills/</code>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Utveckling -->
+    <section id="dev">
+      <h2><span class="icon">🛠️</span> Utveckling</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Starta dev-miljö</h3>
+          <pre><code>simon dev</code></pre>
+          <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+            Startar PostgreSQL + Backend via Tilt/Docker Compose
+          </p>
+        </div>
+        <div class="card">
+          <h3>Bygga agent</h3>
+          <pre><code>cd src/agent
+go build -o ../../agent ./cmd/agent</code></pre>
+        </div>
+        <div class="card">
+          <h3>Köra tester</h3>
+          <pre><code># Enhetstester
+go test ./...
+
+# BDD-tester
+go test ./features_test/... \
+  -godog.tags=@implemented</code></pre>
+        </div>
+        <div class="card">
+          <h3>Frontend</h3>
+          <pre><code>cd src/frontend
+nub run dev      # Dev server (port 3000)
+nub run build    # Production build
+nub run typecheck</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Providers -->
+    <section id="providers">
+      <h2><span class="icon">🤖</span> LLM Providers</h2>
+      <div class="card">
+        <p style="margin-bottom: 1rem;">
+          Agenten väljer automatiskt den bästa tillgängliga providern:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Prioritet</th>
+              <th>Provider</th>
+              <th>Default Model</th>
+              <th>Miljövariabel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>AgentGateway</td>
+              <td>gpt-4o-mini</td>
+              <td><code>AGENTGATEWAY_API_KEY</code></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>MiniMax</td>
+              <td>MiniMax-M2.7</td>
+              <td><code>MINIMAX_API_KEY</code></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>OpenAI</td>
+              <td>gpt-4o-mini</td>
+              <td><code>OPENAI_API_KEY</code></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Anthropic</td>
+              <td>claude-sonnet-4-7-25</td>
+              <td><code>ANTHROPIC_API_KEY</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <nav class="quick-nav">
+    <a href="#overview" title="Översikt">📖</a>
+    <a href="#architecture" title="Arkitektur">🏗️</a>
+    <a href="#modes" title="Körsätt">▶️</a>
+    <a href="#flow" title="Dataflöde">🔄</a>
+    <a href="#components" title="Komponenter">🧩</a>
+    <a href="#tools" title="Verktyg">🔧</a>
+    <a href="#dev" title="Utveckling">🛠️</a>
+  </nav>
+
+  <footer>
+    <p>Agents — byggd för att hjälpa dig uppnå mål</p>
+  </footer>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabGroup = tab.parentElement;
+        const targetId = tab.dataset.tab;
+
+        // Update tabs
+        tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-' + targetId).classList.add('active');
+      });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

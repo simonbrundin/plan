@@ -191,6 +191,26 @@ Det finns inga snapshots och ingen lokal backup - tidsresan är enda
 återställningsvägen.
 
 <!-- wiki:start -->
+## Ägande av kunskaps-wikin
+
+Det här repot **äger den globala kunskaps-wikin** (`~/wiki` → `wiki/` här)
+och verktyget `wikictl` (`src/agent/cmd/wikictl`). Alla andra repor
+använder wikin men äger den inte.
+
+**Ägareansvar:**
+
+- Ändra inte `wiki/AGENTS.md`-schemat utan att följa de tre lagren:
+  råkällor (`raw/`), syntes (`wiki/`) och schema (`AGENTS.md`).
+- Råkällor är immutabla - skriv ny syntes i stället för att redigera dem.
+- Kör `wikictl lint` efter att du ändrat strukturer eller länkar.
+
+Wikin flyttades hit från `agents`-repot 2026-11-24 i samband med att
+agentens backend lades in under `src/agent`. Verktyget byggs med:
+
+```bash
+cd src/agent && go build -o ~/.local/bin/wikictl ./cmd/wikictl
+```
+
 ## Kunskaps-wiki
 
 Det här repot delar en gemensam kunskaps-wiki med alla andra repor.
