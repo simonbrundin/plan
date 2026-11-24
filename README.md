@@ -109,3 +109,46 @@ erDiagram
     GOALS ||--o{ GOALRELATIONS : "child"
     GOALS ||--o{ GOALDEPENDENCIES : "depends on"
 ```
+
+## Agent Platform
+
+Plan can delegate implementation work for a goal to an agent. Each delegation
+is represented by an **AgentRun**, linked to the goal it serves. Plan owns the
+run metadata in the `agent_runs` table, so the interface can display the agent's
+progress even when the agent worker is temporarily unavailable.
+
+### Run lifecycle
+
+An agent run moves through the following phases:
+
+1. **define** - clarify the goal and acceptance criteria.
+2. **plan** - inspect the repository and propose the implementation.
+3. **execute** - make the requested changes in an isolated workspace.
+4. **verify** - run the relevant tests and present the result for human approval.
+5. **completed** - publish the verified branch for review and merge.
+
+A run has one of these statuses: `queued`, `running`, `blocked`, `done`, or
+`failed`. `blocked` means that the agent cannot continue without input or a
+decision; it is not an automatic failure.
+
+### Approval and delivery
+
+Agent work is not merged automatically. At the verify phase, the implementation
+and its test results require **human approval** in the Plan interface. Once
+approved, the agent applies the change in its isolated workspace, runs the
+tests, and publishes a dedicated branch named
+`agent/goal-<id>-run-<run-id>` (for example,
+`agent/goal-540-run-70`).
+
+The worker job for a run is named `agent-worker-run-<run-id>`. The run's
+summary, conversation reference, artifact URL, and cost are stored in Plan so
+that the delivery can be reviewed from the same interface as the original goal.
+
+A complete delivery therefore has the following chain:
+
+1. A goal starts an AgentRun.
+2. The agent worker executes the run.
+3. The implementation reaches verify and waits for human approval.
+4. The approved change is applied in an isolated workspace.
+5. The relevant tests run successfully.
+6. The agent publishes its branch for human review and merge.
