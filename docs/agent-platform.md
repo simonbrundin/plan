@@ -46,6 +46,10 @@ Jobbcontrollern (`src/agent/internal/jobcontroller`) ser till att det finns
 exakt ett Job per mål, och workern i jobbet adopterar den köade körningen
 i stället för att skapa en egen.
 
+Bekräftelsen är en uttrycklig begäran - den gäller även om målet inte är
+markerat som agentmål. Workern hämtar då målet direkt. En begäran får inte
+tappa vägen i något lager, för då står jobbet bara och väntar.
+
 ```text
 Plan-mål
    │
@@ -148,6 +152,53 @@ det tydligt vid start - det ska vara ett medvetet val, inte en olycka.
 Jobben kör med `plan-agent-worker` som har `automountServiceAccountToken:
 false` - de kan inte prata med Kubernetes-API:t alls. Agent-API:t har en egen
 roll som bara får skapa, läsa och radera Jobb samt läsa poddar och loggar.
+
+## Körningens livscykel
+
+Varje körning börjar med `run_started` och slutar med `run_completed`.
+Mellan dem ligger händelserna som beskriver vad som hände:
+
+```text
+run_started
+  ├── definition_created        (målet specificerades)
+  ├── approval_requested        (förslaget väntar på en människa)
+  ├── approval_decided          (människan godkände eller avvisade)
+  ├── phase_changed             (körningen bytte fas)
+  ├── artifact                  (diff, branch, annat resultat)
+  ├── verification              (testet kördes)
+  └── run_completed             (körningen är klar)
+```
+
+En körning som avslutas av en profil som inte får röra kod avslutas
+uttryckligen - den lämnas inte öppen bara för att profilen förbjuder ett
+steg.
+
+## Bygg och driftsättning
+
+| Deployable | Källa | Image | CI |
+| --- | --- | --- | --- |
+| Plan (Nuxt + Go API) | `src/nuxt`, `src/go` | `plan`, `go-api` | `ci.yaml`, `commit.nuxt.yaml`, `commit.api.yaml` |
+| Agenten | `src/agent` | `plan-agent` | `commit.agent.yaml` |
+
+Agentens CI bygger och publicerar `plan-agent` och föreslår en PR med den
+nya imagen i `environments/base/agent-deployment.yaml`. Dev bygger samma
+image lokalt via Tilt.
+
+### Hemligheter i prod
+
+Agentens hemligheter är inte i git. De skapas med:
+
+```bash
+cd environments/prod/secrets
+SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
+  AGENT_PLAN_API_KEY=... AGENT_WORKER_KEY=... \
+  AGENT_LLM_API_KEY=... AGENT_GIT_HEADER=... AGENT_DB_PASSWORD=... \
+  ./create-agent-secrets.sh
+```
+
+Skriptet krypterar varje hemlighet med repoets publika age-nyckel. Tills
+det är gjort är agenten inte utplockad i prod - `environments/prod/patches`
+tar bort agentens deployment och databas.
 
 ## Human gate i gränssnittet
 

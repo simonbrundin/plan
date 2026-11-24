@@ -130,6 +130,7 @@ finns i `index.md`.
 | [[notes/kandidatlistan-heter-nu-personer]] | Kandidatlistan heter nu /personer | note | pappa, ui, navigering, omdöping, projekt:pappa | 2026-11-17 | 1 |
 | [[notes/klustret-anvander-sops-via-flux-inte-vault-eso]] | Klustret anvander SOPS via Flux - inte Vault/ESO | note | secrets, gitops, sops, projekt:infrastructure | 2026-11-23 | 0 |
 | [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] | Klustret har byggts om - bara kube-system, Flux och appar saknas (2026-11-23) | note | kubernetes, talos, gitops, projekt:infrastructure | 2026-11-23 | 0 |
+| [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] | Köda körningar är uttryckliga begäran - och en avslutad körning har alltid run_completed | note | plan, agent, jobb, worker, bugg, händelser, verifiering, projekt:simon | 2026-11-24 | 0 |
 | [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]] | "Konsulter i Sundsvall: antalet går inte att mäta - det som går att säga" | note | pappa, sourcing, statistik, scb, sundsvall, konsulter, projekt:pappa | 2026-11-18 | 2 |
 | [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]] | "[DEPRECATED] 50/50-uppdelning mellan konsulter och anställda - FEL, se den nya noten" | note | pappa, sourcing, statistik, scb, sundsvall, konsulter, projekt:pappa | 2026-11-18 | 3 |
 | [[notes/konventioner]] | Konventioner i repot | note | konventioner, stil, go | 2026-10-21 | 3 |
@@ -298,6 +299,7 @@ finns i `index.md`.
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
+| [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] | Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan | note | plan, agent, verifiering, e2e, human-gate, kubernetes, wiki, projekt:simon | 2026-11-24 | 0 |
 | [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] | Snabbtillägg med mål och valbart föräldramål | note | feature, quick-add, mål, kalender, projekt:plan | 2026-11-20 | 0 |
 | [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] | Snabbtilläggets popup fick Escape och visuell polish | note | feature, quick-add, ui, projekt:plan | 2026-11-20 | 0 |
 | [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]] | Sortering av grundmål på /goals med piltangenterna | note | feature, ui, goals, go, nuxt, projekt:plan | 2026-11-23 | 2 |
@@ -387,7 +389,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (11)
+- `agent` (13)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -422,7 +424,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `bug` (87)
-- `bugg` (4)
+- `bugg` (5)
 - `build` (2)
 - `bun` (1)
 - `bygg` (1)
@@ -484,7 +486,7 @@ finns i `index.md`.
 - `dubbeluttag` (1)
 - `duckdns` (2)
 - `durable` (4)
-- `e2e` (1)
+- `e2e` (2)
 - `efivarfs` (1)
 - `encryption` (1)
 - `envoy` (2)
@@ -536,8 +538,9 @@ finns i `index.md`.
 - `hostname` (1)
 - `http` (2)
 - `http-routing` (1)
-- `human-gate` (1)
+- `human-gate` (2)
 - `hyprland` (1)
+- `händelser` (1)
 - `icon` (5)
 - `identitet` (1)
 - `identity-provider` (3)
@@ -562,6 +565,7 @@ finns i `index.md`.
 - `ipv6` (2)
 - `it` (2)
 - `job` (1)
+- `jobb` (1)
 - `k8s` (1)
 - `kalender` (34)
 - `kameo` (7)
@@ -578,7 +582,7 @@ finns i `index.md`.
 - `kortkommandon` (4)
 - `kubeconfig` (1)
 - `kubelet` (1)
-- `kubernetes` (21)
+- `kubernetes` (22)
 - `kunskapsbas` (2)
 - `kurering` (1)
 - `kustomize` (4)
@@ -666,7 +670,7 @@ finns i `index.md`.
 - `picokvm` (1)
 - `pipeline` (2)
 - `pki` (3)
-- `plan` (13)
+- `plan` (15)
 - `plan-api` (1)
 - `platser` (1)
 - `poe` (1)
@@ -693,7 +697,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (68)
+- `projekt:simon` (70)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -806,12 +810,13 @@ finns i `index.md`.
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)
+- `verifiering` (2)
 - `verktyg` (7)
 - `visionite` (1)
 - `wan` (1)
 - `webbapp` (1)
-- `wiki` (6)
-- `worker` (8)
+- `wiki` (7)
+- `worker` (9)
 - `worker-1` (2)
 - `worker-2` (1)
 - `worker-3` (5)

@@ -2539,3 +2539,13 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]] — ny sida från inboxen
 - [archive] 2026-11-24-sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det.md
 
+
+## [2026-11-24] ingest | create notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan
+- [create] [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] — ny sida från inboxen
+- [archive] 2026-11-24-slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan.md
+
+
+## [2026-11-24] ingest | create notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed
+- [create] [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] — ny sida från inboxen
+- [archive] 2026-11-24-koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed.md
+
