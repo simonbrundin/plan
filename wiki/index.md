@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 349 |
+| Noter | 352 |
 
 ## Entiteter
 
@@ -87,6 +87,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] - Diagnos 2026-11-11 (session: felsökning av 'workers ansluter inte'). _(uppdaterad 2026-11-23)_
 - [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] - Matchbox-profilerna node-controlplane-1..3 pekar på /assets/talos-config/nodes/controlplane-N.yaml, men den filen genereras inte: pxe/gen... _(uppdaterad 2026-11-17)_
 - [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] - Bakgrund: neuro (github.com/simonbrundin/neuro) är ett offentligt repo. _(uppdaterad 2026-11-17)_
+- [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] - Kustomex och Flux kan inte installera en CRD och använda den i samma synkning. _(uppdaterad 2026-11-24)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
@@ -104,6 +105,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] - Figma har ingen officiell Font Helper på Linux (FigmaAgent finns bara för macOS/Windows). _(uppdaterad 2026-11-23)_
 - [[notes/flera-kalendrar-med-egna-farger-i-plan]] - Användaren kan nu skapa hur många kalendrar som helst (t.ex. _(uppdaterad 2026-11-18)_
 - [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] - Ny funktion i pappa: på /personer kan man markera flera personkort och parkera hela gänget med samma skäl och samma genomgångsdatum. _(uppdaterad 2026-11-18)_
+- [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] - Symptom: flux-system-kustomizationen i prod stod kvar i 'Source artifact not found' i 20 timmar och source-controller kraschade i en omst... _(uppdaterad 2026-11-24)_
 - [[notes/foraldrar-syns-pa-mal-i-now]] - Målsidan /now (Gör nu) visar nu vilka föräldrar ett mål ligger under. _(uppdaterad 2026-11-22)_
 - [[notes/globala-agentinstruktioner-deployas-via-dotfiles]] - Globala agentinstruktioner bor i dotfiles-repot och deployas med stow till agenternas konfigurationskataloger. _(uppdaterad 2026-10-21)_
 - [[notes/go-imap-uidstore-istallet-for-store-med-uid-mangd]] - 2026-11-19: Bugfix i src/go/imap/client.go - MarkAsRead och MarkAsUnread använde UidSearch (som returnerar UIDs) och skickade sedan dess... _(uppdaterad 2026-11-20)_
@@ -159,6 +161,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
+- [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] - I prod-klustret gick det inte att läsa poddarnas loggar med 'kubectl logs' på noderna worker-4, worker-5, worker-6 och worker-7. _(uppdaterad 2026-11-24)_
 - [[notes/kunskaps-wiki]] - Så fungerar den globala kunskaps-wikin, vilka lager den har och hur agenter använder verktyget. _(uppdaterad 2026-11-17)_
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] - Under omsättningen till Karpathys tre-lagers-modell granskades varje sida mot den faktiska infrastrukturen i ~/repos/infrastructure. _(uppdaterad 2026-10-24)_
 - [[notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel]] - 2026-11-20: Den KVM-portmappning som var deployad pa PXE-Pi:n var FEL och ledde _(uppdaterad 2026-11-20)_

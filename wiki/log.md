@@ -2579,3 +2579,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] — ny sida från inboxen
 - [archive] 2026-11-24-mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24.md
 
+
+## [2026-11-24] ingest | create notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg
+- [create] [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] — ny sida från inboxen
+- [create] [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] — ny sida från inboxen
+- [create] [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] — ny sida från inboxen
+- [archive] 2026-11-24-crd-beroende-resurser-maste-synkas-i-ett-andra-steg.md
+- [archive] 2026-11-24-flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog.md
+- [archive] 2026-11-24-kubeletts-logg-api-svarade-med-tls-internal-error-i-prod.md
+## [2026-11-24] ingest | create notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog
+## [2026-11-24] ingest | create notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod
+

@@ -62,6 +62,7 @@ finns i `index.md`.
 | [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] | cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11 | note | felsokning, pki, worker, talos, kubeconfig, projekt:infrastructure | 2026-11-23 | 2 |
 | [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] | Controlplane-recovery via PXE är inte konfigurerad | note | pxe, talos, bug, controlplane, projekt:simon | 2026-11-17 | 2 |
 | [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] | cookies.json var versionsstyrd i offentligt neuro-repo | note | neuro, bug, säkerhet, projekt:simon | 2026-11-17 | 2 |
+| [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] | CRD-beroende resurser måste synkas i ett andra steg | note | flux, kustomize, gateway-api, projekt:infrastructure | 2026-11-24 | 0 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
@@ -79,6 +80,7 @@ finns i `index.md`.
 | [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] | Figma lokala fonter på Linux: figma-agent-linux | note | figma, fonts, linux, omarchy, projekt:simon | 2026-11-23 | 0 |
 | [[notes/flera-kalendrar-med-egna-farger-i-plan]] | Flera kalendrar med egna färger i Plan | note | kalender, feature, färg, projekt:plan | 2026-11-18 | 4 |
 | [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] | Flerval: parkera flera kandidater samtidigt i /personer | note | feature, pappa, personer, potential, projekt:pappa | 2026-11-18 | 0 |
+| [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] | Flux i prod klonade ett 1,3 GB stort repo och dog | note | flux, prod, incident, projekt:infrastructure | 2026-11-24 | 0 |
 | [[notes/foraldrar-syns-pa-mal-i-now]] | Föräldrar syns på mål i /now | note | feature, now, goals, projekt:plan | 2026-11-22 | 0 |
 | [[notes/globala-agentinstruktioner-deployas-via-dotfiles]] | Globala agentinstruktioner deployas via dotfiles | note | konventioner, agent, wiki, projekt:typetrainer | 2026-10-21 | 0 |
 | [[notes/go-imap-uidstore-istallet-for-store-med-uid-mangd]] | go-imap: UidStore istället för Store med UID-mängd | note | bug, go, imap, projekt:pappa | 2026-11-20 | 0 |
@@ -139,6 +141,7 @@ finns i `index.md`.
 | [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] | Kortkommando-hjälpen i HelpModal måste följa tangentändringar | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
 | [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
+| [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] | Kubeletts logg-API svarade med tls: internal error i prod | note | diagnostik, talos, kubernetes, projekt:infrastructure | 2026-11-24 | 0 |
 | [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-17 | 7 |
 | [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] | Kureringspasset hittade foraldrad kunskap i wikin | note | wiki, kurering, karpathy, projekt:agents | 2026-10-24 | 0 |
 | [[notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel]] | KVM-portmappning: worker-N = port N - den deployade configen pa Pi:n var fel | note | kvm, bug, projekt:infrastructure | 2026-11-20 | 0 |
@@ -479,6 +482,7 @@ finns i `index.md`.
 - `dev` (6)
 - `dev-miljo` (2)
 - `dhcp` (1)
+- `diagnostik` (1)
 - `dialog` (1)
 - `discovery` (1)
 - `disk` (1)
@@ -510,7 +514,7 @@ finns i `index.md`.
 - `figma` (1)
 - `filter` (2)
 - `fix` (1)
-- `flux` (6)
+- `flux` (8)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -519,7 +523,7 @@ finns i `index.md`.
 - `fråga` (1)
 - `färg` (4)
 - `förenkling` (1)
-- `gateway-api` (2)
+- `gateway-api` (3)
 - `gdpr` (10)
 - `ghcr` (1)
 - `git` (4)
@@ -557,7 +561,7 @@ finns i `index.md`.
 - `image-factory` (2)
 - `imap` (11)
 - `import` (1)
-- `incident` (12)
+- `incident` (13)
 - `incidents` (1)
 - `infra` (2)
 - `infrastructure` (4)
@@ -591,10 +595,10 @@ finns i `index.md`.
 - `kostnad` (1)
 - `kubeconfig` (1)
 - `kubelet` (1)
-- `kubernetes` (22)
+- `kubernetes` (23)
 - `kunskapsbas` (2)
 - `kurering` (1)
-- `kustomize` (4)
+- `kustomize` (5)
 - `kvadrat` (1)
 - `kvm` (6)
 - `kyverno` (2)
@@ -695,11 +699,12 @@ finns i `index.md`.
 - `prestanda` (3)
 - `prioritetssida` (2)
 - `priority` (3)
+- `prod` (1)
 - `produktion` (1)
 - `profil` (1)
 - `projekt:agents` (13)
 - `projekt:dotfiles` (2)
-- `projekt:infrastructure` (59)
+- `projekt:infrastructure` (62)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
@@ -787,7 +792,7 @@ finns i `index.md`.
 - `säkerhet` (8)
 - `tags` (1)
 - `tailwind` (2)
-- `talos` (32)
+- `talos` (33)
 - `tangent` (1)
 - `tangentbord` (2)
 - `teknik` (1)
