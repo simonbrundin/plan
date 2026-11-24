@@ -13,7 +13,8 @@ export type AgentRunStatus =
   | 'running'
   | 'blocked'
   | 'done'
-  | 'failed';
+  | 'failed'
+  | 'cancelled';
 
 // Vad som startade en körning: användare, schema, webhook eller agent.
 export type AgentRunTrigger = 'user' | 'schedule' | 'webhook' | 'agent';

@@ -32,6 +32,7 @@ const statusLabels: Record<AgentRunStatus, string> = {
   blocked: "Väntar på dig",
   done: "Klar",
   failed: "Misslyckades",
+  cancelled: "Avbruten",
 };
 
 function statusClasses(status: AgentRunStatus): string {
@@ -44,6 +45,8 @@ function statusClasses(status: AgentRunStatus): string {
       return "text-emerald-300 border-emerald-500/40 bg-emerald-500/10";
     case "failed":
       return "text-red-300 border-red-500/40 bg-red-500/10";
+    case "cancelled":
+      return "text-ink-muted border-line bg-surface-2";
     default:
       return "text-ink-muted border-line bg-surface-2";
   }
@@ -99,6 +102,9 @@ onMounted(async () => {
         Mål som är markerade för en agent. Agenten arbetar vidare och du kan godkänna
         det som behöver godkännande.
       </p>
+      <NuxtLink to="/agent-cost" class="mt-3 inline-block text-sm text-accent underline">
+        Se kostnad och budgetgränser
+      </NuxtLink>
     </div>
 
     <div v-if="pending" class="rounded-2xl border border-line bg-surface p-10 text-center text-ink-muted">
