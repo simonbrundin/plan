@@ -65,6 +65,12 @@ func (p *OpenAIProvider) buildRequest(
 		"messages": convertMessages(msgs),
 	}
 
+	// OpenAI-liknande leverantörer skickar användningen i ett eget
+	// stycke när detta begärs.
+	if opts.Usage {
+		reqBody["stream_options"] = map[string]any{"include_usage": true}
+	}
+
 	if opts.MaxTokens != nil {
 		reqBody["max_tokens"] = *opts.MaxTokens
 	}

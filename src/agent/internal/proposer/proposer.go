@@ -90,7 +90,7 @@ func (p *Proposer) proposeOnce(ctx context.Context, ws *workspace.Workspace, goa
 		},
 	}
 
-	stream, err := p.provider.Stream(ctx, p.model, msgs, nil, provider.StreamingOptions{})
+	stream, err := p.provider.Stream(ctx, p.model, msgs, nil, provider.StreamingOptions{Usage: true})
 	if err != nil {
 		return nil, fmt.Errorf("failed to stream response: %w", err)
 	}
@@ -140,7 +140,7 @@ func (p *Proposer) Revise(ctx context.Context, ws *workspace.Workspace, goalTitl
 		},
 	}
 
-	stream, err := p.provider.Stream(ctx, p.model, msgs, nil, provider.StreamingOptions{})
+	stream, err := p.provider.Stream(ctx, p.model, msgs, nil, provider.StreamingOptions{Usage: true})
 	if err != nil {
 		return nil, fmt.Errorf("failed to stream response: %w", err)
 	}
@@ -182,7 +182,7 @@ func (p *Proposer) FixTest(ctx context.Context, ws *workspace.Workspace, goalTit
 		},
 	}
 
-	stream, err := p.provider.Stream(ctx, p.model, msgs, nil, provider.StreamingOptions{})
+	stream, err := p.provider.Stream(ctx, p.model, msgs, nil, provider.StreamingOptions{Usage: true})
 	if err != nil {
 		return "", fmt.Errorf("failed to stream response: %w", err)
 	}

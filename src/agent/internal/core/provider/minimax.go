@@ -52,7 +52,9 @@ func (p *MinimaxProvider) Stream(
 	}
 
 	events := make(chan StreamEvent, 100)
-	if len(toolDefs) > 0 {
+	if len(toolDefs) > 0 || opts.Usage {
+		// Ett strömmat svar från MiniMax saknar användningen, så när
+		// den efterfrågas används det vanliga svaret i stället.
 		go p.handleNonStreamingResponse(resp.Body, events)
 	} else {
 		go p.streamResponse(resp.Body, events)
@@ -324,6 +326,12 @@ func (p *MinimaxProvider) handleNonStreamingResponse(body io.Reader, events chan
 			Message      interface{} `json:"message"`
 			FinishReason string      `json:"finish_reason"`
 		} `json:"choices"`
+		Usage *struct {
+			PromptTokens     int `json:"prompt_tokens"`
+			CompletionTokens int `json:"completion_tokens"`
+			TotalTokens      int `json:"total_tokens"`
+			CachedTokens     int `json:"cached_tokens"`
+		} `json:"usage"`
 		Error *struct {
 			Message string `json:"message"`
 		} `json:"error"`
@@ -346,6 +354,17 @@ func (p *MinimaxProvider) handleNonStreamingResponse(body io.Reader, events chan
 	choice := response.Choices[0]
 	msg := newAssistantMessage()
 	msg.StopReason = normalizeStopReason(choice.FinishReason)
+
+	// Användningen sparas på meddelandet, så att den kan rapporteras
+	// vidare. Utan den går det inte att räkna ut vad körningen kostade.
+	if response.Usage != nil {
+		msg.Usage = &messages.Usage{
+			InputTokens:  response.Usage.PromptTokens,
+			OutputTokens: response.Usage.CompletionTokens,
+			TotalTokens:  response.Usage.TotalTokens,
+			CacheTokens:  response.Usage.CachedTokens,
+		}
+	}
 
 	if msgMap, ok := choice.Message.(map[string]any); ok {
 		if content, ok := msgMap["content"].(string); ok && content != "" {

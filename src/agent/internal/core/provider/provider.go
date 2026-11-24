@@ -59,6 +59,12 @@ type StreamingOptions struct {
 	MaxTokens    *int
 	Thinking     *ThinkingLevel
 	SystemPrompt string
+	// Usage ber om att tokenanvändningen ska följa med svaret.
+	//
+	// Vissa leverantörer ger inte användningen i en strömmad svar, så
+	// då används ett vanligt svar i stället. Det kostar lite mer
+	// fördröjning men ger riktiga siffror att räkna kostnad med.
+	Usage bool
 }
 
 // ThinkingLevel controls reasoning effort
