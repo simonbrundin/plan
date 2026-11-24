@@ -2549,3 +2549,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] — ny sida från inboxen
 - [archive] 2026-11-24-koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed.md
 
+
+## [2026-11-24] ingest | create notes/jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen
+- [create] [[notes/jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen]] — ny sida från inboxen
+- [archive] 2026-11-24-jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen.md
+

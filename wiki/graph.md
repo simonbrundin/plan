@@ -99,6 +99,7 @@ graph LR
   n_notes_interaktiv_malchatt_behover_sakra_plan_verktyg["Interaktiv målchatt behöver säkra Plan-verktyg"]
   n_notes_ipv6_ingress_till_envoy_designlage_2026_11_15["'IPv6-ingress till Envoy: designläge 2026-11-15 (klustret är nere)'"]
   n_notes_it_arbetsplatser_i_sundsvall_3_469_enligt_scb_yrkesregistret["IT-arbetsplatser i Sundsvall: 3 469 enligt SCB Yrkesregistret"]
+  n_notes_jobb_ska_avslutas_nar_korningen_ar_klar_och_en_delad_proxy_rensar_typescript_felen["Jobb ska avslutas när körningen är klar, och en delad proxy rensar TypeScript-felen"]
   n_notes_kalender_som_permanent_hogerspalt_pa_desktop["Kalender som permanent högerspalt på desktop"]
   n_notes_kalenderhandelser_aterstallda_fran_neon_wal_historik["Kalenderhändelser återställda från Neon WAL-historik"]
   n_notes_kalenderhandelser_kan_ha_egna_farger["Kalenderhändelser kan ha egna färger"]

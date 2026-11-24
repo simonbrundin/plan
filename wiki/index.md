@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 343 |
+| Noter | 344 |
 
 ## Entiteter
 
@@ -123,6 +123,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]] - Genomgång av AGENTS.md i ~/repos/infrastructure (2026-10-23) hittade tre konkreta fällor som kommer att kosta tid om de inte står i AGENT... _(uppdaterad 2026-10-23)_
 - [[notes/interaktiv-malchatt-behover-sakra-plan-verktyg]] - Interaktiv målchatt försökte tidigare använda bash i agent-api-containern och loopade tills maxgränsen. _(uppdaterad 2026-11-24)_
 - [[notes/it-arbetsplatser-i-sundsvall-3-469-enligt-scb-yrkesregistret]] - Mått på IT-marknadens storlek i Sundsvall, gjord 2026-10-27 via SCB:s PxWeb-API _(uppdaterad 2026-10-27)_
+- [[notes/jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen]] - Två saker som blev bättre under slutverifieringen 2026-11-24: _(uppdaterad 2026-11-24)_
 - [[notes/kalender-som-permanent-hogerspalt-pa-desktop]] - Plan-appen visar nu VerticalCalendar permanent i default-layoutens högerspalt på desktop, med bredd 24rem (26rem på xl). _(uppdaterad 2026-11-20)_
 - [[notes/kalenderhandelser-kan-ha-egna-farger]] - Kalenderhändelser har nu ett valfritt hex-färgfält som sparas i calendar_events.color. _(uppdaterad 2026-11-17)_
 - [[notes/kalenderhandelser-kan-tas-bort-och-dupliceras]] - Användaren kan nu ta bort och duplicera kalenderhändelser, och kalendrarna _(uppdaterad 2026-11-18)_

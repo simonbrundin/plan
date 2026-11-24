@@ -100,6 +100,7 @@ finns i `index.md`.
 | [[notes/interaktiv-malchatt-behover-sakra-plan-verktyg]] | Interaktiv målchatt behöver säkra Plan-verktyg | note | bug, agent, chat, projekt:agents | 2026-11-24 | 0 |
 | [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]] | "IPv6-ingress till Envoy: designläge 2026-11-15 (klustret är nere)" | note | ipv6, envoy, gateway-api, metallb, dns, cloudflare, starlink, projekt:infrastructure | 2026-11-17 | 3 |
 | [[notes/it-arbetsplatser-i-sundsvall-3-469-enligt-scb-yrkesregistret]] | IT-arbetsplatser i Sundsvall: 3 469 enligt SCB Yrkesregistret | note | sourcing, it, sundsvall, statistik, projekt:pappa | 2026-10-27 | 1 |
+| [[notes/jobb-ska-avslutas-nar-korningen-ar-klar-och-en-delad-proxy-rensar-typescript-felen]] | Jobb ska avslutas när körningen är klar, och en delad proxy rensar TypeScript-felen | note | plan, agent, jobb, worker, typescript, refaktor, nuxt, lärdom, projekt:simon | 2026-11-24 | 0 |
 | [[notes/kalender-som-permanent-hogerspalt-pa-desktop]] | Kalender som permanent högerspalt på desktop | note | frontend, layout, projekt:plan | 2026-11-20 | 0 |
 | [[notes/kalenderhandelser-aterstallda-fran-neon-wal-historik]] | Kalenderhändelser återställda från Neon WAL-historik | note | bug, incident, kalender, neon, projekt:plan | 2026-11-20 | 1 |
 | [[notes/kalenderhandelser-kan-ha-egna-farger]] | Kalenderhändelser kan ha egna färger | note | kalender, feature, färg, projekt:plan | 2026-11-17 | 0 |
@@ -389,7 +390,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (13)
+- `agent` (14)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -565,7 +566,7 @@ finns i `index.md`.
 - `ipv6` (2)
 - `it` (2)
 - `job` (1)
-- `jobb` (1)
+- `jobb` (2)
 - `k8s` (1)
 - `kalender` (34)
 - `kameo` (7)
@@ -607,6 +608,7 @@ finns i `index.md`.
 - `load-balancer` (1)
 - `longhorn` (3)
 - `lunch` (2)
+- `lärdom` (1)
 - `mail` (20)
 - `mailagent` (3)
 - `mailmaster` (8)
@@ -642,7 +644,7 @@ finns i `index.md`.
 - `notis` (1)
 - `now` (1)
 - `ntp` (1)
-- `nuxt` (38)
+- `nuxt` (39)
 - `nätverk` (3)
 - `oauth` (2)
 - `oauth2` (3)
@@ -670,7 +672,7 @@ finns i `index.md`.
 - `picokvm` (1)
 - `pipeline` (2)
 - `pki` (3)
-- `plan` (15)
+- `plan` (16)
 - `plan-api` (1)
 - `platser` (1)
 - `poe` (1)
@@ -697,7 +699,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (70)
+- `projekt:simon` (71)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -717,7 +719,7 @@ finns i `index.md`.
 - `recovery` (3)
 - `recurrence` (1)
 - `refactor` (1)
-- `refaktor` (1)
+- `refaktor` (2)
 - `rekrytering` (6)
 - `relationer` (9)
 - `repo` (1)
@@ -794,6 +796,7 @@ finns i `index.md`.
 - `tui` (2)
 - `tunnel` (1)
 - `twingate` (2)
+- `typescript` (1)
 - `typetrainer` (2)
 - `u-boot` (1)
 - `uboot` (20)
@@ -816,7 +819,7 @@ finns i `index.md`.
 - `wan` (1)
 - `webbapp` (1)
 - `wiki` (7)
-- `worker` (9)
+- `worker` (10)
 - `worker-1` (2)
 - `worker-2` (1)
 - `worker-3` (5)
