@@ -3,6 +3,35 @@
 A goal management and planning application that helps users organize and track
 their objectives using a modern web interface with hierarchical goal structures.
 
+## Agentplattformen
+
+### Syfte
+
+Agentplattformen hjälper till att utföra mål på ett mer konsekvent och
+spårbart sätt. Den tar hand om repetitiva agentarbeten och samlar resultat,
+status och beslut kring varje körning så att användaren kan fokusera på
+målen och följa upp arbetet.
+
+### AgentRun
+
+En `AgentRun` representerar en enskild agentkörning för ett mål. Den skapas
+när en agent ska arbeta med målet och startas när körningen accepteras. Under
+körningen går den genom plattformens faser, till exempel definiering,
+planering, utförande och verifiering.
+
+### Human gate
+
+En human gate används när agentens arbete kräver mänsklig granskning innan det
+får fortsätta. Körningen väntar då på en granskare. Om arbetet godkänns fortsätter
+körningen; om det inte godkänns stoppas den för vidare åtgärd.
+
+### Körningshistorik
+
+Körningshistorik samlas för respektive mål och visar bland annat status,
+resultat och eventuella artefakter från agentkörningarna. Den används för att
+följa upp vad som har gjorts, förstå resultat och avgöra om ytterligare
+insatser behövs.
+
 ## Tech Stack
 
 - **Frontend**: Nuxt 4, TypeScript, Tailwind CSS
