@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 355 |
+| Noter | 356 |
 
 ## Entiteter
 
@@ -85,6 +85,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] - När man cachar IMAP-sessioner per konto (i stället för att stänga och _(uppdaterad 2026-10-29)_
 - [[notes/chattinterface-byggt-i-plan-slack-borttaget]] - Användaren vill inte använda Slack alls - agenten ska prata med henom i Plan. _(uppdaterad 2026-11-24)_
 - [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] - Sedan repot skapades (3f33ab1) misslyckades jobbet 'Bygg och pusha image' med 'failed to fetch anonymous token ... _(uppdaterad 2026-11-06)_
+- [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] - 2026-11-25: mål 497 (fas 1) färdigställdes. _(uppdaterad 2026-11-25)_
 - [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] - Diagnos 2026-11-11 (session: felsökning av 'workers ansluter inte'). _(uppdaterad 2026-11-23)_
 - [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] - Matchbox-profilerna node-controlplane-1..3 pekar på /assets/talos-config/nodes/controlplane-N.yaml, men den filen genereras inte: pxe/gen... _(uppdaterad 2026-11-17)_
 - [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] - Bakgrund: neuro (github.com/simonbrundin/neuro) är ett offentligt repo. _(uppdaterad 2026-11-17)_

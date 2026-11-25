@@ -59,6 +59,7 @@ finns i `index.md`.
 | [[notes/brevladelistan-maste-hamtas-innan-granskningslaget-startar]] | Brevlådelistan måste hämtas innan granskningsläget startar | note | nuxt, mail, ui, bug, projekt:pappa | 2026-11-20 | 0 |
 | [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] | Cachade IMAP-sessioner kräver hantering av döda anslutningar | note | mailmaster, bug, imap, go, projekt:simon | 2026-10-29 | 1 |
 | [[notes/chattinterface-byggt-i-plan-slack-borttaget]] | Chattinterface byggt i Plan - Slack borttaget | note | feature, agent, slack, session, projekt:plan | 2026-11-24 | 0 |
+| [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] | CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt | note | agent, ci, kontrakt, databas, projekt:plan | 2026-11-25 | 0 |
 | [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] | CI saknade inloggning mot GHCR - alla image-pushar misslyckades | note | bug, ci, ghcr, projekt:stk | 2026-11-06 | 0 |
 | [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] | cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11 | note | felsokning, pki, worker, talos, kubeconfig, projekt:infrastructure | 2026-11-23 | 2 |
 | [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] | Controlplane-recovery via PXE är inte konfigurerad | note | pxe, talos, bug, controlplane, projekt:simon | 2026-11-17 | 2 |
@@ -401,7 +402,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (16)
+- `agent` (17)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -451,7 +452,7 @@ finns i `index.md`.
 - `cfd` (1)
 - `cgNAT` (1)
 - `chat` (1)
-- `ci` (6)
+- `ci` (7)
 - `clean-code` (1)
 - `cli` (5)
 - `cloudflare` (3)
@@ -471,7 +472,7 @@ finns i `index.md`.
 - `dark-mode` (1)
 - `dashboard` (2)
 - `data` (2)
-- `databas` (10)
+- `databas` (11)
 - `database` (4)
 - `datamodell` (2)
 - `db` (6)
@@ -592,6 +593,7 @@ finns i `index.md`.
 - `kluster` (2)
 - `konferens` (1)
 - `konsulter` (2)
+- `kontrakt` (1)
 - `konventioner` (2)
 - `korrigering` (2)
 - `kortkommandon` (4)
@@ -713,7 +715,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (97)
+- `projekt:plan` (98)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)

@@ -2601,3 +2601,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 ## [2026-11-25] ingest | create notes/mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan
 ## [2026-11-25] ingest | create notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe
 
+
+## [2026-11-25] ingest | create notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt
+- [create] [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] — ny sida från inboxen
+- [archive] 2026-11-25-ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt.md
+

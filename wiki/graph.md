@@ -58,6 +58,7 @@ graph LR
   n_notes_brevladelistan_maste_hamtas_innan_granskningslaget_startar["Brevlådelistan måste hämtas innan granskningsläget startar"]
   n_notes_cachade_imap_sessioner_kraver_hantering_av_doda_anslutningar["Cachade IMAP-sessioner kräver hantering av döda anslutningar"]
   n_notes_chattinterface_byggt_i_plan_slack_borttaget["Chattinterface byggt i Plan - Slack borttaget"]
+  n_notes_ci_gates_kanonisk_agentrun_livscykel_och_versionerat_plan_agent_kontrakt["CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt"]
   n_notes_ci_saknade_inloggning_mot_ghcr_alla_image_pushar_misslyckades["CI saknade inloggning mot GHCR - alla image-pushar misslyckades"]
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11["cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11"]
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad["Controlplane-recovery via PXE är inte konfigurerad"]
