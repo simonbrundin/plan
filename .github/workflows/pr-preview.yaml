@@ -166,6 +166,7 @@ jobs:
           ref: main
           sparse-checkout: |
             environments/pr
+            .github/scripts
 
       - name: Sätt upp Python
         uses: actions/setup-python@v5
