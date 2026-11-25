@@ -353,7 +353,7 @@ func (r *CalendarEventRepository) SplitSeries(ctx context.Context, userID, paren
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	if _, err := tx.Exec(ctx, `UPDATE calendar_events SET recurrence_rule = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3`, truncatedRule, parentEventID, userID); err != nil {
 		return nil, err
 	}

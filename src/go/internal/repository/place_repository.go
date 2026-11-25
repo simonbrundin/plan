@@ -207,7 +207,7 @@ func (r *PlaceRepository) setPlaces(ctx context.Context, userID, ownerID int64, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE %s = $1`, table, ownerColumn), ownerID); err != nil {
 		return nil, fmt.Errorf("failed to clear places: %w", err)

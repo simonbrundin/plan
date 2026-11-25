@@ -236,7 +236,7 @@ func ValidateSession(token string) (*Session, error) {
 		// Clean up expired session
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		database.GetPool().Exec(ctx, "DELETE FROM sessions WHERE token = $1", token)
+		_, _ = database.GetPool().Exec(ctx, "DELETE FROM sessions WHERE token = $1", token)
 		return nil, fmt.Errorf("session expired")
 	}
 
@@ -263,7 +263,7 @@ func DeleteSession(token string) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	database.GetPool().Exec(ctx, "DELETE FROM sessions WHERE token = $1", token)
+	_, _ = database.GetPool().Exec(ctx, "DELETE FROM sessions WHERE token = $1", token)
 }
 
 // CleanupExpiredSessions removes expired sessions from database
@@ -273,7 +273,7 @@ func CleanupExpiredSessions() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	database.GetPool().Exec(ctx, "DELETE FROM sessions WHERE expires_at < NOW()")
+	_, _ = database.GetPool().Exec(ctx, "DELETE FROM sessions WHERE expires_at < NOW()")
 }
 
 // signSession creates a signed session token (HMAC-based, no DB needed for the token itself)

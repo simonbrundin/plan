@@ -74,7 +74,7 @@ func getJWKS(zitadelDomain string) (*JWKS, error) {
 		}
 		return nil, fmt.Errorf("failed to fetch JWKS: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var jwks JWKS
 	if err := json.NewDecoder(resp.Body).Decode(&jwks); err != nil {
@@ -279,25 +279,6 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// lookupUserBySub looks up a user by their Zitadel subject (sub)
-func lookupUserBySub(sub string) (int64, error) {
-	pool := database.GetPool()
-	if pool == nil {
-		log.Printf("Auth: Database pool not available")
-		return 0, fmt.Errorf("database not connected")
-	}
-
-	var userID int64
-	err := pool.QueryRow(context.Background(),
-		"SELECT id FROM users WHERE sub = $1", sub).Scan(&userID)
-	if err != nil {
-		log.Printf("Auth: User not found for sub=%s: %v", sub, err)
-		return 0, fmt.Errorf("user not found")
-	}
-
-	return userID, nil
-}
-
 // LookupOrCreateUser looks up a user by sub and creates them if they don't exist
 func LookupOrCreateUser(sub, email string) (int64, error) {
 	pool := database.GetPool()
@@ -372,7 +353,7 @@ func introspectToken(zitadelDomain, token string) (*introspectionResponse, error
 	if err != nil {
 		return nil, fmt.Errorf("introspection request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result introspectionResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

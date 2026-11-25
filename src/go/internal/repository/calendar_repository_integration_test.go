@@ -46,7 +46,7 @@ func TestCalendarFlowIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("create calendar:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, calendar.ID)
+	defer func() { _, _ = database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, calendar.ID) }()
 
 	if calendar.Color != "#ef4444" {
 		t.Fatalf("calendar color = %q, want #ef4444", calendar.Color)
@@ -62,7 +62,7 @@ func TestCalendarFlowIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("create event:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1`, created.ID)
+	defer func() { _, _ = database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1`, created.ID) }()
 
 	if created.CalendarID == nil || *created.CalendarID != calendar.ID {
 		t.Fatalf("event calendar = %v, want %d", created.CalendarID, calendar.ID)
@@ -73,7 +73,7 @@ func TestCalendarFlowIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("create second calendar:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, other.ID)
+	defer func() { _, _ = database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, other.ID) }()
 
 	moved, err := events.Update(ctx, userID, created.ID, models.UpdateCalendarEventRequest{
 		CalendarID: &other.ID,
@@ -108,7 +108,9 @@ func TestCalendarFlowIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("create series:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1 OR parent_event_id = $1`, series.ID)
+	defer func() {
+		_, _ = database.GetPool().Exec(ctx, `DELETE FROM calendar_events WHERE id = $1 OR parent_event_id = $1`, series.ID)
+	}()
 
 	occStart := start.Add(7 * 24 * time.Hour)
 	occEnd := occStart.Add(time.Hour)
@@ -169,7 +171,7 @@ func TestDefaultCalendarIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("create first:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, first.ID)
+	defer func() { _, _ = database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, first.ID) }()
 
 	if first.IsDefault {
 		t.Fatal("a new calendar should not be default")
@@ -200,7 +202,7 @@ func TestDefaultCalendarIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("create second:", err)
 	}
-	defer database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, second.ID)
+	defer func() { _, _ = database.GetPool().Exec(ctx, `DELETE FROM calendars WHERE id = $1`, second.ID) }()
 
 	if !second.IsDefault {
 		t.Fatal("second calendar should be default")

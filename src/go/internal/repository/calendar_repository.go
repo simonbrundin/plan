@@ -101,7 +101,7 @@ func (r *CalendarRepository) Create(ctx context.Context, userID int64, req model
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if _, err := tx.Exec(ctx, `UPDATE calendars SET is_default = FALSE WHERE user_id = $1 AND is_default`, userID); err != nil {
 		return nil, fmt.Errorf("failed to clear default calendar: %w", err)
@@ -135,7 +135,7 @@ func (r *CalendarRepository) Update(ctx context.Context, userID, calendarID int6
 		if err != nil {
 			return nil, fmt.Errorf("failed to begin transaction: %w", err)
 		}
-		defer tx.Rollback(ctx)
+		defer func() { _ = tx.Rollback(ctx) }()
 
 		if _, err := tx.Exec(ctx, `UPDATE calendars SET is_default = FALSE WHERE user_id = $1 AND is_default AND id <> $2`, userID, calendarID); err != nil {
 			return nil, fmt.Errorf("failed to clear default calendar: %w", err)

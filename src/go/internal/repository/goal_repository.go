@@ -158,7 +158,7 @@ func (r *GoalRepository) CreateGoal(ctx context.Context, userID int64, title, ic
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Insert goal. Nya grundmål läggs sist i ordningen, så att de inte
 	// hamnar ovanför mål som redan har en sparad placering.
@@ -418,7 +418,7 @@ func (r *GoalRepository) SetRecurrence(ctx context.Context, goalID int64, rule s
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	_, err = tx.Exec(ctx, `
 		UPDATE goals
@@ -465,7 +465,7 @@ func (r *GoalRepository) ClearRecurrence(ctx context.Context, goalID int64) erro
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	_, err = tx.Exec(ctx, `
 		UPDATE goals
@@ -495,7 +495,7 @@ func (r *GoalRepository) CompleteOccurrence(ctx context.Context, goalID int64, o
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var rule *string
 	var mode *string
@@ -597,7 +597,7 @@ func (r *GoalRepository) UndoOccurrence(ctx context.Context, goalID int64) (*mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var rule *string
 	err = tx.QueryRow(ctx, `SELECT recurrence_rule FROM goals WHERE id = $1 FOR UPDATE`, goalID).Scan(&rule)
@@ -648,7 +648,7 @@ func (r *GoalRepository) DeleteGoal(ctx context.Context, goalID int64) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Delete in correct order to avoid FK violations
 	_, err = tx.Exec(ctx, `DELETE FROM user_goals WHERE goal_id = $1`, goalID)
@@ -853,7 +853,7 @@ func (r *GoalRepository) ReorderRelations(ctx context.Context, parentID int64, c
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Fetch the children that are not part of the request so they can be
 	// appended instead of being left with a colliding order value.
@@ -897,7 +897,7 @@ func (r *GoalRepository) ReorderRootGoals(ctx context.Context, userID int64, goa
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Fetch the root goals that are not part of the request so they can be
 	// appended instead of being left with a colliding order value.
@@ -948,7 +948,7 @@ func (r *GoalRepository) ReorderPriorityGoals(ctx context.Context, userID int64,
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	rows, err := tx.Query(ctx, `
 		SELECT g.id
@@ -1051,7 +1051,7 @@ func (r *GoalRepository) UpdateRelationWeights(ctx context.Context, parentID int
 	if err != nil {
 		return fmt.Errorf("failed to begin weight update: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	for _, relation := range weights {
 		if relation.Weight < 0 || relation.Weight > 100 {
@@ -1353,7 +1353,7 @@ func (r *GoalRepository) UpdateGoalStatus(ctx context.Context, goalID int64, new
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Get current status
 	var currentStatusID *int64

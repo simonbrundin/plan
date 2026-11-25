@@ -132,9 +132,7 @@ func parse(rule string) (*rrule.RRule, error) {
 		return nil, fmt.Errorf("%w: regeln är tom", ErrInvalidRule)
 	}
 
-	if strings.HasPrefix(normalized, rulePrefix) {
-		normalized = strings.TrimPrefix(normalized, rulePrefix)
-	}
+	normalized = strings.TrimPrefix(normalized, rulePrefix)
 
 	if err := validateParts(normalized); err != nil {
 		return nil, err

@@ -28,6 +28,30 @@ jobs:
         working-directory: src/go
         run: go test ./...
 
+  # Lint-gate för Plan-API:t - samma linter som agenten använder.
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: src/go/go.mod
+          cache-dependency-path: src/go/go.sum
+
+      - name: Run golangci-lint
+        # v2 av golangci-lint byggs med en Go-version som klarar go.mod:s
+        # Go-version. v1 av actionen installerar en äldre linter som
+        # vägrar köra mot ett modernt Go-mål.
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.15.0
+          working-directory: src/go
+
   build-publish-image:
     needs: unit-tests
     runs-on: ubuntu-latest

@@ -119,7 +119,7 @@ func (r *TagRepository) SetGoalTags(ctx context.Context, userID, goalID int64, n
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if _, err := tx.Exec(ctx, `DELETE FROM goal_tags WHERE goal_id = $1`, goalID); err != nil {
 		return nil, fmt.Errorf("failed to clear goal tags: %w", err)
