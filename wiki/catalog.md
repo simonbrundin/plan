@@ -27,6 +27,7 @@ finns i `index.md`.
 | [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-10-23 | 5 |
 | [[entities/flux-gitops]] | Flux GitOps | entity | flux, gitops, infrastructure, kubernetes | 2026-10-24 | 6 |
 | [[entities/hdmi-kvm-switch-16-port-labbet]] | HDMI KVM-switch 16 port (labbet) | entity | kvm, hardware, labb, projekt:infrastructure, projekt:simon | 2026-11-15 | 2 |
+| [[entities/home-assistant]] | Home Assistant | entity | home-assistant, ssh, hassio, supervisor, drift, projekt:simon | 2026-11-25 | 5 |
 | [[entities/kubernetes]] | Kubernetes | entity | kubernetes, k8s, container-orchestration | 2026-11-23 | 19 |
 | [[entities/pxe-server]] | PXE-server | entity | pxe, talos, uboot, matchbox, dnsmasq, boot, infrastructure | 2026-10-24 | 35 |
 | [[entities/talos-linux]] | Talos Linux | entity | bare-metal, baremetal, infrastructure, kubernetes, linux, pxe, talos | 2026-10-24 | 9 |
@@ -35,6 +36,7 @@ finns i `index.md`.
 | [[notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t]] | Admin-inloggning via lösenord i stället för token i UI:t | note | pappa, admin, auth, projekt:pappa | 2026-11-16 | 0 |
 | [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]] | Agent-api crashade i Tilt: saknad DATABASE_URL mot CNPG-databasen i agents-dev | note | bug, tilt, dev, agent-api, database, plan-api, projekt:agents | 2026-11-23 | 1 |
 | [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]] | Agent-gränssnittet (Nuxt) saknades helt i Tilt - routes försvann i refaktoreringen 677b876 | note | agents, tilt, nuxt, bug, projekt:agents | 2026-11-23 | 1 |
+| [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] | Agent-scope i prod: allowlistan måste matcha kontraktet | note | agent, api, scope, bug, projekt:plan | 2026-11-25 | 2 |
 | [[notes/agentmal-flaggan-blev-levande-mvp]] | Agentmål: flaggan blev levande (MVP) | note | feature, agent, bug, session, projekt:plan | 2026-11-24 | 0 |
 | [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] | Agentmärke på mål - tangenten a är reserverad | note | feature, goals, tangent, projekt:plan | 2026-11-20 | 0 |
 | [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] | Agentprofiler som teknisk policy utanför prompten | note | plan, agent, profil, policy, behörighet, säkerhet, projekt:simon | 2026-11-24 | 0 |
@@ -59,7 +61,7 @@ finns i `index.md`.
 | [[notes/brevladelistan-maste-hamtas-innan-granskningslaget-startar]] | Brevlådelistan måste hämtas innan granskningsläget startar | note | nuxt, mail, ui, bug, projekt:pappa | 2026-11-20 | 0 |
 | [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] | Cachade IMAP-sessioner kräver hantering av döda anslutningar | note | mailmaster, bug, imap, go, projekt:simon | 2026-10-29 | 1 |
 | [[notes/chattinterface-byggt-i-plan-slack-borttaget]] | Chattinterface byggt i Plan - Slack borttaget | note | feature, agent, slack, session, projekt:plan | 2026-11-24 | 0 |
-| [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] | CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt | note | agent, ci, kontrakt, databas, projekt:plan | 2026-11-25 | 0 |
+| [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] | CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt | note | agent, ci, kontrakt, databas, projekt:plan | 2026-11-25 | 1 |
 | [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] | CI saknade inloggning mot GHCR - alla image-pushar misslyckades | note | bug, ci, ghcr, projekt:stk | 2026-11-06 | 0 |
 | [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] | cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11 | note | felsokning, pki, worker, talos, kubeconfig, projekt:infrastructure | 2026-11-23 | 2 |
 | [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] | Controlplane-recovery via PXE är inte konfigurerad | note | pxe, talos, bug, controlplane, projekt:simon | 2026-11-17 | 2 |
@@ -91,10 +93,12 @@ finns i `index.md`.
 | [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]] | Gotcha: 'PXE först' gör noden till en PXE-nod (maintenance mode) | note | pxe, boot, drift, worker, projekt:simon | 2026-11-17 | 6 |
 | [[notes/gron-markering-av-tider-som-ar-bokade-i-matchi-skrivlasande-jamforelse]] | Grön markering av tider som är bokade i MATCHi (skrivläsande jämförelse) | note | stk, matchi, bokning, feature, frontend, projekt:stk | 2026-11-06 | 0 |
 | [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]] | HA: automationer behöver en startvág för att återställa läget (och tre syntaxfällor) | note | home-assistant, session, projekt:simon | 2026-11-03 | 1 |
+| [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]] | HA Krokviken: robotdammsugare startar/stoppar pa person-entiteter | note | home-assistant, automation, dammsugare, tuya, session, projekt:simon | 2026-11-25 | 1 |
+| [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]] | HA Tuya Tesvor S6: anslutningen fungerar men statusfält saknas | note | home-assistant, tuya, tesvor, dammsugare, felsökning, projekt:simon | 2026-11-25 | 1 |
 | [[notes/handelsen-har-ingen-egen-farg]] | Händelsen har ingen egen färg | note | kalender, färg, förenkling, projekt:plan | 2026-11-18 | 2 |
 | [[notes/hierarki-i-gor-nu-listan-now]] | Hierarki i Gör nu-listan (/now) | note | feature, nuxt, prioritetssida, ui, projekt:simon | 2026-11-23 | 0 |
 | [[notes/hjalpmodalen-for-kortkommandon-fick-sokfilter]] | Hjälpmodalen för kortkommandon fick sökfilter | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
-| [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] | Home Assistant Krokviken: SSH via Terminal & SSH-addon | note | home-assistant, ssh, supervisor, projekt:simon | 2026-11-25 | 0 |
+| [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] | Home Assistant Krokviken: SSH via Terminal & SSH-addon | note | home-assistant, ssh, supervisor, projekt:simon | 2026-11-25 | 1 |
 | [[notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln]] | Human gate som teknisk gräns: scope på API-nyckeln | note | plan, agent, säkerhet, behörighet, human-gate, api-nyckel, projekt:simon | 2026-11-24 | 0 |
 | [[notes/ikonsokning-far-timeout-och-checkbox-fallback-vid-nya-mal]] | Ikonsökning får timeout och checkbox-fallback vid nya mål | note | bug, icon, goals, nuxt, projekt:plan | 2026-11-22 | 0 |
 | [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]] | Ikonväljaren i plan: /api-icons-routen var borttagen och ikonprovider none gjorde att inga ikoner renderades | note | bug, nuxt, icon, plan, projekt:plan | 2026-11-17 | 1 |
@@ -135,7 +139,7 @@ finns i `index.md`.
 | [[notes/kanata-switch-session-tmuxinator-fonster-oppnades-inte]] | Kanata switch-session: tmuxinator-fönster öppnades inte | note | bug, kanata, tmux, tmuxinator, projekt:simon | 2026-10-22 | 0 |
 | [[notes/kandidatlistan-heter-nu-personer]] | Kandidatlistan heter nu /personer | note | pappa, ui, navigering, omdöping, projekt:pappa | 2026-11-17 | 1 |
 | [[notes/klustret-anvander-sops-via-flux-inte-vault-eso]] | Klustret anvander SOPS via Flux - inte Vault/ESO | note | secrets, gitops, sops, projekt:infrastructure | 2026-11-23 | 0 |
-| [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] | Klustret har byggts om - bara kube-system, Flux och appar saknas (2026-11-23) | note | kubernetes, talos, gitops, projekt:infrastructure | 2026-11-23 | 0 |
+| [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] | Klustret har byggts om - bara kube-system, Flux och appar saknas (2026-11-23) | note | kubernetes, talos, gitops, projekt:infrastructure | 2026-11-25 | 1 |
 | [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] | Köda körningar är uttryckliga begäran - och en avslutad körning har alltid run_completed | note | plan, agent, jobb, worker, bugg, händelser, verifiering, projekt:simon | 2026-11-24 | 0 |
 | [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]] | "Konsulter i Sundsvall: antalet går inte att mäta - det som går att säga" | note | pappa, sourcing, statistik, scb, sundsvall, konsulter, projekt:pappa | 2026-11-18 | 2 |
 | [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]] | "[DEPRECATED] 50/50-uppdelning mellan konsulter och anställda - FEL, se den nya noten" | note | pappa, sourcing, statistik, scb, sundsvall, konsulter, projekt:pappa | 2026-11-18 | 3 |
@@ -253,6 +257,7 @@ finns i `index.md`.
 | [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]] | Prioriteringsordningen på /now sparades inte - bulk-update och spar-kö | note | bugg, go, nuxt, prioritetssida, prestanda, projekt:plan | 2026-11-23 | 1 |
 | [[notes/priority-vyn-byter-namn-till-gor-nu]] | Priority-vyn byter namn till Gör nu | note | feature, frontend, constraints, projekt:plan | 2026-11-22 | 0 |
 | [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] | Priorityfilter ska behandla saknat started som ej påbörjat | note | bug, priority, filter, projekt:plan | 2026-11-17 | 1 |
+| [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] | Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte | note | kubernetes, talos, drift, projekt:plan | 2026-11-25 | 2 |
 | [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]] | PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde | note | pxe, talos, infrastructure, worker-9, projekt:simon | 2026-11-17 | 2 |
 | [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]] | PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text | note | pxe, bug, uboot, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
 | [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] | PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC | note | pxe, talos, worker-2, felsokning, projekt:infrastructure | 2026-11-17 | 2 |
@@ -307,7 +312,7 @@ finns i `index.md`.
 | [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]] | Skogsduvan: Elementet styrs av minsta temperaturen (fail-open) | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-03 | 1 |
 | [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]] | Skogsduvan: fyra Shelly-enheter svarar inte på nätet | note | home-assistant, skogsduvan, hardware, session, projekt:simon | 2026-11-02 | 1 |
 | [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]] | Skogsduvan: larm när sensorer/Shelly-enheter faller ur online | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-03 | 1 |
-| [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] | "Skogsduvan: SSH via duckdns fungerar (port 22 forwardad 2026-11-02)" | note | ssh, homeassistant, duckdns, drift, projekt:infrastructure | 2026-11-02 | 1 |
+| [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] | "Skogsduvan: SSH via duckdns fungerar (port 22 forwardad 2026-11-02)" | note | ssh, homeassistant, duckdns, drift, projekt:infrastructure | 2026-11-25 | 2 |
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
@@ -403,7 +408,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (17)
+- `agent` (18)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -411,7 +416,7 @@ finns i `index.md`.
 - `algoritm` (1)
 - `analys` (1)
 - `animation` (2)
-- `api` (7)
+- `api` (8)
 - `api-nyckel` (1)
 - `appimage` (1)
 - `arch` (1)
@@ -422,6 +427,7 @@ finns i `index.md`.
 - `authentication` (2)
 - `authentik` (1)
 - `automatik` (1)
+- `automation` (1)
 - `automatisering` (5)
 - `axum` (1)
 - `backend` (2)
@@ -438,7 +444,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (89)
+- `bug` (90)
 - `bugg` (5)
 - `build` (2)
 - `bun` (1)
@@ -470,6 +476,7 @@ finns i `index.md`.
 - `csi` (1)
 - `csr` (1)
 - `css` (3)
+- `dammsugare` (2)
 - `dark-mode` (1)
 - `dashboard` (2)
 - `data` (2)
@@ -499,7 +506,7 @@ finns i `index.md`.
 - `dokumentation` (1)
 - `dotfiles` (3)
 - `drag` (1)
-- `drift` (5)
+- `drift` (7)
 - `dubbeluttag` (1)
 - `duckdns` (2)
 - `durable` (4)
@@ -516,6 +523,7 @@ finns i `index.md`.
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (19)
+- `felsökning` (1)
 - `figma` (1)
 - `filter` (2)
 - `fix` (1)
@@ -546,11 +554,12 @@ finns i `index.md`.
 - `grundare` (1)
 - `hardsvaru` (1)
 - `hardware` (9)
+- `hassio` (1)
 - `hdd` (1)
 - `helpmodal` (2)
 - `hemligheter` (2)
 - `heuristik` (1)
-- `home-assistant` (9)
+- `home-assistant` (12)
 - `homeassistant` (1)
 - `hostname` (1)
 - `http` (2)
@@ -601,7 +610,7 @@ finns i `index.md`.
 - `kostnad` (1)
 - `kubeconfig` (1)
 - `kubelet` (1)
-- `kubernetes` (24)
+- `kubernetes` (25)
 - `kunskapsbas` (2)
 - `kurering` (1)
 - `kustomize` (5)
@@ -716,11 +725,11 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (98)
+- `projekt:plan` (100)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (79)
+- `projekt:simon` (82)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -764,11 +773,12 @@ finns i `index.md`.
 - `scalar` (2)
 - `scb` (3)
 - `schema` (2)
+- `scope` (1)
 - `scraper` (1)
 - `secret` (1)
 - `secrets` (2)
 - `security` (3)
-- `session` (37)
+- `session` (38)
 - `shell` (1)
 - `skogsduvan` (6)
 - `slack` (1)
@@ -778,7 +788,7 @@ finns i `index.md`.
 - `soulmate` (1)
 - `sourcing` (12)
 - `sprint` (1)
-- `ssh` (3)
+- `ssh` (4)
 - `ssl` (1)
 - `sso` (2)
 - `standardkalender` (1)
@@ -793,18 +803,19 @@ finns i `index.md`.
 - `styrelsemöte` (1)
 - `submodule` (2)
 - `sundsvall` (5)
-- `supervisor` (1)
+- `supervisor` (2)
 - `svenska` (1)
 - `systemd` (1)
 - `systemd-boot` (1)
 - `säkerhet` (8)
 - `tags` (1)
 - `tailwind` (2)
-- `talos` (33)
+- `talos` (34)
 - `tangent` (1)
 - `tangentbord` (2)
 - `teknik` (1)
 - `test` (3)
+- `tesvor` (1)
 - `tillstand` (1)
 - `tilt` (6)
 - `tls` (3)
@@ -817,6 +828,7 @@ finns i `index.md`.
 - `translation` (1)
 - `tui` (2)
 - `tunnel` (1)
+- `tuya` (2)
 - `twingate` (2)
 - `typescript` (1)
 - `typetrainer` (2)

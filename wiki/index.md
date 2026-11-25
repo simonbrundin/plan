@@ -6,15 +6,16 @@ och gå sedan ner på sidorna som är relevanta.
 
 | Typ | Antal |
 |---|---|
-| Entiteter | 5 |
+| Entiteter | 6 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 357 |
+| Noter | 361 |
 
 ## Entiteter
 
 - [[entities/flux-gitops]] - GitOps-operatorn som synkar klustrets tillstånd från git; här styrd av FluxOperator. _(uppdaterad 2026-10-24)_
 - [[entities/hdmi-kvm-switch-16-port-labbet]] - En 16-portars HDMI KVM-switch (MLEEDA, Amazon ASIN B0GCD38QN9) som ska styras från PXE-Pi:n (Raspberry Pi 5, 10.10.10.2, Ubuntu 25.04). _(uppdaterad 2026-11-15)_
+- [[entities/home-assistant]] - Två Home Assistant-instanser - "Krokviken" (10.20.20.20, HAOS 18.4) och "Skogsduvan" (stugan) - samt hur man administrations-API:t mot Supervisor nås via WebSocket. _(uppdaterad 2026-11-25)_
 - [[entities/kubernetes]] - Kubernetes (K8s) är containerorkestreringsplattformen i detta kluster. _(uppdaterad 2026-11-23)_
 - [[entities/pxe-server]] - PXE-servern i infrastructure-repot - dnsmasq, matchbox och mainline-U-Boot byggda för nätverksboot av Talos-noderna. _(uppdaterad 2026-10-24)_
 - [[entities/talos-linux]] - Minimalt, API-drivet Linux-OS för Kubernetes; styrs deklarativt via maskinpatches. _(uppdaterad 2026-10-24)_
@@ -56,13 +57,14 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]] - RÄTTELSE 2026-11-18: den här notens 50/50-påstående var FEL. _(uppdaterad 2026-11-18)_
 - [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]] - `*.simonbrundin.com` → publik IPv6 → vidarebefordras till Envoy Gateway, analogt med _(uppdaterad 2026-11-17)_
 - [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]] - Rättelse: en tidigare version av den här noten påstodde en "50/50-uppdelning" _(uppdaterad 2026-11-18)_
-- [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] - **Status 2026-11-02: löst.** Simons har vidarebefordrat port 22 i stugans router. _(uppdaterad 2026-11-02)_
+- [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] - **Status 2026-11-02: löst.** Simons har vidarebefordrat port 22 i stugans router. _(uppdaterad 2026-11-25)_
 - [[notes/goals-listar-bara-grundmal-scroll-vid-j-k]] - Ändring i plan-repot (commit 36b89d8, 9ae273a, 9be938f). _(uppdaterad 2026-11-16)_
 - [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] - 1Password:s desktop-app exponerar Environments-MCP via en IPC-relay ( abstrakt unix-socket @1PASSWORD_MCP ) som bara startar när 'Settin... _(uppdaterad 2026-11-23)_
 - [[notes/accuracy-fel-omstart]] - Så här upptäcktes att omstart behöver skiljas från skrivfel, och varför sekvensfelet inte gav en tydlig signal. _(uppdaterad 2026-11-17)_
 - [[notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t]] - Pappa (src/nuxt) har bytt från 'mata in admin-token i webbläsaren' till en enkel inloggningssida på /admin. _(uppdaterad 2026-11-16)_
 - [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]] - Symtom: agent-api-podden i default-ns (namespace dev) gick i CrashLoopBackOff. _(uppdaterad 2026-11-23)_
 - [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]] - Tilt (environments/dev i agents-repot) visade bara Plan-appen. _(uppdaterad 2026-11-23)_
+- [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] - Agentens egen API-nyckel har scope 'agent' i prod (hashen sätts in av environments/prod/secrets/plan-api-key.sql). _(uppdaterad 2026-11-25)_
 - [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] - Mål har nu en agent-flagga (goals.agent i databasen) som visas med AgentBadge (blått när på) och växlas med leader + a (mellanslag +... _(uppdaterad 2026-11-20)_
 - [[notes/agentmal-flaggan-blev-levande-mvp]] - Plan hade redan goals.agent men ingen agent läste flaggan. _(uppdaterad 2026-11-24)_
 - [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] - I ~/repos/plan (Fas 4 i mål 497) ligger agentprofilerna i src/agent/internal/profile och är tekniska gränser - inte text i prompten. _(uppdaterad 2026-11-24)_
@@ -114,6 +116,8 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen]] - 2026-11-20 (16:11 UTC): Neon dev-branchen tömdes igen - den här gången försvann 17 av 18 kalenderhändelser (bara "Esters kalas" var ... _(uppdaterad 2026-11-20)_
 - [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]] - Nodernas PXE-configer ar maintenance-configer (ingen machine.install-sektion), sa en PXE-start landar i Talos maintenance mode och skrive... _(uppdaterad 2026-11-17)_
 - [[notes/gron-markering-av-tider-som-ar-bokade-i-matchi-skrivlasande-jamforelse]] - Nytt GET /matchi/bookings i Go API:t (paket internal/occupancy) jämför kommunens bokningar med MATCHis schema och returnerar de bokning... _(uppdaterad 2026-11-06)_
+- [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]] - Automationer skapade via HA:s config-API: POST /api/config/automation/config/<id> med JSON-body (alias/triggers/conditions/actions). _(uppdaterad 2026-11-25)_
+- [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]] - Felsökning 2026-11-25 av Krokviken (10.20.20.20): UniFi visar Tesvor S6 som online på 10.20.20.175 (Wi-Fi IoT, MAC d8:c0:a6:75:7a:8d, s... _(uppdaterad 2026-11-25)_
 - [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]] - Problem som upptäcktes 2026-11-03 i Skogsduvans HA: en temperatureautomation som styrs av minsta temperaturen ska "äga" rätt tillstån... _(uppdaterad 2026-11-03)_
 - [[notes/hierarki-i-gor-nu-listan-now]] - Mål i /now som har en förälder som också syns i /now visas nu indenterade under föräldern. _(uppdaterad 2026-11-23)_
 - [[notes/hjalpmodalen-for-kortkommandon-fick-sokfilter]] - 2026-11-20: HelpModal.vue fick ett sökfilter. _(uppdaterad 2026-11-20)_
@@ -158,7 +162,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kanata-switch-session-tmuxinator-fonster-oppnades-inte]] - Symtom: tangenterna i kanatas tmux-lager (t.ex. _(uppdaterad 2026-10-22)_
 - [[notes/kandidatlistan-heter-nu-personer]] - Sidan som tidigare hette /kandidater heter nu /personer (2026-11-17). _(uppdaterad 2026-11-17)_
 - [[notes/klustret-anvander-sops-via-flux-inte-vault-eso]] - Klustret (Talos, home) har EN secret-vag: SOPS + age, dekrypterat av Flux kustomize-controller via spec.decryption.provider: sops (patch ... _(uppdaterad 2026-11-23)_
-- [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-23)_
+- [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-25)_
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
@@ -274,6 +278,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]] - Symtom: att ändra ordningen på /now med ArrowUp/ArrowDown såg ut att fungera, _(uppdaterad 2026-11-23)_
 - [[notes/priority-vyn-byter-namn-till-gor-nu]] - Gör nu introducerades som ny route /now. _(uppdaterad 2026-11-22)_
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
+- [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] - Diagnos 2026-11-25 13:40 (prod-klustret, context admin@cluster1): _(uppdaterad 2026-11-25)_
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] - worker-2 startade om i en bootloop for att noden hade en Talos-installation pa eMMC - U-Boot ska boota disk forst. _(uppdaterad 2026-11-17)_
 - [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade v... _(uppdaterad 2026-11-20)_
 - [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]] - Radxa ROCK 4C+ har ingen UEFI-meny - U-Boot i SPI-flash väljer bootkälla via boot_targets. _(uppdaterad 2026-10-22)_

@@ -2611,3 +2611,54 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] — ny sida från inboxen
 - [archive] 2026-11-25-home-assistant-krokviken-ssh-via-terminal-ssh-addon.md
 
+
+## [2026-11-25] page | entities/home-assistant
+
+
+## [2026-11-25] link | notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon -> entities/home-assistant
+
+
+## [2026-11-25] link | notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02 -> entities/home-assistant
+
+
+## [2026-11-25] ingest | create notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter
+- [create] [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]] — ny sida från inboxen
+- [archive] 2026-11-25-ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter.md
+
+
+## [2026-11-25] link | notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter -> entities/home-assistant
+
+
+## [2026-11-25] ingest | create notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet
+- [create] [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] — ny sida från inboxen
+- [create] [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] — ny sida från inboxen
+- [archive] 2026-11-25-agent-scope-i-prod-allowlistan-maste-matcha-kontraktet.md
+- [archive] 2026-11-25-prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte.md
+## [2026-11-25] ingest | create notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte
+
+
+## [2026-11-25] link | notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet -> notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt
+
+
+## [2026-11-25] link | notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet -> concepts/kubernetes
+
+
+## [2026-11-25] link | notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte -> entities/kubernetes
+
+
+## [2026-11-25] link | notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte -> notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23
+
+
+## [2026-11-25] link | notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt -> notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet
+
+
+## [2026-11-25] link | notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23 -> notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte
+
+
+## [2026-11-25] ingest | create notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas
+- [create] [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]] — ny sida från inboxen
+- [archive] 2026-11-25-ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas.md
+
+
+## [2026-11-25] link | notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas -> entities/home-assistant
+

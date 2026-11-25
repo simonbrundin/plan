@@ -3,9 +3,9 @@ title: "Skogsduvan: SSH via duckdns fungerar (port 22 forwardad 2026-11-02)"
 type: note
 tags: [ssh, homeassistant, duckdns, drift, projekt:infrastructure]
 created: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-25
 status: active
-related: [notes/twingate-anslutaren-for-10-10-10-0-24-var-nere-recovery-floden-kan-inte-koras-fran-arbetsstationen]
+related: [entities/home-assistant, notes/twingate-anslutaren-for-10-10-10-0-24-var-nere-recovery-floden-kan-inte-koras-fran-arbetsstationen]
 ---
 
 **Status 2026-11-02: löst.** Simons har vidarebefordrat port 22 i stugans router. `ssh skogsduvan` fungerar nu direkt från hemmet med samma nyckel som `homeassistant.local`.
@@ -36,5 +36,5 @@ Arbetsnotering: `~/.ssh/config` har Host `skogsduvan` -> stuganskogsduvan.duckdn
 
 ## Relaterade
 
+- [[entities/home-assistant]]
 - [[notes/twingate-anslutaren-for-10-10-10-0-24-var-nere-recovery-floden-kan-inte-koras-fran-arbetsstationen]]
-

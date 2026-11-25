@@ -5,6 +5,7 @@ tags: [agent, ci, kontrakt, databas, projekt:plan]
 created: 2026-11-25
 updated: 2026-11-25
 status: active
+related: [notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]
 ---
 
 2026-11-25: mål 497 (fas 1) färdigställdes. Delmålen 499 (checkpoint-orchestratorn startar),
@@ -52,3 +53,8 @@ Kustomize-rendering av environments/prod är verifierad: 25 resurser, bland dem 
 deployment, CNPG-klustret, RBAC och de fyra agenthemligheterna. Kvar i prod: köra
 environments/prod/secrets/plan-api-key.sql (hashen av agentens API-nyckel) och låta Flux
 synka - vilket kräver att klustret är igång.
+
+## Relaterade
+
+- [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]]
+

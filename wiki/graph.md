@@ -26,6 +26,7 @@ graph LR
   n_concepts_zitadel["Zitadel"]
   n_entities_flux_gitops["Flux GitOps"]
   n_entities_hdmi_kvm_switch_16_port_labbet["HDMI KVM-switch 16 port (labbet)"]
+  n_entities_home_assistant["Home Assistant"]
   n_entities_kubernetes["Kubernetes"]
   n_entities_pxe_server["PXE-server"]
   n_entities_talos_linux["Talos Linux"]
@@ -34,6 +35,7 @@ graph LR
   n_notes_admin_inloggning_via_losenord_i_stallet_for_token_i_ui_t["Admin-inloggning via lösenord i stället för token i UI:t"]
   n_notes_agent_api_crashade_i_tilt_saknad_database_url_mot_cnpg_databasen_i_agents_dev["Agent-api crashade i Tilt: saknad DATABASE_URL mot CNPG-databasen i agents-dev"]
   n_notes_agent_granssnittet_nuxt_saknades_helt_i_tilt_routes_forsvann_i_refaktoreringen_677b876["Agent-gränssnittet (Nuxt) saknades helt i Tilt - routes försvann i refaktoreringen 677b876"]
+  n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet["Agent-scope i prod: allowlistan måste matcha kontraktet"]
   n_notes_agentmal_flaggan_blev_levande_mvp["Agentmål: flaggan blev levande (MVP)"]
   n_notes_agentmarke_pa_mal_tangenten_a_ar_reserverad["Agentmärke på mål - tangenten a är reserverad"]
   n_notes_agentprofiler_som_teknisk_policy_utanfor_prompten["Agentprofiler som teknisk policy utanför prompten"]
@@ -90,6 +92,8 @@ graph LR
   n_notes_gotcha_pxe_forst_gor_noden_till_en_pxe_nod_maintenance_mode["Gotcha: 'PXE först' gör noden till en PXE-nod (maintenance mode)"]
   n_notes_gron_markering_av_tider_som_ar_bokade_i_matchi_skrivlasande_jamforelse["Grön markering av tider som är bokade i MATCHi (skrivläsande jämförelse)"]
   n_notes_ha_automationer_behover_en_startv_g_for_att_aterstalla_laget_och_tre_syntaxfallor["HA: automationer behöver en startvág för att återställa läget (och tre syntaxfällor)"]
+  n_notes_ha_krokviken_robotdammsugare_startar_stoppar_pa_person_entiteter["HA Krokviken: robotdammsugare startar/stoppar pa person-entiteter"]
+  n_notes_ha_tuya_tesvor_s6_anslutningen_fungerar_men_statusfalt_saknas["HA Tuya Tesvor S6: anslutningen fungerar men statusfält saknas"]
   n_notes_handelsen_har_ingen_egen_farg["Händelsen har ingen egen färg"]
   n_notes_hierarki_i_gor_nu_listan_now["Hierarki i Gör nu-listan (/now)"]
   n_notes_hjalpmodalen_for_kortkommandon_fick_sokfilter["Hjälpmodalen för kortkommandon fick sökfilter"]
@@ -252,6 +256,7 @@ graph LR
   n_notes_prioriteringsordningen_pa_now_sparades_inte_bulk_update_och_spar_ko["Prioriteringsordningen på /now sparades inte - bulk-update och spar-kö"]
   n_notes_priority_vyn_byter_namn_till_gor_nu["Priority-vyn byter namn till Gör nu"]
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat["Priorityfilter ska behandla saknat started som ej påbörjat"]
+  n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte["Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte"]
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode["PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde"]
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text["PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text"]
   n_notes_pxe_bootloop_initramfs_startar_om_for_att_boota_installerad_talos_pa_emmc["PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC"]
@@ -465,6 +470,11 @@ graph LR
   n_entities_flux_gitops --> n_entities_talos_linux
   n_entities_hdmi_kvm_switch_16_port_labbet --> n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm
   n_entities_hdmi_kvm_switch_16_port_labbet --> n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll
+  n_entities_home_assistant --> n_notes_home_assistant_krokviken_ssh_via_terminal_ssh_addon
+  n_entities_home_assistant --> n_notes_skogsduvan_ssh_via_duckdns_fungerar_port_22_forwardad_2026_11_02
+  n_entities_home_assistant --> n_notes_ha_krokviken_robotdammsugare_startar_stoppar_pa_person_entiteter
+  n_entities_home_assistant --> n_notes_ha_tuya_tesvor_s6_anslutningen_fungerar_men_statusfalt_saknas
+  n_entities_home_assistant --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
   n_entities_kubernetes --> n_concepts_kubelet_csr_approver
   n_entities_kubernetes --> n_concepts_oidc
   n_entities_kubernetes --> n_concepts_sops
@@ -534,6 +544,8 @@ graph LR
   n_notes_accuracy_fel_omstart --> n_notes_session_livscykel
   n_notes_agent_api_crashade_i_tilt_saknad_database_url_mot_cnpg_databasen_i_agents_dev --> n_notes_agent_granssnittet_nuxt_saknades_helt_i_tilt_routes_forsvann_i_refaktoreringen_677b876
   n_notes_agent_granssnittet_nuxt_saknades_helt_i_tilt_routes_forsvann_i_refaktoreringen_677b876 --> n_notes_agent_api_crashade_i_tilt_saknad_database_url_mot_cnpg_databasen_i_agents_dev
+  n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet --> n_entities_kubernetes
+  n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet --> n_notes_ci_gates_kanonisk_agentrun_livscykel_och_versionerat_plan_agent_kontrakt
   n_notes_agents_repot_arkiverat_och_mergens_mal_kompletterade --> n_notes_sammanslagning_av_agents_repot_in_i_plan_vad_som_flyttades_och_vad_som_medvetet_inte_gjorde_det
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay --> n_notes_kanata_switch_session_tmuxinator_fonster_oppnades_inte
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay --> n_notes_pi_tog_bort_pi_rate_limit_och_pi_pattern_retry_fixade_omarchy_temasy
@@ -559,6 +571,7 @@ graph LR
   n_notes_bigram_algoritmen --> n_notes_wordlist_kallor
   n_notes_bigram_algoritmen --> n_notes_arkitektur
   n_notes_cachade_imap_sessioner_kraver_hantering_av_doda_anslutningar --> n_notes_mailmaster_kontodropdown_outlook_inloggning_via_device_code
+  n_notes_ci_gates_kanonisk_agentrun_livscykel_och_versionerat_plan_agent_kontrakt --> n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad --> n_entities_pxe_server
@@ -594,8 +607,11 @@ graph LR
   n_notes_gotcha_pxe_forst_gor_noden_till_en_pxe_nod_maintenance_mode --> n_notes_u_boot_kors_en_gang_boot_targets_styr_steg_2_inte_steg_1
   n_notes_gotcha_pxe_forst_gor_noden_till_en_pxe_nod_maintenance_mode --> n_notes_worker_1_rock_4c_nar_pxe_via_u_boot_boot_targets_men_pxe_ligger_sist
   n_notes_ha_automationer_behover_en_startv_g_for_att_aterstalla_laget_och_tre_syntaxfallor --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
+  n_notes_ha_krokviken_robotdammsugare_startar_stoppar_pa_person_entiteter --> n_entities_home_assistant
+  n_notes_ha_tuya_tesvor_s6_anslutningen_fungerar_men_statusfalt_saknas --> n_entities_home_assistant
   n_notes_handelsen_har_ingen_egen_farg --> n_notes_flera_kalendrar_med_egna_farger_i_plan
   n_notes_handelsen_har_ingen_egen_farg --> n_notes_standardkalender_i_plan
+  n_notes_home_assistant_krokviken_ssh_via_terminal_ssh_addon --> n_entities_home_assistant
   n_notes_ikonvaljaren_i_plan_api_icons_routen_var_borttagen_och_ikonprovider_none_gjorde_att_inga_ikoner_renderades --> n_notes_plan_cachad_spa_skal_gjorde_att_webblasaren_korde_gammalt_js_bundle_med_ikon_provider_none
   n_notes_imap_inloggning_for_michael_brundin_soulmate_se_kraver_admin_consent --> n_notes_mailmaster_kontodropdown_outlook_inloggning_via_device_code
   n_notes_imap_inloggning_for_michael_brundin_soulmate_se_kraver_admin_consent --> n_notes_sales_soulmate_se_appen_kan_inte_logga_in_oauth_clienten_saknas_i_soulmate_tenanten
@@ -624,6 +640,7 @@ graph LR
   n_notes_kameo_utbetalningar_nuxt_sida_som_laser_lan_fran_kameo --> n_notes_kameo_sidan_flyttad_till_toppniva_och_delad_i_flikar
   n_notes_kameo_utbetalningar_nuxt_sida_som_laser_lan_fran_kameo --> n_notes_kameo_uppgifter_synkas_till_fil_sa_docker_slipper_op_cli
   n_notes_kandidatlistan_heter_nu_personer --> n_notes_nuxt_sidomeny_kandidater_som_startsida_i_pappa
+  n_notes_klustret_har_byggts_om_bara_kube_system_flux_och_appar_saknas_2026_11_23 --> n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte
   n_notes_konsulter_i_sundsvall_antalet_gar_inte_att_mata_det_som_gar_att_saga --> n_notes_it_arbetsplatser_i_sundsvall_3_469_enligt_scb_yrkesregistret
   n_notes_konsulter_i_sundsvall_antalet_gar_inte_att_mata_det_som_gar_att_saga --> n_notes_marknadslage_panel_hogst_upp_pa_personer_i_pappa
   n_notes_konsulter_vs_anstallda_i_sundsvall_halva_it_styrkan_sitter_i_konsultnara_bolag --> n_notes_it_arbetsplatser_i_sundsvall_3_469_enligt_scb_yrkesregistret
@@ -785,6 +802,8 @@ graph LR
   n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection --> n_notes_qbittorrent_ar_standardhanterare_for_torrent_och_magnet_lankar
   n_notes_prioriteringsordningen_pa_now_sparades_inte_bulk_update_och_spar_ko --> n_notes_sortering_av_grundmal_pa_goals_med_piltangenterna
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat --> n_notes_mal_kan_ha_due_datum_deadline
+  n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_entities_kubernetes
+  n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_notes_klustret_har_byggts_om_bara_kube_system_flux_och_appar_saknas_2026_11_23
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_entities_pxe_server
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_notes_recovery_av_en_rock_worker_kraver_fysisk_rattning_esp_filen_pa_emmc_fangar_booten
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text --> n_entities_pxe_server
@@ -878,6 +897,7 @@ graph LR
   n_notes_skogsduvan_elementet_styrs_av_minsta_temperaturen_fail_open --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
   n_notes_skogsduvan_fyra_shelly_enheter_svarar_inte_pa_natet --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
   n_notes_skogsduvan_larm_nar_sensorer_shelly_enheter_faller_ur_online --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
+  n_notes_skogsduvan_ssh_via_duckdns_fungerar_port_22_forwardad_2026_11_02 --> n_entities_home_assistant
   n_notes_skogsduvan_ssh_via_duckdns_fungerar_port_22_forwardad_2026_11_02 --> n_notes_twingate_anslutaren_for_10_10_10_0_24_var_nere_recovery_floden_kan_inte_koras_fran_arbetsstationen
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen --> n_notes_skogsduvan_larm_nar_sensorer_shelly_enheter_faller_ur_online
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen --> n_notes_skogsduvan_ssh_via_duckdns_fungerar_port_22_forwardad_2026_11_02
@@ -1036,13 +1056,15 @@ graph LR
 - **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
 - **entities/flux-gitops** <- [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/sops]], [[entities/kubernetes]], [[entities/talos-linux]], [[summaries/flux-components]]
 - **entities/hdmi-kvm-switch-16-port-labbet** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
-- **entities/kubernetes** <- [[concepts/authentik]], [[concepts/cert-manager]], [[concepts/cloudflare-tunnel]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/kube-prometheus]], [[concepts/kubelet-csr-approver]], [[concepts/kyverno-cel]], [[concepts/kyverno-policies]], [[concepts/longhorn]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/sops]], [[concepts/zitadel]], [[entities/flux-gitops]], [[entities/pxe-server]], [[entities/talos-linux]], [[summaries/flux-components]]
+- **entities/home-assistant** <- [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]], [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]], [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]], [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]]
+- **entities/kubernetes** <- [[concepts/authentik]], [[concepts/cert-manager]], [[concepts/cloudflare-tunnel]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/kube-prometheus]], [[concepts/kubelet-csr-approver]], [[concepts/kyverno-cel]], [[concepts/kyverno-policies]], [[concepts/longhorn]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/sops]], [[concepts/zitadel]], [[entities/flux-gitops]], [[entities/pxe-server]], [[entities/talos-linux]], [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]], [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]], [[summaries/flux-components]]
 - **entities/pxe-server** <- [[entities/kubernetes]], [[entities/talos-linux]], [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]], [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]], [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]], [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]], [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]], [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]], [[notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran]], [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]], [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]], [[notes/pxe-kedjan-dhcp-boot-pekar-pa-textskript-matchbox-efi-ar-uefi-vagen]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/pxe-status-fungerar-i-produktionsklustret-tftp-svarar-inte-fran-pod-natet]], [[notes/pxe-status-pa-dashboard-startsidan-tftp-gar-inte-att-kontrollera-fran-pod-natet]], [[notes/pxe-varden-korde-foraldrad-matchbox-nodconfiger-saknades-404]], [[notes/rk3399-s-bootrom-soker-spi-emmc-sd-usb-hardkodat]], [[notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc]], [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]], [[notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-2026-01-rock-4c-saknar-bootfile-boot-script-dhcp-natverksboot-dor-direkt]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/u-boot-kors-en-gang-boot-targets-styr-steg-2-inte-steg-1]], [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]], [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]], [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]], [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]], [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]]
 - **entities/talos-linux** <- [[concepts/cert-manager]], [[concepts/kubelet-csr-approver]], [[concepts/longhorn]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/pxe-server]], [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[summaries/longhorn-disk-guide]]
 - **notes/accuracy-fel-omstart** <- [[notes/session-livscykel]]
 - **notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t** <- [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]]
 - **notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev** <- [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]]
 - **notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876** <- [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]]
+- **notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet** <- [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]]
 - **notes/agents-repot-arkiverat-och-mergens-mal-kompletterade** <- [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]]
 - **notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay** <- [[notes/utvecklingsflode]]
 - **notes/arkitektur** <- [[notes/bigram-algoritmen]], [[notes/konventioner]], [[notes/session-livscykel]], [[notes/utvecklingsflode]]
@@ -1055,6 +1077,7 @@ graph LR
 - **notes/bigram-algoritmen** <- [[notes/arkitektur]], [[notes/wordlist-kallor]]
 - **notes/boka-enskild-kommunbokning-i-matchi-fran-bookings** <- [[notes/matchi-bokning-slot-id-andras-nar-bokningen-skapas]]
 - **notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar** <- [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]]
+- **notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt** <- [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]]
 - **notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
 - **notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11** <- [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]], [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]]
 - **notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad** <- [[entities/pxe-server]]
@@ -1075,7 +1098,10 @@ graph LR
 - **notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode** <- [[entities/pxe-server]], [[notes/radxa-bradena-behover-bootmedium-men-talos-och-bootloader-maste-ligga-pa-skilda-medium]]
 - **notes/gron-markering-av-tider-som-ar-bokade-i-matchi-skrivlasande-jamforelse** <- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]]
 - **notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
+- **notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter** <- [[entities/home-assistant]]
+- **notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas** <- [[entities/home-assistant]]
 - **notes/handelsen-har-ingen-egen-farg** <- [[notes/flera-kalendrar-med-egna-farger-i-plan]]
+- **notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon** <- [[entities/home-assistant]]
 - **notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/imap-inloggning-for-michael-brundin-soulmate-se-kraver-admin-consent** <- [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]]
 - **notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter** <- [[notes/kunskaps-wiki]]
@@ -1095,7 +1121,7 @@ graph LR
 - **notes/kanata-switch-session-tmuxinator-fonster-oppnades-inte** <- [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]]
 - **notes/kandidatlistan-heter-nu-personer** <- [[notes/nuxt-sidomeny-kandidater-som-startsida-i-pappa]]
 - **notes/klustret-anvander-sops-via-flux-inte-vault-eso** <- [[concepts/sops]], [[entities/kubernetes]]
-- **notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23** <- [[entities/kubernetes]]
+- **notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23** <- [[entities/kubernetes]], [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]]
 - **notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga** <- [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]]
 - **notes/konventioner** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image** <- [[entities/pxe-server]]
@@ -1187,6 +1213,7 @@ graph LR
 - **notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection** <- [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]]
 - **notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko** <- [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
 - **notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
+- **notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte** <- [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]]
 - **notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode** <- [[entities/pxe-server]]
 - **notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text** <- [[entities/pxe-server]]
 - **notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc** <- [[entities/pxe-server]]
@@ -1236,9 +1263,9 @@ graph LR
 - **notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
 - **notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet** <- [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
-- **notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
+- **notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02** <- [[entities/home-assistant]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
 - **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
-- **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
+- **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
 - **notes/sortering-av-grundmal-pa-goals-med-piltangenterna** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]]
 - **notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan** <- [[notes/barnordning-foljer-beroenden-i-malsidan]], [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]], [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
