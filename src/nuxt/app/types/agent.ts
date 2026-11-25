@@ -6,13 +6,17 @@ export type AgentRunPhase =
   | 'verify'
   | 'completed';
 
-// Agentkörningens tillstånd. "blocked" betyder att agenten väntar på
+// Agentkörningens tillstånd. "waiting_approval" betyder att agenten väntar på
 // människan - till exempel ett godkännande.
+//
+// Namnen är de som Plan API:t använder. De definieras i
+// src/go/internal/models/agent_run.go och läses från
+// GET /api/v1/agent-run-lifecycle.
 export type AgentRunStatus =
   | 'queued'
   | 'running'
-  | 'blocked'
-  | 'done'
+  | 'waiting_approval'
+  | 'succeeded'
   | 'failed'
   | 'cancelled';
 

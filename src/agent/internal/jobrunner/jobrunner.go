@@ -19,6 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
+	"plan-agent/internal/planclient"
 	"plan-agent/internal/profile"
 )
 
@@ -487,7 +488,7 @@ func JobStatus(job *batchv1.Job) string {
 
 	switch {
 	case job.Status.Succeeded > 0:
-		return "done"
+		return planclient.RunStatusSucceeded
 	case job.Status.Failed > 0:
 		return "failed"
 	case job.Status.Active > 0:

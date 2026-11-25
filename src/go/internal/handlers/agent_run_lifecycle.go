@@ -25,11 +25,11 @@ type AgentRunLifecycle struct {
 	// Phases är faser i den ordning de sker.
 	Phases []string `json:"phases" example:"define,plan,execute,verify,completed"`
 	// Status är de tillstånd en körning kan ha.
-	Status []string `json:"status" example:"queued,running,blocked,done,failed,cancelled"`
+	Status []string `json:"status" example:"queued,running,waiting_approval,succeeded,failed,cancelled"`
 	// Terminal är de tillstånd en körning inte kan lämna.
 	Terminal []string `json:"terminal" example:"done,failed,cancelled"`
 	// NeedsHuman är de tillstånd där en människa måste agera.
-	NeedsHuman []string `json:"needs_human" example:"blocked"`
+	NeedsHuman []string `json:"needs_human" example:"waiting_approval"`
 	// Transitions visar vilka tillstånd ett tillstånd får övergå till.
 	Transitions map[string][]string `json:"transitions"`
 }

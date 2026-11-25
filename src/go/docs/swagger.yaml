@@ -32,7 +32,7 @@ definitions:
       needs_human:
         description: NeedsHuman är de tillstånd där en människa måste agera.
         example:
-        - blocked
+        - waiting_approval
         items:
           type: string
         type: array
@@ -52,8 +52,8 @@ definitions:
         example:
         - queued
         - running
-        - blocked
-        - done
+        - waiting_approval
+        - succeeded
         - failed
         - cancelled
         items:

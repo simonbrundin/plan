@@ -194,19 +194,20 @@ Tillstånd:
 
 | Tillstånd | Betyder | Kan gå till |
 | --- | --- | --- |
-| `queued` | Plan har accepterat körningen, jobbet har inte startat | `running`, `blocked`, `done`, `failed`, `cancelled` |
-| `running` | jobbet kör och agenten arbetar | `blocked`, `done`, `failed`, `cancelled` |
-| `blocked` | agenten väntar på en människa - till exempel ett godkännande | `queued`, `running`, `done`, `failed`, `cancelled` |
-| `done` | körningen lyckades | terminalt |
+| `queued` | Plan har accepterat körningen, jobbet har inte startat | `running`, `waiting_approval`, `succeeded`, `failed`, `cancelled` |
+| `running` | jobbet kör och agenten arbetar | `waiting_approval`, `succeeded`, `failed`, `cancelled` |
+| `waiting_approval` | agenten väntar på en människa - till exempel ett godkännande | `queued`, `running`, `succeeded`, `failed`, `cancelled` |
+| `succeeded` | körningen lyckades | terminalt |
 | `failed` | körningen misslyckades | terminalt |
 | `cancelled` | körningen avbröts | terminalt |
 
 Reglerna är: en körning får alltid avbrytas, en terminal körning får inte
 återupplivas, och fasen får aldrig gå bakåt.
 
-**Namnen ändras inte utan migrering.** `done` - inte `succeeded` - och `blocked`
-- inte `waiting_approval`. Skälet är att värdena redan ligger i databasen, i
-API-svar och i gränssnittet; ett nytt namn utan migrering ger två sanningar.
+**Namnen ändras inte utan migrering.** De ligger i databasen, i API-svar och i
+gränssnittet - ett nytt namn utan migrering ger två sanningar. 2026-11-25 byttes
+`blocked` till `waiting_approval` och `done` till `succeeded`; migreringen sker
+idempotent i `src/go/internal/database/db.go` vid uppstart.
 
 ## Checkpoint-orchestratorn
 

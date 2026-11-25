@@ -90,9 +90,9 @@ const reject = async () => {
         <span
           v-if="run"
           class="text-xs px-2 py-0.5 rounded-full border"
-          :class="run.status === 'blocked' ? 'text-amber-300 border-amber-500/40 bg-amber-500/10' : 'text-ink-dim border-line bg-surface-2'"
+          :class="run.status === 'waiting_approval' ? 'text-amber-300 border-amber-500/40 bg-amber-500/10' : 'text-ink-dim border-line bg-surface-2'"
         >
-          {{ run.status === 'blocked' ? 'Väntar på dig' : run.phase }}
+          {{ run.status === 'waiting_approval' ? 'Väntar på dig' : run.phase }}
         </span>
       </div>
       <button

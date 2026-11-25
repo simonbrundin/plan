@@ -27,11 +27,11 @@ const (
 	PhaseVerify    = "verify"
 	PhaseCompleted = "completed"
 
-	StatusRunning = "running"
-	StatusDone    = "done"
-	StatusFailed  = "failed"
-	// StatusBlocked betyder att körningen väntar på en människa.
-	StatusBlocked = "blocked"
+	StatusRunning   = "running"
+	StatusSucceeded = "succeeded"
+	StatusFailed    = "failed"
+	// StatusWaitingApproval betyder att körningen väntar på en människa.
+	StatusWaitingApproval = "waiting_approval"
 	// StatusQueued betyder att körningen väntar på att få ett Job.
 	StatusQueued = "queued"
 	// StatusCancelled betyder att en människa avbröt körningen.
@@ -258,7 +258,7 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 
 		// Ett mål som väntar på ett mänskligt beslut ska återupptas så
 		// snart beslutet är fattat.
-		if hasRun && w.codeRunner != nil && run.Status == StatusBlocked {
+		if hasRun && w.codeRunner != nil && run.Status == StatusWaitingApproval {
 			if err := w.codeRunner.Process(ctx, run, goal); err != nil {
 				log.Printf("Failed to resume goal #%d: %v", goal.ID, err)
 			}
@@ -355,7 +355,7 @@ func (w *Worker) goalRunDone(ctx context.Context, goalID int64) (bool, error) {
 		return false, nil
 	}
 
-	return latest.Status == StatusDone, nil
+	return latest.Status == StatusSucceeded, nil
 }
 
 // runQueued tar över en köad körning och utför arbetet i den.
@@ -418,7 +418,7 @@ func (w *Worker) isFinished(goal planclient.Goal, run planclient.AgentRun, hasRu
 	}
 	// En misslyckad körning är inte färdig - jobbet ska inte avslutas
 	// innan en människa eller en ny körning tagit ställning till felet.
-	if run.Status != StatusDone {
+	if run.Status != StatusSucceeded {
 		return false
 	}
 
@@ -441,7 +441,7 @@ func (w *Worker) isFinished(goal planclient.Goal, run planclient.AgentRun, hasRu
 // Profilen säger vad som är tillåtet - körningen ska inte lämnas öppen
 // bara för att profilen förbjuder det steget.
 func (w *Worker) closeRunWithoutChanges(ctx context.Context, goal planclient.Goal, run planclient.AgentRun) error {
-	status := StatusDone
+	status := StatusSucceeded
 	summary := fmt.Sprintf("Profilen %s får inte ändra kod - körningen avslutades utan ändringar", w.profile)
 	finishedAt := time.Now().UTC()
 
@@ -579,7 +579,7 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 		Type:  planclient.EventPhaseChanged,
 		Phase: PhasePlan,
 		Payload: map[string]any{
-			"status": StatusDone,
+			"status": StatusSucceeded,
 		},
 	})
 
@@ -593,7 +593,7 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 		return nil
 	}
 
-	status := StatusDone
+	status := StatusSucceeded
 	summary := definition.Description
 	result := "Målet definierat och flyttat till plan"
 	finishedAt := time.Now().UTC()

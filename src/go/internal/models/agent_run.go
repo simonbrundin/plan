@@ -17,19 +17,18 @@ const (
 	AgentRunPhaseComplete = "completed"
 )
 
-// Agentkörningens tillstånd. "blocked" betyder att agenten väntar på
+// Agentkörningens tillstånd. "waiting_approval" betyder att agenten väntar på
 // människan - till exempel ett godkännande.
 //
 // Namnen är de som används i databasen, i API:t och i gränssnittet. De
-// byts inte ut utan en migrering: "done" och inte "succeeded", "blocked"
-// och inte "waiting_approval".
+// byts inte ut utan en migrering.
 const (
-	AgentRunStatusQueued    = "queued"
-	AgentRunStatusRunning   = "running"
-	AgentRunStatusBlocked   = "blocked"
-	AgentRunStatusDone      = "done"
-	AgentRunStatusFailed    = "failed"
-	AgentRunStatusCancelled = "cancelled"
+	AgentRunStatusQueued          = "queued"
+	AgentRunStatusRunning         = "running"
+	AgentRunStatusWaitingApproval = "waiting_approval"
+	AgentRunStatusSucceeded       = "succeeded"
+	AgentRunStatusFailed          = "failed"
+	AgentRunStatusCancelled       = "cancelled"
 )
 
 // AgentRunPhases är den kanoniska listan över faser. Den är källan för
@@ -48,8 +47,8 @@ var AgentRunPhases = []string{
 var AgentRunStatuses = []string{
 	AgentRunStatusQueued,
 	AgentRunStatusRunning,
-	AgentRunStatusBlocked,
-	AgentRunStatusDone,
+	AgentRunStatusWaitingApproval,
+	AgentRunStatusSucceeded,
 	AgentRunStatusFailed,
 	AgentRunStatusCancelled,
 }
@@ -63,25 +62,25 @@ var AgentRunStatuses = []string{
 var agentRunStatusTransitions = map[string][]string{
 	AgentRunStatusQueued: {
 		AgentRunStatusRunning,
-		AgentRunStatusBlocked,
-		AgentRunStatusDone,
+		AgentRunStatusWaitingApproval,
+		AgentRunStatusSucceeded,
 		AgentRunStatusFailed,
 		AgentRunStatusCancelled,
 	},
 	AgentRunStatusRunning: {
-		AgentRunStatusBlocked,
-		AgentRunStatusDone,
+		AgentRunStatusWaitingApproval,
+		AgentRunStatusSucceeded,
 		AgentRunStatusFailed,
 		AgentRunStatusCancelled,
 	},
-	AgentRunStatusBlocked: {
+	AgentRunStatusWaitingApproval: {
 		AgentRunStatusQueued,
 		AgentRunStatusRunning,
-		AgentRunStatusDone,
+		AgentRunStatusSucceeded,
 		AgentRunStatusFailed,
 		AgentRunStatusCancelled,
 	},
-	AgentRunStatusDone:      {},
+	AgentRunStatusSucceeded: {},
 	AgentRunStatusFailed:    {},
 	AgentRunStatusCancelled: {},
 }
@@ -99,7 +98,7 @@ func AgentRunStatusTransitions() map[string][]string {
 // exempel ett godkännande. Det är skillnaden mot "running": agenten gör
 // ingenting förrän människan svarar.
 func AgentRunStatusNeedsHuman(status string) bool {
-	return status == AgentRunStatusBlocked
+	return status == AgentRunStatusWaitingApproval
 }
 
 // Agentprofiler - vilken typ av agent som utförde körningen.
@@ -262,7 +261,7 @@ func ValidateAgentRunStatus(status string) error {
 // IsTerminalAgentRunStatus berättar om en körning är slut - då ska den
 // inte kunna återupplivas och den får en sluttid.
 func IsTerminalAgentRunStatus(status string) bool {
-	return status == AgentRunStatusDone || status == AgentRunStatusFailed ||
+	return status == AgentRunStatusSucceeded || status == AgentRunStatusFailed ||
 		status == AgentRunStatusCancelled
 }
 

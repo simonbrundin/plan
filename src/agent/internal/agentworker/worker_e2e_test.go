@@ -64,7 +64,7 @@ func TestRunOnceDefinesGoalEndToEnd(t *testing.T) {
 				t.Errorf("decode agent run update: %v", err)
 			}
 			if request.Status != nil {
-				updatedRun = *request.Status == StatusDone
+				updatedRun = *request.Status == StatusSucceeded
 			}
 			if request.Phase != nil {
 				updatedPhase = updatedPhase && *request.Phase == PhasePlan
@@ -180,7 +180,7 @@ func TestRunOnceÅterupptarBlockeradKörning(t *testing.T) {
 			})
 		case "GET /api/v1/agent-runs":
 			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{{
-				ID: 7, GoalID: 42, Phase: PhasePlan, Status: StatusBlocked,
+				ID: 7, GoalID: 42, Phase: PhasePlan, Status: StatusWaitingApproval,
 			}})
 		default:
 			http.NotFound(w, r)
@@ -329,8 +329,8 @@ func TestLivsprofilenAvslutarKörningenUtanÄndringar(t *testing.T) {
 		t.Fatalf("RunOnce: %v", err)
 	}
 
-	if updated.Status == nil || *updated.Status != StatusDone {
-		t.Errorf("körningens status = %v, vill ha %s", updated.Status, StatusDone)
+	if updated.Status == nil || *updated.Status != StatusSucceeded {
+		t.Errorf("körningens status = %v, vill ha %s", updated.Status, StatusSucceeded)
 	}
 
 	// Historiken ska visa att körningen startade och avslutades.
@@ -485,7 +485,7 @@ func TestJobbetAvslutasNärKörningenÄrKlar(t *testing.T) {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/agent-runs":
 			// Den senaste körningen är klar.
 			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{
-				{ID: 10, GoalID: 42, Phase: PhasePlan, Status: StatusDone},
+				{ID: 10, GoalID: 42, Phase: PhasePlan, Status: StatusSucceeded},
 			})
 		default:
 			http.NotFound(w, r)

@@ -36,12 +36,12 @@ type Goal struct {
 
 // Körningens tillstånd - de ägs av Plan, agenten läser dem.
 const (
-	RunStatusQueued    = "queued"
-	RunStatusRunning   = "running"
-	RunStatusBlocked   = "blocked"
-	RunStatusDone      = "done"
-	RunStatusFailed    = "failed"
-	RunStatusCancelled = "cancelled"
+	RunStatusQueued          = "queued"
+	RunStatusRunning         = "running"
+	RunStatusWaitingApproval = "waiting_approval"
+	RunStatusSucceeded       = "succeeded"
+	RunStatusFailed          = "failed"
+	RunStatusCancelled       = "cancelled"
 )
 
 // AgentRun is an agent run registered in Plan

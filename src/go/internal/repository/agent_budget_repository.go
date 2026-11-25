@@ -161,7 +161,7 @@ func budgetStatus(ctx context.Context, q querier, userID int64, budget models.Ag
 		FROM agent_runs ar
 		INNER JOIN user_goals ug ON ug.goal_id = ar.goal_id
 		WHERE ug.user_id = $1
-			AND ar.status IN ('queued', 'running', 'blocked')
+			AND ar.status IN ('queued', 'running', 'waiting_approval')
 			AND ar.reserved_cost_usd > 0
 			AND ($2 = '' OR ar.agent_id = $2 OR ar.agent_id = '')`,
 		userID, budget.AgentID).Scan(&reserved)

@@ -157,7 +157,7 @@ func (h *ApprovalHandler) approve(c *gin.Context, goalID int64, approval *approv
 		log.Printf("Goal %d approved, status -> plan", goalID)
 
 		// Mark the agent run as done so Plan shows the decision.
-		h.markRun(c, goalID, approval, "plan", "done")
+		h.markRun(c, goalID, approval, "plan", planclient.RunStatusSucceeded)
 	}
 
 	h.recordDecision(c, goalID, "approve", feedbackOf(approval))

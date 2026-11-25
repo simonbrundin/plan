@@ -34,6 +34,16 @@ func Connect(ctx context.Context) error {
 		return fmt.Errorf("unable to ensure api key scope column: %w", err)
 	}
 
+	// Agentkörningarnas tillstånd har bytt namn: "blocked" heter nu
+	// "waiting_approval" och "done" heter nu "succeeded". Körningen är
+	// idempotent - gamla värden finns inte kvar efter första körningen.
+	if _, err := pool.Exec(ctx, `
+		UPDATE agent_runs SET status = 'waiting_approval' WHERE status = 'blocked';
+		UPDATE agent_runs SET status = 'succeeded' WHERE status = 'done';
+	`); err != nil {
+		return fmt.Errorf("unable to migrate agent run statuses: %w", err)
+	}
+
 	if _, err := pool.Exec(ctx, `
 		ALTER TABLE agent_runs ADD COLUMN IF NOT EXISTS trigger VARCHAR(16) NOT NULL DEFAULT 'user';
 		ALTER TABLE agent_runs ADD COLUMN IF NOT EXISTS initiator TEXT NOT NULL DEFAULT '';

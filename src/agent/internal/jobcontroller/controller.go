@@ -159,7 +159,7 @@ func (c *Controller) reportFailure(ctx context.Context, run planclient.AgentRun,
 	if job == nil || job.Status.Failed == 0 {
 		return nil
 	}
-	if run.Status == "failed" || run.Status == "done" {
+	if run.Status == planclient.RunStatusFailed || run.Status == planclient.RunStatusSucceeded {
 		return nil
 	}
 

@@ -193,7 +193,7 @@ func TestProposeVäntarPåGodkännande(t *testing.T) {
 		t.Fatal("körningen uppdaterades inte")
 	}
 	last := state.updatedRuns[len(state.updatedRuns)-1]
-	if last.Status == nil || *last.Status != "blocked" {
+	if last.Status == nil || *last.Status != planclient.RunStatusWaitingApproval {
 		t.Errorf("status = %v, vill ha blocked", last.Status)
 	}
 }

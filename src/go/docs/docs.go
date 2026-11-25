@@ -3741,7 +3741,7 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "example": [
-                        "blocked"
+                        "waiting_approval"
                     ]
                 },
                 "phases": {
@@ -3767,8 +3767,8 @@ const docTemplate = `{
                     "example": [
                         "queued",
                         "running",
-                        "blocked",
-                        "done",
+                        "waiting_approval",
+                        "succeeded",
                         "failed",
                         "cancelled"
                     ]

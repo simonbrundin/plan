@@ -9,6 +9,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"plan-agent/internal/planclient"
 )
 
 // testConfig ger en config med en angiven image.
@@ -242,7 +244,7 @@ func TestStatusÖversätterJobbetsUtfall(t *testing.T) {
 		{
 			name:   "klar",
 			job:    &batchv1.Job{Status: batchv1.JobStatus{Succeeded: 1}},
-			status: "done",
+			status: planclient.RunStatusSucceeded,
 		},
 		{
 			name:   "misslyckad",

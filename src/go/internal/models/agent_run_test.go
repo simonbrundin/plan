@@ -80,7 +80,7 @@ func TestVarjeKörningKanAvbrytas(t *testing.T) {
 	for _, current := range []string{
 		AgentRunStatusQueued,
 		AgentRunStatusRunning,
-		AgentRunStatusBlocked,
+		AgentRunStatusWaitingApproval,
 	} {
 		run := AgentRun{Phase: AgentRunPhasePlan, Status: current}
 		if err := ValidateAgentRunTransition(run, UpdateAgentRunRequest{Status: &cancelled}); err != nil {
@@ -89,17 +89,18 @@ func TestVarjeKörningKanAvbrytas(t *testing.T) {
 	}
 }
 
-// TestBlockedVäntarPåMänniska kontrollerar skillnaden mellan "blocked" och
-// "running" - blocked är det tillstånd där en människa måste agera.
-func TestBlockedVäntarPåMänniska(t *testing.T) {
-	if !AgentRunStatusNeedsHuman(AgentRunStatusBlocked) {
-		t.Error("blocked ska kräva en människa")
+// TestWaitingApprovalVäntarPåMänniska kontrollerar skillnaden mellan
+// "waiting_approval" och "running" - waiting_approval är det tillstånd där en
+// människa måste agera.
+func TestWaitingApprovalVäntarPåMänniska(t *testing.T) {
+	if !AgentRunStatusNeedsHuman(AgentRunStatusWaitingApproval) {
+		t.Error("waiting_approval ska kräva en människa")
 	}
 
 	for _, status := range []string{
 		AgentRunStatusQueued,
 		AgentRunStatusRunning,
-		AgentRunStatusDone,
+		AgentRunStatusSucceeded,
 		AgentRunStatusFailed,
 		AgentRunStatusCancelled,
 	} {
@@ -108,8 +109,8 @@ func TestBlockedVäntarPåMänniska(t *testing.T) {
 		}
 	}
 
-	if IsTerminalAgentRunStatus(AgentRunStatusBlocked) {
-		t.Error("blocked är inte terminalt - en körning kan återupptas")
+	if IsTerminalAgentRunStatus(AgentRunStatusWaitingApproval) {
+		t.Error("waiting_approval är inte terminalt - en körning kan återupptas")
 	}
 }
 
@@ -118,10 +119,10 @@ func TestBlockedVäntarPåMänniska(t *testing.T) {
 // värdet.
 func TestAgentRunStatusTransitionsReturnerarKopia(t *testing.T) {
 	transitions := AgentRunStatusTransitions()
-	transitions[AgentRunStatusQueued] = []string{AgentRunStatusDone}
+	transitions[AgentRunStatusQueued] = []string{AgentRunStatusSucceeded}
 
-	if slices.Contains(AgentRunStatusTransitions()[AgentRunStatusQueued], AgentRunStatusDone) &&
-		!slices.Contains(agentRunStatusTransitions[AgentRunStatusQueued], AgentRunStatusDone) {
+	if slices.Contains(AgentRunStatusTransitions()[AgentRunStatusQueued], AgentRunStatusSucceeded) &&
+		!slices.Contains(agentRunStatusTransitions[AgentRunStatusQueued], AgentRunStatusSucceeded) {
 		t.Fatal("den kanoniska tabellen ska inte kunna ändras utifrån")
 	}
 }
@@ -141,7 +142,7 @@ func TestValidAgentRunPhase(t *testing.T) {
 		}
 	}
 
-	invalid := []string{"", "kokar", "Define", "done"}
+	invalid := []string{"", "kokar", "Define", "succeeded"}
 	for _, phase := range invalid {
 		if ValidAgentRunPhase(phase) {
 			t.Errorf("fasen %q ska inte vara giltig", phase)
@@ -154,8 +155,8 @@ func TestValidAgentRunStatus(t *testing.T) {
 	valid := []string{
 		AgentRunStatusQueued,
 		AgentRunStatusRunning,
-		AgentRunStatusBlocked,
-		AgentRunStatusDone,
+		AgentRunStatusWaitingApproval,
+		AgentRunStatusSucceeded,
 		AgentRunStatusFailed,
 		AgentRunStatusCancelled,
 	}
@@ -215,7 +216,7 @@ func TestValidateAgentRunTriggerReturnerarFel(t *testing.T) {
 // TestValidateAgentRunStatusReturnerarFel kontrollerar att ett okänt
 // tillstånd ger ett fel.
 func TestValidateAgentRunStatusReturnerarFel(t *testing.T) {
-	if err := ValidateAgentRunStatus(AgentRunStatusBlocked); err != nil {
+	if err := ValidateAgentRunStatus(AgentRunStatusWaitingApproval); err != nil {
 		t.Errorf("giltigt tillstånd ska inte ge fel: %v", err)
 	}
 	if err := ValidateAgentRunStatus("unknown"); err == nil {
@@ -225,7 +226,7 @@ func TestValidateAgentRunStatusReturnerarFel(t *testing.T) {
 
 func TestValidateAgentRunTransitionTillaterLivscykel(t *testing.T) {
 	phase := AgentRunPhasePlan
-	status := AgentRunStatusDone
+	status := AgentRunStatusSucceeded
 	current := AgentRun{Phase: AgentRunPhaseDefine, Status: AgentRunStatusRunning}
 
 	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Phase: &phase, Status: &status}); err != nil {
@@ -244,7 +245,7 @@ func TestValidateAgentRunTransitionStopparBakåtgång(t *testing.T) {
 
 func TestValidateAgentRunTransitionStopparTerminalRun(t *testing.T) {
 	status := AgentRunStatusRunning
-	current := AgentRun{Phase: AgentRunPhasePlan, Status: AgentRunStatusDone}
+	current := AgentRun{Phase: AgentRunPhasePlan, Status: AgentRunStatusSucceeded}
 
 	if err := ValidateAgentRunTransition(current, UpdateAgentRunRequest{Status: &status}); err == nil {
 		t.Fatal("en avslutad körning ska inte kunna återupplivas")
@@ -260,7 +261,7 @@ func TestValidateAgentRunTransitionTillaterAvbrytning(t *testing.T) {
 	for _, current := range []string{
 		AgentRunStatusQueued,
 		AgentRunStatusRunning,
-		AgentRunStatusBlocked,
+		AgentRunStatusWaitingApproval,
 	} {
 		run := AgentRun{Phase: AgentRunPhasePlan, Status: current}
 		if err := ValidateAgentRunTransition(run, UpdateAgentRunRequest{Status: &cancelled}); err != nil {

@@ -207,7 +207,7 @@ func (c *Coder) propose(ctx context.Context, run planclient.AgentRun, goal planc
 	})
 
 	// Körningen väntar på en människa - statusen säger det tydligt.
-	status := "blocked"
+	status := planclient.RunStatusWaitingApproval
 	summary := "Förslag inväntar mänskligt godkännande: " + proposal.Title
 	if _, err := c.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
 		Status:  &status,
@@ -305,7 +305,7 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 		})
 	}
 
-	status := "done"
+	status := planclient.RunStatusSucceeded
 	phase := "verify"
 	resultText := fmt.Sprintf("Ändringen är gjord på branchen %s och testerna gick igenom", result.Branch)
 	if result.Branch == "" {

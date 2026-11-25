@@ -67,7 +67,7 @@ async function decide(decision: 'approve' | 'reject') {
 // Avbryter körningen. Det är ett sätt att stanna - jobbet och podden
 // städas i klustret när jobbcontrollern ser att körningen är avbruten.
 const canCancel = computed(
-  () => props.run?.status === 'running' || props.run?.status === 'blocked',
+  () => props.run?.status === 'running' || props.run?.status === 'waiting_approval',
 );
 
 async function cancel() {

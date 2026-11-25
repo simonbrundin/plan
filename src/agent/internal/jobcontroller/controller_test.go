@@ -183,7 +183,7 @@ func TestReconcileRörInteKlartKörning(t *testing.T) {
 // körning som redan pågår inte får ett nytt jobb.
 func TestReconcileHopparÖverKörningarSomInteÄrKöade(t *testing.T) {
 	state := &planState{
-		runs: []planclient.AgentRun{{ID: 7, GoalID: 42, Status: "done"}},
+		runs: []planclient.AgentRun{{ID: 7, GoalID: 42, Status: planclient.RunStatusSucceeded}},
 	}
 	client := fake.NewSimpleClientset()
 	controller := newController(t, state, client)

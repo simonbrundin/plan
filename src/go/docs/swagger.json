@@ -3739,7 +3739,7 @@
                         "type": "string"
                     },
                     "example": [
-                        "blocked"
+                        "waiting_approval"
                     ]
                 },
                 "phases": {
@@ -3765,8 +3765,8 @@
                     "example": [
                         "queued",
                         "running",
-                        "blocked",
-                        "done",
+                        "waiting_approval",
+                        "succeeded",
                         "failed",
                         "cancelled"
                     ]

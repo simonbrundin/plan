@@ -163,7 +163,7 @@ func (s *Scheduler) processGoal(ctx context.Context, goal planclient.Goal) {
 	log.Printf("Saved pending approval for goal #%d: %s", goal.ID, definition.Title)
 
 	// Förslaget syns i Plan - där tas beslutet. Slack används inte.
-	s.publish(ctx, goal, "blocked", fmt.Sprintf("Förslag: %s\n\n%s", definition.Title, definition.Description))
+	s.publish(ctx, goal, planclient.RunStatusWaitingApproval, fmt.Sprintf("Förslag: %s\n\n%s", definition.Title, definition.Description))
 	s.recordApprovalRequest(ctx, goal, definition.Title)
 }
 

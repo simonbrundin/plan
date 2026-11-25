@@ -48,14 +48,14 @@ func TestValidateAgentRunEventTypeReturnerarFel(t *testing.T) {
 // TestIsTerminalAgentRunStatus kontrollerar vilka tillstånd som avslutar
 // en körning.
 func TestIsTerminalAgentRunStatus(t *testing.T) {
-	terminal := []string{AgentRunStatusDone, AgentRunStatusFailed}
+	terminal := []string{AgentRunStatusSucceeded, AgentRunStatusFailed}
 	for _, status := range terminal {
 		if !IsTerminalAgentRunStatus(status) {
 			t.Errorf("tillståndet %q ska vara terminalt", status)
 		}
 	}
 
-	ongoing := []string{AgentRunStatusQueued, AgentRunStatusRunning, AgentRunStatusBlocked}
+	ongoing := []string{AgentRunStatusQueued, AgentRunStatusRunning, AgentRunStatusWaitingApproval}
 	for _, status := range ongoing {
 		if IsTerminalAgentRunStatus(status) {
 			t.Errorf("tillståndet %q ska inte vara terminalt", status)

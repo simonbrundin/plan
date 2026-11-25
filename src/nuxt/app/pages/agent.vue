@@ -29,8 +29,8 @@ const phaseLabels: Record<AgentRunPhase, string> = {
 const statusLabels: Record<AgentRunStatus, string> = {
   queued: "Väntar",
   running: "Pågår",
-  blocked: "Väntar på dig",
-  done: "Klar",
+  waiting_approval: "Väntar på dig",
+  succeeded: "Klar",
   failed: "Misslyckades",
   cancelled: "Avbruten",
 };
@@ -39,9 +39,9 @@ function statusClasses(status: AgentRunStatus): string {
   switch (status) {
     case "running":
       return "text-sky-300 border-sky-500/40 bg-sky-500/10";
-    case "blocked":
+    case "waiting_approval":
       return "text-amber-300 border-amber-500/40 bg-amber-500/10";
-    case "done":
+    case "succeeded":
       return "text-emerald-300 border-emerald-500/40 bg-emerald-500/10";
     case "failed":
       return "text-red-300 border-red-500/40 bg-red-500/10";
