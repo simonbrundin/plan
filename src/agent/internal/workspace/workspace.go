@@ -6,6 +6,8 @@
 package workspace
 
 import (
+	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -318,6 +320,66 @@ func (w *Workspace) pushBranch(branch string) error {
 		return err
 	}
 	return nil
+}
+
+// CreatePullRequest skapar eller återanvänder en Pull Request för den
+// publicerade branchen. gh körs i den isolerade workspacen, så repository
+// och aktuell branch är entydiga.
+//
+// Om en PR redan finns för samma branch returneras dess URL. Det gör
+// leveransen idempotent vid retries. GIT_AUTH_HEADER kan användas som
+// fallback för GH_TOKEN eftersom samma GitHub-token redan behövs för push.
+func (w *Workspace) CreatePullRequest(ctx context.Context, title, body, base string) (string, error) {
+	branch, err := w.Run("git", "branch", "--show-current")
+	if err != nil {
+		return "", fmt.Errorf("failed to determine pull request branch: %w", err)
+	}
+	branch = strings.TrimSpace(branch)
+	if branch == "" {
+		return "", fmt.Errorf("cannot create pull request without a branch")
+	}
+	if base == "" {
+		base = "main"
+	}
+
+	env := os.Environ()
+	if os.Getenv("GH_TOKEN") == "" && os.Getenv("GITHUB_TOKEN") == "" {
+		if token := tokenFromGitAuthHeader(os.Getenv("GIT_AUTH_HEADER")); token != "" {
+			env = append(env, "GH_TOKEN="+token)
+		}
+	}
+
+	list := exec.CommandContext(ctx, "gh", "pr", "list", "--head", branch, "--base", base, "--state", "all", "--json", "url", "--jq", ".[0].url")
+	list.Dir = w.root
+	list.Env = env
+	if output, err := list.Output(); err == nil && strings.TrimSpace(string(output)) != "" {
+		return strings.TrimSpace(string(output)), nil
+	}
+
+	create := exec.CommandContext(ctx, "gh", "pr", "create", "--head", branch, "--base", base, "--title", title, "--body", body)
+	create.Dir = w.root
+	create.Env = env
+	output, err := create.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to create pull request: %w: %s", err, strings.TrimSpace(string(output)))
+	}
+	return strings.TrimSpace(string(output)), nil
+}
+
+func tokenFromGitAuthHeader(header string) string {
+	const prefix = "Authorization: Basic "
+	if !strings.HasPrefix(header, prefix) {
+		return ""
+	}
+	decoded, err := base64.StdEncoding.DecodeString(strings.TrimSpace(strings.TrimPrefix(header, prefix)))
+	if err != nil {
+		return ""
+	}
+	_, token, ok := strings.Cut(string(decoded), ":")
+	if !ok {
+		return ""
+	}
+	return token
 }
 
 // Cleanup tar bort arbetsytan.

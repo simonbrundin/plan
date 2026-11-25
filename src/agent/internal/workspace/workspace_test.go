@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	"encoding/base64"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -259,6 +260,16 @@ func TestWorkspaceSätterIdentitet(t *testing.T) {
 	}
 	if strings.TrimSpace(email) != "agent@plan.local" {
 		t.Errorf("user.email = %q", email)
+	}
+}
+
+func TestTokenFromGitAuthHeader(t *testing.T) {
+	header := "Authorization: Basic " + base64.StdEncoding.EncodeToString([]byte("x-access-token:secret-token"))
+	if got := tokenFromGitAuthHeader(header); got != "secret-token" {
+		t.Fatalf("token = %q, vill ha secret-token", got)
+	}
+	if got := tokenFromGitAuthHeader("Bearer secret-token"); got != "" {
+		t.Fatalf("felaktig header gav token %q", got)
 	}
 }
 

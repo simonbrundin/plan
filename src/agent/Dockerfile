@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/agent .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/agentworker ./cmd/agentworker
 
 FROM alpine:3.19
-RUN apk add --no-cache ca-certificates bash git python3
+RUN apk add --no-cache ca-certificates bash git github-cli python3
 WORKDIR /app
 
 COPY --from=builder /app/agent ./agent

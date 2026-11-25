@@ -146,6 +146,12 @@ func (e *Executor) Commit(branch, message string) error {
 	return nil
 }
 
+// CreatePullRequest skapar en idempotent Pull Request från den publicerade
+// branchen i den isolerade workspacen.
+func (e *Executor) CreatePullRequest(ctx context.Context, title, body, base string) (string, error) {
+	return e.ws.CreatePullRequest(ctx, title, body, base)
+}
+
 // Cleanup tar bort arbetsytan.
 func (e *Executor) Cleanup() error {
 	return e.ws.Cleanup()

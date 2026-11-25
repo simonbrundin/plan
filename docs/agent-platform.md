@@ -87,7 +87,15 @@ jobben alltid kör exakt den kod som är utbyggd.
 
 `GIT_AUTH_HEADER` ska vara en komplett header, till exempel
 `Authorization: Basic <base64(x-access-token:TOKEN)>`. Hemligheten skapas
-utanför git:
+utanför git. Agent-imagen innehåller även `gh`; efter en lyckad verifiering
+skapar codern en idempotent Pull Request från agent-branchen. Den befintliga
+tokenen i `GIT_AUTH_HEADER` används tillfälligt som `GH_TOKEN` för PR-anropet
+utan att skrivas till git-konfiguration eller loggar.
+
+Om PR:n redan finns för samma branch återanvänds dess URL. Om PR-skapandet
+misslyckas markeras artifact-eventet som failed, men den verifierade branchen
+förblir resultatet så att en människa kan skapa PR:n manuellt.
+
 
 ```bash
 TOKEN=$(gh auth token)

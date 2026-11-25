@@ -281,6 +281,7 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 	// branch att granska. Utan det skulle ett nytt försök krocka med
 	// den förra branchen i repot.
 	branch := fmt.Sprintf("agent/goal-%d-run-%d", goal.ID, run.ID)
+	prURL := ""
 	if err := exec.Commit(branch, commitMessage(goal, result)); err != nil {
 		if !errors.Is(err, workspace.ErrNotPublished) {
 			c.fail(ctx, run.ID, err)
@@ -303,22 +304,52 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 			"kind":   "branch",
 			"branch": branch,
 		})
+
+		prTitle := fmt.Sprintf("Agent: %s", goal.Title)
+		prBody := pullRequestBody(run, goal, result, testCommand)
+		prURL, err = exec.CreatePullRequest(ctx, prTitle, prBody, "main")
+		if err != nil {
+			// En publicerad branch är fortfarande ett användbart resultat.
+			// PR-leveransen rapporteras separat så att en tillfällig gh- eller
+			// GitHub-fel inte döljer att ändringen är verifierad.
+			log.Printf("Goal #%d branch published but PR creation failed: %v", goal.ID, err)
+			c.record(ctx, run.ID, planclient.EventArtifact, map[string]any{
+				"kind":   "pull_request",
+				"status": "failed",
+				"branch": branch,
+				"error":  err.Error(),
+			})
+		} else {
+			c.record(ctx, run.ID, planclient.EventArtifact, map[string]any{
+				"kind":   "pull_request",
+				"status": "created",
+				"branch": branch,
+				"url":    prURL,
+			})
+		}
 	}
 
 	status := planclient.RunStatusSucceeded
 	phase := "verify"
 	resultText := fmt.Sprintf("Ändringen är gjord på branchen %s och testerna gick igenom", result.Branch)
+	if prURL != "" {
+		resultText += fmt.Sprintf(" Pull Request: %s", prURL)
+	}
 	if result.Branch == "" {
 		resultText = "Ändringen är gjord och testerna gick igenom, men branchen kunde inte publiceras"
 	}
 	finishedAt := time.Now().UTC()
-	if _, err := c.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
+	update := planclient.UpdateAgentRunRequest{
 		Status:     &status,
 		Phase:      &phase,
 		Summary:    &resultText,
 		Result:     &resultText,
 		FinishedAt: &finishedAt,
-	}); err != nil {
+	}
+	if prURL != "" {
+		update.ArtifactURL = &prURL
+	}
+	if _, err := c.planClient.UpdateAgentRun(ctx, run.ID, update); err != nil {
 		return fmt.Errorf("failed to update agent run: %w", err)
 	}
 
@@ -336,6 +367,25 @@ func (c *Coder) execute(ctx context.Context, run planclient.AgentRun, goal planc
 
 	log.Printf("Goal #%d executed and verified", goal.ID)
 	return nil
+}
+
+func pullRequestBody(run planclient.AgentRun, goal planclient.Goal, result *executor.Result, testCommand string) string {
+	return fmt.Sprintf(`## AgentRun #%d
+
+Mål: #%d – %s
+
+### Sammanfattning
+Ändringen skapades efter mänskligt godkännande av förslaget och verifierades i den isolerade workspacen.
+
+### Ändrade filer
+%s
+
+### Verifiering
+%s
+
+AgentRun: %d
+Branch: %s
+`, run.ID, goal.ID, goal.Title, strings.Join(result.ChangedFiles, "\n"), testCommand, run.ID, result.Branch)
 }
 
 // startExecuting markerar att körningen börjar utföra den godkända
