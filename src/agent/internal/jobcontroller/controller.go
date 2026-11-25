@@ -25,6 +25,9 @@ type Config struct {
 	PollInterval time.Duration
 	// Namespace är namespace jobben skapas i.
 	Namespace string
+	// MaxConcurrentJobs begränsar hur många agentjobb som får köra samtidigt.
+	// Noll använder standardvärdet fyra.
+	MaxConcurrentJobs int
 }
 
 // Controller håller Plan och Kubernetes i synk.
@@ -45,8 +48,9 @@ func New(planClient *planclient.Client, runner *jobrunner.Runner, config Config)
 		planClient: planClient,
 		runner:     runner,
 		config: Config{
-			PollInterval: interval,
-			Namespace:    config.Namespace,
+			PollInterval:      interval,
+			Namespace:         config.Namespace,
+			MaxConcurrentJobs: maxConcurrentJobs(config.MaxConcurrentJobs),
 		},
 	}
 }
@@ -111,7 +115,16 @@ func (c *Controller) reconcileRun(ctx context.Context, run planclient.AgentRun) 
 
 		// Jobbet finns inte. Bara en köad körning får skapa ett nytt jobb.
 		if run.Status == "queued" {
-			// Ett mål får ha högst ett pågående jobb - två körningar mot
+			activeJobs, err := c.runner.ActiveJobCount(ctx)
+			if err != nil {
+				return err
+			}
+			if activeJobs >= c.config.MaxConcurrentJobs {
+				log.Printf("Job capacity reached (%d) - run %d stays queued", c.config.MaxConcurrentJobs, run.ID)
+				return nil
+			}
+
+			// Ett mål får högst ett pågående jobb - två körningar mot
 			// samma repo skulle skriva över varandra.
 			active, err := c.runner.HasActiveJobForGoal(ctx, run.GoalID, run.ID)
 			if err != nil {
@@ -240,6 +253,13 @@ func (c *Controller) reportFailure(ctx context.Context, run planclient.AgentRun,
 
 	log.Printf("Job %s failed - run %d for goal #%d marked as failed", job.Name, run.ID, run.GoalID)
 	return nil
+}
+
+func maxConcurrentJobs(value int) int {
+	if value <= 0 {
+		return 4
+	}
+	return value
 }
 
 func jobFailed(job *batchv1.Job) bool {

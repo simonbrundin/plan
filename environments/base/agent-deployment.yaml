@@ -61,6 +61,9 @@ spec:
             # Jobbcontrollern skapar Kubernetes Jobs för agentmål.
             - name: AGENT_JOB_CONTROLLER_ENABLED
               value: "true"
+            # Global kapacitet; jobb för olika mål kan köras parallellt.
+            - name: AGENT_JOB_MAX_CONCURRENT
+              value: "4"
             - name: AGENT_JOB_NAMESPACE
               value: "plan"
             # Jobben ska köra exakt samma agent-image som agent-api.

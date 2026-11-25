@@ -50,6 +50,12 @@ Bekräftelsen är en uttrycklig begäran - den gäller även om målet inte är
 markerat som agentmål. Workern hämtar då målet direkt. En begäran får inte
 tappa vägen i något lager, för då står jobbet bara och väntar.
 
+Om en running-körnings Job försvinner markeras körningen som `failed` med ett
+`job_missing`-event i stället för att ett nytt jobb startas med okänd workspace-
+historik. Jobb som överskrider `ActiveDeadlineSeconds` rapporteras också som
+misslyckade. `waiting_approval` lämnas orörd när ett färdigt Job städats bort,
+eftersom human gate fortfarande kan behöva slutföras.
+
 ```text
 Plan-mål
    │
@@ -68,6 +74,8 @@ Jobbet är byggt med säkerhetsgränser:
 - egen ServiceAccount (`plan-agent-worker`) utan Kubernetes-token
 - CPU- och minnesgränser, deadline och TTL
 - `RestartPolicy: Never`
+- global kapacitet via `AGENT_JOB_MAX_CONCURRENT` (standard fyra); jobb för
+  olika mål kan köras parallellt medan samma mål fortfarande serialiseras
 - non-root (UID/GID 65532), read-only root filesystem, droppade capabilities,
   runtime-default seccomp
 - API-, LLM- och Git-hemligheter kommer från Secrets, inte från manifest

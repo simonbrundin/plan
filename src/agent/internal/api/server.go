@@ -317,8 +317,9 @@ func startJobController(ctx context.Context, planClient *planclient.Client) {
 	runner := jobrunner.New(client, jobConfigFromEnv())
 
 	controller := jobcontroller.New(planClient, runner, jobcontroller.Config{
-		PollInterval: jobPollIntervalFromEnv(),
-		Namespace:    os.Getenv("AGENT_JOB_NAMESPACE"),
+		PollInterval:      jobPollIntervalFromEnv(),
+		Namespace:         os.Getenv("AGENT_JOB_NAMESPACE"),
+		MaxConcurrentJobs: jobMaxConcurrentJobsFromEnv(),
 	})
 
 	controller.Run(ctx)
@@ -368,6 +369,21 @@ func jobConfigFromEnv() jobrunner.Config {
 	}
 
 	return config
+}
+
+// jobMaxConcurrentJobsFromEnv läser den globala jobbkapaciteten.
+func jobMaxConcurrentJobsFromEnv() int {
+	raw := os.Getenv("AGENT_JOB_MAX_CONCURRENT")
+	if raw == "" {
+		return 4
+	}
+
+	value, err := strconv.Atoi(raw)
+	if err != nil || value < 1 {
+		log.Printf("Invalid AGENT_JOB_MAX_CONCURRENT %q, using 4", raw)
+		return 4
+	}
+	return value
 }
 
 // jobPollIntervalFromEnv läser hur ofta controllern läser Plan och klustret.

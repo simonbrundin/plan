@@ -196,6 +196,25 @@ func (r *Runner) HasActiveJobForGoal(ctx context.Context, goalID int64, excludeR
 	return false, nil
 }
 
+// ActiveJobCount returnerar antalet jobb som fortfarande kör.
+// Avslutade jobb räknas inte, även om TTL-cleanup ännu inte har hunnit ske.
+func (r *Runner) ActiveJobCount(ctx context.Context) (int, error) {
+	jobs, err := r.client.BatchV1().Jobs(r.config.Namespace).List(ctx, metav1.ListOptions{
+		LabelSelector: "app=agent-worker",
+	})
+	if err != nil {
+		return 0, fmt.Errorf("failed to list active agent jobs: %w", err)
+	}
+
+	active := 0
+	for _, job := range jobs.Items {
+		if job.Status.Succeeded == 0 && job.Status.Failed == 0 {
+			active++
+		}
+	}
+	return active, nil
+}
+
 // Delete tar bort ett jobb och dess pods.
 func (r *Runner) Delete(ctx context.Context, name string) error {
 	propagation := metav1.DeletePropagationForeground

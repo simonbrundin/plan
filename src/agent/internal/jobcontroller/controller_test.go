@@ -282,6 +282,41 @@ func TestReconcileStartarFleraOlikaMålParallellt(t *testing.T) {
 	}
 }
 
+// TestReconcileRespekterarGlobalJobbkapacitet kontrollerar att flera mål
+// kan köra parallellt utan att jobbcontrollern startar obegränsat många jobb.
+func TestReconcileRespekterarGlobalJobbkapacitet(t *testing.T) {
+	state := &planState{runs: []planclient.AgentRun{
+		{ID: 7, GoalID: 42, Status: "queued"},
+		{ID: 8, GoalID: 43, Status: "queued"},
+		{ID: 9, GoalID: 44, Status: "queued"},
+		{ID: 10, GoalID: 45, Status: "queued"},
+		{ID: 11, GoalID: 46, Status: "queued"},
+	}}
+	client := fake.NewSimpleClientset()
+	server := newPlanServer(t, state)
+	t.Setenv("PLAN_API_URL", server.URL)
+	t.Setenv("PLAN_API_KEY", "test-key")
+	planClient, err := planclient.New()
+	if err != nil {
+		t.Fatalf("create Plan API client: %v", err)
+	}
+	controller := New(planClient, jobrunner.New(client, jobrunner.Config{
+		Namespace: "plan",
+		Image:     "plan-agent:test",
+	}), Config{Namespace: "plan", MaxConcurrentJobs: 2})
+
+	if err := controller.Reconcile(context.Background()); err != nil {
+		t.Fatalf("Reconcile: %v", err)
+	}
+	jobs, err := client.BatchV1().Jobs("plan").List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		t.Fatalf("list jobs: %v", err)
+	}
+	if len(jobs.Items) != 2 {
+		t.Fatalf("antal jobb = %d, vill ha 2", len(jobs.Items))
+	}
+}
+
 // TestReconcileStartarEttJobbPerMål kontrollerar att två köade körningar
 // för samma mål inte ger två jobb.
 //
