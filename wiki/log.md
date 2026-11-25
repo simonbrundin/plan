@@ -2590,3 +2590,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 ## [2026-11-24] ingest | create notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog
 ## [2026-11-24] ingest | create notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod
 
+
+## [2026-11-25] ingest | create notes/agents-repot-arkiverat-och-mergens-mal-kompletterade
+- [create] [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] — ny sida från inboxen
+- [create] [[notes/mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan]] — ny sida från inboxen
+- [create] [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] — ny sida från inboxen
+- [archive] 2026-11-25-agents-repot-arkiverat-och-mergens-mal-kompletterade.md
+- [archive] 2026-11-25-mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan.md
+- [archive] 2026-11-25-plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe.md
+## [2026-11-25] ingest | create notes/mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan
+## [2026-11-25] ingest | create notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe
+

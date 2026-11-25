@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 352 |
+| Noter | 355 |
 
 ## Entiteter
 
@@ -66,6 +66,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] - Mål har nu en agent-flagga (goals.agent i databasen) som visas med AgentBadge (blått när på) och växlas med leader + a (mellanslag +... _(uppdaterad 2026-11-20)_
 - [[notes/agentmal-flaggan-blev-levande-mvp]] - Plan hade redan goals.agent men ingen agent läste flaggan. _(uppdaterad 2026-11-24)_
 - [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] - I ~/repos/plan (Fas 4 i mål 497) ligger agentprofilerna i src/agent/internal/profile och är tekniska gränser - inte text i prompten. _(uppdaterad 2026-11-24)_
+- [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] - 2026-11-25: agents-repot är arkiverat och sammanslagningen med plan-repot är helt avslutad. _(uppdaterad 2026-11-25)_
 - [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] - Arbetstationen (datorn jag sitter pa) ar Omarchy, dvs Arch-baserat. _(uppdaterad 2026-10-24)_
 - [[notes/arkitektur]] - TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session. _(uppdaterad 2026-10-21)_
 - [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] - Källa: https://levelup.gitconnected.com/build-an-agentic-software-factory-f995f79221ef (Akshay Kokane, del 3 i AI-Native SWE-serien). _(uppdaterad 2026-11-23)_
@@ -185,6 +186,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/lunchmenyn-delar-en-modell-mellan-byggskript-och-webblasare]] - Hamtningen av matochmat.se ligger nu i src/nuxt/app/utils/lunchSource.ts och anvands av bade scripts/fetch-lunch.ts (byggtid, skriver app... _(uppdaterad 2026-11-06)_
 - [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]] - Efter att Neon-token hamnat i git-historiken i dotfiles (privat repo) roterades nyckeln: gammal nyckel (id 3491077) revokerad via console... _(uppdaterad 2026-11-17)_
 - [[notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24]] - ENDAST Apple-filer (EFI/APPLE/...) - ingen Talos bootloader där. _(uppdaterad 2026-11-24)_
+- [[notes/mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan]] - Tre incidenter 2026-11-24: Mac minin (worker-9, 10.10.10.29) hänger/kraschar när _(uppdaterad 2026-11-25)_
 - [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] - 1. _(uppdaterad 2026-11-24)_
 - [[notes/mailagent-bygget-brot-pa-ofardig-kameo-integration]] - Dockerbygget för mailagent bröt eftersom en pågående Kameo-integration hade lämnat src/go/kameo/client.go med oanvänd os/exec-impor... _(uppdaterad 2026-11-16)_
 - [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]] - När inkorgen hämtas (/mail -> "Hämta mejl") expanderas nu bifogade .eml-filer _(uppdaterad 2026-11-18)_
@@ -256,6 +258,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/pi-durable-demo-paketet-earendil-works-pi-durable-fungerar]] - Pi Durable (Earendils experimentella harness, https://earendil.com/posts/pi-durable/) finns publicerad på npm som @earendil-works/pi-dura... _(uppdaterad 2026-10-23)_
 - [[notes/pi-tog-bort-pi-rate-limit-och-pi-pattern-retry-fixade-omarchy-temasy]] - Ändring 2025-xx-xx i dotfiles-repo, pi-agentens extension-uppsättning: _(uppdaterad 2026-10-23)_
 - [[notes/picokvm-luckfox-startar-inte-i-labbet-lite-saknar-emmc-ingen-poe]] - Köpt Waveshare/Luckfox PicoKVM Lite (Amazon ASIN B0H4G22JG8, 'Luckfox PicoKVM Lite', full-version-hus med 1.54-tums display men UTAN eMMC). _(uppdaterad 2026-11-17)_
+- [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] - Symtom: /goals i plan visade "Fel vid laddning av mål: [GET] \"/api/proxy/goals\": 503 Service Unavailable". _(uppdaterad 2026-11-25)_
 - [[notes/plan-api-anvander-scalar-for-openapi]] - Plan API bytte från gin-swagger till samma Scalar-upplägg som repo-template. _(uppdaterad 2026-11-17)_
 - [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] - Projekt: plan _(uppdaterad 2026-11-16)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_

@@ -37,6 +37,7 @@ graph LR
   n_notes_agentmal_flaggan_blev_levande_mvp["Agentmål: flaggan blev levande (MVP)"]
   n_notes_agentmarke_pa_mal_tangenten_a_ar_reserverad["Agentmärke på mål - tangenten a är reserverad"]
   n_notes_agentprofiler_som_teknisk_policy_utanfor_prompten["Agentprofiler som teknisk policy utanför prompten"]
+  n_notes_agents_repot_arkiverat_och_mergens_mal_kompletterade["Agents-repot arkiverat och mergens mål kompletterade"]
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay["Arbetsstationen ar Omarchy/Arch - apt-get finns inte, anvand pacman/yay"]
   n_notes_arkitektur["Arkitektur"]
   n_notes_artikeln_om_agentic_software_factory_vad_som_ar_relevant_for_agentsystemet["Artikeln om agentic software factory - vad som är relevant för agentsystemet"]
@@ -164,6 +165,7 @@ graph LR
   n_notes_lunchmenyn_delar_en_modell_mellan_byggskript_och_webblasare["Lunchmenyn delar en modell mellan byggskript och webblasare"]
   n_notes_mac_mini_crashar_varje_gang_man_monterar_den_externa_usb_stickan_msdosfs_2026_11_24["Mac mini crashar varje gang man monterar den externa USB-stickan (msdosfs) - 2026-11-24"]
   n_notes_mac_mini_worker_9_har_en_bootbar_talos_usb_och_dog_under_inspektion_2026_11_24["Mac mini (worker-9) har en bootbar Talos-USB - och dog under inspektion 2026-11-24"]
+  n_notes_mac_mini_worker_9_kraschar_vid_tyngre_usb_i_o_pa_talos_stickan["Mac mini (worker-9) kraschar vid tyngre USB-I/O på Talos-stickan"]
   n_notes_mailagent_bygget_brot_pa_ofardig_kameo_integration["Mailagent-bygget bröt på ofärdig Kameo-integration"]
   n_notes_mailagenten_expanderar_bifogade_eml_till_egna_mejl["Mailagenten expanderar bifogade .eml till egna mejl"]
   n_notes_mailagenten_flyttad_fran_mailmaster_repot_in_i_pappa["Mailagenten flyttad från mailmaster-repot in i pappa"]
@@ -238,6 +240,7 @@ graph LR
   n_notes_plan_appen_morkt_designsystem_med_semantiska_farg_token["Plan-appen: mörkt designsystem med semantiska färg-token"]
   n_notes_plan_cachad_spa_skal_gjorde_att_webblasaren_korde_gammalt_js_bundle_med_ikon_provider_none["Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none"]
   n_notes_plan_dev_kor_mot_neon_istallet_for_lokal_postgres["Plan dev kör mot Neon istället för lokal Postgres"]
+  n_notes_plan_goals_gav_503_go_api_startade_i_mock_lage_nar_dns_inte_var_uppe["plan /goals gav 503 - go-api startade i mock-läge när DNS inte var uppe"]
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg["Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg"]
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places["Platser på mål och kalenderhändelser (OpenSpec-change add-places)"]
   n_notes_popcorn_time_installerad_som_appimage_i_local["Popcorn Time installerad som AppImage i ~/.local"]
@@ -529,6 +532,7 @@ graph LR
   n_notes_accuracy_fel_omstart --> n_notes_session_livscykel
   n_notes_agent_api_crashade_i_tilt_saknad_database_url_mot_cnpg_databasen_i_agents_dev --> n_notes_agent_granssnittet_nuxt_saknades_helt_i_tilt_routes_forsvann_i_refaktoreringen_677b876
   n_notes_agent_granssnittet_nuxt_saknades_helt_i_tilt_routes_forsvann_i_refaktoreringen_677b876 --> n_notes_agent_api_crashade_i_tilt_saknad_database_url_mot_cnpg_databasen_i_agents_dev
+  n_notes_agents_repot_arkiverat_och_mergens_mal_kompletterade --> n_notes_sammanslagning_av_agents_repot_in_i_plan_vad_som_flyttades_och_vad_som_medvetet_inte_gjorde_det
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay --> n_notes_kanata_switch_session_tmuxinator_fonster_oppnades_inte
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay --> n_notes_pi_tog_bort_pi_rate_limit_och_pi_pattern_retry_fixade_omarchy_temasy
   n_notes_arkitektur --> n_notes_bigram_algoritmen
@@ -855,6 +859,7 @@ graph LR
   n_notes_rust_repo_learn_to_code_with_rust_som_submodule --> n_notes_rust_utvecklingsmiljo_pa_workstationen
   n_notes_rust_utvecklingsmiljo_pa_workstationen --> n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet
   n_notes_rust_utvecklingsmiljo_pa_workstationen --> n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork
+  n_notes_sammanslagning_av_agents_repot_in_i_plan_vad_som_flyttades_och_vad_som_medvetet_inte_gjorde_det --> n_notes_agents_repot_arkiverat_och_mergens_mal_kompletterade
   n_notes_session_livscykel --> n_notes_accuracy_fel_omstart
   n_notes_session_livscykel --> n_notes_arkitektur
   n_notes_session_livscykel --> n_notes_sprint_timer_saknas
@@ -1036,6 +1041,7 @@ graph LR
 - **notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t** <- [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]]
 - **notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev** <- [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]]
 - **notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876** <- [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]]
+- **notes/agents-repot-arkiverat-och-mergens-mal-kompletterade** <- [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]]
 - **notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay** <- [[notes/utvecklingsflode]]
 - **notes/arkitektur** <- [[notes/bigram-algoritmen]], [[notes/konventioner]], [[notes/session-livscykel]], [[notes/utvecklingsflode]]
 - **notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet** <- [[notes/verifierade-policy-hal-i-tool-lagret-kommandon-ar-blocklist-inte-allowlist]], [[summaries/llm-wiki-karpathy]]
@@ -1219,6 +1225,7 @@ graph LR
 - **notes/rust-utvecklingsmiljo-pa-workstationen** <- [[notes/rust-repo-learn-to-code-with-rust-som-submodule]]
 - **notes/sa-dampas-bada-rust-analyzer-popupen-no-project-root-found** <- [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]]
 - **notes/sales-soulmate-se-appen-kan-inte-logga-in-oauth-clienten-saknas-i-soulmate-tenanten** <- [[notes/imap-inloggning-for-michael-brundin-soulmate-se-kraver-admin-consent]]
+- **notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det** <- [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]]
 - **notes/session-livscykel** <- [[notes/accuracy-fel-omstart]], [[notes/arkitektur]], [[notes/sprint-timer-saknas]]
 - **notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner** <- [[entities/pxe-server]]

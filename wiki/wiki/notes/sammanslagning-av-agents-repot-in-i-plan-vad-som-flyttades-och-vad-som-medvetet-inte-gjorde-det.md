@@ -16,7 +16,7 @@ Vad som flyttades:
 - agents/environments -> plan/environments/base/agent* (dev och prod delar samma källa).
 
 Vad som medvetet INTE portades:
-- Agentens gamla Nuxt-gränssnitt (checkpoints, kanban, readme, roadmap, repo-map). Plan har egna sidor för mål, chatt och körningar. Koden finns kvar i agents-repot tills det arkiveras.
+- Agentens gamla Nuxt-gränssnitt (checkpoints, kanban, readme, roadmap, repo-map). Plan har egna sidor för mål, chatt och körningar. Koden finns kvar i agents-repot, som arkiverades 2026-11-25 (se [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]]).
 - Det gamla flödet med filbaserade godkännanden och Slack.
 
 Lärdomar:

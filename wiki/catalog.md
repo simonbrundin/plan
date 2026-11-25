@@ -38,6 +38,7 @@ finns i `index.md`.
 | [[notes/agentmal-flaggan-blev-levande-mvp]] | Agentmål: flaggan blev levande (MVP) | note | feature, agent, bug, session, projekt:plan | 2026-11-24 | 0 |
 | [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] | Agentmärke på mål - tangenten a är reserverad | note | feature, goals, tangent, projekt:plan | 2026-11-20 | 0 |
 | [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] | Agentprofiler som teknisk policy utanför prompten | note | plan, agent, profil, policy, behörighet, säkerhet, projekt:simon | 2026-11-24 | 0 |
+| [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] | Agents-repot arkiverat och mergens mål kompletterade | note | arkiv, repo, agent, ci, migrering, projekt:simon | 2026-11-25 | 1 |
 | [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] | Arbetsstationen ar Omarchy/Arch - apt-get finns inte, anvand pacman/yay | note | verktyg, omarchy, bygg, projekt:infrastructure | 2026-10-24 | 2 |
 | [[notes/arkitektur]] | Arkitektur | note | arkitektur, go, oversikt | 2026-10-21 | 6 |
 | [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] | Artikeln om agentic software factory - vad som är relevant för agentsystemet | note | artikel, arkitektur, wiki, governance, projekt:agents | 2026-11-23 | 1 |
@@ -165,6 +166,7 @@ finns i `index.md`.
 | [[notes/lunchmenyn-delar-en-modell-mellan-byggskript-och-webblasare]] | Lunchmenyn delar en modell mellan byggskript och webblasare | note | lunch, arkitektur, beslut, projekt:stk | 2026-11-06 | 0 |
 | [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] | Mac mini crashar varje gang man monterar den externa USB-stickan (msdosfs) - 2026-11-24 | note | macmini, usb, crash, incident, felsokning, projekt:simon | 2026-11-24 | 0 |
 | [[notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24]] | Mac mini (worker-9) har en bootbar Talos-USB - och dog under inspektion 2026-11-24 | note | worker-9, macmini, talos, usb, incident, projekt:simon | 2026-11-24 | 0 |
+| [[notes/mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan]] | Mac mini (worker-9) kraschar vid tyngre USB-I/O på Talos-stickan | note | bug, mac-mini, worker-9, usb, projekt:simon | 2026-11-25 | 0 |
 | [[notes/mailagent-bygget-brot-pa-ofardig-kameo-integration]] | Mailagent-bygget bröt på ofärdig Kameo-integration | note | bug, mailagent, go, build, projekt:pappa | 2026-11-16 | 0 |
 | [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]] | Mailagenten expanderar bifogade .eml till egna mejl | note | feature, mail, imap, projekt:pappa | 2026-11-18 | 1 |
 | [[notes/mailagenten-flyttad-fran-mailmaster-repot-in-i-pappa]] | Mailagenten flyttad från mailmaster-repot in i pappa | note | mail, flytt, kluster, nuxt, go, projekt:pappa | 2026-11-17 | 3 |
@@ -239,6 +241,7 @@ finns i `index.md`.
 | [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] | Plan-appen: mörkt designsystem med semantiska färg-token | note | plan, ui, css, tailwind, dark-mode, projekt:repos | 2026-11-17 | 1 |
 | [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] | Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none | note | bug, nuxt, cache, plan, projekt:plan | 2026-11-16 | 0 |
 | [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] | Plan dev kör mot Neon istället för lokal Postgres | note | neon, dev, database, plan, projekt:plan | 2026-11-16 | 0 |
+| [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] | plan /goals gav 503 - go-api startade i mock-läge när DNS inte var uppe | note | bug, incident, plan, kubernetes, projekt:simon | 2026-11-25 | 0 |
 | [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] | Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg | note | ci, deploy, pipeline, docker, kustomize, projekt:plan | 2026-11-10 | 1 |
 | [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] | Platser på mål och kalenderhändelser (OpenSpec-change add-places) | note | feature, platser, goals, calendar, leaflet, bug, session, projekt:plan | 2026-11-20 | 1 |
 | [[notes/popcorn-time-installerad-som-appimage-i-local]] | Popcorn Time installerad som AppImage i ~/.local | note | omarchy, workstation, popcorntime, appimage, projekt:infrastructure | 2026-11-17 | 1 |
@@ -291,7 +294,7 @@ finns i `index.md`.
 | [[notes/rust-utvecklingsmiljo-pa-workstationen]] | Rust-utvecklingsmiljö på workstationen | note | rust, toolchain, mise, neovim, projekt:rust | 2026-11-17 | 2 |
 | [[notes/sa-dampas-bada-rust-analyzer-popupen-no-project-root-found]] | Så dämpas båda rust-analyzer-popupen (No project root found) | note | rust, neovim, rust-analyzer, leetcode, bug, projekt:rust | 2026-11-02 | 0 |
 | [[notes/sales-soulmate-se-appen-kan-inte-logga-in-oauth-clienten-saknas-i-soulmate-tenanten]] | sales@soulmate.se: appen kan inte logga in (OAuth-clienten saknas i soulmate-tenanten) | note | mailagent, pappa, microsoft365, oauth2, bug, session, projekt:simon | 2026-11-16 | 0 |
-| [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]] | Sammanslagning av agents-repot in i plan: vad som flyttades och vad som medvetet inte gjorde det | note | plan, agent, migrering, repo, sammanläggning, ci, kubernetes, projekt:simon | 2026-11-24 | 0 |
+| [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]] | Sammanslagning av agents-repot in i plan: vad som flyttades och vad som medvetet inte gjorde det | note | plan, agent, migrering, repo, sammanläggning, ci, kubernetes, projekt:simon | 2026-11-24 | 1 |
 | [[notes/serveragd-ko-for-stegvis-mailgranskning]] | Serverägd kö för stegvis mailgranskning | note | mail, go, granskning, kö, projekt:pappa | 2026-11-20 | 0 |
 | [[notes/session-livscykel]] | Sessionens livscykel | note | session, tui, bubbletea, tillstand | 2026-10-21 | 5 |
 | [[notes/sessionen-saknade-executor-varje-godkand-atgard-kraschade-med-502]] | Sessionen saknade executor - varje godkänd åtgärd kraschade med 502 | note | bug, mail, mcp, projekt:pappa | 2026-11-18 | 0 |
@@ -398,7 +401,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (15)
+- `agent` (16)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -411,7 +414,7 @@ finns i `index.md`.
 - `appimage` (1)
 - `arch` (1)
 - `arkitektur` (3)
-- `arkiv` (1)
+- `arkiv` (2)
 - `artikel` (1)
 - `auth` (5)
 - `authentication` (2)
@@ -433,7 +436,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (87)
+- `bug` (89)
 - `bugg` (5)
 - `build` (2)
 - `bun` (1)
@@ -448,7 +451,7 @@ finns i `index.md`.
 - `cfd` (1)
 - `cgNAT` (1)
 - `chat` (1)
-- `ci` (5)
+- `ci` (6)
 - `clean-code` (1)
 - `cli` (5)
 - `cloudflare` (3)
@@ -561,7 +564,7 @@ finns i `index.md`.
 - `image-factory` (2)
 - `imap` (11)
 - `import` (1)
-- `incident` (13)
+- `incident` (14)
 - `incidents` (1)
 - `infra` (2)
 - `infrastructure` (4)
@@ -595,7 +598,7 @@ finns i `index.md`.
 - `kostnad` (1)
 - `kubeconfig` (1)
 - `kubelet` (1)
-- `kubernetes` (23)
+- `kubernetes` (24)
 - `kunskapsbas` (2)
 - `kurering` (1)
 - `kustomize` (5)
@@ -621,6 +624,7 @@ finns i `index.md`.
 - `longhorn` (3)
 - `lunch` (2)
 - `lärdom` (1)
+- `mac-mini` (1)
 - `macmini` (4)
 - `mail` (20)
 - `mailagent` (3)
@@ -635,7 +639,7 @@ finns i `index.md`.
 - `meta` (2)
 - `metallb` (2)
 - `microsoft365` (2)
-- `migrering` (1)
+- `migrering` (2)
 - `mime` (1)
 - `minimax` (1)
 - `minne` (1)
@@ -685,7 +689,7 @@ finns i `index.md`.
 - `picokvm` (1)
 - `pipeline` (2)
 - `pki` (3)
-- `plan` (16)
+- `plan` (17)
 - `plan-api` (1)
 - `platser` (1)
 - `poe` (1)
@@ -713,7 +717,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (75)
+- `projekt:simon` (78)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -736,7 +740,7 @@ finns i `index.md`.
 - `refaktor` (2)
 - `rekrytering` (6)
 - `relationer` (9)
-- `repo` (1)
+- `repo` (2)
 - `repo-template` (3)
 - `research` (1)
 - `reverse-proxy` (1)
@@ -821,7 +825,7 @@ finns i `index.md`.
 - `unifi` (8)
 - `uppdrag` (1)
 - `urval` (1)
-- `usb` (4)
+- `usb` (5)
 - `utoipa` (1)
 - `ux` (2)
 - `v1.14` (2)
@@ -839,7 +843,7 @@ finns i `index.md`.
 - `worker-3` (5)
 - `worker-4` (3)
 - `worker-8` (1)
-- `worker-9` (4)
+- `worker-9` (5)
 - `workers` (1)
 - `workflow` (2)
 - `workmux` (1)
