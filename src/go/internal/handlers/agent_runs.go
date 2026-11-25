@@ -285,6 +285,14 @@ func (h *AgentRunHandler) CancelAgentRun(c *gin.Context) {
 	result := "Körningen avbröts innan den blev klar"
 	finishedAt := time.Now().UTC()
 
+	// En avslutad körning kan inte avbrytas - avbrytning är ett sätt att
+	// stanna, inte ett sätt att skriva om historiken. Samma regel gäller
+	// som när status uppdateras med PATCH.
+	if err := models.ValidateAgentRunTransition(*current, models.UpdateAgentRunRequest{Status: &status}); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
 	run, err := h.repo.Update(c.Request.Context(), userID, runID, models.UpdateAgentRunRequest{
 		Status:     &status,
 		Summary:    &summary,
