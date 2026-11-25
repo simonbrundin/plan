@@ -2606,3 +2606,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] — ny sida från inboxen
 - [archive] 2026-11-25-ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt.md
 
+
+## [2026-11-25] ingest | create notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon
+- [create] [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] — ny sida från inboxen
+- [archive] 2026-11-25-home-assistant-krokviken-ssh-via-terminal-ssh-addon.md
+

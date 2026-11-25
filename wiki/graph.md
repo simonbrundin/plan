@@ -93,6 +93,7 @@ graph LR
   n_notes_handelsen_har_ingen_egen_farg["Händelsen har ingen egen färg"]
   n_notes_hierarki_i_gor_nu_listan_now["Hierarki i Gör nu-listan (/now)"]
   n_notes_hjalpmodalen_for_kortkommandon_fick_sokfilter["Hjälpmodalen för kortkommandon fick sökfilter"]
+  n_notes_home_assistant_krokviken_ssh_via_terminal_ssh_addon["Home Assistant Krokviken: SSH via Terminal & SSH-addon"]
   n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln["Human gate som teknisk gräns: scope på API-nyckeln"]
   n_notes_ikonsokning_far_timeout_och_checkbox_fallback_vid_nya_mal["Ikonsökning får timeout och checkbox-fallback vid nya mål"]
   n_notes_ikonvaljaren_i_plan_api_icons_routen_var_borttagen_och_ikonprovider_none_gjorde_att_inga_ikoner_renderades["Ikonväljaren i plan: /api-icons-routen var borttagen och ikonprovider none gjorde att inga ikoner renderades"]

@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 5 |
 | Koncept | 19 |
 | Sammanfattningar | 7 |
-| Noter | 356 |
+| Noter | 357 |
 
 ## Entiteter
 
@@ -117,6 +117,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]] - Problem som upptäcktes 2026-11-03 i Skogsduvans HA: en temperatureautomation som styrs av minsta temperaturen ska "äga" rätt tillstån... _(uppdaterad 2026-11-03)_
 - [[notes/hierarki-i-gor-nu-listan-now]] - Mål i /now som har en förälder som också syns i /now visas nu indenterade under föräldern. _(uppdaterad 2026-11-23)_
 - [[notes/hjalpmodalen-for-kortkommandon-fick-sokfilter]] - 2026-11-20: HelpModal.vue fick ett sökfilter. _(uppdaterad 2026-11-20)_
+- [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] - HAOS 18.4 'Krokviken' på 10.20.20.20 (aarch64). _(uppdaterad 2026-11-25)_
 - [[notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln]] - I ~/repos/plan (Fas 4 i mål 497) görs human gate till en teknisk gräns i två steg. _(uppdaterad 2026-11-24)_
 - [[notes/handelsen-har-ingen-egen-farg]] - Användaren bad om att ta bort möjligheten att sätta en egen färg på ett _(uppdaterad 2026-11-18)_
 - [[notes/ikonsokning-far-timeout-och-checkbox-fallback-vid-nya-mal]] - När ett nytt mål skapades väntade useGoalApi obegränsat på /api/icons, exempelvis om översättningstjänsten/MiniMax inte svarade. _(uppdaterad 2026-11-22)_

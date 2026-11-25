@@ -94,6 +94,7 @@ finns i `index.md`.
 | [[notes/handelsen-har-ingen-egen-farg]] | Händelsen har ingen egen färg | note | kalender, färg, förenkling, projekt:plan | 2026-11-18 | 2 |
 | [[notes/hierarki-i-gor-nu-listan-now]] | Hierarki i Gör nu-listan (/now) | note | feature, nuxt, prioritetssida, ui, projekt:simon | 2026-11-23 | 0 |
 | [[notes/hjalpmodalen-for-kortkommandon-fick-sokfilter]] | Hjälpmodalen för kortkommandon fick sökfilter | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
+| [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] | Home Assistant Krokviken: SSH via Terminal & SSH-addon | note | home-assistant, ssh, supervisor, projekt:simon | 2026-11-25 | 0 |
 | [[notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln]] | Human gate som teknisk gräns: scope på API-nyckeln | note | plan, agent, säkerhet, behörighet, human-gate, api-nyckel, projekt:simon | 2026-11-24 | 0 |
 | [[notes/ikonsokning-far-timeout-och-checkbox-fallback-vid-nya-mal]] | Ikonsökning får timeout och checkbox-fallback vid nya mål | note | bug, icon, goals, nuxt, projekt:plan | 2026-11-22 | 0 |
 | [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]] | Ikonväljaren i plan: /api-icons-routen var borttagen och ikonprovider none gjorde att inga ikoner renderades | note | bug, nuxt, icon, plan, projekt:plan | 2026-11-17 | 1 |
@@ -549,7 +550,7 @@ finns i `index.md`.
 - `helpmodal` (2)
 - `hemligheter` (2)
 - `heuristik` (1)
-- `home-assistant` (8)
+- `home-assistant` (9)
 - `homeassistant` (1)
 - `hostname` (1)
 - `http` (2)
@@ -719,7 +720,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (78)
+- `projekt:simon` (79)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -777,7 +778,7 @@ finns i `index.md`.
 - `soulmate` (1)
 - `sourcing` (12)
 - `sprint` (1)
-- `ssh` (2)
+- `ssh` (3)
 - `ssl` (1)
 - `sso` (2)
 - `standardkalender` (1)
@@ -792,6 +793,7 @@ finns i `index.md`.
 - `styrelsemöte` (1)
 - `submodule` (2)
 - `sundsvall` (5)
+- `supervisor` (1)
 - `svenska` (1)
 - `systemd` (1)
 - `systemd-boot` (1)
