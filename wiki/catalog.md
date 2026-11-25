@@ -193,6 +193,7 @@ finns i `index.md`.
 | [[notes/mailmaster-svarmejl-fick-fel-brodtext-tre-buggar-i-svarttextskedjan]] | MailMaster: svarmejl fick fel brödtext - tre buggar i svarttextskedjan | note | bug, mailmaster, ai, mcp, projekt:simon | 2026-11-17 | 1 |
 | [[notes/mailvyn-mail-omstegad-till-tailwind-tema]] | Mailvyn (/mail) omstegad till Tailwind-tema | note | ui, mail, tailwind, projekt:pappa | 2026-11-17 | 1 |
 | [[notes/mal-540-slutfort-agentens-readme-andring-granskad-och-mergead]] | Mal 540 slutfort: agentens README-andring granskad och mergead | note | agent, mal, review, readme, projekt:plan | 2026-11-26 | 0 |
+| [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]] | Mål 568 verifierad: två samtidiga AgentRuns i dev | note | agent, kubernetes, job, verifiering, projekt:plan | 2026-11-26 | 2 |
 | [[notes/mal-kan-ha-due-datum-deadline]] | Mål kan ha due-datum (deadline) | note | feature, goals, go, nuxt, db, projekt:plan | 2026-11-20 | 1 |
 | [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]] | Mål kan ha en lång beskrivning, redigerad med tangenten t | note | feature, goals, go, nuxt, db, projekt:plan | 2026-11-17 | 3 |
 | [[notes/mal-kan-ha-startdatum-syns-i-priority-forst-nar-datumet-passerat]] | Mål kan ha startdatum - syns i /priority först när datumet passerat | note | feature, goals, priority, go, nuxt, db, projekt:plan | 2026-11-20 | 1 |
@@ -417,7 +418,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (21)
+- `agent` (22)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -602,7 +603,7 @@ finns i `index.md`.
 - `ip-address-pool` (1)
 - `ipv6` (2)
 - `it` (2)
-- `job` (1)
+- `job` (2)
 - `jobb` (2)
 - `k8s` (1)
 - `kalender` (34)
@@ -622,7 +623,7 @@ finns i `index.md`.
 - `kostnad` (1)
 - `kubeconfig` (3)
 - `kubelet` (1)
-- `kubernetes` (25)
+- `kubernetes` (26)
 - `kunskapsbas` (2)
 - `kurering` (1)
 - `kustomize` (5)
@@ -739,7 +740,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (104)
+- `projekt:plan` (105)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -867,7 +868,7 @@ finns i `index.md`.
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)
-- `verifiering` (2)
+- `verifiering` (3)
 - `verktyg` (7)
 - `visionite` (1)
 - `wan` (1)

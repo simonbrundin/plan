@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 7 |
-| Noter | 369 |
+| Noter | 370 |
 
 ## Entiteter
 
@@ -227,6 +227,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/michael-brundin-blir-en-personnod-i-relationsgrafen]] - Beslut: ersätt den separata my_contact/my_contact_relation-modellen med vanliga person- och person_relation-rader. _(uppdaterad 2026-11-18)_
 - [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] - 2026-11-10: Efter ägarskapet kom nästa fråga: 'jag vill kunna lägga till vilka personer som jag känner (alltså michael brundin kän... _(uppdaterad 2026-11-17)_
 - [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] - Föregående version (se [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]]) _(uppdaterad 2026-11-19)_
+- [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]] - Verifiering 2026-11-26 i dev-klustret (kind-dev, agent-api). _(uppdaterad 2026-11-26)_
 - [[notes/mal-kan-ha-due-datum-deadline]] - 2026-11-17: Mål i plan kan nu ha ett due-datum (deadline). _(uppdaterad 2026-11-20)_
 - [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]] - VARFÖR: titeln på ett mål är kort (VARCHAR(64)) och räcker inte när man vill skriva _(uppdaterad 2026-11-17)_
 - [[notes/mal-kan-ha-startdatum-syns-i-priority-forst-nar-datumet-passerat]] - 2026-11-20: Mål kan nu ha ett **startdatum** (goals.start_date, "YYYY-MM-DD"): _(uppdaterad 2026-11-20)_
