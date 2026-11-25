@@ -2770,6 +2770,11 @@ watch(selectedParentIndex, async () => {
           @decided="loadAgentRun"
           @cancelled="loadAgentRun"
         />
+        <AgentCheckpointWorkflowPanel
+          :feature="goal.title || ''"
+          :description="goal.description || ''"
+          class="mt-3"
+        />
       </div>
 
       <!-- Dependencies-sektion -->
