@@ -165,7 +165,7 @@ func (h *AgentApprovalHandler) CreateAgentApproval(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-approvals/{id}/decision [post]
+// @Router /api/v1/agent-approvals/{id}/decision [post]
 func (h *AgentApprovalHandler) DecideAgentApproval(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {

@@ -201,7 +201,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, result inter
 // GetGoalsByStatus returns all goals with a specific status
 func (c *Client) GetGoalsByStatus(ctx context.Context, statusID int) ([]Goal, error) {
 	var goals []Goal
-	err := c.do(ctx, http.MethodGet, "/api/v1/goals", nil, &goals)
+	err := c.do(ctx, http.MethodGet, pathGoals, nil, &goals)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func (c *Client) GetGoal(ctx context.Context, id int64) (*Goal, error) {
 	var result struct {
 		Goal Goal `json:"goal"`
 	}
-	err := c.do(ctx, http.MethodGet, fmt.Sprintf("/api/v1/goals/%d", id), nil, &result)
+	err := c.do(ctx, http.MethodGet, fmt.Sprintf(pathGoal, id), nil, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (c *Client) UpdateGoal(ctx context.Context, id int64, req UpdateGoalRequest
 	var result struct {
 		Goal Goal `json:"goal"`
 	}
-	err := c.do(ctx, http.MethodPatch, fmt.Sprintf("/api/v1/goals/%d", id), req, &result)
+	err := c.do(ctx, http.MethodPatch, fmt.Sprintf(pathGoal, id), req, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -287,13 +287,13 @@ func (c *Client) UpdateGoalStatus(ctx context.Context, id int64, statusID int) e
 		StatusID int `json:"status_id"`
 	}{StatusID: statusID}
 
-	return c.do(ctx, http.MethodPatch, fmt.Sprintf("/api/v1/goals/%d/status", id), req, nil)
+	return c.do(ctx, http.MethodPatch, fmt.Sprintf(pathGoalStatus, id), req, nil)
 }
 
 // GetStatuses returns all available statuses
 func (c *Client) GetStatuses(ctx context.Context) ([]Status, error) {
 	var statuses []Status
-	err := c.do(ctx, http.MethodGet, "/api/v1/statuses", nil, &statuses)
+	err := c.do(ctx, http.MethodGet, pathStatuses, nil, &statuses)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,7 @@ func (c *Client) UpdateGoalPhase(ctx context.Context, goalID int64, phase string
 // Endast markerade mål hämtas - det är agentens enda ingång.
 func (c *Client) GetAgentGoals(ctx context.Context) ([]Goal, error) {
 	var goals []Goal
-	if err := c.do(ctx, http.MethodGet, "/api/v1/goals?agent=true", nil, &goals); err != nil {
+	if err := c.do(ctx, http.MethodGet, pathGoals+"?agent=true", nil, &goals); err != nil {
 		return nil, err
 	}
 	return goals, nil
@@ -371,7 +371,7 @@ type CreateRelationRequest struct {
 // CreateSubgoal creates a goal and attaches it to parentID.
 func (c *Client) CreateSubgoal(ctx context.Context, parentID int64, title, description string) (*Goal, error) {
 	var goal Goal
-	if err := c.do(ctx, http.MethodPost, "/api/v1/goals", CreateGoalRequest{
+	if err := c.do(ctx, http.MethodPost, pathGoals, CreateGoalRequest{
 		Title:    title,
 		StatusID: StatusDefine,
 	}, &goal); err != nil {
@@ -384,7 +384,7 @@ func (c *Client) CreateSubgoal(ctx context.Context, parentID int64, title, descr
 		}
 	}
 
-	if err := c.do(ctx, http.MethodPost, "/api/v1/goals/relations", CreateRelationRequest{
+	if err := c.do(ctx, http.MethodPost, pathGoalRelations, CreateRelationRequest{
 		ChildID:  goal.ID,
 		ParentID: parentID,
 		Weight:   10,
@@ -398,7 +398,7 @@ func (c *Client) CreateSubgoal(ctx context.Context, parentID int64, title, descr
 // CreateAgentRun registers that the agent started working on a goal
 func (c *Client) CreateAgentRun(ctx context.Context, req CreateAgentRunRequest) (*AgentRun, error) {
 	var run AgentRun
-	if err := c.do(ctx, http.MethodPost, "/api/v1/agent-runs", req, &run); err != nil {
+	if err := c.do(ctx, http.MethodPost, pathAgentRuns, req, &run); err != nil {
 		return nil, err
 	}
 	return &run, nil
@@ -409,18 +409,18 @@ func (c *Client) CreateAgentRun(ctx context.Context, req CreateAgentRunRequest) 
 // Only the usage is reported - Plan calculates the cost from its versioned
 // price list, so every run uses the same prices.
 func (c *Client) RecordAgentRunUsage(ctx context.Context, id int64, req AgentRunUsageRequest) error {
-	return c.do(ctx, http.MethodPost, fmt.Sprintf("/api/v1/agent-runs/%d/usage", id), req, nil)
+	return c.do(ctx, http.MethodPost, fmt.Sprintf(pathAgentRunUsage, id), req, nil)
 }
 
 // CreateAgentRunEvent appends a structured event to an AgentRun.
 func (c *Client) CreateAgentRunEvent(ctx context.Context, id int64, req CreateAgentRunEventRequest) error {
-	return c.do(ctx, http.MethodPost, fmt.Sprintf("/api/v1/agent-runs/%d/events", id), req, nil)
+	return c.do(ctx, http.MethodPost, fmt.Sprintf(pathAgentRunEvents, id), req, nil)
 }
 
 // UpdateAgentRun updates phase, status or summary of an agent run
 func (c *Client) UpdateAgentRun(ctx context.Context, id int64, req UpdateAgentRunRequest) (*AgentRun, error) {
 	var run AgentRun
-	if err := c.do(ctx, http.MethodPatch, fmt.Sprintf("/api/v1/agent-runs/%d", id), req, &run); err != nil {
+	if err := c.do(ctx, http.MethodPatch, fmt.Sprintf(pathAgentRun, id), req, &run); err != nil {
 		return nil, err
 	}
 	return &run, nil
@@ -428,7 +428,7 @@ func (c *Client) UpdateAgentRun(ctx context.Context, id int64, req UpdateAgentRu
 
 // GetAgentRuns returns the agent runs registered in Plan
 func (c *Client) GetAgentRuns(ctx context.Context, goalID *int64) ([]AgentRun, error) {
-	path := "/api/v1/agent-runs"
+	path := pathAgentRuns
 	if goalID != nil {
 		path = fmt.Sprintf("%s?goal_id=%d", path, *goalID)
 	}
@@ -470,7 +470,7 @@ type CreateAgentApprovalRequest struct {
 // CreateAgentApproval registrerar ett förslag som väntar på ett mänskligt beslut.
 func (c *Client) CreateAgentApproval(ctx context.Context, runID int64, req CreateAgentApprovalRequest) (*AgentApproval, error) {
 	var approval AgentApproval
-	if err := c.do(ctx, http.MethodPost, fmt.Sprintf("/api/v1/agent-runs/%d/approvals", runID), req, &approval); err != nil {
+	if err := c.do(ctx, http.MethodPost, fmt.Sprintf(pathAgentRunApprovals, runID), req, &approval); err != nil {
 		return nil, err
 	}
 	return &approval, nil
@@ -479,7 +479,7 @@ func (c *Client) CreateAgentApproval(ctx context.Context, runID int64, req Creat
 // GetAgentApprovals returnerar godkännandena för en körning.
 func (c *Client) GetAgentApprovals(ctx context.Context, runID int64) ([]AgentApproval, error) {
 	var approvals []AgentApproval
-	if err := c.do(ctx, http.MethodGet, fmt.Sprintf("/api/v1/agent-runs/%d/approvals", runID), nil, &approvals); err != nil {
+	if err := c.do(ctx, http.MethodGet, fmt.Sprintf(pathAgentRunApprovals, runID), nil, &approvals); err != nil {
 		return nil, err
 	}
 	return approvals, nil

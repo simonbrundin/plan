@@ -61,7 +61,7 @@ func validateCalendarName(name *string) (*string, bool) {
 // @Security BearerAuth
 // @Success 200 {array} models.Calendar
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/calendars [get]
+// @Router /api/v1/calendars [get]
 func (h *CalendarHandler) List(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -89,7 +89,7 @@ func (h *CalendarHandler) List(c *gin.Context) {
 // @Security BearerAuth
 // @Success 201 {object} models.Calendar
 // @Failure 400 {object} models.ErrorResponse
-// @Router /api/calendars [post]
+// @Router /api/v1/calendars [post]
 func (h *CalendarHandler) Create(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -145,7 +145,7 @@ func (h *CalendarHandler) Create(c *gin.Context) {
 // @Success 200 {object} models.Calendar
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendars/{id} [patch]
+// @Router /api/v1/calendars/{id} [patch]
 func (h *CalendarHandler) Update(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -207,7 +207,7 @@ func (h *CalendarHandler) Update(c *gin.Context) {
 // @Security BearerAuth
 // @Success 204
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendars/{id} [delete]
+// @Router /api/v1/calendars/{id} [delete]
 func (h *CalendarHandler) Delete(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return

@@ -1,0 +1,115 @@
+// Package contracts läser kontraktet mellan Plan och agenten.
+//
+// Kontraktet ligger i src/contracts/plan-agent.yaml och beskriver de
+// delar agenten använder: faser, tillstånd, triggrar, profiler och
+// API-anropen. Både Plan API:t och agenten testar mot samma fil - om en
+// sida ändras utan den andra faller testerna.
+package contracts
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+// Endpoint är ett API-anrop agenten gör mot Plan.
+type Endpoint struct {
+	Method string `yaml:"method"`
+	Path   string `yaml:"path"`
+}
+
+// Key gör att ett anrop kan jämföras i en mängd.
+func (e Endpoint) Key() string {
+	return e.Method + " " + e.Path
+}
+
+// Contract är kontraktet mellan Plan och agenten.
+type Contract struct {
+	Version            int        `yaml:"version"`
+	Phases             []string   `yaml:"phases"`
+	Statuses           []string   `yaml:"statuses"`
+	TerminalStatuses   []string   `yaml:"terminal_statuses"`
+	StatusNeedingHuman []string   `yaml:"status_needing_human"`
+	Triggers           []string   `yaml:"triggers"`
+	Profiles           []string   `yaml:"profiles"`
+	Endpoints          []Endpoint `yaml:"endpoints"`
+}
+
+// Filnamnet på kontraktet.
+const Filename = "plan-agent.yaml"
+
+// Path returnerar sökvägen till kontraktet. Sökningen börjar i den
+// katalog testet körs i och går uppåt tills filen hittas - så fungerar
+// den oavsett vilken modul eller paket koden ligger i.
+func Path() (string, error) {
+	start, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("kan inte läsa arbetskatalogen: %w", err)
+	}
+
+	// Börja i katalogen där anropet sker, så att sökningen inte
+	// behöver gissa om paketets djup.
+	if _, file, _, ok := runtime.Caller(1); ok {
+		start = filepath.Dir(file)
+	}
+
+	dir := start
+	for {
+		kandidat := filepath.Join(dir, "contracts", Filename)
+		if _, err := os.Stat(kandidat); err == nil {
+			return kandidat, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	return "", fmt.Errorf("hittade inte kontraktet contracts/%s", Filename)
+}
+
+// Load läser kontraktet från disk.
+func Load() (*Contract, error) {
+	path, err := Path()
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("kan inte läsa kontraktet: %w", err)
+	}
+
+	var contract Contract
+	if err := yaml.Unmarshal(raw, &contract); err != nil {
+		return nil, fmt.Errorf("kan inte tolka kontraktet: %w", err)
+	}
+
+	if contract.Version <= 0 {
+		return nil, fmt.Errorf("kontraktet saknar en version")
+	}
+
+	return &contract, nil
+}
+
+// HasEndpoint berättar om ett anrop finns i kontraktet.
+func (c *Contract) HasEndpoint(method, path string) bool {
+	for _, endpoint := range c.Endpoints {
+		if endpoint.Method == method && endpoint.Path == path {
+			return true
+		}
+	}
+	return false
+}
+
+// NormalizePath gör om en formatsökväg (%d) till kontraktets form ({id}),
+// så att koden och kontraktet kan jämföras.
+func NormalizePath(path string) string {
+	return strings.ReplaceAll(path, "%d", "{id}")
+}

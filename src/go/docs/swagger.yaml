@@ -1823,7 +1823,33 @@ info:
   title: Goals Management API
   version: "1.0"
 paths:
-  /api/agent-approvals/{id}/decision:
+  /api/v1/agent-approvals:
+    get:
+      description: Get every proposal that waits for a human, optionally for one goal
+      parameters:
+      - description: Only approvals for this goal
+        in: query
+        name: goal_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentApproval'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List approvals waiting for a human decision
+      tags:
+      - agent-runs
+  /api/v1/agent-approvals/{id}/decision:
     post:
       consumes:
       - application/json
@@ -1862,1236 +1888,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Decide an approval
-      tags:
-      - agent-runs
-  /api/api-keys:
-    get:
-      description: Get all API keys for the authenticated user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/handlers.APIKey'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List API keys
-      tags:
-      - api-keys
-    post:
-      consumes:
-      - application/json
-      description: Create a new API key for programmatic access
-      parameters:
-      - description: API key data
-        in: body
-        name: key
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.CreateAPIKeyRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/handlers.APIKeyResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create an API key
-      tags:
-      - api-keys
-  /api/api-keys/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete an API key
-      parameters:
-      - description: API Key ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: boolean
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete an API key
-      tags:
-      - api-keys
-  /api/calendar-events:
-    get:
-      consumes:
-      - application/json
-      description: List calendar events for the authenticated user. Without a time
-        window the recurring series are returned unexpanded, so the client can expand
-        them locally. Within a time window the recurring events are expanded into
-        occurrences.
-      parameters:
-      - description: all returns every event without expanding recurring series
-        in: query
-        name: scope
-        type: string
-      - description: Start of the window (RFC3339), required unless scope is all
-        in: query
-        name: from
-        type: string
-      - description: End of the window (RFC3339), required unless scope is all
-        in: query
-        name: to
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.CalendarEvent'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List calendar events
-      tags:
-      - calendar-events
-    post:
-      consumes:
-      - application/json
-      description: Create a new calendar event, optionally recurring and optionally
-        linked to a goal
-      parameters:
-      - description: Calendar event
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateCalendarEventRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.CalendarEvent'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create a calendar event
-      tags:
-      - calendar-events
-  /api/calendar-events/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a calendar event
-      parameters:
-      - description: Calendar event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete a calendar event
-      tags:
-      - calendar-events
-    get:
-      consumes:
-      - application/json
-      description: Get a single calendar event by ID
-      parameters:
-      - description: Calendar event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.CalendarEvent'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get a calendar event
-      tags:
-      - calendar-events
-    patch:
-      consumes:
-      - application/json
-      description: 'Update a calendar event. The icon field has three states: omitted
-        keeps the current icon, an empty string clears it and a value sets it.'
-      parameters:
-      - description: Calendar event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Fields to update
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateCalendarEventRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.CalendarEvent'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update a calendar event
-      tags:
-      - calendar-events
-  /api/calendar-events/{id}/occurrences:
-    post:
-      consumes:
-      - application/json
-      description: Create an override for one occurrence in a recurring series. Unspecified
-        fields are inherited from the parent event.
-      parameters:
-      - description: Parent calendar event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Occurrence override
-        in: body
-        name: occurrence
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateCalendarOccurrenceRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.CalendarEvent'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Override a single occurrence
-      tags:
-      - calendar-events
-  /api/calendar-events/{id}/split:
-    post:
-      consumes:
-      - application/json
-      description: End a recurring series before a chosen occurrence and continue
-        it as a new series
-      parameters:
-      - description: Parent calendar event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Split request
-        in: body
-        name: split
-        required: true
-        schema:
-          $ref: '#/definitions/models.SplitCalendarEventRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.CalendarEvent'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Split a recurring series
-      tags:
-      - calendar-events
-  /api/calendars:
-    get:
-      description: List the calendars owned by the authenticated user.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Calendar'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List calendars
-      tags:
-      - calendars
-    post:
-      consumes:
-      - application/json
-      description: Create a new calendar for the authenticated user.
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.Calendar'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create calendar
-      tags:
-      - calendars
-  /api/calendars/{id}:
-    delete:
-      description: Delete a calendar. Events in it are kept but lose their calendar.
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete calendar
-      tags:
-      - calendars
-    patch:
-      consumes:
-      - application/json
-      description: Update the name, color, icon or order of a calendar.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Calendar'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update calendar
-      tags:
-      - calendars
-  /api/goals:
-    get:
-      consumes:
-      - application/json
-      description: Get all goals for the authenticated user
-      parameters:
-      - description: Filtrera på agent-flaggan (true = bara agentmål)
-        in: query
-        name: agent
-        type: boolean
-      - description: Filtrera på status-id
-        in: query
-        name: status
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Goal'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List all goals
-      tags:
-      - goals
-    post:
-      consumes:
-      - application/json
-      description: Create a new goal for the authenticated user
-      parameters:
-      - description: Goal data
-        in: body
-        name: goal
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateGoalRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.Goal'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create a new goal
-      tags:
-      - goals
-  /api/goals/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a goal and all its relations
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: boolean
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete a goal
-      tags:
-      - goals
-    get:
-      consumes:
-      - application/json
-      description: Get a single goal with all its relations and dependencies
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.GetGoalResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get a goal by ID
-      tags:
-      - goals
-    patch:
-      consumes:
-      - application/json
-      description: Update a goal's title, icon, started, or finished status
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Update data
-        in: body
-        name: goal
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateGoalRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Goal'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update a goal
-      tags:
-      - goals
-  /api/goals/{id}/completions:
-    delete:
-      consumes:
-      - application/json
-      description: Removes the latest completion of a recurring goal and restores
-        that occurrence
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Goal'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Undo the last completed occurrence of a recurring goal
-      tags:
-      - goals
-    post:
-      consumes:
-      - application/json
-      description: Marks the current occurrence of a recurring goal as completed and
-        moves on to the next one
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Completion data
-        in: body
-        name: completion
-        required: true
-        schema:
-          $ref: '#/definitions/models.CompleteOccurrenceRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Goal'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Complete the current occurrence of a recurring goal
-      tags:
-      - goals
-  /api/goals/{id}/status:
-    get:
-      consumes:
-      - application/json
-      description: Get the current status of a specific goal
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Status'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get a goal's current status
-      tags:
-      - statuses
-    patch:
-      consumes:
-      - application/json
-      description: Update a goal's status and log the change in history
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: New status
-        in: body
-        name: status
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateStatusRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.StatusUpdate'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update a goal's status
-      tags:
-      - statuses
-  /api/goals/{id}/status/history:
-    get:
-      consumes:
-      - application/json
-      description: Get all status changes for a specific goal
-      parameters:
-      - description: Goal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.StatusUpdate'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get status change history for a goal
-      tags:
-      - statuses
-  /api/goals/dependencies:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a dependency between two goals
-      parameters:
-      - description: Dependency data
-        in: body
-        name: dependency
-        required: true
-        schema:
-          $ref: '#/definitions/models.DeleteDependencyRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: boolean
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete a dependency
-      tags:
-      - dependencies
-    post:
-      consumes:
-      - application/json
-      description: Create a dependency between two goals
-      parameters:
-      - description: Dependency data
-        in: body
-        name: dependency
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateDependencyRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.GoalDependency'
-        "400":
-          description: Invalid request or cycle detected
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create a dependency
-      tags:
-      - dependencies
-  /api/goals/prioritized:
-    get:
-      consumes:
-      - application/json
-      description: Get all active goals sorted by priority
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.PrioritizedGoal'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get prioritized goals
-      tags:
-      - goals
-  /api/goals/priority/reorder:
-    patch:
-      consumes:
-      - application/json
-      description: Sets a new order for the active goals in the priority list
-      parameters:
-      - description: New priority order
-        in: body
-        name: goals
-        required: true
-        schema:
-          $ref: '#/definitions/models.ReorderPriorityGoalsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Reorder the priority list
-      tags:
-      - goals
-  /api/goals/relations:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a parent-child relation
-      parameters:
-      - description: Relation data
-        in: body
-        name: relation
-        required: true
-        schema:
-          $ref: '#/definitions/models.DeleteRelationRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: boolean
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete a relation
-      tags:
-      - relations
-    patch:
-      consumes:
-      - application/json
-      description: Update a relation's order and weight
-      parameters:
-      - description: Update data
-        in: body
-        name: relation
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateRelationRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update a relation
-      tags:
-      - relations
-    post:
-      consumes:
-      - application/json
-      description: Create a relation between two goals
-      parameters:
-      - description: Relation data
-        in: body
-        name: relation
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateRelationRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ChildRelation'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create a parent-child relation
-      tags:
-      - relations
-  /api/goals/relations/reorder:
-    patch:
-      consumes:
-      - application/json
-      description: Sets a new order for all children of a goal in one transaction
-      parameters:
-      - description: New order of the children
-        in: body
-        name: relation
-        required: true
-        schema:
-          $ref: '#/definitions/models.ReorderRelationsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Reorder the children of a goal
-      tags:
-      - relations
-  /api/goals/relations/weights:
-    patch:
-      consumes:
-      - application/json
-      description: Replaces all weights for a parent atomically. Weights must total
-        100.
-      parameters:
-      - description: Relation weights
-        in: body
-        name: relation
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateRelationWeightsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: boolean
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update all child goal weights
-      tags:
-      - relations
-  /api/goals/reorder:
-    patch:
-      consumes:
-      - application/json
-      description: Sets a new order for the root goals (goals without a parent) of
-        the current user
-      parameters:
-      - description: New order of the root goals
-        in: body
-        name: goals
-        required: true
-        schema:
-          $ref: '#/definitions/models.ReorderGoalsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Reorder the root goals
-      tags:
-      - goals
-  /api/statuses:
-    get:
-      consumes:
-      - application/json
-      description: Get all available goal statuses
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Status'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List all statuses
-      tags:
-      - statuses
-  /api/v1/agent-approvals:
-    get:
-      description: Get every proposal that waits for a human, optionally for one goal
-      parameters:
-      - description: Only approvals for this goal
-        in: query
-        name: goal_id
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.AgentApproval'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List approvals waiting for a human decision
       tags:
       - agent-runs
   /api/v1/agent-budgets:
@@ -3653,6 +2449,328 @@ paths:
       summary: List and aggregate agent usage
       tags:
       - agent-usage
+  /api/v1/api-keys:
+    get:
+      description: Get all API keys for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.APIKey'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - api-keys
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for programmatic access
+      parameters:
+      - description: API key data
+        in: body
+        name: key
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.APIKeyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create an API key
+      tags:
+      - api-keys
+  /api/v1/api-keys/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an API key
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an API key
+      tags:
+      - api-keys
+  /api/v1/calendar-events:
+    get:
+      consumes:
+      - application/json
+      description: List calendar events for the authenticated user. Without a time
+        window the recurring series are returned unexpanded, so the client can expand
+        them locally. Within a time window the recurring events are expanded into
+        occurrences.
+      parameters:
+      - description: all returns every event without expanding recurring series
+        in: query
+        name: scope
+        type: string
+      - description: Start of the window (RFC3339), required unless scope is all
+        in: query
+        name: from
+        type: string
+      - description: End of the window (RFC3339), required unless scope is all
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CalendarEvent'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List calendar events
+      tags:
+      - calendar-events
+    post:
+      consumes:
+      - application/json
+      description: Create a new calendar event, optionally recurring and optionally
+        linked to a goal
+      parameters:
+      - description: Calendar event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCalendarEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a calendar event
+      tags:
+      - calendar-events
+  /api/v1/calendar-events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a calendar event
+      parameters:
+      - description: Calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a calendar event
+      tags:
+      - calendar-events
+    get:
+      consumes:
+      - application/json
+      description: Get a single calendar event by ID
+      parameters:
+      - description: Calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a calendar event
+      tags:
+      - calendar-events
+    patch:
+      consumes:
+      - application/json
+      description: 'Update a calendar event. The icon field has three states: omitted
+        keeps the current icon, an empty string clears it and a value sets it.'
+      parameters:
+      - description: Calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCalendarEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a calendar event
+      tags:
+      - calendar-events
+  /api/v1/calendar-events/{id}/occurrences:
+    post:
+      consumes:
+      - application/json
+      description: Create an override for one occurrence in a recurring series. Unspecified
+        fields are inherited from the parent event.
+      parameters:
+      - description: Parent calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Occurrence override
+        in: body
+        name: occurrence
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCalendarOccurrenceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Override a single occurrence
+      tags:
+      - calendar-events
   /api/v1/calendar-events/{id}/places:
     get:
       consumes:
@@ -3729,6 +2847,397 @@ paths:
       summary: Replace a calendar event's places
       tags:
       - places
+  /api/v1/calendar-events/{id}/split:
+    post:
+      consumes:
+      - application/json
+      description: End a recurring series before a chosen occurrence and continue
+        it as a new series
+      parameters:
+      - description: Parent calendar event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Split request
+        in: body
+        name: split
+        required: true
+        schema:
+          $ref: '#/definitions/models.SplitCalendarEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CalendarEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Split a recurring series
+      tags:
+      - calendar-events
+  /api/v1/calendars:
+    get:
+      description: List the calendars owned by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Calendar'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List calendars
+      tags:
+      - calendars
+    post:
+      consumes:
+      - application/json
+      description: Create a new calendar for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Calendar'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create calendar
+      tags:
+      - calendars
+  /api/v1/calendars/{id}:
+    delete:
+      description: Delete a calendar. Events in it are kept but lose their calendar.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete calendar
+      tags:
+      - calendars
+    patch:
+      consumes:
+      - application/json
+      description: Update the name, color, icon or order of a calendar.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Calendar'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update calendar
+      tags:
+      - calendars
+  /api/v1/goals:
+    get:
+      consumes:
+      - application/json
+      description: Get all goals for the authenticated user
+      parameters:
+      - description: Filtrera på agent-flaggan (true = bara agentmål)
+        in: query
+        name: agent
+        type: boolean
+      - description: Filtrera på status-id
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Goal'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all goals
+      tags:
+      - goals
+    post:
+      consumes:
+      - application/json
+      description: Create a new goal for the authenticated user
+      parameters:
+      - description: Goal data
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new goal
+      tags:
+      - goals
+  /api/v1/goals/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a goal and all its relations
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a goal
+      tags:
+      - goals
+    get:
+      consumes:
+      - application/json
+      description: Get a single goal with all its relations and dependencies
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetGoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a goal by ID
+      tags:
+      - goals
+    patch:
+      consumes:
+      - application/json
+      description: Update a goal's title, icon, started, or finished status
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update data
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a goal
+      tags:
+      - goals
+  /api/v1/goals/{id}/completions:
+    delete:
+      consumes:
+      - application/json
+      description: Removes the latest completion of a recurring goal and restores
+        that occurrence
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Undo the last completed occurrence of a recurring goal
+      tags:
+      - goals
+    post:
+      consumes:
+      - application/json
+      description: Marks the current occurrence of a recurring goal as completed and
+        moves on to the next one
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Completion data
+        in: body
+        name: completion
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompleteOccurrenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Goal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Complete the current occurrence of a recurring goal
+      tags:
+      - goals
   /api/v1/goals/{id}/places:
     get:
       consumes:
@@ -3805,6 +3314,126 @@ paths:
       summary: Replace a goal's places
       tags:
       - places
+  /api/v1/goals/{id}/status:
+    get:
+      consumes:
+      - application/json
+      description: Get the current status of a specific goal
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a goal's current status
+      tags:
+      - statuses
+    patch:
+      consumes:
+      - application/json
+      description: Update a goal's status and log the change in history
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StatusUpdate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a goal's status
+      tags:
+      - statuses
+  /api/v1/goals/{id}/status/history:
+    get:
+      consumes:
+      - application/json
+      description: Get all status changes for a specific goal
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.StatusUpdate'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get status change history for a goal
+      tags:
+      - statuses
   /api/v1/goals/{id}/tags:
     get:
       consumes:
@@ -3911,6 +3540,79 @@ paths:
       summary: Remove a tag from a goal
       tags:
       - tags
+  /api/v1/goals/dependencies:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a dependency between two goals
+      parameters:
+      - description: Dependency data
+        in: body
+        name: dependency
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteDependencyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a dependency
+      tags:
+      - dependencies
+    post:
+      consumes:
+      - application/json
+      description: Create a dependency between two goals
+      parameters:
+      - description: Dependency data
+        in: body
+        name: dependency
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDependencyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GoalDependency'
+        "400":
+          description: Invalid request or cycle detected
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a dependency
+      tags:
+      - dependencies
   /api/v1/goals/graph:
     get:
       consumes:
@@ -3930,6 +3632,281 @@ paths:
       security:
       - BearerAuth: []
       summary: Get the user's whole goal graph
+      tags:
+      - goals
+  /api/v1/goals/prioritized:
+    get:
+      consumes:
+      - application/json
+      description: Get all active goals sorted by priority
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PrioritizedGoal'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get prioritized goals
+      tags:
+      - goals
+  /api/v1/goals/priority/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets a new order for the active goals in the priority list
+      parameters:
+      - description: New priority order
+        in: body
+        name: goals
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReorderPriorityGoalsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder the priority list
+      tags:
+      - goals
+  /api/v1/goals/relations:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a parent-child relation
+      parameters:
+      - description: Relation data
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a relation
+      tags:
+      - relations
+    patch:
+      consumes:
+      - application/json
+      description: Update a relation's order and weight
+      parameters:
+      - description: Update data
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a relation
+      tags:
+      - relations
+    post:
+      consumes:
+      - application/json
+      description: Create a relation between two goals
+      parameters:
+      - description: Relation data
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRelationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ChildRelation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a parent-child relation
+      tags:
+      - relations
+  /api/v1/goals/relations/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets a new order for all children of a goal in one transaction
+      parameters:
+      - description: New order of the children
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReorderRelationsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder the children of a goal
+      tags:
+      - relations
+  /api/v1/goals/relations/weights:
+    patch:
+      consumes:
+      - application/json
+      description: Replaces all weights for a parent atomically. Weights must total
+        100.
+      parameters:
+      - description: Relation weights
+        in: body
+        name: relation
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRelationWeightsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update all child goal weights
+      tags:
+      - relations
+  /api/v1/goals/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets a new order for the root goals (goals without a parent) of
+        the current user
+      parameters:
+      - description: New order of the root goals
+        in: body
+        name: goals
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReorderGoalsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder the root goals
       tags:
       - goals
   /api/v1/me/current-place:
@@ -4149,6 +4126,29 @@ paths:
       summary: Find places near a position
       tags:
       - places
+  /api/v1/statuses:
+    get:
+      consumes:
+      - application/json
+      description: Get all available goal statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Status'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all statuses
+      tags:
+      - statuses
   /api/v1/tags:
     get:
       consumes:

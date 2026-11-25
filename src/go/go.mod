@@ -11,6 +11,8 @@ require (
 
 require github.com/teambition/rrule-go v1.8.2
 
+require gopkg.in/yaml.v3 v3.0.1
+
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PeterTakahashi/gin-openapi v0.1.0

@@ -160,7 +160,7 @@ func validateColor(color *string) (*string, bool) {
 // @Success 200 {array} models.CalendarEvent
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/calendar-events [get]
+// @Router /api/v1/calendar-events [get]
 func (h *CalendarEventHandler) List(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -228,7 +228,7 @@ func (h *CalendarEventHandler) listInWindow(c *gin.Context, userID int64) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendar-events/{id} [get]
+// @Router /api/v1/calendar-events/{id} [get]
 func (h *CalendarEventHandler) Get(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -270,7 +270,7 @@ func (h *CalendarEventHandler) Get(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/calendar-events [post]
+// @Router /api/v1/calendar-events [post]
 func (h *CalendarEventHandler) Create(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -363,7 +363,7 @@ func (h *CalendarEventHandler) Create(c *gin.Context) {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendar-events/{id} [patch]
+// @Router /api/v1/calendar-events/{id} [patch]
 func (h *CalendarEventHandler) Update(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -482,7 +482,7 @@ func (h *CalendarEventHandler) Update(c *gin.Context) {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendar-events/{id}/occurrences [post]
+// @Router /api/v1/calendar-events/{id}/occurrences [post]
 func (h *CalendarEventHandler) CreateOccurrenceOverride(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -572,7 +572,7 @@ func (h *CalendarEventHandler) CreateOccurrenceOverride(c *gin.Context) {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendar-events/{id}/split [post]
+// @Router /api/v1/calendar-events/{id}/split [post]
 func (h *CalendarEventHandler) SplitSeries(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return
@@ -654,7 +654,7 @@ func (h *CalendarEventHandler) SplitSeries(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/calendar-events/{id} [delete]
+// @Router /api/v1/calendar-events/{id} [delete]
 func (h *CalendarEventHandler) Delete(c *gin.Context) {
 	if !h.checkCalendarDB(c) {
 		return

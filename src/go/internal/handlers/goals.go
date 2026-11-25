@@ -145,7 +145,7 @@ func (h *GoalHandler) checkDb(c *gin.Context) bool {
 // @Success 200 {array} models.Goal
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/goals [get]
+// @Router /api/v1/goals [get]
 func (h *GoalHandler) GetGoals(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -190,7 +190,7 @@ func (h *GoalHandler) GetGoals(c *gin.Context) {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/goals/{id} [get]
+// @Router /api/v1/goals/{id} [get]
 func (h *GoalHandler) GetGoal(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -256,7 +256,7 @@ func (h *GoalHandler) GetGoal(c *gin.Context) {
 // @Success 201 {object} models.Goal
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/goals [post]
+// @Router /api/v1/goals [post]
 func (h *GoalHandler) CreateGoal(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -410,7 +410,7 @@ func recurrenceErrorMessage(err error) string {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/goals/{id} [patch]
+// @Router /api/v1/goals/{id} [patch]
 func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -496,7 +496,7 @@ func (h *GoalHandler) UpdateGoal(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/{id}/completions [post]
+// @Router /api/v1/goals/{id}/completions [post]
 func (h *GoalHandler) CompleteGoalOccurrence(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -578,7 +578,7 @@ func (h *GoalHandler) CompleteGoalOccurrence(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/{id}/completions [delete]
+// @Router /api/v1/goals/{id}/completions [delete]
 func (h *GoalHandler) UndoGoalOccurrence(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -635,7 +635,7 @@ func (h *GoalHandler) UndoGoalOccurrence(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/{id} [delete]
+// @Router /api/v1/goals/{id} [delete]
 func (h *GoalHandler) DeleteGoal(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -676,7 +676,7 @@ func (h *GoalHandler) DeleteGoal(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {array} models.PrioritizedGoal
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/goals/prioritized [get]
+// @Router /api/v1/goals/prioritized [get]
 func (h *GoalHandler) GetPrioritizedGoals(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -726,7 +726,7 @@ func (h *GoalHandler) GetPrioritizedGoals(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/relations [post]
+// @Router /api/v1/goals/relations [post]
 func (h *GoalHandler) CreateRelation(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -772,7 +772,7 @@ func (h *GoalHandler) CreateRelation(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/relations [patch]
+// @Router /api/v1/goals/relations [patch]
 func (h *GoalHandler) UpdateRelation(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -816,7 +816,7 @@ func (h *GoalHandler) UpdateRelation(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/relations/weights [patch]
+// @Router /api/v1/goals/relations/weights [patch]
 func (h *GoalHandler) UpdateRelationWeights(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -875,7 +875,7 @@ func (h *GoalHandler) UpdateRelationWeights(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/relations [delete]
+// @Router /api/v1/goals/relations [delete]
 func (h *GoalHandler) DeleteRelation(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -919,7 +919,7 @@ func (h *GoalHandler) DeleteRelation(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/relations/reorder [patch]
+// @Router /api/v1/goals/relations/reorder [patch]
 func (h *GoalHandler) ReorderRelations(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -967,7 +967,7 @@ func (h *GoalHandler) ReorderRelations(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/goals/reorder [patch]
+// @Router /api/v1/goals/reorder [patch]
 func (h *GoalHandler) ReorderGoals(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1009,7 +1009,7 @@ func (h *GoalHandler) ReorderGoals(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/goals/priority/reorder [patch]
+// @Router /api/v1/goals/priority/reorder [patch]
 func (h *GoalHandler) ReorderPriorityGoals(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1047,7 +1047,7 @@ func (h *GoalHandler) ReorderPriorityGoals(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse "Invalid request or cycle detected"
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/dependencies [post]
+// @Router /api/v1/goals/dependencies [post]
 func (h *GoalHandler) CreateDependency(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1106,7 +1106,7 @@ func (h *GoalHandler) CreateDependency(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/dependencies [delete]
+// @Router /api/v1/goals/dependencies [delete]
 func (h *GoalHandler) DeleteDependency(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1147,7 +1147,7 @@ func (h *GoalHandler) DeleteDependency(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {array} models.Status
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/statuses [get]
+// @Router /api/v1/statuses [get]
 func (h *GoalHandler) GetStatuses(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1184,7 +1184,7 @@ func (h *GoalHandler) GetStatuses(c *gin.Context) {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/goals/{id}/status [get]
+// @Router /api/v1/goals/{id}/status [get]
 func (h *GoalHandler) GetGoalStatus(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1235,7 +1235,7 @@ func (h *GoalHandler) GetGoalStatus(c *gin.Context) {
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/goals/{id}/status [patch]
+// @Router /api/v1/goals/{id}/status [patch]
 func (h *GoalHandler) UpdateGoalStatus(c *gin.Context) {
 	if !h.checkDb(c) {
 		return
@@ -1286,7 +1286,7 @@ func (h *GoalHandler) UpdateGoalStatus(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 403 {object} models.ErrorResponse
-// @Router /api/goals/{id}/status/history [get]
+// @Router /api/v1/goals/{id}/status/history [get]
 func (h *GoalHandler) GetStatusHistory(c *gin.Context) {
 	if !h.checkDb(c) {
 		return

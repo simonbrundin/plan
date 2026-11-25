@@ -1,0 +1,101 @@
+# Kontraktet mellan Plan och agenten.
+#
+# Plan äger agentkörningarna - agenten läser och skriver dem via Plan API:t.
+# Den här filen beskriver de delar av kontraktet agenten använder: faser,
+# tillstånd, triggrar, profiler och de API-anrop agenten gör.
+#
+# Filen är versionsstyrd. Båda sidor testar mot den:
+#
+#   src/go/internal/contracts     - Plan API:t (faser, tillstånd, Swagger)
+#   src/agent/internal/planclient - agentens klient (konstanter, sökvägar)
+#
+# Om en sida ändras utan den andra faller testerna. Ändras kontraktet på ett
+# sätt som kräver samtidig ändring på båda sidor, bumpas versionen.
+#
+# versionshistorik:
+#   1 - 2026-11-25 - första versionen. Bytte samtidigt "blocked" till
+#       "waiting_approval" och "done" till "succeeded" i API, agent,
+#       gränssnitt och databas.
+
+version: 1
+
+# Agentkörningens faser, i den ordning de sker.
+phases:
+  - define
+  - plan
+  - execute
+  - verify
+  - completed
+
+# Agentkörningens tillstånd.
+statuses:
+  - queued
+  - running
+  - waiting_approval
+  - succeeded
+  - failed
+  - cancelled
+
+# Tillstånd som en körning inte kan lämna.
+terminal_statuses:
+  - succeeded
+  - failed
+  - cancelled
+
+# Tillstånd där en människa måste agera innan agenten fortsätter.
+status_needing_human:
+  - waiting_approval
+
+# Vad som startade en körning.
+triggers:
+  - user
+  - schedule
+  - webhook
+  - agent
+
+# Vilken sorts agent som utför körningen.
+profiles:
+  - coding
+  - life
+
+# De API-anrop agenten gör mot Plan. Sökvägarna skrivs med {id} för
+# parametrar - i koden motsvaras de av format-strängar med %d.
+endpoints:
+  - method: GET
+    path: /api/v1/goals
+  - method: POST
+    path: /api/v1/goals
+  - method: GET
+    path: /api/v1/goals/{id}
+  - method: PATCH
+    path: /api/v1/goals/{id}
+  - method: GET
+    path: /api/v1/goals/{id}/status
+  - method: PATCH
+    path: /api/v1/goals/{id}/status
+  - method: GET
+    path: /api/v1/statuses
+  - method: POST
+    path: /api/v1/goals/relations
+  - method: GET
+    path: /api/v1/agent-runs
+  - method: POST
+    path: /api/v1/agent-runs
+  - method: PATCH
+    path: /api/v1/agent-runs/{id}
+  - method: POST
+    path: /api/v1/agent-runs/{id}/cancel
+  - method: GET
+    path: /api/v1/agent-run-lifecycle
+  - method: GET
+    path: /api/v1/agent-runs/{id}/usage
+  - method: POST
+    path: /api/v1/agent-runs/{id}/usage
+  - method: GET
+    path: /api/v1/agent-runs/{id}/events
+  - method: POST
+    path: /api/v1/agent-runs/{id}/events
+  - method: GET
+    path: /api/v1/agent-runs/{id}/approvals
+  - method: POST
+    path: /api/v1/agent-runs/{id}/approvals

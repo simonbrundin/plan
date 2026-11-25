@@ -209,6 +209,32 @@ gränssnittet - ett nytt namn utan migrering ger två sanningar. 2026-11-25 bytt
 `blocked` till `waiting_approval` och `done` till `succeeded`; migreringen sker
 idempotent i `src/go/internal/database/db.go` vid uppstart.
 
+## Kontraktet mellan Plan och agenten
+
+Plan äger agentkörningarna, men agenten och Plan pratar via HTTP - och de två
+sidorna ligger i samma repo. Därför finns kontraktet som en fil:
+`src/contracts/plan-agent.yaml`.
+
+Filen beskriver de delar agenten använder: faser, tillstånd, terminala
+tillstånd, tillstånd där en människa måste agera, triggrar, profiler och de
+API-anrop agenten gör. Den är versionsstyrd - `version: 1` beskriver första
+versionen, som samtidigt bytte `blocked` till `waiting_approval` och `done` till
+`succeeded`.
+
+Båda sidor testar mot samma fil:
+
+| Sida | Test | Vad det fångar |
+| --- | --- | --- |
+| Plan | `src/go/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, och att varje anrop i kontraktet finns i OpenAPI-specifikationen |
+| Agent | `src/agent/internal/planclient` | att agentens statuskonstanter och sökvägar stämmer med kontraktet, och att kontraktets anrop finns i Plan |
+
+Sökvägarna i agentens klient ligger i `src/agent/internal/planclient/paths.go`
+som namngivna konstanter - annars går det inte att jämföra dem mot kontraktet.
+I koden skrivs parametrar som `%d`, i kontraktet som `{id}`.
+
+Om kontraktet ändras så att det kräver samtidiga ändringar på båda sidor, bumpas
+versionen - då går det att se i historiken att kontraktet ändrades.
+
 ## Checkpoint-orchestratorn
 
 Checkpoint-orchestratorn (`src/agent/internal/core/workflow`) driver det planerade

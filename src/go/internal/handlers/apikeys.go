@@ -58,7 +58,7 @@ func NewAPIKeyHandler() *APIKeyHandler {
 // @Security BearerAuth
 // @Success 200 {array} APIKey
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/api-keys [get]
+// @Router /api/v1/api-keys [get]
 func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -111,7 +111,7 @@ func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 // @Success 201 {object} APIKeyResponse
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/api-keys [post]
+// @Router /api/v1/api-keys [post]
 func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -178,7 +178,7 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 // @Success 200 {object} map[string]bool
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/api-keys/{id} [delete]
+// @Router /api/v1/api-keys/{id} [delete]
 func (h *APIKeyHandler) DeleteAPIKey(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
