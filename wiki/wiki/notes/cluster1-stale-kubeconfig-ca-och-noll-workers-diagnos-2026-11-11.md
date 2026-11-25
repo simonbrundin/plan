@@ -23,8 +23,12 @@ Diagnos 2026-11-11 (session: felsökning av 'workers ansluter inte').
 - NYTT ADMIN-KUBECONFIG: repot talos/talosconfig har tomma certifikat (kan inte anvandas).
   ~/.talos/config fungerar for Talos-API:t, och en fungerande admin-kubeconfig far man med
   "talosctl --talosconfig ~/.talos/config --nodes 10.10.10.11 kubeconfig <fil>".
-  I ~/.kube/config fungerar kontexterna admin@cluster1-2 ... admin@cluster1-6; admin@cluster1 har
-  fortfarande en for gammal CA.
+  I ~/.kube/config fanns 2026-11-25 kontexterna admin@cluster1-2 ... admin@cluster1-6 (samt -1-1);
+  admin@cluster1 hade fortfarande en for gammal CA. UPPDATERAT 2026-11-25: alla dubbletter ar
+  borttagna och admin@cluster1 ar nu den enda giltiga admin-kontexten (VIP 10.10.10.10 + aktuell
+  CA). Se [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]].
+  Varfor: talosctl kubeconfig --merge lagger in nya kontexter varje gang - anvand
+  "talosctl kubeconfig /tmp/kc.yaml --merge=false" istallet.
 
 ## 1. Två helt separata fel - blanda inte ihop dem
 
@@ -32,7 +36,7 @@ A) KLIENTEN (kubeconfig) - det som gav 'x509: certificate signed by unknown auth
    - ~/.kube/config kontexten admin@cluster1 pekar pa server 10.10.10.12:6443 med en CA fran 2026-10-14 (sha256 CA:5C:EB:...).
    - KLUSTRET anvander CA 2026-10-22 (sha256 7B:3F:A5:9A:4F:69:E7:20:28:1A:AF:79:C7:56:86:C4:56:7B:3F:F1:09:29:C0:E1:16:2F:66:C0:A1:09:5C:DA).
    - Apiservernas servercertifikat pa alla tre controlplanes ar utstalda 2026-11-11 (10:54 / 11:22 / 11:24) - dvs CA:n roterades om.
-   - LOSNING: 'talosctl --nodes 10.10.10.11 kubeconfig' (skriver in i ~/.kube/config). Skapade kontexten admin@cluster1-4, som ar den nuvarande current-context och fungerar.
+   - LOSNING: 'talosctl --nodes 10.10.10.11 kubeconfig' (skriver in i ~/.kube/config). Skapade kontexten admin@cluster1-4, som ar den nuvarande current-context och fungerar. (2026-11-25: de -N-kontexterna ar borttagna, admin@cluster1 anvands nu.)
    - VARFORS: talosctl kubeconfig mergar in i befintlig ~/.kube/config och byter namn pa krockande 'cluster1' -> 'cluster1-2/-3/-4'. Det var darfor jag fick tre extra kontexter; -2 och -3 ar nu borttagna.
 
 B) KLUSTRET HAR NOLL WORKERS - det faktiska problemet.

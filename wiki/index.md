@@ -7,9 +7,9 @@ och gå sedan ner på sidorna som är relevanta.
 | Typ | Antal |
 |---|---|
 | Entiteter | 6 |
-| Koncept | 19 |
+| Koncept | 20 |
 | Sammanfattningar | 7 |
-| Noter | 361 |
+| Noter | 369 |
 
 ## Entiteter
 
@@ -22,6 +22,7 @@ och gå sedan ner på sidorna som är relevanta.
 
 ## Koncept
 
+- [[concepts/anvanda-agenter-i-plan]] - Så här använder en människa agenterna i Plan-gränssnittet (Nuxt, `src/nuxt`). _(uppdaterad 2026-11-26)_
 - [[concepts/authentik]] - Authentik var tidigare identity provider i klustret och är nu ersatt av Zitadel. _(uppdaterad 2026-10-23)_
 - [[concepts/cert-manager]] - cert-manager är en Kubernetes-operator som automatiserar hantering av TLS-certifikat. _(uppdaterad 2026-10-24)_
 - [[concepts/cloudflare-tunnel]] - Cloudflare Tunnel är utkommenterat i komponentlistan och används inte - trafiken går via DuckDNS och port-forwarding i stället. _(uppdaterad 2026-10-24)_
@@ -92,6 +93,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] - Matchbox-profilerna node-controlplane-1..3 pekar på /assets/talos-config/nodes/controlplane-N.yaml, men den filen genereras inte: pxe/gen... _(uppdaterad 2026-11-17)_
 - [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] - Bakgrund: neuro (github.com/simonbrundin/neuro) är ett offentligt repo. _(uppdaterad 2026-11-17)_
 - [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] - Kustomex och Flux kan inte installera en CRD och använda den i samma synkning. _(uppdaterad 2026-11-24)_
+- [[notes/ctrl-backspace-i-foot-skickar-ctrl-w-till-pi]] - Foot skickade Ctrl+Backspace som rå byte 0x08. _(uppdaterad 2026-11-25)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
@@ -110,6 +112,8 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/flera-kalendrar-med-egna-farger-i-plan]] - Användaren kan nu skapa hur många kalendrar som helst (t.ex. _(uppdaterad 2026-11-18)_
 - [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] - Ny funktion i pappa: på /personer kan man markera flera personkort och parkera hela gänget med samma skäl och samma genomgångsdatum. _(uppdaterad 2026-11-18)_
 - [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] - Symptom: flux-system-kustomizationen i prod stod kvar i 'Source artifact not found' i 20 timmar och source-controller kraschade i en omst... _(uppdaterad 2026-11-24)_
+- [[notes/foot-bindningen-kraver-omstart-av-foot]] - Konfigurationen \x17=Control+BackSpace validerar korrekt, men foot läser foot.ini vid uppstart. _(uppdaterad 2026-11-25)_
+- [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] - 2026-11-25, efter kubeconfig-städningen (se [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]])... _(uppdaterad 2026-11-25)_
 - [[notes/foraldrar-syns-pa-mal-i-now]] - Målsidan /now (Gör nu) visar nu vilka föräldrar ett mål ligger under. _(uppdaterad 2026-11-22)_
 - [[notes/globala-agentinstruktioner-deployas-via-dotfiles]] - Globala agentinstruktioner bor i dotfiles-repot och deployas med stow till agenternas konfigurationskataloger. _(uppdaterad 2026-10-21)_
 - [[notes/go-imap-uidstore-istallet-for-store-med-uid-mangd]] - 2026-11-19: Bugfix i src/go/imap/client.go - MarkAsRead och MarkAsUnread använde UidSearch (som returnerar UIDs) och skickade sedan dess... _(uppdaterad 2026-11-20)_
@@ -168,6 +172,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
+- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] - 2026-11-25: ~/.kube/config innehöll 8 kontexter mot samma Talos-kluster. _(uppdaterad 2026-11-25)_
 - [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] - I prod-klustret gick det inte att läsa poddarnas loggar med 'kubectl logs' på noderna worker-4, worker-5, worker-6 och worker-7. _(uppdaterad 2026-11-24)_
 - [[notes/kunskaps-wiki]] - Så fungerar den globala kunskaps-wikin, vilka lager den har och hur agenter använder verktyget. _(uppdaterad 2026-11-17)_
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] - Under omsättningen till Karpathys tre-lagers-modell granskades varje sida mot den faktiska infrastrukturen i ~/repos/infrastructure. _(uppdaterad 2026-10-24)_
@@ -207,6 +212,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]] - Nuxt-UI:t har nu en dropdown med alla e-postkonton och en inloggningsknapp _(uppdaterad 2026-11-17)_
 - [[notes/mailmaster-svarmejl-fick-fel-brodtext-tre-buggar-i-svarttextskedjan]] - Symtom: MailAgent skickade svarmejl men brödtexten var ofta fel (t.ex. _(uppdaterad 2026-11-17)_
 - [[notes/mailvyn-mail-omstegad-till-tailwind-tema]] - Sidorna /mail och komponenterna AccountSelector, EmailControls, EmailList använde handskrivet scoped-CSS med en egen reset (:deep(*)) oc... _(uppdaterad 2026-11-17)_
+- [[notes/mal-540-slutfort-agentens-readme-andring-granskad-och-mergead]] - 2026-11-25: mal #540 (Dokumentera agentplattformen i README) gick fran verify till completed. _(uppdaterad 2026-11-26)_
 - [[notes/manuell-sortering-av-mal-pa-priority]] - På /priority kan det markerade målet nu flyttas med ArrowUp/ArrowDown. _(uppdaterad 2026-11-17)_
 - [[notes/marknadslage-panel-hogst-upp-pa-personer-i-pappa]] - Ny panel (MarknadPanel.vue) högst upp på /personer i pappa: uppskattad population (SCB Yrkesregister BAS 2024) vs. _(uppdaterad 2026-11-18)_
 - [[notes/masterdatabas-i-postgres-schema-import-och-drift-for-it-rekryteringen]] - Projekt 'pappa' har nu en riktig masterdatabas i stället för bara en YAML-fil. _(uppdaterad 2026-11-03)_
@@ -239,6 +245,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/ny-rs232-hardvara-ak-co-02-db9-breakout-och-kopplingen-till-kvm-ns-3-pin]] - Inköp 2026-11-20: AKYGA AK-CO-02 (B07TXJXWJ3) = USB-A hane -> DB9 **hane** RS-232-kabel, 1 m, chip oklart (Akyga-länken pekar på FT232... _(uppdaterad 2026-11-20)_
 - [[notes/ny-terminal-i-tmux-fragade-efter-datorns-losenord]] - Varje ny shell (tmux-fönster/tab, ny terminal) startade ~/.config/secrets/load.sh, som KÖRDE `op read op://Private/Neon API key/credent... _(uppdaterad 2026-11-20)_
 - [[notes/nya-mal-far-ikon-fran-titeln]] - När ett mål skapas via Nuxts useGoalApi söks Iconify med målens titel via /api/icons. _(uppdaterad 2026-11-17)_
+- [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] - `kubectl --context oidc-cluster1` gav "You must be logged in to the server (Unauthorized)" _(uppdaterad 2026-11-25)_
 - [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_
 - [[notes/wordlist-kallor]] - Ordlistan finns på två ställen och måste hållas i synk. _(uppdaterad 2026-10-21)_
@@ -275,6 +282,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] - Symtom: Popcorn Time 0.5.1 (AppImage) startar men listan är tom och felet 'The remote movies API failed to respond' visas. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] - Fakta (verifierat 2026-10-24 mot API-servrarna fusme.link/jfper.link/uxert.link/yrkde.link): katalogen (Filmer/Serier/Anime) har INGA sve... _(uppdaterad 2026-11-17)_
 - [[notes/popup-editor-i-klickbar-rad-klicken-bubblar-och-navigerar-bort]] - Att rendera en editor/popup INUTI en klickbar rad gör att klick i popupen bubblar upp till radens klick-handler. _(uppdaterad 2026-11-19)_
+- [[notes/pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller]] - 2026-11-25: .github/workflows/pr-preview.yaml rad 49 har taggen _(uppdaterad 2026-11-26)_
 - [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]] - Symtom: att ändra ordningen på /now med ArrowUp/ArrowDown såg ut att fungera, _(uppdaterad 2026-11-23)_
 - [[notes/priority-vyn-byter-namn-till-gor-nu]] - Gör nu introducerades som ny route /now. _(uppdaterad 2026-11-22)_
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
@@ -414,5 +422,6 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
 - [[notes/aterkommande-mal-samma-malobjekt-med-upprepningsregel]] - Återkommande mål (t.ex. _(uppdaterad 2026-11-18)_
 - [[notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva]] - Tidigare begränsades varje återkommande serie till 8 förekomster innan händelserna grupperades per månad/år (limitRecurringOccurren... _(uppdaterad 2026-11-18)_
+- [[notes/aterstaende-funktioner-i-agentplattformen]] - 2026-11-25: Efter sammanslagningen av agents-repot och verifieringen av AgentRun-kontraktet bedöms följande funktioner återstå under ... _(uppdaterad 2026-11-25)_
 - [[notes/atta-feature-commits-pushade-till-det-arkiverade-mailmaster-repot]] - Arbetet låg som ocommittade ändringar i arbetsytan i det arkiverade mailmaster-repot och skickades i 8 commits (regelparsering, AI-svar... _(uppdaterad 2026-11-20)_
 

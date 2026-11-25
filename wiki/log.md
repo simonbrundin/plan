@@ -2662,3 +2662,70 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-25] link | notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas -> entities/home-assistant
 
+
+## [2026-11-25] ingest | create notes/aterstaende-funktioner-i-agentplattformen
+- [create] [[notes/aterstaende-funktioner-i-agentplattformen]] — ny sida från inboxen
+- [create] [[notes/ctrl-backspace-i-foot-skickar-ctrl-w-till-pi]] — ny sida från inboxen
+- [create] [[notes/foot-bindningen-kraver-omstart-av-foot]] — ny sida från inboxen
+- [archive] 2026-11-25-aterstaende-funktioner-i-agentplattformen.md
+- [archive] 2026-11-25-ctrl-backspace-i-foot-skickar-ctrl-w-till-pi.md
+- [archive] 2026-11-25-foot-bindningen-kraver-omstart-av-foot.md
+## [2026-11-25] ingest | create notes/ctrl-backspace-i-foot-skickar-ctrl-w-till-pi
+## [2026-11-25] ingest | create notes/foot-bindningen-kraver-omstart-av-foot
+
+
+## [2026-11-25] ingest | create notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna
+- [create] [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] — ny sida från inboxen
+- [archive] 2026-11-25-kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna.md
+
+
+## [2026-11-25] ingest | create notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard
+- [create] [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] — ny sida från inboxen
+- [archive] 2026-11-25-falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard.md
+
+
+## [2026-11-25] link | notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna -> notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard
+
+
+## [2026-11-25] link | notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard -> notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna
+
+
+## [2026-11-25] ingest | create notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat
+- [create] [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] — ny sida från inboxen
+- [archive] 2026-11-25-oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat.md
+
+
+## [2026-11-25] link | notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat -> notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna
+
+
+## [2026-11-25] link | notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat -> notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard
+
+
+## [2026-11-25] link | notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna -> notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat
+
+
+## [2026-11-25] link | notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard -> notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat
+
+
+## [2026-11-26] page | concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-26] link | concepts/anvanda-agenter-i-plan -> concepts/sops
+
+
+## [2026-11-26] unlink | concepts/anvanda-agenter-i-plan -> concepts/sops
+
+
+## [2026-11-26] link | concepts/anvanda-agenter-i-plan -> notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln
+
+
+## [2026-11-26] page | concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-26] ingest | create notes/mal-540-slutfort-agentens-readme-andring-granskad-och-mergead
+- [create] [[notes/mal-540-slutfort-agentens-readme-andring-granskad-och-mergead]] — ny sida från inboxen
+- [create] [[notes/pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller]] — ny sida från inboxen
+- [archive] 2026-11-26-mal-540-slutfort-agentens-readme-andring-granskad-och-mergead.md
+- [archive] 2026-11-26-pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller.md
+## [2026-11-26] ingest | create notes/pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller
+

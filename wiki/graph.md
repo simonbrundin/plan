@@ -5,6 +5,7 @@ Kunskapsgrafen: varje nod är en sida, varje kant är en länk mellan dem.
 
 ```mermaid
 graph LR
+  n_concepts_anvanda_agenter_i_plan["Använda agenter i Plan"]
   n_concepts_authentik["Authentik"]
   n_concepts_cert_manager["Cert-Manager"]
   n_concepts_cloudflare_tunnel["Cloudflare Tunnel (cloudflared)"]
@@ -45,6 +46,7 @@ graph LR
   n_notes_artikeln_om_agentic_software_factory_vad_som_ar_relevant_for_agentsystemet["Artikeln om agentic software factory - vad som är relevant för agentsystemet"]
   n_notes_aterkommande_mal_samma_malobjekt_med_upprepningsregel["Återkommande mål: samma målobjekt med upprepningsregel"]
   n_notes_aterkommande_serier_doljs_inte_langre_beroende_pa_zoomniva["Återkommande serier döljs inte längre beroende på zoomnivå"]
+  n_notes_aterstaende_funktioner_i_agentplattformen["Återstående funktioner i agentplattformen"]
   n_notes_atta_feature_commits_pushade_till_det_arkiverade_mailmaster_repot["Åtta feature-commits pushade till det arkiverade mailmaster-repot"]
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt["Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt"]
   n_notes_automatisk_malikon_behovde_sokord_och_svenska_alias["Automatisk målikon behövde sökord och svenska alias"]
@@ -66,6 +68,7 @@ graph LR
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad["Controlplane-recovery via PXE är inte konfigurerad"]
   n_notes_cookies_json_var_versionsstyrd_i_offentligt_neuro_repo["cookies.json var versionsstyrd i offentligt neuro-repo"]
   n_notes_crd_beroende_resurser_maste_synkas_i_ett_andra_steg["CRD-beroende resurser måste synkas i ett andra steg"]
+  n_notes_ctrl_backspace_i_foot_skickar_ctrl_w_till_pi["Ctrl-Backspace i foot skickar Ctrl-W till Pi"]
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater["Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater"]
   n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er["Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er"]
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor["dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor"]
@@ -79,11 +82,13 @@ graph LR
   n_notes_escape_i_datum_popup_maste_hanteras_fore_leader_listenern["Escape i datum-popup måste hanteras före leader-listenern"]
   n_notes_eviga_mal_i_plan_kan_inte_slutforas["Eviga mål i plan - kan inte slutföras"]
   n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append["Expanderade .eml läggs in som riktiga mejl i mappen (APPEND)"]
+  n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard["Fälla fixad: talosctl kubeconfig skapar inga dubbletter längre (talos-kubeconfig + shell-guard)"]
   n_notes_feedback_loop_ai_uppdaterar_mailreglerna_och_analyserar_om_mejlet["Feedback-loop: AI uppdaterar mailreglerna och analyserar om mejlet"]
   n_notes_figma_lokala_fonter_pa_linux_figma_agent_linux["Figma lokala fonter på Linux: figma-agent-linux"]
   n_notes_flera_kalendrar_med_egna_farger_i_plan["Flera kalendrar med egna färger i Plan"]
   n_notes_flerval_parkera_flera_kandidater_samtidigt_i_personer["Flerval: parkera flera kandidater samtidigt i /personer"]
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog["Flux i prod klonade ett 1,3 GB stort repo och dog"]
+  n_notes_foot_bindningen_kraver_omstart_av_foot["Foot-bindningen kräver omstart av foot"]
   n_notes_foraldrar_syns_pa_mal_i_now["Föräldrar syns på mål i /now"]
   n_notes_globala_agentinstruktioner_deployas_via_dotfiles["Globala agentinstruktioner deployas via dotfiles"]
   n_notes_go_imap_uidstore_istallet_for_store_med_uid_mangd["go-imap: UidStore istället för Store med UID-mängd"]
@@ -147,6 +152,7 @@ graph LR
   n_notes_kortkommando_hjalpen_i_helpmodal_maste_folja_tangentandringar["Kortkommando-hjälpen i HelpModal måste följa tangentändringar"]
   n_notes_kostnad_och_budget_for_agentkorningar["Kostnad och budget för agentkörningar"]
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force["Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force"]
+  n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna["Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna"]
   n_notes_kubeletts_logg_api_svarade_med_tls_internal_error_i_prod["Kubeletts logg-API svarade med tls: internal error i prod"]
   n_notes_kunskaps_wiki["Kunskaps-wikin"]
   n_notes_kureringspasset_hittade_foraldrad_kunskap_i_wikin["Kureringspasset hittade foraldrad kunskap i wikin"]
@@ -185,6 +191,7 @@ graph LR
   n_notes_mailmaster_kontodropdown_outlook_inloggning_via_device_code["MailMaster: kontodropdown + Outlook-inloggning via device code"]
   n_notes_mailmaster_svarmejl_fick_fel_brodtext_tre_buggar_i_svarttextskedjan["MailMaster: svarmejl fick fel brödtext - tre buggar i svarttextskedjan"]
   n_notes_mailvyn_mail_omstegad_till_tailwind_tema["Mailvyn (/mail) omstegad till Tailwind-tema"]
+  n_notes_mal_540_slutfort_agentens_readme_andring_granskad_och_mergead["Mal 540 slutfort: agentens README-andring granskad och mergead"]
   n_notes_mal_kan_ha_due_datum_deadline["Mål kan ha due-datum (deadline)"]
   n_notes_mal_kan_ha_en_lang_beskrivning_redigerad_med_tangenten_t["Mål kan ha en lång beskrivning, redigerad med tangenten t"]
   n_notes_mal_kan_ha_startdatum_syns_i_priority_forst_nar_datumet_passerat["Mål kan ha startdatum - syns i /priority först när datumet passerat"]
@@ -217,6 +224,7 @@ graph LR
   n_notes_ny_rs232_hardvara_ak_co_02_db9_breakout_och_kopplingen_till_kvm_ns_3_pin["Ny RS232-hårdvara: AK-CO-02 + DB9-breakout, och kopplingen till KVM:ns 3-pin"]
   n_notes_ny_terminal_i_tmux_fragade_efter_datorns_losenord["Ny terminal i tmux frågade efter datorns lösenord"]
   n_notes_nya_mal_far_ikon_fran_titeln["Nya mål får ikon från titeln"]
+  n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat["OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat"]
   n_notes_omarchy_idle_lasning_stangs_av_via_shell_json_inte_hypridle_conf["Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf)"]
   n_notes_one_com_lagrar_mappar_i_nfd_normalisera_i_getfoldername["one.com lagrar mappar i NFD - normalisera i getFolderName"]
   n_notes_p_tangenten_konfliktade_med_viktlaget_pa_priority["p-tangenten konfliktade med viktläget på /priority"]
@@ -253,6 +261,7 @@ graph LR
   n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix["Popcorn Time: 'remote movies API failed to respond' - orsak och fix"]
   n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection["Popcorn Time: svenskt ljud finns INTE i katalogen - använd Torrentsamling (Torrent Collection)"]
   n_notes_popup_editor_i_klickbar_rad_klicken_bubblar_och_navigerar_bort["Popup-editor i klickbar rad: klicken bubblar och navigerar bort"]
+  n_notes_pr_preview_yaml_bygger_ogiltig_image_tagg_alla_pr_preview_floden_faller["pr-preview.yaml bygger ogiltig image-tagg - alla PR-preview-floden faller"]
   n_notes_prioriteringsordningen_pa_now_sparades_inte_bulk_update_och_spar_ko["Prioriteringsordningen på /now sparades inte - bulk-update och spar-kö"]
   n_notes_priority_vyn_byter_namn_till_gor_nu["Priority-vyn byter namn till Gör nu"]
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat["Priorityfilter ska behandla saknat started som ej påbörjat"]
@@ -398,6 +407,7 @@ graph LR
   n_summaries_kalenderns_detaljnivaer_och_lane_packning["Kalenderns detaljnivåer och lane-packning"]
   n_summaries_llm_wiki_karpathy["Sammanfattning: LLM Wiki (Karpathy)"]
   n_summaries_longhorn_disk_guide["Sammanfattning: Diskar i Longhorn"]
+  n_concepts_anvanda_agenter_i_plan --> n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln
   n_concepts_authentik --> n_concepts_oidc
   n_concepts_authentik --> n_concepts_zitadel
   n_concepts_authentik --> n_concepts_cloudnative_pg
@@ -574,6 +584,7 @@ graph LR
   n_notes_ci_gates_kanonisk_agentrun_livscykel_och_versionerat_plan_agent_kontrakt --> n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs
+  n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad --> n_entities_pxe_server
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad --> n_notes_talos_etcd_en_gammal_ephemeral_kopia_pa_controlplanet_ger_en_trasig_raft_log
   n_notes_cookies_json_var_versionsstyrd_i_offentligt_neuro_repo --> n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken
@@ -594,6 +605,8 @@ graph LR
   n_notes_eviga_mal_i_plan_kan_inte_slutforas --> n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat
   n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append --> n_notes_mailagenten_expanderar_bifogade_eml_till_egna_mejl
   n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append --> n_notes_moderposten_arkiveras_nar_eml_bilagorna_har_lagts_in
+  n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
+  n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_handelsen_har_ingen_egen_farg
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_standardkalender_i_plan
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_valfri_fargkod_pa_kalendrar
@@ -654,6 +667,8 @@ graph LR
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force --> n_notes_synk_hallbokningar_kommunens_actor_smartbook_matchi
+  n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
+  n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
   n_notes_kunskaps_wiki --> n_notes_globala_agentinstruktioner_deployas_via_dotfiles
   n_notes_kunskaps_wiki --> n_notes_infrastructure_agents_md_uppdaterad_tre_fallor_for_agenter
   n_notes_kunskaps_wiki --> n_notes_konventioner
@@ -741,6 +756,8 @@ graph LR
   n_notes_nuxt_sidomeny_kandidater_som_startsida_i_pappa --> n_notes_kandidatlistan_heter_nu_personer
   n_notes_nya_mal_far_ikon_fran_titeln --> n_notes_automatisk_malikon_behovde_sokord_och_svenska_alias
   n_notes_nya_mal_far_ikon_fran_titeln --> n_notes_malikoner_anvander_enkel_oversattning_fore_iconify
+  n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
+  n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_entities_pxe_server
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_notes_rk3399_s_bootrom_soker_spi_emmc_sd_usb_hardkodat
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
@@ -1091,6 +1108,7 @@ graph LR
 - **notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund** <- [[notes/masterdatabas-i-postgres-schema-import-och-drift-for-it-rekryteringen]], [[notes/pappa-anstallningshistorik-i-cv-format-fix-av-kompetensordboken]]
 - **notes/eviga-mal-i-plan-kan-inte-slutforas** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]]
 - **notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append** <- [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]], [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]]
+- **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/globala-agentinstruktioner-deployas-via-dotfiles** <- [[notes/kunskaps-wiki]]
 - **notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen** <- [[notes/kalenderhandelser-aterstallda-fran-neon-wal-historik]]
@@ -1102,6 +1120,7 @@ graph LR
 - **notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas** <- [[entities/home-assistant]]
 - **notes/handelsen-har-ingen-egen-farg** <- [[notes/flera-kalendrar-med-egna-farger-i-plan]]
 - **notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon** <- [[entities/home-assistant]]
+- **notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln** <- [[concepts/anvanda-agenter-i-plan]]
 - **notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/imap-inloggning-for-michael-brundin-soulmate-se-kraver-admin-consent** <- [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]]
 - **notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter** <- [[notes/kunskaps-wiki]]
@@ -1126,6 +1145,7 @@ graph LR
 - **notes/konventioner** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image** <- [[entities/pxe-server]]
 - **notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force** <- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]]
+- **notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
 - **notes/kunskaps-wiki** <- [[notes/arkitektur]], [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]], [[notes/utvecklingsflode]], [[summaries/llm-wiki-karpathy]]
 - **notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin** <- [[notes/kunskaps-wiki]], [[summaries/llm-wiki-karpathy]]
 - **notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel** <- [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]]
@@ -1179,6 +1199,7 @@ graph LR
 - **notes/nuxt-cli-via-bun-run-dev-gar-sonder-i-stk** <- [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]]
 - **notes/nuxt-sidomeny-kandidater-som-startsida-i-pappa** <- [[notes/kandidatlistan-heter-nu-personer]], [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]]
 - **notes/nya-mal-far-ikon-fran-titeln** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
+- **notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat** <- [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]]
 - **notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername** <- [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]]
 - **notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran** <- [[entities/pxe-server]], [[notes/radxa-bradena-behover-bootmedium-men-talos-och-bootloader-maste-ligga-pa-skilda-medium]], [[notes/rk3399-s-bootrom-soker-spi-emmc-sd-usb-hardkodat]], [[notes/u-boot-2026-01-rock-4c-saknar-bootfile-boot-script-dhcp-natverksboot-dor-direkt]]
 - **notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo** <- [[notes/pappa-hemlighet-i-build-context-env-i-docker-imagen]]
