@@ -46,7 +46,7 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-{{ github.sha }}
+            ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-${{ github.sha }}
             ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
