@@ -140,11 +140,17 @@ An agent run moves through the following phases:
    approval.
 5. **completed** - publish the verified branch for review and merge.
 
-A run has one of these statuses: `queued`, `running`, `blocked`, `done`,
-`failed`, or `cancelled`. `blocked` means that the agent cannot continue without
-input or a decision; it is not an automatic failure. `cancelled` means that a
+A run has one of these statuses: `queued`, `running`, `waiting_approval`,
+`succeeded`, `failed`, or `cancelled`. `waiting_approval` means that the agent
+cannot continue without input or a decision; it is not an automatic failure.
+`succeeded`, `failed` and `cancelled` are terminal. `cancelled` means that a
 human stopped the run - the run keeps its history, and the Kubernetes job is
 cleaned up.
+
+Phases and statuses are canonical and versioned in
+[`src/contracts/plan-agent.yaml`](src/contracts/plan-agent.yaml). Plan and the
+agent are both tested against that file, so the names cannot drift apart
+between the interface, the API and the database.
 
 ### Approval and delivery
 
@@ -173,9 +179,22 @@ The complete chain was verified in dev for goal #540: AgentRun #72 ran as
 Kubernetes Job `agent-worker-run-72`, approval #54 was decided in the Plan
 interface, the approved change was applied in an isolated workspace, and the
 tests passed. The agent published branch `agent/goal-540-run-72` for review and
-merge. Huvudgrennen är orörd, och jobbet avslutades direkt när körningen var
-klar. Körningen står kvar i verifyfasen eftersom en människa ska granska och
-mergea branchen.
+merge and left the main branch untouched. The job was torn down as soon as the
+run finished, and the run stayed in the verify phase until a human reviewed
+and merged the branch.
+
+### Profiles and permissions
+
+Every run carries a profile that sets technical limits - it is not an
+instruction to the model. The `coding` profile may clone the repository,
+change files and use the Git secret; the `life` profile may not. An unknown
+profile falls back to `coding`, the stricter one, so a configuration mistake
+can never grant more rights than intended.
+
+The agent authenticates with its own API key, scoped to `agent`. That scope
+allows working with goals, runs and their approvals, but it cannot decide an
+approval, delete data or manage API keys. The human gate is enforced by the
+API, not by the agent's good intentions.
 
 ### Cost and budgets
 
