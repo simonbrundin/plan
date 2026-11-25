@@ -5,16 +5,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../../base
-namespace: plan-pr-120
+namespace: plan-pr-121
 patches:
-- patch: "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: plan-pr-120\n  labels:\n\
-    \    app.kubernetes.io/managed-by: flux\n    preview: 'true'\n    pr-number: '120'\n"
+- patch: "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: plan-pr-121\n  labels:\n\
+    \    app.kubernetes.io/managed-by: flux\n    preview: 'true'\n    pr-number: '121'\n"
   target:
     kind: Namespace
     name: plan
 - patch: "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: nuxt-app\n  labels:\n\
     \    app: plan\n    preview: 'true'\nspec:\n  replicas: 1\n  template:\n    spec:\n\
-    \      containers:\n      - name: plan\n        image: ghcr.io/simonbrundin/plan/pr-preview:120-551000b8324987b3231e5474b92701c4ff925b31@sha256:9ea41f7f83c19fcf5acfa3d65db9c35d83520b9ecf7ec959eaf5c75df7bf1d8c\n\
+    \      containers:\n      - name: plan\n        image: ghcr.io/simonbrundin/plan/pr-preview:121-a526f3751d803ed2ef4166b2067ebf5807124868@sha256:576e8a957ad152be70163c0d7c1961860dce86ab6875f8e1888c3e3609365d5a\n\
     \        resources:\n          requests:\n            memory: 64Mi\n         \
     \   cpu: 50m\n          limits:\n            memory: 128Mi\n            cpu: 200m\n"
   target:
@@ -22,7 +22,7 @@ patches:
     name: nuxt-app
 - patch: "apiVersion: gateway.networking.k8s.io/v1\nkind: HTTPRoute\nmetadata:\n \
     \ name: plan-route\n  annotations:\n    external-dns.alpha.kubernetes.io/hostname:\
-    \ plan-pr-120.simonbrundin.com.\nspec:\n  hostnames:\n  - plan-pr-120.simonbrundin.com\n"
+    \ plan-pr-121.simonbrundin.com.\nspec:\n  hostnames:\n  - plan-pr-121.simonbrundin.com\n"
   target:
     kind: HTTPRoute
     name: plan-route
