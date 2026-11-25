@@ -16,6 +16,8 @@ const goals = ref<Goal[]>([]);
 const runs = ref<AgentRun[]>([]);
 const pending = ref(true);
 const errorMessage = ref("");
+let refreshTimer: ReturnType<typeof setInterval> | undefined;
+let refreshInFlight = false;
 
 // Agentkörningens fas visar samma arbetsfas som målets status.
 const phaseLabels: Record<AgentRunPhase, string> = {
@@ -76,7 +78,9 @@ function formatUpdated(value: string): string {
   }).format(new Date(value));
 }
 
-onMounted(async () => {
+async function refreshAgentData(initial = false) {
+  if (refreshInFlight) return;
+  refreshInFlight = true;
   try {
     const [agentGoals, agentRuns] = await Promise.all([
       fetchAgentGoals(),
@@ -84,12 +88,25 @@ onMounted(async () => {
     ]);
     goals.value = agentGoals;
     runs.value = agentRuns;
+    if (initial) errorMessage.value = "";
   } catch (error) {
-    errorMessage.value = "Kunde inte ladda agentmålen.";
-    console.error("Failed to load agent goals:", error);
+    if (initial) errorMessage.value = "Kunde inte ladda agentmålen.";
+    console.error("Failed to refresh agent goals:", error);
   } finally {
-    pending.value = false;
+    refreshInFlight = false;
+    if (initial) pending.value = false;
   }
+}
+
+onMounted(async () => {
+  await refreshAgentData(true);
+  refreshTimer = setInterval(() => {
+    if (document.visibilityState === "visible") void refreshAgentData();
+  }, 5000);
+});
+
+onUnmounted(() => {
+  if (refreshTimer) clearInterval(refreshTimer);
 });
 </script>
 
@@ -101,6 +118,9 @@ onMounted(async () => {
       <p class="mt-2 text-ink-muted">
         Mål som är markerade för en agent. Agenten arbetar vidare och du kan godkänna
         det som behöver godkännande.
+      </p>
+      <p class="mt-2 text-xs text-ink-dim" aria-live="polite">
+        Uppdateras automatiskt var femte sekund när sidan är synlig.
       </p>
       <NuxtLink to="/agent-cost" class="mt-3 inline-block text-sm text-accent underline">
         Se kostnad och budgetgränser

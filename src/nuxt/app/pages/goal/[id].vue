@@ -66,8 +66,12 @@ const { fetchAgentRuns, fetchAgentRunEvents, fetchAgentApprovals } = useAgentApi
 const agentRun = ref<AgentRun | null>(null);
 const agentRunEvents = ref<AgentRunEvent[]>([]);
 const agentApprovals = ref<AgentApproval[]>([]);
+let agentPollTimer: ReturnType<typeof setInterval> | undefined;
+let agentRefreshInFlight = false;
 
 async function loadAgentRun() {
+  if (agentRefreshInFlight) return;
+  agentRefreshInFlight = true;
   try {
     const runs = await fetchAgentRuns(goalId.value);
     agentRun.value = runs[0] ?? null;
@@ -75,8 +79,26 @@ async function loadAgentRun() {
       ? await fetchAgentRunEvents(agentRun.value.id)
       : [];
     agentApprovals.value = await fetchAgentApprovals(agentRun.value?.id);
-  } catch {
-    agentRun.value = null;
+  } catch (cause) {
+    // Behåll senast kända läge vid ett tillfälligt nätverksfel. En refresh
+    // ska inte få en pågående körning att se ut att ha försvunnit.
+    console.warn('Kunde inte uppdatera AgentRun:', cause);
+  } finally {
+    agentRefreshInFlight = false;
+  }
+}
+
+function startAgentPolling() {
+  stopAgentPolling();
+  agentPollTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') void loadAgentRun();
+  }, 5000);
+}
+
+function stopAgentPolling() {
+  if (agentPollTimer) {
+    clearInterval(agentPollTimer);
+    agentPollTimer = undefined;
   }
 }
 
@@ -1121,6 +1143,7 @@ const descriptionExpanded = ref(false);
 
 watch(goalId, () => {
   descriptionExpanded.value = false;
+  void loadAgentRun();
 });
 
 function startEditDescription(target: { id: number; description?: string }) {
@@ -2330,11 +2353,13 @@ function handleKeydown(event: KeyboardEvent) {
 // Lägg till och ta bort event listener
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
-  loadAgentRun();
+  void loadAgentRun();
+  startAgentPolling();
 });
 
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
+  stopAgentPolling();
 });
 
 // Återställ selectedChildIndex när children ändras
