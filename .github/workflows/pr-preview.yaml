@@ -64,6 +64,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Installera Python-beroenden
+        run: python3 -m pip install --disable-pip-version-check pyyaml
+
       - name: Skapa PR Preview resurser
         env:
           PR_NUM: ${{ github.event.pull_request.number }}
@@ -166,6 +169,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Installera Python-beroenden
+        run: python3 -m pip install --disable-pip-version-check pyyaml
 
       - name: Ta bort preview-resurser och uppdatera kustomization
         env:
