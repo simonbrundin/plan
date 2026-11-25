@@ -19,7 +19,9 @@ jobs:
   # ============================================
   create-preview:
     name: Skapa PR Preview
-    if: github.event_name == 'pull_request'
+    # Bot-PR (label skip-review) får ingen preview-miljö. Annars skapar
+    # städjobbet en ny PR för varje PR, och kedjan blir oändlig.
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-review')
     runs-on: ubuntu-latest
     outputs:
       # build-push-action v5 har ingen "image"-output - bara imageid, digest
@@ -183,34 +185,22 @@ jobs:
           python3 .github/scripts/pr-preview-cleanup.py
 
       - name: Commit och pusha
-        env:
-          PR_NUM: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Konfigurera git
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          
-          # Lägg till ändringar
-          git add environments/pr/
-          
-          if git diff --staged --quiet; then
-            echo "Inga ändringar att committa"
-            exit 0
-          fi
-          
-          # Committa
-          git commit -F - <<'MSG'
-          chore: remove preview resources for PR $PR_NUM
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: remove preview resources for PR ${{ github.event.pull_request.number }}"
+          branch: bot/remove-pr-preview-${{ github.event.pull_request.number }}
+          delete-branch: true
+          title: "chore: remove preview resources for PR ${{ github.event.pull_request.number }}"
+          body: |
+            Automatically generated cleanup by GitHub Actions.
 
-          Auto-generated cleanup by GitHub Actions.
-          Flux will clean up Kubernetes resources.
-          MSG
-          
-          # Pusha direkt till main
-          git push origin main
-          
-          echo "✓ Tog bort preview-resurser"
+            Removes the preview overlay for the closed PR.
+          labels: |
+            ci
+            skip-review
+          add-paths: |
+            environments/pr
 
       - name: Kommentera PR
         if: always()
