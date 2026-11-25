@@ -37,9 +37,16 @@ This file contains preferences and requirements for AI coding agents working on 
   1Password - hämta med `op read "op://Private/<item>/<field>"`.
 
 ## Cluster Access
-- Kubectl: `kubectl --context admin@cluster1-2 ...` (kubeconfig i
+- Kubectl: `kubectl --context admin@cluster1 ...` (kubeconfig i
   `~/.kube/config`). `/tmp/kubeconfig-certificate` fungerar inte - det
-  pekar mot en gammal CA.
+  pekar mot en gammal CA. Kontexten `admin@cluster1` pekar mot VIP
+  `https://10.10.10.10:6443` med aktuell CA.
+- **Kör ALDRIG `talosctl kubeconfig` rakt in i `~/.kube/config`** - det mergar
+  in och skapar `cluster1-N`-dubbletter med olika CA. Använd
+  `talos-kubeconfig` (i `~/.local/bin`) som hämtar med `--merge=false` och
+  installerar `admin@cluster1` på rätt sätt, eller
+  `talosctl kubeconfig /tmp/kc.yaml --merge=false` och kopiera in CA+cert
+  manuellt. Shell-guarden i `dotfiles/bash/.bashrc` tvingar `--merge=false`.
 - `talosctl`: `talosctl -n <nod-ip> ...` med `~/.talos/config`.
 - **Ingen Vault och ingen ESO (External Secrets Operator)** i klustret - det
   var en ArgoCD-era-modell. SOPS via Flux är enda secret-väg. Se

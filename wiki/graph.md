@@ -192,6 +192,7 @@ graph LR
   n_notes_mailmaster_svarmejl_fick_fel_brodtext_tre_buggar_i_svarttextskedjan["MailMaster: svarmejl fick fel brödtext - tre buggar i svarttextskedjan"]
   n_notes_mailvyn_mail_omstegad_till_tailwind_tema["Mailvyn (/mail) omstegad till Tailwind-tema"]
   n_notes_mal_540_slutfort_agentens_readme_andring_granskad_och_mergead["Mal 540 slutfort: agentens README-andring granskad och mergead"]
+  n_notes_mal_568_verifierad_tva_samtidiga_agentruns_i_dev["Mål 568 verifierad: två samtidiga AgentRuns i dev"]
   n_notes_mal_kan_ha_due_datum_deadline["Mål kan ha due-datum (deadline)"]
   n_notes_mal_kan_ha_en_lang_beskrivning_redigerad_med_tangenten_t["Mål kan ha en lång beskrivning, redigerad med tangenten t"]
   n_notes_mal_kan_ha_startdatum_syns_i_priority_forst_nar_datumet_passerat["Mål kan ha startdatum - syns i /priority först när datumet passerat"]
@@ -711,6 +712,8 @@ graph LR
   n_notes_mailmaster_kontodropdown_outlook_inloggning_via_device_code --> n_notes_one_com_lagrar_mappar_i_nfd_normalisera_i_getfoldername
   n_notes_mailmaster_svarmejl_fick_fel_brodtext_tre_buggar_i_svarttextskedjan --> n_notes_mailmaster_granskning_av_ai_atgarder_fore_utforande
   n_notes_mailvyn_mail_omstegad_till_tailwind_tema --> n_notes_plan_appen_morkt_designsystem_med_semantiska_farg_token
+  n_notes_mal_568_verifierad_tva_samtidiga_agentruns_i_dev --> n_concepts_anvanda_agenter_i_plan
+  n_notes_mal_568_verifierad_tva_samtidiga_agentruns_i_dev --> n_notes_aterstaende_funktioner_i_agentplattformen
   n_notes_mal_kan_ha_due_datum_deadline --> n_notes_mal_kan_ha_startdatum_syns_i_priority_forst_nar_datumet_passerat
   n_notes_mal_kan_ha_en_lang_beskrivning_redigerad_med_tangenten_t --> n_notes_enter_pa_goals_skapar_nytt_grundmal_istallet_for_att_oppna_malet
   n_notes_mal_kan_ha_en_lang_beskrivning_redigerad_med_tangenten_t --> n_notes_eviga_mal_i_plan_kan_inte_slutforas
@@ -1052,6 +1055,7 @@ graph LR
 
 ## Backlinks
 
+- **concepts/anvanda-agenter-i-plan** <- [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1087,6 +1091,7 @@ graph LR
 - **notes/arkitektur** <- [[notes/bigram-algoritmen]], [[notes/konventioner]], [[notes/session-livscykel]], [[notes/utvecklingsflode]]
 - **notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet** <- [[notes/verifierade-policy-hal-i-tool-lagret-kommandon-ar-blocklist-inte-allowlist]], [[summaries/llm-wiki-karpathy]]
 - **notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva** <- [[notes/kalendern-begransar-aterkommande-forekomster-i-langtidvyer]], [[notes/uttunnade-serier-vags-sa-att-antalen-blir-exakta]]
+- **notes/aterstaende-funktioner-i-agentplattformen** <- [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
 - **notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt** <- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]]
 - **notes/automatisk-malikon-behovde-sokord-och-svenska-alias** <- [[notes/nya-mal-far-ikon-fran-titeln]]
 - **notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler** <- [[entities/pxe-server]]
