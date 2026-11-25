@@ -157,6 +157,29 @@ func TestReconcileMarkerarMisslyckatJobb(t *testing.T) {
 	}
 }
 
+// TestReconcileMarkerarRunningUtanJobbSomMisslyckad kontrollerar att en
+// körning inte blir kvar för evigt när Kubernetes-jobbet försvinner.
+func TestReconcileMarkerarRunningUtanJobbSomMisslyckad(t *testing.T) {
+	state := &planState{
+		runs: []planclient.AgentRun{{ID: 7, GoalID: 42, Status: planclient.RunStatusRunning}},
+	}
+	controller := newController(t, state, fake.NewSimpleClientset())
+
+	if err := controller.Reconcile(context.Background()); err != nil {
+		t.Fatalf("Reconcile: %v", err)
+	}
+
+	if len(state.updatedRuns) != 1 || state.updatedRuns[0].Status == nil || *state.updatedRuns[0].Status != planclient.RunStatusFailed {
+		t.Fatalf("uppdateringar = %v, vill ha en failed-uppdatering", state.updatedRuns)
+	}
+	if len(state.events) != 1 || state.events[0].Type != planclient.EventRunFailed {
+		t.Fatalf("händelser = %v, vill ha run_failed", state.events)
+	}
+	if state.events[0].Payload["reason"] != "job_missing" {
+		t.Errorf("orsak = %v, vill ha job_missing", state.events[0].Payload["reason"])
+	}
+}
+
 // TestReconcileRörInteKlartKörning kontrollerar att en pågående körning
 // inte får ett nytt jobb.
 func TestReconcileRörInteKlartKörning(t *testing.T) {
@@ -176,6 +199,37 @@ func TestReconcileRörInteKlartKörning(t *testing.T) {
 	}
 	if len(jobs.Items) != 0 {
 		t.Errorf("antal jobb = %d, vill ha 0", len(jobs.Items))
+	}
+}
+
+// TestReconcileDeadlineMarkerarMisslyckatJobb kontrollerar att Kubernetes
+// deadline rapporteras även innan Failed-räknaren hunnit uppdateras.
+func TestReconcileDeadlineMarkerarMisslyckatJobb(t *testing.T) {
+	state := &planState{
+		runs: []planclient.AgentRun{{ID: 7, GoalID: 42, Status: planclient.RunStatusRunning}},
+	}
+	client := fake.NewSimpleClientset()
+	_, err := client.BatchV1().Jobs("plan").Create(context.Background(), &batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{Name: "agent-worker-run-7", Namespace: "plan"},
+		Status: batchv1.JobStatus{Conditions: []batchv1.JobCondition{{
+			Type:   batchv1.JobConditionType("DeadlineExceeded"),
+			Status: "True",
+		}}},
+	}, metav1.CreateOptions{})
+	if err != nil {
+		t.Fatalf("create job: %v", err)
+	}
+
+	controller := newController(t, state, client)
+	if err := controller.Reconcile(context.Background()); err != nil {
+		t.Fatalf("Reconcile: %v", err)
+	}
+
+	if len(state.updatedRuns) != 1 || state.updatedRuns[0].Status == nil || *state.updatedRuns[0].Status != planclient.RunStatusFailed {
+		t.Fatalf("uppdateringar = %v, vill ha failed", state.updatedRuns)
+	}
+	if got := *state.updatedRuns[0].Summary; got != "Jobbet agent-worker-run-7 överskred sin tidsgräns" {
+		t.Errorf("summary = %q", got)
 	}
 }
 
@@ -202,6 +256,31 @@ func TestReconcileHopparÖverKörningarSomInteÄrKöade(t *testing.T) {
 }
 
 var _ = time.Second
+
+// TestReconcileStartarFleraOlikaMålParallellt kontrollerar att jobb för
+// olika mål inte blockeras av regeln om ett aktivt jobb per mål.
+func TestReconcileStartarFleraOlikaMålParallellt(t *testing.T) {
+	state := &planState{
+		runs: []planclient.AgentRun{
+			{ID: 7, GoalID: 42, Status: "queued"},
+			{ID: 8, GoalID: 43, Status: "queued"},
+		},
+	}
+	client := fake.NewSimpleClientset()
+	controller := newController(t, state, client)
+
+	if err := controller.Reconcile(context.Background()); err != nil {
+		t.Fatalf("Reconcile: %v", err)
+	}
+
+	jobs, err := client.BatchV1().Jobs("plan").List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		t.Fatalf("list jobs: %v", err)
+	}
+	if len(jobs.Items) != 2 {
+		t.Fatalf("antal jobb = %d, vill ha 2", len(jobs.Items))
+	}
+}
 
 // TestReconcileStartarEttJobbPerMål kontrollerar att två köade körningar
 // för samma mål inte ger två jobb.

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"plan-agent/internal/jobrunner"
 	"plan-agent/internal/planclient"
@@ -104,29 +105,41 @@ func (c *Controller) reconcileRun(ctx context.Context, run planclient.AgentRun) 
 
 	job, err := c.runner.Get(ctx, jobName)
 	if err != nil {
-		// Jobbet finns inte. Bara en köad körning startar ett nytt jobb.
-		if run.Status != "queued" {
+		if !apierrors.IsNotFound(err) {
+			return fmt.Errorf("failed to get job %s: %w", jobName, err)
+		}
+
+		// Jobbet finns inte. Bara en köad körning får skapa ett nytt jobb.
+		if run.Status == "queued" {
+			// Ett mål får ha högst ett pågående jobb - två körningar mot
+			// samma repo skulle skriva över varandra.
+			active, err := c.runner.HasActiveJobForGoal(ctx, run.GoalID, run.ID)
+			if err != nil {
+				return err
+			}
+			if active {
+				log.Printf("Goal #%d already has a running job - run %d stays queued", run.GoalID, run.ID)
+				return nil
+			}
+
+			if _, err := c.runner.Create(ctx, jobrunner.Spec{
+				GoalID:  run.GoalID,
+				RunID:   run.ID,
+				Name:    jobName,
+				Profile: run.AgentProfile,
+			}); err != nil {
+				return err
+			}
 			return nil
 		}
 
-		// Ett mål får ha högst ett pågående jobb - två körningar mot
-		// samma repo skulle skriva över varandra.
-		active, err := c.runner.HasActiveJobForGoal(ctx, run.GoalID, run.ID)
-		if err != nil {
-			return err
-		}
-		if active {
-			log.Printf("Goal #%d already has a running job - run %d stays queued", run.GoalID, run.ID)
-			return nil
-		}
-
-		if _, err := c.runner.Create(ctx, jobrunner.Spec{
-			GoalID:  run.GoalID,
-			RunID:   run.ID,
-			Name:    jobName,
-			Profile: run.AgentProfile,
-		}); err != nil {
-			return err
+		// En körning som redan är running utan motsvarande Job kan inte
+		// återupptas säkert: workspace och process är borta. Markera den
+		// som failed i stället för att lämna den fast för alltid eller
+		// skapa ett nytt jobb med okänd historik. waiting_approval lämnas
+		// orörd eftersom jobbet kan vara färdigt medan människan beslutar.
+		if run.Status == planclient.RunStatusRunning {
+			return c.reportMissingJob(ctx, run, jobName)
 		}
 		return nil
 	}
@@ -154,20 +167,57 @@ func (c *Controller) cleanUpCancelled(ctx context.Context, run planclient.AgentR
 	return nil
 }
 
-// reportFailure markerar körningen som misslyckad om jobbet föll.
+// reportMissingJob markerar en running-körning som misslyckad när dess Job
+// är borta. Det är säkrare än att återskapa jobbet, eftersom den gamla
+// workspacen och processhistoriken inte längre går att identifiera.
+func (c *Controller) reportMissingJob(ctx context.Context, run planclient.AgentRun, jobName string) error {
+	status := planclient.RunStatusFailed
+	summary := fmt.Sprintf("Jobbet %s försvann medan körningen pågick", jobName)
+	result := "AgentRun markerades som failed eftersom dess Kubernetes Job inte längre finns"
+	finishedAt := time.Now().UTC()
+
+	if _, err := c.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
+		Status:     &status,
+		Summary:    &summary,
+		Result:     &result,
+		FinishedAt: &finishedAt,
+	}); err != nil {
+		return fmt.Errorf("failed to mark orphaned run %d as failed: %w", run.ID, err)
+	}
+
+	if err := c.planClient.CreateAgentRunEvent(ctx, run.ID, planclient.CreateAgentRunEventRequest{
+		Type: planclient.EventRunFailed,
+		Payload: map[string]any{
+			"reason":  "job_missing",
+			"job":     jobName,
+			"goal_id": run.GoalID,
+			"message": "running AgentRun saknar sitt Kubernetes Job",
+		},
+	}); err != nil {
+		log.Printf("Failed to record missing-job event for run %d: %v", run.ID, err)
+	}
+
+	return nil
+}
+
+// reportFailure markerar körningen som misslyckad om jobbet föll eller
+// överskred sin aktiva deadline.
 func (c *Controller) reportFailure(ctx context.Context, run planclient.AgentRun, job *batchv1.Job) error {
-	if job == nil || job.Status.Failed == 0 {
+	if job == nil || !jobFailed(job) {
 		return nil
 	}
 	if run.Status == planclient.RunStatusFailed || run.Status == planclient.RunStatusSucceeded {
 		return nil
 	}
 
-	status := "failed"
+	status := planclient.RunStatusFailed
 	summary := fmt.Sprintf("Jobbet %s misslyckades", job.Name)
 	result := fmt.Sprintf("Jobbet %s misslyckades utan att ge ett resultat", job.Name)
+	if jobDeadlineExceeded(job) {
+		summary = fmt.Sprintf("Jobbet %s överskred sin tidsgräns", job.Name)
+		result = fmt.Sprintf("Jobbet %s stoppades av Kubernetes efter att deadline passerat", job.Name)
+	}
 	finishedAt := time.Now().UTC()
-
 	if _, err := c.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
 		Status:     &status,
 		Summary:    &summary,
@@ -190,4 +240,17 @@ func (c *Controller) reportFailure(ctx context.Context, run planclient.AgentRun,
 
 	log.Printf("Job %s failed - run %d for goal #%d marked as failed", job.Name, run.ID, run.GoalID)
 	return nil
+}
+
+func jobFailed(job *batchv1.Job) bool {
+	return job.Status.Failed > 0 || jobDeadlineExceeded(job)
+}
+
+func jobDeadlineExceeded(job *batchv1.Job) bool {
+	for _, condition := range job.Status.Conditions {
+		if condition.Type == batchv1.JobConditionType("DeadlineExceeded") && condition.Status == "True" {
+			return true
+		}
+	}
+	return false
 }
