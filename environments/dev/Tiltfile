@@ -101,7 +101,9 @@ k8s_resource(
 k8s_resource(
     "agent-api",
     new_name="agent",
-    resource_deps=["go-api"],
+    # Resursen heter "go" (new_name ovan), inte "go-api" - annars
+    # ignorerar Tilt beroendet och agent-API:t startar utan go-API:t.
+    resource_deps=["go"],
     links=[link("http://localhost:" + go_port + "/api/v1/health", "Agent API via Plan")]
 )
 
