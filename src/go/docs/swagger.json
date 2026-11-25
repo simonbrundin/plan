@@ -21,54 +21,14 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/api/agent-runs": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get agent runs for the authenticated user, optionally filtered by goal",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "agent-runs"
-                ],
-                "summary": "List agent runs",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Filter by goal ID",
-                        "name": "goal_id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.AgentRun"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            },
+        "/api/agent-approvals/{id}/decision": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Register that an agent started working on a goal",
+                "description": "Approve or reject a proposal. Only a person can make this decision.",
                 "consumes": [
                     "application/json"
                 ],
@@ -78,79 +38,22 @@
                 "tags": [
                     "agent-runs"
                 ],
-                "summary": "Start an agent run",
-                "parameters": [
-                    {
-                        "description": "Agent run",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateAgentRunRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.AgentRun"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/agent-runs/{id}": {
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update phase, status, summary, cost or artifact of an agent run",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "agent-runs"
-                ],
-                "summary": "Update an agent run",
+                "summary": "Decide an approval",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Agent run ID",
+                        "description": "Approval ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Fields to update",
+                        "description": "Decision",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateAgentRunRequest"
+                            "$ref": "#/definitions/models.DecideAgentApprovalRequest"
                         }
                     }
                 ],
@@ -158,118 +61,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.AgentRun"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/agent-runs/{id}/events": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get the chronological event history for an agent run",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "agent-runs"
-                ],
-                "summary": "List AgentRun events",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Agent run ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.AgentRunEvent"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Append a structured event to an agent run",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "agent-runs"
-                ],
-                "summary": "Record an AgentRun event",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Agent run ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Agent run event",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateAgentRunEventRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.AgentRunEvent"
+                            "$ref": "#/definitions/models.AgentApproval"
                         }
                     },
                     "400": {
@@ -2168,6 +1960,921 @@
                 }
             }
         },
+        "/api/v1/agent-approvals": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get every proposal that waits for a human, optionally for one goal",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "List approvals waiting for a human decision",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Only approvals for this goal",
+                        "name": "goal_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentApproval"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-budgets": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-budgets"
+                ],
+                "summary": "List agent budgets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentBudget"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a cost limit for agent runs over a period. A hard limit blocks new runs, a warning limit only warns.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-budgets"
+                ],
+                "summary": "Create an agent budget",
+                "parameters": [
+                    {
+                        "description": "Budget to create",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentBudgetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentBudget"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-budgets/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-budgets"
+                ],
+                "summary": "Delete an agent budget",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the limits of an agent budget or pause it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-budgets"
+                ],
+                "summary": "Update an agent budget",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Changes to apply",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateAgentBudgetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentBudget"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-budgets/{id}/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-budgets"
+                ],
+                "summary": "Show the status of an agent budget",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BudgetStatus"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-run-lifecycle": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "The canonical phases, statuses and allowed transitions for agent runs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Get agent run lifecycle",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AgentRunLifecycle"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-runs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get agent runs for the authenticated user, optionally filtered by goal",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "List agent runs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by goal ID",
+                        "name": "goal_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentRun"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Register that an agent started working on a goal",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Start an agent run",
+                "parameters": [
+                    {
+                        "description": "Agent run",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRun"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-runs/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update phase, status, summary, cost or artifact of an agent run",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Update an agent run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateAgentRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRun"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-runs/{id}/approvals": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the human decisions waiting on an agent run",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "List approvals for an agent run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentApproval"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Register a proposal that needs a human decision before it is applied",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Propose a change for human approval",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Approval",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentApprovalRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentApproval"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-runs/{id}/cancel": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cancel a running or queued agent run. The agent stops and the cluster resources are cleaned up.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Cancel an agent run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRun"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-runs/{id}/events": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the chronological event history for an agent run",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "List AgentRun events",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AgentRunEvent"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Append a structured event to an agent run",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-runs"
+                ],
+                "summary": "Record an AgentRun event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Agent run event",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentRunEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRunEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-runs/{id}/usage": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-usage"
+                ],
+                "summary": "Get usage for an agent run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRunUsage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Store the token usage of an agent run. The cost is calculated in Plan from a versioned price list.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-usage"
+                ],
+                "summary": "Record usage for an agent run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agent run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Usage to record",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAgentRunUsageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentRunUsage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent-usage": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "List agent usage rows and an aggregated summary, filtered by agent, model, tool or period.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent-usage"
+                ],
+                "summary": "List and aggregate agent usage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by agent",
+                        "name": "agent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by model",
+                        "name": "model",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by tool name",
+                        "name": "tool",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Period start (RFC3339)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Period end (RFC3339)",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AgentUsageSummary"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/calendar-events/{id}/places": {
             "get": {
                 "security": [
@@ -2998,6 +3705,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "scope": {
+                    "type": "string"
                 }
             }
         },
@@ -3013,6 +3723,75 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.AgentRunLifecycle": {
+            "type": "object",
+            "properties": {
+                "needs_human": {
+                    "description": "NeedsHuman är de tillstånd där en människa måste agera.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "blocked"
+                    ]
+                },
+                "phases": {
+                    "description": "Phases är faser i den ordning de sker.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "define",
+                        "plan",
+                        "execute",
+                        "verify",
+                        "completed"
+                    ]
+                },
+                "status": {
+                    "description": "Status är de tillstånd en körning kan ha.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "queued",
+                        "running",
+                        "blocked",
+                        "done",
+                        "failed",
+                        "cancelled"
+                    ]
+                },
+                "terminal": {
+                    "description": "Terminal är de tillstånd en körning inte kan lämna.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "done",
+                        "failed",
+                        "cancelled"
+                    ]
+                },
+                "transitions": {
+                    "description": "Transitions visar vilka tillstånd ett tillstånd får övergå till.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -3028,12 +3807,126 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "scope": {
+                    "description": "Scope bestämmer vad nyckeln får göra. \"full\" ger samma rättigheter\nsom en inloggad användare, \"agent\" begränsar nyckeln till agentens\narbete med mål och körningar.",
+                    "type": "string"
+                }
+            }
+        },
+        "models.AgentApproval": {
+            "type": "object",
+            "properties": {
+                "agent_run_id": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "consequence": {
+                    "description": "Consequence beskriver vad som händer om beslutet tas.",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decided_at": {
+                    "type": "string"
+                },
+                "decided_by": {
+                    "description": "DecidedBy är användaren som fattade beslutet.",
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Varför ändringen behövs"
+                },
+                "feedback": {
+                    "description": "Feedback är människans motivering.",
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer",
+                    "example": 449
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "payload": {
+                    "description": "Payload innehåller exakt det som föreslogs - de ändringar och det\ntestkommando som ska köras. Utan det skulle agenten behöva generera\nom förslaget, och det som godkänns skulle inte vara det som appliceras.",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "status": {
+                    "description": "Status är pending, approved eller rejected.",
+                    "type": "string",
+                    "example": "pending"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Förslag: lägg till sak i fil"
+                },
+                "verification_plan": {
+                    "description": "VerificationPlan beskriver hur resultatet ska kontrolleras.",
+                    "type": "string"
+                }
+            }
+        },
+        "models.AgentBudget": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "description": "Active anger om budgeten gäller.",
+                    "type": "boolean"
+                },
+                "agent_id": {
+                    "description": "AgentID gäller en enskild agent. Tom gäller alla.",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "hard_limit_usd": {
+                    "description": "HardLimitUSD stoppar nya körningar när gränsen nås.",
+                    "type": "number",
+                    "example": 10
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Mars"
+                },
+                "period": {
+                    "description": "Period är day, week eller month.",
+                    "type": "string",
+                    "example": "month"
+                },
+                "reservation_per_run_usd": {
+                    "description": "ReservationPerRunUSD är hur mycket en ny körning reserverar direkt.\nDet gör att samtidiga körningar inte tillsammans överskrider\ngränsen.",
+                    "type": "number",
+                    "example": 1
+                },
+                "warning_limit_usd": {
+                    "description": "WarningLimitUSD varnar utan att blockera.",
+                    "type": "number"
                 }
             }
         },
         "models.AgentRun": {
             "type": "object",
             "properties": {
+                "agent_id": {
+                    "description": "AgentID identifierar agenten som gjorde körningen.",
+                    "type": "string",
+                    "example": "agent-worker-run-72"
+                },
+                "agent_profile": {
+                    "description": "AgentProfile är vilken sorts agent som körde - coding eller life.",
+                    "type": "string",
+                    "example": "coding"
+                },
                 "artifact_url": {
                     "description": "ArtifactURL pekar på resultatet - en PR-länk eller ett bokningsutkast.",
                     "type": "string"
@@ -3049,6 +3942,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "finished_at": {
+                    "type": "string"
+                },
                 "goal_id": {
                     "type": "integer",
                     "example": 449
@@ -3057,9 +3953,40 @@
                     "type": "integer",
                     "example": 1
                 },
+                "initiator": {
+                    "type": "string",
+                    "example": "user:1"
+                },
+                "model": {
+                    "type": "string",
+                    "example": "MiniMax-M2.7"
+                },
+                "model_version": {
+                    "description": "ModelVersion är modellens version.",
+                    "type": "string"
+                },
                 "phase": {
                     "type": "string",
                     "example": "define"
+                },
+                "provider": {
+                    "description": "Provider och Model visar vilken modell som användes. Modellen\nbehövs för att räkna fram kostnaden ur prislistan.",
+                    "type": "string",
+                    "example": "minimax"
+                },
+                "reserved_cost_usd": {
+                    "description": "ReservedCostUSD är den kostnad som reserverats för körningen så\nlänge den pågår.",
+                    "type": "number",
+                    "example": 1
+                },
+                "result": {
+                    "description": "Result beskriver vad körningen ledde till.",
+                    "type": "string",
+                    "example": "Målet definierat och flyttat till plan"
+                },
+                "started_at": {
+                    "description": "StartedAt sätts när körningen börjar, FinishedAt när den är klar.",
+                    "type": "string"
                 },
                 "status": {
                     "type": "string",
@@ -3068,6 +3995,11 @@
                 "summary": {
                     "type": "string",
                     "example": "Agenten specificerar målet"
+                },
+                "trigger": {
+                    "description": "Trigger beskriver vad som startade körningen: user, schedule, webhook eller agent.",
+                    "type": "string",
+                    "example": "user"
                 },
                 "updated_at": {
                     "type": "string"
@@ -3099,6 +4031,209 @@
                 "type": {
                     "type": "string",
                     "example": "tool_call"
+                }
+            }
+        },
+        "models.AgentRunUsage": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "description": "AgentID identifierar agenten som gjorde körningen.",
+                    "type": "string",
+                    "example": "agent-worker-run-72"
+                },
+                "agent_run_id": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "cache_read_tokens": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "cost_usd": {
+                    "description": "CostUSD är den beräknade kostnaden.",
+                    "type": "number",
+                    "example": 0.0042
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "Currency är valutan kostnaden anges i.",
+                    "type": "string",
+                    "example": "USD"
+                },
+                "finished_at": {
+                    "type": "string"
+                },
+                "goal_id": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "input_tokens": {
+                    "description": "Tokenantal för de olika sorterna.",
+                    "type": "integer",
+                    "example": 1200
+                },
+                "model": {
+                    "type": "string",
+                    "example": "MiniMax-M2.7"
+                },
+                "model_version": {
+                    "description": "ModelVersion är modellens version.",
+                    "type": "string"
+                },
+                "output_tokens": {
+                    "type": "integer",
+                    "example": 800
+                },
+                "price_list_version": {
+                    "description": "PriceListVersion visar vilken prislista som användes.",
+                    "type": "string",
+                    "example": "2026-11-24.1"
+                },
+                "price_source": {
+                    "description": "PriceSource visar om priset kom från prislistan eller från en\nschablon.",
+                    "type": "string",
+                    "example": "price_list"
+                },
+                "provider": {
+                    "description": "Provider och Model visar vilken modell som användes.",
+                    "type": "string",
+                    "example": "minimax"
+                },
+                "started_at": {
+                    "description": "StartedAt och FinishedAt avgränsar körningen.",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status är \"reported\" eller \"incomplete\".",
+                    "type": "string",
+                    "example": "reported"
+                },
+                "tool_calls": {
+                    "description": "ToolCalls är antalet verktygsanrop och ToolNames de anropade\nverktygens namn.",
+                    "type": "integer",
+                    "example": 4
+                },
+                "tool_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.AgentUsageByModel": {
+            "type": "object",
+            "properties": {
+                "cost_usd": {
+                    "type": "number",
+                    "example": 0.12
+                },
+                "model": {
+                    "type": "string",
+                    "example": "MiniMax-M2.7"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "minimax"
+                },
+                "runs": {
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "models.AgentUsageSummary": {
+            "type": "object",
+            "properties": {
+                "by_model": {
+                    "description": "ByModel bryter ner kostnaden per modell.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AgentUsageByModel"
+                    }
+                },
+                "cache_read_tokens": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "currency": {
+                    "description": "Currency är valutan kostnaderna anges i.",
+                    "type": "string",
+                    "example": "USD"
+                },
+                "input_tokens": {
+                    "description": "InputTokens, OutputTokens och CacheReadTokens är summan av tokens.",
+                    "type": "integer",
+                    "example": 12000
+                },
+                "output_tokens": {
+                    "type": "integer",
+                    "example": 8000
+                },
+                "runs": {
+                    "description": "Runs är antalet körningar i urvalet.",
+                    "type": "integer",
+                    "example": 4
+                },
+                "tool_calls": {
+                    "description": "ToolCalls är summan av verktygsanrop.",
+                    "type": "integer",
+                    "example": 17
+                },
+                "total_cost_usd": {
+                    "description": "TotalCostUSD är summan av körningarnas kostnad.",
+                    "type": "number",
+                    "example": 0.42
+                }
+            }
+        },
+        "models.BudgetStatus": {
+            "type": "object",
+            "properties": {
+                "budget_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "exceeded": {
+                    "description": "Exceeded är true om gränsen är nådd.",
+                    "type": "boolean"
+                },
+                "hard_limit_usd": {
+                    "description": "HardLimitUSD, SpentUSD och ReservedUSD beskriver gränsen och vad\nsom redan är använd eller reserverat.",
+                    "type": "number",
+                    "example": 10
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Mars"
+                },
+                "period": {
+                    "type": "string",
+                    "example": "month"
+                },
+                "reason": {
+                    "description": "Reason förklarar varför körningen stoppades: \"limit_reached\" eller\n\"unknown_price\".",
+                    "type": "string",
+                    "example": "limit_reached"
+                },
+                "reserved_usd": {
+                    "type": "number",
+                    "example": 1
+                },
+                "spent_usd": {
+                    "type": "number",
+                    "example": 8.5
+                },
+                "warning": {
+                    "description": "Warning är true om varningsgränsen är nådd.",
+                    "type": "boolean"
                 }
             }
         },
@@ -3367,6 +4502,57 @@
                 }
             }
         },
+        "models.CreateAgentApprovalRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "consequence": {
+                    "description": "Consequence beskriver vad som händer om beslutet tas.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description förklarar varför förslaget finns.",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "Payload innehåller exakt det som föreslogs.",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "title": {
+                    "type": "string"
+                },
+                "verification_plan": {
+                    "description": "VerificationPlan beskriver hur resultatet ska kontrolleras.",
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateAgentBudgetRequest": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "string"
+                },
+                "hard_limit_usd": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "reservation_per_run_usd": {
+                    "type": "number"
+                },
+                "warning_limit_usd": {
+                    "type": "number"
+                }
+            }
+        },
         "models.CreateAgentRunEventRequest": {
             "type": "object",
             "required": [
@@ -3391,6 +4577,13 @@
                 "goal_id"
             ],
             "properties": {
+                "agent_id": {
+                    "description": "AgentID identifierar agenten.",
+                    "type": "string"
+                },
+                "agent_profile": {
+                    "type": "string"
+                },
                 "artifact_url": {
                     "type": "string"
                 },
@@ -3400,7 +4593,27 @@
                 "goal_id": {
                     "type": "integer"
                 },
+                "initiator": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "model_version": {
+                    "type": "string"
+                },
                 "phase": {
+                    "type": "string"
+                },
+                "provider": {
+                    "description": "Provider och Model behövs för att prissätta körningen.",
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "description": "StartedAt sätts när körningen börjar. Nil ger \"nu\".",
                     "type": "string"
                 },
                 "status": {
@@ -3408,6 +4621,52 @@
                 },
                 "summary": {
                     "type": "string"
+                },
+                "trigger": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateAgentRunUsageRequest": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "string"
+                },
+                "cache_read_tokens": {
+                    "description": "CacheReadTokens är tokens som lästs från modellens cache.",
+                    "type": "integer"
+                },
+                "finished_at": {
+                    "type": "string"
+                },
+                "input_tokens": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "model_version": {
+                    "type": "string"
+                },
+                "output_tokens": {
+                    "type": "integer"
+                },
+                "provider": {
+                    "description": "Provider och Model används för att hitta priset i prislistan.",
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "tool_calls": {
+                    "type": "integer"
+                },
+                "tool_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -3608,6 +4867,22 @@
                 }
             }
         },
+        "models.DecideAgentApprovalRequest": {
+            "type": "object",
+            "required": [
+                "decision"
+            ],
+            "properties": {
+                "decision": {
+                    "description": "Decision är \"approve\" eller \"reject\".",
+                    "type": "string"
+                },
+                "feedback": {
+                    "description": "Feedback är människans motivering.",
+                    "type": "string"
+                }
+            }
+        },
         "models.DeleteDependencyRequest": {
             "type": "object",
             "required": [
@@ -3649,6 +4924,9 @@
         "models.ErrorResponse": {
             "type": "object",
             "properties": {
+                "details": {
+                    "description": "Details ger mer information om felet - till exempel en budgets\nstatus när en budget stoppade en körning."
+                },
                 "message": {
                     "type": "string",
                     "example": "Error description"
@@ -4433,9 +5711,38 @@
                 }
             }
         },
+        "models.UpdateAgentBudgetRequest": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "hard_limit_usd": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "reservation_per_run_usd": {
+                    "type": "number"
+                },
+                "warning_limit_usd": {
+                    "type": "number"
+                }
+            }
+        },
         "models.UpdateAgentRunRequest": {
             "type": "object",
             "properties": {
+                "agent_id": {
+                    "type": "string"
+                },
+                "agent_profile": {
+                    "type": "string"
+                },
                 "artifact_url": {
                     "type": "string"
                 },
@@ -4445,13 +5752,37 @@
                 "cost_usd": {
                     "type": "number"
                 },
+                "finished_at": {
+                    "type": "string"
+                },
+                "initiator": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "model_version": {
+                    "type": "string"
+                },
                 "phase": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string"
+                },
+                "started_at": {
                     "type": "string"
                 },
                 "status": {
                     "type": "string"
                 },
                 "summary": {
+                    "type": "string"
+                },
+                "trigger": {
                     "type": "string"
                 }
             }

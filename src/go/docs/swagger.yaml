@@ -12,6 +12,8 @@ definitions:
         type: string
       name:
         type: string
+      scope:
+        type: string
     type: object
   handlers.APIKeyResponse:
     properties:
@@ -22,6 +24,57 @@ definitions:
         type: string
       name:
         type: string
+      scope:
+        type: string
+    type: object
+  handlers.AgentRunLifecycle:
+    properties:
+      needs_human:
+        description: NeedsHuman är de tillstånd där en människa måste agera.
+        example:
+        - blocked
+        items:
+          type: string
+        type: array
+      phases:
+        description: Phases är faser i den ordning de sker.
+        example:
+        - define
+        - plan
+        - execute
+        - verify
+        - completed
+        items:
+          type: string
+        type: array
+      status:
+        description: Status är de tillstånd en körning kan ha.
+        example:
+        - queued
+        - running
+        - blocked
+        - done
+        - failed
+        - cancelled
+        items:
+          type: string
+        type: array
+      terminal:
+        description: Terminal är de tillstånd en körning inte kan lämna.
+        example:
+        - done
+        - failed
+        - cancelled
+        items:
+          type: string
+        type: array
+      transitions:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: Transitions visar vilka tillstånd ett tillstånd får övergå till.
+        type: object
     type: object
   handlers.CreateAPIKeyRequest:
     properties:
@@ -30,11 +83,105 @@ definitions:
         type: string
       name:
         type: string
+      scope:
+        description: |-
+          Scope bestämmer vad nyckeln får göra. "full" ger samma rättigheter
+          som en inloggad användare, "agent" begränsar nyckeln till agentens
+          arbete med mål och körningar.
+        type: string
     required:
     - name
     type: object
+  models.AgentApproval:
+    properties:
+      agent_run_id:
+        example: 12
+        type: integer
+      consequence:
+        description: Consequence beskriver vad som händer om beslutet tas.
+        type: string
+      created_at:
+        type: string
+      decided_at:
+        type: string
+      decided_by:
+        description: DecidedBy är användaren som fattade beslutet.
+        type: integer
+      description:
+        example: Varför ändringen behövs
+        type: string
+      feedback:
+        description: Feedback är människans motivering.
+        type: string
+      goal_id:
+        example: 449
+        type: integer
+      id:
+        example: 1
+        type: integer
+      payload:
+        additionalProperties: {}
+        description: |-
+          Payload innehåller exakt det som föreslogs - de ändringar och det
+          testkommando som ska köras. Utan det skulle agenten behöva generera
+          om förslaget, och det som godkänns skulle inte vara det som appliceras.
+        type: object
+      status:
+        description: Status är pending, approved eller rejected.
+        example: pending
+        type: string
+      title:
+        example: 'Förslag: lägg till sak i fil'
+        type: string
+      verification_plan:
+        description: VerificationPlan beskriver hur resultatet ska kontrolleras.
+        type: string
+    type: object
+  models.AgentBudget:
+    properties:
+      active:
+        description: Active anger om budgeten gäller.
+        type: boolean
+      agent_id:
+        description: AgentID gäller en enskild agent. Tom gäller alla.
+        type: string
+      created_at:
+        type: string
+      hard_limit_usd:
+        description: HardLimitUSD stoppar nya körningar när gränsen nås.
+        example: 10
+        type: number
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Mars
+        type: string
+      period:
+        description: Period är day, week eller month.
+        example: month
+        type: string
+      reservation_per_run_usd:
+        description: |-
+          ReservationPerRunUSD är hur mycket en ny körning reserverar direkt.
+          Det gör att samtidiga körningar inte tillsammans överskrider
+          gränsen.
+        example: 1
+        type: number
+      warning_limit_usd:
+        description: WarningLimitUSD varnar utan att blockera.
+        type: number
+    type: object
   models.AgentRun:
     properties:
+      agent_id:
+        description: AgentID identifierar agenten som gjorde körningen.
+        example: agent-worker-run-72
+        type: string
+      agent_profile:
+        description: AgentProfile är vilken sorts agent som körde - coding eller life.
+        example: coding
+        type: string
       artifact_url:
         description: ArtifactURL pekar på resultatet - en PR-länk eller ett bokningsutkast.
         type: string
@@ -46,20 +193,55 @@ definitions:
         type: number
       created_at:
         type: string
+      finished_at:
+        type: string
       goal_id:
         example: 449
         type: integer
       id:
         example: 1
         type: integer
+      initiator:
+        example: user:1
+        type: string
+      model:
+        example: MiniMax-M2.7
+        type: string
+      model_version:
+        description: ModelVersion är modellens version.
+        type: string
       phase:
         example: define
+        type: string
+      provider:
+        description: |-
+          Provider och Model visar vilken modell som användes. Modellen
+          behövs för att räkna fram kostnaden ur prislistan.
+        example: minimax
+        type: string
+      reserved_cost_usd:
+        description: |-
+          ReservedCostUSD är den kostnad som reserverats för körningen så
+          länge den pågår.
+        example: 1
+        type: number
+      result:
+        description: Result beskriver vad körningen ledde till.
+        example: Målet definierat och flyttat till plan
+        type: string
+      started_at:
+        description: StartedAt sätts när körningen börjar, FinishedAt när den är klar.
         type: string
       status:
         example: running
         type: string
       summary:
         example: Agenten specificerar målet
+        type: string
+      trigger:
+        description: 'Trigger beskriver vad som startade körningen: user, schedule,
+          webhook eller agent.'
+        example: user
         type: string
       updated_at:
         type: string
@@ -83,6 +265,166 @@ definitions:
       type:
         example: tool_call
         type: string
+    type: object
+  models.AgentRunUsage:
+    properties:
+      agent_id:
+        description: AgentID identifierar agenten som gjorde körningen.
+        example: agent-worker-run-72
+        type: string
+      agent_run_id:
+        example: 12
+        type: integer
+      cache_read_tokens:
+        example: 0
+        type: integer
+      cost_usd:
+        description: CostUSD är den beräknade kostnaden.
+        example: 0.0042
+        type: number
+      created_at:
+        type: string
+      currency:
+        description: Currency är valutan kostnaden anges i.
+        example: USD
+        type: string
+      finished_at:
+        type: string
+      goal_id:
+        example: 42
+        type: integer
+      id:
+        example: 1
+        type: integer
+      input_tokens:
+        description: Tokenantal för de olika sorterna.
+        example: 1200
+        type: integer
+      model:
+        example: MiniMax-M2.7
+        type: string
+      model_version:
+        description: ModelVersion är modellens version.
+        type: string
+      output_tokens:
+        example: 800
+        type: integer
+      price_list_version:
+        description: PriceListVersion visar vilken prislista som användes.
+        example: 2026-11-24.1
+        type: string
+      price_source:
+        description: |-
+          PriceSource visar om priset kom från prislistan eller från en
+          schablon.
+        example: price_list
+        type: string
+      provider:
+        description: Provider och Model visar vilken modell som användes.
+        example: minimax
+        type: string
+      started_at:
+        description: StartedAt och FinishedAt avgränsar körningen.
+        type: string
+      status:
+        description: Status är "reported" eller "incomplete".
+        example: reported
+        type: string
+      tool_calls:
+        description: |-
+          ToolCalls är antalet verktygsanrop och ToolNames de anropade
+          verktygens namn.
+        example: 4
+        type: integer
+      tool_names:
+        items:
+          type: string
+        type: array
+    type: object
+  models.AgentUsageByModel:
+    properties:
+      cost_usd:
+        example: 0.12
+        type: number
+      model:
+        example: MiniMax-M2.7
+        type: string
+      provider:
+        example: minimax
+        type: string
+      runs:
+        example: 2
+        type: integer
+    type: object
+  models.AgentUsageSummary:
+    properties:
+      by_model:
+        description: ByModel bryter ner kostnaden per modell.
+        items:
+          $ref: '#/definitions/models.AgentUsageByModel'
+        type: array
+      cache_read_tokens:
+        example: 0
+        type: integer
+      currency:
+        description: Currency är valutan kostnaderna anges i.
+        example: USD
+        type: string
+      input_tokens:
+        description: InputTokens, OutputTokens och CacheReadTokens är summan av tokens.
+        example: 12000
+        type: integer
+      output_tokens:
+        example: 8000
+        type: integer
+      runs:
+        description: Runs är antalet körningar i urvalet.
+        example: 4
+        type: integer
+      tool_calls:
+        description: ToolCalls är summan av verktygsanrop.
+        example: 17
+        type: integer
+      total_cost_usd:
+        description: TotalCostUSD är summan av körningarnas kostnad.
+        example: 0.42
+        type: number
+    type: object
+  models.BudgetStatus:
+    properties:
+      budget_id:
+        example: 1
+        type: integer
+      exceeded:
+        description: Exceeded är true om gränsen är nådd.
+        type: boolean
+      hard_limit_usd:
+        description: |-
+          HardLimitUSD, SpentUSD och ReservedUSD beskriver gränsen och vad
+          som redan är använd eller reserverat.
+        example: 10
+        type: number
+      name:
+        example: Mars
+        type: string
+      period:
+        example: month
+        type: string
+      reason:
+        description: |-
+          Reason förklarar varför körningen stoppades: "limit_reached" eller
+          "unknown_price".
+        example: limit_reached
+        type: string
+      reserved_usd:
+        example: 1
+        type: number
+      spent_usd:
+        example: 8.5
+        type: number
+      warning:
+        description: Warning är true om varningsgränsen är nådd.
+        type: boolean
     type: object
   models.Calendar:
     properties:
@@ -315,6 +657,41 @@ definitions:
         example: "2026-01-01"
         type: string
     type: object
+  models.CreateAgentApprovalRequest:
+    properties:
+      consequence:
+        description: Consequence beskriver vad som händer om beslutet tas.
+        type: string
+      description:
+        description: Description förklarar varför förslaget finns.
+        type: string
+      payload:
+        additionalProperties: {}
+        description: Payload innehåller exakt det som föreslogs.
+        type: object
+      title:
+        type: string
+      verification_plan:
+        description: VerificationPlan beskriver hur resultatet ska kontrolleras.
+        type: string
+    required:
+    - title
+    type: object
+  models.CreateAgentBudgetRequest:
+    properties:
+      agent_id:
+        type: string
+      hard_limit_usd:
+        type: number
+      name:
+        type: string
+      period:
+        type: string
+      reservation_per_run_usd:
+        type: number
+      warning_limit_usd:
+        type: number
+    type: object
   models.CreateAgentRunEventRequest:
     properties:
       payload:
@@ -329,20 +706,70 @@ definitions:
     type: object
   models.CreateAgentRunRequest:
     properties:
+      agent_id:
+        description: AgentID identifierar agenten.
+        type: string
+      agent_profile:
+        type: string
       artifact_url:
         type: string
       conversation_id:
         type: string
       goal_id:
         type: integer
+      initiator:
+        type: string
+      model:
+        type: string
+      model_version:
+        type: string
       phase:
+        type: string
+      provider:
+        description: Provider och Model behövs för att prissätta körningen.
+        type: string
+      result:
+        type: string
+      started_at:
+        description: StartedAt sätts när körningen börjar. Nil ger "nu".
         type: string
       status:
         type: string
       summary:
         type: string
+      trigger:
+        type: string
     required:
     - goal_id
+    type: object
+  models.CreateAgentRunUsageRequest:
+    properties:
+      agent_id:
+        type: string
+      cache_read_tokens:
+        description: CacheReadTokens är tokens som lästs från modellens cache.
+        type: integer
+      finished_at:
+        type: string
+      input_tokens:
+        type: integer
+      model:
+        type: string
+      model_version:
+        type: string
+      output_tokens:
+        type: integer
+      provider:
+        description: Provider och Model används för att hitta priset i prislistan.
+        type: string
+      started_at:
+        type: string
+      tool_calls:
+        type: integer
+      tool_names:
+        items:
+          type: string
+        type: array
     type: object
   models.CreateCalendarEventRequest:
     properties:
@@ -491,6 +918,17 @@ definitions:
     - childId
     - parentId
     type: object
+  models.DecideAgentApprovalRequest:
+    properties:
+      decision:
+        description: Decision är "approve" eller "reject".
+        type: string
+      feedback:
+        description: Feedback är människans motivering.
+        type: string
+    required:
+    - decision
+    type: object
   models.DeleteDependencyRequest:
     properties:
       dependsOnId:
@@ -518,6 +956,10 @@ definitions:
     type: object
   models.ErrorResponse:
     properties:
+      details:
+        description: |-
+          Details ger mer information om felet - till exempel en budgets
+          status när en budget stoppade en körning.
       message:
         example: Error description
         type: string
@@ -1177,19 +1619,54 @@ definitions:
         example: ute
         type: string
     type: object
+  models.UpdateAgentBudgetRequest:
+    properties:
+      active:
+        type: boolean
+      hard_limit_usd:
+        type: number
+      name:
+        type: string
+      period:
+        type: string
+      reservation_per_run_usd:
+        type: number
+      warning_limit_usd:
+        type: number
+    type: object
   models.UpdateAgentRunRequest:
     properties:
+      agent_id:
+        type: string
+      agent_profile:
+        type: string
       artifact_url:
         type: string
       conversation_id:
         type: string
       cost_usd:
         type: number
+      finished_at:
+        type: string
+      initiator:
+        type: string
+      model:
+        type: string
+      model_version:
+        type: string
       phase:
+        type: string
+      provider:
+        type: string
+      result:
+        type: string
+      started_at:
         type: string
       status:
         type: string
       summary:
+        type: string
+      trigger:
         type: string
     type: object
   models.UpdateCalendarEventRequest:
@@ -1346,92 +1823,30 @@ info:
   title: Goals Management API
   version: "1.0"
 paths:
-  /api/agent-runs:
-    get:
-      description: Get agent runs for the authenticated user, optionally filtered
-        by goal
-      parameters:
-      - description: Filter by goal ID
-        in: query
-        name: goal_id
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.AgentRun'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List agent runs
-      tags:
-      - agent-runs
+  /api/agent-approvals/{id}/decision:
     post:
       consumes:
       - application/json
-      description: Register that an agent started working on a goal
+      description: Approve or reject a proposal. Only a person can make this decision.
       parameters:
-      - description: Agent run
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateAgentRunRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.AgentRun'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Start an agent run
-      tags:
-      - agent-runs
-  /api/agent-runs/{id}:
-    patch:
-      consumes:
-      - application/json
-      description: Update phase, status, summary, cost or artifact of an agent run
-      parameters:
-      - description: Agent run ID
+      - description: Approval ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Fields to update
+      - description: Decision
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateAgentRunRequest'
+          $ref: '#/definitions/models.DecideAgentApprovalRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.AgentRun'
+            $ref: '#/definitions/models.AgentApproval'
         "400":
           description: Bad Request
           schema:
@@ -1446,78 +1861,7 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Update an agent run
-      tags:
-      - agent-runs
-  /api/agent-runs/{id}/events:
-    get:
-      description: Get the chronological event history for an agent run
-      parameters:
-      - description: Agent run ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.AgentRunEvent'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List AgentRun events
-      tags:
-      - agent-runs
-    post:
-      consumes:
-      - application/json
-      description: Append a structured event to an agent run
-      parameters:
-      - description: Agent run ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Agent run event
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateAgentRunEventRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.AgentRunEvent'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Record an AgentRun event
+      summary: Decide an approval
       tags:
       - agent-runs
   /api/api-keys:
@@ -2724,6 +3068,591 @@ paths:
       summary: List all statuses
       tags:
       - statuses
+  /api/v1/agent-approvals:
+    get:
+      description: Get every proposal that waits for a human, optionally for one goal
+      parameters:
+      - description: Only approvals for this goal
+        in: query
+        name: goal_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentApproval'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List approvals waiting for a human decision
+      tags:
+      - agent-runs
+  /api/v1/agent-budgets:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentBudget'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List agent budgets
+      tags:
+      - agent-budgets
+    post:
+      consumes:
+      - application/json
+      description: Create a cost limit for agent runs over a period. A hard limit
+        blocks new runs, a warning limit only warns.
+      parameters:
+      - description: Budget to create
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentBudgetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AgentBudget'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create an agent budget
+      tags:
+      - agent-budgets
+  /api/v1/agent-budgets/{id}:
+    delete:
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an agent budget
+      tags:
+      - agent-budgets
+    patch:
+      consumes:
+      - application/json
+      description: Change the limits of an agent budget or pause it.
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Changes to apply
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAgentBudgetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentBudget'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update an agent budget
+      tags:
+      - agent-budgets
+  /api/v1/agent-budgets/{id}/status:
+    get:
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BudgetStatus'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Show the status of an agent budget
+      tags:
+      - agent-budgets
+  /api/v1/agent-run-lifecycle:
+    get:
+      description: The canonical phases, statuses and allowed transitions for agent
+        runs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AgentRunLifecycle'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get agent run lifecycle
+      tags:
+      - agent-runs
+  /api/v1/agent-runs:
+    get:
+      description: Get agent runs for the authenticated user, optionally filtered
+        by goal
+      parameters:
+      - description: Filter by goal ID
+        in: query
+        name: goal_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentRun'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List agent runs
+      tags:
+      - agent-runs
+    post:
+      consumes:
+      - application/json
+      description: Register that an agent started working on a goal
+      parameters:
+      - description: Agent run
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentRunRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AgentRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Start an agent run
+      tags:
+      - agent-runs
+  /api/v1/agent-runs/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update phase, status, summary, cost or artifact of an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAgentRunRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update an agent run
+      tags:
+      - agent-runs
+  /api/v1/agent-runs/{id}/approvals:
+    get:
+      description: Get the human decisions waiting on an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentApproval'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List approvals for an agent run
+      tags:
+      - agent-runs
+    post:
+      consumes:
+      - application/json
+      description: Register a proposal that needs a human decision before it is applied
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Approval
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentApprovalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AgentApproval'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Propose a change for human approval
+      tags:
+      - agent-runs
+  /api/v1/agent-runs/{id}/cancel:
+    post:
+      description: Cancel a running or queued agent run. The agent stops and the cluster
+        resources are cleaned up.
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel an agent run
+      tags:
+      - agent-runs
+  /api/v1/agent-runs/{id}/events:
+    get:
+      description: Get the chronological event history for an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AgentRunEvent'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List AgentRun events
+      tags:
+      - agent-runs
+    post:
+      consumes:
+      - application/json
+      description: Append a structured event to an agent run
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Agent run event
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentRunEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AgentRunEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Record an AgentRun event
+      tags:
+      - agent-runs
+  /api/v1/agent-runs/{id}/usage:
+    get:
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentRunUsage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get usage for an agent run
+      tags:
+      - agent-usage
+    post:
+      consumes:
+      - application/json
+      description: Store the token usage of an agent run. The cost is calculated in
+        Plan from a versioned price list.
+      parameters:
+      - description: Agent run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Usage to record
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAgentRunUsageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentRunUsage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Record usage for an agent run
+      tags:
+      - agent-usage
+  /api/v1/agent-usage:
+    get:
+      description: List agent usage rows and an aggregated summary, filtered by agent,
+        model, tool or period.
+      parameters:
+      - description: Filter by agent
+        in: query
+        name: agent_id
+        type: string
+      - description: Filter by model
+        in: query
+        name: model
+        type: string
+      - description: Filter by tool name
+        in: query
+        name: tool
+        type: string
+      - description: Period start (RFC3339)
+        in: query
+        name: from
+        type: string
+      - description: Period end (RFC3339)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AgentUsageSummary'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List and aggregate agent usage
+      tags:
+      - agent-usage
   /api/v1/calendar-events/{id}/places:
     get:
       consumes:

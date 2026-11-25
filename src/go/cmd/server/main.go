@@ -214,6 +214,8 @@ func main() {
 		// Agent run endpoints
 		agentRunHandler := handlers.NewAgentRunHandler(dbConnected)
 		agentUsageHandler := handlers.NewAgentUsageHandler()
+		agentRunLifecycleHandler := handlers.NewAgentRunLifecycleHandler()
+		api.GET("/agent-run-lifecycle", agentRunLifecycleHandler.GetAgentRunLifecycle)
 		api.GET("/agent-runs", agentRunHandler.ListAgentRuns)
 		api.POST("/agent-runs", agentRunHandler.CreateAgentRun)
 		api.PATCH("/agent-runs/:id", agentRunHandler.UpdateAgentRun)

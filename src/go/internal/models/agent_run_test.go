@@ -1,6 +1,130 @@
 package models
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
+
+// TestAgentRunPhasesÄrKanoniska kontrollerar att faslistan är den enda
+// definitionen - en fas som inte står i listan är inte giltig.
+func TestAgentRunPhasesÄrKanoniska(t *testing.T) {
+	if len(AgentRunPhases) == 0 {
+		t.Fatal("faslistan får inte vara tom")
+	}
+
+	seen := map[string]bool{}
+	for _, phase := range AgentRunPhases {
+		if seen[phase] {
+			t.Errorf("fasen %q finns två gånger i listan", phase)
+		}
+		seen[phase] = true
+
+		if !ValidAgentRunPhase(phase) {
+			t.Errorf("fasen %q i listan ska vara giltig", phase)
+		}
+	}
+}
+
+// TestAgentRunStatusesÄrKanoniska kontrollerar samma sak för tillstånden.
+func TestAgentRunStatusesÄrKanoniska(t *testing.T) {
+	if len(AgentRunStatuses) == 0 {
+		t.Fatal("tillståndslistan får inte vara tom")
+	}
+
+	seen := map[string]bool{}
+	for _, status := range AgentRunStatuses {
+		if seen[status] {
+			t.Errorf("tillståndet %q finns två gånger i listan", status)
+		}
+		seen[status] = true
+
+		if !ValidAgentRunStatus(status) {
+			t.Errorf("tillståndet %q i listan ska vara giltigt", status)
+		}
+	}
+}
+
+// TestÖvergångstabellenÄrSammansatt kontrollerar att övergångstabellen bara
+// pekar på kända tillstånd och att terminala tillstånd inte går vidare.
+func TestÖvergångstabellenÄrSammansatt(t *testing.T) {
+	transitions := AgentRunStatusTransitions()
+
+	for från, till := range transitions {
+		if !ValidAgentRunStatus(från) {
+			t.Errorf("övergångstabellen har okänt tillstånd %q", från)
+		}
+
+		if IsTerminalAgentRunStatus(från) && len(till) > 0 {
+			t.Errorf("terminalt tillstånd %q får inte ha övergångar, fick %v", från, till)
+		}
+
+		for _, status := range till {
+			if !ValidAgentRunStatus(status) {
+				t.Errorf("övergången %q -> %q pekar på ett okänt tillstånd", från, status)
+			}
+		}
+	}
+
+	for _, status := range AgentRunStatuses {
+		if _, ok := transitions[status]; !ok {
+			t.Errorf("tillståndet %q saknas i övergångstabellen", status)
+		}
+	}
+}
+
+// TestVarjeKörningKanAvbrytas kontrollerar att en körning alltid kan stanna
+// - av en människa, av en budget eller av en policy.
+func TestVarjeKörningKanAvbrytas(t *testing.T) {
+	cancelled := AgentRunStatusCancelled
+
+	for _, current := range []string{
+		AgentRunStatusQueued,
+		AgentRunStatusRunning,
+		AgentRunStatusBlocked,
+	} {
+		run := AgentRun{Phase: AgentRunPhasePlan, Status: current}
+		if err := ValidateAgentRunTransition(run, UpdateAgentRunRequest{Status: &cancelled}); err != nil {
+			t.Errorf("körning i %q ska kunna avbrytas: %v", current, err)
+		}
+	}
+}
+
+// TestBlockedVäntarPåMänniska kontrollerar skillnaden mellan "blocked" och
+// "running" - blocked är det tillstånd där en människa måste agera.
+func TestBlockedVäntarPåMänniska(t *testing.T) {
+	if !AgentRunStatusNeedsHuman(AgentRunStatusBlocked) {
+		t.Error("blocked ska kräva en människa")
+	}
+
+	for _, status := range []string{
+		AgentRunStatusQueued,
+		AgentRunStatusRunning,
+		AgentRunStatusDone,
+		AgentRunStatusFailed,
+		AgentRunStatusCancelled,
+	} {
+		if AgentRunStatusNeedsHuman(status) {
+			t.Errorf("tillståndet %q ska inte kräva en människa", status)
+		}
+	}
+
+	if IsTerminalAgentRunStatus(AgentRunStatusBlocked) {
+		t.Error("blocked är inte terminalt - en körning kan återupptas")
+	}
+}
+
+// TestAgentRunStatusTransitionsReturnerarKopia kontrollerar att en caller
+// inte kan ändra den kanoniska tabellen genom att ändra det returnerade
+// värdet.
+func TestAgentRunStatusTransitionsReturnerarKopia(t *testing.T) {
+	transitions := AgentRunStatusTransitions()
+	transitions[AgentRunStatusQueued] = []string{AgentRunStatusDone}
+
+	if slices.Contains(AgentRunStatusTransitions()[AgentRunStatusQueued], AgentRunStatusDone) &&
+		!slices.Contains(agentRunStatusTransitions[AgentRunStatusQueued], AgentRunStatusDone) {
+		t.Fatal("den kanoniska tabellen ska inte kunna ändras utifrån")
+	}
+}
 
 // TestValidAgentRunPhase kontrollerar vilka faser som accepteras.
 func TestValidAgentRunPhase(t *testing.T) {

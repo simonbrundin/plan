@@ -36,7 +36,7 @@ func NewAgentApprovalHandler() *AgentApprovalHandler {
 // @Success 200 {array} models.AgentApproval
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/approvals [get]
+// @Router /api/v1/agent-runs/{id}/approvals [get]
 func (h *AgentApprovalHandler) ListAgentApprovals(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -118,7 +118,7 @@ func (h *AgentApprovalHandler) ListPendingAgentApprovals(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/approvals [post]
+// @Router /api/v1/agent-runs/{id}/approvals [post]
 func (h *AgentApprovalHandler) CreateAgentApproval(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {

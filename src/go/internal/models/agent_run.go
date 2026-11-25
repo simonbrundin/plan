@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -18,6 +19,10 @@ const (
 
 // Agentkörningens tillstånd. "blocked" betyder att agenten väntar på
 // människan - till exempel ett godkännande.
+//
+// Namnen är de som används i databasen, i API:t och i gränssnittet. De
+// byts inte ut utan en migrering: "done" och inte "succeeded", "blocked"
+// och inte "waiting_approval".
 const (
 	AgentRunStatusQueued    = "queued"
 	AgentRunStatusRunning   = "running"
@@ -26,6 +31,76 @@ const (
 	AgentRunStatusFailed    = "failed"
 	AgentRunStatusCancelled = "cancelled"
 )
+
+// AgentRunPhases är den kanoniska listan över faser. Den är källan för
+// validering, för API-svaret som beskriver livscykeln och för dokumentationen
+// - en fas som inte står här är inte en fas.
+var AgentRunPhases = []string{
+	AgentRunPhaseDefine,
+	AgentRunPhasePlan,
+	AgentRunPhaseExecute,
+	AgentRunPhaseVerify,
+	AgentRunPhaseComplete,
+}
+
+// AgentRunStatuses är den kanoniska listan över tillstånd. Samma regel gäller
+// här: ett tillstånd som inte står här är inte giltigt.
+var AgentRunStatuses = []string{
+	AgentRunStatusQueued,
+	AgentRunStatusRunning,
+	AgentRunStatusBlocked,
+	AgentRunStatusDone,
+	AgentRunStatusFailed,
+	AgentRunStatusCancelled,
+}
+
+// agentRunStatusTransitions beskriver vilka tillstånd ett tillstånd får övergå
+// till. Det är den enda definitionen - valideringen och API-svaret läser
+// båda från den här.
+//
+// Från ett terminalt tillstånd går det inte vidare, och en körning får
+// alltid avbrytas.
+var agentRunStatusTransitions = map[string][]string{
+	AgentRunStatusQueued: {
+		AgentRunStatusRunning,
+		AgentRunStatusBlocked,
+		AgentRunStatusDone,
+		AgentRunStatusFailed,
+		AgentRunStatusCancelled,
+	},
+	AgentRunStatusRunning: {
+		AgentRunStatusBlocked,
+		AgentRunStatusDone,
+		AgentRunStatusFailed,
+		AgentRunStatusCancelled,
+	},
+	AgentRunStatusBlocked: {
+		AgentRunStatusQueued,
+		AgentRunStatusRunning,
+		AgentRunStatusDone,
+		AgentRunStatusFailed,
+		AgentRunStatusCancelled,
+	},
+	AgentRunStatusDone:      {},
+	AgentRunStatusFailed:    {},
+	AgentRunStatusCancelled: {},
+}
+
+// AgentRunStatusTransitions returnerar den kanoniska övergångstabellen.
+func AgentRunStatusTransitions() map[string][]string {
+	övergångar := make(map[string][]string, len(agentRunStatusTransitions))
+	for från, till := range agentRunStatusTransitions {
+		övergångar[från] = append([]string(nil), till...)
+	}
+	return övergångar
+}
+
+// AgentRunStatusNeedsHuman anger om körningen väntar på en människa - till
+// exempel ett godkännande. Det är skillnaden mot "running": agenten gör
+// ingenting förrän människan svarar.
+func AgentRunStatusNeedsHuman(status string) bool {
+	return status == AgentRunStatusBlocked
+}
 
 // Agentprofiler - vilken typ av agent som utförde körningen.
 const (
@@ -160,22 +235,12 @@ func ValidateAgentProfile(profile string) error {
 
 // ValidAgentRunPhase kontrollerar att en fas är en känd agentfas.
 func ValidAgentRunPhase(phase string) bool {
-	switch phase {
-	case AgentRunPhaseDefine, AgentRunPhasePlan, AgentRunPhaseExecute,
-		AgentRunPhaseVerify, AgentRunPhaseComplete:
-		return true
-	}
-	return false
+	return slices.Contains(AgentRunPhases, phase)
 }
 
 // ValidAgentRunStatus kontrollerar att ett tillstånd är ett känt tillstånd.
 func ValidAgentRunStatus(status string) bool {
-	switch status {
-	case AgentRunStatusQueued, AgentRunStatusRunning, AgentRunStatusBlocked,
-		AgentRunStatusDone, AgentRunStatusFailed, AgentRunStatusCancelled:
-		return true
-	}
-	return false
+	return slices.Contains(AgentRunStatuses, status)
 }
 
 // ValidateAgentRunPhase returnerar ett fel om fasen är okänd.
@@ -244,22 +309,7 @@ func validAgentRunStatusTransition(current, requested string) bool {
 		return false
 	}
 
-	// En körning kan alltid avbrytas - av en människa, av en budget eller
-	// av en policy. Det är ett sätt att stanna, inte ett sätt att gå vidare.
-	if requested == AgentRunStatusCancelled {
-		return true
-	}
-
-	switch current {
-	case AgentRunStatusQueued:
-		return requested == AgentRunStatusRunning || requested == AgentRunStatusBlocked || requested == AgentRunStatusDone || requested == AgentRunStatusFailed
-	case AgentRunStatusRunning:
-		return requested == AgentRunStatusBlocked || requested == AgentRunStatusDone || requested == AgentRunStatusFailed
-	case AgentRunStatusBlocked:
-		return requested == AgentRunStatusQueued || requested == AgentRunStatusRunning || requested == AgentRunStatusDone || requested == AgentRunStatusFailed
-	default:
-		return false
-	}
+	return slices.Contains(agentRunStatusTransitions[current], requested)
 }
 
 // GoalFilter filtrerar en mållista.

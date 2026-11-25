@@ -1,0 +1,33 @@
+{
+  "app": {
+    "app/components/CalendarManager.vue": 1,
+    "app/components/ConfirmDeleteGoalModal.vue": 7,
+    "app/components/ConfirmRemoveParentModal.vue": 3,
+    "app/components/EventIcon.vue": 1,
+    "app/components/GoalChildrenList.vue": 6,
+    "app/components/NotificationsSlideover.vue": 2,
+    "app/components/VerticalCalendar.vue": 10,
+    "app/composables/useLeaderKey.ts": 1,
+    "app/composables/usePriorityMode.ts": 4,
+    "app/layouts/default.vue": 1,
+    "app/lib/utils.ts": 2,
+    "app/pages/agent-cost.vue": 4,
+    "app/pages/goal/[id].vue": 67,
+    "app/pages/goals/index.vue": 12,
+    "app/pages/now.vue": 3,
+    "app/plugins/pinia-fix.client.ts": 4,
+    "app/plugins/pinia-hydration.ts": 3,
+    "app/utils/calendarScheduling.ts": 1,
+    "app/utils/calendarVisibility.ts": 1,
+    "app/utils/childDependencyOrder.ts": 4,
+    "app/utils/childOrder.ts": 2,
+    "app/utils/estimate.ts": 4,
+    "app/utils/goalGraph.ts": 2,
+    "app/utils/goalWeights.ts": 3,
+    "app/utils/naturalLanguage.ts": 20,
+    "app/utils/recurrence.ts": 1
+  },
+  "server": {
+    "server/plugins/pinia-fix.ts": 1
+  }
+}

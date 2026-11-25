@@ -32,6 +32,7 @@ import (
 	"plan-agent/internal/api/handlers"
 	"plan-agent/internal/api/middleware"
 	"plan-agent/internal/approvals"
+	"plan-agent/internal/core/orchestrator"
 	"plan-agent/internal/core/provider"
 	"plan-agent/internal/core/workflow"
 	"plan-agent/internal/definer"
@@ -39,6 +40,16 @@ import (
 	"plan-agent/internal/jobrunner"
 	"plan-agent/internal/planclient"
 	"plan-agent/internal/scheduler"
+)
+
+// Orchestratorns tillstånd.
+//
+// Initieringsfelet sparas här så att det syns i /health och /status. Ett
+// fel som bara finns i loggen är lätt att missa - och just det felet gör
+// att gate-endpointern aldrig registreras.
+var (
+	orchestratorReady   bool
+	orchestratorInitErr error
 )
 
 // readSwaggerSpec returns the embedded swagger spec
@@ -71,12 +82,26 @@ func Run() {
 	db.SetPool(pool)
 	log.Println("Connected to database")
 
-	// Initialize orchestrator
-	o, err := workflow.InitOrchestrator(workflow.Config{})
+	// Initiera orchestratorn.
+	//
+	// StateStoren ska överleva en omstart när databasen finns, så att en
+	// checkpointplan inte försvinner bara för att podden startades om.
+	// Utan databas faller den tillbaka på minneslagring.
+	var stateStore orchestrator.StateStore
+	if pool != nil {
+		stateStore = orchestrator.NewCheckpointStore(pool)
+	}
+
+	o, err := workflow.InitOrchestrator(workflow.Config{StateStore: stateStore})
 	if err != nil {
+		// Initieringsfelet ska vara synligt - inte bara i loggen. Utan
+		// orchestratorn saknas gate-endpointern, och det ska gå att se
+		// att de saknas.
+		orchestratorInitErr = err
 		log.Printf("Warning: Failed to initialize orchestrator: %v", err)
 		o = nil
 	} else {
+		orchestratorReady = true
 		log.Println("Orchestrator initialized")
 	}
 
@@ -438,12 +463,16 @@ func startGoalScheduler(ctx context.Context, planClient *planclient.Client, appr
 // @Description Returns OK if the service is running
 // @Tags health
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} map[string]any
 // @Router /api/v1/health [get]
 func healthHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  "ok",
 		"service": "agent-api",
+		// Orchestratorns tillstånd syns här också. Health svarar 200 även
+		// när orchestratorn inte startade - tjänsten lever, men en del
+		// av den saknas. Det visas i /status.
+		"orchestrator": orchestratorState(),
 	})
 }
 
@@ -452,12 +481,29 @@ func healthHandler(c *gin.Context) {
 // @Description Returns detailed service status
 // @Tags health
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} map[string]any
 // @Router /api/v1/status [get]
 func statusHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"status":  "healthy",
-		"version": "1.0.0",
-		"uptime":  "running",
+		"status":       "healthy",
+		"version":      "1.0.0",
+		"uptime":       "running",
+		"orchestrator": orchestratorState(),
 	})
+}
+
+// orchestratorState beskriver orchestratorns tillstånd.
+//
+// Ett initieringsfel ska vara synligt utan att tjänsten dör - en del av
+// API:t saknas, men resten fungerar.
+func orchestratorState() gin.H {
+	if orchestratorInitErr != nil {
+		return gin.H{
+			"initialized": false,
+			"error":       orchestratorInitErr.Error(),
+		}
+	}
+	return gin.H{
+		"initialized": orchestratorReady,
+	}
 }

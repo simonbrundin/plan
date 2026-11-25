@@ -38,7 +38,7 @@ func NewAgentRunHandler(dbConnected bool) *AgentRunHandler {
 // @Param goal_id query int false "Filter by goal ID"
 // @Success 200 {array} models.AgentRun
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/agent-runs [get]
+// @Router /api/v1/agent-runs [get]
 func (h *AgentRunHandler) ListAgentRuns(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -77,7 +77,7 @@ func (h *AgentRunHandler) ListAgentRuns(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs [post]
+// @Router /api/v1/agent-runs [post]
 func (h *AgentRunHandler) CreateAgentRun(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -157,7 +157,7 @@ type agentRunResponse struct {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id} [patch]
+// @Router /api/v1/agent-runs/{id} [patch]
 func (h *AgentRunHandler) UpdateAgentRun(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -256,7 +256,7 @@ func (h *AgentRunHandler) ensureUsageRow(c *gin.Context, userID, runID int64) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/cancel [post]
+// @Router /api/v1/agent-runs/{id}/cancel [post]
 func (h *AgentRunHandler) CancelAgentRun(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -332,7 +332,7 @@ func (h *AgentRunHandler) CancelAgentRun(c *gin.Context) {
 // @Success 200 {array} models.AgentRunEvent
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/events [get]
+// @Router /api/v1/agent-runs/{id}/events [get]
 func (h *AgentRunHandler) ListAgentRunEvents(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -370,7 +370,7 @@ func (h *AgentRunHandler) ListAgentRunEvents(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/events [post]
+// @Router /api/v1/agent-runs/{id}/events [post]
 func (h *AgentRunHandler) CreateAgentRunEvent(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {

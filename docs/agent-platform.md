@@ -173,6 +173,63 @@ En körning som avslutas av en profil som inte får röra kod avslutas
 uttryckligen - den lämnas inte öppen bara för att profilen förbjuder ett
 steg.
 
+## AgentRun-statusar
+
+En agentkörning har två dimensioner: en **fas** (vad agenten gör) och ett
+**tillstånd** (hur det går). Båda är kanoniska och definieras i
+`src/go/internal/models/agent_run.go` - klienter läser dem från
+`GET /api/v1/agent-run-lifecycle` i stället för att hålla egna listor.
+
+Faser, i ordning:
+
+| Fas | Betyder |
+| --- | --- |
+| `define` | målet specificeras och bryts ned |
+| `plan` | agenten planerar hur målet ska lösas |
+| `execute` | agenten utför arbetet |
+| `verify` | resultatet verifieras |
+| `completed` | körningen är slut |
+
+Tillstånd:
+
+| Tillstånd | Betyder | Kan gå till |
+| --- | --- | --- |
+| `queued` | Plan har accepterat körningen, jobbet har inte startat | `running`, `blocked`, `done`, `failed`, `cancelled` |
+| `running` | jobbet kör och agenten arbetar | `blocked`, `done`, `failed`, `cancelled` |
+| `blocked` | agenten väntar på en människa - till exempel ett godkännande | `queued`, `running`, `done`, `failed`, `cancelled` |
+| `done` | körningen lyckades | terminalt |
+| `failed` | körningen misslyckades | terminalt |
+| `cancelled` | körningen avbröts | terminalt |
+
+Reglerna är: en körning får alltid avbrytas, en terminal körning får inte
+återupplivas, och fasen får aldrig gå bakåt.
+
+**Namnen ändras inte utan migrering.** `done` - inte `succeeded` - och `blocked`
+- inte `waiting_approval`. Skälet är att värdena redan ligger i databasen, i
+API-svar och i gränssnittet; ett nytt namn utan migrering ger två sanningar.
+
+## Checkpoint-orchestratorn
+
+Checkpoint-orchestratorn (`src/agent/internal/core/workflow`) driver det planerade
+läget: ett mål bryts ned i checkpoints, och varje checkpoint passerar en gate
+(beteende, UI, adversarial, human) innan nästa får köras.
+
+**StateStoren bestämmer om läget överlever en omstart.** I dev och prod används
+`orchestrator.NewCheckpointStore(pool)` som sparar mål, checkpoints och
+gate-resultat i Postgres (`goals`, `checkpoints`, `checkpoint_results`). Finns ingen
+databas faller agenten tillbaka på `NewInMemoryStateStore()`, och då är
+checkpointplanen flyktig.
+
+**Initieringsfel ska synas, inte bara loggas.** Utan orchestratorn registreras
+inga workflow-endpoints - `/api/v1/workflow`, `/api/v1/workflow/:id/approve` och
+gates saknas helt. `/api/v1/health` och `/api/v1/status` rapporterar därför
+`orchestrator.initialized` och `orchestrator.error`, så att ett fel går att se
+utan att läsa loggar.
+
+Testerna i `internal/core/workflow` och `internal/api` håller båda delarna på
+plats: att en egen StateStore behålls, att alla fyra gate-typerna är
+registrerade, och att initieringsfelet syns i status och health.
+
 ## Bygg och driftsättning
 
 | Deployable | Källa | Image | CI |
@@ -196,9 +253,34 @@ SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
   ./create-agent-secrets.sh
 ```
 
-Skriptet krypterar varje hemlighet med repoets publika age-nyckel. Tills
-det är gjort är agenten inte utplockad i prod - `environments/prod/patches`
-tar bort agentens deployment och databas.
+Skriptet krypterar varje hemlighet med repoets publika age-nyckel. Hemligheterna
+finns nu krypterade i `environments/prod/secrets/agent-*.enc.yaml` och agenten är
+**inte längre borttagen** i prod-overlayson - `environments/prod/patches` innehåller
+bara de patchar som fortfarande behövs. När klustret är igång är agenten redo att
+deployas.
+
+Kvar att göra i prod:
+
+1. Kör `environments/prod/secrets/plan-api-key.sql` i Plan-databasen - den lägger in
+   hashen av agentens API-nyckel (nyckeln finns krypterad, Plan sparar bara hashen).
+2. Låt Flux synka `environments/prod` - agent-imagen hämtas från ghcr.io och
+   jobbcontrollern börjar skapa jobb för köade körningar.
+
+### Gates i CI
+
+| Gate | Var | Vad den fångar |
+| --- | --- | --- |
+| `go vet` + `go test -race` | `agent-go.yml`, `commit.api.yaml` | fel i agenten och Plan-API:t |
+| `golangci-lint` | `agent-go.yml` | linterfynd i agenten |
+| `bun run test:unit` | `ci.yaml` | enhetstesterna i `src/nuxt/test/unit` (233 st) |
+| `bun run test` (cucumber) | `ci.yaml` | feature-flöden i gränssnittet |
+| `bun run typecheck` | `ci.yaml` | nya typfel - se nedan |
+
+Typecheck-gaten är en baslinje-gate: gränssnittet har ärvd teknisk skuld (170 typfel
+i `app/` och `server/`), så gaten jämför antalet fel per fil mot
+`src/nuxt/typecheck-baseline.json` och faller bara på **nya** fel. Kör
+`node scripts/typecheck.mjs --update` i `src/nuxt` för att skriva om baslinjen
+efter en avsiktlig rättning.
 
 ## Kostnad och budget
 
@@ -287,12 +369,15 @@ Medvetet inte portade:
 - **Det gamla flödet med filbaserade godkännanden och Slack** - godkännanden
   ligger nu i Plan, där en människa fattar beslutet.
 
-I prod är agenten inte utplockad ännu: `environments/prod/patches` tar bort
-agentens deployment och databas tills hemligheterna (`plan-agent-api-key`,
-`plan-agent-db-app`, `plan-agent-llm`, `plan-agent-git`) finns krypterade.
+I prod är agenten utplockad igen: hemligheterna (`plan-agent-api-key`,
+`plan-agent-db-app`, `plan-agent-llm`, `plan-agent-git`) finns krypterade i
+`environments/prod/secrets/`, och `environments/prod/patches` innehåller bara de
+patchar som fortfarande behövs. Se "Hemligheter i prod" ovan för de två
+stegen som återstår innan agenten kör i produktion.
 
-Det som återstår innan den gamla agents-repon kan arkiveras är:
+Det som återstår för agents-repon:
 
-- CI och releaseflöden för båda deployables (agent-go.yml tillkom, men
-  image-publisering saknas)
+- image-publisering och releaseflöden är på plats (`commit.agent.yaml` bygger
+  `plan-agent` och föreslår PR med taggen), och CI-gates finns för agenten,
+  Plan-API:t och gränssnittet
 - hantera flera samtidiga mål i jobbcontrollern

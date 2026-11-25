@@ -43,7 +43,7 @@ func NewAgentUsageHandler() *AgentUsageHandler {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/usage [post]
+// @Router /api/v1/agent-runs/{id}/usage [post]
 func (h *AgentUsageHandler) RecordUsage(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -85,7 +85,7 @@ func (h *AgentUsageHandler) RecordUsage(c *gin.Context) {
 // @Success 200 {object} models.AgentRunUsage
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-runs/{id}/usage [get]
+// @Router /api/v1/agent-runs/{id}/usage [get]
 func (h *AgentUsageHandler) GetUsage(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -126,7 +126,7 @@ func (h *AgentUsageHandler) GetUsage(c *gin.Context) {
 // @Success 200 {object} models.AgentUsageSummary
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/agent-usage [get]
+// @Router /api/v1/agent-usage [get]
 func (h *AgentUsageHandler) ListUsage(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -165,7 +165,7 @@ func (h *AgentUsageHandler) ListUsage(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {array} models.AgentBudget
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/agent-budgets [get]
+// @Router /api/v1/agent-budgets [get]
 func (h *AgentUsageHandler) ListBudgets(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -193,7 +193,7 @@ func (h *AgentUsageHandler) ListBudgets(c *gin.Context) {
 // @Success 201 {object} models.AgentBudget
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
-// @Router /api/agent-budgets [post]
+// @Router /api/v1/agent-budgets [post]
 func (h *AgentUsageHandler) CreateBudget(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -240,7 +240,7 @@ func (h *AgentUsageHandler) CreateBudget(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-budgets/{id} [patch]
+// @Router /api/v1/agent-budgets/{id} [patch]
 func (h *AgentUsageHandler) UpdateBudget(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -282,7 +282,7 @@ func (h *AgentUsageHandler) UpdateBudget(c *gin.Context) {
 // @Success 204
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-budgets/{id} [delete]
+// @Router /api/v1/agent-budgets/{id} [delete]
 func (h *AgentUsageHandler) DeleteBudget(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
@@ -313,7 +313,7 @@ func (h *AgentUsageHandler) DeleteBudget(c *gin.Context) {
 // @Success 200 {object} models.BudgetStatus
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /api/agent-budgets/{id}/status [get]
+// @Router /api/v1/agent-budgets/{id}/status [get]
 func (h *AgentUsageHandler) BudgetStatus(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {

@@ -4,6 +4,9 @@ on:
     paths:
       - src/agent/**
       - src/commands/**
+      # Byggcontexten för agent-imagen styrs av .dockerignore i repo-roten.
+      # Ändras den ska bilden byggas om.
+      - .dockerignore
       - .github/workflows/commit.agent.yaml
   workflow_dispatch:
 
