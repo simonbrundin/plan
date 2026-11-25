@@ -16,8 +16,12 @@
 #   1 - 2026-11-25 - första versionen. Bytte samtidigt "blocked" till
 #       "waiting_approval" och "done" till "succeeded" i API, agent,
 #       gränssnitt och databas.
+#   2 - 2026-11-25 - markerade vilka anrop agenten faktiskt gör (agent: true).
+#       Plan måste tillåta dem för agent-scope, annars får agenten 403 i prod
+#       där nyckeln har scope 'agent' (i dev har den scope 'full', så felet
+#       syns inte där).
 
-version: 1
+version: 2
 
 # Agentkörningens faser, i den ordning de sker.
 phases:
@@ -60,29 +64,43 @@ profiles:
 
 # De API-anrop agenten gör mot Plan. Sökvägarna skrivs med {id} för
 # parametrar - i koden motsvaras de av format-strängar med %d.
+#
+# agent: true betyder att agenten själv gör anropet. Plan måste då tillåta
+# det för agent-scope - det är agentens egen nyckel som används, och den
+# har scope 'agent' i prod.
 endpoints:
   - method: GET
     path: /api/v1/goals
+    agent: true
   - method: POST
     path: /api/v1/goals
+    agent: true
   - method: GET
     path: /api/v1/goals/{id}
+    agent: true
   - method: PATCH
     path: /api/v1/goals/{id}
+    agent: true
   - method: GET
     path: /api/v1/goals/{id}/status
   - method: PATCH
     path: /api/v1/goals/{id}/status
+    agent: true
   - method: GET
     path: /api/v1/statuses
+    agent: true
   - method: POST
     path: /api/v1/goals/relations
+    agent: true
   - method: GET
     path: /api/v1/agent-runs
+    agent: true
   - method: POST
     path: /api/v1/agent-runs
+    agent: true
   - method: PATCH
     path: /api/v1/agent-runs/{id}
+    agent: true
   - method: POST
     path: /api/v1/agent-runs/{id}/cancel
   - method: GET
@@ -91,11 +109,15 @@ endpoints:
     path: /api/v1/agent-runs/{id}/usage
   - method: POST
     path: /api/v1/agent-runs/{id}/usage
+    agent: true
   - method: GET
     path: /api/v1/agent-runs/{id}/events
   - method: POST
     path: /api/v1/agent-runs/{id}/events
+    agent: true
   - method: GET
     path: /api/v1/agent-runs/{id}/approvals
+    agent: true
   - method: POST
     path: /api/v1/agent-runs/{id}/approvals
+    agent: true

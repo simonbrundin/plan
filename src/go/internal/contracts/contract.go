@@ -20,6 +20,10 @@ import (
 type Endpoint struct {
 	Method string `yaml:"method"`
 	Path   string `yaml:"path"`
+	// Agent betyder att agenten själv gör anropet. Plan ska tillåta det
+	// för agent-scope - annars får agenten 403 när den använder sin egen
+	// nyckel.
+	Agent bool `yaml:"agent"`
 }
 
 // Key gör att ett anrop kan jämföras i en mängd.
@@ -106,6 +110,18 @@ func (c *Contract) HasEndpoint(method, path string) bool {
 		}
 	}
 	return false
+}
+
+// AgentEndpoints returnerar de anrop agenten gör själv. De ska gå att göra
+// med agent-scope.
+func (c *Contract) AgentEndpoints() []Endpoint {
+	var agentens []Endpoint
+	for _, endpoint := range c.Endpoints {
+		if endpoint.Agent {
+			agentens = append(agentens, endpoint)
+		}
+	}
+	return agentens
 }
 
 // NormalizePath gör om en formatsökväg (%d) till kontraktets form ({id}),

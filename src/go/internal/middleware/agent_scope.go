@@ -48,6 +48,12 @@ func agentScopeAllowsGoals(method string, rest []string) bool {
 		// filsystemet.
 		return method == http.MethodGet || method == http.MethodPost
 	case 1:
+		// "relations" är en samling, inte ett mål-id. Dit lägger agenten
+		// undermål - ett skrivande anrop som hör ihop med målen, så det
+		// tillåts.
+		if rest[0] == "relations" {
+			return method == http.MethodPost
+		}
 		return method == http.MethodGet || method == http.MethodPatch
 	case 2:
 		// Statusen på ett mål.

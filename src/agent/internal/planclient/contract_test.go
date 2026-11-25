@@ -25,6 +25,8 @@ type kontrakt struct {
 type endpoint struct {
 	Method string `yaml:"method"`
 	Path   string `yaml:"path"`
+	// Agent betyder att agenten gör anropet själv.
+	Agent bool `yaml:"agent"`
 }
 
 // läsKontrakt läser kontraktet från src/contracts/plan-agent.yaml.
@@ -120,6 +122,31 @@ func TestSokvagarMatcharKontraktet(t *testing.T) {
 
 		if !found {
 			t.Errorf("agenten använder %s, men den vägen finns inte i kontraktet", normaliserad)
+		}
+	}
+}
+
+// TestAgentensAnropArMarkade kontrollerar att varje sökväg agenten
+// använder är markerad som agentens eget anrop i kontraktet.
+//
+// Det markerade anropet är Plan:s agent-scope: agenten får bara göra de
+// anrop den är markerad för. Ett anrop agenten gör men som inte är
+// markerat ger 403 i prod, där agentens nyckel har scope 'agent'.
+func TestAgentensAnropArMarkade(t *testing.T) {
+	k := läsKontrakt(t)
+
+	markerade := map[string]bool{}
+	for _, e := range k.Endpoints {
+		if e.Agent {
+			markerade[e.Path] = true
+		}
+	}
+
+	for _, sökväg := range AllaSökvägar {
+		normaliserad := strings.ReplaceAll(sökväg, "%d", "{id}")
+
+		if !markerade[normaliserad] {
+			t.Errorf("agenten använder %s, men den vägen är inte markerad som agentens eget anrop", normaliserad)
 		}
 	}
 }
