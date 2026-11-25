@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS "agent_runs" (
   "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY("id"),
   CONSTRAINT agent_runs_valid_phase CHECK ("phase" IN ('define', 'plan', 'execute', 'verify', 'completed')),
-  CONSTRAINT agent_runs_valid_status CHECK ("status" IN ('queued', 'running', 'blocked', 'done', 'failed', 'cancelled')),
+  CONSTRAINT agent_runs_valid_status CHECK ("status" IN ('queued', 'running', 'waiting_approval', 'succeeded', 'failed', 'cancelled')),
   CONSTRAINT agent_runs_valid_trigger CHECK ("trigger" IN ('user', 'schedule', 'webhook', 'agent')),
   CONSTRAINT agent_runs_valid_profile CHECK ("agent_profile" IN ('coding', 'life')),
   FOREIGN KEY ("goal_id") REFERENCES "goals"("id") ON DELETE CASCADE

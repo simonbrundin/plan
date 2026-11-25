@@ -35,11 +35,22 @@ func Connect(ctx context.Context) error {
 	}
 
 	// Agentkörningarnas tillstånd har bytt namn: "blocked" heter nu
-	// "waiting_approval" och "done" heter nu "succeeded". Körningen är
-	// idempotent - gamla värden finns inte kvar efter första körningen.
+	// "waiting_approval" och "done" heter nu "succeeded".
+	//
+	// Constrainten måste bort först - annars går det inte att skriva de nya
+	// värdena. Sedan byts raderna, och constrainten sätts tillbaka med de nya
+	// värdena. Alltihop sker i en implicit transaktion (Postgres kör en
+	// fråga med flera satser i en enda transaktion).
+	//
+	// Körningen är idempotent: gamla värden finns inte kvar efter första
+	// körningen, och constrainten sätts tillbaka även om den redan har rätt
+	// värden.
 	if _, err := pool.Exec(ctx, `
+		ALTER TABLE agent_runs DROP CONSTRAINT IF EXISTS agent_runs_valid_status;
 		UPDATE agent_runs SET status = 'waiting_approval' WHERE status = 'blocked';
 		UPDATE agent_runs SET status = 'succeeded' WHERE status = 'done';
+		ALTER TABLE agent_runs ADD CONSTRAINT agent_runs_valid_status
+			CHECK ("status" IN ('queued', 'running', 'waiting_approval', 'succeeded', 'failed', 'cancelled'));
 	`); err != nil {
 		return fmt.Errorf("unable to migrate agent run statuses: %w", err)
 	}
