@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: agent-api
-          image: ghcr.io/simonbrundin/plan-agent:sha-d213719
+          image: ghcr.io/simonbrundin/plan-agent:sha-a1226a0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
