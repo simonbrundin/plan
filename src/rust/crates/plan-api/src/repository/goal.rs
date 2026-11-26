@@ -590,6 +590,100 @@ fn datum(
     Ok(Some(datum))
 }
 
+/// Användarens prioriteringslista.
+///
+/// Ett mål är inte görbart förrän alla direkta beroenden är klara, och
+/// mål med ett startdatum i framtiden syns inte ännu.
+pub async fn get_prioritized_goals(
+    pool: &PgPool,
+    user_id: i64,
+) -> Result<Vec<crate::models::goal::PrioritizedGoal>, AppError> {
+    let rader = sqlx::query(
+        r#"
+        SELECT
+            g.id, g.title, COALESCE(g.description, ''), g.icon, g.status_id, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now,
+            g.priority_order,
+            COALESCE((SELECT MAX(weight) FROM goal_relations WHERE child_id = g.id), 10) AS weight,
+            (SELECT g2.title FROM goal_relations gr INNER JOIN goals g2 ON g2.id = gr.parent_id WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_title,
+            (SELECT gr.parent_id FROM goal_relations gr WHERE gr.child_id = g.id ORDER BY gr.weight DESC LIMIT 1) AS parent_id,
+            -- Alla föräldrar som målet ligger under, sorterade på vikt.
+            COALESCE(
+                (
+                    SELECT json_agg(json_build_object('id', p.id, 'title', p.title) ORDER BY gr.weight DESC)
+                    FROM goal_relations gr
+                    INNER JOIN goals p ON p.id = gr.parent_id
+                    WHERE gr.child_id = g.id
+                ),
+                '[]'::json
+            ) AS parents,
+            g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
+            (SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
+        FROM goals g
+        INNER JOIN user_goals ug ON g.id = ug.goal_id
+        WHERE ug.user_id = $1
+          AND g.finished IS NULL
+          AND g.id <> 1
+          AND (g.start_date IS NULL OR g.start_date <= CURRENT_DATE)
+          -- Ett mål är inte görbart förrän alla direkta beroenden är klara.
+          AND NOT EXISTS (
+            SELECT 1
+            FROM goal_dependencies gd
+            INNER JOIN goals dependency ON dependency.id = gd.depends_on_id
+            WHERE gd.goal_id = g.id
+              AND dependency.finished IS NULL
+          )
+        ORDER BY g.priority_order ASC, weight DESC, g.created DESC
+        "#,
+    )
+    .bind(user_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(rader
+        .iter()
+        .map(|rad| {
+            let mål = crate::models::goal::Goal {
+                id: rad.get::<i32, _>(0) as i64,
+                title: rad.get::<String, _>(1),
+                description: rad.get::<String, _>(2),
+                icon: rad.get::<String, _>(3),
+                status_id: rad.get::<i32, _>(4),
+                created: rad.get::<chrono::DateTime<chrono::Utc>, _>(5),
+                started: rad.get::<Option<chrono::DateTime<chrono::Utc>>, _>(6),
+                finished: rad.get::<Option<chrono::DateTime<chrono::Utc>>, _>(7),
+                due: rad.get::<Option<chrono::NaiveDate>, _>(8),
+                start_date: rad.get::<Option<chrono::NaiveDate>, _>(9),
+                estimated_minutes: rad.get::<Option<i32>, _>(10),
+                inbox: rad.get::<i32, _>(11),
+                eternal: rad.get::<bool, _>(12),
+                agent: rad.get::<bool, _>(13),
+                now: rad.get::<bool, _>(14),
+                has_parent: false,
+                order: 0,
+                places: None,
+                tags: None,
+                recurrence_rule: rad.get::<Option<String>, _>(20),
+                recurrence_mode: rad.get::<Option<String>, _>(21),
+                recurrence_next: rad.get::<Option<chrono::NaiveDate>, _>(22),
+                recurrence_count: rad.get::<i64, _>(23) as i32,
+            };
+
+            let föräldrar: Vec<crate::models::goal::GoalParent> =
+                serde_json::from_value(rad.get::<serde_json::Value, _>(19)).unwrap_or_default();
+
+            crate::models::goal::PrioritizedGoal {
+                goal: mål,
+                weight: rad.get::<i32, _>(16),
+                parent_title: rad.get::<Option<String>, _>(17),
+                parent_id: rad.get::<Option<i32>, _>(18).map(|id| id as i64),
+                priority_order: rad.get::<i32, _>(15),
+                parents: föräldrar,
+            }
+        })
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

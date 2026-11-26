@@ -40,6 +40,7 @@ use crate::routes::{goals, handlers, statuses, tags};
         goals::get_goals,
         goals::get_goal,
         goals::get_goal_graph,
+        goals::get_prioritized_goals,
         goals::create_goal,
         goals::update_goal,
         goals::delete_goal,

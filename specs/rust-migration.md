@@ -93,10 +93,28 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | Router + route-paritetstest (agent) | klar |
 | Planklient + kontrakttest | klar |
 | OpenAPI code-first (utoipa) + Scalar | klar |
-| Auth (sessioner, API-nycklar, Zitadel) | inte påbörjat |
-| Modeller + repositories | inte påbörjat |
-| Handlers (79 endpoints) | inte påbörjat |
+| Auth (sessioner, API-nycklar, Zitadel, agent-scope) | klar |
+| Modeller + repositories (statusar, mål, taggar, platser) | klar för de domänerna |
+| Handlers | 12 av 79 portade (statusar, mål, taggar) |
+| Live-paritetsskript (Go vs Rust, samma databas) | klar |
 | Agentens API, providers, kärna, worker | inte påbörjat |
+
+### Vad som återstår i API:t
+
+- Mål: relationer, beroenden, omordning, återkommande mål (RRULE), förekomster.
+- Platser, kalendrar, kalenderhändelser.
+- Agentkörningar, godkännanden, budgets, användning, livscykel.
+- API-nycklar och auth-endpoints (login, callback, session, logout).
+
+### Noter om paritet
+
+- Sessionstoken är byte-kompatibla med Go, så en cookie fungerar i båda
+  tjänsterna medan de kör parallellt.
+- Tidsstämplar renderas i UTC i Rust och i serverns tidszon i Go. Det är
+  samma tidpunkt, men olika text - paritetsskriptet normaliserar dem.
+- Ett uppdaterat mål svarar `null` för platser och taggar i båda
+  tjänsterna, medan en lista svarar `[]`. Skillnaden syns i svaret och
+  måste därför behållas.
 
 ## Layout
 

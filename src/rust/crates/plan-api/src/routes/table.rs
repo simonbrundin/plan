@@ -132,6 +132,7 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("PATCH", "/api/v1/goals/{id}") => patch(crate::routes::goals::update_goal),
         ("DELETE", "/api/v1/goals/{id}") => delete(crate::routes::goals::delete_goal),
         ("GET", "/api/v1/goals/graph") => get(crate::routes::goals::get_goal_graph),
+        ("GET", "/api/v1/goals/prioritized") => get(crate::routes::goals::get_prioritized_goals),
 
         ("GET", "/api/v1/tags") => get(crate::routes::tags::list),
         ("GET", "/api/v1/goals/{id}/tags") => get(crate::routes::tags::get_goal_tags),

@@ -13,7 +13,8 @@ use crate::auth::Caller;
 use crate::error::AppError;
 use crate::models::goal::{
     ChildRelation, ChildWithDeps, CreateGoalRequest, GetGoalResponse, Goal, GoalDependency,
-    GoalFilter, GoalGraphResponse, GoalRelation, GoalWithRelations, UpdateGoalRequest,
+    GoalFilter, GoalGraphResponse, GoalRelation, GoalWithRelations, PrioritizedGoal,
+    UpdateGoalRequest,
 };
 use crate::repository::{goal, place, tag};
 use crate::routes::state::AppState;
@@ -86,23 +87,33 @@ fn filter_from_query(query: &GoalQuery) -> Result<GoalFilter, AppError> {
 ///
 /// Ett fel här ska inte förstöra svaret - platserna och taggarna är extra
 /// information, så felet hoppas över i stället för att returneras.
+async fn platser_och_taggar(
+    pool: &sqlx::PgPool,
+    ids: &[i64],
+) -> (
+    HashMap<i64, Vec<crate::models::place::Place>>,
+    HashMap<i64, Vec<String>>,
+) {
+    let platser = place::get_places_for_goals(pool, ids)
+        .await
+        .unwrap_or_default();
+    let taggar = tag::tags_for_goals(pool, ids).await.unwrap_or_default();
+
+    (platser, taggar)
+}
+
+/// Fyller i målens platser och taggar.
 async fn attach_places_and_tags(pool: &sqlx::PgPool, goals: &mut [Goal]) {
     if goals.is_empty() {
         return;
     }
 
     let ids: Vec<i64> = goals.iter().map(|mål| mål.id).collect();
+    let (platser, taggar) = platser_och_taggar(pool, &ids).await;
 
-    if let Ok(platser) = place::get_places_for_goals(pool, &ids).await {
-        for mål in goals.iter_mut() {
-            mål.places = Some(platser.get(&mål.id).cloned().unwrap_or_default());
-        }
-    }
-
-    if let Ok(taggar) = tag::tags_for_goals(pool, &ids).await {
-        for mål in goals.iter_mut() {
-            mål.tags = Some(taggar.get(&mål.id).cloned().unwrap_or_default());
-        }
+    for mål in goals.iter_mut() {
+        mål.places = Some(platser.get(&mål.id).cloned().unwrap_or_default());
+        mål.tags = Some(taggar.get(&mål.id).cloned().unwrap_or_default());
     }
 }
 
@@ -310,6 +321,42 @@ pub async fn get_goals(
     let mut goals = goal::get_goals_filtered(pool, user_id, &filter).await?;
 
     attach_places_and_tags(pool, &mut goals).await;
+
+    Ok(Json(goals))
+}
+
+/// Användarens prioriteringslista.
+#[utoipa::path(
+    get,
+    path = "/api/v1/goals/prioritized",
+    tag = "goals",
+    responses(
+        (status = 200, description = "Prioriteringslistan", content_type = "application/json",
+            body = Vec<PrioritizedGoal>),
+        (status = 401, description = "Ingen giltig session")
+    )
+)]
+pub async fn get_prioritized_goals(
+    State(state): State<AppState>,
+    Extension(caller): Extension<Caller>,
+) -> Result<Json<Vec<PrioritizedGoal>>, AppError> {
+    let user_id = user_id(&caller)?;
+
+    let Some(pool) = state.pool.as_ref() else {
+        return Err(no_database());
+    };
+
+    let mut goals = goal::get_prioritized_goals(pool, user_id).await?;
+
+    // Prioriterade mål är en lista av mål - de platser och taggar som hör
+    // till dem hämtas i ett svep.
+    let ids: Vec<i64> = goals.iter().map(|mål| mål.goal.id).collect();
+    let (platser, taggar) = platser_och_taggar(pool, &ids).await;
+
+    for mål in goals.iter_mut() {
+        mål.goal.places = Some(platser.get(&mål.goal.id).cloned().unwrap_or_default());
+        mål.goal.tags = Some(taggar.get(&mål.goal.id).cloned().unwrap_or_default());
+    }
 
     Ok(Json(goals))
 }
