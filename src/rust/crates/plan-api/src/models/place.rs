@@ -108,6 +108,49 @@ pub struct CreatePlaceRequest {
     pub icon: Option<String>,
 }
 
+/// Request-body för att uppdatera en plats.
+///
+/// Alla fält är valfria - ett fält som saknas lämnas oförändrat.
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct UpdatePlaceRequest {
+    /// Nytt namn.
+    #[serde(default)]
+    pub name: Option<String>,
+    /// Ny latitud.
+    #[serde(default)]
+    pub latitude: Option<f64>,
+    /// Ny longitud.
+    #[serde(default)]
+    pub longitude: Option<f64>,
+    /// Ny radie i meter.
+    #[serde(default)]
+    pub radius_meters: Option<i32>,
+    /// Ny ikon.
+    #[serde(default)]
+    pub icon: Option<String>,
+}
+
+/// Request-body som ersätter platserna på ett mål eller en händelse.
+///
+/// `place_ids` ersätter hela uppsättningen - en tom lista tar bort alla
+/// platser.
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct SetPlacesRequest {
+    /// Id:n på platserna.
+    #[serde(default)]
+    pub place_ids: Vec<i64>,
+}
+
+/// Request-body som sätter användarens "jag är här"-plats.
+///
+/// `place_id` = null rensar den valda platsen.
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct SetCurrentPlaceRequest {
+    /// Id:t på platsen, eller inget för att rensa.
+    #[serde(default)]
+    pub place_id: Option<i64>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

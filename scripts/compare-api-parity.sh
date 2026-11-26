@@ -51,6 +51,11 @@ ANROP_BODY=(
   "PATCH /api/v1/goals/relations/reorder {}"
   "PATCH /api/v1/goals/reorder {}"
   "PATCH /api/v1/goals/priority/reorder {}"
+  "POST /api/v1/places {}"
+  "PATCH /api/v1/places/1 {}"
+  "PUT /api/v1/goals/1/places {}"
+  "PUT /api/v1/calendar-events/1/places {}"
+  "PUT /api/v1/me/current-place {}"
   "POST /api/v1/goals {}"
   "PATCH /api/v1/goals/1 {}"
 )

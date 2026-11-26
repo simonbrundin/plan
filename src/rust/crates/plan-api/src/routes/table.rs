@@ -152,6 +152,22 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
             delete(crate::routes::relations::delete_dependency)
         }
 
+        ("GET", "/api/v1/places") => get(crate::routes::places::list),
+        ("POST", "/api/v1/places") => post(crate::routes::places::create),
+        ("GET", "/api/v1/places/nearby") => get(crate::routes::places::nearby),
+        ("PATCH", "/api/v1/places/{id}") => patch(crate::routes::places::update),
+        ("DELETE", "/api/v1/places/{id}") => delete(crate::routes::places::delete),
+        ("GET", "/api/v1/goals/{id}/places") => get(crate::routes::places::get_goal_places),
+        ("PUT", "/api/v1/goals/{id}/places") => put(crate::routes::places::set_goal_places),
+        ("GET", "/api/v1/calendar-events/{id}/places") => {
+            get(crate::routes::places::get_event_places)
+        }
+        ("PUT", "/api/v1/calendar-events/{id}/places") => {
+            put(crate::routes::places::set_event_places)
+        }
+        ("GET", "/api/v1/me/current-place") => get(crate::routes::places::get_current_place),
+        ("PUT", "/api/v1/me/current-place") => put(crate::routes::places::set_current_place),
+
         ("GET", "/api/v1/tags") => get(crate::routes::tags::list),
         ("GET", "/api/v1/goals/{id}/tags") => get(crate::routes::tags::get_goal_tags),
         ("PUT", "/api/v1/goals/{id}/tags") => put(crate::routes::tags::set_goal_tags),

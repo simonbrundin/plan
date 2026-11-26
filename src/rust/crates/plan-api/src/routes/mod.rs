@@ -5,6 +5,7 @@
 
 pub mod goals;
 pub mod handlers;
+pub mod places;
 pub mod relations;
 pub mod state;
 pub mod statuses;
