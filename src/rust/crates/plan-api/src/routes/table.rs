@@ -134,6 +134,24 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("GET", "/api/v1/goals/graph") => get(crate::routes::goals::get_goal_graph),
         ("GET", "/api/v1/goals/prioritized") => get(crate::routes::goals::get_prioritized_goals),
 
+        ("POST", "/api/v1/goals/relations") => post(crate::routes::relations::create_relation),
+        ("PATCH", "/api/v1/goals/relations") => patch(crate::routes::relations::update_relation),
+        ("DELETE", "/api/v1/goals/relations") => delete(crate::routes::relations::delete_relation),
+        ("PATCH", "/api/v1/goals/relations/weights") => {
+            patch(crate::routes::relations::update_relation_weights)
+        }
+        ("PATCH", "/api/v1/goals/relations/reorder") => {
+            patch(crate::routes::relations::reorder_relations)
+        }
+        ("PATCH", "/api/v1/goals/reorder") => patch(crate::routes::relations::reorder_goals),
+        ("PATCH", "/api/v1/goals/priority/reorder") => {
+            patch(crate::routes::relations::reorder_priority_goals)
+        }
+        ("POST", "/api/v1/goals/dependencies") => post(crate::routes::relations::create_dependency),
+        ("DELETE", "/api/v1/goals/dependencies") => {
+            delete(crate::routes::relations::delete_dependency)
+        }
+
         ("GET", "/api/v1/tags") => get(crate::routes::tags::list),
         ("GET", "/api/v1/goals/{id}/tags") => get(crate::routes::tags::get_goal_tags),
         ("PUT", "/api/v1/goals/{id}/tags") => put(crate::routes::tags::set_goal_tags),

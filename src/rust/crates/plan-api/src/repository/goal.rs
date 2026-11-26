@@ -4,6 +4,8 @@
 //! identiska med Go-tjänstens - samma JOIN, samma sortering, samma
 //! felmeddelanden.
 
+use std::collections::HashSet;
+
 use sqlx::{PgPool, Row};
 
 use crate::error::AppError;
@@ -684,6 +686,429 @@ pub async fn get_prioritized_goals(
         .collect())
 }
 
+/// Skapar en relation mellan ett föräldermål och ett barnmål.
+///
+/// En befintlig relation uppdateras i stället för att ge ett dubblettfel.
+pub async fn create_relation(
+    pool: &PgPool,
+    parent_id: i64,
+    child_id: i64,
+    order: i32,
+    weight: i32,
+) -> Result<crate::models::goal::ChildRelation, AppError> {
+    let rad = sqlx::query(
+        r#"
+        INSERT INTO goal_relations (parent_id, child_id, "order", weight)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (parent_id, child_id) DO UPDATE SET "order" = $3, weight = $4
+        RETURNING child_id, "order", weight
+        "#,
+    )
+    .bind(parent_id)
+    .bind(child_id)
+    .bind(order)
+    .bind(weight)
+    .fetch_one(pool)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(crate::models::goal::ChildRelation {
+        child_id: rad.get::<i32, _>(0) as i64,
+        order: rad.get::<i32, _>(1),
+        weight: rad.get::<i32, _>(2),
+    })
+}
+
+/// Uppdaterar en relations ordning och vikt.
+///
+/// Bara de fält som finns i requesten ändras.
+pub async fn update_relation(
+    pool: &PgPool,
+    parent_id: i64,
+    child_id: i64,
+    order: Option<i32>,
+    weight: Option<i32>,
+) -> Result<(), AppError> {
+    let mut fråga = sqlx::QueryBuilder::<sqlx::Postgres>::new("UPDATE goal_relations SET");
+    let mut första = true;
+
+    if let Some(order) = order {
+        if !första {
+            fråga.push(",");
+        }
+        fråga.push(" \"order\" = ").push_bind(order);
+        första = false;
+    }
+
+    if let Some(weight) = weight {
+        if !första {
+            fråga.push(",");
+        }
+        fråga.push(" weight = ").push_bind(weight);
+    }
+
+    // Utan något att ändra görs ingenting - men inget fel heller.
+    if första {
+        return Ok(());
+    }
+
+    fråga
+        .push(" WHERE parent_id = ")
+        .push_bind(parent_id)
+        .push(" AND child_id = ")
+        .push_bind(child_id);
+
+    fråga
+        .build()
+        .execute(pool)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Ersätter alla vikter för en förälder i en transaktion.
+///
+/// Vikterna måste summera till 100 - annars rullas transaktionen tillbaka,
+/// så en förälder aldrig hamnar i ett halvuppdaterat tillstånd.
+pub async fn update_relation_weights(
+    pool: &PgPool,
+    parent_id: i64,
+    weights: &[(i64, i32)],
+) -> Result<(), AppError> {
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    for (child_id, weight) in weights {
+        if *weight < 0 || *weight > 100 {
+            return Err(AppError::BadRequest(
+                "weight must be between 0 and 100".to_string(),
+            ));
+        }
+
+        let result = sqlx::query(
+            "UPDATE goal_relations SET weight = $1 WHERE parent_id = $2 AND child_id = $3",
+        )
+        .bind(weight)
+        .bind(parent_id)
+        .bind(child_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+        if result.rows_affected() != 1 {
+            return Err(AppError::BadRequest(
+                "relation does not belong to parent".to_string(),
+            ));
+        }
+    }
+
+    let total: i32 = sqlx::query_scalar(
+        "SELECT COALESCE(SUM(weight), 0) FROM goal_relations WHERE parent_id = $1",
+    )
+    .bind(parent_id)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    if total != 100 {
+        return Err(AppError::BadRequest(
+            "relation weights must total 100".to_string(),
+        ));
+    }
+
+    tx.commit()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Tar bort en relation.
+pub async fn delete_relation(pool: &PgPool, parent_id: i64, child_id: i64) -> Result<(), AppError> {
+    sqlx::query("DELETE FROM goal_relations WHERE parent_id = $1 AND child_id = $2")
+        .bind(parent_id)
+        .bind(child_id)
+        .execute(pool)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Kombinerar den begärda ordningen med de barn som finns på servern men
+/// inte var med i requesten.
+///
+/// De begärda barnen kommer först, i begär ordning, och resten behåller sin
+/// inbördes ordning. Barn som inte finns på servern hoppas över, så
+/// resultatet har exakt en plats per existerande barn.
+pub fn merge_order(existing: &[i64], requested: &[i64]) -> Vec<i64> {
+    let känd: HashSet<i64> = existing.iter().copied().collect();
+    let mut sedda: HashSet<i64> = HashSet::new();
+    let mut ordning: Vec<i64> = Vec::with_capacity(existing.len());
+
+    for id in requested {
+        if sedda.contains(id) || !känd.contains(id) {
+            continue;
+        }
+        sedda.insert(*id);
+        ordning.push(*id);
+    }
+
+    for id in existing {
+        if sedda.contains(id) {
+            continue;
+        }
+        sedda.insert(*id);
+        ordning.push(*id);
+    }
+
+    ordning
+}
+
+/// Ordnar om barnen under ett mål.
+pub async fn reorder_relations(
+    pool: &PgPool,
+    parent_id: i64,
+    child_ids: &[i64],
+) -> Result<(), AppError> {
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    let befintliga: Vec<i64> = sqlx::query_scalar(
+        r#"SELECT child_id FROM goal_relations WHERE parent_id = $1 ORDER BY "order" ASC, child_id ASC"#,
+    )
+    .bind(parent_id)
+    .fetch_all(&mut *tx)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    for (position, child_id) in merge_order(&befintliga, child_ids).into_iter().enumerate() {
+        sqlx::query(
+            r#"UPDATE goal_relations SET "order" = $1 WHERE parent_id = $2 AND child_id = $3"#,
+        )
+        .bind(position as i32)
+        .bind(parent_id)
+        .bind(child_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Ordnar om grundmålen - de mål som inte ligger under någon förälder.
+///
+/// Grundmålens ordning ligger i kolumnen `order`, till skillnad från
+/// prioriteringslistans `priority_order`.
+pub async fn reorder_root_goals(
+    pool: &PgPool,
+    user_id: i64,
+    goal_ids: &[i64],
+) -> Result<(), AppError> {
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    let befintliga: Vec<i64> = sqlx::query_scalar(
+        r#"
+        SELECT g.id
+        FROM goals g
+        INNER JOIN user_goals ug ON ug.goal_id = g.id
+        WHERE ug.user_id = $1
+          AND NOT EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id)
+        ORDER BY g."order" ASC, g.created DESC, g.id ASC
+        "#,
+    )
+    .bind(user_id)
+    .fetch_all(&mut *tx)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    for (position, goal_id) in merge_order(&befintliga, goal_ids).into_iter().enumerate() {
+        sqlx::query(
+            r#"
+            UPDATE goals SET "order" = $1
+            WHERE id = $2
+              AND id IN (SELECT goal_id FROM user_goals WHERE user_id = $3)
+              AND NOT EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id)
+            "#,
+        )
+        .bind(position as i32)
+        .bind(goal_id)
+        .bind(user_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Ordnar om prioriteringslistan.
+///
+/// Ordningen sparas med EN bulk-update. En update per mål betydde en
+/// round-trip per mål, och med ett par hundra mål tog det runt tio
+/// sekunder över internet - en omsortering som fortfarande var på väg
+/// när sidan laddades om såg ut att den aldrig hade sparats.
+pub async fn reorder_priority_goals(
+    pool: &PgPool,
+    user_id: i64,
+    goal_ids: &[i64],
+) -> Result<(), AppError> {
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    let befintliga: Vec<i64> = sqlx::query_scalar(
+        r#"
+        SELECT g.id
+        FROM goals g
+        INNER JOIN user_goals ug ON ug.goal_id = g.id
+        WHERE ug.user_id = $1 AND g.finished IS NULL AND g.id <> 1
+        ORDER BY g.priority_order ASC, g.created DESC, g.id ASC
+        "#,
+    )
+    .bind(user_id)
+    .fetch_all(&mut *tx)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    let ordning = merge_order(&befintliga, goal_ids);
+    if !ordning.is_empty() {
+        let index: Vec<i64> = (0..ordning.len() as i64).collect();
+
+        sqlx::query(
+            r#"
+            UPDATE goals g
+            SET priority_order = v.ord
+            FROM (SELECT * FROM UNNEST($1::bigint[], $2::bigint[]) AS t(id, ord)) AS v(id, ord)
+            WHERE g.id = v.id::int
+              AND g.id IN (SELECT goal_id FROM user_goals WHERE user_id = $3)
+              AND g.finished IS NULL
+              AND g.id <> 1
+            "#,
+        )
+        .bind(&ordning)
+        .bind(&index)
+        .bind(user_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Skapar ett beroende mellan två mål.
+pub async fn create_dependency(
+    pool: &PgPool,
+    goal_id: i64,
+    depends_on_id: i64,
+) -> Result<crate::models::goal::GoalDependency, AppError> {
+    let rad = sqlx::query(
+        "INSERT INTO goal_dependencies (goal_id, depends_on_id) VALUES ($1, $2) RETURNING id, goal_id, depends_on_id, created",
+    )
+    .bind(goal_id)
+    .bind(depends_on_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(crate::models::goal::GoalDependency {
+        id: rad.get::<i32, _>(0) as i64,
+        goal_id: rad.get::<i32, _>(1) as i64,
+        depends_on_id: rad.get::<i32, _>(2) as i64,
+        created: rad.get::<chrono::DateTime<chrono::Utc>, _>(3),
+    })
+}
+
+/// Tar bort ett beroende.
+pub async fn delete_dependency(
+    pool: &PgPool,
+    goal_id: i64,
+    depends_on_id: i64,
+) -> Result<(), AppError> {
+    sqlx::query("DELETE FROM goal_dependencies WHERE goal_id = $1 AND depends_on_id = $2")
+        .bind(goal_id)
+        .bind(depends_on_id)
+        .execute(pool)
+        .await
+        .map_err(|err| AppError::Internal(err.to_string()))?;
+
+    Ok(())
+}
+
+/// Finns det en cykel om målet får bero på det andra målet?
+///
+/// Returnerar även sökvägen, så felet kan visa vilka mål som bildar
+/// cykeln.
+pub async fn check_for_cycle(
+    pool: &PgPool,
+    goal_id: i64,
+    depends_on_id: i64,
+) -> Result<(bool, Vec<i64>), AppError> {
+    let mut besökta: HashSet<i64> = HashSet::new();
+    let mut väg: Vec<i64> = Vec::new();
+    let mut kö: Vec<i64> = vec![depends_on_id];
+
+    // Sökningen sker med en stack i stället för rekursion - då går det
+    // att hålla reda på vägen utan att låna ut anropet.
+    while let Some(current) = kö.pop() {
+        if current == goal_id {
+            return Ok((true, väg));
+        }
+
+        if !besökta.insert(current) {
+            continue;
+        }
+
+        väg.push(current);
+
+        // Målens id:n är INTEGER i schemat, så de läses som i32.
+        let barn = sqlx::query_scalar::<_, i32>(
+            "SELECT depends_on_id FROM goal_dependencies WHERE goal_id = $1",
+        )
+        .bind(current as i32)
+        .fetch_all(pool)
+        .await;
+
+        // Går frågan inte att köra hoppas gren över - att missa en cykel är
+        // bättre än att felaktigt neka ett beroende.
+        let Ok(barn) = barn else {
+            tracing::warn!("Kunde inte läsa beroenden för mål {current} vid cykelkontroll");
+            continue;
+        };
+
+        // Stacken tas upp i omvänd ordning, så barnen besöks i samma
+        // ordning som i frågan.
+        for nästa in barn.into_iter().rev() {
+            kö.push(nästa as i64);
+        }
+    }
+
+    Ok((false, väg))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -751,5 +1176,25 @@ mod tests {
             Err(AppError::InvalidStartDate) => {}
             _ => panic!("ett ogiltigt startdatum ska avvisas"),
         }
+    }
+
+    /// Den begärda ordningen vinner, men barn som inte nämns behåller
+    /// sin plats efter de.
+    #[test]
+    fn merge_order_behaller_okerade_barn() {
+        let befintliga = vec![1, 2, 3];
+        let begärda = vec![3, 1];
+
+        assert_eq!(merge_order(&befintliga, &begärda), vec![3, 1, 2]);
+    }
+
+    /// Barn som inte finns på servern hoppas över - ordningen ska alltid
+    /// ha exakt en plats per existerande barn.
+    #[test]
+    fn merge_order_ignorerar_okanda_barn() {
+        let befintliga = vec![1, 2];
+        let begärda = vec![9, 2, 2];
+
+        assert_eq!(merge_order(&befintliga, &begärda), vec![2, 1]);
     }
 }

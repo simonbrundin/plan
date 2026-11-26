@@ -5,11 +5,13 @@
 
 pub mod goals;
 pub mod handlers;
+pub mod relations;
 pub mod state;
 pub mod statuses;
 pub mod table;
 pub mod tags;
 
+use axum::body::Bytes;
 use axum::extract::State;
 use axum::http::{header, HeaderValue, Method, StatusCode};
 use axum::response::{IntoResponse, Response};
@@ -19,8 +21,22 @@ use tower_http::trace::TraceLayer;
 
 use crate::config::Config;
 use crate::docs::scalar_ui;
+use crate::error::AppError;
 use crate::openapi::openapi;
 use crate::routes::state::AppState;
+
+/// Läser en request-body och ger Go-kompatibla felmeddelanden.
+///
+/// Gin svarar med ett eget meddelande när bindningen misslyckas, till
+/// exempel "childId and parentId are required". Axums inbyggda JSON-läsare
+/// ger i stället en teknisk beskrivning och status 422 - därför läses
+/// body:n manuellt här, så varje endpoint kan ange sitt eget meddelande.
+pub fn parse_body<T: serde::de::DeserializeOwned>(
+    body: &Bytes,
+    meddelande: &str,
+) -> Result<T, AppError> {
+    serde_json::from_slice(body).map_err(|_| AppError::BadRequest(meddelande.to_string()))
+}
 
 /// Bygger API:ts router med tillstånd.
 pub fn router(pool: Option<sqlx::postgres::PgPool>, config: &Config) -> Router {

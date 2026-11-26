@@ -40,6 +40,21 @@ ANROP=(
   "GET /api/v1/api-keys"
 )
 
+# Anrop som skickar en body. Endast felmeddelanden jämförs - de ändrar
+# ingen data, så båda tjänsterna kan anropas med samma body.
+ANROP_BODY=(
+  "POST /api/v1/goals/dependencies {}"
+  "POST /api/v1/goals/relations {}"
+  "PATCH /api/v1/goals/relations {}"
+  "DELETE /api/v1/goals/relations {}"
+  "PATCH /api/v1/goals/relations/weights {}"
+  "PATCH /api/v1/goals/relations/reorder {}"
+  "PATCH /api/v1/goals/reorder {}"
+  "PATCH /api/v1/goals/priority/reorder {}"
+  "POST /api/v1/goals {}"
+  "PATCH /api/v1/goals/1 {}"
+)
+
 # Normaliserar tidsstämplar och gör JSON stabilt att jämföra.
 normalisera() {
   jq -S 'walk(
@@ -58,6 +73,38 @@ for anrop in "${ANROP[@]}"; do
     -X "$metod" -H "Authorization: Bearer $TOKEN" "$GO_URL$vag")
   rust_svar=$(curl -s -o /tmp/parity_rust.json -w '%{http_code}' \
     -X "$metod" -H "Authorization: Bearer $TOKEN" "$RUST_URL$vag")
+
+  if [ "$go_svar" != "$rust_svar" ]; then
+    echo "STATUSKOD skiljer sig: $metod $vag (go=$go_svar, rust=$rust_svar)"
+    fel=1
+    continue
+  fi
+
+  go_json=$(normalisera < /tmp/parity_go.json)
+  rust_json=$(normalisera < /tmp/parity_rust.json)
+
+  if [ "$go_json" != "$rust_json" ]; then
+    echo "BODY skiljer sig: $metod $vag (status $go_svar)"
+    diff <(echo "$go_json") <(echo "$rust_json") | head -20
+    fel=1
+    continue
+  fi
+
+  echo "OK: $metod $vag ($go_svar)"
+done
+
+for anrop in "${ANROP_BODY[@]}"; do
+  metod="${anrop%% *}"
+  resten="${anrop#* }"
+  vag="${resten%% *}"
+  body="${resten#* }"
+
+  go_svar=$(curl -s -o /tmp/parity_go.json -w '%{http_code}' \
+    -X "$metod" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d "$body" "$GO_URL$vag")
+  rust_svar=$(curl -s -o /tmp/parity_rust.json -w '%{http_code}' \
+    -X "$metod" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d "$body" "$RUST_URL$vag")
 
   if [ "$go_svar" != "$rust_svar" ]; then
     echo "STATUSKOD skiljer sig: $metod $vag (go=$go_svar, rust=$rust_svar)"

@@ -4,6 +4,7 @@
 
 use std::collections::HashMap;
 
+use axum::body::Bytes;
 use axum::extract::{Extension, Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -457,9 +458,11 @@ pub async fn get_goal_graph(
 pub async fn create_goal(
     State(state): State<AppState>,
     Extension(caller): Extension<Caller>,
-    Json(req): Json<CreateGoalRequest>,
+    body: Bytes,
 ) -> Result<Response, AppError> {
     let user_id = user_id(&caller)?;
+
+    let req: CreateGoalRequest = crate::routes::parse_body(&body, "Title is required")?;
 
     if req.title.is_empty() {
         return Err(AppError::BadRequest("Title is required".to_string()));
@@ -498,10 +501,12 @@ pub async fn update_goal(
     State(state): State<AppState>,
     Extension(caller): Extension<Caller>,
     Path(id): Path<String>,
-    Json(req): Json<UpdateGoalRequest>,
+    body: Bytes,
 ) -> Result<Json<Goal>, AppError> {
     let user_id = user_id(&caller)?;
     let goal_id = goal_id(&id)?;
+
+    let req: UpdateGoalRequest = crate::routes::parse_body(&body, "No fields to update")?;
 
     let Some(pool) = state.pool.as_ref() else {
         return Err(no_database());

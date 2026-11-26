@@ -8,7 +8,7 @@
 use utoipa::openapi::server::Server;
 use utoipa::OpenApi;
 
-use crate::routes::{goals, handlers, statuses, tags};
+use crate::routes::{goals, handlers, relations, statuses, tags};
 
 /// Grund för OpenAPI-specen.
 #[derive(OpenApi)]
@@ -29,7 +29,9 @@ use crate::routes::{goals, handlers, statuses, tags};
         (name = "tags", description = "Taggar"),
         (name = "agent", description = "Agentkörningar, godkännanden och budgets"),
         (name = "api-keys", description = "API-nycklar"),
-        (name = "statuses", description = "Statusar och statushistorik")
+        (name = "statuses", description = "Statusar och statushistorik"),
+        (name = "relations", description = "Förälder-barn-relationer"),
+        (name = "dependencies", description = "Beroenden mellan mål")
     ),
     paths(
         handlers::health,
@@ -48,6 +50,15 @@ use crate::routes::{goals, handlers, statuses, tags};
         tags::get_goal_tags,
         tags::set_goal_tags,
         tags::delete_goal_tag,
+        relations::create_relation,
+        relations::update_relation,
+        relations::update_relation_weights,
+        relations::delete_relation,
+        relations::reorder_relations,
+        relations::reorder_goals,
+        relations::reorder_priority_goals,
+        relations::create_dependency,
+        relations::delete_dependency,
     )
 )]
 pub struct ApiDoc;
