@@ -70,6 +70,14 @@ pub fn build() -> Router<AppState> {
             continue;
         }
 
+        // Gin skickar "/docs" vidare till "/docs/" med sin trailing-slash-
+        // redirect. Axum gör inte det, så det händer här.
+        if *path == "/docs/{*any}" {
+            router = router
+                .route("/docs", get(crate::routes::docs::docs_redirect))
+                .route("/docs/", get(crate::routes::docs::docs_root));
+        }
+
         router = router.route(path, route_for(method, path));
     }
 
@@ -93,6 +101,13 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("GET", "/api/v1/health") => get(crate::routes::health::health),
         ("GET", "/api/v1/status") => get(crate::routes::health::status),
         ("GET", "/api/v1/readme") => get(crate::routes::readme::readme),
+
+        ("GET", "/docs/{*any}") => get(crate::routes::docs::docs),
+        ("GET", "/openapi.json") => get(crate::routes::docs::openapi_json),
+
+        ("POST", "/api/v1/tools/cancel") => post(crate::routes::tools::cancel),
+        ("POST", "/api/v1/tools/cancel-all") => post(crate::routes::tools::cancel_all),
+        ("GET", "/api/v1/tools/status") => get(crate::routes::tools::status),
 
         ("GET", "/api/v1/approvals") => get(crate::routes::approvals::list),
         ("GET", "/api/v1/approvals/{goal_id}") => get(crate::routes::approvals::get),

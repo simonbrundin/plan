@@ -42,6 +42,9 @@ ANROP_BODY=(
   "POST /api/v1/approvals/540/decision {\"decision\":\"approve\"}"
   "POST /api/v1/api-keys {\"provider\":\"anthropic\",\"api_key\":\"hemligt\",\"model\":\"claude\"}"
   "DELETE /api/v1/api-keys/anthropic {}"
+  "POST /api/v1/tools/cancel {\"toolCallId\":\"saknas\"}"
+  "POST /api/v1/tools/cancel {}"
+  "POST /api/v1/tools/cancel-all {}"
 )
 
 # Normaliserar tidsstämplar och gör JSON stabilt att jämföra.
@@ -113,6 +116,26 @@ for anrop in "${ANROP_BODY[@]}"; do
   fi
 
   echo "OK: $metod $vag ($go_svar)"
+done
+
+# Dokumentationsvägarna jämförs på status, innehållstyp och Location -
+# Scalar-sidan innehåller versionsbunden HTML som inte ska jämföras.
+for vag in /docs /docs/ /docs/abc; do
+  go_status=$(curl -s -o /dev/null -D /tmp/parity_go_head.txt -w '%{http_code}' "$GO_URL$vag")
+  rust_status=$(curl -s -o /dev/null -D /tmp/parity_rust_head.txt -w '%{http_code}' "$RUST_URL$vag")
+
+  # HTTP-headernamn är skiftlägesokänsliga - jämför dem i gemensam
+  # storlek.
+  go_plats=$(grep -i '^location' /tmp/parity_go_head.txt | tr -d '\r' | tr 'A-Z' 'a-z')
+  rust_plats=$(grep -i '^location' /tmp/parity_rust_head.txt | tr -d '\r' | tr 'A-Z' 'a-z')
+
+  if [ "$go_status" != "$rust_status" ] || [ "$go_plats" != "$rust_plats" ]; then
+    echo "Dokumentationsvägen skiljer sig: $vag (go=$go_status $go_plats, rust=$rust_status $rust_plats)"
+    fel=1
+    continue
+  fi
+
+  echo "OK: GET $vag ($go_status)"
 done
 
 if [ "$fel" -ne 0 ]; then

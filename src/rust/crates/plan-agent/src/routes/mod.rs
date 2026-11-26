@@ -3,9 +3,11 @@
 pub mod api_keys;
 pub mod approvals;
 pub mod conversations;
+pub mod docs;
 pub mod health;
 pub mod readme;
 pub mod table;
+pub mod tools;
 
 use axum::Router;
 

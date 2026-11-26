@@ -186,10 +186,16 @@ async fn require_api_key(
 
 /// Anger vilka anrop som är öppna utan nyckel.
 ///
-/// Det är bara hälsokontrollen - den behöver fungera utan nyckel så att
-/// drift kan se att tjänsten lever.
+/// Det är hälsokontrollen och dokumentationen - de behöver fungera utan
+/// nyckel så att drift kan se att tjänsten lever och så att API:et går
+/// att läsa. Go registrerar dem utanför nyckelskyddet, så här gör vi
+/// samma sak.
 fn is_public_path(path: &str) -> bool {
-    matches!(path, "/api/v1/health" | "/api/v1/status" | "/health")
+    matches!(
+        path,
+        "/api/v1/health" | "/api/v1/status" | "/health" | "/openapi.json"
+    ) || path == "/docs"
+        || path.starts_with("/docs/")
 }
 
 /// CORS - samma uppsättning som Go-agenten (alla ursprung tillåtna).

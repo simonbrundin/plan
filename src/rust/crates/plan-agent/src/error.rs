@@ -26,6 +26,13 @@ pub enum AgentError {
     /// Klienten skickade något agenten inte kan tolka.
     #[error("{0}")]
     BadRequest(String),
+
+    /// Verktygsanropet finns inte.
+    ///
+    /// Go svarar här med både "error" och "message" - det är det enda
+    /// stället i agenten som gör det.
+    #[error("tool execution not found")]
+    ToolNotFound,
 }
 
 impl AgentError {
@@ -35,6 +42,7 @@ impl AgentError {
             AgentError::NotImplemented(_) => StatusCode::NOT_IMPLEMENTED,
             AgentError::NotFound(_) => StatusCode::NOT_FOUND,
             AgentError::BadRequest(_) => StatusCode::BAD_REQUEST,
+            AgentError::ToolNotFound => StatusCode::NOT_FOUND,
             AgentError::Plan(_) | AgentError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -66,6 +74,17 @@ impl IntoResponse for AgentError {
         // därför texten i felet, utan en extra "message"-nyckel.
         if let AgentError::Internal(err) = &self {
             tracing::error!("Internt fel: {err}");
+        }
+
+        if let AgentError::ToolNotFound = &self {
+            return (
+                status,
+                Json(json!({
+                    "error": "tool execution not found",
+                    "message": "No running tool execution found with this ID",
+                })),
+            )
+                .into_response();
         }
 
         (status, Json(json!({ "error": self.to_string() }))).into_response()
