@@ -49,7 +49,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 // vad varje tangent gör.
 const goalActionShortcuts: Shortcut[] = [
   { keys: ["d"], description: "Toggle slutfört" },
-  { keys: ["e"], description: "Toggle evigt-märke" },
+  { keys: ["e"], description: "Toggle evigt-märke på markerat mål eller alla Tab-markerade mål" },
   { keys: ["t"], description: "Redigera beskrivning" },
   { keys: ["c"], description: "Sätt deadline (due-datum)" },
   { keys: ["b"], description: "Sätt startdatum" },
@@ -126,6 +126,7 @@ const sections = computed<Section[]>(() => {
       shortcuts: [
         { keys: ["j"], description: "Nästa mål" },
         { keys: ["k"], description: "Föregående mål" },
+        { keys: ["Tab"], description: "Markera mål och gå till nästa (Shift+Tab går bakåt)" },
         { keys: ["g"], description: "Hoppa till första målet" },
         { keys: ["G"], description: "Hoppa till sista målet" },
         { keys: ["l"], description: "Öppna markerat mål" },
@@ -148,6 +149,7 @@ const sections = computed<Section[]>(() => {
       shortcuts: [
         { keys: ["j"], description: "Nästa mål" },
         { keys: ["k"], description: "Föregående mål" },
+        { keys: ["Tab"], description: "Markera mål och gå till nästa (Shift+Tab går bakåt)" },
         { keys: ["l"], description: "Öppna markerat mål" },
         { keys: ["↑"], description: "Flytta upp i prioritetsordningen (barnmål sorteras bara under föräldern)" },
         { keys: ["↓"], description: "Flytta ner i prioritetsordningen (barnmål sorteras bara under föräldern)" },
@@ -186,7 +188,7 @@ const sections = computed<Section[]>(() => {
         },
         {
           keys: ["a"],
-          description: "Växla agent-märke för markerat mål",
+          description: "Växla agent-märke för markerat mål eller alla Tab-markerade mål",
         },
         {
           keys: ["v"],
@@ -195,7 +197,7 @@ const sections = computed<Section[]>(() => {
         },
         {
           keys: ["n"],
-          description: "Växla nu-märke för markerat mål (syns i Gör nu)",
+          description: "Växla nu-märke för markerat mål eller alla Tab-markerade mål",
         },
         {
           keys: ["d"],
@@ -207,7 +209,7 @@ const sections = computed<Section[]>(() => {
         },
         {
           keys: ["s"],
-          description: "Toggle påbörjat på markerat mål (målsidan, /goals, /now)",
+          description: "Toggle påbörjat på markerat mål eller alla Tab-markerade mål (målsidan, /goals, /now)",
         },
         { keys: ["Esc"], description: "Avbryt leader-läget" },
       ],

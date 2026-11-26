@@ -5,6 +5,7 @@ import { dueTone, formatDueDate, isFutureDate, todayDateString } from '~/utils/d
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
+import { useGoalSelection } from '~/composables/useGoalSelection'
 
 definePageMeta({
   ssr: false,
@@ -12,6 +13,7 @@ definePageMeta({
 
 const { user } = useUserSession()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
+const goalSelection = useGoalSelection()
 const goalsStore = useGoalsStore()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
@@ -50,6 +52,10 @@ const {
   setNowFilter,
   setFilterByCurrentPlace,
 } = usePriorityMode()
+
+const bulkBusy = ref(false)
+const selectedGoals = computed(() => visibleGoals.value.filter((goal) => goalSelection.isSelected(goal.id)))
+const allVisibleSelected = computed(() => visibleGoals.value.length > 0 && visibleGoals.value.every((goal) => goalSelection.isSelected(goal.id)))
 
 // Platser: "jag är här"-platsen styr filtret "görbar här".
 const { places: allPlaces, currentPlaceId, fetchPlaces, fetchCurrentPlace, setCurrentPlace, findNearbyPlaces } = usePlaces()
@@ -133,6 +139,7 @@ watch(tagPicker.savedRevision, () => {
   if (!saved) return
   updateTags(saved.id, saved.tags)
 })
+watch(visibleGoals, (goals) => goalSelection.prune(goals))
 
 onMounted(() => {
   loadPrioritizedGoals()
@@ -158,6 +165,21 @@ onMounted(() => {
 
     const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
 
+    // Tab markerar det aktuella målet och går vidare till nästa. Shift+Tab
+    // gör samma sak bakåt, så flera mål kan väljas snabbt från tangentbordet.
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const rowIndex = displayRows.value.findIndex((row) => row.goal.id === selectedGoalId.value)
+      const current = displayRows.value[rowIndex]?.goal
+      if (current) {
+        goalSelection.toggle(current.id)
+        const direction = e.shiftKey ? -1 : 1
+        const nextRow = displayRows.value[Math.max(0, Math.min(rowIndex + direction, displayRows.value.length - 1))]
+        if (nextRow) selectGoal(nextRow.goal.id)
+      }
+      return
+    }
+
     // Samma tangentkommandon som på målsidan och /goals:
     // d = klar, e = evigt, c = deadline, t = beskrivning, x = ta bort
     if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
@@ -168,7 +190,8 @@ onMounted(() => {
 
     if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault()
-      if (goal) toggleEternal(goal)
+      if (goalSelection.count.value > 0) void toggleBulk('eternal')
+      else if (goal) toggleEternal(goal)
       return
     }
 
@@ -211,8 +234,8 @@ onMounted(() => {
       }
     }
   }
-  window.addEventListener('keydown', onKeydown)
-  onUnmounted(() => window.removeEventListener('keydown', onKeydown))
+  window.addEventListener('keydown', onKeydown, true)
+  onUnmounted(() => window.removeEventListener('keydown', onKeydown, true))
 })
 
 async function toggleFinished(goal: PrioritizedGoalRow) {
@@ -290,6 +313,35 @@ async function toggleAgent(goal: PrioritizedGoalRow) {
   }
 }
 
+async function toggleBulk(action: 'now' | 'started' | 'agent' | 'eternal') {
+  const goalsToUpdate = selectedGoals.value
+  if (!goalsToUpdate.length || bulkBusy.value) return
+
+  const allEnabled = goalsToUpdate.every((goal) => action === 'now' ? !!goal.now : action === 'started' ? !!goal.started : action === 'agent' ? !!goal.agent : !!goal.eternal)
+  const enabled = !allEnabled
+  bulkBusy.value = true
+  try {
+    await Promise.all(goalsToUpdate.map(async (goal) => {
+      if (action === 'now') await setGoalNow(goal.id, enabled)
+      if (action === 'started') await toggleGoalStarted(goal.id, enabled ? new Date().toISOString() : null)
+      if (action === 'agent') await setGoalAgent(goal.id, enabled)
+      if (action === 'eternal') await setGoalEternal(goal.id, enabled)
+      Object.assign(goal, {
+        ...(action === 'now' ? { now: enabled } : {}),
+        ...(action === 'started' ? { started: enabled ? goal.started ?? new Date().toISOString() : null } : {}),
+        ...(action === 'agent' ? { agent: enabled } : {}),
+        ...(action === 'eternal' ? { eternal: enabled } : {}),
+      })
+    }))
+    goalSelection.clear()
+  } catch (err) {
+    console.error('Failed to apply bulk goal change:', err)
+    await loadPrioritizedGoals()
+  } finally {
+    bulkBusy.value = false
+  }
+}
+
 // Växla nu-märket på ett mål. Målet ligger då i "Gör nu"-listan.
 async function toggleNow(goal: PrioritizedGoalRow) {
   try {
@@ -313,10 +365,12 @@ onMounted(() => {
       label: 'A',
       title: 'Växla agent-märke',
       run: () => {
-        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
-        if (goal) {
-          toggleAgent(goal)
+        if (goalSelection.count.value > 0) {
+          void toggleBulk('agent')
+          return
         }
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) toggleAgent(goal)
       },
     },
     {
@@ -324,10 +378,12 @@ onMounted(() => {
       label: 'N',
       title: 'Växla nu-märke',
       run: () => {
-        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
-        if (goal) {
-          toggleNow(goal)
+        if (goalSelection.count.value > 0) {
+          void toggleBulk('now')
+          return
         }
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) toggleNow(goal)
       },
     },
     {
@@ -335,10 +391,12 @@ onMounted(() => {
       label: 'S',
       title: 'Toggle påbörjat',
       run: () => {
-        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
-        if (goal) {
-          toggleStarted(goal)
+        if (goalSelection.count.value > 0) {
+          void toggleBulk('started')
+          return
         }
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) toggleStarted(goal)
       },
     },
     {
@@ -690,6 +748,14 @@ const filterOptions = [
     </div>
 
     <div v-else class="space-y-2">
+      <GoalBulkActions
+        :selected-count="goalSelection.count.value"
+        :all-selected="allVisibleSelected"
+        :busy="bulkBusy"
+        @toggle-all="goalSelection.setAll(visibleGoals, !allVisibleSelected)"
+        @action="toggleBulk"
+        @clear="goalSelection.clear"
+      />
       <div
         v-for="({ goal, depth, number }, index) in displayRows"
         :key="goal.id"
@@ -712,6 +778,15 @@ const filterOptions = [
           @dragstart="startDrag($event, goal)"
           @click="selectGoal(goal.id)"
         >
+          <input
+            v-if="goalSelection.count.value > 0"
+            type="checkbox"
+            :checked="goalSelection.isSelected(goal.id)"
+            class="h-4 w-4 flex-shrink-0 accent-[var(--color-accent)]"
+            :aria-label="`Markera ${goal.title}`"
+            @click.stop
+            @change="goalSelection.toggle(goal.id)"
+          />
           <div class="flex-shrink-0 w-8 text-center">
             <span v-if="number !== null" class="text-lg font-bold tabular-nums" :class="getWeightColor(goal.weight)">
               {{ number }}

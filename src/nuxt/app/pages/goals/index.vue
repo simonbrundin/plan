@@ -10,9 +10,11 @@ import { dueTone, formatDueDate, isFutureDate, todayDateString } from '~/utils/d
 import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, recurrenceCount } from '~/utils/recurrence'
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
+import { useGoalSelection } from '~/composables/useGoalSelection'
 
 const router = useRouter()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency, removeDependency } = useGoalApi()
+const goalSelection = useGoalSelection()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
@@ -119,6 +121,9 @@ const displayedGoals = computed(() =>
   rootGoals.value.filter(isUnfinishedGoal)
 )
 const showStarted = ref(false)
+const bulkBusy = ref(false)
+const selectedGoals = computed(() => filteredGoals.value.filter((goal) => goalSelection.isSelected(goal.id)))
+const allVisibleSelected = computed(() => filteredGoals.value.length > 0 && filteredGoals.value.every((goal) => goalSelection.isSelected(goal.id)))
 
 const filteredGoals = computed(() => {
   let result = displayedGoals.value
@@ -560,6 +565,39 @@ async function toggleNow(goal: Goal) {
   }
 }
 
+async function toggleBulk(action: 'now' | 'started' | 'agent' | 'eternal') {
+  const goalsToUpdate = selectedGoals.value
+  if (!goalsToUpdate.length || bulkBusy.value) return
+
+  const allEnabled = goalsToUpdate.every((goal) => action === 'now' ? !!goal.now : action === 'started' ? !!goal.started : action === 'agent' ? !!goal.agent : !!goal.eternal)
+  const enabled = !allEnabled
+  bulkBusy.value = true
+  try {
+    await Promise.all(goalsToUpdate.map(async (goal) => {
+      if (action === 'now') await setGoalNow(goal.id, enabled)
+      if (action === 'started') await toggleGoalStarted(goal.id, enabled ? new Date().toISOString() : null)
+      if (action === 'agent') await setGoalAgent(goal.id, enabled)
+      if (action === 'eternal') await setGoalEternal(goal.id, enabled)
+      const index = goals.value.findIndex((item) => item.id === goal.id)
+      const current = goals.value[index]
+      if (index === -1 || !current) return
+      goals.value[index] = {
+        ...current,
+        ...(action === 'now' ? { now: enabled } : {}),
+        ...(action === 'started' ? { started: enabled ? current.started ?? new Date().toISOString() : null } : {}),
+        ...(action === 'agent' ? { agent: enabled } : {}),
+        ...(action === 'eternal' ? { eternal: enabled } : {}),
+      }
+    }))
+    goalSelection.clear()
+  } catch (err) {
+    console.error('Failed to apply bulk goal change:', err)
+    await refreshGoals()
+  } finally {
+    bulkBusy.value = false
+  }
+}
+
 // Delete goal
 async function handleDelete(goal: Goal) {
   try {
@@ -632,6 +670,22 @@ function handleKeydown(event: KeyboardEvent) {
   if (isInInput && !showSearch.value && !showDeleteConfirm.value) return
   if (isInInput) return
 
+  // Tab markerar det aktuella målet och går vidare till nästa. Shift+Tab
+  // gör samma sak bakåt, så flera mål kan väljas snabbt från tangentbordet.
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    const goal = filteredGoals.value[selectedIndex.value]
+    if (goal) {
+      goalSelection.toggle(goal.id)
+      const direction = event.shiftKey ? -1 : 1
+      selectedIndex.value = Math.max(0, Math.min(
+        selectedIndex.value + direction,
+        filteredGoals.value.length - 1,
+      ))
+    }
+    return
+  }
+
   // ESC för att stänga sök
   if (event.key === 'Escape' && showSearch.value) {
     showSearch.value = false
@@ -665,7 +719,9 @@ function handleKeydown(event: KeyboardEvent) {
   // e - växla evigt-märke
   if (event.key === 'e') {
     event.preventDefault()
-    if (filteredGoals.value.length > 0) {
+    if (goalSelection.count.value > 0) {
+      void toggleBulk('eternal')
+    } else if (filteredGoals.value.length > 0) {
       toggleEternal(filteredGoals.value[selectedIndex.value])
     }
     return
@@ -798,7 +854,7 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keydown', handleKeydown, true)
 
   // Leader + a växlar agent-märket på det markerade målet.
   unregisterLeaderCommands = registerPageCommands([
@@ -807,10 +863,12 @@ onMounted(() => {
       label: 'A',
       title: 'Växla agent-märke',
       run: () => {
-        const goal = filteredGoals.value[selectedIndex.value]
-        if (goal) {
-          toggleAgent(goal)
+        if (goalSelection.count.value > 0) {
+          void toggleBulk('agent')
+          return
         }
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) toggleAgent(goal)
       },
     },
     {
@@ -818,10 +876,12 @@ onMounted(() => {
       label: 'N',
       title: 'Växla nu-märke',
       run: () => {
-        const goal = filteredGoals.value[selectedIndex.value]
-        if (goal) {
-          toggleNow(goal)
+        if (goalSelection.count.value > 0) {
+          void toggleBulk('now')
+          return
         }
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) toggleNow(goal)
       },
     },
     {
@@ -829,10 +889,12 @@ onMounted(() => {
       label: 'S',
       title: 'Toggle påbörjat',
       run: () => {
-        const goal = filteredGoals.value[selectedIndex.value]
-        if (goal) {
-          toggleStarted(goal)
+        if (goalSelection.count.value > 0) {
+          void toggleBulk('started')
+          return
         }
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) toggleStarted(goal)
       },
     },
     {
@@ -863,11 +925,12 @@ onMounted(() => {
 onUnmounted(() => {
   unregisterLeaderCommands?.()
   unregisterLeaderCommands = null
-  window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keydown', handleKeydown, true)
 })
 
 // Återställ selectedIndex när mål ändras
 watch(filteredGoals, () => {
+  goalSelection.prune(filteredGoals.value)
   if (selectedIndex.value >= filteredGoals.value.length) {
     selectedIndex.value = Math.max(0, filteredGoals.value.length - 1)
   }
@@ -955,6 +1018,15 @@ definePageMeta({
     </div>
 
     <div v-else class="space-y-2">
+      <GoalBulkActions
+        :selected-count="goalSelection.count.value"
+        :all-selected="allVisibleSelected"
+        :busy="bulkBusy"
+        @toggle-all="goalSelection.setAll(filteredGoals, !allVisibleSelected)"
+        @action="toggleBulk"
+        @clear="goalSelection.clear"
+      />
+
       <!-- Nytt grundmål -->
       <div
         v-if="showNewGoalInput"
@@ -989,6 +1061,15 @@ definePageMeta({
           @dragstart="startDrag($event, goal)"
           @click="goToGoal(goal.id)"
         >
+          <input
+            v-if="goalSelection.count.value > 0"
+            type="checkbox"
+            :checked="goalSelection.isSelected(goal.id)"
+            class="h-4 w-4 flex-shrink-0 accent-[var(--color-accent)]"
+            :aria-label="`Markera ${goal.title}`"
+            @click.stop
+            @change="goalSelection.toggle(goal.id)"
+          />
           <span
             class="w-1 h-8 rounded-full transition-colors"
             :class="index === selectedIndex ? 'bg-accent' : 'bg-transparent group-hover:bg-line-strong'"

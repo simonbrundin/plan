@@ -25,6 +25,7 @@ import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_COLOR, ETERNAL_TEXT, ETER
 import { normalizeGoalWeights } from '~/utils/goalWeights'
 import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent'
 import { useAgentApi } from '~/composables/useAgentApi'
+import { useGoalSelection } from '~/composables/useGoalSelection'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -37,6 +38,7 @@ const goalId = computed(() => parseInt(route.params.id as string));
 const { user } = useUserSession();
 const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeights, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 const { startDrag: startGoalDrag } = useGoalDrag();
+const goalSelection = useGoalSelection();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
@@ -564,6 +566,9 @@ const visibleTree = computed(() => buildDependencyTree(visibleChildren.value));
 
 // Undermålen i den ordning de visas: trädets ordning.
 const filteredChildren = computed(() => visibleTree.value.map((item) => item.child));
+const bulkBusy = ref(false);
+const selectedChildren = computed(() => filteredChildren.value.filter((child) => goalSelection.isSelected(child.id)));
+const allVisibleChildrenSelected = computed(() => filteredChildren.value.length > 0 && filteredChildren.value.every((child) => goalSelection.isSelected(child.id)));
 
 // Viktläget arbetar bara med pågående undermål. Slutförda mål ska inte
 // ta plats i fördelningsvyn.
@@ -1812,6 +1817,41 @@ async function saveEstimate(target: Goal, minutes: number | null) {
 	}
 }
 
+async function toggleBulk(action: 'now' | 'started' | 'agent' | 'eternal') {
+  const childrenToUpdate = selectedChildren.value;
+  if (!childrenToUpdate.length || bulkBusy.value) return;
+
+  const allEnabled = childrenToUpdate.every((child) => action === 'now' ? !!child.now : action === 'started' ? !!child.started : action === 'agent' ? !!child.agent : !!child.eternal);
+  const enabled = !allEnabled;
+  bulkBusy.value = true;
+  try {
+    await Promise.all(childrenToUpdate.map(async (child) => {
+      if (action === 'now') await setGoalNow(child.id, enabled);
+      if (action === 'started') await toggleGoalStarted(child.id, enabled ? new Date().toISOString() : null);
+      if (action === 'agent') await setGoalAgent(child.id, enabled);
+      if (action === 'eternal') await setGoalEternal(child.id, enabled);
+      Object.assign(child, {
+        ...(action === 'now' ? { now: enabled } : {}),
+        ...(action === 'started' ? { started: enabled ? child.started ?? new Date().toISOString() : null } : {}),
+        ...(action === 'agent' ? { agent: enabled } : {}),
+        ...(action === 'eternal' ? { eternal: enabled } : {}),
+      });
+      goalsStore.updateGoal(child.id, {
+        ...(action === 'now' ? { now: enabled } : {}),
+        ...(action === 'started' ? { started: child.started } : {}),
+        ...(action === 'agent' ? { agent: enabled } : {}),
+        ...(action === 'eternal' ? { eternal: enabled } : {}),
+      });
+    }));
+    goalSelection.clear();
+  } catch (error) {
+    console.error('Failed to apply bulk goal change:', error);
+    await refresh(true);
+  } finally {
+    bulkBusy.value = false;
+  }
+}
+
 // Toggla started status på ett mål
 function updateGoalPhase(goalToUpdate: Goal | null | undefined, statusId: number) {
   if (!goalToUpdate) return
@@ -2000,10 +2040,12 @@ onMounted(() => {
       label: "A",
       title: "Växla agent-märke",
       run: () => {
-        const target = agentTarget();
-        if (target) {
-          toggleAgent(target);
+        if (goalSelection.count.value > 0) {
+          void toggleBulk("agent");
+          return;
         }
+        const target = agentTarget();
+        if (target) toggleAgent(target);
       },
     },
     {
@@ -2011,10 +2053,12 @@ onMounted(() => {
       label: "N",
       title: "Växla nu-märke",
       run: () => {
-        const target = agentTarget();
-        if (target) {
-          toggleNow(target);
+        if (goalSelection.count.value > 0) {
+          void toggleBulk("now");
+          return;
         }
+        const target = agentTarget();
+        if (target) toggleNow(target);
       },
     },
     {
@@ -2040,7 +2084,13 @@ onMounted(() => {
       keys: "s",
       label: "S",
       title: "Toggle påbörjat",
-      run: toggleStartedForSelection,
+      run: () => {
+        if (goalSelection.count.value > 0) {
+          void toggleBulk("started");
+          return;
+        }
+        toggleStartedForSelection();
+      },
     },
     {
       keys: "v",
@@ -2089,6 +2139,22 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
+  // Tab markerar aktuellt undermål och går vidare. Shift+Tab går bakåt.
+  if (event.key === 'Tab') {
+    event.preventDefault();
+    if (filteredChildren.value.length > 0) {
+      const index = Math.max(0, Math.min(selectedChildIndex.value, filteredChildren.value.length - 1));
+      const child = filteredChildren.value[index];
+      if (child) {
+        goalSelection.toggle(child.id);
+        const direction = event.shiftKey ? -1 : 1;
+        selectedChildIndex.value = Math.max(0, Math.min(index + direction, filteredChildren.value.length - 1));
+        isGoalSelected.value = false;
+      }
+    }
+    return;
+  }
+
   // ===============================================
   // LEADER MODE - hanteras globalt, här bara ignorerar tangenten
   // ===============================================
@@ -2120,7 +2186,9 @@ function handleKeydown(event: KeyboardEvent) {
   // Hantera 'e' för att växla evigt-flaggan
   if (event.key === "e") {
     event.preventDefault();
-    if (isParentMode.value && parents.value.length > 0) {
+    if (goalSelection.count.value > 0) {
+      void toggleBulk("eternal");
+    } else if (isParentMode.value && parents.value.length > 0) {
       toggleEternal(parents.value[selectedParentIndex.value]);
     } else if (isGoalSelected.value && goal.value) {
       toggleEternal(goal.value);
@@ -2388,18 +2456,19 @@ function handleKeydown(event: KeyboardEvent) {
 
 // Lägg till och ta bort event listener
 onMounted(() => {
-  window.addEventListener("keydown", handleKeydown);
+  window.addEventListener("keydown", handleKeydown, true);
   void loadAgentRun();
   startAgentPolling();
 });
 
 onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("keydown", handleKeydown, true);
   stopAgentPolling();
 });
 
 // Återställ selectedChildIndex när children ändras
 watch(filteredChildren, () => {
+  goalSelection.prune(filteredChildren.value);
   if (selectedChildIndex.value >= filteredChildren.value.length) {
     selectedChildIndex.value = Math.max(0, filteredChildren.value.length - 1);
   }
@@ -2935,6 +3004,17 @@ watch(selectedParentIndex, async () => {
           </div>
         </div>
 
+        <GoalBulkActions
+          v-if="filteredChildren.length > 0"
+          class="mb-3"
+          :selected-count="goalSelection.count.value"
+          :all-selected="allVisibleChildrenSelected"
+          :busy="bulkBusy"
+          @toggle-all="goalSelection.setAll(filteredChildren, !allVisibleChildrenSelected)"
+          @action="toggleBulk"
+          @clear="goalSelection.clear"
+        />
+
         <!-- Sökfält för undermål -->
         <div v-if="showChildSearch" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-4">
           <div class="mb-2">
@@ -3020,6 +3100,15 @@ watch(selectedParentIndex, async () => {
 
               <!-- Normal mode - visa länk -->
               <div v-else class="flex items-center gap-1.5 px-2">
+                 <input
+                   v-if="goalSelection.count.value > 0"
+                   type="checkbox"
+                   :checked="goalSelection.isSelected(child.id)"
+                   class="h-4 w-4 flex-shrink-0 accent-[var(--color-accent)]"
+                   :aria-label="`Markera ${child.title}`"
+                   @click.stop
+                   @change="goalSelection.toggle(child.id)"
+                 />
                  <button v-if="!(mode === 'insert' && editingGoalId === child.id)"
                    @click.stop="editingIconGoalId = child.id; showIconPicker = true"
                    :class="['flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors', child.eternal ? ETERNAL_TEXT + ' ' + ETERNAL_TEXT_HOVER : isChildBlocked(child.id) || child.finished ? 'text-ink-dim hover:text-ink-dim' : 'text-ink hover:text-white hover:bg-elevated']"
