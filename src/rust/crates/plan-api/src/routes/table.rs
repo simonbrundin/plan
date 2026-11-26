@@ -152,6 +152,25 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
             delete(crate::routes::relations::delete_dependency)
         }
 
+        ("GET", "/api/v1/calendar-events") => get(crate::routes::calendar_events::list),
+        ("POST", "/api/v1/calendar-events") => post(crate::routes::calendar_events::create),
+        ("GET", "/api/v1/calendar-events/{id}") => get(crate::routes::calendar_events::get),
+        ("PATCH", "/api/v1/calendar-events/{id}") => patch(crate::routes::calendar_events::update),
+        ("DELETE", "/api/v1/calendar-events/{id}") => {
+            delete(crate::routes::calendar_events::delete)
+        }
+        ("POST", "/api/v1/calendar-events/{id}/occurrences") => {
+            post(crate::routes::calendar_events::create_occurrence_override)
+        }
+        ("POST", "/api/v1/calendar-events/{id}/split") => {
+            post(crate::routes::calendar_events::split_series)
+        }
+
+        ("GET", "/api/v1/calendars") => get(crate::routes::calendars::list),
+        ("POST", "/api/v1/calendars") => post(crate::routes::calendars::create),
+        ("PATCH", "/api/v1/calendars/{id}") => patch(crate::routes::calendars::update),
+        ("DELETE", "/api/v1/calendars/{id}") => delete(crate::routes::calendars::delete),
+
         ("GET", "/api/v1/places") => get(crate::routes::places::list),
         ("POST", "/api/v1/places") => post(crate::routes::places::create),
         ("GET", "/api/v1/places/nearby") => get(crate::routes::places::nearby),

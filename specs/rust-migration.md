@@ -95,14 +95,13 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | OpenAPI code-first (utoipa) + Scalar | klar |
 | Auth (sessioner, API-nycklar, Zitadel, agent-scope) | klar |
 | Modeller + repositories (statusar, mål, taggar, platser) | klar för de domänerna |
-| Handlers | 21 av 79 portade (statusar, mål, taggar, relationer, beroenden) |
+| Handlers | 32 av 79 portade (statusar, mål, taggar, relationer, beroenden, platser, kalendrar, kalenderhändelser) |
 | Live-paritetsskript (Go vs Rust, samma databas) | klar |
 | Agentens API, providers, kärna, worker | inte påbörjat |
 
 ### Vad som återstår i API:t
 
 - Mål: återkommande mål (RRULE), förekomster, målets statusbyte.
-- Platser, kalendrar, kalenderhändelser.
 - Agentkörningar, godkännanden, budgets, användning, livscykel.
 - API-nycklar och auth-endpoints (login, callback, session, logout).
 
@@ -115,6 +114,13 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 - Ett uppdaterat mål svarar `null` för platser och taggar i båda
   tjänsterna, medan en lista svarar `[]`. Skillnaden syns i svaret och
   måste därför behållas.
+- Återkommande serier expanderas av `plan-recurrence` - en egen motor för
+  den delmängd av RRULE som appen använder (`FREQ`, `INTERVAL`, `COUNT`,
+  `UNTIL`, `BYDAY`). Testvektorerna är desamma som i Go:s
+  `recurrence_test.go`.
+- Ett skapat override eller en delad serie svarar `places: null` i båda
+  tjänsterna - Go fyller inte i platser i de svaren. Listor, enskilda
+  händelser och skapade händelser svarar `places: []`.
 
 ## Layout
 
@@ -124,6 +130,7 @@ src/rust/
   crates/plan-api/        # REST-API
   crates/plan-agent/      # agenttjänsten (fas 4)
   crates/plan-parity/     # paritetsverktyg: jämför Rust-routes mot Go-källan
+  crates/plan-recurrence/ # RRULE-motor - port av Go-tjänstens rrule-go-användning
 ```
 
 `plan-parity` läser route-registreringarna ur Go-källan och jämför dem med

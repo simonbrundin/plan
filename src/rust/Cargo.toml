@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["crates/plan-api", "crates/plan-agent", "crates/plan-parity"]
+members = [
+    "crates/plan-api",
+    "crates/plan-agent",
+    "crates/plan-parity",
+    "crates/plan-recurrence",
+]
 
 [workspace.package]
 version = "0.1.0"

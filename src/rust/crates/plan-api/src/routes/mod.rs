@@ -3,6 +3,8 @@
 //! Routern bygger samma vägar som Go-tjänsten (`src/api/cmd/api/main.go`).
 //! Paritetstestet i `table.rs` håller de två i synk.
 
+pub mod calendar_events;
+pub mod calendars;
 pub mod goals;
 pub mod handlers;
 pub mod places;
