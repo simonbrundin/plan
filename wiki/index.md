@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 7 |
-| Noter | 385 |
+| Noter | 402 |
 
 ## Entiteter
 
@@ -25,7 +25,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/anvanda-agenter-i-plan]] - Så här använder en människa agenterna i Plan-gränssnittet (Nuxt, `src/nuxt`). _(uppdaterad 2026-11-26)_
 - [[concepts/authentik]] - Authentik var tidigare identity provider i klustret och är nu ersatt av Zitadel. _(uppdaterad 2026-10-23)_
 - [[concepts/cert-manager]] - cert-manager är en Kubernetes-operator som automatiserar hantering av TLS-certifikat. _(uppdaterad 2026-10-24)_
-- [[concepts/cloudflare-tunnel]] - Cloudflare Tunnel är utkommenterat i komponentlistan och används inte - trafiken går via DuckDNS och port-forwarding i stället. _(uppdaterad 2026-10-24)_
+- [[concepts/cloudflare-tunnel]] - Cloudflare Tunnel är aktiverat (2026-11-26) och serverar plan.simonbrundin.com publikt - den enda fungerande publika ingressen sedan Starlink-CGNAT. _(uppdaterad 2026-11-26)_
 - [[concepts/cloudnative-pg]] - CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhandahåller automatiserad hantering av PostgreSQL-databaser. _(uppdaterad 2026-10-24)_
 - [[concepts/envoy-gateway]] - Envoy Gateway är en implementation av Kubernetes Gateway API som använder Envoy proxy som control plane och data plane. _(uppdaterad 2026-10-24)_
 - [[concepts/flux-operator]] - Operator som installerar och styr Flux via FluxInstance-CRD istället för flux bootstrap. _(uppdaterad 2026-11-26)_
@@ -62,6 +62,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/goals-listar-bara-grundmal-scroll-vid-j-k]] - Ändring i plan-repot (commit 36b89d8, 9ae273a, 9be938f). _(uppdaterad 2026-11-16)_
 - [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] - 1Password:s desktop-app exponerar Environments-MCP via en IPC-relay ( abstrakt unix-socket @1PASSWORD_MCP ) som bara startar när 'Settin... _(uppdaterad 2026-11-23)_
 - [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]] - 2026-11-25: Artificial Analysis pensionerade /api/v2/data/* (410 Gone sedan 4 nov 2026). _(uppdaterad 2026-11-26)_
+- [[notes/aa-intelligence-index-api-och-webb-ar-samsta-aldre-index-finns-bara-i-krypterade-chartfiler]] - Gransking av 'modeller saknar intelligence-poang trots att AA visar dem': (1) AA free-API har index for 155 av 766 modeller, och dashboar... _(uppdaterad 2026-11-26)_
 - [[notes/accuracy-fel-omstart]] - Så här upptäcktes att omstart behöver skiljas från skrivfel, och varför sekvensfelet inte gav en tydlig signal. _(uppdaterad 2026-11-17)_
 - [[notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t]] - Pappa (src/nuxt) har bytt från 'mata in admin-token i webbläsaren' till en enkel inloggningssida på /admin. _(uppdaterad 2026-11-16)_
 - [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]] - Symtom: agent-api-podden i default-ns (namespace dev) gick i CrashLoopBackOff. _(uppdaterad 2026-11-23)_
@@ -87,10 +88,14 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/bigram-algoritmen]] - Hur bigram-statistiken lagras, rankas och används för att välja ord som tränar svaga teckenpar. _(uppdaterad 2026-10-21)_
 - [[notes/boka-enskild-kommunbokning-i-matchi-fran-bookings]] - Ny knapp "Boka i MATCHi" på /bookings i stk (repo: stk). _(uppdaterad 2026-11-06)_
 - [[notes/brevladelistan-maste-hamtas-innan-granskningslaget-startar]] - 2026-11-19: I pappa/appens granskningsvy försvann brevlådelistan helt när granskningen startade, och den kom inte tillbaka när man tr... _(uppdaterad 2026-11-20)_
+- [[notes/bulkmarkering-av-mal]] - Mållistan och Gör nu-listan har nu checkboxar för att markera flera mål samtidigt. _(uppdaterad 2026-11-26)_
+- [[notes/bulkmarkering-pa-malsidor]] - Bulkmarkeringen utökades till målsidorna. _(uppdaterad 2026-11-26)_
 - [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] - När man cachar IMAP-sessioner per konto (i stället för att stänga och _(uppdaterad 2026-10-29)_
 - [[notes/chattinterface-byggt-i-plan-slack-borttaget]] - Användaren vill inte använda Slack alls - agenten ska prata med henom i Plan. _(uppdaterad 2026-11-24)_
 - [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] - Sedan repot skapades (3f33ab1) misslyckades jobbet 'Bygg och pusha image' med 'failed to fetch anonymous token ... _(uppdaterad 2026-11-06)_
 - [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] - 2026-11-25: mål 497 (fas 1) färdigställdes. _(uppdaterad 2026-11-25)_
+- [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] - Läge: publik IPv4 är död (Starlink CGNAT), så Cloudflare Tunnel aktiverades som publik ingress. _(uppdaterad 2026-11-26)_
+- [[notes/cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad]] - Worker-4 hade intermittenta CRI/kubelet-problem och Longhorn engine-image kunde inte starta. _(uppdaterad 2026-11-26)_
 - [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] - Diagnos 2026-11-11 (session: felsökning av 'workers ansluter inte'). _(uppdaterad 2026-11-23)_
 - [[notes/controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3]] - controlplane-1 (10.10.10.11) fastnade i Raspberry Pi DHCP/TFTP-boot när PXE-värden 10.10.10.2 var död. _(uppdaterad 2026-11-26)_
 - [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] - Matchbox-profilerna node-controlplane-1..3 pekar på /assets/talos-config/nodes/controlplane-N.yaml, men den filen genereras inte: pxe/gen... _(uppdaterad 2026-11-17)_
@@ -98,8 +103,14 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] - Kustomex och Flux kan inte installera en CRD och använda den i samma synkning. _(uppdaterad 2026-11-24)_
 - [[notes/ctrl-backspace-i-foot-skickar-ctrl-w-till-pi]] - Foot skickade Ctrl+Backspace som rå byte 0x08. _(uppdaterad 2026-11-25)_
 - [[notes/dashboard-importerar-hela-aa-katalogen-766-modeller]] - Orsak till att bara 141 modeller importerades: isRankableModel-filtret i artificialAnalysis.ts tog bort modeller utan både Intelligence ... _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-plans-visar-och-raknar-anvandningskvoter]] - Dashboardens prenumerationsjämförelse har nu plan-kvoter som data. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-ranking-anvander-benchmark-matchade-kostnader]] - Prisvärdhetsrankingen isolerar varje benchmark och undviker blandade score/kostnad-pairs. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] - Dashboardens modellranking använder nu separata, effort-matchade data för DeepSWE v1.1, Terminal-Bench 4.1/4.0, AA Coding Agent och Ben... _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-budget-finder-och-prenumerationsjamforelse]] - Användarens egentliga behov: 'billigaste modellen som är tillräckligt smart för kod' + jämföra prenumerationsmodeller. _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-en-synk-knapp-i-stallet-for-tre-forvirrande]] - Användaren upplevde de tre knapparna (Synka modeller/Hämta priser/Uppdatera priser) som otydliga. _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel]] - Efter katalogimporten (766 modeller) upptaktes tva UX-buggar: (1) estimateCostPerTask returnerade null nar kostnaden blev 0, sa 15 gratis... _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] - Slutbehovet kristalliserades: 'vilken modell ska jag köra genom vilken provider eller prenumeration'. _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-tydlighetslyft-av-jamforelserna]] - Användaren upplevde jamforeelserna som 'sjukt otydliga'. _(uppdaterad 2026-11-26)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
@@ -110,6 +121,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/en-uttunnad-forekomst-maste-vara-synlig-aven-om-den-ligger-utanfor-fonstret]] - När en serie tunnas ut behålls en förekomst per period, och den förekomsten ligger i periodens början. _(uppdaterad 2026-11-18)_
 - [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]] - Ändring i src/nuxt/app/pages/goals/index.vue: tangenten Enter (och en + -knapp i sidhuvudet) öppnar nu en inline-rad där man skriver e... _(uppdaterad 2026-11-17)_
 - [[notes/enter-skapar-alltid-nytt-mal-piltangenterna-markerar-befintligt-mal-i-sokfalt]] - PROBLEM: När man söker efter ett mål (undermål/förälder på målsidan, eller föräldersökningen i snabbfältet) och trycker Enter... _(uppdaterad 2026-11-23)_
+- [[notes/envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar]] - Symtom: plan.simonbrundin.com (och övriga *.simonbrundin.com) nås inte trots att klustret, HTTPRoutes, cert och app-pods är friska. _(uppdaterad 2026-11-26)_
 - [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]] - 2026-11-03: önskemål om ett filter som sorterar bort personer som inte jobbat _(uppdaterad 2026-11-03)_
 - [[notes/escape-i-datum-popup-maste-hanteras-fore-leader-listenern]] - Datum-popupens Escape stängdes inte eftersom leader-keydown lyssnar i capture-fasen och konsumerade Escape innan popupens egen listener. _(uppdaterad 2026-11-20)_
 - [[notes/eviga-mal-i-plan-kan-inte-slutforas]] - Mål i plan kan nu markeras som EVIGA (eternal): de pågår hela livet (t.ex. _(uppdaterad 2026-11-17)_
@@ -120,6 +132,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/flera-kalendrar-med-egna-farger-i-plan]] - Användaren kan nu skapa hur många kalendrar som helst (t.ex. _(uppdaterad 2026-11-18)_
 - [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] - Ny funktion i pappa: på /personer kan man markera flera personkort och parkera hela gänget med samma skäl och samma genomgångsdatum. _(uppdaterad 2026-11-18)_
 - [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] - Flux GoGit-repoets stora PXE-träd fick source-controller att OOM:a; FluxInstance använder nu sparseCheckout för att bara hämta infrastructure-flux/. _(uppdaterad 2026-11-26)_
+- [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] - Resources blev först grönt efter att cert-manager-webhook flyttades till worker-3. _(uppdaterad 2026-11-26)_
 - [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] - Vid felsökning av cluster1 exponerades en GitHub-token och en privat SOPS age-nyckel i agentens verktygsutdata. _(uppdaterad 2026-11-26)_
 - [[notes/foot-bindningen-kraver-omstart-av-foot]] - Konfigurationen \x17=Control+BackSpace validerar korrekt, men foot läser foot.ini vid uppstart. _(uppdaterad 2026-11-25)_
 - [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] - 2026-11-25, efter kubeconfig-städningen (se [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]])... _(uppdaterad 2026-11-25)_
@@ -235,6 +248,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]] - Katalogen 'Radxa Rock 4C+' i repot innehaller mellanslag. _(uppdaterad 2026-10-23)_
 - [[notes/michael-brundin-blir-en-personnod-i-relationsgrafen]] - Beslut: ersätt den separata my_contact/my_contact_relation-modellen med vanliga person- och person_relation-rader. _(uppdaterad 2026-11-18)_
 - [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] - 2026-11-10: Efter ägarskapet kom nästa fråga: 'jag vill kunna lägga till vilka personer som jag känner (alltså michael brundin kän... _(uppdaterad 2026-11-17)_
+- [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] - Användaren kör MiniMax M2.7 via 'MiniMax Starter Plan'. _(uppdaterad 2026-11-26)_
 - [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] - Föregående version (se [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]]) _(uppdaterad 2026-11-19)_
 - [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]] - Verifiering 2026-11-26 i dev-klustret (kind-dev, agent-api). _(uppdaterad 2026-11-26)_
 - [[notes/mal-kan-ha-due-datum-deadline]] - 2026-11-17: Mål i plan kan nu ha ett due-datum (deadline). _(uppdaterad 2026-11-20)_
@@ -378,6 +392,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/sa-dampas-bada-rust-analyzer-popupen-no-project-root-found]] - Fas 3: rustaceanvim har TVÅ notiser för filer utan Cargo.toml, beroende på _(uppdaterad 2026-11-02)_
 - [[notes/taggar-pa-mal-i-plan-tangenten-g]] - ÖNSKEMÅL: kunna lägga till taggar på mål (t.ex. _(uppdaterad 2026-11-23)_
 - [[notes/taggar-via-leader-t-pa-alla-malsidor]] - Kommandot för att sätta taggar har flyttat från tangenten 'g' på målsidan till leader+t, och fungerar nu på alla sidor där ett må... _(uppdaterad 2026-11-23)_
+- [[notes/talos-certifikat-kortlivade-servercertifikat-roteras-automatiskt]] - Talos v1.14-dokumentationen verifierades. _(uppdaterad 2026-11-26)_
 - [[notes/talos-dns-fallback-mot-publika-resolvrar]] - Flera Talos-noder loggade 'error serving dns request' med read udp <nod>:<port>->10.10.10.1:53: i/o timeout och DiscoveryService rapporte... _(uppdaterad 2026-11-20)_
 - [[notes/talos-etcd-en-gammal-ephemeral-kopia-pa-controlplanet-ger-en-trasig-raft-log]] - Symtom: controlplane-3 crash-loopar etcd med 'task "etcd" failed: exit code 2' och loggen slutar i 'panic: tocommit(1556432) is out of ra... _(uppdaterad 2026-10-25)_
 - [[notes/talos-image-cache-kraver-ephemeral-cirkulart-beroende-med-state-meta-pa-en-farsk-metal-nod]] - En oinstallerad metal-nod (t.ex. _(uppdaterad 2026-10-24)_
@@ -388,6 +403,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/talos-hostname-auto-i-en-generisk-config-byter-nodens-namn-och-kastar-ut-den-ur-klustret]] - Misstag: applicerade pxe/matchbox/assets/talos-config/controlplane.yaml pa _(uppdaterad 2026-10-24)_
 - [[notes/talos-noden-kan-hamna-i-maintenance-mode-om-state-volymen-hittas-efter-config-fasen]] - Symtom: controlplane-3 gick in i maintenance mode direkt efter en reboot, trots att noden redan hadde en komplett config persistad pa STA... _(uppdaterad 2026-10-25)_
 - [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]] - Funktion: alla mål i Plan kan ha en uppskattad tidsåtgång i minuter (nullable estimated_minutes). _(uppdaterad 2026-11-20)_
+- [[notes/tillfalliga-felsokningspoddar-rensade]] - Inventering av cluster1 hittade kvarvarande unowned debug-poddar i default, flux-system och kube-system: np-controlplane-2/3, np-worker-3... _(uppdaterad 2026-11-26)_
 - [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] - En långlivad Nuxt-server ska vara en Tilt serve_cmd-resurs, inte ett avslutande cmd-build. _(uppdaterad 2026-11-26)_
 - [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] - Symtom: en långvarig 'tilt up'-instans i environments/dev upphörde att bygga om bilden när källfiler ändrades (inga nya byggloggar, ... _(uppdaterad 2026-11-26)_
 - [[notes/transienta-502-fra-go-api-t-nar-poddar-startar-om-i-dev-klustret]] - I stk:s dev-klustret (namespace repo-template) proxar nginx i nuxt-imageen /api/ -> go-api-service:8080/. _(uppdaterad 2026-11-06)_
@@ -407,6 +423,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/uttunnade-serier-vags-sa-att-antalen-blir-exakta]] - En serie kan ha fler förekomster än expanderaren klarar (MAX_OCCURRENCES_PER_SERIES = 5000). _(uppdaterad 2026-11-18)_
 - [[notes/utvecklingsflode]] - Bygg, test och installera av TypeTrainer och wikictl, plus verktyg som inte finns. _(uppdaterad 2026-10-24)_
 - [[notes/valfri-fargkod-pa-kalendrar]] - Användaren vill kunna sätta en helt valfri färg på en kalender - en _(uppdaterad 2026-11-18)_
+- [[notes/varfor-src-har-tva-cmd-kataloger-go-internal-regeln-sparrar-gemensam-cmd]] - 2026-11-26 flyttades binarerna till cmd/: src/api/cmd/{api,rrt} och src/agent/cmd/{agent,agentworker,wikictl}. _(uppdaterad 2026-11-26)_
 - [[notes/verifierade-policy-hal-i-tool-lagret-kommandon-ar-blocklist-inte-allowlist]] - Relaterat: notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet (punkt C - governance som deklarativ policy). _(uppdaterad 2026-11-23)_
 - [[notes/vertikal-kalender-med-ikonstod-i-plan]] - Vertikal kalendersida i Plan där tiden löper uppifrån och ned. _(uppdaterad 2026-11-17)_
 - [[notes/vertikal-kalender-med-kontinuerlig-zoom]] - Plan ska få en vertikal tidslinjekalender. _(uppdaterad 2026-11-17)_

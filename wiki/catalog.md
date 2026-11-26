@@ -9,7 +9,7 @@ finns i `index.md`.
 | [[concepts/anvanda-agenter-i-plan]] | Använda agenter i Plan | concept | agent, gränssnitt, human-gate, nuxt, projekt:plan | 2026-11-26 | 3 |
 | [[concepts/authentik]] | Authentik | concept | authentik, identity-provider, oidc, saml, sso, deprecated | 2026-10-23 | 4 |
 | [[concepts/cert-manager]] | Cert-Manager | concept | cert-manager, tls, certificates, lets-encrypt, ssl | 2026-10-24 | 3 |
-| [[concepts/cloudflare-tunnel]] | Cloudflare Tunnel (cloudflared) | concept | cloudflare, tunnel, cfd, dns, ingress, deprecated | 2026-10-24 | 3 |
+| [[concepts/cloudflare-tunnel]] | Cloudflare Tunnel (cloudflared) | concept | cloudflare, tunnel, cfd, dns, ingress | 2026-11-26 | 4 |
 | [[concepts/cloudnative-pg]] | CloudNativePG (CNPG) | concept | postgresql, database, postgres, cloudnativepg, cnpg | 2026-10-24 | 3 |
 | [[concepts/envoy-gateway]] | Envoy Gateway | concept | envoy, gateway-api, ingress, reverse-proxy, http-routing | 2026-10-24 | 6 |
 | [[concepts/flux-operator]] | FluxOperator | concept | flux, flux-operator, gitops, installation, kubernetes, operator | 2026-11-26 | 7 |
@@ -34,6 +34,7 @@ finns i `index.md`.
 | [[entities/talos-linux]] | Talos Linux | entity | bare-metal, baremetal, infrastructure, kubernetes, linux, pxe, talos | 2026-10-24 | 9 |
 | [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] | 1Password MCP (Environments) på Arch/Omarchy kräver setgid på 1password-mcp | note | 1password, mcp, arch, omarchy, security, projekt:tmp | 2026-11-23 | 1 |
 | [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]] | AA Data API v2/data pensionerad - dashboard migrerar till /api/v2/language/models | note | bug, dashboard, artificialanalysis, api, projekt:simon | 2026-11-26 | 1 |
+| [[notes/aa-intelligence-index-api-och-webb-ar-samsta-aldre-index-finns-bara-i-krypterade-chartfiler]] | AA Intelligence Index: API och webb ar samsta - aldre index finns bara i krypterade chartfiler | note | dashboard, aa, intelligence-index, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/accuracy-fel-omstart]] | Accuracy-felet vid omstart | note | bug, postmortem, accuracy, session | 2026-11-17 | 3 |
 | [[notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t]] | Admin-inloggning via lösenord i stället för token i UI:t | note | pappa, admin, auth, projekt:pappa | 2026-11-16 | 0 |
 | [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]] | Agent-api crashade i Tilt: saknad DATABASE_URL mot CNPG-databasen i agents-dev | note | bug, tilt, dev, agent-api, database, plan-api, projekt:agents | 2026-11-23 | 1 |
@@ -63,19 +64,29 @@ finns i `index.md`.
 | [[notes/bigram-algoritmen]] | Bigram-algoritmen | note | algoritm, bigram, ordlista, urval | 2026-10-21 | 3 |
 | [[notes/boka-enskild-kommunbokning-i-matchi-fran-bookings]] | Boka enskild kommunbokning i MATCHi från /bookings | note | matchi, feature, bookings, projekt:stk | 2026-11-06 | 0 |
 | [[notes/brevladelistan-maste-hamtas-innan-granskningslaget-startar]] | Brevlådelistan måste hämtas innan granskningsläget startar | note | nuxt, mail, ui, bug, projekt:pappa | 2026-11-20 | 0 |
+| [[notes/bulkmarkering-av-mal]] | Bulkmarkering av mål | note | feature, goals, now, ui, projekt:plan | 2026-11-26 | 0 |
+| [[notes/bulkmarkering-pa-malsidor]] | Bulkmarkering på målsidor | note | feature, goals, ui, projekt:plan | 2026-11-26 | 0 |
 | [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] | Cachade IMAP-sessioner kräver hantering av döda anslutningar | note | mailmaster, bug, imap, go, projekt:simon | 2026-10-29 | 1 |
 | [[notes/chattinterface-byggt-i-plan-slack-borttaget]] | Chattinterface byggt i Plan - Slack borttaget | note | feature, agent, slack, session, projekt:plan | 2026-11-24 | 0 |
 | [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] | CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt | note | agent, ci, kontrakt, databas, projekt:plan | 2026-11-25 | 1 |
 | [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] | CI saknade inloggning mot GHCR - alla image-pushar misslyckades | note | bug, ci, ghcr, projekt:stk | 2026-11-06 | 0 |
+| [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] | Cloudflare Tunnel aktiverat - plan.simonbrundin.com publikt nåbar | note | cloudflare, tunnel, ingress, dns, projekt:infrastructure | 2026-11-26 | 0 |
+| [[notes/cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad]] | Cluster1: Longhorn worker-4 återställd och Flux stabiliserad | note | cluster1, flux, longhorn, incident, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] | cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11 | note | felsokning, pki, worker, talos, kubeconfig, projekt:infrastructure | 2026-11-23 | 3 |
 | [[notes/controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3]] | controlplane-1 återansluten via temporär PXE på controlplane-3 | note | incident, talos, pxe, recovery, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] | Controlplane-recovery via PXE är inte konfigurerad | note | pxe, talos, bug, controlplane, projekt:simon | 2026-11-17 | 2 |
 | [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] | cookies.json var versionsstyrd i offentligt neuro-repo | note | neuro, bug, säkerhet, projekt:simon | 2026-11-17 | 2 |
 | [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] | CRD-beroende resurser måste synkas i ett andra steg | note | flux, kustomize, gateway-api, projekt:infrastructure | 2026-11-24 | 0 |
 | [[notes/ctrl-backspace-i-foot-skickar-ctrl-w-till-pi]] | Ctrl-Backspace i foot skickar Ctrl-W till Pi | note | bug, terminal, pi, projekt:dotfiles | 2026-11-25 | 0 |
+| [[notes/dashboard-budget-finder-och-prenumerationsjamforelse]] | Dashboard: budget-finder och prenumerationsjamforelse | note | dashboard, feature, pricing, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dashboard-en-synk-knapp-i-stallet-for-tre-forvirrande]] | Dashboard: en synk-knapp i stället för tre förvirrande | note | dashboard, ux, sync, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel]] | Dashboard: gratismodeller saknade uppskattad kostnad och knapparna lovade fel | note | dashboard, bug, estimated-cost, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-importerar-hela-aa-katalogen-766-modeller]] | Dashboard importerar hela AA-katalogen (766 modeller) | note | dashboard, import, aa, ranking, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dashboard-plans-visar-och-raknar-anvandningskvoter]] | Dashboard plans visar och räknar användningskvoter | note | feature, modelljämförelse, prenumerationer, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-ranking-anvander-benchmark-matchade-kostnader]] | Dashboard ranking använder benchmark-matchade kostnader | note | benchmark, dashboard, metodik, projekt:dashboard, projekt:simon, ranking | 2026-11-26 | 1 |
 | [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] | Dashboard ranking utökad med benchmark- och kostnadstäckning | note | dashboard, ranking, benchmark, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] | Dashboard: rekommendationsvyn som enda forstavy | note | dashboard, ux, recommendation, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
@@ -86,6 +97,7 @@ finns i `index.md`.
 | [[notes/en-uttunnad-forekomst-maste-vara-synlig-aven-om-den-ligger-utanfor-fonstret]] | En uttunnad förekomst måste vara synlig även om den ligger utanför fönstret | note | kalender, bugg, gotcha, projekt:plan | 2026-11-18 | 1 |
 | [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]] | Enter på /goals skapar nytt grundmål istället för att öppna målet | note | ui, goals, feature, projekt:plan | 2026-11-17 | 3 |
 | [[notes/enter-skapar-alltid-nytt-mal-piltangenterna-markerar-befintligt-mal-i-sokfalt]] | Enter skapar alltid nytt mål - piltangenterna markerar befintligt mål i sökfält | note | bug, ui, goals, tangentbord, projekt:plan | 2026-11-23 | 0 |
+| [[notes/envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar]] | Envoy-VIP 10.10.10.101 stulen av agentgateway-admin - plan.simonbrundin.com onåbar | note | metallb, envoy, gateway, dns, incident, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]] | Erfarenhetsfilter i pappa: it_experience_years med spårbart grund | note | databas, gdpr, sourcing, filter, projekt:pappa | 2026-11-03 | 3 |
 | [[notes/escape-i-datum-popup-maste-hanteras-fore-leader-listenern]] | Escape i datum-popup måste hanteras före leader-listenern | note | bug, keyboard, ui, projekt:plan | 2026-11-20 | 0 |
 | [[notes/eviga-mal-i-plan-kan-inte-slutforas]] | Eviga mål i plan - kan inte slutföras | note | feature, goals, plan, ui, go, nuxt, projekt:simon | 2026-11-17 | 4 |
@@ -98,6 +110,7 @@ finns i `index.md`.
 | [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] | Flerval: parkera flera kandidater samtidigt i /personer | note | feature, pappa, personer, potential, projekt:pappa | 2026-11-18 | 0 |
 | [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] | Flux-felsökning avbruten efter exponerade hemligheter | note | incident, flux, säkerhet, projekt:plan | 2026-11-26 | 0 |
 | [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] | Flux i prod klonade ett 1,3 GB stort repo och dog | note | flux, incident, prod, projekt:infrastructure | 2026-11-26 | 2 |
+| [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] | Flux source-controller flyttad från worker-3 efter livenessfel | note | flux, incident, cluster1, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/foot-bindningen-kraver-omstart-av-foot]] | Foot-bindningen kräver omstart av foot | note | bug, terminal, pi, projekt:dotfiles | 2026-11-25 | 0 |
 | [[notes/foraldrar-syns-pa-mal-i-now]] | Föräldrar syns på mål i /now | note | feature, now, goals, projekt:plan | 2026-11-22 | 0 |
 | [[notes/globala-agentinstruktioner-deployas-via-dotfiles]] | Globala agentinstruktioner deployas via dotfiles | note | konventioner, agent, wiki, projekt:typetrainer | 2026-10-21 | 0 |
@@ -223,6 +236,7 @@ finns i `index.md`.
 | [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]] | Mellanslag i 'Radxa Rock 4C+' saboterar byggen - losning: bind-mount | note | ubygg, uboot, verktyg, felsokning, projekt:infrastructure | 2026-10-23 | 3 |
 | [[notes/michael-brundin-blir-en-personnod-i-relationsgrafen]] | Michael Brundin blir en personnod i relationsgrafen | note | pappa, relationer, datamodell, projekt:pappa | 2026-11-18 | 1 |
 | [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] | Min kontaktlista - jag som nod i grafen (pappa) | note | pappa, relationer, graf, nätverk, introduktioner, modell, projekt:pappa | 2026-11-17 | 1 |
+| [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] | MiniMax M Plan inlagd i jamforelsen, M2.7 syns som uppskattad | note | dashboard, minimax, subscriptions, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] | Moderposten arkiveras när .eml-bilagorna har lagts in | note | feature, mail, imap, projekt:simon | 2026-11-19 | 1 |
 | [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] | Neon API-token hamnade i dotfiles-git-historiken | note | säkerhet, dotfiles, secret, projekt:simon | 2026-11-17 | 1 |
 | [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] | NeuroQuant är ombyggt - tRPC-API och e-post-verifiering | note | neuro, scraper, neuroquant, projekt:neuro | 2026-11-03 | 2 |
@@ -358,6 +372,7 @@ finns i `index.md`.
 | [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]] | Synk hallbokningar: kommunens Actor Smartbook -> matchi | note | stk, actorsmartbook, bokning, integration, projekt:stk | 2026-11-17 | 6 |
 | [[notes/taggar-pa-mal-i-plan-tangenten-g]] | Taggar på mål i plan - tangenten g | note | feature, goals, tags, ui, go, nuxt, db, projekt:plan | 2026-11-23 | 0 |
 | [[notes/taggar-via-leader-t-pa-alla-malsidor]] | Taggar via leader+t på alla målsidor | note | feature, frontend, plan, projekt:plan | 2026-11-23 | 0 |
+| [[notes/talos-certifikat-kortlivade-servercertifikat-roteras-automatiskt]] | Talos certifikat: kortlivade servercertifikat roteras automatiskt | note | talos, certifikat, dokumentation, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/talos-dns-fallback-mot-publika-resolvrar]] | Talos DNS-fallback mot publika resolvrar | note | talos, dns, felsokning, projekt:infrastructure | 2026-11-20 | 0 |
 | [[notes/talos-etcd-en-gammal-ephemeral-kopia-pa-controlplanet-ger-en-trasig-raft-log]] | Talos etcd: en gammal EPHEMERAL-kopia pa controlplanet ger en trasig raft-log | note | etcd, talos, incident, controlplane, projekt:infrastructure | 2026-10-25 | 0 |
 | [[notes/talos-hostname-auto-i-en-generisk-config-byter-nodens-namn-och-kastar-ut-den-ur-klustret]] | Talos: hostname: auto i en generisk config byter nodens namn och kastar ut den ur klustret | note | talos, hostname, config, kluster, felsokning, projekt:infrastructure | 2026-10-24 | 0 |
@@ -368,6 +383,7 @@ finns i `index.md`.
 | [[notes/talos-v1-14-utan-unattendedinstallconfig-oinstallerad-metal-nod-bootar-om-i-en-loop]] | Talos v1.14 utan UnattendedInstallConfig: oinstallerad metal-nod bootar om i en loop | note | pxe, talos, reboot-loop, config, projekt:infrastructure | 2026-10-24 | 0 |
 | [[notes/talos-varningar-pa-controlplanes-90-kommer-fra-talos-discovery-service-dns]] | Talos-varningar pa controlplanes: 90% kommer fra Talos Discovery Service + DNS | note | talos, felsokning, dns, discovery, projekt:infrastructure | 2026-11-20 | 0 |
 | [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]] | Tidsåtgång på mål i Plan (estimated_minutes) | note | feature, plan, goals, schema, frontend, backend, projekt:simon | 2026-11-20 | 2 |
+| [[notes/tillfalliga-felsokningspoddar-rensade]] | Tillfälliga felsökningspoddar rensade | note | cleanup, cluster1, debugging, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] | Tilt dev-server ska köras som serve_cmd | note | arbetsflöde, dashboard, dev, projekt:dashboard, projekt:simon, tilt | 2026-11-26 | 1 |
 | [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] | Tilt-filbevakning kan dö - starta om tilt up | note | tilt, dev, infra, lesson, projekt:plan | 2026-11-26 | 2 |
 | [[notes/transienta-502-fra-go-api-t-nar-poddar-startar-om-i-dev-klustret]] | Transienta 502 fra Go API:t nar poddar startar om i dev-klustret | note | bug, frontend, go, kubernetes, projekt:stk | 2026-11-06 | 0 |
@@ -387,6 +403,7 @@ finns i `index.md`.
 | [[notes/uttunnade-serier-vags-sa-att-antalen-blir-exakta]] | Uttunnade serier vägs så att antalen blir exakta | note | kalender, feature, beslut, prestanda, projekt:plan | 2026-11-18 | 1 |
 | [[notes/utvecklingsflode]] | Utvecklingsflöde | note | build, test, verktyg | 2026-10-24 | 6 |
 | [[notes/valfri-fargkod-pa-kalendrar]] | Valfri färgkod på kalendrar | note | kalender, färg, projekt:plan | 2026-11-18 | 1 |
+| [[notes/varfor-src-har-tva-cmd-kataloger-go-internal-regeln-sparrar-gemensam-cmd]] | Varfor src har tva cmd-kataloger: Go internal-regeln sparrar gemensam cmd | note | go, struktur, plan, projekt:plan | 2026-11-26 | 0 |
 | [[notes/verifierade-policy-hal-i-tool-lagret-kommandon-ar-blocklist-inte-allowlist]] | Verifierade policy-hål i tool-lagret - kommandon är blocklist, inte allowlist | note | säkerhet, governance, tools, bug, projekt:agents | 2026-11-23 | 1 |
 | [[notes/vertikal-kalender-med-ikonstod-i-plan]] | Vertikal kalender med ikonstöd i Plan | note | kalender, feature, ikon, quick-add, projekt:plan | 2026-11-17 | 8 |
 | [[notes/vertikal-kalender-med-kontinuerlig-zoom]] | Vertikal kalender med kontinuerlig zoom | note | feature, kalender, ui, projekt:plan | 2026-11-17 | 3 |
@@ -428,7 +445,7 @@ finns i `index.md`.
 ## Taggar
 
 - `1password` (6)
-- `aa` (1)
+- `aa` (2)
 - `accuracy` (1)
 - `actorsmartbook` (2)
 - `admin` (1)
@@ -473,7 +490,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (95)
+- `bug` (96)
 - `bugg` (5)
 - `build` (2)
 - `bun` (1)
@@ -485,15 +502,17 @@ finns i `index.md`.
 - `cert-manager` (1)
 - `certificate` (1)
 - `certificates` (1)
+- `certifikat` (1)
 - `cfd` (1)
 - `cgNAT` (1)
 - `chat` (1)
 - `ci` (9)
 - `clean-code` (1)
+- `cleanup` (1)
 - `cli` (5)
-- `cloudflare` (3)
+- `cloudflare` (4)
 - `cloudnativepg` (1)
-- `cluster1` (3)
+- `cluster1` (6)
 - `cnpg` (1)
 - `components` (1)
 - `config` (2)
@@ -508,17 +527,17 @@ finns i `index.md`.
 - `css` (3)
 - `dammsugare` (2)
 - `dark-mode` (1)
-- `dashboard` (7)
+- `dashboard` (14)
 - `data` (2)
 - `databas` (11)
 - `database` (4)
 - `datamodell` (2)
 - `db` (6)
-- `debugging` (1)
+- `debugging` (2)
 - `dependencies` (2)
 - `deploy` (2)
 - `deployment` (2)
-- `deprecated` (2)
+- `deprecated` (1)
 - `design` (1)
 - `desktop` (1)
 - `dev` (7)
@@ -529,11 +548,11 @@ finns i `index.md`.
 - `discovery` (1)
 - `disk` (1)
 - `distributed-storage` (1)
-- `dns` (5)
+- `dns` (7)
 - `dnsmasq` (2)
 - `docker` (3)
 - `docs` (1)
-- `dokumentation` (2)
+- `dokumentation` (3)
 - `dotfiles` (3)
 - `drag` (1)
 - `drift` (7)
@@ -543,13 +562,14 @@ finns i `index.md`.
 - `e2e` (2)
 - `efivarfs` (1)
 - `encryption` (1)
-- `envoy` (2)
+- `envoy` (3)
 - `envoys-gateway` (1)
+- `estimated-cost` (1)
 - `etcd` (1)
 - `extension` (1)
 - `extensions` (1)
 - `fakta` (4)
-- `feature` (82)
+- `feature` (86)
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (19)
@@ -558,7 +578,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (10)
+- `flux` (12)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -568,6 +588,7 @@ finns i `index.md`.
 - `fälla` (1)
 - `färg` (4)
 - `förenkling` (1)
+- `gateway` (1)
 - `gateway-api` (3)
 - `gdpr` (10)
 - `ghcr` (1)
@@ -576,8 +597,8 @@ finns i `index.md`.
 - `github-actions` (3)
 - `gitops` (12)
 - `gmail` (1)
-- `go` (32)
-- `goals` (29)
+- `go` (33)
+- `goals` (31)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -609,16 +630,17 @@ finns i `index.md`.
 - `image-factory` (2)
 - `imap` (11)
 - `import` (2)
-- `incident` (19)
+- `incident` (22)
 - `incidents` (1)
 - `infra` (2)
 - `infrastructure` (4)
 - `infrastructure-as-code` (1)
-- `ingress` (2)
+- `ingress` (3)
 - `install` (2)
 - `installation` (1)
 - `inställningar` (1)
 - `integration` (1)
+- `intelligence-index` (1)
 - `interaktion` (1)
 - `introduktioner` (1)
 - `ip-address-pool` (1)
@@ -667,7 +689,7 @@ finns i `index.md`.
 - `linux` (2)
 - `llm` (1)
 - `load-balancer` (1)
-- `longhorn` (3)
+- `longhorn` (4)
 - `lunch` (2)
 - `lärdom` (1)
 - `mac-mini` (1)
@@ -684,16 +706,17 @@ finns i `index.md`.
 - `matchning` (1)
 - `mcp` (7)
 - `meta` (2)
-- `metallb` (2)
+- `metallb` (3)
 - `metodik` (1)
 - `microsoft365` (2)
 - `migrering` (2)
 - `mime` (1)
-- `minimax` (1)
+- `minimax` (2)
 - `minne` (1)
 - `mise` (1)
 - `miss` (1)
 - `modell` (2)
+- `modelljämförelse` (1)
 - `monitoring` (1)
 - `mål` (4)
 - `målsida` (1)
@@ -707,7 +730,7 @@ finns i `index.md`.
 - `neuroquant` (2)
 - `node-authentication` (1)
 - `notis` (1)
-- `now` (1)
+- `now` (2)
 - `ntp` (1)
 - `nuxt` (41)
 - `nätverk` (3)
@@ -737,7 +760,7 @@ finns i `index.md`.
 - `picokvm` (1)
 - `pipeline` (2)
 - `pki` (4)
-- `plan` (17)
+- `plan` (18)
 - `plan-api` (1)
 - `platser` (1)
 - `poe` (1)
@@ -749,21 +772,23 @@ finns i `index.md`.
 - `postmortem` (1)
 - `potential` (1)
 - `pr-preview` (2)
+- `prenumerationer` (1)
 - `prestanda` (3)
+- `pricing` (1)
 - `prioritetssida` (2)
 - `priority` (3)
 - `prod` (1)
 - `produktion` (1)
 - `profil` (1)
 - `projekt:agents` (13)
-- `projekt:dashboard` (4)
+- `projekt:dashboard` (12)
 - `projekt:dotfiles` (4)
-- `projekt:infrastructure` (68)
+- `projekt:infrastructure` (74)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (111)
+- `projekt:plan` (114)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -785,6 +810,7 @@ finns i `index.md`.
 - `rbac` (2)
 - `readme` (1)
 - `reboot-loop` (1)
+- `recommendation` (1)
 - `recovery` (4)
 - `recurrence` (1)
 - `refactor` (1)
@@ -842,19 +868,21 @@ finns i `index.md`.
 - `stk` (6)
 - `storage` (2)
 - `stow` (1)
-- `struktur` (1)
+- `struktur` (2)
 - `styrelsemöte` (1)
 - `städning` (1)
 - `submodule` (2)
+- `subscriptions` (1)
 - `sundsvall` (5)
 - `supervisor` (2)
 - `svenska` (1)
+- `sync` (1)
 - `systemd` (1)
 - `systemd-boot` (1)
 - `säkerhet` (9)
 - `tags` (1)
 - `tailwind` (2)
-- `talos` (36)
+- `talos` (37)
 - `talosctl` (1)
 - `tangent` (1)
 - `tangentbord` (2)
@@ -873,7 +901,7 @@ finns i `index.md`.
 - `torrent` (3)
 - `translation` (1)
 - `tui` (2)
-- `tunnel` (1)
+- `tunnel` (2)
 - `tuya` (2)
 - `twingate` (2)
 - `typescript` (1)
@@ -881,7 +909,7 @@ finns i `index.md`.
 - `u-boot` (1)
 - `uboot` (20)
 - `ubygg` (2)
-- `ui` (40)
+- `ui` (42)
 - `undo` (1)
 - `unicode` (1)
 - `unifi` (9)
@@ -889,7 +917,7 @@ finns i `index.md`.
 - `urval` (1)
 - `usb` (5)
 - `utoipa` (1)
-- `ux` (2)
+- `ux` (5)
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)

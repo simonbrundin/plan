@@ -1,31 +1,36 @@
 ---
 title: Cloudflare Tunnel (cloudflared)
 type: concept
-summary: Cloudflare Tunnel är utkommenterat i komponentlistan och används inte - trafiken går via DuckDNS och port-forwarding i stället.
-tags: [cloudflare, tunnel, cfd, dns, ingress, deprecated]
+summary: Cloudflare Tunnel är aktiverat (2026-11-26) och serverar plan.simonbrundin.com publikt - den enda fungerande publika ingressen sedan Starlink-CGNAT.
+tags: [cloudflare, tunnel, cfd, dns, ingress]
 sources: [infrastructure-flux/components/kustomization.yaml, infrastructure-flux/components/cloudflared/]
 created: 2026-06-02
-updated: 2026-10-24
-status: deprecated
+updated: 2026-11-26
+status: active
 ---
 
 # Cloudflare Tunnel (cloudflared)
 
-## Status: deprecated
+## Status: aktiverad 2026-11-26
 
-Cloudflare Tunnel är **utkommenterat** i
-`infrastructure-flux/components/kustomization.yaml`:
+Cloudflare Tunnel är **aktiverat** i
+`infrastructure-flux/components/kustomization.yaml` och är den enda
+fungerande publika ingressen sedan Starlink-bytet (CGNAT, ingen publik
+IPv4 - se [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]]).
 
-```yaml
-  # - cloudflared # Ev lösning ifall jag inte får till en fast publik ipadress
-```
-
-Komponenten finns kvar i repot som ett alternativ, men den deployas
-inte. Det betyder att trafiken till klustret går via **DuckDNS +
-port-forwarding i hemroutern**, inte via en tunnel - se
-[[concepts/http-routing-flow]].
-
-Tunnelen aktiveras om det blir aktuellt med en fast publik IP-adress.
+- Lokalt hanterad tunnel (credentials.json i SOPS-secreten
+  `cloudflared-token`), tunnel-ID `6a223f33-98f4-4075-8743-edabf3213773`,
+  account `eacb088cc62989f84dcd8788a62d5ed`.
+- Ingress i `components/cloudflared/release.yaml`:
+  `plan.simonbrundin.com` → `http://envoy-envoy-simons-gateway-2efb778c.envoy.svc.cluster.local:80`
+  (Envoy routar vidare via befintliga HTTPRoutes, t.ex. `/api/v1` → go-api).
+- DNS: CNAME `plan.simonbrundin.com` → `<tunnel-id>.cfargotunnel.com`
+  (proxied). Wildcard-CNAME → krokviken.duckdns.org är kvar (DNS only)
+  men är död för inkommande trafik.
+- Flöde: användare → Cloudflare edge (TLS) → QUIC-tunnel → cloudflared-pod
+  → Envoy → service. Verifierat 2026-11-26: `https://plan.simonbrundin.com` → 200.
+- Cert-manager-API-tokenen har bara DNS-rättigheter - tunnelkonfiguration
+  via API kräver ett token med Cloudflare Tunnel:Edit.
 
 ## Definition
 

@@ -2846,3 +2846,72 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [archive] 2026-11-26-sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops.md
 ## [2026-11-26] ingest | create notes/sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops
 
+
+## [2026-11-26] ingest | create notes/dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel
+- [create] [[notes/dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel]] — ny sida från inboxen
+- [create] [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel.md
+- [archive] 2026-11-26-flux-source-controller-flyttad-fran-worker-3-efter-livenessfel.md
+## [2026-11-26] ingest | create notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel
+
+
+## [2026-11-26] ingest | create notes/dashboard-en-synk-knapp-i-stallet-for-tre-forvirrande
+- [create] [[notes/dashboard-en-synk-knapp-i-stallet-for-tre-forvirrande]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-en-synk-knapp-i-stallet-for-tre-forvirrande.md
+
+
+## [2026-11-26] ingest | create notes/aa-intelligence-index-api-och-webb-ar-samsta-aldre-index-finns-bara-i-krypterade-chartfiler
+- [create] [[notes/aa-intelligence-index-api-och-webb-ar-samsta-aldre-index-finns-bara-i-krypterade-chartfiler]] — ny sida från inboxen
+- [create] [[notes/bulkmarkering-av-mal]] — ny sida från inboxen
+- [archive] 2026-11-26-aa-intelligence-index-api-och-webb-ar-samsta-aldre-index-finns-bara-i-krypterade-chartfiler.md
+- [archive] 2026-11-26-bulkmarkering-av-mal.md
+## [2026-11-26] ingest | create notes/bulkmarkering-av-mal
+
+
+## [2026-11-26] ingest | create notes/bulkmarkering-pa-malsidor
+- [create] [[notes/bulkmarkering-pa-malsidor]] — ny sida från inboxen
+- [create] [[notes/dashboard-budget-finder-och-prenumerationsjamforelse]] — ny sida från inboxen
+- [archive] 2026-11-26-bulkmarkering-pa-malsidor.md
+- [archive] 2026-11-26-dashboard-budget-finder-och-prenumerationsjamforelse.md
+## [2026-11-26] ingest | create notes/dashboard-budget-finder-och-prenumerationsjamforelse
+
+
+## [2026-11-26] ingest | create notes/dashboard-tydlighetslyft-av-jamforelserna
+- [create] [[notes/dashboard-tydlighetslyft-av-jamforelserna]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-tydlighetslyft-av-jamforelserna.md
+
+
+## [2026-11-26] ingest | create notes/cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad
+- [create] [[notes/cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad]] — ny sida från inboxen
+- [create] [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] — ny sida från inboxen
+- [create] [[notes/tillfalliga-felsokningspoddar-rensade]] — ny sida från inboxen
+- [archive] 2026-11-26-cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad.md
+- [archive] 2026-11-26-dashboard-rekommendationsvyn-som-enda-forstavy.md
+- [archive] 2026-11-26-tillfalliga-felsokningspoddar-rensade.md
+## [2026-11-26] ingest | create notes/dashboard-rekommendationsvyn-som-enda-forstavy
+## [2026-11-26] ingest | create notes/tillfalliga-felsokningspoddar-rensade
+
+
+## [2026-11-26] ingest | create notes/dashboard-plans-visar-och-raknar-anvandningskvoter
+- [create] [[notes/dashboard-plans-visar-och-raknar-anvandningskvoter]] — ny sida från inboxen
+- [create] [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] — ny sida från inboxen
+- [create] [[notes/talos-certifikat-kortlivade-servercertifikat-roteras-automatiskt]] — ny sida från inboxen
+- [create] [[notes/varfor-src-har-tva-cmd-kataloger-go-internal-regeln-sparrar-gemensam-cmd]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-plans-visar-och-raknar-anvandningskvoter.md
+- [archive] 2026-11-26-minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad.md
+- [archive] 2026-11-26-talos-certifikat-kortlivade-servercertifikat-roteras-automatiskt.md
+- [archive] 2026-11-26-varfor-src-har-tva-cmd-kataloger-go-internal-regeln-sparrar-gemensam-cmd.md
+## [2026-11-26] ingest | create notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad
+## [2026-11-26] ingest | create notes/talos-certifikat-kortlivade-servercertifikat-roteras-automatiskt
+## [2026-11-26] ingest | create notes/varfor-src-har-tva-cmd-kataloger-go-internal-regeln-sparrar-gemensam-cmd
+
+
+## [2026-11-26] ingest | create notes/envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar
+- [create] [[notes/envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar]] — ny sida från inboxen
+- [archive] 2026-11-26-envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar.md
+
+
+## [2026-11-26] ingest | create notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar
+- [create] [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] — ny sida från inboxen
+- [archive] 2026-11-26-cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar.md
+
