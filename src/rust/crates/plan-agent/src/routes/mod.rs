@@ -5,9 +5,11 @@ pub mod approvals;
 pub mod conversations;
 pub mod docs;
 pub mod health;
+pub mod json_fel;
 pub mod readme;
 pub mod table;
 pub mod tools;
+pub mod workflow;
 
 use axum::Router;
 

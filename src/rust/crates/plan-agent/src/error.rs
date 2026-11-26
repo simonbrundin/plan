@@ -27,6 +27,10 @@ pub enum AgentError {
     #[error("{0}")]
     BadRequest(String),
 
+    /// Tjänsten klarar inte att hantera anropet just nu.
+    #[error("{0}")]
+    ServiceUnavailable(String),
+
     /// Verktygsanropet finns inte.
     ///
     /// Go svarar här med både "error" och "message" - det är det enda
@@ -43,6 +47,7 @@ impl AgentError {
             AgentError::NotFound(_) => StatusCode::NOT_FOUND,
             AgentError::BadRequest(_) => StatusCode::BAD_REQUEST,
             AgentError::ToolNotFound => StatusCode::NOT_FOUND,
+            AgentError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
             AgentError::Plan(_) | AgentError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -50,6 +55,12 @@ impl AgentError {
 
 impl From<std::io::Error> for AgentError {
     fn from(err: std::io::Error) -> Self {
+        AgentError::Internal(err.to_string())
+    }
+}
+
+impl From<crate::state_store::StateError> for AgentError {
+    fn from(err: crate::state_store::StateError) -> Self {
         AgentError::Internal(err.to_string())
     }
 }
