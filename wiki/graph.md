@@ -412,6 +412,7 @@ graph LR
   n_notes_viktning_som_proportional_bar_under_maltitel["Viktning som proportional bar under måltitel"]
   n_notes_visionite_och_kvadrat_i_sundsvall_kartlagt_via_bolagsregister_visionites_kontaktsida_och_linkedin["Visionite och Kvadrat i Sundsvall - kartlagt via bolagsregister, Visionites kontaktsida och LinkedIn"]
   n_notes_vy_for_avslutade_mal["Vy för avslutade mål"]
+  n_notes_wildcard_dns_via_cloudflare_tunnel_alla_simonbrundin_com_gar_genom_tunneln_till_envoy["Wildcard DNS via Cloudflare Tunnel - alla *.simonbrundin.com går genom tunneln till Envoy"]
   n_notes_windows_1252_avkodning_av_mejlens_amnesrad["Windows-1252-avkodning av mejlens ämnesrad"]
   n_notes_wordlist_kallor["Ordlistan finns på två ställen"]
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot["worker-1-kortet flashat med ny mainline-build (TF-A fran repot)"]

@@ -413,6 +413,7 @@ finns i `index.md`.
 | [[notes/viktning-som-proportional-bar-under-maltitel]] | Viktning som proportional bar under måltitel | note | feature, goals, frontend, projekt:plan | 2026-11-20 | 0 |
 | [[notes/visionite-och-kvadrat-i-sundsvall-kartlagt-via-bolagsregister-visionites-kontaktsida-och-linkedin]] | Visionite och Kvadrat i Sundsvall - kartlagt via bolagsregister, Visionites kontaktsida och LinkedIn | note | research, sundsvall, visionite, kvadrat, databas, projekt:pappa | 2026-11-18 | 0 |
 | [[notes/vy-for-avslutade-mal]] | Vy för avslutade mål | note | feature, frontend, navigation, projekt:plan | 2026-11-20 | 0 |
+| [[notes/wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy]] | Wildcard DNS via Cloudflare Tunnel - alla *.simonbrundin.com går genom tunneln till Envoy | note | cloudflare, tunnel, dns, ingress, envoy, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/windows-1252-avkodning-av-mejlens-amnesrad]] | Windows-1252-avkodning av mejlens ämnesrad | note | bug, go, imap, mime, projekt:pappa | 2026-11-20 | 0 |
 | [[notes/wordlist-kallor]] | Ordlistan finns på två ställen | note | ordlista, data, risk, teknik | 2026-10-21 | 3 |
 | [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]] | worker-1-kortet flashat med ny mainline-build (TF-A fran repot) | note | pxe, uboot, rock4cplus, mainline, projekt:infrastructure | 2026-10-23 | 4 |
@@ -510,7 +511,7 @@ finns i `index.md`.
 - `clean-code` (1)
 - `cleanup` (1)
 - `cli` (5)
-- `cloudflare` (4)
+- `cloudflare` (5)
 - `cloudnativepg` (1)
 - `cluster1` (6)
 - `cnpg` (1)
@@ -548,7 +549,7 @@ finns i `index.md`.
 - `discovery` (1)
 - `disk` (1)
 - `distributed-storage` (1)
-- `dns` (7)
+- `dns` (8)
 - `dnsmasq` (2)
 - `docker` (3)
 - `docs` (1)
@@ -562,7 +563,7 @@ finns i `index.md`.
 - `e2e` (2)
 - `efivarfs` (1)
 - `encryption` (1)
-- `envoy` (3)
+- `envoy` (4)
 - `envoys-gateway` (1)
 - `estimated-cost` (1)
 - `etcd` (1)
@@ -635,7 +636,7 @@ finns i `index.md`.
 - `infra` (2)
 - `infrastructure` (4)
 - `infrastructure-as-code` (1)
-- `ingress` (3)
+- `ingress` (4)
 - `install` (2)
 - `installation` (1)
 - `inställningar` (1)
@@ -783,7 +784,7 @@ finns i `index.md`.
 - `projekt:agents` (13)
 - `projekt:dashboard` (12)
 - `projekt:dotfiles` (4)
-- `projekt:infrastructure` (74)
+- `projekt:infrastructure` (75)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
@@ -901,7 +902,7 @@ finns i `index.md`.
 - `torrent` (3)
 - `translation` (1)
 - `tui` (2)
-- `tunnel` (2)
+- `tunnel` (3)
 - `tuya` (2)
 - `twingate` (2)
 - `typescript` (1)

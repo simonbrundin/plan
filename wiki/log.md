@@ -2915,3 +2915,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] — ny sida från inboxen
 - [archive] 2026-11-26-cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar.md
 
+
+## [2026-11-26] ingest | create notes/wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy
+- [create] [[notes/wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy]] — ny sida från inboxen
+- [archive] 2026-11-26-wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy.md
+

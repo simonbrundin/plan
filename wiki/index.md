@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 7 |
-| Noter | 402 |
+| Noter | 403 |
 
 ## Entiteter
 
@@ -433,6 +433,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/viktning-som-proportional-bar-under-maltitel]] - Viktningen visas nu som en enkel proportional bar direkt under varje undermåls titel i stället för en balanserad mittlinje. _(uppdaterad 2026-11-20)_
 - [[notes/visionite-och-kvadrat-i-sundsvall-kartlagt-via-bolagsregister-visionites-kontaktsida-och-linkedin]] - Uppdraget: komplettera rekryteringsdatabasen "pappa" med personer som jobbar på Visionite eller Kvadrat i Sundsvall. _(uppdaterad 2026-11-18)_
 - [[notes/vy-for-avslutade-mal]] - Plan har nu sidan /completed för att visa mål med finished-tidsstämpel. _(uppdaterad 2026-11-20)_
+- [[notes/wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy]] - Slutgiltigt läge 2026-11-26 (commits 26d040ac..810e22f7): _(uppdaterad 2026-11-26)_
 - [[notes/windows-1252-avkodning-av-mejlens-amnesrad]] - 2026-11-19: Ämnen på Outlook-mejl visades rått MIME-kodat i pappa, t.ex. _(uppdaterad 2026-11-20)_
 - [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]] - Radxa ROCK 4C+ (worker-1..3) bootar via U-Boot i SPI-flash, inte UEFI. _(uppdaterad 2026-10-22)_
 - [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]] - worker-1 (ROCK 4C+, 10.10.10.21) startar inte: ingen skarmbild, ingen ARP/DHCP/TFTP, ingen klient i UniFi. _(uppdaterad 2026-10-23)_
