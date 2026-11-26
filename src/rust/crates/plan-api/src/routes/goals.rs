@@ -9,6 +9,7 @@ use axum::extract::{Extension, Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use serde::Deserialize;
 
 use crate::auth::Caller;
 use crate::error::AppError;
@@ -478,7 +479,85 @@ pub async fn create_goal(
         req.icon.as_str()
     };
 
-    let mål = goal::create_goal(pool, user_id, &req.title, icon).await?;
+    // Upprepningen valideras innan målet skapas, så att en ogiltig regel
+    // inte lämnar kvar ett tomt mål.
+    let mut regel = String::new();
+    let mut läge = "schedule".to_string();
+    let mut start = chrono::Utc::now().date_naive();
+
+    if let Some(angiven) = req.recurrence_rule.as_deref() {
+        regel = angiven.trim().to_string();
+
+        plan_recurrence::Regel::validera(&regel).map_err(|fel| {
+            AppError::BadRequest(format!("ogiltig upprepningsregel: {}", detalj_av_fel(&fel)))
+        })?;
+
+        if let Some(angiven_läge) = req.recurrence_mode.as_deref().filter(|v| !v.is_empty()) {
+            plan_recurrence::Läge::tolka(angiven_läge).map_err(|_| {
+                AppError::BadRequest(
+                    "Ogiltig schemaläggningsstrategi. Använd 'schedule' eller 'push'.".to_string(),
+                )
+            })?;
+            läge = angiven_läge.to_string();
+        }
+
+        if let Some(angivet) = req
+            .recurrence_start_date
+            .as_deref()
+            .filter(|v| !v.is_empty())
+        {
+            start = chrono::NaiveDate::parse_from_str(angivet, "%Y-%m-%d").map_err(|_| {
+                AppError::BadRequest(
+                    "recurrence_start_date måste vara på formatet YYYY-MM-DD".to_string(),
+                )
+            })?;
+        }
+
+        // Regeln ska ge åtminstone en förekomst.
+        plan_recurrence::Regel::tolka(&regel)
+            .and_then(|tolkad| {
+                tolkad.första_förekomst(chrono::DateTime::from_naive_utc_and_offset(
+                    start
+                        .and_hms_opt(0, 0, 0)
+                        .expect("midnatt är ett giltigt klockslag"),
+                    chrono::Utc,
+                ))
+            })
+            .map_err(|fel| match fel {
+                plan_recurrence::Fel::IngenFörekomst(_) => {
+                    AppError::BadRequest("Regeln ger inga förekomster.".to_string())
+                }
+                other => AppError::BadRequest(format!(
+                    "ogiltig upprepningsregel: {}",
+                    detalj_av_fel(&other)
+                )),
+            })?;
+    }
+
+    // Startdatumet valideras innan målet skapas, så att ett ogiltigt
+    // datum inte lämnar kvar ett mål utan startdatum.
+    let mut startdatum = None;
+    if let Some(angivet) = req.start_date.as_deref().filter(|v| !v.is_empty()) {
+        let datum = chrono::NaiveDate::parse_from_str(angivet, "%Y-%m-%d").map_err(|_| {
+            AppError::BadRequest("start_date måste vara på formatet YYYY-MM-DD".to_string())
+        })?;
+        startdatum = Some(datum);
+    }
+
+    let mål = goal::create_goal(pool, user_id, &req.title, icon, startdatum).await?;
+
+    if !regel.is_empty() {
+        goal::set_recurrence(pool, mål.id, &regel, &läge, start)
+            .await
+            .map_err(upprepningsfel)?;
+
+        // Målet läses om - nu har serien fått sin första förekomst.
+        let mål = goal::get_goal_by_id(pool, mål.id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Goal not found".to_string()))?;
+
+        return Ok((StatusCode::CREATED, Json(mål)).into_response());
+    }
 
     Ok((StatusCode::CREATED, Json(mål)).into_response())
 }
@@ -527,14 +606,21 @@ pub async fn update_goal(
         }
     }
 
-    // Upprepning hanteras inte ännu i Rust-tjänsten.
+    let mål = goal::update_goal(pool, goal_id, &req).await?;
+
+    // Upprepningen sätts efter de vanliga fälten - en ny regel startar en
+    // ny serie.
     if req.recurrence_rule.set || req.recurrence_mode.set {
-        return Err(AppError::NotImplemented(
-            "Återkommande mål hanteras inte ännu i Rust-tjänsten".to_string(),
+        goal::apply_recurrence_update(pool, goal_id, &req)
+            .await
+            .map_err(upprepningsfel)?;
+
+        return Ok(Json(
+            goal::get_goal_by_id(pool, goal_id)
+                .await?
+                .ok_or_else(|| AppError::NotFound("Goal not found".to_string()))?,
         ));
     }
-
-    let mål = goal::update_goal(pool, goal_id, &req).await?;
 
     Ok(Json(mål))
 }
@@ -588,4 +674,208 @@ mod tests {
         assert_eq!(parse_bool("ja"), None);
         assert_eq!(parse_bool(""), None);
     }
+}
+
+/// Översätter ett upprepningsfel till Go:s meddelanden.
+///
+/// Go skiljer på "ogiltig regel", "ogiltig strategi", "ingen förekomst"
+/// och "målet är inte återkommande" - och ger olika text för dem.
+fn upprepningsfel(fel: goal::KompletteringFel) -> AppError {
+    match fel {
+        goal::KompletteringFel::OgiltigRegel(detalj) => {
+            AppError::BadRequest(format!("ogiltig upprepningsregel: {detalj}"))
+        }
+        goal::KompletteringFel::OgiltigLäge(_) => AppError::BadRequest(
+            "Ogiltig schemaläggningsstrategi. Använd 'schedule' eller 'push'.".to_string(),
+        ),
+        goal::KompletteringFel::IngenFörekomst(_) => {
+            AppError::BadRequest("Regeln ger inga förekomster.".to_string())
+        }
+        goal::KompletteringFel::InteÅterkommande => {
+            AppError::BadRequest("Målet är inte återkommande.".to_string())
+        }
+        // Go använder due-datumets meddelande även för startdatumet -
+        // klienten får samma text från båda tjänsterna.
+        goal::KompletteringFel::OgiltigtStartdatum(_) => {
+            AppError::BadRequest("due-datumet måste vara på formatet YYYY-MM-DD".to_string())
+        }
+        goal::KompletteringFel::IngenSlutförd => {
+            AppError::BadRequest("Målet har ingen slutförd förekomst".to_string())
+        }
+        goal::KompletteringFel::Databas(err) => {
+            AppError::Internal(format!("failed to update recurrence: {err}"))
+        }
+    }
+}
+
+/// Detaljerna i ett upprepningsfel.
+///
+/// Go skriver ut felets detalj - i Rust ligger den i varianten.
+fn detalj_av_fel(fel: &plan_recurrence::Fel) -> String {
+    match fel {
+        plan_recurrence::Fel::OgiltigRegel(detalj) => detalj.clone(),
+        plan_recurrence::Fel::IngenFörekomst(detalj) => detalj.clone(),
+        plan_recurrence::Fel::OgiltigLäge(läge) => format!("{läge:?}"),
+    }
+}
+
+/// Body för att slutföra en förekomst.
+#[derive(Debug, Default, Deserialize, utoipa::ToSchema)]
+pub struct CompleteOccurrenceRequest {
+    /// Vilken förekomst som slutförs ("YYYY-MM-DD").
+    #[serde(default)]
+    pub occurrence_date: String,
+    /// När slutförandet skedde ("YYYY-MM-DD").
+    #[serde(default)]
+    pub completed_on: String,
+}
+
+/// Slutför den aktuella förekomsten av ett återkommande mål.
+#[utoipa::path(
+    post,
+    path = "/api/v1/goals/{id}/completions",
+    tag = "goals",
+    params(("id" = i64, Path, description = "Målets id")),
+    request_body = CompleteOccurrenceRequest,
+    responses(
+        (status = 200, description = "Målet efter förekomsten slutförts", body = Goal),
+        (status = 400, description = "Ogiltigt id, datum eller målet är inte återkommande"),
+        (status = 403, description = "Ingen åtkomst till målet")
+    )
+)]
+pub async fn complete_goal_occurrence(
+    State(state): State<AppState>,
+    Extension(caller): Extension<Caller>,
+    Path(id): Path<String>,
+    body: Bytes,
+) -> Result<Json<Goal>, AppError> {
+    let user_id = user_id(&caller)?;
+    let goal_id = goal_id(&id)?;
+
+    let Some(pool) = state.pool.as_ref() else {
+        return Err(no_database());
+    };
+
+    if !goal::user_has_access(pool, user_id, goal_id).await? {
+        return Err(AppError::Forbidden("Access denied".to_string()));
+    }
+
+    // En trasig body ger samma fel som i Go - fältens format är
+    // valfritt, så standarden är tom.
+    let req: CompleteOccurrenceRequest = serde_json::from_slice(&body).unwrap_or_default();
+
+    // Utan uppgift slutförs målets aktuella förekomst.
+    let förekomst = if req.occurrence_date.is_empty() {
+        None
+    } else {
+        Some(
+            chrono::NaiveDate::parse_from_str(&req.occurrence_date, "%Y-%m-%d").map_err(|_| {
+                AppError::BadRequest(
+                    "occurrence_date måste vara på formatet YYYY-MM-DD".to_string(),
+                )
+            })?,
+        )
+    };
+
+    // Utan uppgift används dagens datum.
+    let slutförd_på = if req.completed_on.is_empty() {
+        chrono::Utc::now().date_naive()
+    } else {
+        chrono::NaiveDate::parse_from_str(&req.completed_on, "%Y-%m-%d").map_err(|_| {
+            AppError::BadRequest("completed_on måste vara på formatet YYYY-MM-DD".to_string())
+        })?
+    };
+
+    let mål = goal::complete_occurrence(pool, goal_id, förekomst, slutförd_på)
+        .await
+        .map_err(|fel| match fel {
+            goal::KompletteringFel::InteÅterkommande => {
+                AppError::BadRequest("Målet är inte återkommande".to_string())
+            }
+            goal::KompletteringFel::IngenFörekomst(_) => {
+                AppError::BadRequest("Målet har ingen aktiv förekomst".to_string())
+            }
+            goal::KompletteringFel::IngenSlutförd => {
+                AppError::BadRequest("Målet har ingen slutförd förekomst".to_string())
+            }
+            goal::KompletteringFel::OgiltigRegel(detalj) => {
+                AppError::Internal(format!("ogiltig upprepningsregel: {detalj}"))
+            }
+            goal::KompletteringFel::OgiltigLäge(läge) => {
+                AppError::Internal(format!("ogiltig schemaläggningsstrategi: {läge}"))
+            }
+            goal::KompletteringFel::OgiltigtStartdatum(värde) => {
+                AppError::Internal(format!("ogiltigt startdatum: {värde}"))
+            }
+            goal::KompletteringFel::Databas(err) => {
+                AppError::Internal(format!("failed to complete occurrence: {err}"))
+            }
+        })?;
+
+    let Some(mål) = mål else {
+        return Err(AppError::NotFound("Goal not found".to_string()));
+    };
+
+    Ok(Json(mål))
+}
+
+/// Ångra den senast slutförda förekomsten.
+#[utoipa::path(
+    delete,
+    path = "/api/v1/goals/{id}/completions",
+    tag = "goals",
+    params(("id" = i64, Path, description = "Målets id")),
+    responses(
+        (status = 200, description = "Målet efter att förekomsten ångrats", body = Goal),
+        (status = 400, description = "Ogiltigt id eller målet är inte återkommande"),
+        (status = 403, description = "Ingen åtkomst till målet")
+    )
+)]
+pub async fn undo_goal_occurrence(
+    State(state): State<AppState>,
+    Extension(caller): Extension<Caller>,
+    Path(id): Path<String>,
+) -> Result<Json<Goal>, AppError> {
+    let user_id = user_id(&caller)?;
+    let goal_id = goal_id(&id)?;
+
+    let Some(pool) = state.pool.as_ref() else {
+        return Err(no_database());
+    };
+
+    if !goal::user_has_access(pool, user_id, goal_id).await? {
+        return Err(AppError::Forbidden("Access denied".to_string()));
+    }
+
+    let mål = goal::undo_occurrence(pool, goal_id)
+        .await
+        .map_err(|fel| match fel {
+            goal::KompletteringFel::InteÅterkommande => {
+                AppError::BadRequest("Målet är inte återkommande".to_string())
+            }
+            goal::KompletteringFel::IngenSlutförd => {
+                AppError::BadRequest("Målet har ingen slutförd förekomst".to_string())
+            }
+            goal::KompletteringFel::IngenFörekomst(_) => {
+                AppError::BadRequest("Målet har ingen aktiv förekomst".to_string())
+            }
+            goal::KompletteringFel::OgiltigRegel(detalj) => {
+                AppError::Internal(format!("ogiltig upprepningsregel: {detalj}"))
+            }
+            goal::KompletteringFel::OgiltigLäge(läge) => {
+                AppError::Internal(format!("ogiltig schemaläggningsstrategi: {läge}"))
+            }
+            goal::KompletteringFel::OgiltigtStartdatum(värde) => {
+                AppError::Internal(format!("ogiltigt startdatum: {värde}"))
+            }
+            goal::KompletteringFel::Databas(err) => {
+                AppError::Internal(format!("failed to undo occurrence: {err}"))
+            }
+        })?;
+
+    let Some(mål) = mål else {
+        return Err(AppError::NotFound("Goal not found".to_string()));
+    };
+
+    Ok(Json(mål))
 }

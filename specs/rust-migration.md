@@ -97,15 +97,15 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | Modeller + repositories (statusar, mål, taggar, platser) | klar för de domänerna |
 | Modeller + repositories (agentkörningar, händelser, godkännanden, budgetar, användning, API-nycklar) | klar |
 | Versionsstyrd prislista (kostnad i Plan) | klar |
-| Handlers | 69 av 76 portade (statusar, mål, taggar, relationer, beroenden, platser, kalendrar, kalenderhändelser, agentkörningar, godkännanden, budgetar, användning, API-nycklar) |
+| Handlers | 76 av 76 portade (statusar, mål, taggar, relationer, beroenden, platser, kalendrar, kalenderhändelser, agentkörningar, godkännanden, budgetar, användning, API-nycklar, auth, kompletteringar) |
 | Live-paritetsskript (Go vs Rust, samma databas) | klar |
 | Agentens API, providers, kärna, worker | inte påbörjat |
 
 ### Vad som återstår i API:t
 
-- Auth-endpoints: login, callback, dev-login, session, logout.
-- Mål: återkommande mål (RRULE), förekomster och målets kompletteringar
-  (`POST`/`DELETE /api/v1/goals/{id}/completions`).
+- Inget - alla Go-vägar är portade. Resterande arbete ligger i agenten
+  (API-handlers, providers, kärna, worker) och i att Go-tjänsten tas
+  bort.
 
 ### Noter om paritet
 
@@ -131,6 +131,18 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 - Kostnaden räknas i Plan ur en versionsstyrd prislista. En okänd modell
   får dokumenterat fallbackpris med `price_source: "fallback"`, aldrig
   nollkostnad.
+- Authfel svarar `{"error": ...}` medan övriga API-fel svarar
+  `{"message": ...}` - det är Gons kontrakt, och det gäller även i Rust.
+- En återkommande måls regel kan sättas vid skapande och vid uppdatering.
+  Serien börjar på `recurrence_start_date` (annars idag), och de
+  tidigare slutförandena rensas när regeln byts - de hörde till den
+  gamla regeln.
+- RRULE-felen skrivs med samma ordval som `rrule-go` ("undefined
+  frequency: X", "INTERVAL måste vara minst 1" och så vidare), så att
+  klienten får samma meddelande från båda tjänsterna.
+- Varje route i tabellen måste ha en handler - annars svarar den 501.
+  Route-tabellens test kontrollerar det, så en endpoint inte kan glömmas
+  bort utan att testet fallerar.
 
 ## Layout
 

@@ -140,6 +140,12 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("DELETE", "/api/v1/goals/{id}") => delete(crate::routes::goals::delete_goal),
         ("GET", "/api/v1/goals/graph") => get(crate::routes::goals::get_goal_graph),
         ("GET", "/api/v1/goals/prioritized") => get(crate::routes::goals::get_prioritized_goals),
+        ("POST", "/api/v1/goals/{id}/completions") => {
+            post(crate::routes::goals::complete_goal_occurrence)
+        }
+        ("DELETE", "/api/v1/goals/{id}/completions") => {
+            delete(crate::routes::goals::undo_goal_occurrence)
+        }
 
         ("POST", "/api/v1/goals/relations") => post(crate::routes::relations::create_relation),
         ("PATCH", "/api/v1/goals/relations") => patch(crate::routes::relations::update_relation),

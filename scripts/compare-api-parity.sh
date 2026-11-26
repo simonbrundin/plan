@@ -43,6 +43,10 @@ ANROP=(
   "GET /api/v1/agent-usage"
   "GET /api/v1/agent-budgets"
   "GET /api/v1/api-keys"
+  "GET /api/v1/auth/session"
+  "GET /api/v1/auth/login"
+  "GET /api/v1/auth/callback"
+  "GET /api/v1/auth/callback?code=abc&state=xyz"
 )
 
 # Anrop som skickar en body. Endast felmeddelanden jämförs - de ändrar
@@ -82,6 +86,19 @@ ANROP_BODY=(
   "POST /api/v1/api-keys {\"name\":\"[test]\",\"scope\":\"nonsense\"}"
   "DELETE /api/v1/api-keys {}"
   "POST /api/v1/agent-approvals/1/decision {\"decision\":\"nonsense\"}"
+  "POST /api/v1/auth/dev-login {}"
+  "POST /api/v1/auth/logout {}"
+  "POST /api/v1/goals/1/completions {}"
+  "POST /api/v1/goals/1/completions {\"occurrence_date\":\"fel\"}"
+  "POST /api/v1/goals/1/completions {\"completed_on\":\"fel\"}"
+  "DELETE /api/v1/goals/1/completions {}"
+  "PATCH /api/v1/goals/1 {\"recurrence_rule\":\"FREQ=BOGUS\"}"
+  "PATCH /api/v1/goals/1 {\"recurrence_rule\":\"\"}"
+  "PATCH /api/v1/goals/1 {\"recurrence_mode\":\"nonsense\"}"
+  "PATCH /api/v1/goals/1 {\"recurrence_start_date\":\"fel\",\"recurrence_rule\":\"FREQ=DAILY\"}"
+  "POST /api/v1/goals {\"title\":\"[test]\",\"recurrence_rule\":\"FREQ=BOGUS\"}"
+  "POST /api/v1/goals {\"title\":\"[test]\",\"recurrence_rule\":\"FREQ=DAILY;COUNT=0\"}"
+  "POST /api/v1/goals {\"title\":\"[test]\",\"start_date\":\"fel\"}"
 )
 
 # Normaliserar tidsstämplar och gör JSON stabilt att jämföra.

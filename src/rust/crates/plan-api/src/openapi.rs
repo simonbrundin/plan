@@ -51,6 +51,8 @@ use crate::routes::{
         goals::get_goal,
         goals::get_goal_graph,
         goals::get_prioritized_goals,
+        goals::complete_goal_occurrence,
+        goals::undo_goal_occurrence,
         goals::create_goal,
         goals::update_goal,
         goals::delete_goal,

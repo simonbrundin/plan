@@ -215,17 +215,19 @@ async fn en_oportad_vag_svarar_501() {
     forbered();
     let app = app();
 
-    // Vägar som ännu inte är portade ska ge 501 - inte en tyst 404 som
-    // ser ut att fungera. Auth-vägarna är de nästa som portas.
-    let (status, _) = anrop(
+    // En okänd väg ger Gin's 404 - inte 501. 501 är för vägar som
+    // finns i tabellen men ännu inte är portade, och det kontrolleras
+    // i route-tabellens egna test.
+    let (status, body) = anrop(
         &app,
-        "GET",
-        "/api/v1/auth/session",
+        "POST",
+        "/api/v1/inte-porterad",
         &[("Authorization", "Bearer user_4")],
     )
     .await;
 
-    assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    assert_eq!(body, "404 page not found");
 }
 
 #[tokio::test]

@@ -57,6 +57,22 @@ pub enum Fel {
     OgiltigLäge(String),
 }
 
+impl std::fmt::Display for Fel {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Fel::OgiltigRegel(detalj) => write!(formatter, "ogiltig upprepningsregel: {detalj}"),
+            Fel::IngenFörekomst(detalj) => {
+                write!(formatter, "regeln ger inga förekomster: {detalj}")
+            }
+            Fel::OgiltigLäge(läge) => {
+                write!(formatter, "ogiltig schemaläggningsstrategi: \"{läge}\"")
+            }
+        }
+    }
+}
+
+impl std::error::Error for Fel {}
+
 /// Resultatet av en upprepningsberäkning.
 pub type Result<T> = std::result::Result<T, Fel>;
 
@@ -126,7 +142,9 @@ impl Regel {
                         "MONTHLY" => Frekvens::Månadslig,
                         "YEARLY" => Frekvens::Årlig,
                         annat => {
-                            return Err(Fel::OgiltigRegel(format!("okänd frekvens {annat}")));
+                            // Samma ordval som rrule-go, som Go-tjänsten
+                            // använder.
+                            return Err(Fel::OgiltigRegel(format!("undefined frequency: {annat}")));
                         }
                     });
                 }
@@ -135,9 +153,7 @@ impl Regel {
                         Fel::OgiltigRegel(format!("INTERVAL har ogiltigt värde {värde:?}"))
                     })?;
                     if intervall < 1 {
-                        return Err(Fel::OgiltigRegel(format!(
-                            "INTERVAL måste vara minst 1, fick {intervall}"
-                        )));
+                        return Err(Fel::OgiltigRegel("INTERVAL måste vara minst 1".to_string()));
                     }
                 }
                 "COUNT" => {
@@ -145,9 +161,7 @@ impl Regel {
                         Fel::OgiltigRegel(format!("COUNT har ogiltigt värde {värde:?}"))
                     })?;
                     if antal < 1 {
-                        return Err(Fel::OgiltigRegel(format!(
-                            "COUNT måste vara minst 1, fick {antal}"
-                        )));
+                        return Err(Fel::OgiltigRegel("COUNT måste vara minst 1".to_string()));
                     }
                     count = Some(antal);
                 }
@@ -168,7 +182,10 @@ impl Regel {
         }
 
         let Some(frekvens) = frekvens else {
-            return Err(Fel::OgiltigRegel("regeln saknar FREQ".to_string()));
+            // Samma ordval som rrule-go.
+            return Err(Fel::OgiltigRegel(
+                "RRULE property FREQ is required".to_string(),
+            ));
         };
 
         Ok(Regel {
@@ -431,7 +448,7 @@ fn tolka_until(värde: &str) -> Result<DateTime<Utc>> {
             NaiveDate::parse_from_str(värde, "%Y%m%d")
                 .map(|datum| datum.and_hms_opt(0, 0, 0).unwrap().and_utc())
         })
-        .map_err(|_| Fel::OgiltigRegel(format!("UNTIL har ogiltigt värde {värde:?}")))
+        .map_err(|_| Fel::OgiltigRegel(format!("parsing time {värde:?} as \"20060102T150405Z\": cannot parse {värde:?} as \"2006\"")))
 }
 
 /// Tolkar en veckodag i RRULE-format ("MO", "TU" ...).
@@ -444,7 +461,8 @@ fn tolka_vardag(dag: &str) -> Result<Weekday> {
         "FR" => Ok(Weekday::Fri),
         "SA" => Ok(Weekday::Sat),
         "SU" => Ok(Weekday::Sun),
-        annat => Err(Fel::OgiltigRegel(format!("okänd veckodag {annat}"))),
+        // Samma ordval som rrule-go.
+        annat => Err(Fel::OgiltigRegel(format!("undefined weekday: {annat}"))),
     }
 }
 
@@ -582,6 +600,24 @@ mod tests {
                 )
                 .unwrap(),
             datum(2026, 1, 9)
+        );
+    }
+
+    #[test]
+    fn veckodag_halls_i_schemalagt_lage() {
+        let ankare = datum(2026, 1, 1);
+        let regel = Regel::tolka("FREQ=WEEKLY;BYDAY=MO").unwrap();
+
+        assert_eq!(
+            regel
+                .nästa_förekomst(
+                    Läge::Schemalagd,
+                    ankare,
+                    datum(2026, 1, 5),
+                    datum(2026, 1, 5)
+                )
+                .unwrap(),
+            datum(2026, 1, 12)
         );
     }
 

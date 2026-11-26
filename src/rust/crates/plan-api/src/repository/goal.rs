@@ -296,6 +296,7 @@ pub async fn create_goal(
     user_id: i64,
     title: &str,
     icon: &str,
+    start_date: Option<chrono::NaiveDate>,
 ) -> Result<crate::models::goal::Goal, AppError> {
     let mut tx = pool
         .begin()
@@ -304,17 +305,18 @@ pub async fn create_goal(
 
     let rad = sqlx::query(
         r#"
-        INSERT INTO goals (title, icon, "order")
-        SELECT $1, $2, COALESCE((
+        INSERT INTO goals (title, icon, start_date, "order")
+        SELECT $1, $2, $3, COALESCE((
             SELECT MAX(g2."order") + 1
             FROM goals g2
             INNER JOIN user_goals ug2 ON g2.id = ug2.goal_id
-            WHERE ug2.user_id = $3), 0)
+            WHERE ug2.user_id = $4), 0)
         RETURNING id, title, COALESCE(description, ''), icon, status_id, created, started, finished, due, estimated_minutes, inbox, eternal, agent, now, "order"
         "#,
     )
     .bind(title)
     .bind(icon)
+    .bind(start_date)
     .bind(user_id)
     .fetch_one(&mut *tx)
     .await
@@ -1197,4 +1199,409 @@ mod tests {
 
         assert_eq!(merge_order(&befintliga, &begärda), vec![2, 1]);
     }
+}
+
+/// Fel när en förekomst ska slutföras eller ångras.
+///
+/// Go skiljer på samma fel med egna feltyper - meddelandena i API:t är
+/// därför desamma här.
+#[derive(Debug)]
+pub enum KompletteringFel {
+    /// Målet är inte återkommande.
+    InteÅterkommande,
+    /// Regeln ger ingen aktiv förekomst.
+    IngenFörekomst(String),
+    /// Det finns ingen slutförd förekomst att ångra.
+    IngenSlutförd,
+    /// Upprepningsregeln är ogiltig.
+    OgiltigRegel(String),
+    /// Schemaläggningsstrategin är okänd.
+    OgiltigLäge(String),
+    /// Startdatumet kunde inte tolkas.
+    OgiltigtStartdatum(String),
+    /// Databasfel.
+    Databas(sqlx::Error),
+}
+
+impl From<sqlx::Error> for KompletteringFel {
+    fn from(err: sqlx::Error) -> Self {
+        Self::Databas(err)
+    }
+}
+
+/// Målets upprepningsfält, som de läses in.
+type Upprepningsrad = (
+    Option<String>,
+    Option<String>,
+    Option<chrono::NaiveDate>,
+    Option<chrono::NaiveDate>,
+);
+
+/// Början på dagen - ett måls förekomster är datum utan klockslag.
+fn början_på_dagen(datum: chrono::NaiveDate) -> chrono::NaiveDateTime {
+    datum
+        .and_hms_opt(0, 0, 0)
+        .expect("midnatt är ett giltigt klockslag")
+}
+
+/// Slutför den aktuella förekomsten av ett återkommande mål.
+///
+/// `förekomst` anger vilken förekomst som slutförs - utan den slutförs
+/// målets aktuella förekomst. `slutförd_på` är det datum slutförandet
+/// skedde.
+pub async fn complete_occurrence(
+    pool: &sqlx::PgPool,
+    goal_id: i64,
+    förekomst: Option<chrono::NaiveDate>,
+    slutförd_på: chrono::NaiveDate,
+) -> Result<Option<crate::models::goal::Goal>, KompletteringFel> {
+    let mut tx = pool.begin().await?;
+
+    let rad: Option<Upprepningsrad> = sqlx::query_as(
+        r#"
+            SELECT recurrence_rule, recurrence_mode, recurrence_anchor, recurrence_next
+            FROM goals WHERE id = $1 FOR UPDATE
+            "#,
+    )
+    .bind(goal_id)
+    .fetch_optional(&mut *tx)
+    .await?;
+
+    // Målet finns inte - handlern svarar 404.
+    let Some((regel, läge, ankare, nästa)) = rad else {
+        return Ok(None);
+    };
+
+    let (Some(regel), Some(läge), Some(nästa)) = (regel, läge, nästa) else {
+        return Err(KompletteringFel::InteÅterkommande);
+    };
+
+    let mut aktuell = början_på_dagen(nästa);
+
+    if let Some(angiven) = förekomst {
+        let begärd = början_på_dagen(angiven);
+
+        if begärd != aktuell {
+            // En redan slutförd förekomst är en dubblett - inget ändras.
+            let redan: bool = sqlx::query_scalar(
+                "SELECT EXISTS(SELECT 1 FROM goal_completions WHERE goal_id = $1 AND occurrence_date = $2)",
+            )
+            .bind(goal_id)
+            .bind(begärd)
+            .fetch_one(&mut *tx)
+            .await?;
+
+            if redan {
+                tx.commit().await?;
+                return get_goal_by_id(pool, goal_id).await.map_err(|err| {
+                    KompletteringFel::Databas(sqlx::Error::Protocol(err.to_string()))
+                });
+            }
+
+            return Err(KompletteringFel::IngenFörekomst(
+                "är inte den aktuella förekomsten".to_string(),
+            ));
+        }
+
+        aktuell = begärd;
+    }
+
+    let slutförd = början_på_dagen(slutförd_på);
+
+    // Loggen skriver förekomsten - en redan loggad förekomst ändrar
+    // ingenting.
+    let insatt: Option<i64> = sqlx::query_scalar(
+        r#"
+        INSERT INTO goal_completions (goal_id, occurrence_date)
+        VALUES ($1, $2)
+        ON CONFLICT (goal_id, occurrence_date) DO NOTHING
+        RETURNING id
+        "#,
+    )
+    .bind(goal_id)
+    .bind(aktuell)
+    .fetch_optional(&mut *tx)
+    .await?;
+
+    if insatt.is_none() {
+        tx.commit().await?;
+        return get_goal_by_id(pool, goal_id)
+            .await
+            .map_err(|err| KompletteringFel::Databas(sqlx::Error::Protocol(err.to_string())));
+    }
+
+    // Seriens ankare - utan ankare räknas serien från förekomsten.
+    let seriens_ankare = ankare.map(början_på_dagen).unwrap_or(aktuell);
+
+    let regel = plan_recurrence::Regel::tolka(&regel)
+        .map_err(|fel| KompletteringFel::OgiltigRegel(fel.to_string()))?;
+    let läge = plan_recurrence::Läge::tolka(&läge)
+        .map_err(|_| KompletteringFel::OgiltigLäge(läge.clone()))?;
+
+    let ankare_utc = chrono::DateTime::from_naive_utc_and_offset(seriens_ankare, chrono::Utc);
+    let aktuell_utc = chrono::DateTime::from_naive_utc_and_offset(aktuell, chrono::Utc);
+    let slutförd_utc = chrono::DateTime::from_naive_utc_and_offset(slutförd, chrono::Utc);
+
+    match regel.nästa_förekomst(läge, ankare_utc, aktuell_utc, slutförd_utc) {
+        Ok(nästa) => {
+            sqlx::query("UPDATE goals SET recurrence_next = $1 WHERE id = $2")
+                .bind(nästa.date_naive())
+                .bind(goal_id)
+                .execute(&mut *tx)
+                .await?;
+        }
+        // Serien är slut - målet har inget mer att göra.
+        Err(plan_recurrence::Fel::IngenFörekomst(_)) => {
+            sqlx::query("UPDATE goals SET recurrence_next = NULL, finished = CURRENT_TIMESTAMP WHERE id = $1")
+                .bind(goal_id)
+                .execute(&mut *tx)
+                .await?;
+        }
+        Err(fel) => return Err(KompletteringFel::OgiltigRegel(fel.to_string())),
+    }
+
+    tx.commit().await?;
+
+    get_goal_by_id(pool, goal_id)
+        .await
+        .map_err(|err| KompletteringFel::Databas(sqlx::Error::Protocol(err.to_string())))
+}
+
+/// Ångra den senast slutförda förekomsten.
+pub async fn undo_occurrence(
+    pool: &sqlx::PgPool,
+    goal_id: i64,
+) -> Result<Option<crate::models::goal::Goal>, KompletteringFel> {
+    let mut tx = pool.begin().await?;
+
+    let rad: Option<(Option<String>,)> =
+        sqlx::query_as("SELECT recurrence_rule FROM goals WHERE id = $1 FOR UPDATE")
+            .bind(goal_id)
+            .fetch_optional(&mut *tx)
+            .await?;
+
+    // Målet finns inte - handlern svarar 404.
+    let Some((regel,)) = rad else {
+        return Ok(None);
+    };
+
+    if regel.is_none() {
+        return Err(KompletteringFel::InteÅterkommande);
+    }
+
+    let förekomst: Option<chrono::NaiveDate> = sqlx::query_scalar(
+        r#"
+        SELECT occurrence_date FROM goal_completions
+        WHERE goal_id = $1
+        ORDER BY completed_at DESC, id DESC
+        LIMIT 1
+        "#,
+    )
+    .bind(goal_id)
+    .fetch_optional(&mut *tx)
+    .await?;
+
+    let Some(förekomst) = förekomst else {
+        return Err(KompletteringFel::IngenSlutförd);
+    };
+
+    sqlx::query("DELETE FROM goal_completions WHERE goal_id = $1 AND occurrence_date = $2")
+        .bind(goal_id)
+        .bind(förekomst)
+        .execute(&mut *tx)
+        .await?;
+
+    sqlx::query("UPDATE goals SET recurrence_next = $1, finished = NULL WHERE id = $2")
+        .bind(förekomst)
+        .bind(goal_id)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
+
+    get_goal_by_id(pool, goal_id)
+        .await
+        .map_err(|err| KompletteringFel::Databas(sqlx::Error::Protocol(err.to_string())))
+}
+
+/// Sätter eller tar bort målets upprepning.
+///
+/// En ny regel startar en ny serie - de tidigare slutförandena hör till den
+/// gamla regeln och tas därför bort. Att bara byta strategi påverkar inte
+/// den aktuella förekomsten.
+pub async fn apply_recurrence_update(
+    pool: &PgPool,
+    goal_id: i64,
+    req: &crate::models::goal::UpdateGoalRequest,
+) -> Result<(), KompletteringFel> {
+    if req.recurrence_rule.set {
+        // En tom regel rensar upprepningen.
+        let Some(regel) = req.recurrence_rule.value.as_deref() else {
+            return clear_recurrence(pool, goal_id).await;
+        };
+
+        let regel = regel.trim();
+        if regel.is_empty() {
+            return Err(KompletteringFel::OgiltigRegel("regeln är tom".to_string()));
+        }
+
+        // Strategin: den i anropet, annars målets nuvarande, annars
+        // schemalagd.
+        let mut läge = "schedule".to_string();
+
+        if req.recurrence_mode.set {
+            if let Some(angiven) = req
+                .recurrence_mode
+                .value
+                .as_deref()
+                .filter(|värde| !värde.is_empty())
+            {
+                läge = angiven.to_string();
+            }
+        }
+
+        if läge == "schedule" && !req.recurrence_mode.set {
+            if let Some(existerande) = get_goal_by_id(pool, goal_id)
+                .await
+                .map_err(|err| KompletteringFel::Databas(sqlx::Error::Protocol(err.to_string())))?
+            {
+                if let Some(nuvarande) = existerande
+                    .recurrence_mode
+                    .as_deref()
+                    .filter(|värde| !värde.is_empty())
+                {
+                    läge = nuvarande.to_string();
+                }
+            }
+        }
+
+        // Serien startar på startdatumet, annars idag.
+        let start = match req
+            .recurrence_start_date
+            .as_deref()
+            .filter(|värde| !värde.is_empty())
+        {
+            Some(rått) => chrono::NaiveDate::parse_from_str(rått, "%Y-%m-%d")
+                .map_err(|_| KompletteringFel::OgiltigtStartdatum(rått.to_string()))?,
+            None => chrono::Utc::now().date_naive(),
+        };
+
+        return set_recurrence(pool, goal_id, regel, &läge, start).await;
+    }
+
+    // Bara strategin sätts - den måste anges.
+    let läge = req
+        .recurrence_mode
+        .value
+        .as_deref()
+        .filter(|värde| !värde.is_empty())
+        .ok_or_else(|| KompletteringFel::OgiltigLäge("strategin måste anges".to_string()))?;
+
+    set_recurrence_mode(pool, goal_id, läge).await
+}
+
+/// Gör ett mål återkommande med en ny upprepningsregel.
+///
+/// Serien börjar på `start` och nästa förekomst räknas fram därifrån.
+pub async fn set_recurrence(
+    pool: &PgPool,
+    goal_id: i64,
+    regel: &str,
+    läge: &str,
+    start: chrono::NaiveDate,
+) -> Result<(), KompletteringFel> {
+    let regel_text = regel.to_string();
+    let regel = plan_recurrence::Regel::tolka(&regel_text)
+        .map_err(|fel| KompletteringFel::OgiltigRegel(fel.to_string()))?;
+    plan_recurrence::Läge::tolka(läge)
+        .map_err(|_| KompletteringFel::OgiltigLäge(läge.to_string()))?;
+
+    let ankare = start
+        .and_hms_opt(0, 0, 0)
+        .expect("midnatt är ett giltigt klockslag");
+    let ankare = chrono::DateTime::from_naive_utc_and_offset(ankare, chrono::Utc);
+
+    let första = regel.första_förekomst(ankare).map_err(|fel| match fel {
+        plan_recurrence::Fel::IngenFörekomst(detalj) => KompletteringFel::IngenFörekomst(detalj),
+        other => KompletteringFel::OgiltigRegel(other.to_string()),
+    })?;
+
+    let mut tx = pool.begin().await?;
+
+    sqlx::query(
+        r#"
+        UPDATE goals
+        SET recurrence_rule = $1, recurrence_mode = $2, recurrence_anchor = $3, recurrence_next = $4, finished = NULL
+        WHERE id = $5
+        "#,
+    )
+    .bind(&regel_text)
+    .bind(läge)
+    .bind(start)
+    .bind(första.date_naive())
+    .bind(goal_id)
+    .execute(&mut *tx)
+    .await?;
+
+    // Slutförandena hör till den gamla regeln.
+    sqlx::query("DELETE FROM goal_completions WHERE goal_id = $1")
+        .bind(goal_id)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
+
+    Ok(())
+}
+
+/// Byter schemaläggningsstrategin för ett återkommande mål.
+///
+/// Den aktuella förekomsten påverkas inte - strategin avgör hur nästa
+/// förekomst räknas när nästa förekomst slutförs.
+pub async fn set_recurrence_mode(
+    pool: &PgPool,
+    goal_id: i64,
+    läge: &str,
+) -> Result<(), KompletteringFel> {
+    plan_recurrence::Läge::tolka(läge)
+        .map_err(|_| KompletteringFel::OgiltigLäge(läge.to_string()))?;
+
+    let result = sqlx::query(
+        "UPDATE goals SET recurrence_mode = $1 WHERE id = $2 AND recurrence_rule IS NOT NULL",
+    )
+    .bind(läge)
+    .bind(goal_id)
+    .execute(pool)
+    .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(KompletteringFel::InteÅterkommande);
+    }
+
+    Ok(())
+}
+
+/// Tar bort upprepningen så att målet blir ett vanligt mål.
+pub async fn clear_recurrence(pool: &PgPool, goal_id: i64) -> Result<(), KompletteringFel> {
+    let mut tx = pool.begin().await?;
+
+    sqlx::query(
+        r#"
+        UPDATE goals
+        SET recurrence_rule = NULL, recurrence_mode = NULL, recurrence_anchor = NULL, recurrence_next = NULL
+        WHERE id = $1
+        "#,
+    )
+    .bind(goal_id)
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query("DELETE FROM goal_completions WHERE goal_id = $1")
+        .bind(goal_id)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
+
+    Ok(())
 }
