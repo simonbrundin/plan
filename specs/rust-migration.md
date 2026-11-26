@@ -95,13 +95,13 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | OpenAPI code-first (utoipa) + Scalar | klar |
 | Auth (sessioner, API-nycklar, Zitadel, agent-scope) | klar |
 | Modeller + repositories (statusar, mål, taggar, platser) | klar för de domänerna |
-| Handlers | 12 av 79 portade (statusar, mål, taggar) |
+| Handlers | 21 av 79 portade (statusar, mål, taggar, relationer, beroenden) |
 | Live-paritetsskript (Go vs Rust, samma databas) | klar |
 | Agentens API, providers, kärna, worker | inte påbörjat |
 
 ### Vad som återstår i API:t
 
-- Mål: relationer, beroenden, omordning, återkommande mål (RRULE), förekomster.
+- Mål: återkommande mål (RRULE), förekomster, målets statusbyte.
 - Platser, kalendrar, kalenderhändelser.
 - Agentkörningar, godkännanden, budgets, användning, livscykel.
 - API-nycklar och auth-endpoints (login, callback, session, logout).

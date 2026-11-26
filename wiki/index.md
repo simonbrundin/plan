@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 7 |
-| Noter | 403 |
+| Noter | 415 |
 
 ## Entiteter
 
@@ -69,10 +69,12 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna]] - 2026-11-26: På målsidan (/goal/:id) låg agentchatt, körningshistorik och checkpoint-plan i samma lodräta flöde som målets innehåll. _(uppdaterad 2026-11-26)_
 - [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]] - Tilt (environments/dev i agents-repot) visade bara Plan-appen. _(uppdaterad 2026-11-23)_
 - [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] - Agentens egen API-nyckel har scope 'agent' i prod (hashen sätts in av environments/prod/secrets/plan-api-key.sql). _(uppdaterad 2026-11-25)_
+- [[notes/agentens-maldefinition-gar-via-human-gate]] - Agenten kan nu föreslå hur ett mål ska se ut - titel, beskrivning, ikon, now/eternal/agent, datum, uppskattad tid, status, taggar, pla... _(uppdaterad 2026-11-26)_
 - [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] - Mål har nu en agent-flagga (goals.agent i databasen) som visas med AgentBadge (blått när på) och växlas med leader + a (mellanslag +... _(uppdaterad 2026-11-20)_
 - [[notes/agentmal-flaggan-blev-levande-mvp]] - Plan hade redan goals.agent men ingen agent läste flaggan. _(uppdaterad 2026-11-24)_
 - [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] - I ~/repos/plan (Fas 4 i mål 497) ligger agentprofilerna i src/agent/internal/profile och är tekniska gränser - inte text i prompten. _(uppdaterad 2026-11-24)_
 - [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] - 2026-11-25: agents-repot är arkiverat och sammanslagningen med plan-repot är helt avslutad. _(uppdaterad 2026-11-25)_
+- [[notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier]] - Dashboardens modellsida visar nu publicerade användningsgränser per modell: timgräns _(uppdaterad 2026-11-26)_
 - [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] - Arbetstationen (datorn jag sitter pa) ar Omarchy, dvs Arch-baserat. _(uppdaterad 2026-10-24)_
 - [[notes/arkitektur]] - TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session. _(uppdaterad 2026-11-26)_
 - [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] - Källa: https://levelup.gitconnected.com/build-an-agentic-software-factory-f995f79221ef (Akshay Kokane, del 3 i AI-Native SWE-serien). _(uppdaterad 2026-11-23)_
@@ -119,11 +121,13 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/dolda-ikoner-i-barnmalsrader-pa-malsidan-visa-vid-hover]] - Varje målrad (barnmål på målsidan, huvudmålets ikonrad, /goals-listan) hade en handfull ikoner även om målet inte använde agent, ... _(uppdaterad 2026-11-20)_
 - [[notes/en-talos-efi-partition-pa-kortet-blockerar-pxe-booten-bootflow-loaded-fore-natverket]] - 2026-11-20, worker-3 (ROCK 4C+): varför kortet med Talos-EFI-partition inte går PXE _(uppdaterad 2026-11-20)_
 - [[notes/en-uttunnad-forekomst-maste-vara-synlig-aven-om-den-ligger-utanfor-fonstret]] - När en serie tunnas ut behålls en förekomst per period, och den förekomsten ligger i periodens början. _(uppdaterad 2026-11-18)_
+- [[notes/enhet-per-lyckad-uppgift-prenumerationer-kostar-per-forsok-och-maste-omraknas-med-pass-rate]] - Ett byte som är lätt att missa: planpriset sprids över ANTALET AGENTKÖRNINGAR (försök), medan API-kostnaden jämförs som kostnad p... _(uppdaterad 2026-11-26)_
 - [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]] - Ändring i src/nuxt/app/pages/goals/index.vue: tangenten Enter (och en + -knapp i sidhuvudet) öppnar nu en inline-rad där man skriver e... _(uppdaterad 2026-11-17)_
 - [[notes/enter-skapar-alltid-nytt-mal-piltangenterna-markerar-befintligt-mal-i-sokfalt]] - PROBLEM: När man söker efter ett mål (undermål/förälder på målsidan, eller föräldersökningen i snabbfältet) och trycker Enter... _(uppdaterad 2026-11-23)_
 - [[notes/envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar]] - Symtom: plan.simonbrundin.com (och övriga *.simonbrundin.com) nås inte trots att klustret, HTTPRoutes, cert och app-pods är friska. _(uppdaterad 2026-11-26)_
 - [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]] - 2026-11-03: önskemål om ett filter som sorterar bort personer som inte jobbat _(uppdaterad 2026-11-03)_
 - [[notes/escape-i-datum-popup-maste-hanteras-fore-leader-listenern]] - Datum-popupens Escape stängdes inte eftersom leader-keydown lyssnar i capture-fasen och konsumerade Escape innan popupens egen listener. _(uppdaterad 2026-11-20)_
+- [[notes/ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning]] - Anledning: dashboardens modellsida var "helt oduglig" för att få ut information. _(uppdaterad 2026-11-26)_
 - [[notes/eviga-mal-i-plan-kan-inte-slutforas]] - Mål i plan kan nu markeras som EVIGA (eternal): de pågår hela livet (t.ex. _(uppdaterad 2026-11-17)_
 - [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] - Förra versionen av .eml-expansionen (se [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]]) _(uppdaterad 2026-11-19)_
 - [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] - 2026-11-19 (pappa/mailagent): Istället för en "Neka"-knapp kan användaren nu starta en konversation med AI:t om vad som inte fungerade... _(uppdaterad 2026-11-19)_
@@ -200,6 +204,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] - Under omsättningen till Karpathys tre-lagers-modell granskades varje sida mot den faktiska infrastrukturen i ~/repos/infrastructure. _(uppdaterad 2026-10-24)_
 - [[notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel]] - 2026-11-20: Den KVM-portmappning som var deployad pa PXE-Pi:n var FEL och ledde _(uppdaterad 2026-11-20)_
 - [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]] - Köpt 16-portars HDMI KVM-switch (MLEEDA, Amazon ASIN B0GCD38QN9) - samma OEM-familj som TESmart/EZNH. _(uppdaterad 2026-11-20)_
+- [[notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar]] - MiniMax Token Plan och M Plan har kvoter i anrop per 5-timmarsfönster (1 500 anrop för Starter) respektive relativa enheter (Go 1x, Exp... _(uppdaterad 2026-11-26)_
 - [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] - Två brister hittades när flera mål kördes parallellt i dev (AgentRun #65, #66, #67, #68, #69): _(uppdaterad 2026-11-24)_
 - [[notes/leader-d-oppnar-gemensam-datum-popup-for-mal]] - Leader + D (SPACE, sedan D) öppnar en gemensam popup på /goal/:id, /goals och /priority för markerat mål. _(uppdaterad 2026-11-20)_
 - [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]] - Leader-läget (mellanslag) fanns tidigare bara på målsidan och delades i två _(uppdaterad 2026-11-19)_
@@ -255,9 +260,11 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]] - VARFÖR: titeln på ett mål är kort (VARCHAR(64)) och räcker inte när man vill skriva _(uppdaterad 2026-11-17)_
 - [[notes/mal-kan-ha-startdatum-syns-i-priority-forst-nar-datumet-passerat]] - 2026-11-20: Mål kan nu ha ett **startdatum** (goals.start_date, "YYYY-MM-DD"): _(uppdaterad 2026-11-20)_
 - [[notes/mal-kan-schemalaggas-och-kalenderhandelser-flyttas]] - Plan har fått drag-and-drop från mållistorna till kalendern. _(uppdaterad 2026-11-20)_
+- [[notes/malens-id-n-ar-integer-och-tysta-sqlx-fel-ar-farliga]] - Under Rust-migreringen av Plan-API:t upptäcktes en felaktig cykelkontroll som _(uppdaterad 2026-11-26)_
 - [[notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan]] - Plan använder samma fem faser för varje mål: define → plan → execute → verify → completed. _(uppdaterad 2026-11-24)_
 - [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]] - PROBLEM: Att byta målsida i plan tog 2-7 sekunder. _(uppdaterad 2026-11-20)_
 - [[notes/malikoner-anvander-enkel-oversattning-fore-iconify]] - Lösningen använder npm-paketet translate i Nuxt-serverrouten /api/icons. _(uppdaterad 2026-11-17)_
+- [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] - Buggen hittades när användaren frågade vad "agentkörningar" betyder - frågan avslöjade _(uppdaterad 2026-11-26)_
 - [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] - I pi/.pi/agent/mcp.json och opencode/.config/opencode/opencode.json ligger Neon MCP-tokens i klartext, och de committades 2026-11-17 i do... _(uppdaterad 2026-11-17)_
 - [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] - NeuroQuant har byggts om. _(uppdaterad 2026-11-03)_
 - [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]] - NeuroQuant-kontot låstes ("Account Locked", 100 misslyckade försök) 2026-11-02. _(uppdaterad 2026-11-03)_
@@ -286,6 +293,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]] - 2026-11-02: environments/ i pappa var orörd boilerplate från repo-template (go-api, _(uppdaterad 2026-11-17)_
 - [[notes/pappas-grundare-ar-michael-brundin-inte-git-anvandaren-simon-brundin]] - 2026-11-10: När redigerarlistan för relationer skulle seedas tog jag namnet från git config (user.name = 'Simon Brundin') och lade in ... _(uppdaterad 2026-11-17)_
 - [[notes/parallella-agent-sessioner-i-samma-repo-och-databas]] - Det har visat sig finnas flera parallella agent-sessioner som arbetar i _(uppdaterad 2026-11-17)_
+- [[notes/paritetstest-gatear-rust-migreringen-mot-go-kallan]] - Under migreringen från Go till Rust jämförs Rust-tabellerna mot route-registreringarna i Go-källan programmatiskt, i CI. _(uppdaterad 2026-11-26)_
 - [[notes/personer-kan-laggas-in-manuellt-i-pappa]] - Masterdatabasen fylls normalt från YAML-importen, men ibland vet vi om någon innan hen finns i någon fil - en kandidat från ett samta... _(uppdaterad 2026-11-17)_
 - [[notes/photocraft-agentstyrning-via-control-protokoll-control-7878]] - För att låta en AI-agent redigera BILDEN SOM ÄR ÖPPEN i PhotoCraft (inte headless) måste appen startas med --control och en tokenfil... _(uppdaterad 2026-11-17)_
 - [[notes/photocraft-kamerans-look-varning-vid-raw-oppning-och-hur-den-hanteras]] - Varningen 'colour fitted to the camera's embedded JPEG (mean ΔE 0.8 against it; 11.0 with the neutral fallback)' är INTE ett fel utan e... _(uppdaterad 2026-11-17)_
@@ -293,16 +301,19 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/pi-durable-1-4-0-api-avvikelser-fran-blogginlagget-och-tva-gotchas]] - Blogginlägget https://earendil.com/posts/pi-durable/ beskriver API som det såg ut vid release; paketet @earendil-works/pi-durable@1.4.0 s... _(uppdaterad 2026-10-23)_
 - [[notes/pi-durable-fungerar-med-minimax-coding-plan-anthropic-messages-api]] - Pi Durable (harness-biblioteket från earendil.com/posts/pi-durable/) kan köras direkt mot MiniMax coding plan. _(uppdaterad 2026-10-23)_
 - [[notes/pi-durable-demo-paketet-earendil-works-pi-durable-fungerar]] - Pi Durable (Earendils experimentella harness, https://earendil.com/posts/pi-durable/) finns publicerad på npm som @earendil-works/pi-dura... _(uppdaterad 2026-10-23)_
+- [[notes/pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace]] - Ny extension ~/.pi/agent/extensions/minimax-quota-guard.ts (dotfiles-repo, pi/.pi/agent/extensions/), plus tester i pi/tests/. _(uppdaterad 2026-11-26)_
 - [[notes/pi-tog-bort-pi-rate-limit-och-pi-pattern-retry-fixade-omarchy-temasy]] - Ändring 2025-xx-xx i dotfiles-repo, pi-agentens extension-uppsättning: _(uppdaterad 2026-10-23)_
 - [[notes/picokvm-luckfox-startar-inte-i-labbet-lite-saknar-emmc-ingen-poe]] - Köpt Waveshare/Luckfox PicoKVM Lite (Amazon ASIN B0H4G22JG8, 'Luckfox PicoKVM Lite', full-version-hus med 1.54-tums display men UTAN eMMC). _(uppdaterad 2026-11-17)_
 - [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] - Symtom: /goals i plan visade "Fel vid laddning av mål: [GET] \"/api/proxy/goals\": 503 Service Unavailable". _(uppdaterad 2026-11-25)_
 - [[notes/plan-api-anvander-scalar-for-openapi]] - Plan API bytte från gin-swagger till samma Scalar-upplägg som repo-template. _(uppdaterad 2026-11-17)_
 - [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] - src/api och src/agent flyttades till en gemensam Go-modul med rot i src/ (modulnamn plan). _(uppdaterad 2026-11-26)_
 - [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] - Projekt: plan _(uppdaterad 2026-11-16)_
+- [[notes/plan-migreras-fran-go-till-rust]] - Beslut 2026-11-26: Plan-applikationens Go-tjänster skrivs om i Rust. _(uppdaterad 2026-11-26)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
 - [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-10)_
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
 - [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] - Title: Platser på mål och kalenderhändelser (ny OpenSpec-change add-places) _(uppdaterad 2026-11-20)_
+- [[notes/platsvaljaren-flyttade-till-leader-p]] - Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /no... _(uppdaterad 2026-11-26)_
 - [[notes/popcorn-time-installerad-som-appimage-i-local]] - Efter qBittorrent (se noten om mime-kopplingar) bad användaren om Popcorn Time. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] - Symtom: Popcorn Time 0.5.1 (AppImage) startar men listan är tom och felet 'The remote movies API failed to respond' visas. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] - Fakta (verifierat 2026-10-24 mot API-servrarna fusme.link/jfper.link/uxert.link/yrkde.link): katalogen (Filmer/Serier/Anime) har INGA sve... _(uppdaterad 2026-11-17)_
@@ -352,6 +363,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]] - Slutlig fix (fas 4): meddelandet "No project root found" kan undvikas helt vid _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] - Problem: När man öppnade en leetcode.nvim-lösning i Neovim sade health-checken _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] - Fas 2 av samma problem: när standalone-läget stängdes av (server.standalone = _(uppdaterad 2026-11-17)_
+- [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_
 - [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] - I /home/simon/repos/rust (simonbrundin/rust) lades den klonade repot 'learn-to-code-with-rust' in som en riktig git-submodule (.gitmodule... _(uppdaterad 2026-11-17)_
 - [[notes/rust-utvecklingsmiljo-pa-workstationen]] - Vi satte upp en komplett Rust-miljö på maskinen (2026-11-02). _(uppdaterad 2026-11-17)_
 - [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] - För att kunna committa egna lösningar utan att sönderdela tredjepartsrepot skapades en fork: github.com/simonbrundin/learn-to-code-wit... _(uppdaterad 2026-11-17)_
