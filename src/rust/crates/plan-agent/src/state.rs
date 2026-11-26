@@ -2,6 +2,7 @@
 
 use crate::approvals::Store;
 use crate::db::AgentDb;
+use crate::orchestrator::SharedOrchestrator;
 use crate::planclient::PlanClient;
 
 /// Agent-API:ets tillstånd.
@@ -18,4 +19,6 @@ pub struct AppState {
     pub db: Option<AgentDb>,
     /// Store:n med förslag som väntar på ett beslut.
     pub approval_store: Option<Store>,
+    /// Agentens orchestrator. `None` betyder att den inte startade.
+    pub orchestrator: Option<SharedOrchestrator>,
 }

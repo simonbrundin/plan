@@ -5,6 +5,7 @@
 //! utför körningarna).
 
 pub mod approvals;
+pub mod checkpoint;
 pub mod contract;
 pub mod db;
 pub mod error;
@@ -13,4 +14,5 @@ pub mod orchestrator;
 pub mod planclient;
 pub mod routes;
 pub mod state;
+pub mod state_store;
 pub mod tools;

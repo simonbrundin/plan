@@ -102,6 +102,19 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("GET", "/api/v1/status") => get(crate::routes::health::status),
         ("GET", "/api/v1/readme") => get(crate::routes::readme::readme),
 
+        ("POST", "/api/v1/workflow") => post(crate::routes::workflow::start),
+        ("GET", "/api/v1/workflow/plans") => get(crate::routes::workflow::plans),
+        ("GET", "/api/v1/workflow/{id}") => get(crate::routes::workflow::get),
+        ("POST", "/api/v1/workflow/{id}/approve") => post(crate::routes::workflow::approve),
+        ("POST", "/api/v1/workflow/{id}/reject") => post(crate::routes::workflow::reject),
+        ("GET", "/api/v1/workflow/current/checkpoint") => {
+            get(crate::routes::workflow::current_checkpoint)
+        }
+        ("GET", "/api/v1/workflow/current/progress") => {
+            get(crate::routes::workflow::current_progress)
+        }
+        ("POST", "/api/v1/workflow/decision") => post(crate::routes::workflow::decision),
+
         ("GET", "/docs/{*any}") => get(crate::routes::docs::docs),
         ("GET", "/openapi.json") => get(crate::routes::docs::openapi_json),
 

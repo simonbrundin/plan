@@ -104,11 +104,20 @@ async fn main() -> ExitCode {
     // det här och sätter tillståndet själv.
     plan_agent::orchestrator::set_ready();
 
+    // Orchestratorn sparar checkpointplanerna i agentens databas, så
+    // att en plan överlever en omstart.
+    let orchestrator = plan_agent::orchestrator::SharedOrchestrator::new(
+        plan_agent::orchestrator::Orchestrator::new(plan_agent::state_store::StateStore::Database(
+            plan_agent::state_store::CheckpointStore::new(db.pool().clone()),
+        )),
+    );
+
     let state = AppState {
         plan_client,
         api_key,
         db: Some(db),
         approval_store,
+        orchestrator: Some(orchestrator),
     };
 
     let app = Router::new()

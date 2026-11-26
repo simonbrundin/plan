@@ -103,11 +103,30 @@ ANROP_BODY=(
 
 # Normaliserar tidsstämplar och gör JSON stabilt att jämföra.
 normalisera() {
-  jq -S 'walk(
-    if type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}")
-    then (fromdateiso8601 // .)
-    else . end
-  )' 2>/dev/null
+  # Tidsstämplar skrivs olika i de två tjänsterna - Go använder
+  # databasens tidszon, Rust UTC. Tiden görs därför om till epok, och
+  # tidszonen räknas bort.
+  jq -S -f <(cat <<'JQ'
+def tidszon:
+  if (.tz // "Z") == "Z" then 0
+  else (.tz
+        | capture("(?<sgn>[+-])(?<h>[0-9]{2}):(?<m>[0-9]{2})") as $tz
+        | (if $tz.sgn == "-" then -1 else 1 end)
+          * (($tz.h | tonumber) * 3600 + ($tz.m | tonumber) * 60))
+  end;
+
+def normalisera_tid:
+  if type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}")
+  then (capture("^(?<stamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(\\.(?<frac>[0-9]+))?(?<tz>Z|[+-][0-9]{2}:[0-9]{2})?$")
+        | (.stamp + "Z") as $stamp
+        | ($stamp | fromdateiso8601) as $bas
+        | tidszon as $offset
+        | $bas - $offset)
+  else . end;
+
+walk(normalisera_tid)
+JQ
+) 2>/dev/null
 }
 
 fel=0
