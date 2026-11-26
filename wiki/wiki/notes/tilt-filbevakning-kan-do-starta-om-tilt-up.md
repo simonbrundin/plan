@@ -3,9 +3,9 @@ title: Tilt-filbevakning kan dö - starta om tilt up
 type: note
 tags: [tilt, dev, infra, lesson, projekt:plan]
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-26
 status: active
-related: [notes/repo-template-rust-api-kopplad-till-kubernetes-manifests-tilt]
+related: [notes/repo-template-rust-api-kopplad-till-kubernetes-manifests-tilt, notes/tilt-dev-server-ska-koras-som-serve-cmd]
 ---
 
 Symtom: en långvarig 'tilt up'-instans i environments/dev upphörde att bygga om bilden när källfiler ändrades (inga nya byggloggar, deploymenten behöll gammal image-tagg). Lösning: döda den gamla processen och starta om 'tilt up' - den nya instansen fångade ändringar direkt.
@@ -16,5 +16,5 @@ FÄLLA: Tilt's UI-port (10350) kan vara upptagen av en annan Tilt-instans (t.ex.
 
 ## Relaterade
 
+- [[notes/tilt-dev-server-ska-koras-som-serve-cmd]]
 - [[notes/repo-template-rust-api-kopplad-till-kubernetes-manifests-tilt]]
-

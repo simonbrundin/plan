@@ -5,9 +5,9 @@ summary: Operator som installerar och styr Flux via FluxInstance-CRD istället f
 tags: [flux, flux-operator, gitops, installation, kubernetes, operator]
 sources: [infrastructure-flux/components/flux/flux-instance.yaml, infrastructure-flux/components/flux/security-policy.yaml]
 created: 2026-06-02
-updated: 2026-10-24
+updated: 2026-11-26
 status: active
-related: [entities/kubernetes, summaries/flux-components, summaries/infrastructure-flux]
+related: [entities/kubernetes, notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog, summaries/flux-components, summaries/infrastructure-flux]
 ---
 
 # FluxOperator
@@ -177,3 +177,8 @@ flux reconcile kustomization <component> --with-source
 - [[entities/kubernetes]]
 - [[summaries/flux-components]]
 - [[summaries/infrastructure-flux]]
+
+## Relaterade
+
+- [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]]
+

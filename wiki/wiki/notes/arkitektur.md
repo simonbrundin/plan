@@ -4,9 +4,9 @@ type: note
 summary: TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session.
 tags: [arkitektur, go, oversikt]
 created: 2026-10-21
-updated: 2026-10-21
+updated: 2026-11-26
 status: active
-related: [notes/bigram-algoritmen, notes/session-livscykel, notes/utvecklingsflode]
+related: [notes/bigram-algoritmen, notes/dokumentationssidor-i-granssnittet-docs, notes/session-livscykel, notes/utvecklingsflode]
 ---
 
 TypeTrainer är en CLI-app (cobra) med ett bubbletea-TUI som tränar svensk
@@ -58,6 +58,7 @@ körs, och [bigram-algoritmen](bigram-algoritmen.md) för urvalslogiken.
 
 ## Relaterade
 
+- [[notes/dokumentationssidor-i-granssnittet-docs]]
 - [[notes/bigram-algoritmen]]
 - [[notes/session-livscykel]]
 - [[notes/utvecklingsflode]]

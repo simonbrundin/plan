@@ -2740,3 +2740,109 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-26] link | notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev -> notes/aterstaende-funktioner-i-agentplattformen
 
+
+## [2026-11-26] ingest | create notes/dokumentationssidor-i-granssnittet-docs
+- [create] [[notes/dokumentationssidor-i-granssnittet-docs]] — ny sida från inboxen
+- [archive] 2026-11-26-dokumentationssidor-i-granssnittet-docs.md
+
+
+## [2026-11-26] link | concepts/anvanda-agenter-i-plan -> notes/dokumentationssidor-i-granssnittet-docs
+
+
+## [2026-11-26] link | notes/arkitektur -> notes/dokumentationssidor-i-granssnittet-docs
+
+
+## [2026-11-26] ingest | create notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna
+- [create] [[notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna]] — ny sida från inboxen
+- [archive] 2026-11-26-agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna.md
+
+
+## [2026-11-26] ingest | create notes/pr-preview-floden-var-trasig-i-fem-steg-nu-fungerar-den
+- [create] [[notes/pr-preview-floden-var-trasig-i-fem-steg-nu-fungerar-den]] — ny sida från inboxen
+- [archive] 2026-11-26-pr-preview-floden-var-trasig-i-fem-steg-nu-fungerar-den.md
+
+
+## [2026-11-26] link | notes/pr-preview-floden-var-trasig-i-fem-steg-nu-fungerar-den -> notes/pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller
+
+
+## [2026-11-26] ingest | create notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models
+- [create] [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]] — ny sida från inboxen
+- [create] [[notes/controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3]] — ny sida från inboxen
+- [archive] 2026-11-26-aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models.md
+- [archive] 2026-11-26-controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3.md
+## [2026-11-26] ingest | create notes/controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3
+
+
+## [2026-11-26] ingest | create notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands
+- [create] [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]] — ny sida från inboxen
+- [create] [[notes/worker-8-ater-ready-worker-1-och-worker-2-saknar-fysisk-lank]] — ny sida från inboxen
+- [archive] 2026-11-26-src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands.md
+- [archive] 2026-11-26-worker-8-ater-ready-worker-1-och-worker-2-saknar-fysisk-lank.md
+## [2026-11-26] ingest | create notes/worker-8-ater-ready-worker-1-och-worker-2-saknar-fysisk-lank
+
+
+## [2026-11-26] link | notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands -> notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det
+
+
+## [2026-11-26] link | notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands -> notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt
+
+
+## [2026-11-26] link | notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det -> notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands
+
+
+## [2026-11-26] ingest | create notes/dashboard-ranking-anvander-benchmark-matchade-kostnader
+- [create] [[notes/dashboard-ranking-anvander-benchmark-matchade-kostnader]] — ny sida från inboxen
+- [create] [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-ranking-anvander-benchmark-matchade-kostnader.md
+- [archive] 2026-11-26-tilt-dev-server-ska-koras-som-serve-cmd.md
+## [2026-11-26] ingest | create notes/tilt-dev-server-ska-koras-som-serve-cmd
+
+
+## [2026-11-26] page | notes/dashboard-ranking-anvander-benchmark-matchade-kostnader
+
+
+## [2026-11-26] page | notes/tilt-dev-server-ska-koras-som-serve-cmd
+
+
+## [2026-11-26] link | notes/dashboard-ranking-anvander-benchmark-matchade-kostnader -> notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models
+
+
+## [2026-11-26] link | notes/tilt-dev-server-ska-koras-som-serve-cmd -> notes/tilt-filbevakning-kan-do-starta-om-tilt-up
+
+
+## [2026-11-26] link | notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models -> notes/dashboard-ranking-anvander-benchmark-matchade-kostnader
+
+
+## [2026-11-26] link | notes/tilt-filbevakning-kan-do-starta-om-tilt-up -> notes/tilt-dev-server-ska-koras-som-serve-cmd
+
+
+## [2026-11-26] page | notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog
+
+
+## [2026-11-26] link | concepts/flux-operator -> notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog
+
+
+## [2026-11-26] page | notes/dashboard-ranking-anvander-benchmark-matchade-kostnader
+
+
+## [2026-11-26] ingest | create notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning
+- [create] [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] — ny sida från inboxen
+- [create] [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] — ny sida från inboxen
+- [create] [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] — ny sida från inboxen
+- [create] [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-ranking-utokad-med-benchmark-och-kostnadstackning.md
+- [archive] 2026-11-26-flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks.md
+- [archive] 2026-11-26-flux-felsokning-avbruten-efter-exponerade-hemligheter.md
+- [archive] 2026-11-26-plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen.md
+## [2026-11-26] ingest | create notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks
+## [2026-11-26] ingest | create notes/flux-felsokning-avbruten-efter-exponerade-hemligheter
+## [2026-11-26] ingest | create notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen
+
+
+## [2026-11-26] ingest | create notes/dashboard-importerar-hela-aa-katalogen-766-modeller
+- [create] [[notes/dashboard-importerar-hela-aa-katalogen-766-modeller]] — ny sida från inboxen
+- [create] [[notes/sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops]] — ny sida från inboxen
+- [archive] 2026-11-26-dashboard-importerar-hela-aa-katalogen-766-modeller.md
+- [archive] 2026-11-26-sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops.md
+## [2026-11-26] ingest | create notes/sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops
+

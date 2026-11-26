@@ -24,7 +24,7 @@ SOPS. Den publika mottagarnyckeln ligger i
 `infrastructure-flux/components/secrets/sops.age.pub`:
 
 ```
-age1mv3yrgdtqddlr5v9tg67nydvztm3sm6r3uu3j9zhdp736p0wt5gqwyj9lt
+age1e6cmv0vp3ymmhnqv7rrgy2a7wpnnutawqy509wqm3cn7467cps6qupp354
 ```
 
 Flux dekrypterar automatiskt via patchen i `flux-instance.yaml`:
@@ -84,7 +84,7 @@ Samma age-nyckel används i hela "estate":
 ## Lägga till en ny hemlighet
 
 ```bash
-sops --encrypt --age age1mv3yrgdtqddlr5v9tg67nydvztm3sm6r3uu3j9zhdp736p0wt5gqwyj9lt \
+sops --encrypt --age age1e6cmv0vp3ymmhnqv7rrgy2a7wpnnutawqy509wqm3cn7467cps6qupp354 \
   secrets.yaml > secrets.enc.yaml
 git add -f secrets.enc.yaml     # *.enc.yaml är gitignorerat
 ```
@@ -105,7 +105,7 @@ hemligheterna ligger kvar som tracked files.
 
 ```bash
 # Kryptera
-sops --encrypt --age age1mv3yrgdtqddlr5v9tg67nydvztm3sm6r3uu3j9zhdp736p0wt5gqwyj9lt \
+sops --encrypt --age age1e6cmv0vp3ymmhnqv7rrgy2a7wpnnutawqy509wqm3cn7467cps6qupp354 \
   secrets.yaml > secrets.enc.yaml
 
 # Dekryptera

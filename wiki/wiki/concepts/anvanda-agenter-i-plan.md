@@ -5,7 +5,7 @@ tags: [agent, gränssnitt, human-gate, nuxt, projekt:plan]
 created: 2026-11-26
 updated: 2026-11-26
 status: active
-related: [notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln]
+related: [notes/dokumentationssidor-i-granssnittet-docs, notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln]
 ---
 
 # Använda agenter i Plan
@@ -22,16 +22,22 @@ Så här använder en människa agenterna i Plan-gränssnittet (Nuxt, `src/nuxt`
    - Klicka på agent-ikonen (`AgentBadge`) i mållistan.
    - Alla tre vägar togglar samma flagga: `goals.agent`.
 
-2. **Öppna målsidan.** När flaggan är satt visas tre paneler:
-   - **Agentchatt** - "Starta chatt", skriv meddelandet, agenten svarar i
-     strömmande form och föreslår en definition. Förslaget visas som ett
-     godkännande med **Godkänn** / **Avslå** (+ återkoppling).
-   - **Körningshistorik** - faser (`Specificerar`, `Planerar`, `Utför`,
-     `Verifierar`, `Klar`), tillstånd, händelser och **Avbryt** för en pågående
-     körning.
-   - **Checkpoint-plan** - dela upp målet i verifierbara checkpoints och
+2. **Öppna målsidan.** När flaggan är satt finns en **agent-dock** längst till
+   höger i fönstret (knappen med gnomen i målraden, eller **mellanslag + v**).
+   Docken har tre flikar, så att bara en del syns åt gången:
+   - **Chatt** - "Starta chatt", skriv meddelandet (Enter skickar), agenten
+     svarar i strömmande form och föreslår en definition. Förslaget visas som
+     ett godkännande med **Godkänn** / **Avslå** (+ återkoppling).
+   - **Körning** - faser (`Specificerar`, `Planerar`, `Utför`, `Verifierar`,
+     `Klar`), tillstånd, händelser och **Avbryt** för en pågående körning.
+     Historiken är en tidslinje med de senaste händelserna först.
+   - **Plan** - dela upp målet i verifierbara checkpoints och
      godkänn/avslå planen. Varje checkpoint passerar en gate (beteende, UI,
      adversarial, human).
+
+   Docken ligger fast i fönstret: på breda skärmar täcker den kalenderspalten,
+   på små skärmar lägger den sig över sidan. Målets innehåll flyttas inte
+   undan, så undermålen är alltid nåbara utan att scrolla.
 
 3. **Översikt.** Sidan `/agent` listar alla agentmål med den senaste körningens
    fas, tillstånd och sammanfattning. Sidan uppdateras var femte sekund när den
@@ -67,4 +73,9 @@ hantera API-nycklar. Beslutet fattas alltså alltid av en människa via Plan.
 
 - `docs/agent-platform.md` - hela plattformsbeskrivningen och kontraktet.
 - `src/contracts/plan-agent.yaml` - kontraktet mellan Plan och agenten.
+
+## Relaterade
+
+- [[notes/dokumentationssidor-i-granssnittet-docs]]
+- [[notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna]]
 

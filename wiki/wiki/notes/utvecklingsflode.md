@@ -48,11 +48,11 @@ direkt via `m.handleKeyPress(...)` utan att starta ett TUI.
 ## Verktyget för wikin
 
 ```bash
-cd src/go
-go run ./cmd/wikictl list
-go run ./cmd/wikictl search "bigram"
-go run ./cmd/wikictl ingest --dry-run
-go run ./cmd/wikictl ingest
+cd src
+go run ./agent/cmd/wikictl list
+go run ./agent/cmd/wikictl search "bigram"
+go run ./agent/cmd/wikictl ingest --dry-run
+go run ./agent/cmd/wikictl ingest
 ```
 
 Se [kunskaps-wiki](kunskaps-wiki.md).
