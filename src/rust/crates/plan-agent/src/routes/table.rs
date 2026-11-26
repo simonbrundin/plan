@@ -5,7 +5,7 @@
 //! (`src/agent/internal/api/server.go`), så en endpoint som glöms bort
 //! failar i CI.
 
-use axum::routing::{delete, get, patch, post};
+use axum::routing::{delete, get, patch, post, MethodRouter};
 use axum::Router;
 
 use crate::state::AppState;
@@ -70,20 +70,45 @@ pub fn build() -> Router<AppState> {
             continue;
         }
 
-        router = router.route(
-            path,
-            match *method {
-                "GET" => get(crate::handlers::not_implemented),
-                "POST" => post(crate::handlers::not_implemented),
-                "PUT" => axum::routing::put(crate::handlers::not_implemented),
-                "PATCH" => patch(crate::handlers::not_implemented),
-                "DELETE" => delete(crate::handlers::not_implemented),
-                other => panic!("okänd HTTP-metod i route-tabellen: {other}"),
-            },
-        );
+        router = router.route(path, route_for(method, path));
     }
 
     router
+}
+
+/// Handler för en väg.
+///
+/// Portade vägar pekar på sin handler - resten svarar med 501, så att en
+/// förbise endpoint är tydlig i loggen och i testerna.
+fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
+    match (method, path) {
+        ("GET", "/api/v1/conversations") => get(crate::routes::conversations::list),
+        ("POST", "/api/v1/conversations") => post(crate::routes::conversations::create),
+        ("GET", "/api/v1/conversations/{id}") => get(crate::routes::conversations::get),
+        ("PATCH", "/api/v1/conversations/{id}") => patch(crate::routes::conversations::update),
+        ("GET", "/api/v1/conversations/{id}/messages") => {
+            get(crate::routes::conversations::messages)
+        }
+
+        ("GET", "/api/v1/health") => get(crate::routes::health::health),
+        ("GET", "/api/v1/status") => get(crate::routes::health::status),
+        ("GET", "/api/v1/readme") => get(crate::routes::readme::readme),
+
+        ("GET", "/api/v1/approvals") => get(crate::routes::approvals::list),
+        ("GET", "/api/v1/approvals/{goal_id}") => get(crate::routes::approvals::get),
+        ("POST", "/api/v1/approvals/{goal_id}/decision") => post(crate::routes::approvals::decide),
+
+        ("GET", "/api/v1/api-keys") => get(crate::routes::api_keys::list),
+        ("POST", "/api/v1/api-keys") => post(crate::routes::api_keys::set),
+        ("DELETE", "/api/v1/api-keys/{provider}") => delete(crate::routes::api_keys::delete),
+
+        ("GET", _) => get(crate::handlers::not_implemented),
+        ("POST", _) => post(crate::handlers::not_implemented),
+        ("PUT", _) => axum::routing::put(crate::handlers::not_implemented),
+        ("PATCH", _) => patch(crate::handlers::not_implemented),
+        ("DELETE", _) => delete(crate::handlers::not_implemented),
+        other => panic!("okänd HTTP-metod i route-tabellen: {other:?}"),
+    }
 }
 
 #[cfg(test)]

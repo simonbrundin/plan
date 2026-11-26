@@ -17,6 +17,10 @@ use plan_agent::planclient::PlanClient;
 use plan_agent::routes::table;
 use plan_agent::state::AppState;
 
+/// Agentens databas om `DATABASE_URL` inte är satt - samma som i Go.
+const DEFAULT_DATABASE_URL: &str =
+    "postgres://postgres:postgres@postgres:5432/software_agent?sslmode=disable";
+
 #[tokio::main]
 async fn main() -> ExitCode {
     tracing_subscriber::fmt()
@@ -58,9 +62,53 @@ async fn main() -> ExitCode {
         tracing::warn!("AGENT_API_KEY är inte satt - agent-API:t tar emot anrop utan nyckel");
     }
 
+    // Agentens egen databas. Utan DATABASE_URL används Go-agentens
+    // standard-DSN, och kan den inte anslutas startar inte agenten -
+    // precis som Go-agenten gör.
+    let database_url = std::env::var("DATABASE_URL")
+        .ok()
+        .filter(|url| !url.is_empty())
+        .unwrap_or_else(|| DEFAULT_DATABASE_URL.to_string());
+
+    let db = match plan_agent::db::AgentDb::connect(Some(&database_url)).await {
+        Ok(Some(db)) => {
+            tracing::info!("Agentens databas ansluten");
+            db
+        }
+        Ok(None) => {
+            tracing::error!("DATABASE_URL saknas - agent-API:t kan inte starta");
+            return ExitCode::FAILURE;
+        }
+        Err(err) => {
+            tracing::error!("Kunde inte ansluta agentens databas: {err}");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    // Store:n med förslag som väntar på ett beslut. Den finns alltid -
+    // den kan användas utan Plan-koppling.
+    let approval_store = match plan_agent::approvals::Store::new() {
+        Ok(store) => Some(store),
+        Err(err) => {
+            tracing::error!("Kunde inte skapa godkännandestoren: {err}");
+            None
+        }
+    };
+
+    // Orchestratorn är redo.
+    //
+    // Go:s `InitOrchestrator` faller tillbaka på minneslagring om
+    // statestoret saknas och returnerar därför aldrig ett fel - bara
+    // en fel i `orchestrator.New` når health. Här markeras den redo
+    // när agenten startat. Den riktiga orchestratorn (fas 4d) ersätter
+    // det här och sätter tillståndet själv.
+    plan_agent::orchestrator::set_ready();
+
     let state = AppState {
         plan_client,
         api_key,
+        db: Some(db),
+        approval_store,
     };
 
     let app = Router::new()

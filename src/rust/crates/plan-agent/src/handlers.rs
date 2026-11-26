@@ -19,6 +19,11 @@ pub async fn health() -> Json<serde_json::Value> {
         "status": "ok",
         "service": "agent-api",
         "version": std::env::var("APP_VERSION").unwrap_or_default(),
-        "timestamp": chrono::Utc::now().to_rfc3339(),
+        // Go formaterar tiden med RFC3339 i sekundprecision - Rusts
+        // `to_rfc3339` ger nanosekunder och "+00:00". Klienten jämför
+        // texterna, så formaten ska vara densamma.
+        "timestamp": chrono::Utc::now()
+            .format("%Y-%m-%dT%H:%M:%SZ")
+            .to_string(),
     }))
 }

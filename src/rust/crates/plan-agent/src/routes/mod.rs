@@ -1,5 +1,10 @@
 //! Router för agent-API:et.
 
+pub mod api_keys;
+pub mod approvals;
+pub mod conversations;
+pub mod health;
+pub mod readme;
 pub mod table;
 
 use axum::Router;

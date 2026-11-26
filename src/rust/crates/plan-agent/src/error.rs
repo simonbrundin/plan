@@ -22,6 +22,10 @@ pub enum AgentError {
     /// Objektet hittades inte.
     #[error("{0}")]
     NotFound(String),
+
+    /// Klienten skickade något agenten inte kan tolka.
+    #[error("{0}")]
+    BadRequest(String),
 }
 
 impl AgentError {
@@ -30,8 +34,21 @@ impl AgentError {
         match self {
             AgentError::NotImplemented(_) => StatusCode::NOT_IMPLEMENTED,
             AgentError::NotFound(_) => StatusCode::NOT_FOUND,
+            AgentError::BadRequest(_) => StatusCode::BAD_REQUEST,
             AgentError::Plan(_) | AgentError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
+    }
+}
+
+impl From<std::io::Error> for AgentError {
+    fn from(err: std::io::Error) -> Self {
+        AgentError::Internal(err.to_string())
+    }
+}
+
+impl From<sqlx::Error> for AgentError {
+    fn from(err: sqlx::Error) -> Self {
+        AgentError::Internal(err.to_string())
     }
 }
 
@@ -45,20 +62,12 @@ impl IntoResponse for AgentError {
     fn into_response(self) -> Response {
         let status = self.status();
 
-        let message = match &self {
-            AgentError::Internal(err) => {
-                tracing::error!("Internt fel: {err}");
-                "Ett internt fel inträffade".to_string()
-            }
-            other => other.to_string(),
-        };
+        // Go-agentens svar har bara en nyckel - "error". Meddelandet är
+        // därför texten i felet, utan en extra "message"-nyckel.
+        if let AgentError::Internal(err) = &self {
+            tracing::error!("Internt fel: {err}");
+        }
 
-        let error = match &self {
-            AgentError::NotImplemented(_) => "Not implemented",
-            AgentError::NotFound(_) => "Not found",
-            _ => "Internal server error",
-        };
-
-        (status, Json(json!({ "error": error, "message": message }))).into_response()
+        (status, Json(json!({ "error": self.to_string() }))).into_response()
     }
 }
