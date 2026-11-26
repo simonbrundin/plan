@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // SubAgentConfig is configuration for spawning a sub-agent

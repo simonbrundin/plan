@@ -88,13 +88,13 @@ func Current() PriceList {
 	}
 
 	for providerModel, price := range map[string]Price{
-		"minimax/MiniMax-M2.7":  {InputPer1M: 0.20, OutputPer1M: 0.40, CacheReadPer1M: 0.02},
-		"minimax/MiniMax-M1":    {InputPer1M: 0.10, OutputPer1M: 0.20, CacheReadPer1M: 0.01},
-		"openai/gpt-4o-mini":    {InputPer1M: 0.15, OutputPer1M: 0.60, CacheReadPer1M: 0.075},
-		"openai/gpt-4o":         {InputPer1M: 2.50, OutputPer1M: 10.00, CacheReadPer1M: 1.25},
+		"minimax/MiniMax-M2.7":           {InputPer1M: 0.20, OutputPer1M: 0.40, CacheReadPer1M: 0.02},
+		"minimax/MiniMax-M1":             {InputPer1M: 0.10, OutputPer1M: 0.20, CacheReadPer1M: 0.01},
+		"openai/gpt-4o-mini":             {InputPer1M: 0.15, OutputPer1M: 0.60, CacheReadPer1M: 0.075},
+		"openai/gpt-4o":                  {InputPer1M: 2.50, OutputPer1M: 10.00, CacheReadPer1M: 1.25},
 		"anthropic/claude-sonnet-4-7-25": {InputPer1M: 3.00, OutputPer1M: 15.00, CacheReadPer1M: 0.30},
-		"anthropic/claude-opus-4-5":     {InputPer1M: 15.00, OutputPer1M: 75.00, CacheReadPer1M: 1.50},
-		"anthropic/claude-haiku-4-7":    {InputPer1M: 0.80, OutputPer1M: 4.00, CacheReadPer1M: 0.08},
+		"anthropic/claude-opus-4-5":      {InputPer1M: 15.00, OutputPer1M: 75.00, CacheReadPer1M: 1.50},
+		"anthropic/claude-haiku-4-7":     {InputPer1M: 0.80, OutputPer1M: 4.00, CacheReadPer1M: 0.08},
 	} {
 		list.prices[strings.ToLower(strings.TrimSpace(providerModel))] = price
 	}

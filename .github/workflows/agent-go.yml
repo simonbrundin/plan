@@ -6,11 +6,20 @@ on:
     paths:
       - 'src/agent/**'
       - '.github/workflows/agent-go.yml'
+      # Go-modulen ligger i src/ och omfattar både api/ och agent/.
+      - 'src/go.mod'
+      - 'src/go.sum'
+      - 'src/api/**'
+      - 'src/contracts/**'
   pull_request:
     branches: [main]
     paths:
       - 'src/agent/**'
       - '.github/workflows/agent-go.yml'
+      - 'src/go.mod'
+      - 'src/go.sum'
+      - 'src/api/**'
+      - 'src/contracts/**'
 
 jobs:
   test:
@@ -25,40 +34,40 @@ jobs:
         with:
           go-version: '1.26'
           cache: true
-          cache-dependency-path: src/agent/go.sum
+          cache-dependency-path: src/go.sum
 
       - name: Download dependencies
         run: |
-          cd src/agent
+          cd src
           go mod download
 
       - name: Run go vet
         run: |
-          cd src/agent
-          go vet ./...
+          cd src
+          go vet ./agent/...
 
       - name: Run tests
         run: |
-          cd src/agent
+          cd src
           # features_test körs också (feature-filen ligger i .features/).
-          go test -v -race -coverprofile=coverage.out ./...
+          go test -v -race -coverprofile=coverage.out ./agent/...
 
       - name: Build
         run: |
-          cd src/agent
-          go build -o /tmp/agent-worker ./cmd/agentworker
+          cd src
+          go build -o /tmp/agent-worker ./agent/cmd/agentworker
 
       - name: Upload coverage
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: agent-coverage
-          path: src/agent/coverage.out
+          path: src/coverage.out
 
       - name: Coverage report
         if: success()
         run: |
-          cd src/agent
+          cd src
           go tool cover -func=coverage.out | tail -5
 
   lint:
@@ -73,7 +82,7 @@ jobs:
         with:
           go-version: '1.26'
           cache: true
-          cache-dependency-path: src/agent/go.sum
+          cache-dependency-path: src/go.sum
 
       - name: Run golangci-lint
         # v2 av golangci-lint byggs med en Go-version som klarar go.mod:s
@@ -82,4 +91,5 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.15.0
-          working-directory: src/agent
+          working-directory: src
+          args: ./agent/...

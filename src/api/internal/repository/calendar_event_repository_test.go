@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"plan-api/internal/models"
+	"plan/api/internal/models"
 )
 
 func TestExpandCalendarEvent(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/planclient"
 )
 
 // testConfig ger en config med en angiven image.

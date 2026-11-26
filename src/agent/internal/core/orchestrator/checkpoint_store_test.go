@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // TestCheckpointStoreBasic tests the CheckpointStore with an in-memory mock

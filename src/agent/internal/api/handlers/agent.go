@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"plan-agent/internal/api/db"
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/api/db"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/core/tools"
 )
 
 // providerConfig holds configuration for an LLM provider

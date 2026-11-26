@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/messages"
+	"plan/agent/internal/core/messages"
 )
 
 // MinimaxProvider implements LLMProvider for MiniMax's OpenAI-compatible API

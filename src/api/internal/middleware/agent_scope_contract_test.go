@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"plan-api/internal/contracts"
+	"plan/api/internal/contracts"
 )
 
 // TestAgentScopeTillaterKontraktetsAnrop kontrollerar att Plan tillåter

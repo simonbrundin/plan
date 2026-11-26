@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/cucumber/godog"
-	"plan-agent/internal/core/secrets"
+	"plan/agent/internal/core/secrets"
 )
 
 func initieraSecrets(ctx *godog.ScenarioContext) {

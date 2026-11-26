@@ -16,7 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"plan-api/internal/database"
+	"plan/api/internal/database"
 )
 
 // Zitadel introspection response

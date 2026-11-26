@@ -3,7 +3,7 @@
 // Workern pollar Plan efter mål som är markerade för agentarbete och
 // specificerar dem. Den kan också köras för ett enda mål:
 //
-//	AGENT_GOAL_ID=449 go run ./cmd/agentworker
+//	AGENT_GOAL_ID=449 go run ./agent/cmd/agentworker
 package main
 
 import (
@@ -15,14 +15,14 @@ import (
 	"strings"
 	"syscall"
 
-	"plan-agent/internal/agentworker"
-	"plan-agent/internal/coder"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/definer"
-	"plan-agent/internal/planclient"
-	"plan-agent/internal/profile"
-	"plan-agent/internal/proposer"
-	"plan-agent/internal/runusage"
+	"plan/agent/internal/agentworker"
+	"plan/agent/internal/coder"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/definer"
+	"plan/agent/internal/planclient"
+	"plan/agent/internal/profile"
+	"plan/agent/internal/proposer"
+	"plan/agent/internal/runusage"
 )
 
 func main() {

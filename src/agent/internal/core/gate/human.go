@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // HumanGate requires human approval to pass

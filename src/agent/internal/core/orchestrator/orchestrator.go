@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"plan-agent/internal/core"
-	"plan-agent/internal/core/checkpoint"
-	"plan-agent/internal/core/gate"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core"
+	"plan/agent/internal/core/checkpoint"
+	"plan/agent/internal/core/gate"
+	"plan/agent/internal/core/provider"
 )
 
 // Orchestrator coordinates the checkpoint-gate workflow

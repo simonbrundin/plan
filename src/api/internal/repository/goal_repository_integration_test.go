@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"plan-api/internal/database"
-	"plan-api/internal/models"
+	"plan/api/internal/database"
+	"plan/api/internal/models"
 )
 
 // TestGoalDueDateIntegration verifierar att ett due-datum kan sättas,

@@ -13,11 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/executor"
-	"plan-agent/internal/runusage"
-	"plan-agent/internal/workspace"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/executor"
+	"plan/agent/internal/runusage"
+	"plan/agent/internal/workspace"
 )
 
 // Proposal är agentens förslag på en kodändring.

@@ -8,6 +8,11 @@ on:
       # Ändras den ska bilden byggas om.
       - .dockerignore
       - .github/workflows/commit.agent.yaml
+      # Go-modulen ligger i src/ och omfattar både api/ och agent/ - en
+      # ändring i API-koden eller i kontraktet kan påverka agentens build.
+      - src/go.mod
+      - src/go.sum
+      - src/contracts/**
   workflow_dispatch:
 
 jobs:
@@ -22,16 +27,16 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/agent/go.mod
-          cache-dependency-path: src/agent/go.sum
+          go-version-file: src/go.mod
+          cache-dependency-path: src/go.sum
 
       - name: Vet
-        working-directory: src/agent
-        run: go vet ./...
+        working-directory: src
+        run: go vet ./agent/...
 
       - name: Test
-        working-directory: src/agent
-        run: go test ./...
+        working-directory: src
+        run: go test ./agent/...
 
   build-publish-image:
     needs: unit-tests

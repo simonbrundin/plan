@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"plan-api/internal/models"
-	"plan-api/internal/recurrence"
-	"plan-api/internal/repository"
+	"plan/api/internal/models"
+	"plan/api/internal/recurrence"
+	"plan/api/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )

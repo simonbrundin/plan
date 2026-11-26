@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"plan-api/internal/models"
+	"plan/api/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

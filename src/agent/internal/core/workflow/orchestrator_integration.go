@@ -7,11 +7,11 @@ import (
 	"strings"
 	"sync"
 
-	"plan-agent/internal/core"
-	"plan-agent/internal/core/checkpoint"
-	"plan-agent/internal/core/gate"
-	"plan-agent/internal/core/orchestrator"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core"
+	"plan/agent/internal/core/checkpoint"
+	"plan/agent/internal/core/gate"
+	"plan/agent/internal/core/orchestrator"
+	"plan/agent/internal/core/tools"
 )
 
 // Type aliases for convenience

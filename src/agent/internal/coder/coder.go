@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/executor"
-	"plan-agent/internal/planclient"
-	"plan-agent/internal/profile"
-	"plan-agent/internal/proposer"
-	"plan-agent/internal/runusage"
-	"plan-agent/internal/workspace"
+	"plan/agent/internal/executor"
+	"plan/agent/internal/planclient"
+	"plan/agent/internal/profile"
+	"plan/agent/internal/proposer"
+	"plan/agent/internal/runusage"
+	"plan/agent/internal/workspace"
 )
 
 // ProposerWithUsage kan ta emot en recorder för tokenanvändning.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/planclient"
 )
 
 // runRecorder skriver händelser till en AgentRun i Plan.

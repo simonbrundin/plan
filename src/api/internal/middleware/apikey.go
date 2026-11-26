@@ -10,8 +10,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"plan-api/internal/database"
-	"plan-api/internal/models"
+	"plan/api/internal/database"
+	"plan/api/internal/models"
 )
 
 const (

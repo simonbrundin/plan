@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core/tools"
 )
 
 // CancelRequest represents a request to cancel a tool execution

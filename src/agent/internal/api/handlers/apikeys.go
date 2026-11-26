@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/api/db"
+	"plan/agent/internal/api/db"
 )
 
 // ListAPIKeys returns all configured API keys (without the actual key values)

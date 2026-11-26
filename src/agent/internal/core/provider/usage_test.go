@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"plan-agent/internal/core/messages"
+	"plan/agent/internal/core/messages"
 )
 
 // TestAnvändningFångasIVanligtSvar kontrollerar att tokenanvändningen

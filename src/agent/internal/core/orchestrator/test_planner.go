@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // TestPlanner generates tests for checkpoints

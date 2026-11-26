@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"plan-api/internal/middleware"
+	"plan/api/internal/middleware"
 	"strings"
 	"time"
 

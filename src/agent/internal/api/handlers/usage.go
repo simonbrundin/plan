@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/core/usage"
+	"plan/agent/internal/core/usage"
 )
 
 // UsageHandler handles token usage endpoints

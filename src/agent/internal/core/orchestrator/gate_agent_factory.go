@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"plan-agent/internal/core/gate"
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/gate"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // NewUIGateAgentFactory creates a gate.AgentFactory that uses the provider for LLM calls

@@ -1,9 +1,9 @@
 package orchestrator
 
 import (
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/core/tools"
 )
 
 // AddLearningTool returns a tool for adding learnings

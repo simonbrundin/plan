@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // DefaultCheckpointPlanner creates checkpoints based on heuristics

@@ -1,5 +1,67 @@
 basePath: /
 definitions:
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: seconds
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
+        description: '"Bearer"'
+        type: string
+      user:
+        $ref: '#/definitions/auth.UserInfo'
+    type: object
+  auth.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  auth.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: seconds
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
+        description: '"Bearer"'
+        type: string
+    type: object
+  auth.UserInfo:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    type: object
   handlers.APIKey:
     properties:
       created:
@@ -76,6 +138,29 @@ definitions:
         description: Transitions visar vilka tillstånd ett tillstånd får övergå till.
         type: object
     type: object
+  handlers.ApprovePlanRequest:
+    properties:
+      approvedBy:
+        type: string
+    type: object
+  handlers.CancelRequest:
+    description: Request to cancel a running tool execution
+    properties:
+      toolCallId:
+        type: string
+    required:
+    - toolCallId
+    type: object
+  handlers.CancelResponse:
+    description: Response from a cancel request
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+      toolCallId:
+        type: string
+    type: object
   handlers.CreateAPIKeyRequest:
     properties:
       expires:
@@ -91,6 +176,134 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  handlers.CreateConversationRequest:
+    properties:
+      model:
+        type: string
+      provider:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.CreateMessageRequest:
+    properties:
+      content:
+        type: string
+      goal_context:
+        $ref: '#/definitions/handlers.GoalContext'
+    type: object
+  handlers.DecisionRequest:
+    properties:
+      decision:
+        description: Decision is "approve" or "reject"
+        type: string
+      feedback:
+        description: Feedback is optional - what the agent should change
+        type: string
+    required:
+    - decision
+    type: object
+  handlers.Goal:
+    properties:
+      completed_at:
+        type: string
+      created:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      priority:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.GoalContext:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+  handlers.GoalStatus:
+    properties:
+      label:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.GoalsResponse:
+    properties:
+      goals:
+        items:
+          $ref: '#/definitions/handlers.Goal'
+        type: array
+      statuses:
+        items:
+          $ref: '#/definitions/handlers.GoalStatus'
+        type: array
+    type: object
+  handlers.SetAPIKeyRequest:
+    properties:
+      api_key:
+        type: string
+      model:
+        type: string
+      provider:
+        type: string
+    required:
+    - api_key
+    - provider
+    type: object
+  handlers.StartAgentRequest:
+    properties:
+      goal_id:
+        type: string
+      instructions:
+        type: string
+    type: object
+  handlers.StartWorkflowRequest:
+    properties:
+      description:
+        type: string
+      feature:
+        type: string
+    required:
+    - feature
+    type: object
+  handlers.SubmitDecisionRequest:
+    properties:
+      approved:
+        type: boolean
+      checkpointId:
+        type: string
+      feedback:
+        type: string
+    required:
+    - checkpointId
+    type: object
+  handlers.UpdateConversationRequest:
+    properties:
+      title:
+        type: string
+    type: object
+  handlers.UpdateGoalRequest:
+    properties:
+      description:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
     type: object
   models.AgentApproval:
     properties:
@@ -1810,6 +2023,49 @@ definitions:
     required:
     - status_id
     type: object
+  usage.Stats:
+    properties:
+      averageLatencyMs:
+        type: integer
+      firstRequest:
+        type: string
+      lastRequest:
+        type: string
+      totalCost:
+        type: number
+      totalInputTokens:
+        type: integer
+      totalLatencyMs:
+        type: integer
+      totalOutputTokens:
+        type: integer
+      totalRequests:
+        type: integer
+    type: object
+  usage.TokenUsage:
+    properties:
+      conversationId:
+        type: string
+      cost:
+        description: Estimated cost in USD
+        type: number
+      id:
+        type: string
+      inputTokens:
+        type: integer
+      latencyMs:
+        type: integer
+      model:
+        type: string
+      outputTokens:
+        type: integer
+      provider:
+        type: string
+      timestamp:
+        type: string
+      totalTokens:
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -2534,6 +2790,231 @@ paths:
       summary: Delete an API key
       tags:
       - api-keys
+  /api/v1/api-keys/{provider}:
+    delete:
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an API key
+      tags:
+      - api-keys
+  /api/v1/approvals:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List pending approvals
+      tags:
+      - approvals
+  /api/v1/approvals/{goal_id}:
+    get:
+      parameters:
+      - description: Goal ID
+        in: path
+        name: goal_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get one pending approval
+      tags:
+      - approvals
+  /api/v1/approvals/{goal_id}/decision:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Goal ID
+        in: path
+        name: goal_id
+        required: true
+        type: integer
+      - description: Decision
+        in: body
+        name: decision
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.DecisionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Approve or reject a proposal
+      tags:
+      - approvals
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Logout request
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/auth.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.UserInfo'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
   /api/v1/calendar-events:
     get:
       consumes:
@@ -2975,6 +3456,237 @@ paths:
       summary: Update calendar
       tags:
       - calendars
+  /api/v1/conversations:
+    get:
+      parameters:
+      - default: 50
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all conversations
+      tags:
+      - conversations
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conversation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateConversationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new conversation
+      tags:
+      - conversations
+  /api/v1/conversations/{id}:
+    get:
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a conversation by ID
+      tags:
+      - conversations
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateConversationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a conversation
+      tags:
+      - conversations
+  /api/v1/conversations/{id}/messages:
+    get:
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get messages for a conversation
+      tags:
+      - messages
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Message request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateMessageRequest'
+      produces:
+      - application/x-ndjson
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Send a message to the agent
+      tags:
+      - messages
+  /api/v1/conversations/{id}/stream:
+    get:
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE stream
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Stream messages via SSE
+      tags:
+      - messages
   /api/v1/goals:
     get:
       consumes:
@@ -3909,6 +4621,70 @@ paths:
       summary: Reorder the root goals
       tags:
       - goals
+  /api/v1/goals/start-agent:
+    post:
+      consumes:
+      - application/json
+      description: Starts an agent to work on a specific goal with optional instructions
+      parameters:
+      - description: Start agent request
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.StartAgentRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start agent for a goal
+      tags:
+      - goals
+  /api/v1/goals/stats:
+    get:
+      description: Returns statistics about all goals
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get goal statistics
+      tags:
+      - goals
+  /api/v1/health:
+    get:
+      description: Returns OK if the service is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
   /api/v1/me/current-place:
     get:
       consumes:
@@ -3961,6 +4737,20 @@ paths:
       summary: Set the current place
       tags:
       - places
+  /api/v1/metrics:
+    get:
+      description: Returns metrics in JSON format
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Metrics as JSON
+      tags:
+      - metrics
   /api/v1/places:
     get:
       consumes:
@@ -4126,6 +4916,47 @@ paths:
       summary: Find places near a position
       tags:
       - places
+  /api/v1/readme:
+    get:
+      description: Returns the README.md content from the project root
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get README
+      tags:
+      - docs
+  /api/v1/roadmap:
+    get:
+      description: Returns the roadmap generated from goals.json (goalsen är roadmaps
+        hem)
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get Roadmap
+      tags:
+      - docs
+  /api/v1/status:
+    get:
+      description: Returns detailed service status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Service status
+      tags:
+      - health
   /api/v1/statuses:
     get:
       consumes:
@@ -4173,6 +5004,278 @@ paths:
       summary: List all tags
       tags:
       - tags
+  /api/v1/tools/cancel:
+    post:
+      consumes:
+      - application/json
+      description: Cancels a running tool execution by tool call ID
+      parameters:
+      - description: Cancel request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CancelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CancelResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cancel tool execution
+      tags:
+      - tools
+  /api/v1/tools/cancel-all:
+    post:
+      description: Cancels all running tool executions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Cancel all tool executions
+      tags:
+      - tools
+  /api/v1/tools/status:
+    get:
+      description: Returns the number of running tool executions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Tool execution status
+      tags:
+      - tools
+  /api/v1/usage/conversation/{id}:
+    get:
+      description: Returns token usage for a specific conversation
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usage.TokenUsage'
+            type: array
+      summary: Conversation usage
+      tags:
+      - usage
+  /api/v1/usage/costs:
+    get:
+      description: Returns the cost configuration per provider/model
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: Cost configuration
+      tags:
+      - usage
+  /api/v1/usage/stats:
+    get:
+      description: Returns aggregated token usage statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usage.Stats'
+      summary: Usage statistics
+      tags:
+      - usage
+  /api/v1/workflow:
+    post:
+      consumes:
+      - application/json
+      description: Creates a checkpoint plan for a feature
+      parameters:
+      - description: Workflow request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.StartWorkflowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Start a new workflow
+      tags:
+      - workflow
+  /api/v1/workflow/{id}:
+    get:
+      description: Returns details of a specific plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get plan details
+      tags:
+      - workflow
+  /api/v1/workflow/{id}/approve:
+    post:
+      description: Marks a plan as approved
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Approval request
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handlers.ApprovePlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Approve a plan
+      tags:
+      - workflow
+  /api/v1/workflow/{id}/reject:
+    post:
+      description: Marks a plan as rejected
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Reject a plan
+      tags:
+      - workflow
+  /api/v1/workflow/current/checkpoint:
+    get:
+      description: Returns the currently executing checkpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get current checkpoint
+      tags:
+      - workflow
+  /api/v1/workflow/current/progress:
+    get:
+      description: Returns gate progress for the current checkpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get checkpoint progress
+      tags:
+      - workflow
+  /api/v1/workflow/decision:
+    post:
+      consumes:
+      - application/json
+      description: Submit approval or rejection for a checkpoint
+      parameters:
+      - description: Decision request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SubmitDecisionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Submit human decision
+      tags:
+      - workflow
+  /api/v1/workflow/plans:
+    get:
+      description: Returns all checkpoint plans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all plans
+      tags:
+      - workflow
+  /metrics:
+    get:
+      description: Returns metrics in Prometheus format
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Prometheus metrics
+          schema:
+            type: string
+      summary: Prometheus metrics
+      tags:
+      - metrics
 schemes:
 - http
 - https

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"plan-agent/internal/executor"
+	"plan/agent/internal/executor"
 )
 
 // TestParseProposal kontrollerar att ett välformaterat svar blir ett förslag.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // ConsoleViewer displays checkpoints to console

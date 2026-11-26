@@ -1137,6 +1137,356 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/api-keys/{provider}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "summary": "Delete an API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/approvals": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "approvals"
+                ],
+                "summary": "List pending approvals",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/approvals/{goal_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "approvals"
+                ],
+                "summary": "Get one pending approval",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "goal_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/approvals/{goal_id}/decision": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "approvals"
+                ],
+                "summary": "Approve or reject a proposal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Goal ID",
+                        "name": "goal_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Decision",
+                        "name": "decision",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DecisionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User logout",
+                "parameters": [
+                    {
+                        "description": "Logout request",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UserInfo"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.TokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/calendar-events": {
             "get": {
                 "security": [
@@ -1812,6 +2162,355 @@ const docTemplate = `{
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/conversations": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "List all conversations",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Create a new conversation",
+                "parameters": [
+                    {
+                        "description": "Conversation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateConversationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/conversations/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Get a conversation by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Update a conversation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateConversationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/conversations/{id}/messages": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Get messages for a conversation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/x-ndjson"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Send a message to the agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Message request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/conversations/{id}/stream": {
+            "get": {
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Stream messages via SSE",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SSE stream",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -2497,6 +3196,82 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/goals/start-agent": {
+            "post": {
+                "description": "Starts an agent to work on a specific goal with optional instructions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Start agent for a goal",
+                "parameters": [
+                    {
+                        "description": "Start agent request",
+                        "name": "goal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.StartAgentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/goals/stats": {
+            "get": {
+                "description": "Returns statistics about all goals",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get goal statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -3272,6 +4047,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/health": {
+            "get": {
+                "description": "Returns OK if the service is running",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/me/current-place": {
             "get": {
                 "security": [
@@ -3350,6 +4146,27 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/metrics": {
+            "get": {
+                "description": "Returns metrics in JSON format",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "metrics"
+                ],
+                "summary": "Metrics as JSON",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -3614,6 +4431,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/readme": {
+            "get": {
+                "description": "Returns the README.md content from the project root",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "docs"
+                ],
+                "summary": "Get README",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/roadmap": {
+            "get": {
+                "description": "Returns the roadmap generated from goals.json (goalsen är roadmaps hem)",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "docs"
+                ],
+                "summary": "Get Roadmap",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/status": {
+            "get": {
+                "description": "Returns detailed service status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Service status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/statuses": {
             "get": {
                 "security": [
@@ -3687,9 +4565,514 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/tools/cancel": {
+            "post": {
+                "description": "Cancels a running tool execution by tool call ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tools"
+                ],
+                "summary": "Cancel tool execution",
+                "parameters": [
+                    {
+                        "description": "Cancel request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CancelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CancelResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tools/cancel-all": {
+            "post": {
+                "description": "Cancels all running tool executions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tools"
+                ],
+                "summary": "Cancel all tool executions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tools/status": {
+            "get": {
+                "description": "Returns the number of running tool executions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tools"
+                ],
+                "summary": "Tool execution status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usage/conversation/{id}": {
+            "get": {
+                "description": "Returns token usage for a specific conversation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usage"
+                ],
+                "summary": "Conversation usage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usage.TokenUsage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usage/costs": {
+            "get": {
+                "description": "Returns the cost configuration per provider/model",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usage"
+                ],
+                "summary": "Cost configuration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usage/stats": {
+            "get": {
+                "description": "Returns aggregated token usage statistics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usage"
+                ],
+                "summary": "Usage statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usage.Stats"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow": {
+            "post": {
+                "description": "Creates a checkpoint plan for a feature",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Start a new workflow",
+                "parameters": [
+                    {
+                        "description": "Workflow request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.StartWorkflowRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/current/checkpoint": {
+            "get": {
+                "description": "Returns the currently executing checkpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Get current checkpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/current/progress": {
+            "get": {
+                "description": "Returns gate progress for the current checkpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Get checkpoint progress",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/decision": {
+            "post": {
+                "description": "Submit approval or rejection for a checkpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Submit human decision",
+                "parameters": [
+                    {
+                        "description": "Decision request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SubmitDecisionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/plans": {
+            "get": {
+                "description": "Returns all checkpoint plans",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "List all plans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/{id}": {
+            "get": {
+                "description": "Returns details of a specific plan",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Get plan details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/{id}/approve": {
+            "post": {
+                "description": "Marks a plan as approved",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Approve a plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Approval request",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ApprovePlanRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow/{id}/reject": {
+            "post": {
+                "description": "Marks a plan as rejected",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflow"
+                ],
+                "summary": "Reject a plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/metrics": {
+            "get": {
+                "description": "Returns metrics in Prometheus format",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "metrics"
+                ],
+                "summary": "Prometheus metrics",
+                "responses": {
+                    "200": {
+                        "description": "Prometheus metrics",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "auth.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "auth.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "seconds",
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "description": "\"Bearer\"",
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/auth.UserInfo"
+                }
+            }
+        },
+        "auth.LogoutRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.RefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "seconds",
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "description": "\"Bearer\"",
+                    "type": "string"
+                }
+            }
+        },
+        "auth.UserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "handlers.APIKey": {
             "type": "object",
             "properties": {
@@ -3797,6 +5180,41 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.ApprovePlanRequest": {
+            "type": "object",
+            "properties": {
+                "approvedBy": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CancelRequest": {
+            "description": "Request to cancel a running tool execution",
+            "type": "object",
+            "required": [
+                "toolCallId"
+            ],
+            "properties": {
+                "toolCallId": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CancelResponse": {
+            "description": "Response from a cancel request",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "toolCallId": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.CreateAPIKeyRequest": {
             "type": "object",
             "required": [
@@ -3812,6 +5230,203 @@ const docTemplate = `{
                 },
                 "scope": {
                     "description": "Scope bestämmer vad nyckeln får göra. \"full\" ger samma rättigheter\nsom en inloggad användare, \"agent\" begränsar nyckeln till agentens\narbete med mål och körningar.",
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateConversationRequest": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateMessageRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "goal_context": {
+                    "$ref": "#/definitions/handlers.GoalContext"
+                }
+            }
+        },
+        "handlers.DecisionRequest": {
+            "type": "object",
+            "required": [
+                "decision"
+            ],
+            "properties": {
+                "decision": {
+                    "description": "Decision is \"approve\" or \"reject\"",
+                    "type": "string"
+                },
+                "feedback": {
+                    "description": "Feedback is optional - what the agent should change",
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.Goal": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "created": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.GoalContext": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.GoalStatus": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.GoalsResponse": {
+            "type": "object",
+            "properties": {
+                "goals": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Goal"
+                    }
+                },
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.GoalStatus"
+                    }
+                }
+            }
+        },
+        "handlers.SetAPIKeyRequest": {
+            "type": "object",
+            "required": [
+                "api_key",
+                "provider"
+            ],
+            "properties": {
+                "api_key": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.StartAgentRequest": {
+            "type": "object",
+            "properties": {
+                "goal_id": {
+                    "type": "string"
+                },
+                "instructions": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.StartWorkflowRequest": {
+            "type": "object",
+            "required": [
+                "feature"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "feature": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.SubmitDecisionRequest": {
+            "type": "object",
+            "required": [
+                "checkpointId"
+            ],
+            "properties": {
+                "approved": {
+                    "type": "boolean"
+                },
+                "checkpointId": {
+                    "type": "string"
+                },
+                "feedback": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UpdateConversationRequest": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UpdateGoalRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -5977,6 +7592,71 @@ const docTemplate = `{
                 "status_id": {
                     "type": "integer",
                     "example": 2
+                }
+            }
+        },
+        "usage.Stats": {
+            "type": "object",
+            "properties": {
+                "averageLatencyMs": {
+                    "type": "integer"
+                },
+                "firstRequest": {
+                    "type": "string"
+                },
+                "lastRequest": {
+                    "type": "string"
+                },
+                "totalCost": {
+                    "type": "number"
+                },
+                "totalInputTokens": {
+                    "type": "integer"
+                },
+                "totalLatencyMs": {
+                    "type": "integer"
+                },
+                "totalOutputTokens": {
+                    "type": "integer"
+                },
+                "totalRequests": {
+                    "type": "integer"
+                }
+            }
+        },
+        "usage.TokenUsage": {
+            "type": "object",
+            "properties": {
+                "conversationId": {
+                    "type": "string"
+                },
+                "cost": {
+                    "description": "Estimated cost in USD",
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inputTokens": {
+                    "type": "integer"
+                },
+                "latencyMs": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "outputTokens": {
+                    "type": "integer"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "totalTokens": {
+                    "type": "integer"
                 }
             }
         }

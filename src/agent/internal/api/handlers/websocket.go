@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"plan-agent/internal/api/llm"
+	"plan/agent/internal/api/llm"
 )
 
 // WebSocket upgrader configuration

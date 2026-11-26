@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"plan-api/internal/models"
-	"plan-api/internal/repository"
+	"plan/api/internal/models"
+	"plan/api/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )

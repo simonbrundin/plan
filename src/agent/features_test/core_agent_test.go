@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/cucumber/godog"
-	"plan-agent/internal/core"
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 var (

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // BehaviorGate checks that the feature works correctly through automated tests

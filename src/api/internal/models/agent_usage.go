@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-api/internal/pricing"
+	"plan/api/internal/pricing"
 )
 
 // Statusar för en användningsrad.

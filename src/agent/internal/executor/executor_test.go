@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"plan-agent/internal/runusage"
+	"plan/agent/internal/runusage"
 	"strings"
 	"testing"
 )

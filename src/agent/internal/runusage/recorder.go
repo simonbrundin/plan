@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"plan-agent/internal/core/messages"
+	"plan/agent/internal/core/messages"
 )
 
 // Snapshot är den samlade användningen för en körning.

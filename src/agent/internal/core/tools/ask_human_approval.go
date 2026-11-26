@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // planGetter is a function that returns the current plan

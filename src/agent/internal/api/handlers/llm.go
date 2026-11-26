@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"plan-agent/internal/api/llm"
+	"plan/agent/internal/api/llm"
 )
 
 // LLMHandler handles LLM API requests

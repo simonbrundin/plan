@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // Public aliases for backward compatibility with existing tests

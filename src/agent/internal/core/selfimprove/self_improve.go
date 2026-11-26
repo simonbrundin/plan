@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/memory"
+	"plan/agent/internal/core/memory"
 )
 
 // SelfAnalyzer analyzes code for improvement opportunities

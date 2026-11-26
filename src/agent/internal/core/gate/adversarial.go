@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // AdversarialGate performs adversarial code review

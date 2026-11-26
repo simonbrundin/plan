@@ -6,7 +6,7 @@ import (
 	"sort"
 	"sync"
 
-	"plan-api/internal/models"
+	"plan/api/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

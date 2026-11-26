@@ -3,7 +3,7 @@ package orchestrator
 import (
 	"context"
 
-	"plan-agent/internal/core/gate"
+	"plan/agent/internal/core/gate"
 )
 
 // NewDefaultGateRegistry creates a registry with all default gates

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"plan-agent/internal/core"
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // ShouldStopHook implements the gate-checking logic for agent stopping

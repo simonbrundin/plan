@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"plan-agent/internal/approvals"
-	"plan-agent/internal/definer"
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/approvals"
+	"plan/agent/internal/definer"
+	"plan/agent/internal/planclient"
 )
 
 // TriggerSchedule beskriver att körningen startades av schemaläggningen.

@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 func globExecute(_ string, args map[string]any, signal <-chan struct{}, _ func(partial *provider.ToolResult)) (*provider.ToolResult, error) {

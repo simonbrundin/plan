@@ -178,10 +178,34 @@ func TestKontraktetsAnropFinnsIPlan(t *testing.T) {
 }
 
 // läsSwagger läser Plan API:ets OpenAPI-specifikation.
+//
+// Sökningen utgår från modulroten (katalogen med go.mod) - så hittas
+// rätt fil oavsett vilken paketkatalog testet ligger i. Vi letar inte
+// bara efter "api/docs/swagger.json" uppåt: agenten har en egen
+// swagger.json i internal/api/docs som ligger närmare.
 func läsSwagger(t *testing.T) map[string]any {
 	t.Helper()
 
-	raw, err := os.ReadFile(filepath.Join("..", "..", "..", "go", "docs", "swagger.json"))
+	dir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("kan inte läsa arbetskatalogen: %v", err)
+	}
+
+	var path string
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			path = filepath.Join(dir, "api", "docs", "swagger.json")
+			break
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			t.Fatal("hittade inte modulroten (go.mod)")
+		}
+		dir = parent
+	}
+
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("kan inte läsa swagger-specifikationen: %v", err)
 	}

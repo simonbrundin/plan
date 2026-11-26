@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"plan-api/internal/database"
-	"plan-api/internal/models"
+	"plan/api/internal/database"
+	"plan/api/internal/models"
 )
 
 // TestGoalEstimateIntegration verifierar att en uppskattad tidsåtgång kan

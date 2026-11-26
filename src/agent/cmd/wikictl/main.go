@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/wiki"
+	"plan/agent/internal/wiki"
 )
 
 func main() {

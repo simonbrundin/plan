@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // ToolFunc is the function signature for tool implementations

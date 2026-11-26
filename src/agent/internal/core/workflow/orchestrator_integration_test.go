@@ -3,8 +3,8 @@ package workflow
 import (
 	"testing"
 
-	"plan-agent/internal/core/gate"
-	"plan-agent/internal/core/orchestrator"
+	"plan/agent/internal/core/gate"
+	"plan/agent/internal/core/orchestrator"
 )
 
 // Regressionstest: InitOrchestrator får inte returnera fel för en tom Config.

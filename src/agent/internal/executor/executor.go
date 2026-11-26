@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
-	"plan-agent/internal/runusage"
-	"plan-agent/internal/workspace"
+	"plan/agent/internal/runusage"
+	"plan/agent/internal/workspace"
 )
 
 // Change är en föreslagen ändring i en fil.

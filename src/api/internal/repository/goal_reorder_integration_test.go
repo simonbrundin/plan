@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"plan-api/internal/database"
+	"plan/api/internal/database"
 )
 
 // TestReorderPriorityGoalsIntegration verifierar att en ny ordning på

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // CheckpointExecutor orchestrates checkpoint execution: plan tests → write tests → implement → run tests

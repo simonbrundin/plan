@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/core/workflow"
+	"plan/agent/internal/core/workflow"
 )
 
 // WorkflowHandler handles workflow-related API requests

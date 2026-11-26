@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // UIGate checks that the UI matches the design/prototype

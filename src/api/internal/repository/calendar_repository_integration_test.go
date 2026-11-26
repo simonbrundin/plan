@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"plan-api/internal/database"
-	"plan-api/internal/models"
+	"plan/api/internal/database"
+	"plan/api/internal/models"
 )
 
 // TestCalendarFlowIntegration kontrollerar hela kedjan mellan kalendrar

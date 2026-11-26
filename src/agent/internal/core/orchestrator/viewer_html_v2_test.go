@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 func TestHTMLViewerV2ViewPlan(t *testing.T) {

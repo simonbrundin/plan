@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // HTMLViewerV2 generates enhanced HTML visualization of checkpoint plans

@@ -15,8 +15,8 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"plan-agent/internal/jobrunner"
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/jobrunner"
+	"plan/agent/internal/planclient"
 )
 
 // Config styr hur controllern arbetar.

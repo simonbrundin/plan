@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/core/tools"
 )
 
 // ToolName constants

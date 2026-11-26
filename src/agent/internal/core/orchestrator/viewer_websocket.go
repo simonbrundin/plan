@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // WebSocketViewer sends checkpoint updates via WebSocket

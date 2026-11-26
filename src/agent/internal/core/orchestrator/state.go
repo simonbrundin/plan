@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // StateStore persists checkpoint and plan state

@@ -12,8 +12,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"plan-agent/internal/jobrunner"
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/jobrunner"
+	"plan/agent/internal/planclient"
 )
 
 type planState struct {

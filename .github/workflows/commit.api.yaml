@@ -3,6 +3,11 @@ on:
   push:
     paths:
       - src/api/**
+      # Go-modulen ligger i src/ och omfattar både api/ och agent/.
+      - src/go.mod
+      - src/go.sum
+      - src/contracts/**
+      - src/.dockerignore
   workflow_dispatch:
 
 jobs:
@@ -17,16 +22,16 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/api/go.mod
-          cache-dependency-path: src/api/go.sum
+          go-version-file: src/go.mod
+          cache-dependency-path: src/go.sum
 
       - name: Vet
-        working-directory: src/api
-        run: go vet ./...
+        working-directory: src
+        run: go vet ./api/...
 
       - name: Test
-        working-directory: src/api
-        run: go test ./...
+        working-directory: src
+        run: go test ./api/...
 
   # Lint-gate för Plan-API:t - samma linter som agenten använder.
   lint:
@@ -40,8 +45,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/api/go.mod
-          cache-dependency-path: src/api/go.sum
+          go-version-file: src/go.mod
+          cache-dependency-path: src/go.sum
 
       - name: Run golangci-lint
         # v2 av golangci-lint byggs med en Go-version som klarar go.mod:s
@@ -50,7 +55,8 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.15.0
-          working-directory: src/api
+          working-directory: src
+          args: ./api/...
 
   build-publish-image:
     needs: unit-tests
@@ -88,7 +94,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: src/api
+          context: src
           file: src/api/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}

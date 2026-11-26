@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // MockHumanGate is for testing purposes

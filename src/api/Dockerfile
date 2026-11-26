@@ -1,17 +1,23 @@
 # ==============================
+# Byggcontexten är src/ (modulroten) - se src/.dockerignore.
+# Go-modulen ligger i src/ och omfattar både api/ och agent/.
+# ==============================
+# ==============================
 # OpenAPI documentation stage
 # ==============================
-FROM golang:1.25-alpine AS swag
+FROM golang:1.26-alpine AS swag
 WORKDIR /app
 
 RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
-COPY . .
-RUN swag init -g cmd/server/main.go -o docs --parseFuncBody --quiet
+COPY go.mod go.sum ./
+RUN go mod download
+COPY api/ ./api/
+RUN swag init -g api/cmd/server/main.go -o api/docs --parseFuncBody --quiet
 
 # ==============================
 # Build Stage
 # ==============================
-FROM golang:1.25-alpine AS build
+FROM golang:1.26-alpine AS build
 WORKDIR /app
 
 # Installera build-beroenden
@@ -24,11 +30,11 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Kopiera källkod och den genererade OpenAPI-specifikationen
-COPY . .
-COPY --from=swag /app/docs ./docs
+COPY api/ ./api/
+COPY --from=swag /app/api/docs ./api/docs
 
 # Bygg binären
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o plan-api ./cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o plan-api ./api/cmd/server/main.go
 
 # ==============================
 # Runtime Stage (minimal, säker)
@@ -42,10 +48,10 @@ RUN apk --no-cache add ca-certificates tzdata
 
 # Kopiera binären och OpenAPI-specifikationen
 COPY --from=build /app/plan-api .
-COPY --from=build /app/docs ./docs
+COPY --from=build /app/api/docs ./api/docs
 
 # Scalar läser specen från denna sökväg
-ENV DOCS_PATH=/app/docs/swagger.json
+ENV DOCS_PATH=/app/api/docs/swagger.json
 
 # Exponera port
 EXPOSE 8080

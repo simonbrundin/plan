@@ -19,8 +19,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"plan-agent/internal/planclient"
-	"plan-agent/internal/profile"
+	"plan/agent/internal/planclient"
+	"plan/agent/internal/profile"
 )
 
 // Config beskriver hur jobb ska byggas.

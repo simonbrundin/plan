@@ -3,7 +3,7 @@ package gate
 import (
 	"context"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // GateType represents the type of gate

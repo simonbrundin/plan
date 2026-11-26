@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"plan-agent/internal/api/db"
+	"plan/agent/internal/api/db"
 )
 
 // StreamMessages handles SSE for real-time message updates

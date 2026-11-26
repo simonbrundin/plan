@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	msgpkg "plan-agent/internal/core/messages"
+	msgpkg "plan/agent/internal/core/messages"
 )
 
 // mockProvider is a test provider that can be configured to fail or succeed

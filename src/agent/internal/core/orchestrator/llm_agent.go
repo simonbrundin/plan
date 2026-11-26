@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // PlannerAgent implements the Agent interface using a PlannerProvider (ProviderManager)

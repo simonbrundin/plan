@@ -13,10 +13,10 @@ import (
 	"os"
 	"time"
 
-	"plan-agent/internal/definer"
-	"plan-agent/internal/planclient"
-	"plan-agent/internal/profile"
-	"plan-agent/internal/runusage"
+	"plan/agent/internal/definer"
+	"plan/agent/internal/planclient"
+	"plan/agent/internal/profile"
+	"plan/agent/internal/runusage"
 )
 
 // Faser och tillstånd speglar agent_runs-tabellen i Plan.

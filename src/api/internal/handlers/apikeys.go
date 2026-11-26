@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"plan-api/internal/database"
-	"plan-api/internal/middleware"
-	"plan-api/internal/models"
+	"plan/api/internal/database"
+	"plan/api/internal/middleware"
+	"plan/api/internal/models"
 )
 
 // Keep the response model available to swaggo annotations in this package.

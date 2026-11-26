@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"plan-agent/internal/core"
-	"plan-agent/internal/core/checkpoint"
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/orchestrator"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core"
+	"plan/agent/internal/core/checkpoint"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/orchestrator"
+	"plan/agent/internal/core/tools"
 )
 
 func TestCreatePrepareNextTurnHook(t *testing.T) {

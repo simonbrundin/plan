@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"plan-agent/internal/core/messages"
+	"plan/agent/internal/core/messages"
 )
 
 // ProviderManager manages multiple providers with automatic fallback

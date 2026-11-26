@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 // CLIAdapter adapts the orchestrator for CLI usage

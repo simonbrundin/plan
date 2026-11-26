@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"time"
 
-	"plan-agent/internal/core/messages"
+	"plan/agent/internal/core/messages"
 )
 
 // Tool execution modes

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"plan-agent/internal/api"
+	"plan/agent/internal/api"
 )
 
 func main() {

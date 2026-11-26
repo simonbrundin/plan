@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"plan-api/internal/models"
+	"plan/api/internal/models"
 )
 
 // TestKontraktetFinns kontrollerar att kontraktet går att läsa - utan det

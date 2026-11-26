@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 // AllowedPaths restricts file operations to these directories (empty = all allowed)

@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"plan-api/internal/database"
+	"plan/api/internal/database"
 
 	"github.com/gin-gonic/gin"
 )

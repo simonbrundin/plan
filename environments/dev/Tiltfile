@@ -44,7 +44,9 @@ update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api", "pla
 # =============================================================================
 
 docker_build("plan-nuxt", "../../src/nuxt")
-docker_build("plan-go-api", "../../src/api")
+# Byggcontexten för API-imagen är src/ - Go-modulen ligger där och
+# omfattar både api/ och agent/. Se src/.dockerignore.
+docker_build("plan-go-api", "../../src", dockerfile="../../src/api/Dockerfile")
 docker_build("plan-agent", "../..", dockerfile="../../src/agent/Dockerfile")
 
 # =============================================================================

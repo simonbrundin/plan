@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
 )
 
 func bashExecute(_ string, args map[string]any, signal <-chan struct{}, onUpdate func(partial *provider.ToolResult)) (*provider.ToolResult, error) {

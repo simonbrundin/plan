@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/approvals"
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/approvals"
+	"plan/agent/internal/planclient"
 )
 
 // ApprovalHandler exposes the pending agent proposals over REST so that

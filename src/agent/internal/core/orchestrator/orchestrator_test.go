@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"plan-agent/internal/core/checkpoint"
+	"plan/agent/internal/core/checkpoint"
 )
 
 func TestNewOrchestrator(t *testing.T) {

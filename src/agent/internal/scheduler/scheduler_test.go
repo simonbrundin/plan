@@ -3,7 +3,7 @@ package scheduler
 import (
 	"testing"
 
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/planclient"
 )
 
 func TestIsAgentDefineGoal(t *testing.T) {

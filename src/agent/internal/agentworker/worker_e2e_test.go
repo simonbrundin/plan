@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"plan-agent/internal/definer"
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/definer"
+	"plan/agent/internal/planclient"
 )
 
 type fakeDefiner struct{}

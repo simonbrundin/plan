@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/cucumber/godog"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/core/tools"
 )
 
 var (

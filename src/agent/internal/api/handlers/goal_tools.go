@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/core/tools"
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/core/tools"
+	"plan/agent/internal/planclient"
 )
 
 // createSubgoalTool lets an interactive goal chat persist a proposed child

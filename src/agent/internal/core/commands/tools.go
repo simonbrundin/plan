@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"plan-agent/internal/core/messages"
-	"plan-agent/internal/core/provider"
-	"plan-agent/internal/core/tools"
+	"plan/agent/internal/core/messages"
+	"plan/agent/internal/core/provider"
+	"plan/agent/internal/core/tools"
 )
 
 // ListCommandsTool returns the list_commands tool definition

@@ -12,10 +12,10 @@ import (
 	"strings"
 	"testing"
 
-	"plan-agent/internal/executor"
-	"plan-agent/internal/planclient"
-	"plan-agent/internal/proposer"
-	"plan-agent/internal/workspace"
+	"plan/agent/internal/executor"
+	"plan/agent/internal/planclient"
+	"plan/agent/internal/proposer"
+	"plan/agent/internal/workspace"
 )
 
 // fakeProposer ger alltid samma förslag.

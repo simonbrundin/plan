@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"plan-api/internal/database"
-	"plan-api/internal/models"
-	"plan-api/internal/recurrence"
+	"plan/api/internal/database"
+	"plan/api/internal/models"
+	"plan/api/internal/recurrence"
 )
 
 // TestGoalRecurrenceIntegration verifierar att ett återkommande mål får en

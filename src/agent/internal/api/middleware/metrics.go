@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/api/metrics"
+	"plan/agent/internal/api/metrics"
 )
 
 // Metrics returns a Gin middleware that records HTTP metrics

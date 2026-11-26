@@ -20,7 +20,7 @@ import (
 )
 
 // Default age recipient for SOPS encryption
-const defaultAgeRecipient = "age1mv3yrgdtqddlr5v9tg67nydvztm3sm6r3uu3j9zhdp736p0wt5gqwyj9lt"
+const defaultAgeRecipient = "age1e6cmv0vp3ymmhnqv7rrgy2a7wpnnutawqy509wqm3cn7467cps6qupp354"
 
 // Config represents the structure of the secrets file
 type Config struct {
@@ -370,7 +370,7 @@ func configToYAML(config *Config) (string, error) {
 	// Build YAML manually with proper formatting
 	var lines []string
 	lines = append(lines, "# DO NOT EDIT - This file is encrypted with SOPS")
-	lines = append(lines, "# Managed by plan-agent/internal/core/secrets")
+	lines = append(lines, "# Managed by plan/agent/internal/core/secrets")
 	lines = append(lines, "")
 	lines = append(lines, "apiKeys:")
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"plan-agent/internal/api/metrics"
+	"plan/agent/internal/api/metrics"
 )
 
 // MetricsHandler handles metrics endpoints

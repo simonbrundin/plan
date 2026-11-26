@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"plan-api/internal/database"
-	"plan-api/internal/models"
-	"plan-api/internal/recurrence"
+	"plan/api/internal/database"
+	"plan/api/internal/models"
+	"plan/api/internal/recurrence"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

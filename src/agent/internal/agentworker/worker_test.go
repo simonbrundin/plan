@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"plan-agent/internal/planclient"
+	"plan/agent/internal/planclient"
 )
 
 func TestSyncPhaseKeepsGoalAndRunPhaseAligned(t *testing.T) {

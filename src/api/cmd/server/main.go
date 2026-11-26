@@ -10,14 +10,14 @@ import (
 	"syscall"
 	"time"
 
-	"plan-api/internal/database"
-	"plan-api/internal/handlers"
-	"plan-api/internal/middleware"
+	"plan/api/internal/database"
+	"plan/api/internal/handlers"
+	"plan/api/internal/middleware"
 
 	openapiui "github.com/PeterTakahashi/gin-openapi/openapiui"
 	"github.com/gin-gonic/gin"
 
-	_ "plan-api/docs"
+	_ "plan/api/docs"
 )
 
 // @title Goals Management API
