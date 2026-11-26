@@ -204,27 +204,6 @@ definitions:
     required:
     - decision
     type: object
-  handlers.Goal:
-    properties:
-      completed_at:
-        type: string
-      created:
-        type: string
-      description:
-        type: string
-      icon:
-        type: string
-      id:
-        type: string
-      parent_id:
-        type: string
-      priority:
-        type: integer
-      status:
-        type: string
-      title:
-        type: string
-    type: object
   handlers.GoalContext:
     properties:
       description:
@@ -233,24 +212,6 @@ definitions:
         type: integer
       title:
         type: string
-    type: object
-  handlers.GoalStatus:
-    properties:
-      label:
-        type: string
-      name:
-        type: string
-    type: object
-  handlers.GoalsResponse:
-    properties:
-      goals:
-        items:
-          $ref: '#/definitions/handlers.Goal'
-        type: array
-      statuses:
-        items:
-          $ref: '#/definitions/handlers.GoalStatus'
-        type: array
     type: object
   handlers.SetAPIKeyRequest:
     properties:
@@ -263,13 +224,6 @@ definitions:
     required:
     - api_key
     - provider
-    type: object
-  handlers.StartAgentRequest:
-    properties:
-      goal_id:
-        type: string
-      instructions:
-        type: string
     type: object
   handlers.StartWorkflowRequest:
     properties:
@@ -293,15 +247,6 @@ definitions:
     type: object
   handlers.UpdateConversationRequest:
     properties:
-      title:
-        type: string
-    type: object
-  handlers.UpdateGoalRequest:
-    properties:
-      description:
-        type: string
-      status:
-        type: string
       title:
         type: string
     type: object
@@ -4621,56 +4566,6 @@ paths:
       summary: Reorder the root goals
       tags:
       - goals
-  /api/v1/goals/start-agent:
-    post:
-      consumes:
-      - application/json
-      description: Starts an agent to work on a specific goal with optional instructions
-      parameters:
-      - description: Start agent request
-        in: body
-        name: goal
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.StartAgentRequest'
-      produces:
-      - application/json
-      responses:
-        "202":
-          description: Accepted
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Start agent for a goal
-      tags:
-      - goals
-  /api/v1/goals/stats:
-    get:
-      description: Returns statistics about all goals
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get goal statistics
-      tags:
-      - goals
   /api/v1/health:
     get:
       description: Returns OK if the service is running
@@ -4927,20 +4822,6 @@ paths:
           schema:
             type: string
       summary: Get README
-      tags:
-      - docs
-  /api/v1/roadmap:
-    get:
-      description: Returns the roadmap generated from goals.json (goalsen är roadmaps
-        hem)
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Get Roadmap
       tags:
       - docs
   /api/v1/status:

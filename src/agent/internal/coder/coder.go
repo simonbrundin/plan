@@ -114,20 +114,20 @@ func (c *Coder) Process(ctx context.Context, run planclient.AgentRun, goal planc
 		return fmt.Errorf("failed to check approvals: %w", err)
 	}
 
-	approved := findApproved(approvals)
+	approved := findApproved(approvals, planclient.ApprovalKindCodeChange)
 	if approved != nil {
 		return c.execute(ctx, run, goal, approved)
 	}
 
 	// Ett förslag som redan väntar på beslut ska inte ersättas av ett nytt.
-	if findPending(approvals) != nil {
+	if findPending(approvals, planclient.ApprovalKindCodeChange) != nil {
 		log.Printf("Goal #%d already has a proposal waiting for a decision", goal.ID)
 		return nil
 	}
 
 	// Ett avslaget förslag ska inte köras om - det är människan som
 	// avgör om agenten får försöka igen.
-	if findRejected(approvals) != nil {
+	if findRejected(approvals, planclient.ApprovalKindCodeChange) != nil {
 		log.Printf("Goal #%d has a rejected proposal - waiting for a human decision", goal.ID)
 		return nil
 	}
@@ -415,9 +415,12 @@ func (c *Coder) startExecuting(ctx context.Context, run planclient.AgentRun, goa
 }
 
 // findApproved ger det godkända förslaget, om det finns.
-func findApproved(approvals []planclient.AgentApproval) *planclient.AgentApproval {
+//
+// Bara förslag av den givna typen räknas - ett godkänt förslag om målets
+// utseende ska inte köras som en kodändring.
+func findApproved(approvals []planclient.AgentApproval, kind string) *planclient.AgentApproval {
 	for i := range approvals {
-		if approvals[i].Status == "approved" {
+		if approvals[i].Status == "approved" && approvals[i].ApprovalKind() == kind {
 			return &approvals[i]
 		}
 	}
@@ -425,9 +428,9 @@ func findApproved(approvals []planclient.AgentApproval) *planclient.AgentApprova
 }
 
 // findPending ger det förslag som fortfarande väntar på beslut.
-func findPending(approvals []planclient.AgentApproval) *planclient.AgentApproval {
+func findPending(approvals []planclient.AgentApproval, kind string) *planclient.AgentApproval {
 	for i := range approvals {
-		if approvals[i].Status == "pending" {
+		if approvals[i].Status == "pending" && approvals[i].ApprovalKind() == kind {
 			return &approvals[i]
 		}
 	}
@@ -435,9 +438,9 @@ func findPending(approvals []planclient.AgentApproval) *planclient.AgentApproval
 }
 
 // findRejected ger det förslag som en människa har avslagit.
-func findRejected(approvals []planclient.AgentApproval) *planclient.AgentApproval {
+func findRejected(approvals []planclient.AgentApproval, kind string) *planclient.AgentApproval {
 	for i := range approvals {
-		if approvals[i].Status == "rejected" {
+		if approvals[i].Status == "rejected" && approvals[i].ApprovalKind() == kind {
 			return &approvals[i]
 		}
 	}
@@ -456,6 +459,7 @@ func proposalPayload(proposal *proposer.Proposal) map[string]any {
 	}
 
 	return map[string]any{
+		"kind":         planclient.ApprovalKindCodeChange,
 		"changes":      changes,
 		"test_command": proposal.TestCommand,
 	}

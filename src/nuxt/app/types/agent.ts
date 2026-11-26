@@ -78,6 +78,18 @@ export interface AgentMessage {
   created_at?: string;
 }
 
+// Ett fält som agenten föreslår ändra på målet.
+export interface AgentApprovalField {
+  // Fältets namn, t.ex. "due".
+  field: string;
+  // Fältets namn på svenska, t.ex. "Slutdatum".
+  label: string;
+  // Målets nuvarande värde. Tomt = inget värde.
+  from: string;
+  // Det föreslagna värdet.
+  to: string;
+}
+
 // Ett förslag från agenten som väntar på ett beslut i Plan.
 export interface AgentApproval {
   // Godkännandets id i Plan - det är det beslutet tas på.
@@ -92,9 +104,17 @@ export interface AgentApproval {
   conversation_id?: string;
   // Vad som föreslogs - exakt de ändringar och det test som ska köras.
   payload?: {
+    // Typen av förslag. Utan typ räknas förslaget som ett kodförslag.
+    kind?: 'goal_definition' | 'code_change';
     changes?: Array<{ path: string; content: string }>;
     test_command?: string;
     pre_verification?: { passed: boolean; output?: string };
+    // Förslaget om målets utseende: de fält som föreslås ändrade.
+    fields?: AgentApprovalField[];
+    // De exakta värdena som appliceras om förslaget godkänns.
+    values?: Record<string, unknown>;
+    // Noteringar om värden som hoppades över.
+    notes?: string[];
   };
 }
 

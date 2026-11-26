@@ -20,8 +20,12 @@
 #       Plan måste tillåta dem för agent-scope, annars får agenten 403 i prod
 #       där nyckeln har scope 'agent' (i dev har den scope 'full', så felet
 #       syns inte där).
+#   3 - 2026-11-26 - lade till godkännandetyperna (goal_definition och
+#       code_change) så att en människa och agenten kan skilja på vad som
+#       föreslogs. Lade också till de anrop agenten behöver för en rik
+#       måldefinition: platser, taggar och platser på ett mål.
 
-version: 2
+version: 3
 
 # Agentkörningens faser, i den ordning de sker.
 phases:
@@ -62,6 +66,17 @@ profiles:
   - coding
   - life
 
+# Typer av godkännanden. Typen ligger i godkännandets payload ("kind") så
+# att en människa ser vad som föreslogs och att agenten inte blandar ihop
+# ett definitionsförslag med ett kodförslag i samma körning.
+#
+# Plan avvisar ett godkännande med en okänd typ. Ett godkännande utan typ
+# behandlas som code_change - så att förslag som skapats tidigare
+# fortfarande fungerar.
+approval_kinds:
+  - goal_definition
+  - code_change
+
 # De API-anrop agenten gör mot Plan. Sökvägarna skrivs med {id} för
 # parametrar - i koden motsvaras de av format-strängar med %d.
 #
@@ -88,6 +103,15 @@ endpoints:
     agent: true
   - method: GET
     path: /api/v1/statuses
+    agent: true
+  - method: GET
+    path: /api/v1/places
+    agent: true
+  - method: PUT
+    path: /api/v1/goals/{id}/tags
+    agent: true
+  - method: PUT
+    path: /api/v1/goals/{id}/places
     agent: true
   - method: POST
     path: /api/v1/goals/relations

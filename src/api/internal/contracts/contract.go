@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"gopkg.in/yaml.v3"
 )
@@ -33,14 +34,17 @@ func (e Endpoint) Key() string {
 
 // Contract är kontraktet mellan Plan och agenten.
 type Contract struct {
-	Version            int        `yaml:"version"`
-	Phases             []string   `yaml:"phases"`
-	Statuses           []string   `yaml:"statuses"`
-	TerminalStatuses   []string   `yaml:"terminal_statuses"`
-	StatusNeedingHuman []string   `yaml:"status_needing_human"`
-	Triggers           []string   `yaml:"triggers"`
-	Profiles           []string   `yaml:"profiles"`
-	Endpoints          []Endpoint `yaml:"endpoints"`
+	Version            int      `yaml:"version"`
+	Phases             []string `yaml:"phases"`
+	Statuses           []string `yaml:"statuses"`
+	TerminalStatuses   []string `yaml:"terminal_statuses"`
+	StatusNeedingHuman []string `yaml:"status_needing_human"`
+	Triggers           []string `yaml:"triggers"`
+	Profiles           []string `yaml:"profiles"`
+	// ApprovalKinds är typerna av godkännanden agenten kan skapa.
+	// De deklareras här så att Plan och agenten pratar om samma sak.
+	ApprovalKinds []string   `yaml:"approval_kinds"`
+	Endpoints     []Endpoint `yaml:"endpoints"`
 }
 
 // Filnamnet på kontraktet.
@@ -102,6 +106,24 @@ func Load() (*Contract, error) {
 	return &contract, nil
 }
 
+// shared håller kontraktet som laddats en gång för processen.
+//
+// Kontraktet är samma fil för hela API:t - det behöver inte läsas om
+// för varje anrop.
+var (
+	sharedOnce sync.Once
+	shared     *Contract
+	sharedErr  error
+)
+
+// Shared returnerar kontraktet, som laddas vid första anropet.
+func Shared() (*Contract, error) {
+	sharedOnce.Do(func() {
+		shared, sharedErr = Load()
+	})
+	return shared, sharedErr
+}
+
 // HasEndpoint berättar om ett anrop finns i kontraktet.
 func (c *Contract) HasEndpoint(method, path string) bool {
 	for _, endpoint := range c.Endpoints {
@@ -122,6 +144,19 @@ func (c *Contract) AgentEndpoints() []Endpoint {
 		}
 	}
 	return agentens
+}
+
+// HasApprovalKind berättar om en godkännandetyp finns i kontraktet.
+//
+// Ett godkännande utan typ godtas - så att förslag som skapats före
+// godkännandetyperna introducerades fortfarande fungerar.
+func (c *Contract) HasApprovalKind(kind string) bool {
+	for _, kandidat := range c.ApprovalKinds {
+		if kandidat == kind {
+			return true
+		}
+	}
+	return false
 }
 
 // NormalizePath gör om en formatsökväg (%d) till kontraktets form ({id}),

@@ -9,12 +9,18 @@ import (
 	"testing"
 
 	"plan/agent/internal/definer"
+	"plan/agent/internal/goaldefinition"
 	"plan/agent/internal/planclient"
 )
 
-type fakeDefiner struct{}
+type fakeDefiner struct {
+	definition *definer.Definition
+}
 
-func (fakeDefiner) Define(context.Context, string, string, string) (*definer.Definition, error) {
+func (f fakeDefiner) Define(context.Context, definer.Input) (*definer.Definition, error) {
+	if f.definition != nil {
+		return f.definition, nil
+	}
 	return &definer.Definition{
 		Title:       "Ett definierat mål",
 		Description: "Målet har tydliga krav och ett verifierbart slutkriterium.",
@@ -22,14 +28,19 @@ func (fakeDefiner) Define(context.Context, string, string, string) (*definer.Def
 }
 
 // TestRunOnceDefinesGoalEndToEnd verifierar fas 1:s första hela del-flöde:
-// agentmål -> AgentRun -> definition -> Plan-status plan -> klar körning.
+// agentmål -> AgentRun -> definition -> godkännande -> väntan på människa.
 // Testet använder samma HTTP-kontrakt som den riktiga Plan-klienten men en
-// deterministisk definerare, så det kräver varken en LLM-nyckel eller nätverk.
+// deterministisk definerare, så det kräver varken en LLM-nyckel eller
+// nätverk.
+//
+// Målet skrivs inte till förrän en människa godkänt förslaget - det är
+// human gate.
 func TestRunOnceDefinesGoalEndToEnd(t *testing.T) {
 	var createdRun bool
+	var createdApproval bool
 	var updatedGoal bool
-	var updatedRun bool
-	var updatedPhase bool
+	var waitingApproval bool
+	var approvalPayload map[string]any
 	var createRequest planclient.CreateAgentRunRequest
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +55,8 @@ func TestRunOnceDefinesGoalEndToEnd(t *testing.T) {
 				{ID: 1, Name: PhaseDefine},
 				{ID: 2, Name: PhasePlan},
 			})
+		case "GET /api/v1/places":
+			_ = json.NewEncoder(w).Encode([]planclient.Place{})
 		case "GET /api/v1/agent-runs":
 			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{})
 		case "POST /api/v1/agent-runs":
@@ -52,24 +65,30 @@ func TestRunOnceDefinesGoalEndToEnd(t *testing.T) {
 				t.Errorf("decode agent run create: %v", err)
 			}
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7, GoalID: 42, Phase: PhaseDefine, Status: StatusRunning})
+		case "POST /api/v1/agent-runs/7/approvals":
+			createdApproval = true
+			var request planclient.CreateAgentApprovalRequest
+			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+				t.Errorf("decode approval create: %v", err)
+			}
+			approvalPayload = request.Payload
+			_ = json.NewEncoder(w).Encode(planclient.AgentApproval{ID: 3, AgentRunID: 7, GoalID: 42, Status: "pending"})
 		case "PATCH /api/v1/goals/42":
 			updatedGoal = true
 			_ = json.NewEncoder(w).Encode(map[string]planclient.Goal{"goal": {ID: 42, StatusID: 1}})
 		case "PATCH /api/v1/goals/42/status":
-			updatedPhase = true
 			_ = json.NewEncoder(w).Encode(map[string]any{"status_id": 2})
 		case "PATCH /api/v1/agent-runs/7":
 			var request planclient.UpdateAgentRunRequest
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 				t.Errorf("decode agent run update: %v", err)
 			}
-			if request.Status != nil {
-				updatedRun = *request.Status == StatusSucceeded
-			}
-			if request.Phase != nil {
-				updatedPhase = updatedPhase && *request.Phase == PhasePlan
+			if request.Status != nil && *request.Status == StatusWaitingApproval {
+				waitingApproval = true
 			}
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7})
+		case "POST /api/v1/agent-runs/7/events":
+			w.WriteHeader(http.StatusCreated)
 		default:
 			http.NotFound(w, r)
 		}
@@ -88,8 +107,170 @@ func TestRunOnceDefinesGoalEndToEnd(t *testing.T) {
 		t.Fatalf("RunOnce: %v", err)
 	}
 
-	if !createdRun || !updatedGoal || !updatedRun || !updatedPhase {
-		t.Fatalf("flow incomplete: createdRun=%v updatedGoal=%v updatedRun=%v updatedPhase=%v", createdRun, updatedGoal, updatedRun, updatedPhase)
+	if !createdRun || !createdApproval || !waitingApproval {
+		t.Fatalf("flow incomplete: createdRun=%v createdApproval=%v waitingApproval=%v", createdRun, createdApproval, waitingApproval)
+	}
+	if updatedGoal {
+		t.Error("målet ska inte skrivas till förrän en människa godkänt förslaget")
+	}
+	if approvalPayload["kind"] != goaldefinition.Kind {
+		t.Errorf("godkännandets typ = %v, vill ha %q", approvalPayload["kind"], goaldefinition.Kind)
+	}
+}
+
+// TestGodkändDefinitionAppliceras verifierar att exakt de godkända
+// värdena skrivs till målet när en människa godkänt förslaget.
+func TestGodkändDefinitionAppliceras(t *testing.T) {
+	var updatedGoal planclient.UpdateGoalRequest
+	var updatedPhase bool
+	var completed bool
+
+	proposal := goaldefinition.Build(goaldefinition.Context{
+		Goal: planclient.Goal{ID: 42, Title: "Gör något viktigt", Description: "lös idé", StatusID: 1, Agent: true},
+		Definition: definer.Definition{
+			Title:       "Ett definierat mål",
+			Description: "Målet har tydliga krav.",
+			Icon:        "heroicons:flag",
+		},
+		NextPhase: PhasePlan,
+	})
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.Method + " " + r.URL.Path {
+		case "GET /api/v1/goals":
+			_ = json.NewEncoder(w).Encode([]planclient.Goal{{
+				ID: 42, Title: "Gör något viktigt", Description: "lös idé", StatusID: 1, Agent: true,
+			}})
+		case "GET /api/v1/statuses":
+			_ = json.NewEncoder(w).Encode([]planclient.Status{
+				{ID: 1, Name: PhaseDefine},
+				{ID: 2, Name: PhasePlan},
+			})
+		case "GET /api/v1/agent-runs":
+			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{{
+				ID: 7, GoalID: 42, Phase: PhaseDefine, Status: StatusWaitingApproval,
+			}})
+		case "GET /api/v1/agent-runs/7/approvals":
+			_ = json.NewEncoder(w).Encode([]planclient.AgentApproval{{
+				ID: 3, AgentRunID: 7, GoalID: 42, Status: "approved", Payload: proposal.Payload(),
+			}})
+		case "PATCH /api/v1/goals/42":
+			if err := json.NewDecoder(r.Body).Decode(&updatedGoal); err != nil {
+				t.Errorf("decode goal update: %v", err)
+			}
+			_ = json.NewEncoder(w).Encode(map[string]planclient.Goal{"goal": {ID: 42, StatusID: 2}})
+		case "PATCH /api/v1/goals/42/status":
+			updatedPhase = true
+			_ = json.NewEncoder(w).Encode(map[string]any{"status_id": 2})
+		case "PATCH /api/v1/agent-runs/7":
+			var request planclient.UpdateAgentRunRequest
+			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+				t.Errorf("decode agent run update: %v", err)
+			}
+			if request.Status != nil && *request.Status == StatusSucceeded {
+				completed = true
+			}
+			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7})
+		case "POST /api/v1/agent-runs/7/events":
+			w.WriteHeader(http.StatusCreated)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	t.Setenv("PLAN_API_URL", server.URL)
+	t.Setenv("PLAN_API_KEY", "test-key")
+	client, err := planclient.New()
+	if err != nil {
+		t.Fatalf("create Plan API client: %v", err)
+	}
+
+	worker := New(client, fakeDefiner{}, Config{OnlyGoalId: 42})
+	if err := worker.RunOnce(context.Background()); err != nil {
+		t.Fatalf("RunOnce: %v", err)
+	}
+
+	if updatedGoal.Title == nil || *updatedGoal.Title != "Ett definierat mål" {
+		t.Errorf("titel = %v, vill ha %q", updatedGoal.Title, "Ett definierat mål")
+	}
+	if updatedGoal.Icon == nil || *updatedGoal.Icon != "heroicons:flag" {
+		t.Errorf("ikon = %v, vill ha %q", updatedGoal.Icon, "heroicons:flag")
+	}
+	if !updatedPhase {
+		t.Error("målet ska flyttas till planfasen")
+	}
+	if !completed {
+		t.Error("körningen ska avslutas när definitionen är applicerad")
+	}
+}
+
+// TestAvslagenDefinitionKörsInte verifierar att ett avslaget förslag
+// inte skrivs till målet - och att agenten inte föreslår om det.
+func TestAvslagenDefinitionKörsInte(t *testing.T) {
+	var updatedGoal bool
+	var createdApproval bool
+
+	proposal := goaldefinition.Build(goaldefinition.Context{
+		Goal:       planclient.Goal{ID: 42, Title: "Gör något viktigt", StatusID: 1, Agent: true},
+		Definition: definer.Definition{Title: "Ett definierat mål"},
+		NextPhase:  PhasePlan,
+	})
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.Method + " " + r.URL.Path {
+		case "GET /api/v1/goals":
+			_ = json.NewEncoder(w).Encode([]planclient.Goal{{
+				ID: 42, Title: "Gör något viktigt", Description: "lös idé", StatusID: 1, Agent: true,
+			}})
+		case "GET /api/v1/statuses":
+			_ = json.NewEncoder(w).Encode([]planclient.Status{
+				{ID: 1, Name: PhaseDefine},
+				{ID: 2, Name: PhasePlan},
+			})
+		case "GET /api/v1/agent-runs":
+			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{{
+				ID: 7, GoalID: 42, Phase: PhaseDefine, Status: StatusWaitingApproval,
+			}})
+		case "GET /api/v1/agent-runs/7/approvals":
+			_ = json.NewEncoder(w).Encode([]planclient.AgentApproval{{
+				ID: 3, AgentRunID: 7, GoalID: 42, Status: "rejected", Payload: proposal.Payload(),
+			}})
+		case "POST /api/v1/agent-runs/7/approvals":
+			createdApproval = true
+			_ = json.NewEncoder(w).Encode(planclient.AgentApproval{ID: 4, AgentRunID: 7, GoalID: 42, Status: "pending"})
+		case "PATCH /api/v1/goals/42":
+			updatedGoal = true
+			_ = json.NewEncoder(w).Encode(map[string]planclient.Goal{"goal": {ID: 42, StatusID: 1}})
+		case "PATCH /api/v1/agent-runs/7":
+			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7})
+		case "POST /api/v1/agent-runs/7/events":
+			w.WriteHeader(http.StatusCreated)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	t.Setenv("PLAN_API_URL", server.URL)
+	t.Setenv("PLAN_API_KEY", "test-key")
+	client, err := planclient.New()
+	if err != nil {
+		t.Fatalf("create Plan API client: %v", err)
+	}
+
+	worker := New(client, fakeDefiner{}, Config{OnlyGoalId: 42})
+	if err := worker.RunOnce(context.Background()); err != nil {
+		t.Fatalf("RunOnce: %v", err)
+	}
+
+	if updatedGoal {
+		t.Error("ett avslaget förslag ska inte skrivas till målet")
+	}
+	if createdApproval {
+		t.Error("agenten ska inte föreslå om ett avslaget förslag")
 	}
 }
 
@@ -117,12 +298,18 @@ func TestRunOnceRegistrerarTriggerOchInitiativtagare(t *testing.T) {
 				t.Errorf("decode agent run create: %v", err)
 			}
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7, GoalID: 42})
+		case "GET /api/v1/places":
+			_ = json.NewEncoder(w).Encode([]planclient.Place{})
+		case "POST /api/v1/agent-runs/7/approvals":
+			_ = json.NewEncoder(w).Encode(planclient.AgentApproval{ID: 3, AgentRunID: 7, GoalID: 42, Status: "pending"})
 		case "PATCH /api/v1/goals/42":
 			_ = json.NewEncoder(w).Encode(map[string]planclient.Goal{"goal": {ID: 42, StatusID: 1}})
 		case "PATCH /api/v1/goals/42/status":
 			_ = json.NewEncoder(w).Encode(map[string]any{"status_id": 2})
 		case "PATCH /api/v1/agent-runs/7":
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7})
+		case "POST /api/v1/agent-runs/7/events":
+			w.WriteHeader(http.StatusCreated)
 		default:
 			http.NotFound(w, r)
 		}
@@ -406,11 +593,17 @@ func TestKöadKörningTasÖverÄvenFörMålSomInteÄrAgentmål(t *testing.T) {
 	}
 }
 
-// TestDefinieradKörningSlutarMedRunCompleted verifierar att en körning som
-// avslutas efter definitionen också registreras som avslutad. Annars ser
-// historiken ut som om körningen bara upphörde.
-func TestDefinieradKörningSlutarMedRunCompleted(t *testing.T) {
+// TestUtanNyaFältAvslutarKörningen verifierar att en körning avslutas
+// när definitionen inte har något nytt att föreslå - då finns inget att
+// godkänna, så målet går bara vidare till nästa fas.
+func TestUtanNyaFältAvslutarKörningen(t *testing.T) {
 	var events []string
+	var updatedPhase bool
+
+	definer := fakeDefiner{definition: &definer.Definition{
+		Title:       "Ett mål",
+		Description: "beskrivning",
+	}}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -424,13 +617,14 @@ func TestDefinieradKörningSlutarMedRunCompleted(t *testing.T) {
 				{ID: 1, Name: PhaseDefine},
 				{ID: 2, Name: PhasePlan},
 			})
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/places":
+			_ = json.NewEncoder(w).Encode([]planclient.Place{})
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/agent-runs":
 			_ = json.NewEncoder(w).Encode([]planclient.AgentRun{})
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/agent-runs":
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 11, GoalID: 42})
-		case r.Method == http.MethodPatch && r.URL.Path == "/api/v1/goals/42":
-			_ = json.NewEncoder(w).Encode(planclient.Goal{ID: 42})
 		case r.Method == http.MethodPatch && r.URL.Path == "/api/v1/goals/42/status":
+			updatedPhase = true
 			w.WriteHeader(http.StatusNoContent)
 		case r.Method == http.MethodPatch && r.URL.Path == "/api/v1/agent-runs/11":
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 11})
@@ -452,9 +646,13 @@ func TestDefinieradKörningSlutarMedRunCompleted(t *testing.T) {
 		t.Fatalf("create Plan API client: %v", err)
 	}
 
-	worker := New(client, fakeDefiner{}, Config{OnlyGoalId: 42})
+	worker := New(client, definer, Config{OnlyGoalId: 42})
 	if err := worker.RunOnce(context.Background()); err != nil {
 		t.Fatalf("RunOnce: %v", err)
+	}
+
+	if !updatedPhase {
+		t.Error("målet ska flyttas till planfasen")
 	}
 
 	var completed bool

@@ -31,6 +31,24 @@ const draft = ref('');
 const listRef = ref<HTMLElement | null>(null);
 const inputRef = ref<HTMLTextAreaElement | null>(null);
 const feedback = ref('');
+let approvalTimer: ReturnType<typeof setInterval> | undefined;
+
+// Ett förslag om målets utseende visar varje fält som föreslås ändrat.
+// Ett kodförslag visar i stället diffen.
+const isDefinition = computed(
+	() => approval.value?.payload?.kind === 'goal_definition',
+);
+
+const approvalFields = computed(() => {
+	if (!isDefinition.value) return [];
+	return approval.value?.payload?.fields ?? [];
+});
+
+const approvalHeading = computed(() =>
+	isDefinition.value
+		? 'Agenten föreslår en definition:'
+		: 'Agenten föreslår en ändring:',
+);
 
 // Sant när chatten är scrollad till slutet. Då ska nya meddelanden
 // scrolla med - annars ska man kunna läsa i fred och röra sig själv.
@@ -88,10 +106,19 @@ const formatTime = (value?: string) => {
 
 onMounted(async () => {
 	await loadApproval();
+	// Godkännandet hämtas om - agenten kan skapa det när som helst,
+	// och en human gate som inte syns är ingen human gate.
+	approvalTimer = setInterval(() => {
+		if (document.visibilityState === 'visible') void loadApproval();
+	}, 15000);
 	if (props.run?.conversation_id) {
 		conversationId.value = props.run.conversation_id;
 		await load(props.run.conversation_id);
 	}
+});
+
+onUnmounted(() => {
+	if (approvalTimer) clearInterval(approvalTimer);
 });
 
 // Startar en konversation om det inte finns en.
@@ -157,9 +184,17 @@ const reject = async () => {
 
 		<!-- Förslag som väntar på beslut -->
 		<div v-if="approval" class="flex-shrink-0 border-b border-line bg-amber-500/5 px-4 py-3">
-			<p class="mb-2 text-xs text-amber-300">Agenten föreslår en definition:</p>
+			<p class="mb-2 text-xs text-amber-300">{{ approvalHeading }}</p>
 			<p class="text-sm font-medium text-ink">{{ approval.title }}</p>
 			<p class="mt-1 whitespace-pre-wrap text-sm text-ink-muted">{{ approval.description }}</p>
+			<ul v-if="approvalFields.length" class="mt-2 space-y-1 text-sm">
+				<li v-for="field in approvalFields" :key="field.field">
+					<span class="text-ink">{{ field.label }}</span>
+					<span class="text-ink-dim">{{ field.from || 'ingen' }}</span>
+					<span class="text-ink-dim">→</span>
+					<span class="text-ink">{{ field.to }}</span>
+				</li>
+			</ul>
 			<div class="mt-3 flex items-center gap-2">
 				<button
 					@click="approve"

@@ -3201,82 +3201,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/goals/start-agent": {
-            "post": {
-                "description": "Starts an agent to work on a specific goal with optional instructions",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "goals"
-                ],
-                "summary": "Start agent for a goal",
-                "parameters": [
-                    {
-                        "description": "Start agent request",
-                        "name": "goal",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.StartAgentRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "202": {
-                        "description": "Accepted",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/goals/stats": {
-            "get": {
-                "description": "Returns statistics about all goals",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "goals"
-                ],
-                "summary": "Get goal statistics",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/goals/{id}": {
             "get": {
                 "security": [
@@ -4451,26 +4375,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/roadmap": {
-            "get": {
-                "description": "Returns the roadmap generated from goals.json (goalsen är roadmaps hem)",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "docs"
-                ],
-                "summary": "Get Roadmap",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/status": {
             "get": {
                 "description": "Returns detailed service status",
@@ -5275,38 +5179,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.Goal": {
-            "type": "object",
-            "properties": {
-                "completed_at": {
-                    "type": "string"
-                },
-                "created": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "parent_id": {
-                    "type": "string"
-                },
-                "priority": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "handlers.GoalContext": {
             "type": "object",
             "properties": {
@@ -5318,34 +5190,6 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
-                }
-            }
-        },
-        "handlers.GoalStatus": {
-            "type": "object",
-            "properties": {
-                "label": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.GoalsResponse": {
-            "type": "object",
-            "properties": {
-                "goals": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.Goal"
-                    }
-                },
-                "statuses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.GoalStatus"
-                    }
                 }
             }
         },
@@ -5363,17 +5207,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "provider": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.StartAgentRequest": {
-            "type": "object",
-            "properties": {
-                "goal_id": {
-                    "type": "string"
-                },
-                "instructions": {
                     "type": "string"
                 }
             }
@@ -5412,20 +5245,6 @@ const docTemplate = `{
         "handlers.UpdateConversationRequest": {
             "type": "object",
             "properties": {
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.UpdateGoalRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }

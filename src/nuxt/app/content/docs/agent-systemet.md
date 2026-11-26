@@ -26,7 +26,7 @@ define ──▶ plan ──▶ execute ──▶ verify ──▶ completed
 
 | Fas | Vad som händer |
 | --- | --- |
-| `define` | Agenten skriver målets definition - vad som egentligen ska göras, vilka krav som gäller |
+| `define` | Agenten skriver målets definition - vad som egentligen ska göras, vilka krav som gäller. Förslaget går via human gate innan något skrivs |
 | `plan` | Definitionen bryts ner till checkpoints med uppgifter |
 | `execute` | Checkpoints utförs, kod skrivs i en isolerad kopia av repot |
 | `verify` | Testerna körs och resultatet verifieras |
@@ -78,7 +78,7 @@ körningen skapas (`agent_profile`).
 ```text
 src/agent/
 ├── internal/
-│   ├── agentworker/   Pollar Plan efter mål markerade för agent
+│   ├── agentworker/   Agent-arbetsmotor (internt paketnamn, inte binär)
 │   ├── definer/       Skriver definitionen (fas define)
 │   ├── proposer/      Föreslår kodändringar
 │   ├── coder/         Driver kodändringen från förslag till verifierat resultat
@@ -99,7 +99,7 @@ src/agent/
 │       ├── memory/   Agentens minne
 │       ├── selfimprove/ Lärdomar från körningar
 │       └── checkpoint/ Checkpoint-modellen
-├── cmd/agentworker/   Workerns ingång
+├── cmd/agent-worker/  Workerns ingång
 └── cmd/wikictl/       Verktyget för kunskapswikin
 ```
 
@@ -137,6 +137,29 @@ Ett godkännande ska visa:
 
 Inte bara det tekniska kommandot. Beslutet sparas i `agent_approvals`
 med `feedback`, `consequence` och `verification_plan`.
+
+## Måldefinitionen - vad agenten föreslår
+
+I `define`-fasen föreslår agenten hur målet ska se ut. Det är inte bara
+titel och beskrivning - även ikon, `now`, `eternal`, `agent`, startdatum,
+due, uppskattad tid, status, taggar, platser och upprepning.
+
+Förslaget lämnas som ett godkännande i Plan, med typen `goal_definition`.
+Kodförslag har typen `code_change` - de är olika sorts beslut och blir
+inte ihopblandade.
+
+**Agenten fyller luckor.** Ett fält som redan har ett värde lämnas
+orört - agenten skriver aldrig över det du själv har satt. Taggar och
+platser slås ihop med målets egna, så inget användardata försvinner. Ett
+värde som inte går att tolka (ett trasigt datum, en okänd ikon) hoppas
+över och skrivs som en notering i förslaget.
+
+När du godkänner skrivs exakt de värden du godkände till målet - ingenting
+genereras om. Ett avslag stoppar körningen; agenten föreslår inte om något
+utan ett nytt beslut från dig.
+
+Målet flyttas till `plan` när definitionen är applicerad. Först då kan
+agenten föreslå en kodändring.
 
 ## Verifiering före godkännande
 
@@ -211,6 +234,7 @@ Mer om den i `~/wiki/AGENTS.md`.
 | `AGENT_JOB_NAMESPACE` | Namespace som jobben skapas i |
 | `AGENT_JOB_DEADLINE_SECONDS` | Tidsgräns för ett jobb |
 | `AGENT_WORKER_ENABLED` | Kör workern i agent-API:t (off i prod) |
+| `AGENT_SCHEDULER_ENABLED` | Kör den gamla filbaserade schemalaggaren (off i prod) |
 | `AGENT_JOB_CONTROLLER_ENABLED` | Skapa Jobb för köade körningar |
 
 ## Se också

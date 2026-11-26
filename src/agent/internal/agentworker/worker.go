@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"plan/agent/internal/definer"
+	"plan/agent/internal/goaldefinition"
 	"plan/agent/internal/planclient"
 	"plan/agent/internal/profile"
 	"plan/agent/internal/runusage"
@@ -52,7 +53,7 @@ const (
 
 // Worker pollar Plan efter agentmål och definierar dem.
 type GoalDefiner interface {
-	Define(ctx context.Context, goalTitle, existingDescription, feedback string) (*definer.Definition, error)
+	Define(ctx context.Context, input definer.Input) (*definer.Definition, error)
 }
 
 // CodeRunner driver kodändringar för ett mål.
@@ -258,9 +259,26 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 
 		// Ett mål som väntar på ett mänskligt beslut ska återupptas så
 		// snart beslutet är fattat.
-		if hasRun && w.codeRunner != nil && run.Status == StatusWaitingApproval {
-			if err := w.codeRunner.Process(ctx, run, goal); err != nil {
-				log.Printf("Failed to resume goal #%d: %v", goal.ID, err)
+		//
+		// I definitionfasen är det förslaget om målets utseende som
+		// väntar. Lämnar agenten över till kodern först när definitionen
+		// är godkänd och applicerad.
+		if hasRun && run.Status == StatusWaitingApproval {
+			if goal.StatusID == defineStatusID {
+				resumed, err := w.resumeDefinition(ctx, run, goal)
+				if err != nil {
+					log.Printf("Failed to resume the definition of goal #%d: %v", goal.ID, err)
+				}
+				if resumed {
+					handled[goal.ID] = true
+					continue
+				}
+			}
+
+			if w.codeRunner != nil {
+				if err := w.codeRunner.Process(ctx, run, goal); err != nil {
+					log.Printf("Failed to resume goal #%d: %v", goal.ID, err)
+				}
 			}
 			continue
 		}
@@ -514,7 +532,11 @@ func (w *Worker) startCodeRun(ctx context.Context, goal planclient.Goal, hasRun 
 	return nil
 }
 
-// processGoal defines one goal and writes the result back to Plan
+// processGoal defines one goal and leaves the result to a human.
+//
+// Definitionen skickas inte direkt till målet. Den lämnas som ett
+// godkännande, och det är exakt de värden människan godkänner som sedan
+// skrivs till målet.
 //
 // Om det redan finns en körning för målet - en köad körning som workern
 // tagit över - används den i stället för att skapa en ny.
@@ -551,7 +573,24 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 		},
 	})
 
-	definition, err := w.definer.Define(ctx, goal.Title, goal.Description, "")
+	// Platserna behövs för att agenten ska kunna föreslå platser på
+	// målet - och för att den inte ska hitta på platser som inte finns.
+	places := w.places(ctx)
+
+	definition, err := w.definer.Define(ctx, definer.Input{
+		Title:            goal.Title,
+		Description:      goal.Description,
+		Icon:             goal.Icon,
+		Now:              goal.Now,
+		Eternal:          goal.Eternal,
+		Agent:            goal.Agent,
+		Due:              value(goal.Due),
+		StartDate:        value(goal.StartDate),
+		EstimatedMinutes: minutes(goal.EstimatedMinutes),
+		RecurrenceRule:   value(goal.RecurrenceRule),
+		Tags:             goal.Tags,
+		Places:           names(goal.Places),
+	})
 	if err != nil {
 		w.failRun(ctx, run.ID, err)
 		return fmt.Errorf("failed to define goal: %w", err)
@@ -561,15 +600,117 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 		Phase: PhaseDefine,
 	})
 
-	title := definition.Title
-	description := definition.Description
-	if _, err := w.planClient.UpdateGoal(ctx, goal.ID, planclient.UpdateGoalRequest{
-		Title:       &title,
-		Description: &description,
+	proposal := goaldefinition.Build(goaldefinition.Context{
+		Goal:         goal,
+		Definition:   *definition,
+		Places:       places,
+		CurrentPhase: w.phaseName(ctx, goal.StatusID),
+		NextPhase:    PhasePlan,
+	})
+
+	// Utan data att föreslå finns inget att godkänna - målet går bara
+	// vidare till nästa fas.
+	if !proposal.HasDataFields() {
+		log.Printf("Goal #%d has nothing new to propose - moving it to planning", goal.ID)
+		return w.finishDefinition(ctx, goal, *run)
+	}
+
+	if _, err := w.planClient.CreateAgentApproval(ctx, run.ID, planclient.CreateAgentApprovalRequest{
+		Title:            proposalTitle(proposal, goal),
+		Description:      proposal.Summary(),
+		Consequence:      proposal.Consequence(),
+		VerificationPlan: "Förslaget är validerat mot Plans regler för datum, ikon, uppskattad tid och upprepning.",
+		Payload:          proposal.Payload(),
 	}); err != nil {
 		w.failRun(ctx, run.ID, err)
-		return fmt.Errorf("failed to update goal: %w", err)
+		return fmt.Errorf("failed to create approval: %w", err)
 	}
+
+	w.recordEvent(ctx, run.ID, planclient.CreateAgentRunEventRequest{
+		Type:  planclient.EventApprovalRequested,
+		Phase: PhaseDefine,
+		Payload: map[string]any{
+			"title":   proposalTitle(proposal, goal),
+			"kind":    goaldefinition.Kind,
+			"changes": len(proposal.Fields),
+		},
+	})
+
+	// Körningen väntar på en människa - statusen säger det tydligt.
+	status := StatusWaitingApproval
+	summary := "Definitionen inväntar mänskligt godkännande"
+	if _, err := w.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
+		Status:  &status,
+		Summary: &summary,
+	}); err != nil {
+		return fmt.Errorf("failed to mark run as waiting for approval: %w", err)
+	}
+
+	log.Printf("Goal #%d has a definition waiting for approval", goal.ID)
+	return nil
+}
+
+// resumeDefinition hanterar ett förslag om målets utseende.
+//
+// Den returnerar true om förslaget är agentens - då ska koderaren inte
+// köras förrän definitionen är applicerad.
+func (w *Worker) resumeDefinition(ctx context.Context, run planclient.AgentRun, goal planclient.Goal) (bool, error) {
+	approvals, err := w.planClient.GetAgentApprovals(ctx, run.ID)
+	if err != nil {
+		return false, fmt.Errorf("failed to check approvals: %w", err)
+	}
+
+	approval := findDefinitionApproval(approvals)
+	if approval == nil {
+		return false, nil
+	}
+
+	switch approval.Status {
+	case "approved":
+		proposal, err := goaldefinition.FromPayload(approval.Payload)
+		if err != nil {
+			w.failRun(ctx, run.ID, err)
+			return true, fmt.Errorf("failed to read the approved definition: %w", err)
+		}
+
+		// Exakt de godkända värdena appliceras - inget genereras om.
+		if err := proposal.Apply(ctx, w.planClient, goal.ID); err != nil {
+			w.failRun(ctx, run.ID, err)
+			return true, fmt.Errorf("failed to apply the approved definition: %w", err)
+		}
+
+		log.Printf("Goal #%d got its approved definition", goal.ID)
+
+		// Med en coder igång fortsätter samma körning - men med det
+		// uppdaterade målet, så förslaget bygger på den nya texten.
+		if w.codeRunner != nil {
+			updated, err := w.planClient.GetGoal(ctx, goal.ID)
+			if err != nil {
+				w.failRun(ctx, run.ID, err)
+				return true, fmt.Errorf("failed to fetch the updated goal: %w", err)
+			}
+			if err := w.codeRunner.Process(ctx, run, *updated); err != nil {
+				return true, fmt.Errorf("failed to hand over to the coder: %w", err)
+			}
+			return true, nil
+		}
+
+		w.finishDefinition(ctx, goal, run)
+		return true, nil
+	case "rejected":
+		// Ett avslaget förslag körs inte om - det är människan som
+		// avgör om agenten får försöka igen.
+		log.Printf("Goal #%d has a rejected definition - waiting for a human decision", goal.ID)
+		return true, nil
+
+	default:
+		// Förslaget väntar fortfarande på beslut.
+		return true, nil
+	}
+}
+
+// finishDefinition avslutar en körning där målet är definierat.
+func (w *Worker) finishDefinition(ctx context.Context, goal planclient.Goal, run planclient.AgentRun) error {
 	if err := w.syncPhase(ctx, goal.ID, run.ID, PhasePlan); err != nil {
 		w.failRun(ctx, run.ID, err)
 		return fmt.Errorf("failed to synchronize plan phase: %w", err)
@@ -583,18 +724,8 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 		},
 	})
 
-	// Med en coder igång fortsätter samma körning - den ändrar bara kod
-	// efter att en människa godkänt förslaget.
-	if w.codeRunner != nil {
-		if err := w.codeRunner.Process(ctx, *run, goal); err != nil {
-			return fmt.Errorf("failed to hand over to the coder: %w", err)
-		}
-		log.Printf("Goal #%d defined and handed over to the coder", goal.ID)
-		return nil
-	}
-
 	status := StatusSucceeded
-	summary := definition.Description
+	summary := goal.Title
 	result := "Målet definierat och flyttat till plan"
 	finishedAt := time.Now().UTC()
 	if _, err := w.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
@@ -616,6 +747,72 @@ func (w *Worker) processGoal(ctx context.Context, goal planclient.Goal, hasRun b
 
 	log.Printf("Goal #%d defined and moved to planning", goal.ID)
 	return nil
+}
+
+// findDefinitionApproval ger det förslag om målets utseende, om det finns.
+func findDefinitionApproval(approvals []planclient.AgentApproval) *planclient.AgentApproval {
+	for i := range approvals {
+		if approvals[i].ApprovalKind() == goaldefinition.Kind {
+			return &approvals[i]
+		}
+	}
+	return nil
+}
+
+// proposalTitle ger förslagets rubrik - den föreslagna titeln om det
+// finns en ny.
+func proposalTitle(proposal goaldefinition.Proposal, goal planclient.Goal) string {
+	if proposal.Values.Title != nil && *proposal.Values.Title != "" {
+		return *proposal.Values.Title
+	}
+	return goal.Title
+}
+
+// places hämtar användarens platser.
+//
+// Ett fel här ska inte stoppa agenten - ett mål kan definieras utan
+// platser också.
+func (w *Worker) places(ctx context.Context) []planclient.Place {
+	places, err := w.planClient.GetPlaces(ctx)
+	if err != nil {
+		log.Printf("Failed to fetch places: %v", err)
+		return nil
+	}
+	return places
+}
+
+// phaseName ger fasnamnet för ett status-id.
+func (w *Worker) phaseName(ctx context.Context, statusID int) string {
+	name, err := w.planClient.GetPhaseName(ctx, statusID)
+	if err != nil {
+		return ""
+	}
+	return name
+}
+
+// value ger värdet i en pekare, eller tomt om pekaren är nil.
+func value(pointer *string) string {
+	if pointer == nil {
+		return ""
+	}
+	return *pointer
+}
+
+// minutes ger värdet i en pekare, eller noll om pekaren är nil.
+func minutes(pointer *int) int {
+	if pointer == nil {
+		return 0
+	}
+	return *pointer
+}
+
+// names listar platsernas namn.
+func names(places []planclient.Place) []string {
+	result := make([]string, 0, len(places))
+	for _, place := range places {
+		result = append(result, place.Name)
+	}
+	return result
 }
 
 func (w *Worker) recordEvent(ctx context.Context, runID int64, event planclient.CreateAgentRunEventRequest) {

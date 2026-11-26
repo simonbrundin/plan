@@ -68,7 +68,7 @@ AgentRun (status queued)          ← Plan äger körningen
    ▼  jobbcontroller
 Kubernetes Job (agent-worker-run-<id>)
    ├── init-container: klonar repot till /workspace/repo
-   └── agentworker: arbetar i en isolerad kopia, rapporterar till Plan
+   └── agent-worker: arbetar i en isolerad kopia, rapporterar till Plan
 ```
 
 Jobbet är byggt med säkerhetsgränser:
@@ -376,6 +376,37 @@ Godkännandena ligger i Plan (`agent_approvals`), inte i agentens minne. UI:t
 listar väntande förslag för målet, visar exakt de föreslagna ändringarna,
 testkommandot och resultatet av agentens egen verifiering. Beslutet skickas
 till Plan med människans session - agentens nyckel går inte igenom.
+
+## Rik måldefinition med human gate
+
+I definitionfasen föreslår agenten hur målet ska se ut - inte bara titel och
+beskrivning, utan även ikon, `now`, `eternal`, `agent`, startdatum, due,
+uppskattad tid, status, taggar, platser och upprepning.
+
+Förslaget lämnas som ett godkännande i Plan, precis som ett kodförslag.
+Skillnaden är typen: `goal_definition` mot `code_change`. Typerna står i
+kontraktet (`src/contracts/plan-agent.yaml`) och Plan avvisar en okänd typ.
+
+**Agenten fyller luckor - den skriver aldrig över användarens värden.**
+
+| Fält | Regel |
+| --- | --- |
+| Titel, beskrivning | föreslås bara om de ändrar något |
+| Ikon, datum, uppskattad tid | föreslås bara om målet saknar värdet |
+| `now`, `eternal`, `agent` | sätts på, tas aldrig av |
+| Taggar, platser | slås ihop med målets egna - inget tas bort |
+| Ogiltiga värden | hoppas över och skrivs som en notering i förslaget |
+
+När människan godkänner skrivs **exakt de godkända värdena** till målet - det
+genereras inget om. Ett avslaget avslutar körningen: agenten föreslår inte om
+något utan ett nytt mänskligt beslut.
+
+Fasen flyttas till `plan` när definitionen är applicerad. Därefter kan
+kodern föreslå en kodändring - men aldrig förrän definitionen är godkänd.
+
+Implementationen ligger i `src/agent/internal/goaldefinition` (policyn),
+`src/agent/internal/definer` (modellens svar) och
+`src/agent/internal/agentworker` (flödet).
 
 ## Aktuell migrationsstatus
 

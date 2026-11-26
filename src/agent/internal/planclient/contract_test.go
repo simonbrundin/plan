@@ -19,6 +19,7 @@ type kontrakt struct {
 	StatusNeedingHuman []string   `yaml:"status_needing_human"`
 	Triggers           []string   `yaml:"triggers"`
 	Profiles           []string   `yaml:"profiles"`
+	ApprovalKinds      []string   `yaml:"approval_kinds"`
 	Endpoints          []endpoint `yaml:"endpoints"`
 }
 
@@ -94,6 +95,30 @@ func TestStatusMatcharKontraktet(t *testing.T) {
 	for i, status := range k.Statuses {
 		if agentens[i] != status {
 			t.Errorf("tillstånd %d: kontraktet säger %q, agenten säger %q", i, status, agentens[i])
+		}
+	}
+}
+
+// TestGodkannandetyperMatcharKontraktet kontrollerar att agentens
+// godkännandetyper är de som kontraktet anger.
+//
+// Plan avvisar en okänd typ - så om agenten hittar på en typ som inte
+// står i kontraktet blir förslaget stoppat i API:t.
+func TestGodkannandetyperMatcharKontraktet(t *testing.T) {
+	k := läsKontrakt(t)
+
+	agentens := []string{
+		ApprovalKindGoalDefinition,
+		ApprovalKindCodeChange,
+	}
+
+	if len(agentens) != len(k.ApprovalKinds) {
+		t.Fatalf("kontraktet har %d godkännandetyper, agenten har %d", len(k.ApprovalKinds), len(agentens))
+	}
+
+	for i, kind := range k.ApprovalKinds {
+		if agentens[i] != kind {
+			t.Errorf("godkännandetyp %d: kontraktet säger %q, agenten säger %q", i, kind, agentens[i])
 		}
 	}
 }

@@ -137,7 +137,11 @@ func (s *Scheduler) processGoal(ctx context.Context, goal planclient.Goal) {
 	}
 
 	// Define the goal
-	definition, err := s.definer.Define(ctx, goal.Title, goal.Title, feedback)
+	definition, err := s.definer.Define(ctx, definer.Input{
+		Title:       goal.Title,
+		Description: goal.Title,
+		Feedback:    feedback,
+	})
 	if err != nil {
 		log.Printf("Failed to define goal #%d: %v", goal.ID, err)
 		s.publish(ctx, goal, "failed", fmt.Sprintf("Agenten kunde inte specificera målet: %v", err))

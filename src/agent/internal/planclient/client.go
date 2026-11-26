@@ -32,6 +32,31 @@ type Goal struct {
 	// Agent är true om målet är markerat för en agent. Bara sådana mål
 	// får agenten ta sig an.
 	Agent bool `json:"agent,omitempty"`
+	// Now betyder att målet ska göras nu.
+	Now bool `json:"now,omitempty"`
+	// Eternal betyder att målet aldrig slutar.
+	Eternal bool `json:"eternal,omitempty"`
+	// Due är det datum målet ska vara klart ("YYYY-MM-DD").
+	Due *string `json:"due,omitempty"`
+	// StartDate är det datum målet får dyka upp i prioriteringslistan.
+	StartDate *string `json:"start_date,omitempty"`
+	// EstimatedMinutes är den uppskattade tidsåtgången, i minuter.
+	EstimatedMinutes *int `json:"estimated_minutes,omitempty"`
+	// RecurrenceRule är upprepningsregeln (RRULE). Nil = inte återkommande.
+	RecurrenceRule *string `json:"recurrence_rule,omitempty"`
+	// RecurrenceMode är schemaläggningsstrategin: "schedule" eller "push".
+	RecurrenceMode *string `json:"recurrence_mode,omitempty"`
+	// Tags är målets taggar.
+	Tags []string `json:"tags,omitempty"`
+	// Places är platserna där målet kan slutföras.
+	Places []Place `json:"places,omitempty"`
+}
+
+// Place är en plats i Plan - till exempel "Hem" eller "Gymmet".
+type Place struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon,omitempty"`
 }
 
 // Körningens tillstånd - de ägs av Plan, agenten läser dem.
@@ -127,11 +152,29 @@ type Status struct {
 }
 
 // UpdateGoalRequest is the request body for updating a goal
+//
+// Pekare används för att skilja "sätt värdet" från "lämna oförändrat":
+// ett fält som inte finns i requesten lämnas som det var.
 type UpdateGoalRequest struct {
 	Title       *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Icon        *string `json:"icon,omitempty"`
 	StatusID    *int    `json:"status_id,omitempty"`
+	// Now, Eternal och Agent sätter målets operativa flaggor.
+	Now     *bool `json:"now,omitempty"`
+	Eternal *bool `json:"eternal,omitempty"`
+	Agent   *bool `json:"agent,omitempty"`
+	// Due och StartDate sätter målets datum ("YYYY-MM-DD").
+	Due       *string `json:"due,omitempty"`
+	StartDate *string `json:"start_date,omitempty"`
+	// EstimatedMinutes sätter den uppskattade tidsåtgången i minuter.
+	EstimatedMinutes *int `json:"estimated_minutes,omitempty"`
+	// RecurrenceRule sätter upprepningsregeln ("FREQ=WEEKLY;BYDAY=MO").
+	RecurrenceRule *string `json:"recurrence_rule,omitempty"`
+	// RecurrenceMode sätter schemaläggningsstrategin ("schedule" eller "push").
+	RecurrenceMode *string `json:"recurrence_mode,omitempty"`
+	// RecurrenceStartDate sätter seriens startdatum ("YYYY-MM-DD").
+	RecurrenceStartDate *string `json:"recurrence_start_date,omitempty"`
 }
 
 // New creates a new Plan API client
@@ -300,6 +343,40 @@ func (c *Client) GetStatuses(ctx context.Context) ([]Status, error) {
 	return statuses, nil
 }
 
+// GetPlaces returnerar användarens platser.
+//
+// Agenten behöver dem för att kunna föreslå platser på ett mål - den
+// föreslår bara platser som redan finns.
+func (c *Client) GetPlaces(ctx context.Context) ([]Place, error) {
+	var places []Place
+	if err := c.do(ctx, http.MethodGet, pathPlaces, nil, &places); err != nil {
+		return nil, err
+	}
+	return places, nil
+}
+
+// SetGoalTags ersätter målets taggar med de angivna.
+//
+// API:t skapar taggar som inte finns ännu - så agenten kan föreslå en ny
+// tagg. Befintliga taggar ska skickas med, eftersom anropet ersätter
+// hela uppsättningen.
+func (c *Client) SetGoalTags(ctx context.Context, goalID int64, tags []string) error {
+	req := struct {
+		Tags []string `json:"tags"`
+	}{Tags: tags}
+
+	return c.do(ctx, http.MethodPut, fmt.Sprintf(pathGoalTags, goalID), req, nil)
+}
+
+// SetGoalPlaces ersätter målets platser med de angivna.
+func (c *Client) SetGoalPlaces(ctx context.Context, goalID int64, placeIDs []int64) error {
+	req := struct {
+		PlaceIDs []int64 `json:"place_ids"`
+	}{PlaceIDs: placeIDs}
+
+	return c.do(ctx, http.MethodPut, fmt.Sprintf(pathGoalPlaces, goalID), req, nil)
+}
+
 // Status IDs (from seed data)
 const (
 	StatusDefine    = 1
@@ -332,6 +409,23 @@ func (c *Client) GetStatusIDByName(ctx context.Context, phase string) (int, erro
 		}
 	}
 	return 0, fmt.Errorf("goal phase %q is not available in Plan", phase)
+}
+
+// GetPhaseName ger fasnamnet för ett status-id.
+//
+// Det är väntet att statusen motsvarar en fas - men ett okänt id ger
+// ett fel, inte en tom sträng.
+func (c *Client) GetPhaseName(ctx context.Context, statusID int) (string, error) {
+	statuses, err := c.GetStatuses(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get goal statuses: %w", err)
+	}
+	for _, status := range statuses {
+		if int(status.ID) == statusID {
+			return status.Name, nil
+		}
+	}
+	return "", fmt.Errorf("status %d is not available in Plan", statusID)
 }
 
 func (c *Client) UpdateGoalPhase(ctx context.Context, goalID int64, phase string) error {
@@ -455,6 +549,30 @@ type AgentApproval struct {
 	// Payload innehåller exakt det som föreslogs.
 	Payload   map[string]any `json:"payload,omitempty"`
 	DecidedAt *time.Time     `json:"decided_at"`
+}
+
+// Typer av godkännanden. Typen ligger i godkännandets payload ("kind") så
+// att en människa ser vad som föreslogs och att agenten inte blandar
+// ihop ett definitionsförslag med ett kodförslag i samma körning.
+//
+// Typerna deklareras i kontraktet (src/contracts/plan-agent.yaml).
+const (
+	// ApprovalKindGoalDefinition är ett förslag på hur ett mål ska se ut.
+	ApprovalKindGoalDefinition = "goal_definition"
+	// ApprovalKindCodeChange är ett förslag på en kodändring.
+	ApprovalKindCodeChange = "code_change"
+)
+
+// ApprovalKind ger godkännandets typ.
+//
+// Ett godkännande utan typ är ett äldre förslag och behandlas som ett
+// kodförslag - så att förslag som skapats tidigare fortfarande fungerar.
+func (a AgentApproval) ApprovalKind() string {
+	kind, _ := a.Payload["kind"].(string)
+	if kind == "" {
+		return ApprovalKindCodeChange
+	}
+	return kind
 }
 
 // CreateAgentApprovalRequest skapar ett godkännande som väntar på beslut.

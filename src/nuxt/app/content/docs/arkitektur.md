@@ -57,7 +57,7 @@ PostgreSQL-databas.
 | Gränssnitt | `src/nuxt` | `node:lts-alpine` | 3000 | SPA, proxy mot API:erna |
 | Plan API | `src/api` | `gcr.io/distroless` | 8080 | Mål, kalender, agentkörningar, godkännanden, kostnad |
 | Agent-API | `src/agent` | `plan-agent` | 8080 | Verktyg, chatt, gates, jobbhantering |
-| Agent-worker | `src/agent/cmd/agentworker` | `plan-agent` | - | Utför en körning i ett Kubernetes Job |
+| Agent-worker | `src/agent/cmd/agent-worker` | `plan-agent` | - | Utför en körning i ett Kubernetes Job |
 
 Båda Go-träden ligger i **en** Go-modul med rot i `src/` (modulnamn
 `plan`): `src/api` ger `plan/api/...` och `src/agent` ger
@@ -83,34 +83,32 @@ src/
 │   │   ├── content/docs/ Dokumentationens markdown-filer
 │   │   └── stores/      Pinia (goals)
 │   └── server/      Proxy mot Go- och agent-API:t
-├── go/              Plan API (Gin)
-│   ├── cmd/server/  Startpunkt
+├── api/             Plan API (Gin)
+│   ├── cmd/api/     Startpunkt
 │   ├── internal/
 │   │   ├── handlers/    HTTP-handlers per domän
 │   │   ├── middleware/  Auth, scopes
 │   │   ├── database/    Anslutning och seed
 │   │   └── pricing/     Prislista för agentkostnad
 │   └── docs/        Genererad OpenAPI-spec
-├── agent/           Agentmotorn (egen Go-modul)
-│   ├── cmd/agentworker/  Workerns ingång
+├── agent/           Agentmotorn
+│   ├── cmd/agent-api/    Agent-API:t (långlivad)
+│   ├── cmd/agent-worker/ Workerns ingång (kör en uppgift och avslutar)
 │   ├── cmd/wikictl/      Verktyget för kunskapswikin
 │   └── internal/
-│       ├── agentworker/  Pollar Plan efter agentmål
-│       ├── definer/      Skriver definitionen för ett mål
-│       ├── executor/     Utför en definierad uppgift
-│       ├── proposer/     Föreslår kodändringar
-│       ├── coder/        Klonar, ändrar, testar, skapar PR
-│       ├── jobcontroller/ Skapar Kubernetes Jobb per körning
-│       ├── profile/      coding- och life-profiler
-│       ├── core/         Verktyg, gates, orchestrator, minne
-│       ├── planclient/   Agentens klient mot Plan
-│       └── wiki/         Kunskapswikin
+│       ├── agentworker/    Internt paket (namnet är oförändrat)
+│       ├── definer/        Skriver definitionen för ett mål
+│       ├── goaldefinition/ Bygger förslaget - fyller luckor, skriver aldrig över
+│       ├── executor/       Utför en definierad uppgift
+│       ├── proposer/       Föreslår kodändringar
+│       ├── coder/          Klonar, ändrar, testar, skapar PR
+│       ├── jobcontroller/  Skapar Kubernetes Jobb per körning
+│       ├── profile/        coding- och life-profiler
+│       ├── core/           Verktyg, gates, orchestrator, minne
+│       ├── planclient/     Agentens klient mot Plan
+│       └── wiki/           Kunskapswikin
 ├── contracts/       Kontraktet mellan Plan och agenten
-├── commands/        Kommandon som agentmotorn kan ladda
-└── api/             Dockerfile för lokal agentutveckling
-
-environments/         Kubernetes-manifest (base, dev, pr, prod)
-wiki/                 Den gemensamma kunskapswikin
+└── go.mod           Gemensam Go-modul för API och agent
 ```
 
 ## Flöde för en vanlig uppgift

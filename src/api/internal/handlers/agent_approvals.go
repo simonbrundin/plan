@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"plan/api/internal/contracts"
 	"plan/api/internal/models"
 	"plan/api/internal/repository"
 
@@ -139,6 +141,11 @@ func (h *AgentApprovalHandler) CreateAgentApproval(c *gin.Context) {
 	}
 	req.AgentRunID = runID
 
+	if err := validateApprovalKind(req.Payload); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
 	approval, err := h.repo.Create(c.Request.Context(), userID, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
@@ -150,6 +157,31 @@ func (h *AgentApprovalHandler) CreateAgentApproval(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, approval)
+}
+
+// validateApprovalKind kontrollerar att godkännandets typ finns i kontraktet
+// mellan Plan och agenten.
+//
+// Ett förslag utan typ godtas - det är ett äldre förslag, före typerna
+// introducerades, och behandlas som ett kodförslag.
+func validateApprovalKind(payload map[string]any) error {
+	kind, ok := payload["kind"].(string)
+	if !ok || kind == "" {
+		return nil
+	}
+
+	contract, err := contracts.Shared()
+	if err != nil {
+		// Kontraktet kunde inte läsas. Då går förslaget igenom - ett
+		// förslag ska inte stoppas av att en fil saknas.
+		return nil
+	}
+
+	if !contract.HasApprovalKind(kind) {
+		return fmt.Errorf("okänd godkännandetyp %q", kind)
+	}
+
+	return nil
 }
 
 // DecideAgentApproval godoc

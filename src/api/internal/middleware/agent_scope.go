@@ -26,6 +26,12 @@ func agentScopeAllows(method, path string) bool {
 	case "statuses":
 		return method == http.MethodGet
 
+	case "places":
+		// Agenten behöver känna till användarens platser för att kunna
+		// föreslå platser på ett mål. Den får inte skapa eller radera
+		// platser.
+		return method == http.MethodGet
+
 	case "goals":
 		return agentScopeAllowsGoals(method, rest)
 
@@ -56,8 +62,15 @@ func agentScopeAllowsGoals(method string, rest []string) bool {
 		}
 		return method == http.MethodGet || method == http.MethodPatch
 	case 2:
-		// Statusen på ett mål.
-		return rest[1] == "status" && (method == http.MethodGet || method == http.MethodPatch)
+		switch rest[1] {
+		case "status":
+			// Statusen på ett mål.
+			return method == http.MethodGet || method == http.MethodPatch
+		case "tags", "places":
+			// Agenten får sätta taggar och platser på ett mål - de är
+			// en del av måldefinitionen. Den får inte radera dem.
+			return method == http.MethodPut
+		}
 	}
 
 	return false
