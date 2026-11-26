@@ -1,7 +1,8 @@
 # Plan
 
-Plan är kontrollplanet för både livsplanering och agentkörningar. Agentmotorn
-ligger i samma repository under `src/agent` och körs som en separat tjänst.
+Plan är kontrollplanet för både livsplanering och agentkörningar. Plan-API:t
+(`src/api`) och agentmotorn (`src/agent`) delar en Go-modul med rot i `src/`,
+men byggs till separata binärer och körs som separata tjänster.
 
 | Dokument                                                               | Innehåll                                    |
 | ---------------------------------------------------------------------- | ------------------------------------------- |

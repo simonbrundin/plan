@@ -148,7 +148,7 @@ data - inget extra att göra där.
 cd src/nuxt && bun run dev
 
 # Go API
-cd src/api && go run ./cmd/server
+cd src && go run ./api/cmd/server
 
 # PostgreSQL (if local)
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres:16
@@ -215,7 +215,7 @@ Wikin flyttades hit från `agents`-repot 2026-11-24 i samband med att
 agentens backend lades in under `src/agent`. Verktyget byggs med:
 
 ```bash
-cd src/agent && go build -o ~/.local/bin/wikictl ./cmd/wikictl
+cd src && go build -o ~/.local/bin/wikictl ./agent/cmd/wikictl
 ```
 
 ## Kunskaps-wiki

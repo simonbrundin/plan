@@ -23,8 +23,11 @@ Agent API (`src/agent`)
 
 - `src/api/` — Plan API och kontrollplan.
 - `src/nuxt/` — Plan-gränssnittet.
-- `src/agent/` — agentmotorn, worker och agent-API:t som egen Go-modul.
+- `src/agent/` — agentmotorn, worker och agent-API:t.
 - `src/agent/commands/` — kommandon som kan laddas av agentmotorn.
+- `src/go.mod` — Go-modulen. Roten är `src/`: `src/api` ger `plan/api/...`
+  och `src/agent` ger `plan/agent/...`. En modul, två binärer
+  (`plan-api`, `plan-agent`) och två tjänster.
 - `wiki/` — gemensam kunskapswiki.
 
 ## Exekveringsmodell
@@ -377,7 +380,9 @@ till Plan med människans session - agentens nyckel går inte igenom.
 ## Aktuell migrationsstatus
 
 Agent-backendens kod är inflyttad till `src/agent` och bygger med
-`src/agent/Dockerfile` från repository-roten. Plan har redan serverroutes och
+`src/agent/Dockerfile` från repository-roten. Go-modulen är gemensam
+med Plan-API:t och har rot i `src/` - därför kopieras `src/go.mod` och
+`src/go.sum` in i bilden. Plan har redan serverroutes och
 UI för agentmål, körningar, konversationer och godkännanden.
 
 Dev-miljön har nu manifest för en separat agentdatabas (`plan-agent-db`),

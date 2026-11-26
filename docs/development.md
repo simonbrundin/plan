@@ -24,7 +24,7 @@ Tilt bygger tre images:
 | Image | Byggcontext | Vad det är |
 | --- | --- | --- |
 | `plan-nuxt` | `src/nuxt` | Plan-gränssnittet |
-| `plan-go-api` | `src/api` | Plan API - äger mål, körningar, godkännanden |
+| `plan-go-api` | `src` | Plan API - äger mål, körningar, godkännanden |
 | `plan-agent` | repo-roten | Agent-API:t och workern - utför arbetet |
 
 Portar i dev:
@@ -67,5 +67,5 @@ Wikin ligger i `wiki/` i det här repot och delas av alla andra repor.
 Verktyget byggs med:
 
 ```bash
-cd src/agent && go build -o ~/.local/bin/wikictl ./cmd/wikictl
+cd src && go build -o ~/.local/bin/wikictl ./agent/cmd/wikictl
 ```

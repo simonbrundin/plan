@@ -8,4 +8,7 @@
 src/*
 !src/agent/
 !src/agent/**
+# Go-modulen ligger i src/ och omfattar både api/ och agent/.
+!src/go.mod
+!src/go.sum
 !README.md
