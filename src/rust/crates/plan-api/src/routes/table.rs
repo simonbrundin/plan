@@ -126,6 +126,13 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
     match (method, path) {
         ("GET", "/health") => get(crate::routes::handlers::health),
 
+        // Autentisering
+        ("GET", "/api/v1/auth/login") => get(crate::routes::auth::login),
+        ("GET", "/api/v1/auth/callback") => get(crate::routes::auth::callback),
+        ("POST", "/api/v1/auth/dev-login") => post(crate::routes::auth::dev_login),
+        ("GET", "/api/v1/auth/session") => get(crate::routes::auth::session),
+        ("POST", "/api/v1/auth/logout") => post(crate::routes::auth::logout),
+
         ("GET", "/api/v1/goals") => get(crate::routes::goals::get_goals),
         ("POST", "/api/v1/goals") => post(crate::routes::goals::create_goal),
         ("GET", "/api/v1/goals/{id}") => get(crate::routes::goals::get_goal),
@@ -290,6 +297,51 @@ mod tests {
             saknas.is_empty(),
             "följande routes finns i Go-tjänsten men inte i Rust-tabellen: {}",
             saknas.join(", ")
+        );
+    }
+
+    /// Varje route i tabellen ska ha en handler.
+    ///
+    /// En route utan handler svarar med 501 - det fångar en endpoint som
+    /// glömts bort när den portades.
+    #[test]
+    fn varje_route_i_tabellen_har_en_handler() {
+        let kalla = include_str!("table.rs");
+        let funktion = kalla
+            .split("fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {")
+            .nth(1)
+            .expect("route_for finns i filen");
+        let funktion = funktion
+            .split("\n    }\n")
+            .next()
+            .expect("route_for har en avslutande parentes");
+
+        // Varje arm börjar med (metod, "sökväg") => ...
+        let mut handlagda = BTreeSet::new();
+        for rad in funktion.lines() {
+            let rad = rad.trim();
+            let Some(rest) = rad.strip_prefix("(\"") else {
+                continue;
+            };
+            let Some((metod, rest)) = rest.split_once("\", \"") else {
+                continue;
+            };
+            let Some(sokvag) = rest.split_once("\"") else {
+                continue;
+            };
+            handlagda.insert((metod.to_string(), sokvag.0.to_string()));
+        }
+
+        let tabellen: BTreeSet<(String, String)> = rust_routes().into_iter().collect();
+        let utan_handler: Vec<String> = tabellen
+            .difference(&handlagda)
+            .map(|(metod, sokvag)| format!("{metod} {sokvag}"))
+            .collect();
+
+        assert!(
+            utan_handler.is_empty(),
+            "följande routes saknar handler: {}",
+            utan_handler.join(", ")
         );
     }
 

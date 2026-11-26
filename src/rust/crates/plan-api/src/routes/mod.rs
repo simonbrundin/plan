@@ -7,6 +7,7 @@ pub mod agent_approvals;
 pub mod agent_runs;
 pub mod agent_usage;
 pub mod api_keys;
+pub mod auth;
 pub mod calendar_events;
 pub mod calendars;
 pub mod goals;

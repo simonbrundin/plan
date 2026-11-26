@@ -9,7 +9,7 @@ use utoipa::openapi::server::Server;
 use utoipa::OpenApi;
 
 use crate::routes::{
-    agent_approvals, agent_runs, agent_usage, api_keys, calendar_events, calendars, goals,
+    agent_approvals, agent_runs, agent_usage, api_keys, auth, calendar_events, calendars, goals,
     handlers, places, relations, statuses, tags,
 };
 
@@ -38,6 +38,11 @@ use crate::routes::{
     ),
     paths(
         handlers::health,
+        auth::login,
+        auth::callback,
+        auth::dev_login,
+        auth::session,
+        auth::logout,
         statuses::get_statuses,
         statuses::get_goal_status,
         statuses::update_goal_status,

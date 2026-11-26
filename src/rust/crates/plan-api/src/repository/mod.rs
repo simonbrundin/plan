@@ -14,3 +14,4 @@ pub mod calendar_event;
 pub mod goal;
 pub mod place;
 pub mod tag;
+pub mod user;

@@ -265,16 +265,18 @@ pub fn session_cookies(token: &str, sub: &str, email: &str, secure: bool) -> Vec
     let user_data = serde_json::json!({ "sub": sub, "email": email });
     let encoded_user = base64::engine::general_purpose::STANDARD.encode(user_data.to_string());
 
+    // Go skriver attributen i ordningen Path, Max-Age, HttpOnly, Secure,
+    // SameSite - samma ordning ger samma header.
     vec![
         format!(
-            "{}={}; Path=/; Max-Age={}; HttpOnly; SameSite=Lax{}",
+            "{}={}; Path=/; Max-Age={}; HttpOnly{}; SameSite=Lax",
             SESSION_COOKIE_NAME,
             token,
             COOKIE_MAX_AGE_SECONDS,
             if secure { "; Secure" } else { "" }
         ),
         format!(
-            "{}={}; Path=/; Max-Age={}; SameSite=Lax{}",
+            "{}={}; Path=/; Max-Age={}{}; SameSite=Lax",
             USER_COOKIE_NAME,
             encoded_user,
             COOKIE_MAX_AGE_SECONDS,
@@ -285,14 +287,15 @@ pub fn session_cookies(token: &str, sub: &str, email: &str, secure: bool) -> Vec
 
 /// Bygger cookie-headers som rensar sessionen.
 pub fn clear_session_cookies(secure: bool) -> Vec<String> {
+    // Go skriver "Max-Age=0" när max age är negativ - samma som här.
     vec![
         format!(
-            "{}=; Path=/; Max-Age=-1; HttpOnly; SameSite=Lax{}",
+            "{}=; Path=/; Max-Age=0; HttpOnly{}; SameSite=Lax",
             SESSION_COOKIE_NAME,
             if secure { "; Secure" } else { "" }
         ),
         format!(
-            "{}=; Path=/; Max-Age=-1; SameSite=Lax{}",
+            "{}=; Path=/; Max-Age=0{}; SameSite=Lax",
             USER_COOKIE_NAME,
             if secure { "; Secure" } else { "" }
         ),
