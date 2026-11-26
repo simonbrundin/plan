@@ -9,7 +9,8 @@ use utoipa::openapi::server::Server;
 use utoipa::OpenApi;
 
 use crate::routes::{
-    calendar_events, calendars, goals, handlers, places, relations, statuses, tags,
+    agent_approvals, agent_runs, agent_usage, api_keys, calendar_events, calendars, goals,
+    handlers, places, relations, statuses, tags,
 };
 
 /// Grund för OpenAPI-specen.
@@ -83,6 +84,28 @@ use crate::routes::{
         calendar_events::delete,
         calendar_events::create_occurrence_override,
         calendar_events::split_series,
+        agent_runs::lifecycle,
+        agent_runs::list,
+        agent_runs::create,
+        agent_runs::update,
+        agent_runs::cancel,
+        agent_runs::list_events,
+        agent_runs::create_event,
+        agent_usage::get_usage,
+        agent_usage::record_usage,
+        agent_usage::list_usage,
+        agent_usage::list_budgets,
+        agent_usage::create_budget,
+        agent_usage::budget_status,
+        agent_usage::update_budget,
+        agent_usage::delete_budget,
+        agent_approvals::list_for_run,
+        agent_approvals::create,
+        agent_approvals::list_pending,
+        agent_approvals::decide,
+        api_keys::list,
+        api_keys::create,
+        api_keys::delete,
     )
 )]
 pub struct ApiDoc;

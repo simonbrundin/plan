@@ -147,13 +147,13 @@ async fn agent_nyckeln_far_inte_radera_mal() {
 }
 
 #[tokio::test]
-async fn agent_nyckeln_far_inte_radera_direkt_pa_malet() {
+async fn en_okand_vag_svarar_404_precis_som_gin() {
     let _lås = lås().lock().await;
     forbered();
     std::env::set_var("AGENT_API_KEY", "agent-nyckel");
 
     let app = app();
-    let (status, _) = anrop(
+    let (status, body) = anrop(
         &app,
         "DELETE",
         "/api/v1/goals",
@@ -161,7 +161,10 @@ async fn agent_nyckeln_far_inte_radera_direkt_pa_malet() {
     )
     .await;
 
-    assert_eq!(status, StatusCode::FORBIDDEN);
+    // Gin svarar "404 page not found" när ingen route matchar. Authen
+    // körs inte ens, eftersom den i Go sitter på API-gruppens routes.
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    assert_eq!(body, "404 page not found");
 }
 
 #[tokio::test]
@@ -213,11 +216,11 @@ async fn en_oportad_vag_svarar_501() {
     let app = app();
 
     // Vägar som ännu inte är portade ska ge 501 - inte en tyst 404 som
-    // ser ut att fungera.
+    // ser ut att fungera. Auth-vägarna är de nästa som portas.
     let (status, _) = anrop(
         &app,
         "GET",
-        "/api/v1/agent-runs",
+        "/api/v1/auth/session",
         &[("Authorization", "Bearer user_4")],
     )
     .await;

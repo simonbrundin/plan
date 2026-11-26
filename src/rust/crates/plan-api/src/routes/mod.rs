@@ -3,6 +3,10 @@
 //! Routern bygger samma vägar som Go-tjänsten (`src/api/cmd/api/main.go`).
 //! Paritetstestet i `table.rs` håller de två i synk.
 
+pub mod agent_approvals;
+pub mod agent_runs;
+pub mod agent_usage;
+pub mod api_keys;
 pub mod calendar_events;
 pub mod calendars;
 pub mod goals;
@@ -48,18 +52,52 @@ pub fn router(pool: Option<sqlx::postgres::PgPool>, config: &Config) -> Router {
         config: config.clone(),
     };
 
+    // Autentiseringen ligger på API:ts routes - precis som i Go, där
+    // middleware-kedjan sitter på gruppen `/api/v1`. Okända vägar ska
+    // därför ge 404 som Gin gör, inte 401.
+    let api = table::build().layer(axum::middleware::from_fn_with_state(
+        state.clone(),
+        crate::auth::authenticate,
+    ));
+
     Router::new()
-        .route("/docs", get(scalar_ui))
+        .route("/docs", get(docs_redirect))
         .route("/docs/{*any}", get(scalar_ui))
         .route("/docs/openapi.json", get(openapi_json))
-        .merge(table::build())
+        .merge(api)
+        .fallback(gins_svar)
+        .method_not_allowed_fallback(gins_svar)
         .layer(axum::middleware::from_fn(cors))
-        .layer(axum::middleware::from_fn_with_state(
-            state.clone(),
-            crate::auth::authenticate,
-        ))
         .layer(TraceLayer::new_for_http())
         .with_state(state)
+}
+
+/// Gin skickar vidare "/docs" till "/docs/" - samma sak gör Rust.
+///
+/// Go använder `http.Redirect`, som svarar med en liten HTML-länk.
+async fn docs_redirect() -> Response {
+    (
+        StatusCode::MOVED_PERMANENTLY,
+        [
+            (header::LOCATION, "/docs/"),
+            (header::CONTENT_TYPE, "text/html; charset=utf-8"),
+        ],
+        "<a href=\"/docs/\">Moved Permanently</a>.\n\n",
+    )
+        .into_response()
+}
+
+/// Gin's svar för okända vägar och för metoder som inte stöds.
+///
+/// Gin har ingen egen hantering av metodfel - båda fallen ger
+/// "404 page not found" i ren text.
+async fn gins_svar() -> Response {
+    (
+        StatusCode::NOT_FOUND,
+        [(header::CONTENT_TYPE, "text/plain")],
+        "404 page not found",
+    )
+        .into_response()
 }
 
 /// OpenAPI-specen, genererad ur koden.

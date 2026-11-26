@@ -95,15 +95,17 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | OpenAPI code-first (utoipa) + Scalar | klar |
 | Auth (sessioner, API-nycklar, Zitadel, agent-scope) | klar |
 | Modeller + repositories (statusar, mål, taggar, platser) | klar för de domänerna |
-| Handlers | 32 av 79 portade (statusar, mål, taggar, relationer, beroenden, platser, kalendrar, kalenderhändelser) |
+| Modeller + repositories (agentkörningar, händelser, godkännanden, budgetar, användning, API-nycklar) | klar |
+| Versionsstyrd prislista (kostnad i Plan) | klar |
+| Handlers | 69 av 76 portade (statusar, mål, taggar, relationer, beroenden, platser, kalendrar, kalenderhändelser, agentkörningar, godkännanden, budgetar, användning, API-nycklar) |
 | Live-paritetsskript (Go vs Rust, samma databas) | klar |
 | Agentens API, providers, kärna, worker | inte påbörjat |
 
 ### Vad som återstår i API:t
 
-- Mål: återkommande mål (RRULE), förekomster, målets statusbyte.
-- Agentkörningar, godkännanden, budgets, användning, livscykel.
-- API-nycklar och auth-endpoints (login, callback, session, logout).
+- Auth-endpoints: login, callback, dev-login, session, logout.
+- Mål: återkommande mål (RRULE), förekomster och målets kompletteringar
+  (`POST`/`DELETE /api/v1/goals/{id}/completions`).
 
 ### Noter om paritet
 
@@ -121,6 +123,14 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 - Ett skapat override eller en delad serie svarar `places: null` i båda
   tjänsterna - Go fyller inte i platser i de svaren. Listor, enskilda
   händelser och skapade händelser svarar `places: []`.
+- Gin svarar `404 page not found` i ren text för okända vägar och för
+  metoder som inte stöds. Rust har därför en egen fallback utanför
+  auth-lagret - annars hade okända vägar svarat 401.
+- Ett terminalt tillstånd i livscykeln har `null` som övergångar i båda
+  tjänsterna - Go lämnar en tom lista som null.
+- Kostnaden räknas i Plan ur en versionsstyrd prislista. En okänd modell
+  får dokumenterat fallbackpris med `price_source: "fallback"`, aldrig
+  nollkostnad.
 
 ## Layout
 

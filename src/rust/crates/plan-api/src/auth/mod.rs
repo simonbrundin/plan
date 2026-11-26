@@ -107,7 +107,7 @@ pub async fn authenticate(
 
     if let Some(api_key) = api_key.filter(|key| !key.is_empty()) {
         match apikey::validate_api_key(state.pool.as_ref(), &api_key).await {
-            Ok(identitet) => {
+            Ok(Some(identitet)) => {
                 let caller = Caller {
                     user_id: identitet.user_id,
                     sub: String::new(),
@@ -124,6 +124,16 @@ pub async fn authenticate(
 
                 request.extensions_mut().insert(caller);
                 return next.run(request).await;
+            }
+            // Nyckeln finns inte - Go svarar då utan extra meddelande.
+            Ok(None) => {
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({
+                        "error": "Invalid API key",
+                    })),
+                )
+                    .into_response();
             }
             Err(err) => {
                 return (

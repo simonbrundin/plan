@@ -6,10 +6,12 @@
 
 pub mod auth;
 pub mod config;
+pub mod contracts;
 pub mod db;
 pub mod docs;
 pub mod error;
 pub mod models;
 pub mod openapi;
+pub mod pricing;
 pub mod repository;
 pub mod routes;

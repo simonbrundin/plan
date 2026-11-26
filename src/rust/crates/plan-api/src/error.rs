@@ -29,6 +29,18 @@ pub enum AppError {
     #[error("{0}")]
     Forbidden(String),
 
+    /// En konflikt - t.ex. att en budget stoppar en körning.
+    ///
+    /// Svaret innehåller även `details`, så att klienten vet vad som
+    /// stoppade - inte bara att något gick snett.
+    #[error("{message}")]
+    Conflict {
+        /// Meddelandet som skickas.
+        message: String,
+        /// Detaljerna om vad som hände.
+        details: serde_json::Value,
+    },
+
     /// Ingen giltig autentisering.
     #[error("{0}")]
     Unauthorized(String),
@@ -69,6 +81,7 @@ impl AppError {
             AppError::NotFound(_) => StatusCode::NOT_FOUND,
             AppError::BadRequest(_) => StatusCode::BAD_REQUEST,
             AppError::Forbidden(_) => StatusCode::FORBIDDEN,
+            AppError::Conflict { .. } => StatusCode::CONFLICT,
             AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             AppError::NotImplemented(_) => StatusCode::NOT_IMPLEMENTED,
             AppError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
@@ -97,6 +110,15 @@ impl IntoResponse for AppError {
             }
             other => other.to_string(),
         };
+
+        // Konflikter har ett extra fält - därför byggs svaret särskilt.
+        if let AppError::Conflict { message, details } = &self {
+            return (
+                status,
+                Json(json!({ "message": message, "details": details })),
+            )
+                .into_response();
+        }
 
         (status, Json(json!({ "message": message }))).into_response()
     }

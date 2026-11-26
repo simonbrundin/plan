@@ -17,6 +17,13 @@ pub const SCOPE_FULL: &str = "full";
 /// Nyckelns scope: bara agentens egna anrop.
 pub const SCOPE_AGENT: &str = "agent";
 
+/// Kontrollerar att ett scope är känt.
+///
+/// En okänd scope ger inga rättigheter - därför är listan sluten.
+pub fn giltig_scope(scope: &str) -> bool {
+    scope == SCOPE_FULL || scope == SCOPE_AGENT
+}
+
 /// Resultatet av en nyckelvalidering.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ApiKeyIdentity {
@@ -38,19 +45,23 @@ pub fn hash_api_key(api_key: &str) -> String {
 /// Agentens nyckel sätts i `AGENT_API_KEY` och har agent-scope - gränsen
 /// lever i API:t, inte i en prompt. `API_KEY_BYPASS` är en utvecklingsnyckel
 /// med full behörighet.
+///
+/// `Ok(None)` betyder att nyckeln inte finns - Go svarar då med ett 401
+/// utan extra meddelande. `Err` betyder att databasen inte är uppkopplad,
+/// vilket är det enda fall där Go skickar med ett meddelande.
 pub async fn validate_api_key(
     pool: Option<&sqlx::PgPool>,
     api_key: &str,
-) -> Result<ApiKeyIdentity, String> {
+) -> Result<Option<ApiKeyIdentity>, String> {
     if let Some(agent_key) = std::env::var("AGENT_API_KEY")
         .ok()
         .filter(|k| !k.is_empty())
     {
         if api_key == agent_key {
-            return Ok(ApiKeyIdentity {
+            return Ok(Some(ApiKeyIdentity {
                 user_id: 1,
                 scope: SCOPE_AGENT.to_string(),
-            });
+            }));
         }
     }
 
@@ -59,10 +70,10 @@ pub async fn validate_api_key(
         .filter(|k| !k.is_empty())
     {
         if api_key == bypass {
-            return Ok(ApiKeyIdentity {
+            return Ok(Some(ApiKeyIdentity {
                 user_id: 1,
                 scope: SCOPE_FULL.to_string(),
-            });
+            }));
         }
     }
 
@@ -82,16 +93,32 @@ pub async fn validate_api_key(
     )
     .bind(&key_hash)
     .fetch_optional(pool)
-    .await
-    .map_err(|err| format!("databasfel: {err}"))?;
+    .await;
+
+    // Go behandlar ett databasfel som "nyckeln hittades inte" - samma
+    // svar, men felet loggas så att det inte försvinner.
+    let row = match row {
+        Ok(row) => row,
+        Err(err) => {
+            tracing::warn!("kunde inte slå upp API-nyckeln: {err}");
+            return Ok(None);
+        }
+    };
 
     match row {
-        Some(row) => Ok(ApiKeyIdentity {
-            user_id: row.get::<i64, _>(0),
-            scope: row.get::<String, _>(1),
-        }),
+        Some(row) => {
+            // `user_id` är INTEGER i databasen, så den läses som i32.
+            // `try_get` används i stället för `get` - en typmismatch ska
+            // ge ett fel, inte en panik.
+            let user_id: i32 = row.try_get(0).map_err(|err| format!("databasfel: {err}"))?;
+            let scope: String = row.try_get(1).map_err(|err| format!("databasfel: {err}"))?;
+            Ok(Some(ApiKeyIdentity {
+                user_id: user_id as i64,
+                scope,
+            }))
+        }
         // Nyckeln hittades inte - det är inte ett databasfel.
-        None => Err("API key not found".to_string()),
+        None => Ok(None),
     }
 }
 

@@ -203,6 +203,44 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
             get(crate::routes::statuses::get_status_history)
         }
 
+        // Agentkörningar
+        ("GET", "/api/v1/agent-run-lifecycle") => get(crate::routes::agent_runs::lifecycle),
+        ("GET", "/api/v1/agent-runs") => get(crate::routes::agent_runs::list),
+        ("POST", "/api/v1/agent-runs") => post(crate::routes::agent_runs::create),
+        ("PATCH", "/api/v1/agent-runs/{id}") => patch(crate::routes::agent_runs::update),
+        ("POST", "/api/v1/agent-runs/{id}/cancel") => post(crate::routes::agent_runs::cancel),
+        ("GET", "/api/v1/agent-runs/{id}/events") => get(crate::routes::agent_runs::list_events),
+        ("POST", "/api/v1/agent-runs/{id}/events") => post(crate::routes::agent_runs::create_event),
+        ("GET", "/api/v1/agent-runs/{id}/usage") => get(crate::routes::agent_usage::get_usage),
+        ("POST", "/api/v1/agent-runs/{id}/usage") => post(crate::routes::agent_usage::record_usage),
+        ("GET", "/api/v1/agent-usage") => get(crate::routes::agent_usage::list_usage),
+        ("GET", "/api/v1/agent-budgets") => get(crate::routes::agent_usage::list_budgets),
+        ("POST", "/api/v1/agent-budgets") => post(crate::routes::agent_usage::create_budget),
+        ("GET", "/api/v1/agent-budgets/{id}/status") => {
+            get(crate::routes::agent_usage::budget_status)
+        }
+        ("PATCH", "/api/v1/agent-budgets/{id}") => patch(crate::routes::agent_usage::update_budget),
+        ("DELETE", "/api/v1/agent-budgets/{id}") => {
+            delete(crate::routes::agent_usage::delete_budget)
+        }
+
+        // Godkännanden
+        ("GET", "/api/v1/agent-runs/{id}/approvals") => {
+            get(crate::routes::agent_approvals::list_for_run)
+        }
+        ("POST", "/api/v1/agent-runs/{id}/approvals") => {
+            post(crate::routes::agent_approvals::create)
+        }
+        ("GET", "/api/v1/agent-approvals") => get(crate::routes::agent_approvals::list_pending),
+        ("POST", "/api/v1/agent-approvals/{id}/decision") => {
+            post(crate::routes::agent_approvals::decide)
+        }
+
+        // API-nycklar
+        ("GET", "/api/v1/api-keys") => get(crate::routes::api_keys::list),
+        ("POST", "/api/v1/api-keys") => post(crate::routes::api_keys::create),
+        ("DELETE", "/api/v1/api-keys") => delete(crate::routes::api_keys::delete),
+
         ("GET", _) => get(crate::routes::handlers::not_implemented),
         ("POST", _) => post(crate::routes::handlers::not_implemented),
         ("PUT", _) => put(crate::routes::handlers::not_implemented),
