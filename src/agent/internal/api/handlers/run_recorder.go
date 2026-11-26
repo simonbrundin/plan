@@ -9,7 +9,7 @@ import (
 
 // runRecorder skriver händelser till en AgentRun i Plan.
 //
-// Den interaktiva målchatten hör till samma körning som agentworkern startade,
+// Den interaktiva målchatten hör till samma körning som agent-workern startade,
 // så historiken visar hela arbetet - inte bara definitionen.
 type runRecorder struct {
 	client *planclient.Client

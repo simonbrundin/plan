@@ -55,7 +55,7 @@ jobs:
       - name: Build
         run: |
           cd src
-          go build -o /tmp/agent-worker ./agent/cmd/agentworker
+          go build -o /tmp/agent-worker ./agent/cmd/agent-worker
 
       - name: Upload coverage
         if: success()

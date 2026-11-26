@@ -148,7 +148,7 @@ data - inget extra att göra där.
 cd src/nuxt && bun run dev
 
 # Go API
-cd src && go run ./api/cmd/server
+cd src && go run ./api/cmd/api
 
 # PostgreSQL (if local)
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres:16

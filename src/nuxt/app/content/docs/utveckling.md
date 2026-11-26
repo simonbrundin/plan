@@ -18,7 +18,7 @@ group: Utvecklare
 cd src/nuxt && bun run dev
 
 # Go API (port 8080)
-cd src && go run ./api/cmd/server
+cd src && go run ./api/cmd/api
 ```
 
 Dev kör **inte** mot en Postgres i klustret. `environments/dev/db/neon.env`

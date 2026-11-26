@@ -203,7 +203,7 @@ func TestCreateSkaparJobbet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
-	if fetched.Spec.Template.Spec.Containers[0].Name != "agentworker" {
+	if fetched.Spec.Template.Spec.Containers[0].Name != "agent-worker" {
 		t.Errorf("containern heter %q", fetched.Spec.Template.Spec.Containers[0].Name)
 	}
 }

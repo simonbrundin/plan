@@ -12,7 +12,7 @@ RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
 COPY go.mod go.sum ./
 RUN go mod download
 COPY api/ ./api/
-RUN swag init -g api/cmd/server/main.go -o api/docs --parseFuncBody --quiet
+RUN swag init -g api/cmd/api/main.go -o api/docs --parseFuncBody --quiet
 
 # ==============================
 # Build Stage
@@ -34,7 +34,7 @@ COPY api/ ./api/
 COPY --from=swag /app/api/docs ./api/docs
 
 # Bygg binären
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o plan-api ./api/cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o plan-api ./api/cmd/api
 
 # ==============================
 # Runtime Stage (minimal, säker)

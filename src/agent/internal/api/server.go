@@ -201,13 +201,6 @@ func Run() {
 			v1.POST("/workflow/decision", workflowHandler.SubmitHumanDecision)
 		}
 
-		// Goals
-		v1.GET("/goals", handlers.ListGoals)
-		v1.GET("/goals/stats", handlers.GetGoalStats)
-		v1.GET("/goals/:id", handlers.GetGoal)
-		v1.PATCH("/goals/:id", handlers.UpdateGoal)
-		v1.POST("/goals/start-agent", handlers.StartAgentForGoal)
-
 		// Conversations
 		v1.GET("/conversations", handlers.ListConversations)
 		v1.POST("/conversations", handlers.CreateConversation)
@@ -229,9 +222,8 @@ func Run() {
 		v1.GET("/approvals/:goal_id", approvalHandler.GetApproval)
 		v1.POST("/approvals/:goal_id/decision", approvalHandler.DecideApproval)
 
-		// Docs (README/Roadmap som markdown)
+		// Docs (README som markdown)
 		v1.GET("/readme", handlers.GetReadme)
-		v1.GET("/roadmap", handlers.GetRoadmap)
 
 		// WebSocket för realtids-chatt
 		v1.GET("/ws/chat", handlers.NewWebSocketHandler().HandleChat)
@@ -270,13 +262,32 @@ func Run() {
 	log.Printf("Server starting on :%s", port)
 	log.Printf("Scalar Docs: http://localhost:%s/docs (OpenAPI spec: /openapi.json)", port)
 
-	switch mode := os.Getenv("AGENT_GOAL_MODE"); mode {
-	case "worker":
+	// Vad som startas styrs av AGENT_WORKER_ENABLED och
+	// AGENT_SCHEDULER_ENABLED. I klustret är båda avstängda - där går
+	// arbetet via Kubernetes Jobs i stället.
+	//
+	// AGENT_GOAL_MODE är deprecated. Den används bara om ingen av
+	// flaggorna är satta, så att en gammal deployment inte tyst slutar
+	// att starta något.
+	workerEnabled := os.Getenv("AGENT_WORKER_ENABLED")
+	schedulerEnabled := os.Getenv("AGENT_SCHEDULER_ENABLED")
+
+	if workerEnabled == "" && schedulerEnabled == "" {
+		switch mode := os.Getenv("AGENT_GOAL_MODE"); mode {
+		case "worker":
+			workerEnabled = "true"
+		case "", "approval":
+			schedulerEnabled = "true"
+		default:
+			log.Printf("Unknown AGENT_GOAL_MODE %q; starting approval scheduler", mode)
+			schedulerEnabled = "true"
+		}
+	}
+
+	if workerEnabled == "true" {
 		go startAgentWorker(ctx, planClient)
-	case "", "approval":
-		go startGoalScheduler(ctx, planClient, approvalStore)
-	default:
-		log.Printf("Unknown AGENT_GOAL_MODE %q; starting approval scheduler", mode)
+	}
+	if schedulerEnabled == "true" {
 		go startGoalScheduler(ctx, planClient, approvalStore)
 	}
 

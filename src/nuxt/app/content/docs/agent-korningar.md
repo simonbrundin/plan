@@ -55,7 +55,7 @@ AgentRun (status queued)          ← Plan äger körningen
    ▼  jobbcontroller
 Kubernetes Job (agent-worker-run-<id>)
    ├── init-container: klonar repot till /workspace/repo
-   └── agentworker: arbetar i en isolerad kopia, rapporterar till Plan
+   └── agent-worker: arbetar i en isolerad kopia, rapporterar till Plan
 ```
 
 ### Säkerhetsgränser
@@ -150,7 +150,7 @@ Workern kan köras mot ett enda mål, utan Kubernetes:
 
 ```bash
 cd src
-AGENT_GOAL_ID=449 go run ./agent/cmd/agentworker
+AGENT_GOAL_ID=449 go run ./agent/cmd/agent-worker
 ```
 
 Utan `AGENT_REPO_PATH` gör workern bara definitioner - kodändringar

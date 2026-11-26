@@ -344,10 +344,10 @@ func (r *Runner) Build(spec Spec, image string) (*batchv1.Job, error) {
 					},
 					Containers: []corev1.Container{
 						{
-							Name:            "agentworker",
+							Name:            "agent-worker",
 							Image:           image,
 							ImagePullPolicy: r.config.ImagePullPolicy,
-							Command:         []string{"/app/agentworker"},
+							Command:         []string{"/app/agent-worker"},
 							Env:             env,
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: "workspace", MountPath: "/workspace"},

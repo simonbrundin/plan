@@ -96,7 +96,7 @@ func TestReconcileStartarJobb(t *testing.T) {
 	if err != nil {
 		t.Fatalf("jobbet skapades inte: %v", err)
 	}
-	if job.Spec.Template.Spec.Containers[0].Name != "agentworker" {
+	if job.Spec.Template.Spec.Containers[0].Name != "agent-worker" {
 		t.Errorf("containern heter %q", job.Spec.Template.Spec.Containers[0].Name)
 	}
 }

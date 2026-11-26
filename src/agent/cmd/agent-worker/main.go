@@ -1,9 +1,9 @@
-// Command agentworker kör agent workern utanför API-servern.
+// Command agent-worker kör agent workern utanför API-servern.
 //
 // Workern pollar Plan efter mål som är markerade för agentarbete och
 // specificerar dem. Den kan också köras för ett enda mål:
 //
-//	AGENT_GOAL_ID=449 go run ./agent/cmd/agentworker
+//	AGENT_GOAL_ID=449 go run ./agent/cmd/agent-worker
 package main
 
 import (
@@ -117,7 +117,7 @@ func agentIDFromEnv() string {
 	if hostname, err := os.Hostname(); err == nil && hostname != "" {
 		return "agent:" + hostname
 	}
-	return "agent:agentworker"
+	return "agent:agent-worker"
 }
 
 // initiatorFromEnv beskriver vem eller vad som startade körningen.
@@ -129,7 +129,7 @@ func initiatorFromEnv() string {
 	if hostname, err := os.Hostname(); err == nil && hostname != "" {
 		return "worker:" + hostname
 	}
-	return "worker:agentworker"
+	return "worker:agent-worker"
 }
 
 // profileFromEnv läser AGENT_PROFILE - coding eller life.
