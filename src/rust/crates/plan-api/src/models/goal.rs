@@ -46,10 +46,13 @@ pub struct Goal {
     pub has_parent: bool,
     /// Målets placering bland grundmål.
     pub order: i32,
-    /// Platser där målet kan slutföras - skickas alltid ut, även tom.
-    pub places: Vec<Place>,
-    /// Taggar på målet - skickas alltid ut, även tom.
-    pub tags: Vec<String>,
+    /// Platser där målet kan slutföras.
+    ///
+    /// `None` skickas ut som `null` - det är vad svaret på skapa och
+    /// uppdatera ett mål gör i Go. I listor sätts listan i stället till `[]`.
+    pub places: Option<Vec<Place>>,
+    /// Taggar på målet - samma resonemang som för platser.
+    pub tags: Option<Vec<String>>,
     /// Upprepningsregeln som RRULE-sträng - null om målet inte är
     /// återkommande.
     pub recurrence_rule: Option<String>,

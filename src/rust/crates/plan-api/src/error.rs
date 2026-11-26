@@ -44,6 +44,22 @@ pub enum AppError {
     /// Databasen är inte ansluten - samma svar som Go-tjänsten ger.
     #[error("{0}")]
     ServiceUnavailable(String),
+
+    /// En tidsstämpel kunde inte tolkas som RFC3339.
+    #[error("{0}")]
+    InvalidTimestamp(String),
+
+    /// Ett due-datum kunde inte tolkas som "YYYY-MM-DD".
+    #[error("due-datumet måste vara på formatet YYYY-MM-DD")]
+    InvalidDueDate,
+
+    /// Ett startdatum kunde inte tolkas som "YYYY-MM-DD".
+    #[error("startdatumet måste vara på formatet YYYY-MM-DD")]
+    InvalidStartDate,
+
+    /// Den uppskattade tidsåtgången är inte ett positivt antal minuter.
+    #[error("tidsåtgången måste vara ett positivt antal minuter")]
+    InvalidEstimate,
 }
 
 impl AppError {
@@ -56,6 +72,10 @@ impl AppError {
             AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             AppError::NotImplemented(_) => StatusCode::NOT_IMPLEMENTED,
             AppError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
+            AppError::InvalidTimestamp(_)
+            | AppError::InvalidDueDate
+            | AppError::InvalidStartDate
+            | AppError::InvalidEstimate => StatusCode::BAD_REQUEST,
             AppError::Database(_) | AppError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

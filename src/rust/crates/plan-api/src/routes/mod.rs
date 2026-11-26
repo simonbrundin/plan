@@ -8,6 +8,7 @@ pub mod handlers;
 pub mod state;
 pub mod statuses;
 pub mod table;
+pub mod tags;
 
 use axum::extract::State;
 use axum::http::{header, HeaderValue, Method, StatusCode};

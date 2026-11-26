@@ -129,8 +129,16 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("GET", "/api/v1/goals") => get(crate::routes::goals::get_goals),
         ("POST", "/api/v1/goals") => post(crate::routes::goals::create_goal),
         ("GET", "/api/v1/goals/{id}") => get(crate::routes::goals::get_goal),
+        ("PATCH", "/api/v1/goals/{id}") => patch(crate::routes::goals::update_goal),
         ("DELETE", "/api/v1/goals/{id}") => delete(crate::routes::goals::delete_goal),
         ("GET", "/api/v1/goals/graph") => get(crate::routes::goals::get_goal_graph),
+
+        ("GET", "/api/v1/tags") => get(crate::routes::tags::list),
+        ("GET", "/api/v1/goals/{id}/tags") => get(crate::routes::tags::get_goal_tags),
+        ("PUT", "/api/v1/goals/{id}/tags") => put(crate::routes::tags::set_goal_tags),
+        ("DELETE", "/api/v1/goals/{id}/tags/{name}") => {
+            delete(crate::routes::tags::delete_goal_tag)
+        }
 
         ("GET", "/api/v1/statuses") => get(crate::routes::statuses::get_statuses),
         ("GET", "/api/v1/goals/{id}/status") => get(crate::routes::statuses::get_goal_status),

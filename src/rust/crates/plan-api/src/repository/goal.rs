@@ -280,8 +280,8 @@ fn scanna_mal(rad: &sqlx::postgres::PgRow) -> crate::models::goal::Goal {
         recurrence_mode: rad.get::<Option<String>, _>(18),
         recurrence_next: rad.get::<Option<chrono::NaiveDate>, _>(19),
         recurrence_count: rad.get::<i64, _>(20) as i32,
-        places: Vec::new(),
-        tags: Vec::new(),
+        places: None,
+        tags: None,
     }
 }
 
@@ -406,4 +406,256 @@ pub async fn get_all_dependencies(
             created: rad.get::<chrono::DateTime<chrono::Utc>, _>(3),
         })
         .collect())
+}
+
+/// Bygger UPDATE-frågan för ett mål.
+///
+/// Returnerar även om något alls ska uppdateras - en request utan fält
+/// lämnar målet orört.
+/// Bygger UPDATE-frågan för ett mål.
+///
+/// Returnerar även om något alls ska uppdateras - en request utan fält
+/// lämnar målet orört.
+fn bygg_update_query(
+    req: &crate::models::goal::UpdateGoalRequest,
+) -> Result<(sqlx::QueryBuilder<'_, sqlx::Postgres>, bool), AppError> {
+    // QueryBuilder sätter ihop argumenten utan mellanrum, så varje
+    // textstycke börjar med ett blanksteg, och fälten skiljs med komma.
+    let mut byggare = sqlx::QueryBuilder::<sqlx::Postgres>::new("UPDATE goals SET");
+    let mut har_uppdatering = false;
+    let mut forsta = true;
+
+    // Sätter ett fält med ett värde.
+    macro_rules! satt {
+        ($text:expr, $varde:expr) => {{
+            if !forsta {
+                byggare.push(",");
+            }
+            byggare.push($text).push_bind($varde);
+            forsta = false;
+            har_uppdatering = true;
+        }};
+    }
+
+    // Sätter ett fält till null.
+    macro_rules! rensa {
+        ($text:expr) => {{
+            if !forsta {
+                byggare.push(",");
+            }
+            byggare.push($text);
+            forsta = false;
+            har_uppdatering = true;
+        }};
+    }
+
+    if let Some(titel) = &req.title {
+        satt!(" title = ", titel);
+    }
+
+    if let Some(beskrivning) = &req.description {
+        satt!(" description = ", beskrivning);
+    }
+
+    if let Some(ikon) = &req.icon {
+        satt!(" icon = ", ikon);
+    }
+
+    if req.started.set {
+        match tidsstämpel(req.started.value.as_deref())? {
+            Some(tid) => satt!(" started = ", tid),
+            None => rensa!(" started = NULL"),
+        }
+    }
+
+    // Ett evigt mål kan aldrig vara färdigt. När målet markeras som evigt
+    // nollställs därför finished, oavsett vad requesten samtidigt säger.
+    let blir_evigt = req.eternal == Some(true);
+
+    if req.finished.set && !blir_evigt {
+        match tidsstämpel(req.finished.value.as_deref())? {
+            Some(tid) => satt!(" finished = ", tid),
+            None => rensa!(" finished = NULL"),
+        }
+    }
+
+    if let Some(evigt) = req.eternal {
+        satt!(" eternal = ", evigt);
+        if blir_evigt {
+            rensa!(" finished = NULL");
+        }
+    }
+
+    if let Some(agent) = req.agent {
+        satt!(" agent = ", agent);
+    }
+
+    if let Some(now) = req.now {
+        satt!(" now = ", now);
+    }
+
+    if req.due.set {
+        match datum(req.due.value.as_deref(), || AppError::InvalidDueDate)? {
+            Some(datum) => satt!(" due = ", datum),
+            None => rensa!(" due = NULL"),
+        }
+    }
+
+    // Startdatumet anger från vilket datum målet får dyka upp i
+    // prioriteringslistan. Null = målet får synas direkt.
+    if req.start_date.set {
+        match datum(req.start_date.value.as_deref(), || {
+            AppError::InvalidStartDate
+        })? {
+            Some(datum) => satt!(" start_date = ", datum),
+            None => rensa!(" start_date = NULL"),
+        }
+    }
+
+    // Den uppskattade tidsåtgången sätts i minuter. Null rensar den,
+    // och negativa värden avvisas - en uppskattning kan inte vara negativ.
+    if req.estimated_minutes.set {
+        match req.estimated_minutes.value {
+            Some(minuter) if minuter < 0 => {
+                return Err(AppError::InvalidEstimate);
+            }
+            Some(minuter) => satt!(" estimated_minutes = ", minuter),
+            None => rensa!(" estimated_minutes = NULL"),
+        }
+    }
+
+    // Flaggan läses här - annars varnar rustc om den sista tilldelningen.
+    let _ = forsta;
+
+    Ok((byggare, har_uppdatering))
+}
+
+/// Uppdaterar ett mål.
+///
+/// Endast de fält som skickas ändras. Fält som skickas som null rensas,
+/// och fält som saknas lämnas oförändrade - det är därför fälten är
+/// `Nullable`.
+pub async fn update_goal(
+    pool: &PgPool,
+    goal_id: i64,
+    req: &crate::models::goal::UpdateGoalRequest,
+) -> Result<crate::models::goal::Goal, AppError> {
+    let (mut byggare, har_uppdatering) = bygg_update_query(req)?;
+
+    if !har_uppdatering {
+        // Inget att uppdatera - målet returneras som det är.
+        return get_goal_by_id(pool, goal_id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Goal not found".to_string()));
+    }
+
+    byggare.push(" WHERE id = ").push_bind(goal_id);
+
+    byggare
+        .build()
+        .execute(pool)
+        .await
+        .map_err(|err| AppError::Internal(format!("failed to update goal: {err}")))?;
+
+    get_goal_by_id(pool, goal_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Goal not found".to_string()))
+}
+
+fn tidsstämpel(värde: Option<&str>) -> Result<Option<chrono::DateTime<chrono::Utc>>, AppError> {
+    let Some(rått) = värde.filter(|v| !v.is_empty()) else {
+        return Ok(None);
+    };
+
+    let tid = chrono::DateTime::parse_from_rfc3339(rått)
+        .map_err(|_| AppError::InvalidTimestamp(format!("invalid timestamp: {rått:?}")))?;
+
+    Ok(Some(tid.with_timezone(&chrono::Utc)))
+}
+
+/// Tolkar ett datum på formatet "YYYY-MM-DD".
+///
+/// `None` betyder "inget datum" - fältet rensas. `fel` väljer vilket fel
+/// som ges - due-datum och startdatum har olika meddelanden i Go.
+fn datum(
+    värde: Option<&str>,
+    fel: fn() -> AppError,
+) -> Result<Option<chrono::NaiveDate>, AppError> {
+    let Some(rått) = värde.filter(|v| !v.is_empty()) else {
+        return Ok(None);
+    };
+
+    let datum = chrono::NaiveDate::parse_from_str(rått, "%Y-%m-%d").map_err(|_| fel())?;
+
+    Ok(Some(datum))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::goal::UpdateGoalRequest;
+    use sqlx::Execute;
+
+    /// SQL:en som byggs ska gå att köra - varje fält ska ha sitt utrymme
+    /// och sina bindningar på rätt plats.
+    #[test]
+    fn update_sqlen_byggs_ratt() {
+        let req: UpdateGoalRequest =
+            serde_json::from_str(r#"{"title":"Ny","due":"2026-12-24","now":true}"#).unwrap();
+
+        let (mut byggare, har_uppdatering) = bygg_update_query(&req).unwrap();
+        assert!(har_uppdatering);
+
+        let sql = byggare.build().sql().to_string();
+        assert_eq!(sql, "UPDATE goals SET title = $1, now = $2, due = $3");
+    }
+
+    /// En request utan fält uppdaterar ingenting.
+    #[test]
+    fn tom_request_uppdaterar_inget() {
+        let req: UpdateGoalRequest = serde_json::from_str("{}").unwrap();
+
+        let (_, har_uppdatering) = bygg_update_query(&req).unwrap();
+        assert!(!har_uppdatering);
+    }
+
+    /// Ett nullat fält rensas i stället för att sättas.
+    #[test]
+    fn nullade_falt_rensas() {
+        let req: UpdateGoalRequest =
+            serde_json::from_str(r#"{"due":null,"finished":null}"#).unwrap();
+
+        let (mut byggare, har_uppdatering) = bygg_update_query(&req).unwrap();
+        assert!(har_uppdatering);
+
+        let sql = byggare.build().sql().to_string();
+        assert_eq!(sql, "UPDATE goals SET finished = NULL, due = NULL");
+    }
+
+    /// Negativ tidsåtgång avvisas.
+    #[test]
+    fn negativ_tidsatgang_avvisas() {
+        let req: UpdateGoalRequest = serde_json::from_str(r#"{"estimated_minutes":-5}"#).unwrap();
+
+        match bygg_update_query(&req) {
+            Err(AppError::InvalidEstimate) => {}
+            _ => panic!("ett negativt antal minuter ska avvisas"),
+        }
+    }
+
+    /// Ogiltiga datum avvisas med rätt feltyp.
+    #[test]
+    fn ogiltiga_datum_avvisas() {
+        let req: UpdateGoalRequest = serde_json::from_str(r#"{"due":"2026-13-45"}"#).unwrap();
+        match bygg_update_query(&req) {
+            Err(AppError::InvalidDueDate) => {}
+            _ => panic!("ett ogiltigt due-datum ska avvisas"),
+        }
+
+        let req: UpdateGoalRequest = serde_json::from_str(r#"{"start_date":"gammalt"}"#).unwrap();
+        match bygg_update_query(&req) {
+            Err(AppError::InvalidStartDate) => {}
+            _ => panic!("ett ogiltigt startdatum ska avvisas"),
+        }
+    }
 }

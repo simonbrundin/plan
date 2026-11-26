@@ -6,3 +6,4 @@
 pub mod goal;
 pub mod place;
 pub mod status;
+pub mod tag;

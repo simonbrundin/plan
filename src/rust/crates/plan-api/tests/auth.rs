@@ -217,7 +217,7 @@ async fn en_oportad_vag_svarar_501() {
     let (status, _) = anrop(
         &app,
         "GET",
-        "/api/v1/tags",
+        "/api/v1/agent-runs",
         &[("Authorization", "Bearer user_4")],
     )
     .await;

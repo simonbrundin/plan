@@ -13,7 +13,7 @@ use crate::auth::Caller;
 use crate::error::AppError;
 use crate::models::goal::{
     ChildRelation, ChildWithDeps, CreateGoalRequest, GetGoalResponse, Goal, GoalDependency,
-    GoalFilter, GoalGraphResponse, GoalRelation, GoalWithRelations,
+    GoalFilter, GoalGraphResponse, GoalRelation, GoalWithRelations, UpdateGoalRequest,
 };
 use crate::repository::{goal, place, tag};
 use crate::routes::state::AppState;
@@ -95,13 +95,13 @@ async fn attach_places_and_tags(pool: &sqlx::PgPool, goals: &mut [Goal]) {
 
     if let Ok(platser) = place::get_places_for_goals(pool, &ids).await {
         for mål in goals.iter_mut() {
-            mål.places = platser.get(&mål.id).cloned().unwrap_or_default();
+            mål.places = Some(platser.get(&mål.id).cloned().unwrap_or_default());
         }
     }
 
     if let Ok(taggar) = tag::tags_for_goals(pool, &ids).await {
         for mål in goals.iter_mut() {
-            mål.tags = taggar.get(&mål.id).cloned().unwrap_or_default();
+            mål.tags = Some(taggar.get(&mål.id).cloned().unwrap_or_default());
         }
     }
 }
@@ -431,6 +431,60 @@ pub async fn create_goal(
     let mål = goal::create_goal(pool, user_id, &req.title, icon).await?;
 
     Ok((StatusCode::CREATED, Json(mål)).into_response())
+}
+
+/// Uppdaterar ett mål.
+#[utoipa::path(
+    patch,
+    path = "/api/v1/goals/{id}",
+    tag = "goals",
+    params(("id" = i64, Path, description = "Målets id")),
+    request_body = UpdateGoalRequest,
+    responses(
+        (status = 200, description = "Det uppdaterade målet", content_type = "application/json",
+            body = Goal),
+        (status = 400, description = "Ogiltig data eller ogiltigt mål-id"),
+        (status = 403, description = "Ingen åtkomst till målet")
+    )
+)]
+pub async fn update_goal(
+    State(state): State<AppState>,
+    Extension(caller): Extension<Caller>,
+    Path(id): Path<String>,
+    Json(req): Json<UpdateGoalRequest>,
+) -> Result<Json<Goal>, AppError> {
+    let user_id = user_id(&caller)?;
+    let goal_id = goal_id(&id)?;
+
+    let Some(pool) = state.pool.as_ref() else {
+        return Err(no_database());
+    };
+
+    if !goal::user_has_access(pool, user_id, goal_id).await? {
+        return Err(AppError::Forbidden("Access denied".to_string()));
+    }
+
+    // Ett evigt mål kan inte slutföras - det pågår hela livet.
+    if req.finishes_goal() {
+        if let Some(existerande) = goal::get_goal_by_id(pool, goal_id).await? {
+            if existerande.eternal {
+                return Err(AppError::BadRequest(
+                    "Ett evigt mål kan inte slutföras".to_string(),
+                ));
+            }
+        }
+    }
+
+    // Upprepning hanteras inte ännu i Rust-tjänsten.
+    if req.recurrence_rule.set || req.recurrence_mode.set {
+        return Err(AppError::NotImplemented(
+            "Återkommande mål hanteras inte ännu i Rust-tjänsten".to_string(),
+        ));
+    }
+
+    let mål = goal::update_goal(pool, goal_id, &req).await?;
+
+    Ok(Json(mål))
 }
 
 /// Tar bort ett mål.
