@@ -4,7 +4,7 @@ type: note
 tags: [agent, api, scope, bug, projekt:plan]
 ---
 
-Agentens egen API-nyckel har scope 'agent' i prod (hashen sätts in av environments/prod/secrets/plan-api-key.sql). Då gäller allowlistan i src/go/internal/middleware/agent_scope.go - i dev har nyckeln scope 'full', så avvikelser syns inte där.
+Agentens egen API-nyckel har scope 'agent' i prod (hashen sätts in av environments/prod/secrets/plan-api-key.sql). Då gäller allowlistan i src/api/internal/middleware/agent_scope.go - i dev har nyckeln scope 'full', så avvikelser syns inte där.
 
 Fynd 2026-11-25: POST /api/v1/goals/relations (anropet agenten gör i create_subgoal för att skapa undermål) var INTE tillåtet för agent-scope. Allowlisten behandlade varje segment efter /api/v1/goals/ som ett mål-id, så 'relations' föll på 'GET eller PATCH'. I prod skulle varje undermål ha fått 403 Forbidden.
 

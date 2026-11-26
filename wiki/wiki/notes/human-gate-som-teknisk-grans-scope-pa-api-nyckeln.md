@@ -9,7 +9,7 @@ status: active
 
 I ~/repos/plan (Fas 4 i mål 497) görs human gate till en teknisk gräns i två steg.
 
-1. Scopade API-nycklar i Plan (src/go). api_keys fick en scope-kolumn ('full' eller 'agent'). Agent-nyckeln har scope=agent och en allowlist (internal/middleware/agent_scope.go) som stoppar: beslut om godkännande, radering, och allt som hör till kalendrar, API-nycklar och användare. Agenten kan alltså inte godkänna sig själv - inte för att den blivit tillsagd att inte göra det, utan för att nyckeln inte räcker.
+1. Scopade API-nycklar i Plan (src/api). api_keys fick en scope-kolumn ('full' eller 'agent'). Agent-nyckeln har scope=agent och en allowlist (internal/middleware/agent_scope.go) som stoppar: beslut om godkännande, radering, och allt som hör till kalendrar, API-nycklar och användare. Agenten kan alltså inte godkänna sig själv - inte för att den blivit tillsagd att inte göra det, utan för att nyckeln inte räcker.
 
 2. Agent-API:t kräver AGENT_API_KEY (src/agent/internal/api/middleware/auth.go). Innan dess kunde vem som helst som nådde tjänsten besluta om ett godkännande åt människor. Nu skickar Nuxt nyckeln server-side och webbläsaren ser den aldrig.
 

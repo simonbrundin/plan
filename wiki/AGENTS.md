@@ -260,7 +260,7 @@ Slås ihop manuellt, aldrig automatiskt:
 
 ## Verktyget: `wikictl`
 
-Källa: `agents/src/go/cmd/wikictl` (paketet `internal/wiki`).
+Källa: `src/agent/cmd/wikictl` (paketet `internal/wiki`).
 Installerat i `~/.local/bin`.
 
 ```bash

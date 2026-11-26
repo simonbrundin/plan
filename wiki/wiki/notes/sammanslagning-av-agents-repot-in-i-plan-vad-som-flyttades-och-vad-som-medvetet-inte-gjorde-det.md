@@ -3,8 +3,9 @@ title: Sammanslagning av agents-repot in i plan: vad som flyttades och vad som m
 type: note
 tags: [plan, agent, migrering, repo, sammanläggning, ci, kubernetes, projekt:simon]
 created: 2026-11-24
-updated: 2026-11-24
+updated: 2026-11-26
 status: active
+related: [notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]
 ---
 
 Fas 5 i mål 497 (mål 520) slutfördes 2026-11-24. agents-repot och plan-repot är nu ett repo.
@@ -24,3 +25,8 @@ Lärdomar:
 2. En delete-patch i kustomize måste ligga på samma "nivå" ($patch: delete först i dokumentet, metadata med namespace) - annars träffar den ingenting och bygget fallerar med "no resource matches strategic merge patch".
 3. När filer flyttas mellan repon ska symlänkar och byggverktyg följa med. wikictl hittar wikin genom att söka uppåt från arbetskatalogen, så det räckte att bygga om verktyget från det nya repot.
 4. Ett repo med två deployables behöver en build per deployable, men en CI-workflow per modul - annars testar bara den ena.
+
+## Relaterade
+
+- [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]]
+

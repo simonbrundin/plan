@@ -21,7 +21,7 @@ Två separata glapp:
    och agent-databasen - men aldrig agents-repots egen Nuxt. resources/base
    innehöll agents-nuxt, men dev-overlay applicerades aldrig av Tilt.
 2. Agent-API:t saknade routes som frontend:an anropar. De fanns i
-   src/go/cmd/api/main.go tills commit 677b876 ("refactor: simplify to single
+   agents/src/go/cmd/api/main.go tills commit 677b876 ("refactor: simplify to single
    entry point - API server only") raderade cmd/ och flyttade routerna - men
    flyttningen till internal/api/server.go glömde bort:
    PATCH /goals/:id, POST /goals/start-agent, GET /readme, GET /roadmap,
@@ -58,18 +58,18 @@ Två separata glapp:
   ConfigMap:en ändras - podden behöver raderas manuellt för att få nya env-värden.
 - Tiltfile:ens `docker_build`-parametrar (t.ex. `dockerfile=`) är relativa till
   Tiltfile:ens katalog, INTE till buildcontexten. Med contexten "../../" (repo-roten)
-  måste dockerfile-sökvägen vara "../../src/go/Dockerfile", annars letar Tilt i
+  måste dockerfile-sökvägen vara "../../src/agent/Dockerfile", annars letar Tilt i
   environments/dev/ och Tiltfile:en failar att ladda (och Tilt fortsätter med
   den gamla konfigurationen utan att tydligt säga det).
 
 ## /readme och /roadmap (fix 2)
 - Symptom: agent-API:t svarade 404 på /api/v1/readme och /api/v1/roadmap.
   Två orsaker: (1) README.md fanns inte i agent-imagen (buildcontexten var
-  src/go), (2) getProjectFile f resolves sökvägen via runtime.Caller, som ger
+  src/agent), (2) getProjectFile f resolves sökvägen via runtime.Caller, som ger
   den KOMPILERADE sökvägen (/home/simon/repos/agents/...) - den finns inte i
   containern.
-- Fix: byggcontexten är nu repo-roten (Dockerfile: src/go/Dockerfile) och
-  README.md kopplas in i imagen. Root .dockerignore utesluter allt utom src/go
+- Fix: byggcontexten är nu repo-roten (Dockerfile: src/agent/Dockerfile) och
+  README.md kopplas in i imagen. Root .dockerignore utesluter allt utom src/agent
   och README.md (node_modules m.m. är 1,5 GB). getProjectFile söker nu i
   ordningen AGENT_DOCS_DIR, PROJECT_ROOT, working directory, repo-rot via
   runtime.Caller - samma mönster som goals-handlern använder.
@@ -81,7 +81,7 @@ Två separata glapp:
 ## CI (fix 3)
 - .github/workflows/go.yml byggde ./cmd/agent, ./cmd/api och ./cmd/tui - de
   radrades i commit 677b876. Byggsteget är nu `go build -o /tmp/agent .` och
-  ett nytt steg bygger imagen (`docker build -f src/go/Dockerfile .`) så att
+  ett nytt steg bygger imagen (`docker build -f src/agent/Dockerfile .`) så att
   trasiga Dockerfile/.dockerignore fångas i CI. Trigger-sökvägarna täcker nu
   också .dockerignore och README.md.
 - Stale bygginstruktioner i README.md, src/nuxt/content/docs/running.md och
@@ -92,7 +92,7 @@ Två separata glapp:
   docs/index.md beskrev fortfarande den gamla arkitekturen: "pi" som
   agent-harness, CLI/TUI som ingångar, ./cmd/agent|api|tui, katalogen
   src/agent/ och målen i "repo-roten". Allt är nu omskrivet mot kodens
-  verkliga utseende (src/go/, en ingång main.go, scheduler + agentworker,
+  verkliga utseende (src/agent/, en ingång main.go, scheduler + agentworker,
   provider-prioritering, verktygslista, DB-tabeller, Nuxt-sidor och
   server-routs).
 - Prod deployas med FLUX (inte ArgoCD) - användaren bekräftade detta.
@@ -101,7 +101,7 @@ Två separata glapp:
   finns) och är borttagen. environments/prod/db/db.yaml har kvar en
   argocd.argoproj.io-annotation - den är inert för Flux men ligger kvar
   (att ta bort den i prod är en riskfråga, inte en ren dokumentationsfix).
-- goals.json ligger i src/go/goals.json (versionsspårad), inte i repo-roten.
+- goals.json ligger i src/agent/goals.json (versionsspårad), inte i repo-roten.
   I containern ligger kopian på /app/goals.json (workdir) - det är därför
   /api/v1/goals hittar den via working directory-fallbacken.
 - Dockerfile: CMD ["./agent", "-serve"] -> CMD ["./agent"] (main.go parsar

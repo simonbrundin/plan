@@ -2,7 +2,7 @@ name: CI för Go API
 on:
   push:
     paths:
-      - src/go/**
+      - src/api/**
   workflow_dispatch:
 
 jobs:
@@ -17,15 +17,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/go/go.mod
-          cache-dependency-path: src/go/go.sum
+          go-version-file: src/api/go.mod
+          cache-dependency-path: src/api/go.sum
 
       - name: Vet
-        working-directory: src/go
+        working-directory: src/api
         run: go vet ./...
 
       - name: Test
-        working-directory: src/go
+        working-directory: src/api
         run: go test ./...
 
   # Lint-gate för Plan-API:t - samma linter som agenten använder.
@@ -40,8 +40,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/go/go.mod
-          cache-dependency-path: src/go/go.sum
+          go-version-file: src/api/go.mod
+          cache-dependency-path: src/api/go.sum
 
       - name: Run golangci-lint
         # v2 av golangci-lint byggs med en Go-version som klarar go.mod:s
@@ -50,7 +50,7 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.15.0
-          working-directory: src/go
+          working-directory: src/api
 
   build-publish-image:
     needs: unit-tests
@@ -88,8 +88,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: src/go
-          file: src/go/Dockerfile
+          context: src/api
+          file: src/api/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

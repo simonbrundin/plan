@@ -71,7 +71,7 @@ func getProjectRoot() string {
 		return root
 	}
 	// Fallback: look in parent directories for goals.json
-	// The binary is in src/go/ so we need to go up
+	// The binary is in src/agent/ so we need to go up
 	cwd, _ := os.Getwd()
 
 	// Check if goals.json exists in current dir
@@ -79,7 +79,7 @@ func getProjectRoot() string {
 		return cwd
 	}
 
-	// Check parent directory (for when running from src/go)
+	// Check parent directory (for when running from src/agent)
 	if _, err := os.Stat(filepath.Join(cwd, "..", "goals.json")); err == nil {
 		return filepath.Join(cwd, "..")
 	}

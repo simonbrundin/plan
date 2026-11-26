@@ -6,7 +6,7 @@
 #
 # Filen är versionsstyrd. Båda sidor testar mot den:
 #
-#   src/go/internal/contracts     - Plan API:t (faser, tillstånd, Swagger)
+#   src/api/internal/contracts     - Plan API:t (faser, tillstånd, Swagger)
 #   src/agent/internal/planclient - agentens klient (konstanter, sökvägar)
 #
 # Om en sida ändras utan den andra faller testerna. Ändras kontraktet på ett

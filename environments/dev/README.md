@@ -159,7 +159,7 @@ Det gamla CNPG-klustret `plan-db` ligger kvar i `base/db` och används av
 - **Atlas applicerar schemat deklarativt (bara DDL)** - `INSERT`-raderna i
   `schema.yaml` körs alltså _inte_. Applikationen seedar därför själv
   (statusarna + Root-målet + goals-sekvensen) i
-  `src/go/internal/database/seed.go` vid start.
+  `src/api/internal/database/seed.go` vid start.
 - `sessions`-tabellen ingår i `environments/base/db/schema.yaml`; annars vill
   Atlas radera den (den skapas också av API:t vid runtime).
 - `GRANT`-satser får **inte** ligga i `schema.yaml` - Atlas (community) avvisar

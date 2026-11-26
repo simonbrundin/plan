@@ -146,7 +146,7 @@ func projectFileDirs() []string {
 		dirs = append(dirs, cwd)
 	}
 
-	// Lokal utveckling: src/go/internal/api/handlers/docs.go -> repo-roten.
+	// Lokal utveckling: src/agent/internal/api/handlers/docs.go -> repo-nära kataloger.
 	_, currentFile, _, _ := runtime.Caller(0)
 	handlersDir := filepath.Dir(currentFile)
 	apiDir := filepath.Dir(handlersDir)

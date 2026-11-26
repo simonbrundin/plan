@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Command represents a loaded command from src/commands/
+// Command represents a loaded command from src/agent/commands/
 type Command struct {
 	Name         string   // filename without extension
 	Description  string   // from frontmatter description or body
@@ -20,27 +20,42 @@ type Registry struct {
 	commands map[string]*Command
 }
 
-// DefaultCommandsPath returns the default path to the commands directory
+// DefaultCommandsPath returns the default path to the commands directory.
+//
+// Kommandona ligger i src/agent/commands. Sökvägen hittas genom att gå upp
+// från binären eller arbetskatalogen tills en kandidat matchar - agenten kan
+// köras både från repot (go run) och från imagen (/app).
 func DefaultCommandsPath() string {
-	// Walk up to find the repo root (where src/ is a sibling of commands/)
-	exe, err := os.Executable()
-	if err == nil {
-		// Try relative to executable
-		base := filepath.Dir(filepath.Dir(filepath.Dir(exe))) // bin/agent -> agent/ -> repo/
-		cmdDir := filepath.Join(base, "src", "commands")
-		if _, err := os.Stat(cmdDir); err == nil {
-			return cmdDir
+	// Kandidater i prioritetsordning. Den första är den aktuella placeringen,
+	// den andra håller gamla installationer (kommandon under src/commands)
+	// fungerande.
+	candidates := [][]string{
+		{"src", "agent", "commands"},
+		{"src", "commands"},
+	}
+
+	// Try relative to executable
+	if exe, err := os.Executable(); err == nil {
+		// bin/agent -> agent/ -> repo/
+		base := filepath.Dir(filepath.Dir(filepath.Dir(exe)))
+		for _, parts := range candidates {
+			cmdDir := filepath.Join(append([]string{base}, parts...)...)
+			if _, err := os.Stat(cmdDir); err == nil {
+				return cmdDir
+			}
 		}
 	}
 
 	// Fallback: try relative to working directory
 	wd, err := os.Getwd()
 	if err == nil {
-		// wd/src/go/internal/core/commands -> repo/src/commands
+		// wd/src/agent/internal/core/commands -> repo/src/agent/commands
 		for i := 0; i < 6; i++ {
-			cmdDir := filepath.Join(wd, "src", "commands")
-			if _, err := os.Stat(cmdDir); err == nil {
-				return cmdDir
+			for _, parts := range candidates {
+				cmdDir := filepath.Join(append([]string{wd}, parts...)...)
+				if _, err := os.Stat(cmdDir); err == nil {
+					return cmdDir
+				}
 			}
 			parent := filepath.Dir(wd)
 			if parent == wd {

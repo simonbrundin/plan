@@ -21,6 +21,6 @@ SCHEMALÄGGNING: schedule håller serien fast relativt recurrence_anchor (förfa
 
 NATURLIGT SPRÅK: quick-add i mål-läge plockar ut frasen ur titeln ('Gymma varannan dag' -> titel 'Gymma', regel FREQ=DAILY;INTERVAL=2). I automatiskt läge blir en upprepning fortfarande en kalenderhändelse.
 
-TEKNISK HÅLLNING: rrule-go (v1.8.2) används även för mål, med explicit DTSTART - annars använder biblioteket time.Now().UTC() och förekomstberäkningen blir tidsberoende. rrule-go accepterar INTERVAL=0, så det valideras separat i src/go/internal/recurrence.
+TEKNISK HÅLLNING: rrule-go (v1.8.2) används även för mål, med explicit DTSTART - annars använder biblioteket time.Now().UTC() och förekomstberäkningen blir tidsberoende. rrule-go accepterar INTERVAL=0, så det valideras separat i src/api/internal/recurrence.
 
 FALLER: dev-databasen (Neon) svarar på IPv6 men Go-pgx timeout:ar - använd options=endpoint%3D<endpoint-id> i anslutningssträngen för att komma förbi SNI-kravet. Enhetstester (bun test) kan inte importera '~/utils/...' (aliasen finns inte i bun) - använd relativa importer med .ts-extension i delade utils.

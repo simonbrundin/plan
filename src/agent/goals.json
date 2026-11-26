@@ -36,8 +36,8 @@
           "4. Testa med en feature och verifiera att LLM genererar checkpoints"
         ],
         "files_to_modify": [
-          "src/go/internal/core/workflow/prepare_next_turn_test.go",
-          "src/go/internal/core/orchestrator/orchestrator.go"
+          "src/agent/internal/core/workflow/prepare_next_turn_test.go",
+          "src/agent/internal/core/orchestrator/orchestrator.go"
         ],
         "test": "Skapa en feature 'Add user authentication with JWT', kör CreatePlan(), verifiera att checkpoints genereras med rätt gates."
       },
@@ -125,7 +125,7 @@
           "4. Human gate: sätt status till 'pending_approval', vänta på signal"
         ],
         "files_to_modify": [
-          "src/go/internal/core/orchestrator/orchestrator.go:executeCheckpoint()"
+          "src/agent/internal/core/orchestrator/orchestrator.go:executeCheckpoint()"
         ]
       },
       "completed_at": "2026-01-20T00:00:00Z"
@@ -598,13 +598,13 @@
           }
         ],
         "files_to_document": [
-          "src/go/internal/core/orchestrator/orchestrator.go",
-          "src/go/internal/core/checkpoint/checkpoint.go",
-          "src/go/internal/core/gate/gate.go",
-          "src/go/internal/core/gate/behavior.go",
-          "src/go/internal/core/gate/ui.go",
-          "src/go/internal/core/gate/adversarial.go",
-          "src/go/internal/core/gate/human.go"
+          "src/agent/internal/core/orchestrator/orchestrator.go",
+          "src/agent/internal/core/checkpoint/checkpoint.go",
+          "src/agent/internal/core/gate/gate.go",
+          "src/agent/internal/core/gate/behavior.go",
+          "src/agent/internal/core/gate/ui.go",
+          "src/agent/internal/core/gate/adversarial.go",
+          "src/agent/internal/core/gate/human.go"
         ],
         "output_location": "src/nuxt/content/docs/checkpoint-gate.md"
       },

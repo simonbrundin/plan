@@ -9,7 +9,8 @@ import (
 //
 // Sökvägen räknas ut från testets egen plats - en absolut sökväg skulle
 // fungera på en maskin men inte i CI.
-var commandsPath = filepath.Join("..", "..", "..", "..", "commands")
+// src/agent/internal/core/commands -> src/agent/commands
+var commandsPath = filepath.Join("..", "..", "..", "commands")
 
 func TestLoad(t *testing.T) {
 	r, err := Load(commandsPath)

@@ -21,10 +21,10 @@ Agent API (`src/agent`)
 
 ## Repository-layout
 
-- `src/go/` — Plan API och kontrollplan.
+- `src/api/` — Plan API och kontrollplan.
 - `src/nuxt/` — Plan-gränssnittet.
 - `src/agent/` — agentmotorn, worker och agent-API:t som egen Go-modul.
-- `src/commands/` — kommandon som kan laddas av agentmotorn.
+- `src/agent/commands/` — kommandon som kan laddas av agentmotorn.
 - `wiki/` — gemensam kunskapswiki.
 
 ## Exekveringsmodell
@@ -193,7 +193,7 @@ steg.
 
 En agentkörning har två dimensioner: en **fas** (vad agenten gör) och ett
 **tillstånd** (hur det går). Båda är kanoniska och definieras i
-`src/go/internal/models/agent_run.go` - klienter läser dem från
+`src/api/internal/models/agent_run.go` - klienter läser dem från
 `GET /api/v1/agent-run-lifecycle` i stället för att hålla egna listor.
 
 Faser, i ordning:
@@ -223,7 +223,7 @@ Reglerna är: en körning får alltid avbrytas, en terminal körning får inte
 **Namnen ändras inte utan migrering.** De ligger i databasen, i API-svar och i
 gränssnittet - ett nytt namn utan migrering ger två sanningar. 2026-11-25 byttes
 `blocked` till `waiting_approval` och `done` till `succeeded`; migreringen sker
-idempotent i `src/go/internal/database/db.go` vid uppstart.
+idempotent i `src/api/internal/database/db.go` vid uppstart.
 
 ## Kontraktet mellan Plan och agenten
 
@@ -241,7 +241,7 @@ Båda sidor testar mot samma fil:
 
 | Sida | Test | Vad det fångar |
 | --- | --- | --- |
-| Plan | `src/go/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, och att varje anrop i kontraktet finns i OpenAPI-specifikationen |
+| Plan | `src/api/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, och att varje anrop i kontraktet finns i OpenAPI-specifikationen |
 | Agent | `src/agent/internal/planclient` | att agentens statuskonstanter och sökvägar stämmer med kontraktet, och att kontraktets anrop finns i Plan |
 
 Sökvägarna i agentens klient ligger i `src/agent/internal/planclient/paths.go`
@@ -277,7 +277,7 @@ registrerade, och att initieringsfelet syns i status och health.
 
 | Deployable | Källa | Image | CI |
 | --- | --- | --- | --- |
-| Plan (Nuxt + Go API) | `src/nuxt`, `src/go` | `plan`, `go-api` | `ci.yaml`, `commit.nuxt.yaml`, `commit.api.yaml` |
+| Plan (Nuxt + Go API) | `src/nuxt`, `src/api` | `plan`, `go-api` | `ci.yaml`, `commit.nuxt.yaml`, `commit.api.yaml` |
 | Agenten | `src/agent` | `plan-agent` | `commit.agent.yaml` |
 
 Agentens CI bygger och publicerar `plan-agent` och föreslår en PR med den
@@ -342,7 +342,7 @@ agent                 Plan
   │◄───────────────────┤  409 om gränsen är nådd
 ```
 
-**Prislistan** versioneras (`src/go/internal/pricing`). Varje usage-rad sparar
+**Prislistan** versioneras (`src/api/internal/pricing`). Varje usage-rad sparar
 prislistans version, valutan och om priset kom från listan eller från en
 schablon. En okänd modell får aldrig kostnaden noll - då används en
 dokumenterad schablonpris och raden markeras `fallback`.
@@ -397,7 +397,7 @@ Allt som behövdes från `agents`-repot finns i det här repot:
 | Från agents | Hit | Läge |
 | --- | --- | --- |
 | `src/go` | `src/agent` | inflyttat och utvecklat vidare |
-| `src/commands` | `src/commands` | identiskt |
+| `src/commands` | `src/agent/commands` | identiskt |
 | `wiki/` | `wiki/` | flyttat 2026-11-24, `~/wiki` pekar här |
 | `src/go/cmd/wikictl` | `src/agent/cmd/wikictl` | byggs härifrån |
 | `.github/workflows/go.yml` | `.github/workflows/agent-go.yml` | paths omdöpta |

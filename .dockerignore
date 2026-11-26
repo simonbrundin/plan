@@ -1,5 +1,5 @@
 # Byggcontexten för agent-imagen är repo-roten (Dockerfile: src/agent/Dockerfile),
-# så att README.md och src/commands kan kopieras in. Uteslut allt annat -
+# så att README.md och src/agent/commands kan kopieras in. Uteslut allt annat -
 # src/nuxt/node_modules m.m. är över 1 GB och skulle skickas som context
 # vid varje bygge.
 **
@@ -8,6 +8,4 @@
 src/*
 !src/agent/
 !src/agent/**
-!src/commands/
-!src/commands/**
 !README.md

@@ -24,7 +24,7 @@ Tilt bygger tre images:
 | Image | Byggcontext | Vad det är |
 | --- | --- | --- |
 | `plan-nuxt` | `src/nuxt` | Plan-gränssnittet |
-| `plan-go-api` | `src/go` | Plan API - äger mål, körningar, godkännanden |
+| `plan-go-api` | `src/api` | Plan API - äger mål, körningar, godkännanden |
 | `plan-agent` | repo-roten | Agent-API:t och workern - utför arbetet |
 
 Portar i dev:

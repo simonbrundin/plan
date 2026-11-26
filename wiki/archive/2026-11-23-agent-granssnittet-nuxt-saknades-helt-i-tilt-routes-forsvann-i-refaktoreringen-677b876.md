@@ -17,7 +17,7 @@ Två separata glapp:
    och agent-databasen - men aldrig agents-repots egen Nuxt. resources/base
    innehöll agents-nuxt, men dev-overlay applicerades aldrig av Tilt.
 2. Agent-API:t saknade routes som frontend:an anropar. De fanns i
-   src/go/cmd/api/main.go tills commit 677b876 ("refactor: simplify to single
+   src/agent/cmd/api/main.go tills commit 677b876 ("refactor: simplify to single
    entry point - API server only") raderade cmd/ och flyttade routerna - men
    flyttningen till internal/api/server.go glömde bort:
    PATCH /goals/:id, POST /goals/start-agent, GET /readme, GET /roadmap,
@@ -41,7 +41,7 @@ Två separata glapp:
   Bör lösas: antingen deployar agents-Tiltfile inte Plan, eller så körs bara
   ett Tilt.
 - /readme och /roadmap svarar 404 i containern: README.md/ROADMAP.md finns inte
-  i agent-imagen (build-contexten är src/go) och getProjectFile f resolves via
+  i agent-imagen (build-contexten är src/agent) och getProjectFile f resolves via
   runtime.Caller (kompilerad sökväg).
 - .github/workflows/go.yml bygger fortfarande ./cmd/agent, ./cmd/api, ./cmd/tui
   som inte finns sedan refaktoreringen.

@@ -17,7 +17,7 @@ WORKDIR /app
 
 COPY --from=builder /app/agent ./agent
 COPY --from=builder /app/agentworker ./agentworker
-COPY src/commands ./src/commands
+COPY src/agent/commands ./src/agent/commands
 COPY README.md ./README.md
 
 ENV AGENT_DOCS_DIR=/app

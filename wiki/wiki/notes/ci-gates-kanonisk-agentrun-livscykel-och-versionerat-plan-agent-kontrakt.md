@@ -36,12 +36,12 @@ failar. Constrainten måste bort först, sedan byts raderna, sedan sätts constr
 tillbaka, allt i en implicit transaktion. Constrainten ligger också i Atlas-schemat
 (environments/base/db/schema.yaml och environments/pr/template/db/schema.sql) - båda
 måste uppdateras, annan konflikt. Faser, tillstånd och övergångar är nu kanoniska i
-src/go/internal/models/agent_run.go och exponeras för klienter via
+src/api/internal/models/agent_run.go och exponeras för klienter via
 GET /api/v1/agent-run-lifecycle.
 
 522 - kontraktet mellan Plan och agenten ligger i src/contracts/plan-agent.yaml
 (version 1) och är versionsstyrt. Båda sidor testar mot samma fil: Plan
-(src/go/internal/contracts) jämför modellen och OpenAPI-specifikationen, agenten
+(src/api/internal/contracts) jämför modellen och OpenAPI-specifikationen, agenten
 (src/agent/internal/planclient) jämför sina statuskonstanter och sökvägar. Sökvägarna
 ligger nu i paths.go som namngivna konstanter - annars går det inte att jämföra dem.
 Testet hittade att Swagger-annotationerna för mål, kalendrar, statusar och api-nycklar

@@ -44,7 +44,7 @@ update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api", "pla
 # =============================================================================
 
 docker_build("plan-nuxt", "../../src/nuxt")
-docker_build("plan-go-api", "../../src/go")
+docker_build("plan-go-api", "../../src/api")
 docker_build("plan-agent", "../..", dockerfile="../../src/agent/Dockerfile")
 
 # =============================================================================

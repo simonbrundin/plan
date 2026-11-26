@@ -42,7 +42,7 @@ Wikin bor i `agents`-repot men används av alla repor:
 
 ## Verktyget
 
-`agents/src/go/cmd/wikictl` (paketet `internal/wiki`). Kommandot är
+`src/agent/cmd/wikictl` i plan-repot (paketet `internal/wiki`). Kommandot är
 `wikictl` - installerat i `~/.local/bin`:
 
 | Kommando | Gör |

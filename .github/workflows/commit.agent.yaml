@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - src/agent/**
-      - src/commands/**
+      # Kommandona ligger i src/agent/commands och täcks av src/agent/** ovan.
       # Byggcontexten för agent-imagen styrs av .dockerignore i repo-roten.
       # Ändras den ska bilden byggas om.
       - .dockerignore

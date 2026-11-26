@@ -7,7 +7,7 @@ tags: [agent, mal, review, readme, projekt:plan]
 2026-11-25: mal #540 (Dokumentera agentplattformen i README) gick fran verify till completed.
 
 Agenten hade publicerat branchen agent/goal-540-run-82 (korning #82, godkannande #61, status succeeded). Jag granskade diffen och hittade tre problem:
-1. README beskrev fortfarande de FORALDADE statusnamnen 'blocked' och 'done'. De byttes till 'waiting_approval' och 'succeeded' 2026-11-25 (migrering i src/go/internal/database/db.go, kontraktet src/contracts/plan-agent.yaml version 2). README:testas inte mot kontraktet, sa ingen gate fangade det.
+1. README beskrev fortfarande de FORALDADE statusnamnen 'blocked' och 'done'. De byttes till 'waiting_approval' och 'succeeded' 2026-11-25 (migrering i src/api/internal/database/db.go, kontraktet src/contracts/plan-agent.yaml version 2). README:testas inte mot kontraktet, sa ingen gate fangade det.
 2. Den nya 'Verified dev flow'-sektionen blandade engelska och svenska i samma stycke.
 3. Andringen tog bort trailing newline i slutet av README.md.
 

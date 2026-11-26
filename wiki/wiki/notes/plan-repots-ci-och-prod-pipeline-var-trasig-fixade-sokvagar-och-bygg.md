@@ -26,10 +26,13 @@ fel gjorde att prod aldrig uppdaterades (2026-11-10).
 
 3) commit.nuxt.yaml skrev till environments/production/patches/deployment.yaml
    (katalogen heter environments/prod) -> image-uppdateringen kunde aldrig
-   köra. commit.api.yaml byggde dessutom från src/api (som bara innehåller
-   en kvarvarande Dockerfile.dev - Go-koden ligger i src/go), triggade på
+   köra. commit.api.yaml byggde dessutom från src/api (som då bara innehåller
+   en kvarvarande Dockerfile.dev - Go-koden låg i src/go), triggade på
    src/api/** och publicerade till fel bildnamn (plan-api istället för
    go-api).
+
+   (Sedan dess har strukturen ändrats: src/api/Dockerfile.dev är borttagen
+   och Plan-API:t ligger nu i src/api, medan agenten ligger i src/agent.)
 
 Lärdom: en rörlig base-image-tagg (node:lts-alpine) gör byggen
 icke-deterministiska - pinna versionen. Och verifiera att kustomize
