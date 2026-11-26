@@ -13,7 +13,15 @@ spec:
       # Applikationsrollen ("plan") ska kunna skapa och äga tabellerna -
       # annars saknar API:t INSERT/UPDATE på t.ex. users och kan inte
       # skapa sessioner. Schemat appliceras av Atlas som samma roll.
+      #
+      # postInitSQL körs under bootstrap, alltså INNAN operatören skapar
+      # rollerna under managed.roles. Därför måste "plan" skapas här
+      # först - annars avbryter GRANT-satserna bootstrapen med
+      # "role \"plan\" does not exist" och initdb-jobbet börjar om
+      # i en loop. Operatören sätter sedan lösenordet på samma roll
+      # utifrån secretet plan-db-user.
       postInitSQL:
+        - "DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'plan') THEN CREATE ROLE plan LOGIN; END IF; END $$;"
         - "GRANT ALL ON SCHEMA public TO plan"
         - "ALTER DEFAULT PRIVILEGES FOR ROLE admin IN SCHEMA public GRANT ALL ON TABLES TO plan"
         - "ALTER DEFAULT PRIVILEGES FOR ROLE admin IN SCHEMA public GRANT ALL ON SEQUENCES TO plan"
