@@ -1,0 +1,220 @@
+---
+title: Agentsystemet
+description: Plan har en egen agent - en motor som kan specificera, planera, utföra och verifiera mål, med human gate, profiler och kostnadskontroll.
+order: 4
+icon: i-lucide-bot
+updated: 2026-11-25
+group: Agenten
+---
+
+# Agentsystemet
+
+Utöver dina egna mål kan Plan arbeta på mål åt dig. En agentkörning är
+ett spår: den får ett mål, går igenom fyra faser och rapporterar
+tillbaka vad som hände.
+
+**Plan äger körningen, agenten utför arbetet.** Körningen, händelserna
+och godkännandena lagras i Plan - inte i agenten. Därför kan
+gränssnittet visa en pågående körning även om agenttjänsten är nere, och
+ett godkännande som du redan lämnat finns kvar.
+
+## Faser
+
+```text
+define ──▶ plan ──▶ execute ──▶ verify ──▶ completed
+```
+
+| Fas | Vad som händer |
+| --- | --- |
+| `define` | Agenten skriver målets definition - vad som egentligen ska göras, vilka krav som gäller |
+| `plan` | Definitionen bryts ner till checkpoints med uppgifter |
+| `execute` | Checkpoints utförs, kod skrivs i en isolerad kopia av repot |
+| `verify` | Testerna körs och resultatet verifieras |
+| `completed` | Körningen är klar |
+
+Faserna speglar målets status i databasen (`statuses`), så du ser samma
+förlopp i mållistan som i agentvyn.
+
+## Tillstånd
+
+| Tillstånd | Betydelse |
+| --- | --- |
+| `queued` | Körningen väntar på ett Kubernetes Job |
+| `running` | Agenten arbetar |
+| `waiting_approval` | Agenten väntar på ett beslut från dig |
+| `succeeded` | Körningen lyckades |
+| `failed` | Körningen misslyckades |
+| `cancelled` | Du avbröt körningen |
+
+`queued`, `running` och `waiting_approval` är de tillstånd där en
+människa kan ingripa. `succeeded`, `failed` och `cancelled` är
+terminala - en körning lämnar dem inte.
+
+## Triggers och profiler
+
+| Trigger | Betydelse |
+| --- | --- |
+| `user` | Du startade den |
+| `schedule` | Den schemalagdes |
+| `webhook` | Den utlöstes av en händelse utifrån |
+| `agent` | Agenten startade den själv |
+
+Profilerna är **tekniska gränser**, inte instruktioner till modellen.
+De gäller oavsett vad modellen säger.
+
+| Gräns | `coding` | `life` |
+| --- | --- | --- |
+| Får ändra kod | Ja | Nej |
+| Behöver klona repot | Ja | Nej |
+| Kräver mänskligt beslut | Ja | Ja |
+| CPU / minne | 1000m / 2Gi | 500m / 1Gi |
+| Max antal rundor | 20 | 12 |
+
+En okänd profil ger `coding` - den strängaste. Profilen väljs när
+körningen skapas (`agent_profile`).
+
+## Komponenterna
+
+```text
+src/agent/
+├── internal/
+│   ├── agentworker/   Pollar Plan efter mål markerade för agent
+│   ├── definer/       Skriver definitionen (fas define)
+│   ├── proposer/      Föreslår kodändringar
+│   ├── coder/         Driver kodändringen från förslag till verifierat resultat
+│   ├── executor/      Kör kommandon i workspace
+│   ├── workspace/     Hanterar den isolerade kopian av repot
+│   ├── jobcontroller/ Skapar Kubernetes Jobb per köad körning
+│   ├── jobrunner/     Bygger och startar jobben
+│   ├── profile/       Profilernas policies
+│   ├── planclient/    Agentens klient mot Plan
+│   ├── runusage/      Samlar tokenanvändning
+│   ├── scheduler/     Tidsatt start av körningar
+│   ├── wiki/          Kunskapswikin
+│   └── core/
+│       ├── orchestrator/ Checkpoint-exekvering och sub-agenter
+│       ├── gate/     Gates: human, ui, behavior, adversarial
+│       ├── tools/    Verktyg modellen kan använda
+│       ├── provider/ LLM-leverantörer och fallback
+│       ├── memory/   Agentens minne
+│       ├── selfimprove/ Lärdomar från körningar
+│       └── checkpoint/ Checkpoint-modellen
+├── cmd/agentworker/   Workerns ingång
+└── cmd/wikictl/       Verktyget för kunskapswikin
+```
+
+### Verktygen
+
+Modellen arbetar med verktyg, inte med fri text: `bash`, `read`,
+`write`, `edit`, `glob`, `grep`, `read_multiple`. De är validerade
+innan de körs - det finns separata validatorer för kärnan och för
+säkerhet (hemligheter, kommandon utanför arbetsytan).
+
+### Gates
+
+En **gate** är en grind som en körning måste passera. Det finns fyra
+sorters gates:
+
+| Gate | Gör |
+| --- | --- |
+| `human` | Kräver ett beslut av en människa innan något skrivs |
+| `ui` | Syns i gränssnittet och kan interaktas med |
+| `behavior` | Kontrollerar att beteendet håller - regressioner, format |
+| `adversarial` | En granskande agent letar efter problem i förslaget |
+
+### Human gate
+
+Human gate är kärnan i "människan i loopen". Den körs när agenten har
+ett förslag som det vill skriva, och beslutet tas i Plan - i
+gränssnittet, på sidan `/agent`.
+
+Ett godkännande ska visa:
+
+- vilket mål det gäller,
+- vilka observationer agenten gjort,
+- vad beslutet får till följd,
+- hur resultatet ska verifieras.
+
+Inte bara det tekniska kommandot. Beslutet sparas i `agent_approvals`
+med `feedback`, `consequence` och `verification_plan`.
+
+## Verifiering före godkännande
+
+Ett förslag testas med sitt eget testkommando innan det skickas till
+en människa. Om testet inte går igenom får modellen först skriva om
+testkommandot (innehållet behålls) och därefter skriva om hela
+förslaget. Förslaget du ser är alltså självverifierat, och utfallet
+redovisas i godkännandet.
+
+```text
+förslag ──▶ kör testet ──▶ går det igenom? ──ja──▶ human gate
+                            │
+                            nej
+                            ▼
+              skriv om testet ──▶ skriv om förslaget ──▶ kör testet igen
+```
+
+## Kostnad och budget
+
+Agenten rapporterar tokenanvändning efter varje körning: input-,
+output- och cache-tokens, antal verktygsanrop och vilka verktyg som
+användes. Plan räknar sedan fram kostnaden ur en versionsstyrd
+prislista, så att samma körning alltid ger samma summa.
+
+Budgetar (`agent_budgets`) sätter gränser per period - dag, vecka eller
+månad - och kan gälla en enskild agent eller alla agenter. En pågående
+körning reserverar kostnad, så att samtidiga körningar inte
+tillsammans passerar gränsen.
+
+Kostnaden syns på `/agent-cost`, filtrerbar per agent och modell.
+
+## Kontraktet mellan Plan och agenten
+
+`src/contracts/plan-agent.yaml` beskriver allt agenten får göra:
+
+- faserna och tillstånden,
+- vilka triggers och profiler som finns,
+- vilka API-anrop agenten gör - markerade med `agent: true`.
+
+Filen är versionsstyrd och båda sidor testar mot den. Ändras
+kontraktet på ett sätt som kräver samtidig ändring på båda sidor,
+bumpas versionen. I produktion har agentens nyckel scope `agent`, så
+Plan måste tillåta exakt de anrop som står med `agent: true` - annars
+blir det 403 i prod men inte i dev (där nyckeln har scope `full`).
+
+## Kunskapswikin
+
+Alla repon delar en kunskaps-wiki som ligger i `wiki/` och hanteras av
+`wikictl`. Agenten läser och skriver i den, precis som du gör:
+
+```bash
+wikictl search "bigram"        # sök i hela wikin
+wikictl note --title "Rubrik" --tags "bug" --body "Vad som hände."
+wikictl ingest                 # flytta inboxen in i grafen
+wikictl lint                   # hitta trasiga länkar och gammal info
+```
+
+Wikin innehåller råkällor (`raw/`, immutable) och syntes (`wiki/`).
+Den gör att kunskapen överlever mellan sessioner, agenter och modeller.
+Mer om den i `~/wiki/AGENTS.md`.
+
+## Miljövariabler
+
+| Variabel | Betydelse |
+| --- | --- |
+| `PLAN_API_URL` | Plan API:t som agenten pratar med |
+| `PLAN_API_KEY` | Agentens egen nyckel mot Plan |
+| `AGENT_API_KEY` | Nyckel som Plan använder mot agent-API:t |
+| `AGENT_REPO_PATH` | Sätt den för att kunna röra kod lokalt |
+| `AGENT_GOAL_ID` | Kör workern mot ett enda mål |
+| `AGENT_JOB_MAX_CONCURRENT` | Hur många jobb som får köras parallellt |
+| `AGENT_JOB_NAMESPACE` | Namespace som jobben skapas i |
+| `AGENT_JOB_DEADLINE_SECONDS` | Tidsgräns för ett jobb |
+| `AGENT_WORKER_ENABLED` | Kör workern i agent-API:t (off i prod) |
+| `AGENT_JOB_CONTROLLER_ENABLED` | Skapa Jobb för köade körningar |
+
+## Se också
+
+- [Agentkörningar och godkännanden](/docs/agent-korningar) - det
+  kompletta flödet från mål till Pull Request.
+- [API och autentisering](/docs/api) - anropen agenten gör.

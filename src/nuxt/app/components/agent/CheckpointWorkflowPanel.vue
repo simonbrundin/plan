@@ -76,7 +76,7 @@ onMounted(loadPlan)
 </script>
 
 <template>
-  <section class="rounded-2xl border border-line bg-surface p-4 flex-shrink-0" aria-label="Checkpoint-workflow">
+  <section class="min-h-0 flex-1 overflow-y-auto bg-surface p-4" aria-label="Checkpoint-workflow">
     <div class="flex items-center justify-between gap-3">
       <div>
         <h3 class="text-sm font-medium text-ink flex items-center gap-2">

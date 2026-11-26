@@ -1,184 +1,294 @@
 <script setup lang="ts">
-import type { AgentRun } from '~/types/agent';
+import type { AgentMessage, AgentRun } from '~/types/agent';
 
 // Chattpanelen - Plan är agentens gränssnitt. Slack används inte.
 const props = defineProps<{
-  goalId: number;
-  goalTitle: string;
-  goalDescription?: string;
-  run?: AgentRun | null;
+	goalId: number;
+	goalTitle: string;
+	goalDescription?: string;
+	run?: AgentRun | null;
 }>();
 
 const emit = defineEmits<{
-  (event: 'conversation-started', conversationId: string): void;
+	(event: 'conversation-started', conversationId: string): void;
 }>();
 
 const {
-  messages,
-  conversationId,
-  approval,
-  streaming,
-  error,
-  available,
-  load,
-  loadApproval,
-  startConversation,
-  send,
-  decide,
+	messages,
+	conversationId,
+	approval,
+	streaming,
+	error,
+	available,
+	load,
+	loadApproval,
+	startConversation,
+	send,
+	decide,
 } = useAgentChat(toRef(props, 'goalId'));
 
 const draft = ref('');
 const listRef = ref<HTMLElement | null>(null);
+const inputRef = ref<HTMLTextAreaElement | null>(null);
 const feedback = ref('');
+
+// Sant när chatten är scrollad till slutet. Då ska nya meddelanden
+// scrolla med - annars ska man kunna läsa i fred och röra sig själv.
+const atBottom = ref(true);
+
+// Verktygsanrop visas ihop - de är sällan det man vill läsa först.
+const expandedTools = ref<Set<string>>(new Set());
+
+const onScroll = () => {
+	const el = listRef.value;
+	if (!el) return;
+	atBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+};
 
 // Scrollar till slutet när det kommer nya meddelanden.
 watch(
-  () => messages.value.length,
-  async () => {
-    await nextTick();
-    listRef.value?.scrollTo({ top: listRef.value.scrollHeight, behavior: 'smooth' });
-  },
+	() => messages.value.length,
+	async () => {
+		await nextTick();
+		if (atBottom.value) scrollToBottom();
+	},
 );
 
+const scrollToBottom = () => {
+	listRef.value?.scrollTo({ top: listRef.value.scrollHeight, behavior: 'smooth' });
+};
+
+// Fältet växer med texten, men inte mer än några rader.
+const resizeInput = () => {
+	const el = inputRef.value;
+	if (!el) return;
+	el.style.height = 'auto';
+	el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
+};
+
+watch(draft, () => nextTick(resizeInput));
+
+const toggleTool = (message: AgentMessage) => {
+	const next = new Set(expandedTools.value);
+	if (next.has(message.id)) next.delete(message.id);
+	else next.add(message.id);
+	expandedTools.value = next;
+};
+
+const formatTime = (value?: string) => {
+	if (!value) return '';
+	try {
+		return new Intl.DateTimeFormat('sv-SE', { timeStyle: 'short' }).format(
+			new Date(value),
+		);
+	} catch {
+		return '';
+	}
+};
+
 onMounted(async () => {
-  await loadApproval();
-  if (props.run?.conversation_id) {
-    conversationId.value = props.run.conversation_id;
-    await load(props.run.conversation_id);
-  }
+	await loadApproval();
+	if (props.run?.conversation_id) {
+		conversationId.value = props.run.conversation_id;
+		await load(props.run.conversation_id);
+	}
 });
 
 // Startar en konversation om det inte finns en.
 const ensureConversation = async () => {
-  if (conversationId.value) return conversationId.value;
-  const id = await startConversation(props.goalTitle);
-  if (id) {
-    emit('conversation-started', id);
-  }
-  return id;
+	if (conversationId.value) return conversationId.value;
+	const id = await startConversation(props.goalTitle);
+	if (id) {
+		emit('conversation-started', id);
+	}
+	return id;
 };
 
 const submit = async () => {
-  const text = draft.value;
-  if (!text.trim() || streaming.value) return;
+	const text = draft.value;
+	if (!text.trim() || streaming.value) return;
 
-  draft.value = '';
-  await ensureConversation();
-  await send(text, {
-    id: props.goalId,
-    title: props.goalTitle,
-    description: props.goalDescription,
-  });
+	draft.value = '';
+	await nextTick();
+	resizeInput();
+	await ensureConversation();
+	await send(text, {
+		id: props.goalId,
+		title: props.goalTitle,
+		description: props.goalDescription,
+	});
+};
+
+// Enter skickar, Shift+Enter ger en ny rad.
+const onKeydown = (event: KeyboardEvent) => {
+	if (event.key === 'Enter' && !event.shiftKey) {
+		event.preventDefault();
+		void submit();
+	}
 };
 
 const approve = async () => {
-  await decide('approve');
+	await decide('approve');
 };
 
 const reject = async () => {
-  await decide('reject', feedback.value);
-  feedback.value = '';
+	await decide('reject', feedback.value);
+	feedback.value = '';
 };
 </script>
 
 <template>
-  <section class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong">
-    <header class="flex items-center justify-between px-4 py-3 border-b border-line">
-      <div class="flex items-center gap-2">
-        <Icon name="lucide:sparkles" class="w-4 h-4 text-accent" />
-        <h3 class="text-sm font-medium text-ink">Agent</h3>
-        <span
-          v-if="run"
-          class="text-xs px-2 py-0.5 rounded-full border"
-          :class="run.status === 'waiting_approval' ? 'text-amber-300 border-amber-500/40 bg-amber-500/10' : 'text-ink-dim border-line bg-surface-2'"
-        >
-          {{ run.status === 'waiting_approval' ? 'Väntar på dig' : run.phase }}
-        </span>
-      </div>
-      <button
-        v-if="!conversationId"
-        @click="ensureConversation"
-        class="text-xs text-accent hover:text-accent-light transition-colors"
-      >
-        Starta chatt
-      </button>
-    </header>
+	<section class="flex min-h-0 flex-1 flex-col bg-surface">
+		<!-- Rubriken med agentens status ligger i docken - här visas bara
+		     knappen för att starta en konversation. -->
+		<header
+			v-if="!conversationId"
+			class="flex flex-shrink-0 items-center justify-between gap-2 border-b border-line px-4 py-2"
+		>
+			<p class="text-xs text-ink-dim">Ingen konversation ännu.</p>
+			<button
+				type="button"
+				@click="ensureConversation"
+				class="text-xs text-accent transition-colors hover:text-accent-light"
+			>
+				Starta chatt
+			</button>
+		</header>
 
-    <!-- Förslag som väntar på beslut -->
-    <div v-if="approval" class="px-4 py-3 border-b border-line bg-amber-500/5">
-      <p class="text-xs text-amber-300 mb-2">Agenten föreslår en definition:</p>
-      <p class="text-sm text-ink font-medium">{{ approval.title }}</p>
-      <p class="text-sm text-ink-muted whitespace-pre-wrap mt-1">{{ approval.description }}</p>
-      <div class="flex items-center gap-2 mt-3">
-        <button
-          @click="approve"
-          class="px-3 py-1.5 bg-accent-strong hover:bg-accent rounded-lg text-white text-sm transition-colors"
-        >
-          Godkänn
-        </button>
-        <input
-          v-model="feedback"
-          type="text"
-          placeholder="Vad ska ändras?"
-          class="flex-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none"
-        />
-        <button
-          @click="reject"
-          class="px-3 py-1.5 border border-line bg-surface-2 rounded-lg text-ink-muted text-sm hover:border-line-strong hover:text-ink transition-colors"
-        >
-          Avvisa
-        </button>
-      </div>
-    </div>
+		<!-- Förslag som väntar på beslut -->
+		<div v-if="approval" class="flex-shrink-0 border-b border-line bg-amber-500/5 px-4 py-3">
+			<p class="mb-2 text-xs text-amber-300">Agenten föreslår en definition:</p>
+			<p class="text-sm font-medium text-ink">{{ approval.title }}</p>
+			<p class="mt-1 whitespace-pre-wrap text-sm text-ink-muted">{{ approval.description }}</p>
+			<div class="mt-3 flex items-center gap-2">
+				<button
+					@click="approve"
+					class="rounded-lg bg-accent-strong px-3 py-1.5 text-sm text-white transition-colors hover:bg-accent"
+				>
+					Godkänn
+				</button>
+				<input
+					v-model="feedback"
+					type="text"
+					placeholder="Vad ska ändras?"
+					class="flex-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none"
+				/>
+				<button
+					@click="reject"
+					class="rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+				>
+					Avvisa
+				</button>
+			</div>
+		</div>
 
-    <!-- Meddelanden -->
-    <div ref="listRef" class="max-h-96 overflow-y-auto px-4 py-3 space-y-3">
-      <p v-if="!messages.length" class="text-sm text-ink-dim">
-        Inga meddelanden än. Skriv vad du vill ha hjälp med.
-      </p>
-      <div
-        v-for="message in messages"
-        :key="message.id"
-        class="flex"
-        :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
-      >
-        <div
-          class="max-w-[85%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap"
-          :class="message.role === 'user'
-            ? 'bg-accent-strong text-white'
-            : message.role === 'tool'
-              ? 'bg-surface-2 text-ink-dim font-mono text-xs'
-              : 'bg-surface-2 text-ink'"
-        >
-          <span v-if="message.tool_name" class="block text-[10px] uppercase tracking-wide opacity-70 mb-1">
-            {{ message.tool_name }}
-          </span>
-          {{ message.content }}
-        </div>
-      </div>
-      <p v-if="streaming" class="text-xs text-ink-dim">Agenten skriver…</p>
-    </div>
+		<!-- Meddelanden -->
+		<div class="relative min-h-0 flex-1">
+			<div
+				ref="listRef"
+				class="h-full space-y-3 overflow-y-auto px-4 py-3"
+				@scroll="onScroll"
+			>
+				<p v-if="!messages.length" class="text-sm text-ink-dim">
+					Inga meddelanden än. Skriv vad du vill ha hjälp med - till exempel
+					så här: "Definiera målet och dela upp det i checkpoints".
+				</p>
+				<div
+					v-for="message in messages"
+					:key="message.id"
+					class="flex"
+					:class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+				>
+					<!-- Verktygsanrop: ihopfällt tills man vill se dem -->
+					<div
+						v-if="message.role === 'tool'"
+						class="max-w-[90%] rounded-xl border border-line bg-surface-2 px-3 py-2 text-xs text-ink-dim"
+					>
+						<button
+							type="button"
+							class="flex w-full items-center gap-1.5 text-left font-mono"
+							@click="toggleTool(message)"
+						>
+							<Icon
+								:name="expandedTools.has(message.id) ? 'lucide:chevron-down' : 'lucide:chevron-right'"
+								class="h-3 w-3 flex-shrink-0"
+							/>
+							<span class="truncate">{{ message.tool_name || 'verktyg' }}</span>
+						</button>
+						<pre
+							v-if="expandedTools.has(message.id)"
+							class="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words text-[11px]"
+						>{{ message.content }}</pre>
+					</div>
 
-    <p v-if="error" class="px-4 pb-2 text-xs text-red-300">{{ error }}</p>
-    <p v-else-if="!available" class="px-4 pb-2 text-xs text-ink-dim">
-      Agent-API:t är inte nåbar just nu.
-    </p>
+					<!-- Vanliga meddelanden -->
+					<div v-else class="max-w-[90%]">
+						<div
+							class="rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words"
+							:class="
+								message.role === 'user'
+									? 'bg-accent-strong text-white'
+									: message.role === 'system'
+										? 'border border-line bg-surface-2 text-ink-muted'
+										: 'bg-surface-2 text-ink'
+							"
+						>
+							{{ message.content }}
+						</div>
+						<p
+							class="mt-0.5 px-1 text-[10px] text-ink-dim"
+							:class="message.role === 'user' ? 'text-right' : 'text-left'"
+						>
+							{{ message.role === 'user' ? 'Du' : 'Agenten' }}
+							<template v-if="formatTime(message.created_at)">
+								· {{ formatTime(message.created_at) }}
+							</template>
+						</p>
+					</div>
+				</div>
+				<p v-if="streaming" class="text-xs text-ink-dim">Agenten skriver…</p>
+			</div>
 
-    <!-- Skrivfält -->
-    <form class="flex items-center gap-2 px-4 py-3 border-t border-line" @submit.prevent="submit">
-      <input
-        v-model="draft"
-        type="text"
-        placeholder="Skriv till agenten…"
-        class="flex-1 rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-sm text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-      />
-      <button
-        type="submit"
-        :disabled="streaming || !draft.trim()"
-        class="px-3.5 py-2 bg-accent-strong hover:bg-accent disabled:opacity-40 rounded-lg text-white text-sm transition-colors"
-      >
-        Skicka
-      </button>
-    </form>
-  </section>
+			<!-- Knapp som tar ner till de senaste meddelandena -->
+			<button
+				v-if="!atBottom && messages.length"
+				type="button"
+				class="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-line bg-elevated px-3 py-1.5 text-xs text-ink-muted shadow-lg transition-colors hover:text-ink"
+				@click="scrollToBottom"
+			>
+				<Icon name="lucide:arrow-down" class="h-3.5 w-3.5" />
+				Nya meddelanden
+			</button>
+		</div>
+
+		<p v-if="error" class="flex-shrink-0 px-4 pb-2 text-xs text-red-300">{{ error }}</p>
+		<p v-else-if="!available" class="flex-shrink-0 px-4 pb-2 text-xs text-ink-dim">
+			Agent-API:t är inte nåbar just nu.
+		</p>
+
+		<!-- Skrivfält -->
+		<form
+			class="flex flex-shrink-0 items-end gap-2 border-t border-line px-4 py-3"
+			@submit.prevent="submit"
+		>
+			<textarea
+				ref="inputRef"
+				v-model="draft"
+				rows="1"
+				placeholder="Skriv till agenten…"
+				class="max-h-36 flex-1 resize-none rounded-lg border border-line bg-surface-2 px-3.5 py-2 text-sm text-ink placeholder-ink-dim transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+				@keydown="onKeydown"
+			/>
+			<button
+				type="submit"
+				:disabled="streaming || !draft.trim()"
+				class="rounded-lg bg-accent-strong px-3.5 py-2 text-sm text-white transition-colors hover:bg-accent disabled:opacity-40"
+			>
+				Skicka
+			</button>
+		</form>
+		<p class="flex-shrink-0 px-4 pb-2 text-[10px] text-ink-dim">
+			Enter skickar · Shift+Enter ger ny rad
+		</p>
+	</section>
 </template>

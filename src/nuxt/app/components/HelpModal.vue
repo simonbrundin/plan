@@ -189,6 +189,11 @@ const sections = computed<Section[]>(() => {
           description: "Växla agent-märke för markerat mål",
         },
         {
+          keys: ["v"],
+          description:
+            "Visa/dölj agentpanelen på målsidan (chatt, körning, plan)",
+        },
+        {
           keys: ["n"],
           description: "Växla nu-märke för markerat mål (syns i Gör nu)",
         },

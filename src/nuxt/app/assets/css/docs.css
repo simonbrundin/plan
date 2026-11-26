@@ -1,0 +1,234 @@
+/*
+ * Typografi för dokumentationssidorna.
+ *
+ * Innehållet renderas som HTML från markdown, så stilarna kan inte
+ * komma från scoped CSS i komponenten. Därför ligger de här och
+ * appliceras på .docs-content.
+ *
+ * Färgerna kommer från designsystemets tokens (se main.css), så
+ * dokumentationen följer appens mörka tema utan egna färgval.
+ */
+
+.docs-content {
+  color: var(--color-ink);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.docs-content > * + * {
+  margin-top: 1.1em;
+}
+
+/* Rubriker */
+
+.docs-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  margin-top: 0;
+}
+
+.docs-content h2 {
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-top: 2.2em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--color-line);
+}
+
+.docs-content h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 1.8em;
+}
+
+.docs-content h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  margin-top: 1.6em;
+}
+
+.docs-content h2:first-child,
+.docs-content h3:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Rubriker som ankarlänk: fokusmarkering när man hoppar hit */
+
+.docs-content :is(h2, h3)[id] {
+  scroll-margin-top: 5rem;
+  position: relative;
+}
+
+.docs-content :is(h2, h3)[id]:hover::before {
+  content: "#";
+  position: absolute;
+  left: -1.1em;
+  color: var(--color-ink-dim);
+  font-weight: 400;
+}
+
+/* Text */
+
+.docs-content p {
+  color: var(--color-ink-muted);
+}
+
+.docs-content strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.docs-content a {
+  color: var(--color-accent-light);
+  text-decoration: underline;
+  text-decoration-color: rgb(129 140 248 / 0.4);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.docs-content a:hover {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+/* Listor */
+
+.docs-content ul,
+.docs-content ol {
+  padding-left: 1.35em;
+  color: var(--color-ink-muted);
+}
+
+.docs-content ul {
+  list-style: disc;
+}
+
+.docs-content ol {
+  list-style: decimal;
+}
+
+.docs-content li {
+  margin-top: 0.4em;
+}
+
+.docs-content li::marker {
+  color: var(--color-ink-dim);
+}
+
+.docs-content li > ul,
+.docs-content li > ol {
+  margin-top: 0.4em;
+}
+
+/* Inline-kod */
+
+.docs-content code {
+  font-family: ui-monospace, "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.85em;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  border-radius: 0.35rem;
+  padding: 0.1em 0.35em;
+  color: var(--color-accent-light);
+  white-space: nowrap;
+}
+
+/* Kodblock */
+
+.docs-content pre {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+.docs-content pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--color-ink-muted);
+  white-space: pre;
+}
+
+/* Tabeller */
+
+.docs-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.docs-content thead {
+  background: var(--color-surface-2);
+}
+
+.docs-content th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-ink);
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--color-line-strong);
+  white-space: nowrap;
+}
+
+.docs-content td {
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink-muted);
+  vertical-align: top;
+}
+
+.docs-content tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.docs-content tbody tr:nth-child(even) {
+  background: rgb(255 255 255 / 0.015);
+}
+
+.docs-content td code {
+  white-space: nowrap;
+}
+
+/* Citat */
+
+.docs-content blockquote {
+  border-left: 3px solid var(--color-accent-strong);
+  background: rgb(99 102 241 / 0.07);
+  border-radius: 0 0.6rem 0.6rem 0;
+  padding: 0.75rem 1rem;
+  color: var(--color-ink-muted);
+}
+
+.docs-content blockquote p {
+  color: inherit;
+}
+
+/* Linjer */
+
+.docs-content hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin: 2.2em 0;
+}
+
+/* Bilder */
+
+.docs-content img {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-line);
+}

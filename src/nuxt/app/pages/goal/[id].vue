@@ -66,6 +66,36 @@ const { fetchAgentRuns, fetchAgentRunEvents, fetchAgentApprovals } = useAgentApi
 const agentRun = ref<AgentRun | null>(null);
 const agentRunEvents = ref<AgentRunEvent[]>([]);
 const agentApprovals = ref<AgentApproval[]>([]);
+
+// Agent-docken - chatten, körningshistoriken och checkpoint-planen
+// ligger i en egen kolumn bredvid målet. Valet sparas så att
+// agentpanelen ligger kvar mellan sidladdningar.
+const AGENT_DOCK_KEY = 'plan.agentDockOpen';
+const agentDockOpen = ref(false);
+
+// Beslut som väntar på en människa - visas som en prick på agentknappen.
+const pendingApprovalCount = computed(
+  () => agentApprovals.value.filter((item) => item.status === 'pending').length,
+);
+
+const toggleAgentDock = () => {
+  agentDockOpen.value = !agentDockOpen.value;
+};
+
+onMounted(() => {
+  const stored = localStorage.getItem(AGENT_DOCK_KEY);
+  if (stored !== null) {
+    agentDockOpen.value = stored === '1';
+  } else {
+    // På breda skärmar finns plats för både målet och agenten.
+    agentDockOpen.value = window.matchMedia('(min-width: 1024px)').matches;
+  }
+});
+
+watch(agentDockOpen, (value) => {
+  localStorage.setItem(AGENT_DOCK_KEY, value ? '1' : '0');
+});
+
 let agentPollTimer: ReturnType<typeof setInterval> | undefined;
 let agentRefreshInFlight = false;
 
@@ -2012,6 +2042,12 @@ onMounted(() => {
       title: "Toggle påbörjat",
       run: toggleStartedForSelection,
     },
+    {
+      keys: "v",
+      label: "V",
+      title: "Visa/dölj agentpanelen",
+      run: toggleAgentDock,
+    },
   ]);
 });
 
@@ -2576,6 +2612,17 @@ watch(selectedParentIndex, async () => {
         >{{ goal?.title }}<ChildCountBadge v-if="goal" :goal-id="goal.id" size="md" class="ml-2 align-middle" /></h1>
         <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
         <div class="flex items-center gap-1 flex-shrink-0">
+        <!-- Agentpanelen (leader + v) -->
+        <span v-if="goal?.agent" class="opt-icon is-on">
+          <button @click.stop="toggleAgentDock"
+            class="relative rounded-lg p-1.5 transition-colors hover:bg-elevated"
+            :class="agentDockOpen ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
+            :title="agentDockOpen ? 'Dölj agentpanelen (leader + v)' : 'Visa agentpanelen (leader + v)'">
+            <Icon name="lucide:sparkles" class="w-6 h-6" :style="{ opacity: agentDockOpen ? 1 : 0.35 }" />
+            <span v-if="pendingApprovalCount > 0"
+              class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-400" />
+          </button>
+        </span>
         <!-- Started-toggle (leader + s) -->
         <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
           class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">
@@ -2779,28 +2826,8 @@ watch(selectedParentIndex, async () => {
         </button>
       </div>
 
-      <!-- Agentchatt - Plan är agentens gränssnitt -->
-      <div v-if="goal?.agent" class="flex-shrink-0">
-        <AgentChatPanel
-          :goal-id="goal.id"
-          :goal-title="goal.title || ''"
-          :goal-description="goal.description || ''"
-          :run="agentRun"
-          @conversation-started="saveConversationId" />
-        <AgentRunHistory
-          :events="agentRunEvents"
-          :run="agentRun"
-          :approvals="agentApprovals"
-          class="mt-3"
-          @decided="loadAgentRun"
-          @cancelled="loadAgentRun"
-        />
-        <AgentCheckpointWorkflowPanel
-          :feature="goal.title || ''"
-          :description="goal.description || ''"
-          class="mt-3"
-        />
-      </div>
+      <!-- Agentchatt, körningshistorik och checkpoint-plan ligger i
+           agent-docken bredvid målet - se AgentDock. -->
 
       <!-- Dependencies-sektion -->
       <div v-if="showDependencies && (dependsOn.length > 0 || blocking.length > 0)" class="rounded-2xl border border-line bg-surface transition-colors hover:border-line-strong hover:bg-surface-2 p-4 mb-1 flex-shrink-0">
@@ -3255,6 +3282,25 @@ watch(selectedParentIndex, async () => {
       @add="addDependencyFromPicker"
       @remove="removeDependencyFromPicker"
       @close="dependencyPickerOpen = false" />
+
+    <!-- Agent-docken - egen kolumn längst till höger. På breda skärmar
+         täcker den kalenderspalten, på små skärmar lägger den sig över
+         sidan. -->
+    <AgentDock
+      v-if="goal?.agent && agentDockOpen"
+      :goal-id="goal.id"
+      :goal-title="goal.title || ''"
+      :goal-description="goal.description || ''"
+      :run="agentRun"
+      :events="agentRunEvents"
+      :approvals="agentApprovals"
+      @close="agentDockOpen = false"
+      @conversation-started="saveConversationId"
+      @decided="loadAgentRun"
+      @cancelled="loadAgentRun" />
+    <div v-if="goal?.agent && agentDockOpen"
+      class="fixed inset-0 z-30 bg-black/50 lg:hidden"
+      @click="agentDockOpen = false" />
 
   </div>
   <div v-else class="max-w-4xl mx-auto px-6 py-8">

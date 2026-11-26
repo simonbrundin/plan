@@ -154,6 +154,14 @@ const links = [
       },
     },
     {
+      label: "Dokumentation",
+      icon: "i-lucide-book-open",
+      to: "/docs",
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
       label: "Inställningar",
       icon: "i-lucide-settings",
       to: "/settings",

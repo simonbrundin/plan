@@ -19,7 +19,12 @@ export default defineNuxtConfig({
 		'/**': { ssr: false },
 	},
 
-	css: ["@/assets/css/main.css", "leaflet/dist/leaflet.css"],
+	css: [
+		"@/assets/css/main.css",
+		"leaflet/dist/leaflet.css",
+		// Typografin för dokumentationssidorna (markdown -> HTML).
+		"@/assets/css/docs.css",
+	],
 	ui: {
 		colors: {
 			primary: "indigo",
