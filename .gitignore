@@ -63,3 +63,6 @@ environments/dev/pgadmin/pgadmin-values.yaml
 *.sw?
 server/
 !server/
+
+# Rust
+/src/rust/target/

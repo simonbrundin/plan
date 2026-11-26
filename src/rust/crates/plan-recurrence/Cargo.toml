@@ -1,0 +1,9 @@
+[package]
+name = "plan-recurrence"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Återkommande serier (RRULE) - port av Go-tjänstens recurrence-paket"
+
+[dependencies]
+chrono.workspace = true

@@ -2920,3 +2920,171 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy]] — ny sida från inboxen
 - [archive] 2026-11-26-wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy.md
 
+
+## [2026-11-26] ingest | create notes/platsvaljaren-flyttade-till-leader-p
+- [create] [[notes/platsvaljaren-flyttade-till-leader-p]] — ny sida från inboxen
+- [archive] 2026-11-26-platsvaljaren-flyttade-till-leader-p.md
+
+
+## [2026-11-26] ingest | create notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar
+- [create] [[notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar]] — ny sida från inboxen
+- [archive] 2026-11-26-kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar.md
+
+
+## [2026-11-26] ingest | create notes/enhet-per-lyckad-uppgift-prenumerationer-kostar-per-forsok-och-maste-omraknas-med-pass-rate
+- [create] [[notes/enhet-per-lyckad-uppgift-prenumerationer-kostar-per-forsok-och-maste-omraknas-med-pass-rate]] — ny sida från inboxen
+- [archive] 2026-11-26-enhet-per-lyckad-uppgift-prenumerationer-kostar-per-forsok-och-maste-omraknas-med-pass-rate.md
+
+
+## [2026-11-26] ingest | create notes/agentens-maldefinition-gar-via-human-gate
+- [create] [[notes/agentens-maldefinition-gar-via-human-gate]] — ny sida från inboxen
+- [archive] 2026-11-26-agentens-maldefinition-gar-via-human-gate.md
+
+
+## [2026-11-26] ingest | create notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier
+- [create] [[notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier]] — ny sida från inboxen
+- [archive] 2026-11-26-anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier.md
+
+
+## [2026-11-26] ingest | create notes/plan-migreras-fran-go-till-rust
+- [create] [[notes/plan-migreras-fran-go-till-rust]] — ny sida från inboxen
+- [archive] 2026-11-26-plan-migreras-fran-go-till-rust.md
+
+
+## [2026-11-26] ingest | create notes/paritetstest-gatear-rust-migreringen-mot-go-kallan
+- [create] [[notes/paritetstest-gatear-rust-migreringen-mot-go-kallan]] — ny sida från inboxen
+- [archive] 2026-11-26-paritetstest-gatear-rust-migreringen-mot-go-kallan.md
+
+
+## [2026-11-26] ingest | create notes/ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning
+- [create] [[notes/ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning]] — ny sida från inboxen
+- [archive] 2026-11-26-ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning.md
+
+
+## [2026-11-26] ingest | create notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter
+- [create] [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] — ny sida från inboxen
+- [archive] 2026-11-26-manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter.md
+
+
+## [2026-11-26] ingest | create notes/rust-api-t-far-auth-lager-och-forsta-domanerna
+- [create] [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] — ny sida från inboxen
+- [archive] 2026-11-26-rust-api-t-far-auth-lager-och-forsta-domanerna.md
+
+
+## [2026-11-26] ingest | create notes/pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace
+- [create] [[notes/pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace]] — ny sida från inboxen
+- [archive] 2026-11-26-pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace.md
+
+
+## [2026-11-26] link | notes/pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace -> notes/pi-durable-fungerar-med-minimax-coding-plan-anthropic-messages-api
+
+
+## [2026-11-26] ingest | create notes/malens-id-n-ar-integer-och-tysta-sqlx-fel-ar-farliga
+- [create] [[notes/malens-id-n-ar-integer-och-tysta-sqlx-fel-ar-farliga]] — ny sida från inboxen
+- [archive] 2026-11-26-malens-id-n-ar-integer-och-tysta-sqlx-fel-ar-farliga.md
+
+
+## [2026-11-26] ingest | create notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer
+- [create] [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] — ny sida från inboxen
+- [archive] 2026-11-26-planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer.md
+
+
+## [2026-11-26] ingest | create notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med
+- [create] [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] — ny sida från inboxen
+- [archive] 2026-11-26-worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med.md
+
+
+## [2026-11-26] ingest | create notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling
+- [create] [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] — ny sida från inboxen
+- [create] [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]] — ny sida från inboxen
+- [archive] 2026-11-26-worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling.md
+- [archive] 2026-11-26-worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26.md
+## [2026-11-26] ingest | create notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26
+
+
+## [2026-11-26] link | notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling -> concepts/longhorn
+
+
+## [2026-11-26] link | notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med -> concepts/longhorn
+
+
+## [2026-11-26] source | 2026-11-26-pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn.md
+
+
+## [2026-11-26] ingest | create notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn
+- [create] [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]] — ny sida från inboxen
+- [archive] 2026-11-26-usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn.md
+
+
+## [2026-11-26] ingest | create notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv
+- [create] [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]] — ny sida från inboxen
+- [archive] 2026-11-26-pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv.md
+
+
+## [2026-11-26] link | notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn -> concepts/longhorn
+
+
+## [2026-11-26] link | notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn -> notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling
+
+
+## [2026-11-26] page | summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn
+
+
+## [2026-11-26] link | summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn -> notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv
+
+
+## [2026-11-26] link | notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv -> summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn
+
+
+## [2026-11-26] ingest | create notes/rrule-motor-i-rust-ersatter-rrule-go
+- [create] [[notes/rrule-motor-i-rust-ersatter-rrule-go]] — ny sida från inboxen
+- [archive] 2026-11-26-rrule-motor-i-rust-ersatter-rrule-go.md
+
+
+## [2026-11-26] ingest | create notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor
+- [create] [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] — ny sida från inboxen
+- [create] [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] — ny sida från inboxen
+- [create] [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] — ny sida från inboxen
+- [create] [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] — ny sida från inboxen
+- [archive] 2026-11-26-plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor.md
+- [archive] 2026-11-26-zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export.md
+- [archive] 2026-11-26-zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om.md
+- [archive] 2026-11-26-zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in.md
+## [2026-11-26] ingest | create notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export
+## [2026-11-26] ingest | create notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om
+## [2026-11-26] ingest | create notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in
+
+
+## [2026-11-26] link | notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export -> concepts/zitadel
+
+
+## [2026-11-26] link | concepts/zitadel -> notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export
+
+
+## [2026-11-26] link | notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om -> concepts/zitadel
+
+
+## [2026-11-26] link | concepts/zitadel -> notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om
+
+
+## [2026-11-26] link | notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in -> concepts/zitadel
+
+
+## [2026-11-26] link | concepts/zitadel -> notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in
+
+
+## [2026-11-26] link | notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor -> concepts/cloudnative-pg
+
+
+## [2026-11-26] link | concepts/cloudnative-pg -> notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor
+
+
+## [2026-11-26] ingest | create notes/fyra-paritetsfallor-i-agentdomanens-port-till-rust
+- [create] [[notes/fyra-paritetsfallor-i-agentdomanens-port-till-rust]] — ny sida från inboxen
+- [archive] 2026-11-26-fyra-paritetsfallor-i-agentdomanens-port-till-rust.md
+
+
+## [2026-11-26] ingest | create notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna
+- [create] [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] — ny sida från inboxen
+- [archive] 2026-11-26-malkompletteringar-och-auth-i-rust-de-sista-api-vagarna.md
+

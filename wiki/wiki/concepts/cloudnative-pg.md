@@ -5,8 +5,8 @@ summary: CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhand
 tags: [postgresql, database, postgres, cloudnativepg, cnpg]
 sources: [infrastructure-flux/components/cloudnative-pg/]
 created: 2026-06-02
-updated: 2026-10-24
-related: [concepts/zitadel]
+updated: 2026-11-26
+related: [concepts/zitadel, notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]
 ---
 
 # CloudNativePG (CNPG)
@@ -181,3 +181,8 @@ kubectl cnp backup <cluster-name> -n <namespace>
 - [[entities/kubernetes]]
 - [[concepts/longhorn]]
 - [[concepts/zitadel]] (använder CNPG för `zitadel-db`)
+
+## Relaterade
+
+- [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
+

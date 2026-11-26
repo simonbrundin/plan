@@ -1,0 +1,6 @@
+[package]
+name = "plan-parity"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Paritetsverktyg: jämför Rust-routes mot route-registreringar i Go-källan"
