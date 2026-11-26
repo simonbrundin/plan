@@ -8,8 +8,8 @@ och gå sedan ner på sidorna som är relevanta.
 |---|---|
 | Entiteter | 6 |
 | Koncept | 20 |
-| Sammanfattningar | 7 |
-| Noter | 415 |
+| Sammanfattningar | 8 |
+| Noter | 428 |
 
 ## Entiteter
 
@@ -26,7 +26,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/authentik]] - Authentik var tidigare identity provider i klustret och är nu ersatt av Zitadel. _(uppdaterad 2026-10-23)_
 - [[concepts/cert-manager]] - cert-manager är en Kubernetes-operator som automatiserar hantering av TLS-certifikat. _(uppdaterad 2026-10-24)_
 - [[concepts/cloudflare-tunnel]] - Cloudflare Tunnel är aktiverat (2026-11-26) och serverar plan.simonbrundin.com publikt - den enda fungerande publika ingressen sedan Starlink-CGNAT. _(uppdaterad 2026-11-26)_
-- [[concepts/cloudnative-pg]] - CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhandahåller automatiserad hantering av PostgreSQL-databaser. _(uppdaterad 2026-10-24)_
+- [[concepts/cloudnative-pg]] - CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhandahåller automatiserad hantering av PostgreSQL-databaser. _(uppdaterad 2026-11-26)_
 - [[concepts/envoy-gateway]] - Envoy Gateway är en implementation av Kubernetes Gateway API som använder Envoy proxy som control plane och data plane. _(uppdaterad 2026-10-24)_
 - [[concepts/flux-operator]] - Operator som installerar och styr Flux via FluxInstance-CRD istället för flux bootstrap. _(uppdaterad 2026-11-26)_
 - [[concepts/gitops]] - Git är enda sanningskällan för infrastruktur; Flux/FluxOperator applicerar ändringarna till klustret. _(uppdaterad 2026-10-24)_
@@ -41,13 +41,14 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/oidc]] - OIDC är protokollet som låter Zitadel-autentiserade användare få åtkomst till Kubernetes API-servern. _(uppdaterad 2026-10-23)_
 - [[concepts/poolad-eller-direkt-anslutning-mot-neon]] - Neon ger TVÅ endpoints för samma databas. _(uppdaterad 2026-11-02)_
 - [[concepts/sops]] - SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-age och provider: sops. _(uppdaterad 2026-11-23)_
-- [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-10-23)_
+- [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-26)_
 
 ## Sammanfattningar
 
 - [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] - PostgreSQL-lager för Learn implementerat enligt store.Repository, med DATABASE_URL som växlare och egna testdatabaser per test. _(uppdaterad 2026-11-03)_
 - [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] - Källa: TESmart-manualen för HKS801/HKS1601 (kapitel 10.3), som är referensmanualen för en stor grupp OEM-byggen av 16-portars HDMI KV... _(uppdaterad 2026-11-13)_
 - [[summaries/kalenderns-detaljnivaer-och-lane-packning]] - Kalenderns fem detaljnivåer väljs efter tidsfönstrets storlek, inte efter händelsens vikt - och överlapp löses med pixelmätt lane-packning. _(uppdaterad 2026-11-17)_
+- [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]] - PinchBench (Kilo Code) mäter LLM:er som OpenClaw-agenter. _(uppdaterad 2026-11-26)_
 - [[summaries/longhorn-disk-guide]] - `docs/add-disk-to-longhorn.md` — Komplett guide med arkitektur, steg-för-steg, och felsökning. _(uppdaterad 2026-10-24)_
 - [[summaries/flux-components]] - `infrastructure-flux/components/` — Alla HelmReleases och HelmRepositories. _(uppdaterad 2026-10-24)_
 - [[summaries/infrastructure-flux]] - `infrastructure-flux/README.md` — Arkitektur och konfigurationsguide. _(uppdaterad 2026-10-24)_
@@ -139,6 +140,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] - Resources blev först grönt efter att cert-manager-webhook flyttades till worker-3. _(uppdaterad 2026-11-26)_
 - [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] - Vid felsökning av cluster1 exponerades en GitHub-token och en privat SOPS age-nyckel i agentens verktygsutdata. _(uppdaterad 2026-11-26)_
 - [[notes/foot-bindningen-kraver-omstart-av-foot]] - Konfigurationen \x17=Control+BackSpace validerar korrekt, men foot läser foot.ini vid uppstart. _(uppdaterad 2026-11-25)_
+- [[notes/fyra-paritetsfallor-i-agentdomanens-port-till-rust]] - Agentdomänen i Plan-API:t portades till Rust (körningar, händelser, godkännanden, budgetar, användning, API-nycklar). _(uppdaterad 2026-11-26)_
 - [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] - 2026-11-25, efter kubeconfig-städningen (se [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]])... _(uppdaterad 2026-11-25)_
 - [[notes/foraldrar-syns-pa-mal-i-now]] - Målsidan /now (Gör nu) visar nu vilka föräldrar ett mål ligger under. _(uppdaterad 2026-11-22)_
 - [[notes/globala-agentinstruktioner-deployas-via-dotfiles]] - Globala agentinstruktioner bor i dotfiles-repot och deployas med stow till agenternas konfigurationskataloger. _(uppdaterad 2026-10-21)_
@@ -264,6 +266,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan]] - Plan använder samma fem faser för varje mål: define → plan → execute → verify → completed. _(uppdaterad 2026-11-24)_
 - [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]] - PROBLEM: Att byta målsida i plan tog 2-7 sekunder. _(uppdaterad 2026-11-20)_
 - [[notes/malikoner-anvander-enkel-oversattning-fore-iconify]] - Lösningen använder npm-paketet translate i Nuxt-serverrouten /api/icons. _(uppdaterad 2026-11-17)_
+- [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] - De sista 76 Go-vägarna är nu portade till Rust: auth-endpoints (login, callback, dev-login, session, logout) och målens kompletteringa... _(uppdaterad 2026-11-26)_
 - [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] - Buggen hittades när användaren frågade vad "agentkörningar" betyder - frågan avslöjade _(uppdaterad 2026-11-26)_
 - [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] - I pi/.pi/agent/mcp.json och opencode/.config/opencode/opencode.json ligger Neon MCP-tokens i klartext, och de committades 2026-11-17 i do... _(uppdaterad 2026-11-17)_
 - [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] - NeuroQuant har byggts om. _(uppdaterad 2026-11-03)_
@@ -304,14 +307,17 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace]] - Ny extension ~/.pi/agent/extensions/minimax-quota-guard.ts (dotfiles-repo, pi/.pi/agent/extensions/), plus tester i pi/tests/. _(uppdaterad 2026-11-26)_
 - [[notes/pi-tog-bort-pi-rate-limit-och-pi-pattern-retry-fixade-omarchy-temasy]] - Ändring 2025-xx-xx i dotfiles-repo, pi-agentens extension-uppsättning: _(uppdaterad 2026-10-23)_
 - [[notes/picokvm-luckfox-startar-inte-i-labbet-lite-saknar-emmc-ingen-poe]] - Köpt Waveshare/Luckfox PicoKVM Lite (Amazon ASIN B0H4G22JG8, 'Luckfox PicoKVM Lite', full-version-hus med 1.54-tums display men UTAN eMMC). _(uppdaterad 2026-11-17)_
+- [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]] - Anledning: användaren visade pinchbench.com/?view=value och frågade vad jag tycker. _(uppdaterad 2026-11-26)_
 - [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] - Symtom: /goals i plan visade "Fel vid laddning av mål: [GET] \"/api/proxy/goals\": 503 Service Unavailable". _(uppdaterad 2026-11-25)_
 - [[notes/plan-api-anvander-scalar-for-openapi]] - Plan API bytte från gin-swagger till samma Scalar-upplägg som repo-template. _(uppdaterad 2026-11-17)_
 - [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] - src/api och src/agent flyttades till en gemensam Go-modul med rot i src/ (modulnamn plan). _(uppdaterad 2026-11-26)_
 - [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] - Projekt: plan _(uppdaterad 2026-11-16)_
 - [[notes/plan-migreras-fran-go-till-rust]] - Beslut 2026-11-26: Plan-applikationens Go-tjänster skrivs om i Rust. _(uppdaterad 2026-11-26)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
+- [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-26)_
 - [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-10)_
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
+- [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] - Anledning: användaren frågade "menar du att Gemini 4 Neon är lika billig som MiniMax _(uppdaterad 2026-11-26)_
 - [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] - Title: Platser på mål och kalenderhändelser (ny OpenSpec-change add-places) _(uppdaterad 2026-11-20)_
 - [[notes/platsvaljaren-flyttade-till-leader-p]] - Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /no... _(uppdaterad 2026-11-26)_
 - [[notes/popcorn-time-installerad-som-appimage-i-local]] - Efter qBittorrent (se noten om mime-kopplingar) bad användaren om Popcorn Time. _(uppdaterad 2026-11-17)_
@@ -361,6 +367,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rock-4c-4se-talos-kan-aldrig-installeras-till-disk-u-boot-saknar-efi-setvariablert]] - Status 2026-10-24: worker-1 (10.10.10.21) och worker-2 (10.10.10.22) gick med i _(uppdaterad 2026-10-25)_
 - [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]] - Kontrollerat pa PXE-varden (Ubuntu 25.04) 2026-10-23: mainline-defconfigen rock-pi-4-rk3399_defconfig bygger en bild med DTB for 'Radxa R... _(uppdaterad 2026-10-23)_
 - [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]] - Slutlig fix (fas 4): meddelandet "No project root found" kan undvikas helt vid _(uppdaterad 2026-11-17)_
+- [[notes/rrule-motor-i-rust-ersatter-rrule-go]] - Återkommande serier expanderades i Go med rrule-go (teambition/rrule-go v1.8.2). _(uppdaterad 2026-11-26)_
 - [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] - Problem: När man öppnade en leetcode.nvim-lösning i Neovim sade health-checken _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] - Fas 2 av samma problem: när standalone-läget stängdes av (server.standalone = _(uppdaterad 2026-11-17)_
 - [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_
@@ -431,6 +438,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/undo-stapel-i-plan-z-angrar-senaste-malhandling]] - På begäran: tangenten Z ångrar nu den senaste handlingen i plan (slutfört/pågående/evigt/deadline/upprepning på mål). _(uppdaterad 2026-11-20)_
 - [[notes/unifi-gatewayen-har-ingen-publik-ipv6-cgnat-via-starlink]] - Starlink **ger** IPv6 på alla planer, men bara /64 på WAN via SLAAC + /56 via DHCPv6-PD. _(uppdaterad 2026-11-17)_
 - [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]] - USB-disken ACER (WD 320 GB, 5400 rpm) ska INTE anvandas som Longhorn-disk - USB-brygga och IOPS talar emot det. _(uppdaterad 2026-10-24)_
+- [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]] - Kartlagt 2026-11-26. _(uppdaterad 2026-11-26)_
 - [[notes/utbyggnad-av-pappas-personlista-bolagsregister-konferensbios-gav-140-namngivna-personer]] - 2026-11-08: pappas frölista gick från 88 till 140 namngivna personer. _(uppdaterad 2026-11-03)_
 - [[notes/uttunnade-serier-vags-sa-att-antalen-blir-exakta]] - En serie kan ha fler förekomster än expanderaren klarar (MAX_OCCURRENCES_PER_SERIES = 5000). _(uppdaterad 2026-11-18)_
 - [[notes/utvecklingsflode]] - Bygg, test och installera av TypeTrainer och wikictl, plus verktyg som inte finns. _(uppdaterad 2026-10-24)_
@@ -449,11 +457,14 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/windows-1252-avkodning-av-mejlens-amnesrad]] - 2026-11-19: Ämnen på Outlook-mejl visades rått MIME-kodat i pappa, t.ex. _(uppdaterad 2026-11-20)_
 - [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]] - Radxa ROCK 4C+ (worker-1..3) bootar via U-Boot i SPI-flash, inte UEFI. _(uppdaterad 2026-10-22)_
 - [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]] - worker-1 (ROCK 4C+, 10.10.10.21) startar inte: ingen skarmbild, ingen ARP/DHCP/TFTP, ingen klient i UniFi. _(uppdaterad 2026-10-23)_
+- [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] - worker-1 (ROCK 4C+, 10.10.10.21, PoE-port 21) bootar numera PXE med matchbox och har gått med i cluster1 som Ready (Kubernetes) och som ... _(uppdaterad 2026-11-26)_
+- [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] - Kartlagt 2026-11-26 efter att worker-1 gick med i cluster1. _(uppdaterad 2026-11-26)_
 - [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]] - Status 2026-10-23: worker-1 (10.10.10.21, PoE-port 21) och worker-2 (10.10.10.22, PoE-port 22) ar INCOMPLETE i ARP-tabell och svarar inte... _(uppdaterad 2026-10-23)_
 - [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]] - Status 2026-10-27: en fysisk omstart av worker-1 och en kontrollerad PoE-cykel med 1 Hz-strommalning visar att boarden far strom, forhandlar PHY-link pa 1 Gbit/s men aldrig skickar ett enda eget paket - DHCP-rader saknas sedan 2026-10-23... _(uppdaterad 2026-10-27)_
 - [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]] - Status 2026-10-27: en verifierad PoE-cykel pa UniFi port 21 (45 s av, 45 s up) gav PHY-link men fortfarande noll rx-paket, tom MAC-tabell och noll DHCP/TFTP... _(uppdaterad 2026-10-27)_
 - [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]] - worker-1 (ROCK 4C+, MAC 0a:3f:39:25:2b:c8, IP 10.10.10.21, PoE-port 21) har under lång tid varit helt onåbar i nätet: ingen ARP, ingen DH... _(uppdaterad 2026-10-22)_
 - [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]] - Kortet i worker-1 flashades 2026-10-23 med ny mainline-build (TF-A f37f388 + U-Boot 2026.10, bada byggda i repot via bind-mount for att k... _(uppdaterad 2026-10-23)_
+- [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]] - Status 2026-11-26 efter att worker-1 repaired. _(uppdaterad 2026-11-26)_
 - [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]] - När worker-2 inte gick att PXE-boota visade sig att noden aldrig nade nätverket. _(uppdaterad 2026-10-23)_
 - [[notes/worker-3-bootade-via-pxe-men-talos-installen-nollstallde-de-forsta-11-mb-pa-microsd]] - 2026-11-20: Forsta gangen lyckades en ROCK 4C+-nod boota via PXE hela vagen. _(uppdaterad 2026-11-20)_
 - [[notes/worker-3-poe-omstart-och-talos-konfiguration-2026-11-20]] - Worker-3 på 10.10.10.23 startades om via UniFi US48P500 port 23. _(uppdaterad 2026-11-20)_
@@ -466,6 +477,9 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] - Noden 10.10.10.29 (MAC a0:ce:c8:d9:0d:02, UniFi 'MinisomhorSIMON') ar UP: _(uppdaterad 2026-11-24)_
 - [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] - Status 2026-11-13: PXE-servern (10.10.10.2, UniFi-switch port 8, hostname 'pxe', MAC 2c:cf:67:43:f3:b0) var igang och serverkedaan ar hel... _(uppdaterad 2026-11-20)_
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
+- [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] - Vid ZITADELs officiella Cloud->self-hosted-import bevarades application-ID:n (t.ex. _(uppdaterad 2026-11-26)_
+- [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] - Den self-hosade ZITADEL-instansen på auth.simonbrundin.com hade en tom databas (ny installation 2026-11-26) och saknade den historiska i... _(uppdaterad 2026-11-26)_
+- [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] - Efter importen av en användare utan lösenord skapade ZITADEL eventet 'user.human.initialization.code.added', vilket sätter user state ... _(uppdaterad 2026-11-26)_
 - [[notes/aterkommande-mal-samma-malobjekt-med-upprepningsregel]] - Återkommande mål (t.ex. _(uppdaterad 2026-11-18)_
 - [[notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva]] - Tidigare begränsades varje återkommande serie till 8 förekomster innan händelserna grupperades per månad/år (limitRecurringOccurren... _(uppdaterad 2026-11-18)_
 - [[notes/aterstaende-funktioner-i-agentplattformen]] - 2026-11-25: Efter sammanslagningen av agents-repot och verifieringen av AgentRun-kontraktet bedöms följande funktioner återstå under ... _(uppdaterad 2026-11-25)_

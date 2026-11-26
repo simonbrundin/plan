@@ -5,8 +5,8 @@ summary: Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-
 tags: [zitadel, identity-provider, oidc, sso, authentication, rbac]
 sources: [infrastructure-flux/components/zitadel/, infrastructure-flux/components/auth/, talos/patches/controlplane.yaml]
 created: 2026-10-23
-updated: 2026-10-23
-related: [concepts/oidc]
+updated: 2026-11-26
+related: [concepts/oidc, notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export, notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om, notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]
 ---
 
 # Zitadel
@@ -53,7 +53,7 @@ kind: KubeAuthenticationConfig
 configuration:
   jwt:
     - issuer:
-        url: https://simonbrundin-hvukrq.us1.zitadel.cloud
+        url: https://auth.simonbrundin.com
         audiences:
           - "391307619412774131"
       claimMappings:
@@ -65,6 +65,41 @@ configuration:
 Viktigt: i Talos v1.14 ligger OIDC-konfigurationen i detta dokument,
 inte i `KubeAPIServerConfig.extraArgs` - flaggorna avvisas med "use
 KubeAuthenticationConfig".
+
+Issuer pekar på den **self-hosade** instansen (`auth.simonbrundin.com`).
+Tidigare pekade den på ZITADEL Cloud (`simonbrundin-hvukrq.us1.zitadel.cloud`);
+bytet skedde 2026-11-26 i samband med att den historiska installationen
+återställdes self-hosted (se [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]]).
+
+Kontrollera att patchen faktiskt är applicerad på **alla** controlplanes -
+en av dem saknade OIDC-konfigurationen (`jwt: []`) innan patchen kördes:
+
+```bash
+talosctl patch machineconfig --nodes 10.10.10.11,10.10.10.12,10.10.10.13 \
+  --patch @talos/patches/controlplane.yaml --dry-run   # visar diffen per nod
+```
+
+## Återställd installation (2026-11-26)
+
+Den historiska installationen (organisation `simon-brundin-ab`,
+`346062090475233657`) återställdes från en ZITADEL Cloud-export med
+ZITADEL:s eget export/import-flöde. Applikationernas historiska ID:n
+behölls, men OIDC `client_id` genererades om vid importen och skrevs
+därför tillbaka i eventstore och projection.
+
+| App | Application ID | Client ID | Typ | Används av |
+|-----|----------------|-----------|-----|-----------|
+| Console | `346062090475561337` | `346062091180007801` | public | `auth.simonbrundin.com/ui/console` |
+| talos-oidc | `346062485578709720` | `346062485595421400` | public | Talos OIDC |
+| kubernetes-kubectl | `391307619395996915` | `391307619412774131` | public | `kubectl oidc-login` (API-serverns audience) |
+| Foodflow | `392291832727364012` | `392291832744141228` | public | Foodflow |
+| Plan | `400928499969314176` | `391431970426454645` | public | Plan (`/auth/login`) |
+| cluster-ui | `401364362276635673` | `392027778305753717` | confidential | Flux, Dashboard, Longhorn, OpenClaw (via Envoy SecurityPolicy) |
+
+Användaren `simonbrundin@gmail.com` (`346062090475757945`) är ORG_OWNER i
+organisationen och har samma user-ID i både Cloud- och self-hosted-instansen,
+vilket gör att Kubernetes-username (`zitadel-346062090475757945`) är stabil
+oavsett vilken issuer API-servern använder.
 
 ## RBAC-mappning
 
@@ -111,4 +146,7 @@ kubectl get httproute -n zitadel
 
 ## Relaterade
 
+- [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
+- [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]]
+- [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]]
 - [[concepts/oidc]]

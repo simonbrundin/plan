@@ -116,6 +116,7 @@ graph LR
   n_notes_flux_source_controller_flyttad_fran_worker_3_efter_livenessfel["Flux source-controller flyttad från worker-3 efter livenessfel"]
   n_notes_foot_bindningen_kraver_omstart_av_foot["Foot-bindningen kräver omstart av foot"]
   n_notes_foraldrar_syns_pa_mal_i_now["Föräldrar syns på mål i /now"]
+  n_notes_fyra_paritetsfallor_i_agentdomanens_port_till_rust["Fyra paritetsfällor i agentdomänens port till Rust"]
   n_notes_globala_agentinstruktioner_deployas_via_dotfiles["Globala agentinstruktioner deployas via dotfiles"]
   n_notes_go_imap_uidstore_istallet_for_store_med_uid_mangd["go-imap: UidStore istället för Store med UID-mängd"]
   n_notes_go_integrationstest_tomde_kalenderhandelserna_i_neon_igen["Go-integrationstest tömde kalenderhändelserna i Neon igen"]
@@ -228,6 +229,7 @@ graph LR
   n_notes_malfaserna_ar_gemensamma_for_alla_mal_i_plan["Målfaserna är gemensamma för alla mål i Plan"]
   n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder["Målgraph: navigering mellan målsidor går från sekunder till millisekunder"]
   n_notes_malikoner_anvander_enkel_oversattning_fore_iconify["Målikoner använder enkel översättning före Iconify"]
+  n_notes_malkompletteringar_och_auth_i_rust_de_sista_api_vagarna["Målkompletteringar och auth i Rust - de sista API-vägarna"]
   n_notes_manadskostnad_raknas_pa_korningar_inte_pa_losta_uppgifter["Månadskostnad räknas på körningar, inte på lösta uppgifter"]
   n_notes_manuell_sortering_av_mal_pa_priority["Manuell sortering av mål på priority"]
   n_notes_marknadslage_panel_hogst_upp_pa_personer_i_pappa["Marknadsläge-panel högst upp på /personer i pappa"]
@@ -283,14 +285,17 @@ graph LR
   n_notes_pi_extension_minimax_quota_guard_vantar_ut_5h_fonstret_och_visar_pace["Pi-extension: minimax-quota-guard väntar ut 5h-fönstret och visar pace"]
   n_notes_pi_tog_bort_pi_rate_limit_och_pi_pattern_retry_fixade_omarchy_temasy["Pi: tog bort pi-rate-limit och pi-pattern-retry, fixade omarchy temasy"]
   n_notes_picokvm_luckfox_startar_inte_i_labbet_lite_saknar_emmc_ingen_poe["PicoKVM (Luckfox) startar inte i labbet: Lite saknar eMMC + ingen PoE"]
+  n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv["PinchBench: egen Value Score ska inte kopieras - räkna kostnad per lyckad uppgift själv"]
   n_notes_plan_api_anvander_scalar_for_openapi["Plan API använder Scalar för OpenAPI"]
   n_notes_plan_api_och_agent_delar_go_modul_men_behaller_tjanstegransen["Plan API och agent delar Go-modul men behåller tjänstegränsen"]
   n_notes_plan_appen_morkt_designsystem_med_semantiska_farg_token["Plan-appen: mörkt designsystem med semantiska färg-token"]
   n_notes_plan_cachad_spa_skal_gjorde_att_webblasaren_korde_gammalt_js_bundle_med_ikon_provider_none["Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none"]
+  n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor["plan-db: CNPG-kluster fastnade i 'Setting up primary' på en Longhorn-volym utan replikor"]
   n_notes_plan_dev_kor_mot_neon_istallet_for_lokal_postgres["Plan dev kör mot Neon istället för lokal Postgres"]
   n_notes_plan_goals_gav_503_go_api_startade_i_mock_lage_nar_dns_inte_var_uppe["plan /goals gav 503 - go-api startade i mock-läge när DNS inte var uppe"]
   n_notes_plan_migreras_fran_go_till_rust["Plan migreras från Go till Rust"]
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg["Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg"]
+  n_notes_planpris_delat_per_korning_gar_inte_att_jamfora_mellan_planer["Planpris delat per körning går inte att jämföra mellan planer"]
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places["Platser på mål och kalenderhändelser (OpenSpec-change add-places)"]
   n_notes_platsvaljaren_flyttade_till_leader_p["Platsväljaren flyttade till leader + p"]
   n_notes_popcorn_time_installerad_som_appimage_i_local["Popcorn Time installerad som AppImage i ~/.local"]
@@ -339,6 +344,7 @@ graph LR
   n_notes_rock_4c_och_4se_har_ingen_spi_flash_i_fabrik_u_boot_ligger_pa_microsd_emmc["ROCK 4C+ och 4SE har ingen SPI-flash i fabrik - U-Boot ligger på microSD/eMMC"]
   n_notes_rock_pi_4_rk3399_defconfig_bygger_en_rock_pi_4a_for_4c_ska_rock_4c_plus_rk3399_defconfig_anvandas["rock-pi-4-rk3399_defconfig bygger en ROCK Pi 4A - for 4C+ ska rock-4c-plus-rk3399_defconfig anvandas"]
   n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet["root_dir-funktionen stoppar 'No project root found'-meddelandet"]
+  n_notes_rrule_motor_i_rust_ersatter_rrule_go["RRULE-motor i Rust ersätter rrule-go"]
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer["rust-analyzer standalone-läge kraschar på leetcode.nvim-filer"]
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone["rust-analyzer: tysta health-status-notisen istället för att stänga av standalone"]
   n_notes_rust_api_t_far_auth_lager_och_forsta_domanerna["Rust-API:t får auth-lager och första domänerna"]
@@ -410,6 +416,7 @@ graph LR
   n_notes_undo_stapel_i_plan_z_angrar_senaste_malhandling["Undo-stapel i plan: Z ångrar senaste målhandling"]
   n_notes_unifi_gatewayen_har_ingen_publik_ipv6_cgnat_via_starlink["UniFi-gatewayen har ingen publik IPv6 (CGNAT via Starlink)"]
   n_notes_usb_disken_acer_wd_320gb_status_och_longhorn_bedomning["USB-disken 'ACER' (WD 320GB): status och Longhorn-bedömning"]
+  n_notes_usb_ssd_orna_har_kvar_giltig_longhorn_identitet_ssd_1_med_gamla_replikor_de_ar_bara_inte_registrerade_i_longhorn["USB-SSD:orna har kvar giltig Longhorn-identitet ssd-1 med gamla replikor - de är bara inte registrerade i Longhorn"]
   n_notes_utbyggnad_av_pappas_personlista_bolagsregister_konferensbios_gav_140_namngivna_personer["Utbyggnad av pappas personlista: bolagsregister + konferensbios gav 140 namngivna personer"]
   n_notes_uttunnade_serier_vags_sa_att_antalen_blir_exakta["Uttunnade serier vägs så att antalen blir exakta"]
   n_notes_utvecklingsflode["Utvecklingsflöde"]
@@ -427,13 +434,16 @@ graph LR
   n_notes_wildcard_dns_via_cloudflare_tunnel_alla_simonbrundin_com_gar_genom_tunneln_till_envoy["Wildcard DNS via Cloudflare Tunnel - alla *.simonbrundin.com går genom tunneln till Envoy"]
   n_notes_windows_1252_avkodning_av_mejlens_amnesrad["Windows-1252-avkodning av mejlens ämnesrad"]
   n_notes_wordlist_kallor["Ordlistan finns på två ställen"]
+  n_notes_worker_1_ansluter_till_cluster1_2026_11_26_install_config_applicerad_via_pxe_boot_och_noden_gick_med["worker-1 ansluter till cluster1 (2026-11-26) - install-config applicerad via PXE-boot och noden gick med"]
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot["worker-1-kortet flashat med ny mainline-build (TF-A fran repot)"]
+  n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling["worker-1 Longhorn anvager EPHEMERAL-disken, inte USB-SSD:n - och alla workers far samma behandling"]
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande["worker-1 och worker-2 ar doda pa link-niva - PXE-kedjan ar inte blockerande"]
   n_notes_worker_1_rock_4c_nar_pxe_via_u_boot_boot_targets_men_pxe_ligger_sist["worker-1 (Rock 4C+) når PXE via U-Boot boot_targets, men PXE ligger sist"]
   n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet["worker-1 (ROCK 4C+) tyst: mainline-U-Boot byggd, men boarden läser inte kortet"]
   n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel["worker-1 startar om med stram men skickar noll paket - fysisk omstart bevisar samma fel"]
   n_notes_worker_1_svarar_inte_ens_med_en_full_poe_cykel_noll_paket_i_bade_riktningar["worker-1 svarar inte ens med en full PoE-cykel - noll paket i bade riktningar"]
   n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus["worker-1 svarar inte i nätet - felsökningsstatus"]
+  n_notes_worker_2_och_worker_9_saknas_fortfarande_som_cluster1_workers_diagnos_2026_11_26["worker-2 och worker-9 saknas fortfarande som cluster1-workers - diagnos 2026-11-26"]
   n_notes_worker_2_utan_strom_port_22_up_false_poe_power_0["worker-2 utan strom - port 22 up=false poe_power=0"]
   n_notes_worker_3_bootade_via_pxe_men_talos_installen_nollstallde_de_forsta_11_mb_pa_microsd["worker-3 bootade via PXE - men Talos-installen nollstallde de forsta 11 MB pa microSD"]
   n_notes_worker_3_poe_omstart_och_talos_konfiguration_2026_11_20["Worker-3 PoE-omstart och Talos-konfiguration 2026-11-20"]
@@ -446,6 +456,9 @@ graph LR
   n_notes_worker_9_mac_mini_bootade_talos_fran_usb_men_talos_api_t_50000_startar_inte_noden_ar_en_zombie["worker-9 (Mac mini) bootade Talos fran USB men Talos-API:t (50000) startar inte - noden ar en zombie"]
   n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device["Workers bootar inte via PXE trots fungerande PXE-server - UniFi PoE-styrning via rest/device"]
   n_notes_workmux_merge_misslyckas_i_huvud_worktree_kora_kommandot_i_feature_worktreet["workmux merge misslyckas i huvud-worktree - kora kommandot i feature-worktreet"]
+  n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export["ZITADEL-återställning: historisk installation återställd från ZITADEL Cloud-export"]
+  n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om["ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om"]
+  n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in["ZITADEL: importerad användare krävde init-code-event för att kunna logga in"]
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll["16x1 HDMI KVM - RS232/LAN-protokoll"]
   n_summaries_2026_11_03_learn_kunskapsbasen_kan_lagras_i_postgresql["'Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL'"]
   n_summaries_flux_components["Sammanfattning: Flux-komponenter"]
@@ -453,6 +466,7 @@ graph LR
   n_summaries_kalenderns_detaljnivaer_och_lane_packning["Kalenderns detaljnivåer och lane-packning"]
   n_summaries_llm_wiki_karpathy["Sammanfattning: LLM Wiki (Karpathy)"]
   n_summaries_longhorn_disk_guide["Sammanfattning: Diskar i Longhorn"]
+  n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn["PinchBench: verifierade API-fakta och datafel i Value-vyn"]
   n_concepts_anvanda_agenter_i_plan --> n_notes_dokumentationssidor_i_granssnittet_docs
   n_concepts_anvanda_agenter_i_plan --> n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln
   n_concepts_anvanda_agenter_i_plan --> n_notes_agent_dock_pa_malsiden_ersatter_de_tre_agentpanelerna
@@ -468,6 +482,7 @@ graph LR
   n_concepts_cloudflare_tunnel --> n_entities_kubernetes
   n_concepts_cloudflare_tunnel --> n_concepts_sops
   n_concepts_cloudnative_pg --> n_concepts_zitadel
+  n_concepts_cloudnative_pg --> n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor
   n_concepts_cloudnative_pg --> n_entities_kubernetes
   n_concepts_cloudnative_pg --> n_concepts_longhorn
   n_concepts_envoy_gateway --> n_concepts_http_routing_flow
@@ -518,6 +533,9 @@ graph LR
   n_concepts_sops --> n_concepts_flux_operator
   n_concepts_sops --> n_entities_flux_gitops
   n_concepts_zitadel --> n_concepts_oidc
+  n_concepts_zitadel --> n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export
+  n_concepts_zitadel --> n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om
+  n_concepts_zitadel --> n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in
   n_concepts_zitadel --> n_concepts_authentik
   n_concepts_zitadel --> n_concepts_envoy_gateway
   n_concepts_zitadel --> n_concepts_cloudnative_pg
@@ -869,7 +887,9 @@ graph LR
   n_notes_pi_durable_fungerar_med_minimax_coding_plan_anthropic_messages_api --> n_notes_pi_durable_demo_paketet_earendil_works_pi_durable_fungerar
   n_notes_pi_extension_minimax_quota_guard_vantar_ut_5h_fonstret_och_visar_pace --> n_notes_pi_durable_fungerar_med_minimax_coding_plan_anthropic_messages_api
   n_notes_picokvm_luckfox_startar_inte_i_labbet_lite_saknar_emmc_ingen_poe --> n_notes_u7_lite_94_2a_6f_7a_4b_33_adopterar_inte_saknar_management_ip_och_nattverkssegment_pa_switchen
+  n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv --> n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn
   n_notes_plan_appen_morkt_designsystem_med_semantiska_farg_token --> n_notes_mailvyn_mail_omstegad_till_tailwind_tema
+  n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_concepts_cloudnative_pg
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places --> n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder
   n_notes_popcorn_time_installerad_som_appimage_i_local --> n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix
@@ -1036,6 +1056,8 @@ graph LR
   n_notes_unifi_gatewayen_har_ingen_publik_ipv6_cgnat_via_starlink --> n_notes_ipv6_ingress_till_envoy_designlage_2026_11_15
   n_notes_usb_disken_acer_wd_320gb_status_och_longhorn_bedomning --> n_concepts_longhorn
   n_notes_usb_disken_acer_wd_320gb_status_och_longhorn_bedomning --> n_entities_talos_linux
+  n_notes_usb_ssd_orna_har_kvar_giltig_longhorn_identitet_ssd_1_med_gamla_replikor_de_ar_bara_inte_registrerade_i_longhorn --> n_concepts_longhorn
+  n_notes_usb_ssd_orna_har_kvar_giltig_longhorn_identitet_ssd_1_med_gamla_replikor_de_ar_bara_inte_registrerade_i_longhorn --> n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling
   n_notes_utbyggnad_av_pappas_personlista_bolagsregister_konferensbios_gav_140_namngivna_personer --> n_notes_pappa_anstallningshistorik_i_cv_format_fix_av_kompetensordboken
   n_notes_utbyggnad_av_pappas_personlista_bolagsregister_konferensbios_gav_140_namngivna_personer --> n_notes_rekrytering_av_it_personal_i_sundsvall_marknadsbild_och_frolista
   n_notes_uttunnade_serier_vags_sa_att_antalen_blir_exakta --> n_notes_aterkommande_serier_doljs_inte_langre_beroende_pa_zoomniva
@@ -1061,10 +1083,12 @@ graph LR
   n_notes_wordlist_kallor --> n_notes_bigram_algoritmen
   n_notes_wordlist_kallor --> n_notes_utvecklingsflode
   n_notes_wordlist_kallor --> n_notes_bigram_algoritmen
+  n_notes_worker_1_ansluter_till_cluster1_2026_11_26_install_config_applicerad_via_pxe_boot_och_noden_gick_med --> n_concepts_longhorn
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_entities_pxe_server
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_notes_pxe_kedjan_for_worker_1_verifierad_serverside_pxe_metoden_failar_snabbt_utan_pxelinux_cfg
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet
+  n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling --> n_concepts_longhorn
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande --> n_entities_pxe_server
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande --> n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande --> n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus
@@ -1095,6 +1119,9 @@ graph LR
   n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs --> n_notes_worker_7_s_kubeletcertifikat_signerades_av_en_gammal_kubernetes_ca_som_finns_kvar_i_git_historiken
   n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device --> n_entities_pxe_server
   n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device --> n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel
+  n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export --> n_concepts_zitadel
+  n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om --> n_concepts_zitadel
+  n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in --> n_concepts_zitadel
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_entities_hdmi_kvm_switch_16_port_labbet
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm
   n_summaries_flux_components --> n_concepts_flux_operator
@@ -1113,6 +1140,7 @@ graph LR
   n_summaries_longhorn_disk_guide --> n_entities_talos_linux
   n_summaries_longhorn_disk_guide --> n_concepts_flux_operator
   n_summaries_longhorn_disk_guide --> n_concepts_longhorn
+  n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn --> n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv
 ```
 
 ## Backlinks
@@ -1121,7 +1149,7 @@ graph LR
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
-- **concepts/cloudnative-pg** <- [[concepts/authentik]], [[concepts/zitadel]], [[entities/kubernetes]]
+- **concepts/cloudnative-pg** <- [[concepts/authentik]], [[concepts/zitadel]], [[entities/kubernetes]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **concepts/envoy-gateway** <- [[concepts/http-routing-flow]], [[concepts/kube-prometheus]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/zitadel]], [[entities/kubernetes]]
 - **concepts/flux-operator** <- [[concepts/gitops]], [[concepts/kyverno-policies]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]], [[summaries/infrastructure-flux]], [[summaries/longhorn-disk-guide]]
 - **concepts/gitops** <- [[concepts/cert-manager]], [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[summaries/infrastructure-flux]]
@@ -1130,13 +1158,13 @@ graph LR
 - **concepts/kubelet-csr-approver** <- [[entities/kubernetes]]
 - **concepts/kyverno-cel** <- [[concepts/kyverno-policies]]
 - **concepts/kyverno-policies** <- [[concepts/kyverno-cel]], [[entities/kubernetes]]
-- **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[summaries/longhorn-disk-guide]]
+- **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]], [[summaries/longhorn-disk-guide]]
 - **concepts/metallb** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/neon-cli-var-neon-och-neon-ts-maste-ligga** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/zitadel]], [[entities/kubernetes]]
 - **concepts/poolad-eller-direkt-anslutning-mot-neon** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/sops** <- [[concepts/cloudflare-tunnel]], [[concepts/flux-operator]], [[concepts/gitops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]]
-- **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
+- **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
 - **entities/flux-gitops** <- [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/sops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]]
 - **entities/hdmi-kvm-switch-16-port-labbet** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
 - **entities/home-assistant** <- [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]], [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]], [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]], [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]]
@@ -1295,9 +1323,11 @@ graph LR
 - **notes/pi-durable-fungerar-med-minimax-coding-plan-anthropic-messages-api** <- [[notes/beslut-pi-durable-satts-pa-hyllan-for-tillfallet]], [[notes/pi-durable-1-4-0-api-avvikelser-fran-blogginlagget-och-tva-gotchas]], [[notes/pi-durable-demo-paketet-earendil-works-pi-durable-fungerar]], [[notes/pi-extension-minimax-quota-guard-vantar-ut-5h-fonstret-och-visar-pace]]
 - **notes/pi-tog-bort-pi-rate-limit-och-pi-pattern-retry-fixade-omarchy-temasy** <- [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]]
 - **notes/picokvm-luckfox-startar-inte-i-labbet-lite-saknar-emmc-ingen-poe** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
+- **notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv** <- [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]]
 - **notes/plan-api-anvander-scalar-for-openapi** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/plan-appen-morkt-designsystem-med-semantiska-farg-token** <- [[notes/mailvyn-mail-omstegad-till-tailwind-tema]]
 - **notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none** <- [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]]
+- **notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor** <- [[concepts/cloudnative-pg]]
 - **notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]], [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]]
 - **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
 - **notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places** <- [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]]
@@ -1403,6 +1433,7 @@ graph LR
 - **notes/vertikal-kalender-med-kontinuerlig-zoom** <- [[notes/kalenderns-detaljnivaer-fem-nivaer-och-lane-packning]], [[notes/kalenderns-nivavaxling-animeras-crossfade-pop-in-och-hysteresis]], [[notes/parallella-agent-sessioner-i-samma-repo-och-databas]], [[notes/vertikal-kalender-med-ikonstod-i-plan]], [[summaries/kalenderns-detaljnivaer-och-lane-packning]]
 - **notes/wordlist-kallor** <- [[notes/bigram-algoritmen]]
 - **notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot** <- [[entities/pxe-server]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]]
+- **notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling** <- [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]]
 - **notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande** <- [[entities/pxe-server]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]], [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]], [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]]
 - **notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist** <- [[entities/pxe-server]], [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]], [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]]
 - **notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet** <- [[entities/pxe-server]], [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]], [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]]
@@ -1413,6 +1444,9 @@ graph LR
 - **notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken** <- [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]]
 - **notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]]
 - **notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device** <- [[entities/pxe-server]], [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]]
+- **notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export** <- [[concepts/zitadel]]
+- **notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om** <- [[concepts/zitadel]]
+- **notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in** <- [[concepts/zitadel]]
 - **summaries/16x1-hdmi-kvm-rs232-lan-protokoll** <- [[entities/hdmi-kvm-switch-16-port-labbet]], [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql** <- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]]
 - **summaries/flux-components** <- [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]]
@@ -1420,3 +1454,4 @@ graph LR
 - **summaries/kalenderns-detaljnivaer-och-lane-packning** <- [[notes/kalenderns-detaljnivaer-fem-nivaer-och-lane-packning]]
 - **summaries/llm-wiki-karpathy** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **summaries/longhorn-disk-guide** <- [[concepts/longhorn]], [[entities/talos-linux]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]]
+- **summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn** <- [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]]
