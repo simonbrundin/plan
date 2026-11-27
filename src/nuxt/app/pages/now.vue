@@ -724,7 +724,8 @@ const filterOptions = [
       <span class="text-ink-muted">↑/↓</span> sortera &nbsp;|&nbsp;
       <span class="text-ink-muted">l</span> öppna mål &nbsp;|&nbsp;
       <span class="text-ink-muted">Håll Shift+P</span> + <span class="text-ink-muted">K/J</span> ändra vikt &nbsp;|&nbsp;
-      <span class="text-ink-muted">s</span> påbörjad &nbsp;|&nbsp;
+      <span class="text-ink-muted">s</span> status &nbsp;|&nbsp;
+      <span class="text-ink-muted">space+s</span> påbörjad &nbsp;|&nbsp;
       <span class="text-ink-muted">Space+N</span> nu &nbsp;|&nbsp;
       <span class="text-ink-muted">d</span> klar &nbsp;|&nbsp;
       <span class="text-ink-muted">e</span> evigt &nbsp;|&nbsp;
