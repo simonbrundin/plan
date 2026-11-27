@@ -270,6 +270,7 @@ finns i `index.md`.
 | [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] | OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat | note | oidc, auth, zitadel, cluster1, incident, projekt:simon | 2026-11-25 | 2 |
 | [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] | Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf) | note | omarchy, hyprland, bug, session, projekt:dotfiles | 2026-11-23 | 0 |
 | [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] | one.com lagrar mappar i NFD - normalisera i getFolderName | note | mail, imap, one.com, unicode, go, projekt:pappa | 2026-11-16 | 0 |
+| [[notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem]] | Overallokeringen pa worker-1/3/5 ar ett logiskt, inte ett fysiskt problem | note | longhorn, kapacitet, worker-1, drift, projekt:infrastructure | 2026-11-27 | 2 |
 | [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] | p-tangenten konfliktade med viktläget på /priority | note | bug, frontend, kortkommandon, projekt:plan | 2026-11-20 | 0 |
 | [[notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran]] | På Rock-plattorna finns ingen bootloader i hårdvaran | note | pxe, radxa, uboot, fakta, projekt:simon | 2026-10-22 | 4 |
 | [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]] | pappa: admin-token - ett stalle for token, inte handpallagning per miljo | note | pappa, hemligheter, drift, admin-token, projekt:pappa | 2026-11-17 | 4 |
@@ -598,7 +599,7 @@ finns i `index.md`.
 - `dokumentation` (3)
 - `dotfiles` (3)
 - `drag` (1)
-- `drift` (8)
+- `drift` (9)
 - `dubbeluttag` (1)
 - `duckdns` (2)
 - `durable` (4)
@@ -700,7 +701,7 @@ finns i `index.md`.
 - `kameo` (7)
 - `kanata` (1)
 - `kanban` (1)
-- `kapacitet` (1)
+- `kapacitet` (2)
 - `karpathy` (2)
 - `keyboard` (8)
 - `keycloak` (3)
@@ -741,7 +742,7 @@ finns i `index.md`.
 - `linux` (2)
 - `llm` (1)
 - `load-balancer` (1)
-- `longhorn` (12)
+- `longhorn` (13)
 - `lunch` (2)
 - `lärdom` (1)
 - `mac-mini` (1)
@@ -845,7 +846,7 @@ finns i `index.md`.
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
 - `projekt:dotfiles` (5)
-- `projekt:infrastructure` (88)
+- `projekt:infrastructure` (89)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
@@ -996,7 +997,7 @@ finns i `index.md`.
 - `webbapp` (1)
 - `wiki` (7)
 - `worker` (12)
-- `worker-1` (5)
+- `worker-1` (6)
 - `worker-2` (2)
 - `worker-3` (5)
 - `worker-4` (3)

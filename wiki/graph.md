@@ -269,6 +269,7 @@ graph LR
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat["OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat"]
   n_notes_omarchy_idle_lasning_stangs_av_via_shell_json_inte_hypridle_conf["Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf)"]
   n_notes_one_com_lagrar_mappar_i_nfd_normalisera_i_getfoldername["one.com lagrar mappar i NFD - normalisera i getFolderName"]
+  n_notes_overallokeringen_pa_worker_1_3_5_ar_ett_logiskt_inte_ett_fysiskt_problem["Overallokeringen pa worker-1/3/5 ar ett logiskt, inte ett fysiskt problem"]
   n_notes_p_tangenten_konfliktade_med_viktlaget_pa_priority["p-tangenten konfliktade med viktläget på /priority"]
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran["På Rock-plattorna finns ingen bootloader i hårdvaran"]
   n_notes_pappa_admin_token_ett_stalle_for_token_inte_handpallagning_per_miljo["pappa: admin-token - ett stalle for token, inte handpallagning per miljo"]
@@ -868,6 +869,8 @@ graph LR
   n_notes_nya_mal_far_ikon_fran_titeln --> n_notes_malikoner_anvander_enkel_oversattning_fore_iconify
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
+  n_notes_overallokeringen_pa_worker_1_3_5_ar_ett_logiskt_inte_ett_fysiskt_problem --> n_concepts_longhorn
+  n_notes_overallokeringen_pa_worker_1_3_5_ar_ett_logiskt_inte_ett_fysiskt_problem --> n_notes_dedikerad_usb_ssd_per_worker_validerat_flode_for_worker_3_till_worker_8
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_entities_pxe_server
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_notes_rk3399_s_bootrom_soker_spi_emmc_sd_usb_hardkodat
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
@@ -1202,7 +1205,7 @@ graph LR
 - **concepts/kubelet-csr-approver** <- [[entities/kubernetes]]
 - **concepts/kyverno-cel** <- [[concepts/kyverno-policies]]
 - **concepts/kyverno-policies** <- [[concepts/kyverno-cel]], [[entities/kubernetes]]
-- **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8]], [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]], [[notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod]], [[notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]], [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]], [[summaries/longhorn-disk-guide]]
+- **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8]], [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]], [[notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod]], [[notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem]], [[notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]], [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]], [[summaries/longhorn-disk-guide]]
 - **concepts/metallb** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/neon-cli-var-neon-och-neon-ts-maste-ligga** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/zitadel]], [[entities/kubernetes]]
@@ -1242,6 +1245,7 @@ graph LR
 - **notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad** <- [[entities/pxe-server]]
 - **notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo** <- [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/dashboard-ranking-anvander-benchmark-matchade-kostnader** <- [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]]
+- **notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8** <- [[notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem]]
 - **notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]], [[notes/relationer-mellan-kandidater-i-pappa-symmetriska-par-med-styrka-1-10]]
 - **notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er** <- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
 - **notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget** <- [[entities/pxe-server]], [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]], [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]]

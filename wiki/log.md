@@ -3221,3 +3221,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8 -> entities/talos-linux
 
+
+## [2026-11-27] ingest | create notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem
+- [create] [[notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem]] — ny sida från inboxen
+- [archive] 2026-11-27-overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem.md
+
+
+## [2026-11-27] link | notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem -> concepts/longhorn
+
+
+## [2026-11-27] link | notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem -> notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8
+

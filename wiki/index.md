@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 8 |
-| Noter | 440 |
+| Noter | 441 |
 
 ## Entiteter
 
@@ -292,6 +292,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_
 - [[notes/wordlist-kallor]] - Ordlistan finns på två ställen och måste hållas i synk. _(uppdaterad 2026-10-21)_
+- [[notes/overallokeringen-pa-worker-1-3-5-ar-ett-logiskt-inte-ett-fysiskt-problem]] - Bedomningen av overallokeringen pa worker-1, worker-3 och worker-5 blev enkel nar man jamfor logisk och fysisk anvandning. _(uppdaterad 2026-11-27)_
 - [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] - Fynd: usePriorityToggle växlade prioritetssidan vid varje tryck på 'p', samtidigt som usePriorityMode försökte aktivera viktläget me... _(uppdaterad 2026-11-20)_
 - [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]] - 2026-11-02: pappa-databasen provisionerad på Neon (projekt 'konsulter', _(uppdaterad 2026-11-03)_
 - [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]] - Felet "Satt NUXT_ADMIN_TOKEN i appens miljo for att kunna spara _(uppdaterad 2026-11-17)_
