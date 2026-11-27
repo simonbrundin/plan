@@ -46,21 +46,21 @@ databasen, så att både fasendpointern och statusendpointern går samma väg.
 
 ## 4. Agenten
 
-- [ ] 4.1 `goaldefinition` föreslår verifieringsplan (typ, villkor, styrka)
+- [x] 4.1 `goaldefinition` föreslår verifieringsplan (typ, villkor, styrka)
       och åtgärdsprofil i definitionsförslaget
-- [ ] 4.2 `agentworker` härleder åtgärdsprofilen ur det godkända förslaget
-- [ ] 4.3 Ny profil-policy: `planering` och `research` mappar mot livsprofilens
+- [x] 4.2 `agentworker` härleder åtgärdsprofilen ur det godkända förslaget
+- [x] 4.3 Ny profil-policy: `planering` och `research` mappar mot livsprofilens
       rättigheter, `arbete` mot kodprofilens
-- [ ] 4.4 `agentworker` går via fasendpointen och respekterar 409
-- [ ] 4.5 `planclient` får anrop för verifiering, bevis och omdömen
+- [x] 4.4 `agentworker` går via fasendpointen och respekterar 409
+- [x] 4.5 `planclient` får anrop för verifiering, bevis och omdömen
 
 ## 5. Kontrakt
 
-- [ ] 5.1 `src/contracts/plan-agent.yaml` - nya typer, anrop och
+- [x] 5.1 `src/contracts/plan-agent.yaml` - nya typer, anrop och
       fas-villkor; bump version
-- [ ] 5.2 Plan testar att varje anrop i kontraktet finns i OpenAPI-specen och
+- [x] 5.2 Plan testar att varje anrop i kontraktet finns i OpenAPI-specen och
       är tillåtet för agent-scope
-- [ ] 5.3 Agenten testar att dess klientmatchar kontraktet
+- [x] 5.3 Agenten testar att dess klientmatchar kontraktet
 
 ## 6. Gränssnitt
 

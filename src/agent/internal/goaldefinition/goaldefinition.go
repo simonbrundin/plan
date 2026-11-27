@@ -16,6 +16,7 @@ import (
 
 	"plan/agent/internal/definer"
 	"plan/agent/internal/planclient"
+	"plan/agent/internal/profile"
 
 	"github.com/teambition/rrule-go"
 )
@@ -53,6 +54,16 @@ type Values struct {
 	PlaceIDs []int64 `json:"place_ids,omitempty"`
 	// Status är fasen målet flyttas till.
 	Status *string `json:"status,omitempty"`
+	// VerificationType är typen av verifiering ("checklista", "delmal",
+	// "kalender", "bevis", "matvarde" eller "kod").
+	VerificationType *string `json:"verification_type,omitempty"`
+	// VerificationCriterion är villkoret som ska gälla.
+	VerificationCriterion *string `json:"verification_criterion,omitempty"`
+	// VerificationStrength är styrkan på beviset ("stark" eller "svag").
+	VerificationStrength *string `json:"verification_strength,omitempty"`
+	// ActionProfile är åtgärdsprofilen agenten föreslår ("planering",
+	// "research" eller "arbete").
+	ActionProfile *string `json:"action_profile,omitempty"`
 }
 
 // Field är en ändring som föreslås - den visas för människan.
@@ -238,7 +249,88 @@ func Build(ctx Context) Proposal {
 		proposal.add("status", "Fas", ctx.CurrentPhase, value)
 	}
 
+	// Verifieringsplanen - valfri. Utan plan fungerar målet precis som
+	// ett mål med plan, så en saknad eller trasig plan hoppas över med
+	// en notering i stället för att stoppa förslaget.
+	if plan, notering := buildVerification(ctx.Definition); plan != nil {
+		proposal.Values.VerificationType = &plan.Type
+		proposal.Values.VerificationCriterion = &plan.Criterion
+		proposal.Values.VerificationStrength = &plan.Strength
+		proposal.add("verification", "Verifiering", "ingen", plan.Description())
+	} else if notering != "" {
+		proposal.note(notering)
+	}
+
+	// Åtgärdsprofilen - vad agenten får göra i körningen. Utan profil
+	// behåller körningen sin tekniska profil.
+	if ctx.Definition.ActionProfile != "" {
+		action := strings.ToLower(strings.TrimSpace(ctx.Definition.ActionProfile))
+		if profile.ActionKnown(action) {
+			proposal.Values.ActionProfile = &action
+			proposal.add("action_profile", "Åtgärdsprofil", "", action)
+		} else {
+			proposal.note(fmt.Sprintf("åtgärdsprofilen %q är okänd - förslaget lämnades utan profil", ctx.Definition.ActionProfile))
+		}
+	}
+
 	return proposal
+}
+
+// VerificationPlan är agentens förslag på hur ett mål ska verifieras.
+type VerificationPlan struct {
+	// Type är typen av verifiering.
+	Type string
+	// Criterion är villkoret som ska gälla.
+	Criterion string
+	// Strength är styrkan på beviset.
+	Strength string
+}
+
+// Description beskriver planen på svenska, för människan som godkänner.
+func (p VerificationPlan) Description() string {
+	return fmt.Sprintf("%s, %s - %s", p.Type, p.Strength, p.Criterion)
+}
+
+// buildVerification bygger verifieringsplanen ur agentens definition.
+//
+// En plan utan villkor är ingen plan - då hoppas den över med en
+// notering, så att människan ser att agenten inte föreslog något
+// verifierbart i stället för att få en trasig plan.
+func buildVerification(definition definer.Definition) (*VerificationPlan, string) {
+	typ := strings.ToLower(strings.TrimSpace(definition.VerificationType))
+	if typ == "" {
+		return nil, ""
+	}
+
+	if !validVerificationType(typ) {
+		return nil, fmt.Sprintf("verifieringstypen %q är okänd - planen hoppades över", definition.VerificationType)
+	}
+
+	krav := strings.TrimSpace(definition.VerificationCriterion)
+	if krav == "" {
+		return nil, fmt.Sprintf("verifieringen %s saknar ett villkor - planen hoppades över", typ)
+	}
+
+	styrka := strings.ToLower(strings.TrimSpace(definition.VerificationStrength))
+	switch styrka {
+	case "":
+		// Utan uppgiven styrka är beviset användarens eget intyg.
+		styrka = "svag"
+	case "stark", "svag":
+	default:
+		return nil, fmt.Sprintf("verifieringsstyrkan %q är okänd - planen hoppades över", definition.VerificationStrength)
+	}
+
+	return &VerificationPlan{Type: typ, Criterion: krav, Strength: styrka}, ""
+}
+
+// validVerificationType berättar om typen är en känd verifieringstyp.
+func validVerificationType(typ string) bool {
+	switch typ {
+	case "checklista", "delmal", "kalender", "bevis", "matvarde", "kod":
+		return true
+	}
+	return false
 }
 
 // add lägger till en ändring i förslaget.
@@ -342,6 +434,19 @@ func (p Proposal) Apply(ctx context.Context, client *planclient.Client, goalID i
 	if p.Values.Status != nil && *p.Values.Status != "" {
 		if err := client.UpdateGoalPhase(ctx, goalID, *p.Values.Status); err != nil {
 			return fmt.Errorf("failed to update goal phase: %w", err)
+		}
+	}
+
+	// Verifieringsplanen sätts bara om den faktiskt kom med i det
+	// godkända förslaget - en människa som godkänner förslaget utan
+	// plan ska inte få en plan på målet i efterhand.
+	if p.Values.VerificationType != nil && p.Values.VerificationCriterion != nil {
+		styrka := "svag"
+		if p.Values.VerificationStrength != nil && *p.Values.VerificationStrength != "" {
+			styrka = *p.Values.VerificationStrength
+		}
+		if err := client.SetVerification(ctx, goalID, *p.Values.VerificationType, *p.Values.VerificationCriterion, styrka); err != nil {
+			return fmt.Errorf("failed to set the verification plan: %w", err)
 		}
 	}
 

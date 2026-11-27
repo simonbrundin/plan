@@ -132,6 +132,39 @@ Profilmoten följer med AgentRun (`agent_profile`) och sätts i jobbets miljö s
 `AGENT_PROFILE`. En okänd profil ger kodprofilen - den strängaste - så ett
 fel aldrig ger fler rättigheter än avsett.
 
+### Åtgärdsprofiler
+
+Profilerna ovan är tekniska gränser i agentens kod. Det som styr vad agenten
+får göra i en **körning** är åtgärdsprofilen - den följer uppgiften, inte
+målets ämne. Ett livsmål kan kräva kod och ett kodmål kan kräva research.
+
+| Profil | Vad agenten får |
+| --- | --- |
+| `planering` (standard) | prata, bryta ned, föreslå, fråga - skriver ingenting |
+| `research` | läsa och samla underlag - skriver ingenting |
+| `arbete` | arbeta i en isolerad kopia, skriva kod, föreslå ändringar |
+
+Profilen föreslås av agenten i måldefinitionen och godkänns av användaren
+i samma godkännande som resten av definitionen. `planering` och `research`
+mappar mot livsprofilens rättigheter, `arbete` mot kodprofilens - mappningen
+ligger i `src/agent/internal/profile` (`ActionPolicy`).
+
+En okänd eller saknad profil ger den strängaste rättigheten. Kodaren körs
+bara om profilen får röra kod, så en definition utan profil behåller den
+tekniska profilen - äldre förslag fungerar som de gjorde för.
+
+### Agenten går via fasmaskinen
+
+Agenten byter inte längre status själv. Den begär en fasövergång med
+`POST /api/v1/goals/:id/phase`, och villkoren kontrolleras i API:t. Ett
+stoppat byte svarar med `409` och en skälkod, och då:
+
+- körningen markeras som `waiting_approval` - inte som ett fel,
+- skälet sparas i körningens händelser, så att människan ser vad som saknas,
+- agenten går inte vidare på egen hand.
+
+Det är skillnaden mellan "något gick fel" och "en människa bestämmer".
+
 Varje körning publicerar sin egen branch, `agent/goal-<mål>-run-<körning>`.
 Då kan flera försök granskas side by side utan att krocka.
 
@@ -313,17 +346,18 @@ sidorna ligger i samma repo. Därför finns kontraktet som en fil:
 `src/contracts/plan-agent.yaml`.
 
 Filen beskriver de delar agenten använder: faser, tillstånd, terminala
-tillstånd, tillstånd där en människa måste agera, triggrar, profiler och de
-API-anrop agenten gör. Den är versionsstyrd - `version: 1` beskriver första
-versionen, som samtidigt bytte `blocked` till `waiting_approval` och `done` till
-`succeeded`.
+tillstånd, tillstånd där en människa måste agera, triggrar, profiler,
+åtgärdsprofiler, fasövergångarnas villkor och de API-anrop agenten gör. Den
+är versionsstyrd - `version: 1` beskriver första versionen, som samtidigt bytte
+`blocked` till `waiting_approval` och `done` till `succeeded`. Version 4
+kom med fasmaskinen och verifieringen.
 
 Båda sidor testar mot samma fil:
 
 | Sida | Test | Vad det fångar |
 | --- | --- | --- |
-| Plan | `src/api/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, och att varje anrop i kontraktet finns i OpenAPI-specifikationen |
-| Agent | `src/agent/internal/planclient` | att agentens statuskonstanter och sökvägar stämmer med kontraktet, och att kontraktets anrop finns i Plan |
+| Plan | `src/api/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, att varje anrop i kontraktet finns i OpenAPI-specifikationen, att fasövergångarnas skälkoder stämmer med maskinen och att agentens anrop går att göra med agent-scope |
+| Agent | `src/agent/internal/planclient` | att agentens statuskonstanter, sökvägar och åtgärdsprofiler stämmer med kontraktet, och att kontraktets anrop finns i Plan |
 
 Sökvägarna i agentens klient ligger i `src/agent/internal/planclient/paths.go`
 som namngivna konstanter - annars går det inte att jämföra dem mot kontraktet.

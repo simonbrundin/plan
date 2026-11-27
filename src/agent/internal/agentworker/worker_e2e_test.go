@@ -78,6 +78,8 @@ func TestRunOnceDefinesGoalEndToEnd(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(map[string]planclient.Goal{"goal": {ID: 42, StatusID: 1}})
 		case "PATCH /api/v1/goals/42/status":
 			_ = json.NewEncoder(w).Encode(map[string]any{"status_id": 2})
+		case "POST /api/v1/goals/42/phase":
+			_ = json.NewEncoder(w).Encode(planclient.PhaseTransition{GoalID: 42, From: PhaseDefine, To: PhasePlan})
 		case "PATCH /api/v1/agent-runs/7":
 			var request planclient.UpdateAgentRunRequest
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -163,6 +165,9 @@ func TestGodkändDefinitionAppliceras(t *testing.T) {
 		case "PATCH /api/v1/goals/42/status":
 			updatedPhase = true
 			_ = json.NewEncoder(w).Encode(map[string]any{"status_id": 2})
+		case "POST /api/v1/goals/42/phase":
+			updatedPhase = true
+			_ = json.NewEncoder(w).Encode(planclient.PhaseTransition{GoalID: 42, From: PhaseDefine, To: PhasePlan})
 		case "PATCH /api/v1/agent-runs/7":
 			var request planclient.UpdateAgentRunRequest
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -306,6 +311,8 @@ func TestRunOnceRegistrerarTriggerOchInitiativtagare(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(map[string]planclient.Goal{"goal": {ID: 42, StatusID: 1}})
 		case "PATCH /api/v1/goals/42/status":
 			_ = json.NewEncoder(w).Encode(map[string]any{"status_id": 2})
+		case "POST /api/v1/goals/42/phase":
+			_ = json.NewEncoder(w).Encode(planclient.PhaseTransition{GoalID: 42, From: PhaseDefine, To: PhasePlan})
 		case "PATCH /api/v1/agent-runs/7":
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 7})
 		case "POST /api/v1/agent-runs/7/events":
@@ -626,6 +633,9 @@ func TestUtanNyaFältAvslutarKörningen(t *testing.T) {
 		case r.Method == http.MethodPatch && r.URL.Path == "/api/v1/goals/42/status":
 			updatedPhase = true
 			w.WriteHeader(http.StatusNoContent)
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/goals/42/phase":
+			updatedPhase = true
+			_ = json.NewEncoder(w).Encode(planclient.PhaseTransition{GoalID: 42, From: PhaseDefine, To: PhasePlan})
 		case r.Method == http.MethodPatch && r.URL.Path == "/api/v1/agent-runs/11":
 			_ = json.NewEncoder(w).Encode(planclient.AgentRun{ID: 11})
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/agent-runs/11/events":

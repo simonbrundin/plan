@@ -42,6 +42,23 @@ const (
 // ErrFinished betyder att målet är färdigt och workern kan avslutas.
 var ErrFinished = errors.New("goal finished")
 
+// phaseBlockedError betyder att fasmaskinen stoppade en övergång.
+//
+// Det är inte ett fel i agenten - det är svaret på att villkoret för
+// övergången inte är uppfyllt. Agenten ska då stanna och låta en människa
+// bestämma, i stället för att gå vidare på egen hand.
+type phaseBlockedError struct {
+	// Reason är skälkoden, till exempel "definition_not_approved".
+	Reason string
+	// Message förklarar skälet.
+	Message string
+}
+
+// Error beskriver varför bytet stoppades.
+func (e *phaseBlockedError) Error() string {
+	return fmt.Sprintf("fasbytet stoppades (%s): %s", e.Reason, e.Message)
+}
+
 // TriggerAgent beskriver att körningen startades av agenten själv.
 const TriggerAgent = "agent"
 
@@ -681,9 +698,19 @@ func (w *Worker) resumeDefinition(ctx context.Context, run planclient.AgentRun, 
 
 		log.Printf("Goal #%d got its approved definition", goal.ID)
 
+		// Åtgärdsprofilen styr vad agenten får göra i resten av
+		// körningen. Uten profil i förslaget gäller den tekniska
+		// profilen - så att äldre förslag fungerar som de gjorde för.
+		policy, err := w.policyFor(actionProfile(proposal))
+		if err != nil {
+			w.failRun(ctx, run.ID, err)
+			return true, fmt.Errorf("failed to resolve the action profile: %w", err)
+		}
+
 		// Med en coder igång fortsätter samma körning - men med det
 		// uppdaterade målet, så förslaget bygger på den nya texten.
-		if w.codeRunner != nil {
+		// Kodaren körs bara om profilen får röra kod.
+		if w.codeRunner != nil && policy.MayChangeCode {
 			updated, err := w.planClient.GetGoal(ctx, goal.ID)
 			if err != nil {
 				w.failRun(ctx, run.ID, err)
@@ -714,6 +741,13 @@ func (w *Worker) resumeDefinition(ctx context.Context, run planclient.AgentRun, 
 // finishDefinition avslutar en körning där målet är definierat.
 func (w *Worker) finishDefinition(ctx context.Context, goal planclient.Goal, run planclient.AgentRun) error {
 	if err := w.syncPhase(ctx, goal.ID, run.ID, PhasePlan); err != nil {
+		// Ett stoppat fasbyte är inte ett fel - det är en fråga till
+		// människan. Körningen väntar, i stället för att falla.
+		var stoppad *phaseBlockedError
+		if errors.As(err, &stoppad) {
+			w.waitForHuman(ctx, run, stoppad)
+			return nil
+		}
 		w.failRun(ctx, run.ID, err)
 		return fmt.Errorf("failed to synchronize plan phase: %w", err)
 	}
@@ -824,7 +858,13 @@ func (w *Worker) recordEvent(ctx context.Context, runID int64, event planclient.
 }
 
 func (w *Worker) syncPhase(ctx context.Context, goalID, runID int64, phase string) error {
-	if err := w.planClient.UpdateGoalPhase(ctx, goalID, phase); err != nil {
+	// Övergången går via fasmaskinen i API:t - villkoren kontrolleras
+	// där, inte i agenten. Ett stoppat byte ger en skälkod, och då ska
+	// agenten inte fortsätta: människan bestämmer.
+	if _, err := w.planClient.RequestPhase(ctx, goalID, phase); err != nil {
+		if reason := planclient.ReasonCode(err); reason != "" {
+			return &phaseBlockedError{Reason: reason, Message: err.Error()}
+		}
 		return fmt.Errorf("failed to update goal phase: %w", err)
 	}
 	if _, err := w.planClient.UpdateAgentRun(ctx, runID, planclient.UpdateAgentRunRequest{
@@ -833,6 +873,28 @@ func (w *Worker) syncPhase(ctx context.Context, goalID, runID int64, phase strin
 		return fmt.Errorf("failed to update agent run phase: %w", err)
 	}
 	return nil
+}
+
+// policyFor ger policyn för en körning.
+//
+// Åtgärdsprofilen styr när förslaget innehåller en - den bestämmer vad
+// agenten får göra. Utan profil behålls den tekniska profilen, så att
+// förslag som skapats innan profilen fanns fungerar som de gjorde för.
+func (w *Worker) policyFor(action string) (profile.Policy, error) {
+	if action == "" {
+		return profile.PolicyFor(w.profile)
+	}
+	return profile.ActionPolicy(action)
+}
+
+// actionProfile ger åtgärdsprofilen ur ett godkänt förslag.
+//
+// Tom sträng betyder att förslaget inte innehöll någon profil.
+func actionProfile(proposal goaldefinition.Proposal) string {
+	if proposal.Values.ActionProfile == nil {
+		return ""
+	}
+	return *proposal.Values.ActionProfile
 }
 
 // reportUsage rapporterar tokenanvändningen för en körning.
@@ -870,6 +932,34 @@ func (w *Worker) reportUsage(ctx context.Context, runID int64) {
 
 	log.Printf("Reported usage for run %d: %d input, %d output tokens",
 		runID, snapshot.InputTokens, snapshot.OutputTokens)
+}
+
+// waitForHuman markerar en körning som väntar på en människa.
+//
+// Det händer när fasmaskinen stoppar en övergång - till exempel när
+// definitionen inte är godkänd, eller när ett delmål saknar resultat.
+// Agenten går inte vidare på egen hand; människan bestämmer.
+func (w *Worker) waitForHuman(ctx context.Context, run planclient.AgentRun, stoppad *phaseBlockedError) {
+	log.Printf("Goal #%d can not move forward yet: %s", run.GoalID, stoppad.Reason)
+
+	w.recordEvent(ctx, run.ID, planclient.CreateAgentRunEventRequest{
+		Type:  planclient.EventApprovalRequested,
+		Phase: PhaseDefine,
+		Payload: map[string]any{
+			"reason":  stoppad.Reason,
+			"message": stoppad.Message,
+			"goal_id": run.GoalID,
+		},
+	})
+
+	status := StatusWaitingApproval
+	summary := "Målet kan inte gå vidare: " + stoppad.Reason
+	if _, err := w.planClient.UpdateAgentRun(ctx, run.ID, planclient.UpdateAgentRunRequest{
+		Status:  &status,
+		Summary: &summary,
+	}); err != nil {
+		log.Printf("Failed to mark agent run %d as waiting for a human: %v", run.ID, err)
+	}
 }
 
 // failRun marks a run as failed so the goal does not get stuck

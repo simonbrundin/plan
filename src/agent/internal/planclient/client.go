@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -229,7 +231,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, result inter
 
 	if resp.StatusCode >= 400 {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("API error %d: %s", resp.StatusCode, string(body))
+		return newAPIError(resp.StatusCode, body)
 	}
 
 	if result != nil {
@@ -239,6 +241,55 @@ func (c *Client) do(ctx context.Context, method, path string, body, result inter
 	}
 
 	return nil
+}
+
+// APIError är ett fel från Plan.
+//
+// Skälkoden är viktig för fasmaskinen: ett stoppat fasbyte svarar med
+// 409 och en kod som berättar vad som saknas. Utan koden kan agenten
+// inte veta om den ska be om hjälp eller göra om något.
+type APIError struct {
+	// Status är HTTP-statuskoden.
+	Status int
+	// Code är Plan:s skälkod, om den finns.
+	Code string
+	// Message förklarar felet.
+	Message string
+}
+
+// Error beskriver felet på svenska.
+func (e *APIError) Error() string {
+	if e.Code != "" {
+		return fmt.Sprintf("API svarade %d: %s (%s)", e.Status, e.Message, e.Code)
+	}
+	return fmt.Sprintf("API svarade %d: %s", e.Status, e.Message)
+}
+
+// newAPIError gör ett API-fel av ett svar.
+func newAPIError(status int, body []byte) *APIError {
+	fel := &APIError{Status: status, Message: strings.TrimSpace(string(body))}
+
+	var svar struct {
+		Message string `json:"message"`
+		Code    string `json:"code"`
+	}
+	if err := json.Unmarshal(body, &svar); err == nil {
+		if svar.Message != "" {
+			fel.Message = svar.Message
+		}
+		fel.Code = svar.Code
+	}
+
+	return fel
+}
+
+// ReasonCode ger skälkoden i ett API-fel, om det finns.
+func ReasonCode(err error) string {
+	var apiFel *APIError
+	if errors.As(err, &apiFel) {
+		return apiFel.Code
+	}
+	return ""
 }
 
 // GetGoalsByStatus returns all goals with a specific status
@@ -385,6 +436,120 @@ const (
 	StatusVerify    = 4
 	StatusCompleted = 5
 )
+
+// PhaseTransition svarar på en fasövergång.
+type PhaseTransition struct {
+	GoalID         int64  `json:"goal_id"`
+	From           string `json:"from"`
+	To             string `json:"to"`
+	Forced         bool   `json:"forced"`
+	CompletionKind string `json:"completion_kind,omitempty"`
+}
+
+// GoalVerification är en verifieringsplan för ett mål.
+//
+// Planen är valfri - ett mål utan plan fungerar precis som ett mål med
+// plan.
+type GoalVerification struct {
+	ID        int64      `json:"id"`
+	GoalID    int64      `json:"goal_id"`
+	Type      string     `json:"type"`
+	Criterion string     `json:"criterion"`
+	Strength  string     `json:"strength"`
+	Outcome   string     `json:"outcome,omitempty"`
+	DecidedBy *int64     `json:"decided_by,omitempty"`
+	DecidedAt *time.Time `json:"decided_at,omitempty"`
+}
+
+// GoalEvidence är ett bevis på ett mål.
+type GoalEvidence struct {
+	ID             int64     `json:"id"`
+	GoalID         int64     `json:"goal_id"`
+	VerificationID *int64    `json:"verification_id,omitempty"`
+	Type           string    `json:"type"`
+	Value          string    `json:"value"`
+	Source         string    `json:"source,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+}
+
+// GoalVerificationResult är en bedömning av en verifiering.
+//
+// Resultatet blir först giltigt när en människa godkänner det - agenten
+// får skapa och revidera, men inte godkänna.
+type GoalVerificationResult struct {
+	ID             int64      `json:"id"`
+	GoalID         int64      `json:"goal_id"`
+	VerificationID *int64     `json:"verification_id,omitempty"`
+	Outcome        string     `json:"outcome"`
+	Note           string     `json:"note,omitempty"`
+	DecidedBy      *int64     `json:"decided_by,omitempty"`
+	DecidedAt      *time.Time `json:"decided_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+}
+
+// RequestPhase ber Plan byta målets fas.
+//
+// Villkoren kontrolleras i API:t - ett byte som saknar förutsättningar
+// svarar med 409 och en skälkod, som ReasonCode läser.
+func (c *Client) RequestPhase(ctx context.Context, goalID int64, to string) (*PhaseTransition, error) {
+	req := struct {
+		To string `json:"to"`
+	}{To: to}
+
+	var svar PhaseTransition
+	if err := c.do(ctx, http.MethodPost, fmt.Sprintf(pathGoalPhase, goalID), req, &svar); err != nil {
+		return nil, err
+	}
+	return &svar, nil
+}
+
+// GetVerification läser verifieringsplanen för ett mål.
+//
+// Ett mål utan plan svarar med 404 - det är inte ett fel, utan att
+// verifieringen är valfri.
+func (c *Client) GetVerification(ctx context.Context, goalID int64) (*GoalVerification, error) {
+	var svar GoalVerification
+	if err := c.do(ctx, http.MethodGet, fmt.Sprintf(pathGoalVerification, goalID), nil, &svar); err != nil {
+		return nil, err
+	}
+	return &svar, nil
+}
+
+// SetVerification sätter verifieringsplanen för ett mål.
+//
+// Att sätta en ny plan ogiltigförklarar tidigare omdömen - de gällde
+// den gamla planen.
+func (c *Client) SetVerification(ctx context.Context, goalID int64, typ, criterion, strength string) error {
+	req := struct {
+		Type      string `json:"type"`
+		Criterion string `json:"criterion"`
+		Strength  string `json:"strength"`
+	}{Type: typ, Criterion: criterion, Strength: strength}
+
+	return c.do(ctx, http.MethodPut, fmt.Sprintf(pathGoalVerification, goalID), req, nil)
+}
+
+// AddEvidence lämnar ett bevis på ett mål.
+func (c *Client) AddEvidence(ctx context.Context, goalID int64, typ, value, source string) error {
+	req := struct {
+		Type   string `json:"type"`
+		Value  string `json:"value"`
+		Source string `json:"source"`
+	}{Type: typ, Value: value, Source: source}
+
+	return c.do(ctx, http.MethodPost, fmt.Sprintf(pathGoalEvidence, goalID), req, nil)
+}
+
+// RunVerification kör verifieringen för ett mål.
+//
+// Omdömet blir giltigt först när en människa godkänner det.
+func (c *Client) RunVerification(ctx context.Context, goalID int64) (*GoalVerificationResult, error) {
+	var svar GoalVerificationResult
+	if err := c.do(ctx, http.MethodPost, fmt.Sprintf(pathGoalVerifyRun, goalID), nil, &svar); err != nil {
+		return nil, err
+	}
+	return &svar, nil
+}
 
 var goalPhases = map[string]struct{}{
 	"define":    {},

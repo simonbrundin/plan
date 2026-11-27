@@ -32,6 +32,17 @@ func (e Endpoint) Key() string {
 	return e.Method + " " + e.Path
 }
 
+// PhaseTransition är en övergång mellan två målfaser.
+//
+// Requires anger vad som måste vara uppfyllt för att en agent ska få gå
+// vidare, och Reason är skälkoden API:t svarar med om villkoret saknas.
+type PhaseTransition struct {
+	From     string `yaml:"from"`
+	To       string `yaml:"to"`
+	Requires string `yaml:"requires"`
+	Reason   string `yaml:"reason"`
+}
+
 // Contract är kontraktet mellan Plan och agenten.
 type Contract struct {
 	Version            int      `yaml:"version"`
@@ -41,6 +52,11 @@ type Contract struct {
 	StatusNeedingHuman []string `yaml:"status_needing_human"`
 	Triggers           []string `yaml:"triggers"`
 	Profiles           []string `yaml:"profiles"`
+	// ActionProfiles är åtgärdsprofilerna - vad agenten får göra i en
+	// körning. De följer uppgiften, inte målets ämne.
+	ActionProfiles []string `yaml:"action_profiles"`
+	// PhaseTransitions är fasövergångarna och deras villkor.
+	PhaseTransitions []PhaseTransition `yaml:"phase_transitions"`
 	// ApprovalKinds är typerna av godkännanden agenten kan skapa.
 	// De deklareras här så att Plan och agenten pratar om samma sak.
 	ApprovalKinds []string   `yaml:"approval_kinds"`

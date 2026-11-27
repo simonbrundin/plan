@@ -52,8 +52,8 @@ func TestAgentScopeAllows(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := agentScopeAllows(tt.method, tt.path); got != tt.want {
-				t.Errorf("agentScopeAllows(%q, %q) = %v, vill ha %v", tt.method, tt.path, got, tt.want)
+			if got := AgentScopeAllows(tt.method, tt.path); got != tt.want {
+				t.Errorf("AgentScopeAllows(%q, %q) = %v, vill ha %v", tt.method, tt.path, got, tt.want)
 			}
 		})
 	}
