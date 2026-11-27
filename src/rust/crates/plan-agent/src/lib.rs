@@ -6,17 +6,20 @@
 
 pub mod approvals;
 pub mod checkpoint;
+pub mod coder;
 pub mod contract;
 pub mod core;
 pub mod db;
 pub mod definer;
 pub mod error;
+pub mod executor;
 pub mod goaldefinition;
 pub mod handlers;
 pub mod messages;
 pub mod orchestrator;
 pub mod planclient;
 pub mod profile;
+pub mod proposer;
 pub mod provider;
 pub mod routes;
 pub mod runusage;
@@ -24,3 +27,4 @@ pub mod state;
 pub mod state_store;
 pub mod tools;
 pub mod worker;
+pub mod workspace;

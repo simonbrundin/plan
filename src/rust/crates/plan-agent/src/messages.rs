@@ -175,6 +175,14 @@ impl Message {
         }
     }
 
+    /// Tokenanvändningen, om meddelandet bär en sådan.
+    pub fn usage(&self) -> Option<&Usage> {
+        match self {
+            Message::Assistant { usage, .. } | Message::ToolResult { usage, .. } => usage.as_ref(),
+            Message::User { .. } | Message::System { .. } => None,
+        }
+    }
+
     /// Skapar ett användarmeddelande.
     pub fn user(text: impl Into<String>) -> Self {
         Message::User {
