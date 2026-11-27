@@ -286,7 +286,7 @@ async fn hantera_strömmat_svar(svar: reqwest::Response, sändare: mpsc::Sender<
 
     // Strömmen läses rad för rad - varje rad är ett "data: {...}"-stycke.
     let mut buffer = String::new();
-    let mut sista_händelse: Option<StreamEvent> = None;
+    let sista_händelse: Option<StreamEvent> = None;
     let mut svar = svar;
 
     loop {
@@ -324,7 +324,15 @@ async fn hantera_strömmat_svar(svar: reqwest::Response, sändare: mpsc::Sender<
             let (händelse, stoppreason) = MinimaxProvider::tolka_stycke(data, &mut partial);
 
             if let Some(händelse) = händelse {
-                sista_händelse = Some(händelse);
+                // Händelsen skickas direkt - annars skulle bara den
+                // sista delen av svaret nå konsumenten.
+                let är_fel = matches!(händelse, StreamEvent::Error { .. });
+
+                let _ = sändare.send(händelse).await;
+
+                if är_fel {
+                    return;
+                }
             }
 
             let Some(stoppreason) = stoppreason else {

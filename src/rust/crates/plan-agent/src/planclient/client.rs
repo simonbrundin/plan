@@ -140,23 +140,27 @@ impl PlanClient {
     }
 
     /// Uppdaterar ett måls fält.
+    ///
+    /// API:t svarar med målet direkt, medan GET svarar med målet inbakad
+    /// i ett "goal"-fält. Båda formerna accepteras därför.
     pub async fn update_goal(
         &self,
         id: i64,
         req: UpdateGoalRequest,
     ) -> Result<Goal, PlanClientError> {
-        #[derive(serde::Deserialize)]
-        struct Svar {
-            goal: Goal,
-        }
-        let svar: Svar = self
+        let svar: serde_json::Value = self
             .do_request(
                 reqwest::Method::PATCH,
                 &paths::med_id(paths::PATH_GOAL, id),
                 Some(&req),
             )
             .await?;
-        Ok(svar.goal)
+
+        if let Some(mål) = svar.get("goal") {
+            return Ok(serde_json::from_value(mål.clone())?);
+        }
+
+        Ok(serde_json::from_value(svar)?)
     }
 
     /// Uppdaterar titel, beskrivning och status.
