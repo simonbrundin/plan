@@ -3179,3 +3179,37 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/platsvaljaren-flyttade-till-leader-p -> notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats
 
+
+## [2026-11-27] ingest | create notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron
+- [create] [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]] — ny sida från inboxen
+- [create] [[notes/chattkonversationer-sparas-per-mal]] — ny sida från inboxen
+- [create] [[notes/chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan]] — ny sida från inboxen
+- [create] [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]] — ny sida från inboxen
+- [archive] 2026-11-27-anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron.md
+- [archive] 2026-11-27-chattkonversationer-sparas-per-mal.md
+- [archive] 2026-11-27-chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan.md
+- [archive] 2026-11-27-malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten.md
+## [2026-11-27] ingest | create notes/chattkonversationer-sparas-per-mal
+## [2026-11-27] ingest | create notes/chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan
+## [2026-11-27] ingest | create notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten
+
+
+## [2026-11-27] link | notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] ingest | create notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten
+- [create] [[notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten]] — ny sida från inboxen
+- [archive] 2026-11-27-beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten.md
+
+
+## [2026-11-27] link | notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten -> notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten
+
+
+## [2026-11-27] link | notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] source | 2026-11-27-definitionsassistent-for-mal-define-fasen.md
+

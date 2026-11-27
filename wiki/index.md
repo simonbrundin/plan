@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 9 |
-| Noter | 445 |
+| Noter | 451 |
 
 ## Entiteter
 
@@ -79,6 +79,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/agentmal-flaggan-blev-levande-mvp]] - Plan hade redan goals.agent men ingen agent läste flaggan. _(uppdaterad 2026-11-24)_
 - [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] - I ~/repos/plan (Fas 4 i mål 497) ligger agentprofilerna i src/agent/internal/profile och är tekniska gränser - inte text i prompten. _(uppdaterad 2026-11-24)_
 - [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] - 2026-11-25: agents-repot är arkiverat och sammanslagningen med plan-repot är helt avslutad. _(uppdaterad 2026-11-25)_
+- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]] - ÖNSKEMÅL: agenten ska vara användbar i vardagen, inte bara bra i teorin. _(uppdaterad 2026-11-27)_
 - [[notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier]] - Dashboardens modellsida visar nu publicerade användningsgränser per modell: timgräns _(uppdaterad 2026-11-26)_
 - [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] - Arbetstationen (datorn jag sitter pa) ar Omarchy, dvs Arch-baserat. _(uppdaterad 2026-10-24)_
 - [[notes/arkitektur]] - TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session. _(uppdaterad 2026-11-26)_
@@ -91,6 +92,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]] - Två bash-fallgropar som nästan släppte igenom i `simon pxe flash` _(uppdaterad 2026-10-23)_
 - [[notes/beroendevaljare-med-tangenten-w]] - Ny tangent 'w' på målsidan och mållistan: det markerade målet (förälder, huvudmål eller undermål) kan göras beroende av ett valf... _(uppdaterad 2026-11-22)_
 - [[notes/beroendevaljaren-kan-ta-bort-befintliga-beroenden]] - Uppföljning på beroendeväljaren: när användaren trycker w visas nu befintliga beroenden överst i GoalDependencyPicker.vue. _(uppdaterad 2026-11-22)_
+- [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]] - ANVANDARENS SVAR (2026-11-27) pa designfragorna for det agentiska malsystemet, och justeringar de gav: _(uppdaterad 2026-11-27)_
 - [[notes/beslut-pi-durable-satts-pa-hyllan-for-tillfallet]] - Efter att ha byggt och verifierat en fungerande Pi Durable-demo (~/repos/pi-durable-demo, demo.ts + full.ts, körs med MiniMax via PD_PROV... _(uppdaterad 2026-10-24)_
 - [[notes/bigram-algoritmen]] - Hur bigram-statistiken lagras, rankas och används för att välja ord som tränar svaga teckenpar. _(uppdaterad 2026-10-21)_
 - [[notes/boka-enskild-kommunbokning-i-matchi-fran-bookings]] - Ny knapp "Boka i MATCHi" på /bookings i stk (repo: stk). _(uppdaterad 2026-11-06)_
@@ -99,6 +101,8 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/bulkmarkering-pa-malsidor]] - Bulkmarkeringen utökades till målsidorna. _(uppdaterad 2026-11-26)_
 - [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] - När man cachar IMAP-sessioner per konto (i stället för att stänga och _(uppdaterad 2026-10-29)_
 - [[notes/chattinterface-byggt-i-plan-slack-borttaget]] - Användaren vill inte använda Slack alls - agenten ska prata med henom i Plan. _(uppdaterad 2026-11-24)_
+- [[notes/chattkonversationer-sparas-per-mal]] - VARFÖR: Chatten med agenten såg ut att den inte sparades. _(uppdaterad 2026-11-27)_
+- [[notes/chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan]] - Agentens svar i chattpanelen (src/nuxt/app/components/agent/ChatPanel.vue) visades tidigare som rå text - asterisker, #-rubriker och kod... _(uppdaterad 2026-11-27)_
 - [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] - Sedan repot skapades (3f33ab1) misslyckades jobbet 'Bygg och pusha image' med 'failed to fetch anonymous token ... _(uppdaterad 2026-11-06)_
 - [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] - 2026-11-25: mål 497 (fas 1) färdigställdes. _(uppdaterad 2026-11-25)_
 - [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] - Läge: publik IPv4 är död (Starlink CGNAT), så Cloudflare Tunnel aktiverades som publik ingress. _(uppdaterad 2026-11-26)_
@@ -277,6 +281,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]] - PROBLEM: Att byta målsida i plan tog 2-7 sekunder. _(uppdaterad 2026-11-20)_
 - [[notes/malikoner-anvander-enkel-oversattning-fore-iconify]] - Lösningen använder npm-paketet translate i Nuxt-serverrouten /api/icons. _(uppdaterad 2026-11-17)_
 - [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] - De sista 76 Go-vägarna är nu portade till Rust: auth-endpoints (login, callback, dev-login, session, logout) och målens kompletteringa... _(uppdaterad 2026-11-26)_
+- [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]] - ÖNSKEMÅL: ett agentiskt system som tar mål från define till completed OCH verifierat. _(uppdaterad 2026-11-27)_
 - [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] - Buggen hittades när användaren frågade vad "agentkörningar" betyder - frågan avslöjade _(uppdaterad 2026-11-26)_
 - [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] - I pi/.pi/agent/mcp.json och opencode/.config/opencode/opencode.json ligger Neon MCP-tokens i klartext, och de committades 2026-11-17 i do... _(uppdaterad 2026-11-17)_
 - [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] - Symtom: Go API:t mot Neon (Neons dev-branch, `environments/dev/db/neon.env`) _(uppdaterad 2026-11-27)_
@@ -345,6 +350,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
 - [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] - Diagnos 2026-11-25 13:40 (prod-klustret, context admin@cluster1): _(uppdaterad 2026-11-25)_
 - [[notes/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars ma... _(uppdaterad 2026-11-27)_
+- [[notes/produktionsklustret-kor-arm64-och-api-t-saknade-agentens-nyckel]] - Två fel upptäcktes när Rust-imagerna skulle appliceras i produktion. _(uppdaterad 2026-11-27)_
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] - worker-2 startade om i en bootloop for att noden hade en Talos-installation pa eMMC - U-Boot ska boota disk forst. _(uppdaterad 2026-11-17)_
 - [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade v... _(uppdaterad 2026-11-20)_
 - [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]] - Radxa ROCK 4C+ har ingen UEFI-meny - U-Boot i SPI-flash väljer bootkälla via boot_targets. _(uppdaterad 2026-10-22)_

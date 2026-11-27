@@ -46,6 +46,7 @@ graph LR
   n_notes_agentmarke_pa_mal_tangenten_a_ar_reserverad["Agentmärke på mål - tangenten a är reserverad"]
   n_notes_agentprofiler_som_teknisk_policy_utanfor_prompten["Agentprofiler som teknisk policy utanför prompten"]
   n_notes_agents_repot_arkiverat_och_mergens_mal_kompletterade["Agents-repot arkiverat och mergens mål kompletterade"]
+  n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron["Användarytan för agenten ska vara event-driven och asynkron"]
   n_notes_anvandningsgranser_ar_tier_bundna_och_ska_aldrig_visas_utan_sin_tier["Användningsgränser är tier-bundna och ska aldrig visas utan sin tier"]
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay["Arbetsstationen ar Omarchy/Arch - apt-get finns inte, anvand pacman/yay"]
   n_notes_arkitektur["Arkitektur"]
@@ -62,6 +63,7 @@ graph LR
   n_notes_bash_fallgropar_i_pxe_flash_tab_som_ifs_whitespace_och_read_med_for_fa_variabler["bash-fallgropar i pxe-flash: tab som IFS-whitespace och read med for få variabler"]
   n_notes_beroendevaljare_med_tangenten_w["Beroendeväljare med tangenten w"]
   n_notes_beroendevaljaren_kan_ta_bort_befintliga_beroenden["Beroendeväljaren kan ta bort befintliga beroenden"]
+  n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi["Beslut: atgardsprofil per uppgift, valfri verifiering och enhetlig malterminologi"]
   n_notes_beslut_pi_durable_satts_pa_hyllan_for_tillfallet["Beslut: Pi Durable sätts på hyllan för tillfället"]
   n_notes_bigram_algoritmen["Bigram-algoritmen"]
   n_notes_boka_enskild_kommunbokning_i_matchi_fran_bookings["Boka enskild kommunbokning i MATCHi från /bookings"]
@@ -70,6 +72,8 @@ graph LR
   n_notes_bulkmarkering_pa_malsidor["Bulkmarkering på målsidor"]
   n_notes_cachade_imap_sessioner_kraver_hantering_av_doda_anslutningar["Cachade IMAP-sessioner kräver hantering av döda anslutningar"]
   n_notes_chattinterface_byggt_i_plan_slack_borttaget["Chattinterface byggt i Plan - Slack borttaget"]
+  n_notes_chattkonversationer_sparas_per_mal["Chattkonversationer sparas per mål"]
+  n_notes_chattmeddelanden_fran_agenten_renderas_nu_som_markdown_i_plan["Chattmeddelanden från agenten renderas nu som markdown i Plan"]
   n_notes_ci_gates_kanonisk_agentrun_livscykel_och_versionerat_plan_agent_kontrakt["CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt"]
   n_notes_ci_saknade_inloggning_mot_ghcr_alla_image_pushar_misslyckades["CI saknade inloggning mot GHCR - alla image-pushar misslyckades"]
   n_notes_cloudflare_tunnel_aktiverat_plan_simonbrundin_com_publikt_nabar["Cloudflare Tunnel aktiverat - plan.simonbrundin.com publikt nåbar"]
@@ -238,6 +242,7 @@ graph LR
   n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder["Målgraph: navigering mellan målsidor går från sekunder till millisekunder"]
   n_notes_malikoner_anvander_enkel_oversattning_fore_iconify["Målikoner använder enkel översättning före Iconify"]
   n_notes_malkompletteringar_och_auth_i_rust_de_sista_api_vagarna["Målkompletteringar och auth i Rust - de sista API-vägarna"]
+  n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten["Målmaskin och verifierare: fasmaskinen bor i Plan, inte i prompten"]
   n_notes_manadskostnad_raknas_pa_korningar_inte_pa_losta_uppgifter["Månadskostnad räknas på körningar, inte på lösta uppgifter"]
   n_notes_manuell_sortering_av_mal_pa_priority["Manuell sortering av mål på priority"]
   n_notes_marknadslage_panel_hogst_upp_pa_personer_i_pappa["Marknadsläge-panel högst upp på /personer i pappa"]
@@ -321,6 +326,7 @@ graph LR
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat["Priorityfilter ska behandla saknat started som ej påbörjat"]
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte["Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte"]
   n_notes_prod_patch_utan_namespace_bryter_flux_builden["Prod-patch utan namespace bryter Flux-builden"]
+  n_notes_produktionsklustret_kor_arm64_och_api_t_saknade_agentens_nyckel["Produktionsklustret kör arm64 och API:t saknade agentens nyckel"]
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode["PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde"]
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text["PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text"]
   n_notes_pxe_bootloop_initramfs_startar_om_for_att_boota_installerad_talos_pa_emmc["PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC"]
@@ -653,6 +659,9 @@ graph LR
   n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet --> n_entities_kubernetes
   n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet --> n_notes_ci_gates_kanonisk_agentrun_livscykel_och_versionerat_plan_agent_kontrakt
   n_notes_agents_repot_arkiverat_och_mergens_mal_kompletterade --> n_notes_sammanslagning_av_agents_repot_in_i_plan_vad_som_flyttades_och_vad_som_medvetet_inte_gjorde_det
+  n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron --> n_concepts_anvanda_agenter_i_plan
+  n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron --> n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten
+  n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron --> n_notes_skrivbordswidget_som_visar_gor_nu_malet
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay --> n_notes_kanata_switch_session_tmuxinator_fonster_oppnades_inte
   n_notes_arbetsstationen_ar_omarchy_arch_apt_get_finns_inte_anvand_pacman_yay --> n_notes_pi_tog_bort_pi_rate_limit_och_pi_pattern_retry_fixade_omarchy_temasy
   n_notes_arkitektur --> n_notes_bigram_algoritmen
@@ -669,6 +678,9 @@ graph LR
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_started_finished_kunde_inte_rensas_i_plan_null_ignorerades_i_go_api_t
   n_notes_barnordning_foljer_beroenden_i_malsidan --> n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan
   n_notes_bash_fallgropar_i_pxe_flash_tab_som_ifs_whitespace_och_read_med_for_fa_variabler --> n_entities_pxe_server
+  n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi --> n_concepts_anvanda_agenter_i_plan
+  n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi --> n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron
+  n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi --> n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten
   n_notes_beslut_pi_durable_satts_pa_hyllan_for_tillfallet --> n_notes_md_viewer_tauri_installerades_men_avinstallerades_igen
   n_notes_beslut_pi_durable_satts_pa_hyllan_for_tillfallet --> n_notes_pi_desktop_notis_nar_agent_ar_klar
   n_notes_beslut_pi_durable_satts_pa_hyllan_for_tillfallet --> n_notes_pi_durable_1_4_0_api_avvikelser_fran_blogginlagget_och_tva_gotchas
@@ -833,6 +845,9 @@ graph LR
   n_notes_mal_kan_ha_startdatum_syns_i_priority_forst_nar_datumet_passerat --> n_notes_mal_kan_ha_due_datum_deadline
   n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder --> n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places
   n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder --> n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan
+  n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_concepts_anvanda_agenter_i_plan
+  n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron
+  n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi
   n_notes_manuell_sortering_av_mal_pa_priority --> n_notes_mal_kan_ha_due_datum_deadline
   n_notes_marknadslage_panel_hogst_upp_pa_personer_i_pappa --> n_notes_it_arbetsplatser_i_sundsvall_3_469_enligt_scb_yrkesregistret
   n_notes_masterdatabas_i_postgres_schema_import_och_drift_for_it_rekryteringen --> n_notes_erfarenhetsfilter_i_pappa_it_experience_years_med_sparbart_grund
@@ -1205,7 +1220,7 @@ graph LR
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1240,6 +1255,7 @@ graph LR
 - **notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876** <- [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]]
 - **notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet** <- [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]]
 - **notes/agents-repot-arkiverat-och-mergens-mal-kompletterade** <- [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]]
+- **notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron** <- [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
 - **notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay** <- [[notes/utvecklingsflode]]
 - **notes/arkitektur** <- [[notes/bigram-algoritmen]], [[notes/konventioner]], [[notes/session-livscykel]], [[notes/utvecklingsflode]]
 - **notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet** <- [[notes/verifierade-policy-hal-i-tool-lagret-kommandon-ar-blocklist-inte-allowlist]], [[summaries/llm-wiki-karpathy]]
@@ -1248,6 +1264,7 @@ graph LR
 - **notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt** <- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]]
 - **notes/automatisk-malikon-behovde-sokord-och-svenska-alias** <- [[notes/nya-mal-far-ikon-fran-titeln]]
 - **notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler** <- [[entities/pxe-server]]
+- **notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi** <- [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
 - **notes/beslut-pi-durable-satts-pa-hyllan-for-tillfallet** <- [[notes/pi-durable-1-4-0-api-avvikelser-fran-blogginlagget-och-tva-gotchas]], [[notes/pi-durable-demo-paketet-earendil-works-pi-durable-fungerar]], [[notes/pi-durable-fungerar-med-minimax-coding-plan-anthropic-messages-api]]
 - **notes/bigram-algoritmen** <- [[notes/arkitektur]], [[notes/wordlist-kallor]]
 - **notes/boka-enskild-kommunbokning-i-matchi-fran-bookings** <- [[notes/matchi-bokning-slot-id-andras-nar-bokningen-skapas]]
@@ -1344,6 +1361,7 @@ graph LR
 - **notes/mal-kan-ha-startdatum-syns-i-priority-forst-nar-datumet-passerat** <- [[notes/mal-kan-ha-due-datum-deadline]]
 - **notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder** <- [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]]
 - **notes/malikoner-anvander-enkel-oversattning-fore-iconify** <- [[notes/nya-mal-far-ikon-fran-titeln]]
+- **notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]]
 - **notes/manuell-sortering-av-mal-pa-priority** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
 - **notes/marknadslage-panel-hogst-upp-pa-personer-i-pappa** <- [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]], [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]]
 - **notes/masterdatabas-i-postgres-schema-import-och-drift-for-it-rekryteringen** <- [[concepts/poolad-eller-direkt-anslutning-mot-neon]], [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]], [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]], [[notes/pappa-anstallningshistorik-i-cv-format-fix-av-kompetensordboken]], [[notes/pappa-dubblettknapp-mansklig-granskning-och-bestandig-sammanslagning]], [[notes/pappa-uppdragsmatchning-delpoang-forklarande-ranking]], [[notes/pappa-yaml-frolistan-kan-aterskapas-ur-masterdatabasen]], [[notes/rekrytering-av-it-personal-i-sundsvall-marknadsbild-och-frolista]]
@@ -1463,7 +1481,7 @@ graph LR
 - **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
-- **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]], [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
+- **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]], [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
 - **notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden** <- [[concepts/sops]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **notes/sortering-av-grundmal-pa-goals-med-piltangenterna** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]]
 - **notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan** <- [[notes/barnordning-foljer-beroenden-i-malsidan]], [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]], [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]

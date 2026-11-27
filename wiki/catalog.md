@@ -47,6 +47,7 @@ finns i `index.md`.
 | [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] | Agentmärke på mål - tangenten a är reserverad | note | feature, goals, tangent, projekt:plan | 2026-11-20 | 0 |
 | [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] | Agentprofiler som teknisk policy utanför prompten | note | plan, agent, profil, policy, behörighet, säkerhet, projekt:simon | 2026-11-24 | 0 |
 | [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] | Agents-repot arkiverat och mergens mål kompletterade | note | arkiv, repo, agent, ci, migrering, projekt:simon | 2026-11-25 | 1 |
+| [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]] | Användarytan för agenten ska vara event-driven och asynkron | note | agent, ui, usability, projekt:plan | 2026-11-27 | 3 |
 | [[notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier]] | Användningsgränser är tier-bundna och ska aldrig visas utan sin tier | note | dashboard, modeller, granser, kvoter, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] | Arbetsstationen ar Omarchy/Arch - apt-get finns inte, anvand pacman/yay | note | verktyg, omarchy, bygg, projekt:infrastructure | 2026-10-24 | 2 |
 | [[notes/arkitektur]] | Arkitektur | note | arkitektur, go, oversikt | 2026-11-26 | 7 |
@@ -63,6 +64,7 @@ finns i `index.md`.
 | [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]] | bash-fallgropar i pxe-flash: tab som IFS-whitespace och read med for få variabler | note | bash, bug, pxe, cli, projekt:simon | 2026-10-23 | 1 |
 | [[notes/beroendevaljare-med-tangenten-w]] | Beroendeväljare med tangenten w | note | feature, keyboard, dependencies, projekt:plan | 2026-11-22 | 0 |
 | [[notes/beroendevaljaren-kan-ta-bort-befintliga-beroenden]] | Beroendeväljaren kan ta bort befintliga beroenden | note | feature, keyboard, dependencies, projekt:plan | 2026-11-22 | 0 |
+| [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]] | Beslut: atgardsprofil per uppgift, valfri verifiering och enhetlig malterminologi | note | agent, goals, beslut, projekt:plan | 2026-11-27 | 3 |
 | [[notes/beslut-pi-durable-satts-pa-hyllan-for-tillfallet]] | Beslut: Pi Durable sätts på hyllan för tillfället | note | beslut, pi, durable, projekt:infrastructure | 2026-10-24 | 5 |
 | [[notes/bigram-algoritmen]] | Bigram-algoritmen | note | algoritm, bigram, ordlista, urval | 2026-10-21 | 3 |
 | [[notes/boka-enskild-kommunbokning-i-matchi-fran-bookings]] | Boka enskild kommunbokning i MATCHi från /bookings | note | matchi, feature, bookings, projekt:stk | 2026-11-06 | 0 |
@@ -71,6 +73,8 @@ finns i `index.md`.
 | [[notes/bulkmarkering-pa-malsidor]] | Bulkmarkering på målsidor | note | feature, goals, ui, projekt:plan | 2026-11-26 | 0 |
 | [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] | Cachade IMAP-sessioner kräver hantering av döda anslutningar | note | mailmaster, bug, imap, go, projekt:simon | 2026-10-29 | 1 |
 | [[notes/chattinterface-byggt-i-plan-slack-borttaget]] | Chattinterface byggt i Plan - Slack borttaget | note | feature, agent, slack, session, projekt:plan | 2026-11-24 | 0 |
+| [[notes/chattkonversationer-sparas-per-mal]] | Chattkonversationer sparas per mål | note | feature, agent, chatt, mål, projekt:plan | 2026-11-27 | 0 |
+| [[notes/chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan]] | Chattmeddelanden från agenten renderas nu som markdown i Plan | note | feature, agent, chat, markdown, projekt:plan | 2026-11-27 | 0 |
 | [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]] | CI-gates, kanonisk AgentRun-livscykel och versionerat Plan-agent-kontrakt | note | agent, ci, kontrakt, databas, projekt:plan | 2026-11-25 | 1 |
 | [[notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades]] | CI saknade inloggning mot GHCR - alla image-pushar misslyckades | note | bug, ci, ghcr, projekt:stk | 2026-11-06 | 0 |
 | [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] | Cloudflare Tunnel aktiverat - plan.simonbrundin.com publikt nåbar | note | cloudflare, tunnel, ingress, dns, projekt:infrastructure | 2026-11-26 | 0 |
@@ -239,6 +243,7 @@ finns i `index.md`.
 | [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]] | Målgraph: navigering mellan målsidor går från sekunder till millisekunder | note | performance, goals, go, nuxt, session, projekt:plan | 2026-11-20 | 2 |
 | [[notes/malikoner-anvander-enkel-oversattning-fore-iconify]] | Målikoner använder enkel översättning före Iconify | note | feature, icon, translation, goals, projekt:plan | 2026-11-17 | 0 |
 | [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] | Målkompletteringar och auth i Rust - de sista API-vägarna | note | rust, migration, paritet, projekt:plan | 2026-11-26 | 0 |
+| [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]] | Målmaskin och verifierare: fasmaskinen bor i Plan, inte i prompten | note | agent, goals, design, verifiering, human-gate, projekt:plan | 2026-11-27 | 3 |
 | [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] | Månadskostnad räknas på körningar, inte på lösta uppgifter | note | dashboard, modeller, enheter, bugg, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/manuell-sortering-av-mal-pa-priority]] | Manuell sortering av mål på priority | note | feature, ui, priority, go, nuxt, projekt:plan | 2026-11-17 | 1 |
 | [[notes/marknadslage-panel-hogst-upp-pa-personer-i-pappa]] | Marknadsläge-panel högst upp på /personer i pappa | note | pappa, feature, ui, sourcing, statistik, scb, projekt:pappa | 2026-11-18 | 1 |
@@ -322,6 +327,7 @@ finns i `index.md`.
 | [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] | Priorityfilter ska behandla saknat started som ej påbörjat | note | bug, priority, filter, projekt:plan | 2026-11-17 | 1 |
 | [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] | Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte | note | kubernetes, talos, drift, projekt:plan | 2026-11-25 | 2 |
 | [[notes/prod-patch-utan-namespace-bryter-flux-builden]] | Prod-patch utan namespace bryter Flux-builden | note | bug, flux, kustomize, projekt:plan | 2026-11-27 | 1 |
+| [[notes/produktionsklustret-kor-arm64-och-api-t-saknade-agentens-nyckel]] | Produktionsklustret kör arm64 och API:t saknade agentens nyckel | note | bug, migration, rust, produktion, projekt:plan | 2026-11-27 | 0 |
 | [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]] | PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde | note | pxe, talos, infrastructure, worker-9, projekt:simon | 2026-11-17 | 2 |
 | [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]] | PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text | note | pxe, bug, uboot, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
 | [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] | PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC | note | pxe, talos, worker-2, felsokning, projekt:infrastructure | 2026-11-17 | 2 |
@@ -497,7 +503,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (29)
+- `agent` (34)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (3)
@@ -527,7 +533,7 @@ finns i `index.md`.
 - `bash` (1)
 - `behörighet` (3)
 - `benchmark` (4)
-- `beslut` (14)
+- `beslut` (15)
 - `bigram` (1)
 - `bokning` (2)
 - `bolagsregister` (1)
@@ -536,7 +542,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (109)
+- `bug` (110)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -551,7 +557,8 @@ finns i `index.md`.
 - `certifikat` (1)
 - `cfd` (1)
 - `cgNAT` (1)
-- `chat` (1)
+- `chat` (2)
+- `chatt` (1)
 - `ci` (10)
 - `clean-code` (1)
 - `cleanup` (1)
@@ -584,7 +591,7 @@ finns i `index.md`.
 - `deploy` (2)
 - `deployment` (2)
 - `deprecated` (1)
-- `design` (1)
+- `design` (2)
 - `desktop` (1)
 - `dev` (7)
 - `dev-miljo` (2)
@@ -618,7 +625,7 @@ finns i `index.md`.
 - `extension` (2)
 - `extensions` (1)
 - `fakta` (4)
-- `feature` (89)
+- `feature` (91)
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (20)
@@ -649,7 +656,7 @@ finns i `index.md`.
 - `gmail` (1)
 - `gnistring` (1)
 - `go` (33)
-- `goals` (33)
+- `goals` (35)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -671,7 +678,7 @@ finns i `index.md`.
 - `hostname` (1)
 - `http` (2)
 - `http-routing` (1)
-- `human-gate` (4)
+- `human-gate` (5)
 - `hyprland` (1)
 - `händelser` (1)
 - `icon` (5)
@@ -755,7 +762,7 @@ finns i `index.md`.
 - `mainline` (4)
 - `mal` (1)
 - `manuell-verifiering` (1)
-- `markdown` (1)
+- `markdown` (2)
 - `matchbox` (3)
 - `matchi` (7)
 - `matchning` (1)
@@ -764,7 +771,7 @@ finns i `index.md`.
 - `metallb` (3)
 - `metodik` (3)
 - `microsoft365` (2)
-- `migration` (4)
+- `migration` (5)
 - `migrering` (6)
 - `mime` (1)
 - `minimax` (3)
@@ -776,7 +783,7 @@ finns i `index.md`.
 - `modeller` (5)
 - `modelljämförelse` (1)
 - `monitoring` (1)
-- `mål` (4)
+- `mål` (5)
 - `målsida` (1)
 - `navigation` (2)
 - `navigering` (2)
@@ -842,7 +849,7 @@ finns i `index.md`.
 - `prioritetssida` (2)
 - `priority` (3)
 - `prod` (1)
-- `produktion` (1)
+- `produktion` (2)
 - `profil` (1)
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
@@ -852,7 +859,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (136)
+- `projekt:plan` (142)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -897,7 +904,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (18)
+- `rust` (19)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)
@@ -978,19 +985,20 @@ finns i `index.md`.
 - `u-boot` (1)
 - `uboot` (20)
 - `ubygg` (2)
-- `ui` (43)
+- `ui` (44)
 - `undo` (1)
 - `unicode` (1)
 - `unifi` (9)
 - `uppdrag` (1)
 - `urval` (1)
+- `usability` (1)
 - `usb` (5)
 - `utoipa` (1)
 - `ux` (5)
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)
-- `verifiering` (3)
+- `verifiering` (4)
 - `verktyg` (7)
 - `visionite` (1)
 - `wan` (1)
