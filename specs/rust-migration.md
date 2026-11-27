@@ -103,11 +103,11 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | Agentens providers, meddelanden, verktyg, chatt, WebSocket | klar |
 | Agentens workern, definierare, profiler, måldefinition | klar |
 | Agentens kodändringsflöde (workspace, executor, proposer, coder) | klar |
-| Agentens wiki, scheduler, Kubernetes-stöd | inte påbörjat |
+| Agentens wiki, scheduler, Kubernetes-stöd | klar |
+| Kunskaps-wikin (`plan-wiki` + `wikictl`) | klar |
 
 ### Vad som återstår i agenten
 
-- Agentens wiki, scheduler och Kubernetes-stöd.
 - Orchestratorns kvarvarande delar (minne, hemligheter, self-improve).
 - Att skicka in agenten i produktion och ta bort Go-tjänsterna.
 

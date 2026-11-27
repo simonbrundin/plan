@@ -40,8 +40,12 @@ pub fn source_file(
     origin: &str,
     now: DateTime<Local>,
 ) -> Result<PathBuf, String> {
-    let data = std::fs::read_to_string(src_path)
-        .map_err(|err| format!("kunde inte läsa {src_path}: {err}"))?;
+    let data = std::fs::read_to_string(src_path).map_err(|err| {
+        format!(
+            "kunde inte läsa {src_path}: {}",
+            crate::wiki::go_filfel("open", Path::new(src_path), &err)
+        )
+    })?;
 
     let mut rubrik = title.trim().to_string();
 
@@ -80,8 +84,12 @@ pub fn source_file(
 
     // Om källan redan låg i raw/ tar vi bort originalet.
     if is_in_raw_dir(dir, Path::new(src_path))? {
-        std::fs::remove_file(src_path)
-            .map_err(|err| format!("kunde inte ta bort {src_path}: {err}"))?;
+        std::fs::remove_file(src_path).map_err(|err| {
+            format!(
+                "kunde inte ta bort {src_path}: {}",
+                crate::wiki::go_filfel("remove", Path::new(src_path), &err)
+            )
+        })?;
     }
 
     Ok(mål)
@@ -91,10 +99,28 @@ pub fn source_file(
 fn is_in_raw_dir(dir: &Path, path: &Path) -> Result<bool, String> {
     let raw_dir = dir.join(crate::wiki::RAW_DIR);
 
-    let abs_raw = std::fs::canonicalize(&raw_dir)
-        .map_err(|err| format!("kunde inte hitta {}: {err}", raw_dir.display()))?;
-    let abs_path = std::fs::canonicalize(path)
-        .map_err(|err| format!("kunde inte hitta {}: {err}", path.display()))?;
+    let abs_raw = match std::fs::canonicalize(&raw_dir) {
+        Ok(sökväg) => sökväg,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+        Err(err) => {
+            return Err(format!(
+                "kunde inte hitta {}: {}",
+                raw_dir.display(),
+                crate::wiki::go_filfel("stat", &raw_dir, &err)
+            ))
+        }
+    };
+
+    let abs_path = match std::fs::canonicalize(path) {
+        Ok(sökväg) => sökväg,
+        Err(err) => {
+            return Err(format!(
+                "kunde inte hitta {}: {}",
+                path.display(),
+                crate::wiki::go_filfel("stat", path, &err)
+            ))
+        }
+    };
 
     Ok(abs_path.starts_with(&abs_raw))
 }

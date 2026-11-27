@@ -109,8 +109,13 @@ pub fn slug(text: &str) -> String {
 ///
 /// Go: `wiki.ParseNote`.
 pub fn parse_note(sökväg: &Path) -> Result<Note, String> {
-    let data = std::fs::read_to_string(sökväg)
-        .map_err(|err| format!("kunde inte läsa {}: {err}", sökväg.display()))?;
+    let data = std::fs::read_to_string(sökväg).map_err(|err| {
+        format!(
+            "kunde inte läsa {}: {}",
+            sökväg.display(),
+            crate::wiki::go_filfel("open", sökväg, &err)
+        )
+    })?;
 
     let (meta, body) = split_frontmatter(&data)
         .map_err(|err| format!("kunde inte tolka frontmatter i {}: {err}", sökväg.display()))?;
@@ -137,11 +142,19 @@ pub fn parse_note(sökväg: &Path) -> Result<Note, String> {
         tags: split_list(meta.get(META_TAGS).map(String::as_str).unwrap_or_default()),
         created: meta.get(META_CREATED).cloned().unwrap_or_default(),
         updated: meta.get(META_UPDATED).cloned().unwrap_or_default(),
-        related: split_list(meta.get(META_RELATED).map(String::as_str).unwrap_or_default()),
+        related: split_list(
+            meta.get(META_RELATED)
+                .map(String::as_str)
+                .unwrap_or_default(),
+        ),
         status: meta.get(META_STATUS).cloned().unwrap_or_default(),
         sources: merge_sources(
-            meta.get(META_SOURCES).map(String::as_str).unwrap_or_default(),
-            meta.get(META_SOURCE).map(String::as_str).unwrap_or_default(),
+            meta.get(META_SOURCES)
+                .map(String::as_str)
+                .unwrap_or_default(),
+            meta.get(META_SOURCE)
+                .map(String::as_str)
+                .unwrap_or_default(),
         ),
         summary: meta.get(META_SUMMARY).cloned().unwrap_or_default(),
         origin: meta.get(META_ORIGIN).cloned().unwrap_or_default(),
@@ -183,7 +196,9 @@ fn split_frontmatter(innehåll: &str) -> Result<(BTreeMap<String, String>, Strin
         .ok_or_else(|| "frontmatter saknar avslutande ---".to_string())?;
 
     let header = &rest[..slut];
-    let body = rest[slut + "\n---".len()..].strip_prefix('\n').unwrap_or(&rest[slut + "\n---".len()..]);
+    let body = rest[slut + "\n---".len()..]
+        .strip_prefix('\n')
+        .unwrap_or(&rest[slut + "\n---".len()..]);
 
     let mut meta: BTreeMap<String, String> = BTreeMap::new();
 
@@ -332,9 +347,7 @@ impl Note {
 
     /// Svarar på om anteckningen har en given tagg.
     pub fn has_tag(&self, tag: &str) -> bool {
-        self.tags
-            .iter()
-            .any(|t| t.eq_ignore_ascii_case(tag))
+        self.tags.iter().any(|t| t.eq_ignore_ascii_case(tag))
     }
 
     /// Serialiserar anteckningen tillbaka till markdown med frontmatter.

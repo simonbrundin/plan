@@ -202,7 +202,7 @@ Det finns inga snapshots och ingen lokal backup - tidsresan är enda
 ## Ägande av kunskaps-wikin
 
 Det här repot **äger den globala kunskaps-wikin** (`~/wiki` → `wiki/` här)
-och verktyget `wikictl` (`src/agent/cmd/wikictl`). Alla andra repor
+och verktyget `wikictl` (`src/rust/crates/plan-wiki`). Alla andra repor
 använder wikin men äger den inte.
 
 **Ägareansvar:**
@@ -216,8 +216,13 @@ Wikin flyttades hit från `agents`-repot 2026-11-24 i samband med att
 agentens backend lades in under `src/agent`. Verktyget byggs med:
 
 ```bash
-cd src && go build -o ~/.local/bin/wikictl ./agent/cmd/wikictl
+cd src/rust && cargo build -p plan-wiki --bin wikictl
+cp src/rust/target/debug/wikictl ~/.local/bin/wikictl
 ```
+
+Go-versionen finns kvar under `src/agent/cmd/wikictl` tills migreringen
+är klar. Båda ger samma svar - `scripts/compare-wiki-parity.sh`
+jämför dem kommando för kommando.
 
 ## Kunskaps-wiki
 

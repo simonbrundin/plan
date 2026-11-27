@@ -33,7 +33,13 @@ pub struct Merge {
 
 impl std::fmt::Display for Merge {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} + {} (delade taggar: {})", self.a, self.b, self.tags.join(", "))
+        write!(
+            f,
+            "{} + {} (delade taggar: {})",
+            self.a,
+            self.b,
+            self.tags.join(", ")
+        )
     }
 }
 
@@ -228,8 +234,15 @@ pub fn ingest(dir: &Path, opts: &IngestOptions) -> Result<IngestReport, String> 
             let källa = dir.join(INBOX_DIR).join(format!("{id}.md"));
 
             if källa.exists() {
-                std::fs::rename(&källa, &arkiverad)
-                    .map_err(|err| format!("kunde inte arkivera {}: {err}", källa.display()))?;
+                std::fs::rename(&källa, &arkiverad).map_err(|err| {
+                    format!(
+                        "kunde inte arkivera {}: rename {} {}: {}",
+                        källa.display(),
+                        källa.display(),
+                        arkiverad.display(),
+                        crate::wiki::go_errno(&err)
+                    )
+                })?;
             }
         }
     }
@@ -363,7 +376,7 @@ fn is_word_prefix(a: &str, b: &str) -> bool {
 
 /// Tar bort bindestreck och understreck ur en slug.
 fn strip_separators(s: &str) -> String {
-    s.replace('-', "").replace('_', "").replace(' ', "")
+    s.replace(['-', '_', ' '], "")
 }
 
 /// Taggar som två listor delar.

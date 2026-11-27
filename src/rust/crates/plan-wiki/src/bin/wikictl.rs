@@ -200,9 +200,7 @@ fn run(args: Vec<String>) -> Result<(), String> {
             usage();
             Ok(())
         }
-        annan => Err(format!(
-            "okänt kommando: {annan:?} (kör 'wikictl help')"
-        )),
+        annan => Err(format!("okänt kommando: {annan:?} (kör 'wikictl help')")),
     }
 }
 
@@ -518,8 +516,8 @@ fn run_page(args: &[String], wiki_dir: &str) -> Result<(), String> {
     let fil = flags.str("file");
 
     if !fil.is_empty() {
-        text = std::fs::read_to_string(&fil)
-            .map_err(|err| format!("kunde inte läsa {fil}: {err}"))?;
+        text =
+            std::fs::read_to_string(&fil).map_err(|err| format!("kunde inte läsa {fil}: {err}"))?;
     }
 
     if text.trim().is_empty() {
@@ -701,7 +699,10 @@ fn run_source(args: &[String], wiki_dir: &str) -> Result<(), String> {
 
                 ut!(
                     "{:<40} {:<12} {:<14} {}",
-                    källa.id, state, källa.added, origin
+                    källa.id,
+                    state,
+                    källa.added,
+                    origin
                 );
             }
         }
@@ -764,21 +765,22 @@ fn run_init(args: &[String]) -> Result<(), String> {
     let flags = tolka(args, &[])?;
 
     let repo_dir = if flags.args.is_empty() {
-        std::env::current_dir()
-            .map_err(|err| format!("kunde inte läsa arbetskatalogen: {err}"))?
+        std::env::current_dir().map_err(|err| format!("kunde inte läsa arbetskatalogen: {err}"))?
     } else {
         PathBuf::from(&flags.args[0])
     };
 
     let changed = wiki::ensure_agents_block(&repo_dir)?;
 
+    let sökväg = wiki::wiki::go_join(
+        repo_dir.to_str().unwrap_or_default(),
+        wiki::init::AGENTS_FILE_NAME,
+    );
+
     if changed {
-        ut!("Uppdaterade {}", repo_dir.join(wiki::init::AGENTS_FILE_NAME).display());
+        ut!("Uppdaterade {sökväg}");
     } else {
-        ut!(
-            "{} var redan uppdaterad",
-            repo_dir.join(wiki::init::AGENTS_FILE_NAME).display()
-        );
+        ut!("{sökväg} var redan uppdaterad");
     }
 
     Ok(())

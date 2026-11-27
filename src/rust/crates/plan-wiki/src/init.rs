@@ -73,8 +73,13 @@ pub fn ensure_agents_block(repo_dir: &Path) -> Result<bool, String> {
         return Ok(false);
     }
 
-    std::fs::write(&path, &updated)
-        .map_err(|err| format!("kunde inte skriva {}: {err}", path.display()))?;
+    std::fs::write(&path, &updated).map_err(|err| {
+        format!(
+            "kunde inte skriva {}: {}",
+            path.display(),
+            crate::wiki::go_filfel("open", &path, &err)
+        )
+    })?;
 
     Ok(true)
 }

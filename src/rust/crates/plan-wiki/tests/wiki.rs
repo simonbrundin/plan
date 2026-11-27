@@ -3,7 +3,7 @@
 //! Testerna följer samma fall som Go-versionen så att beteendet är
 //! lika i båda implementationerna.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use chrono::{Local, TimeZone};
 use plan_wiki as wiki;
@@ -136,7 +136,10 @@ fn resolve_hittar_wikilänkens_mål() {
     let w = wiki::open(dir.path()).expect("open");
 
     assert!(w.resolve("concepts/Flux").is_some());
-    assert!(w.resolve("entities/talos").is_some(), "ska vara case-insensitive");
+    assert!(
+        w.resolve("entities/talos").is_some(),
+        "ska vara case-insensitive"
+    );
     assert!(w.resolve("saknas").is_none());
 }
 
@@ -221,7 +224,10 @@ fn katalog_och_graph_genereras() {
 
     let katalog = w.catalog();
     assert!(katalog.contains("concepts/Flux"), "katalogen saknar sidan");
-    assert!(katalog.contains("`x`"), "katalogen saknar taggsammanfattning");
+    assert!(
+        katalog.contains("`x`"),
+        "katalogen saknar taggsammanfattning"
+    );
 
     let graph = w.graph();
     assert!(graph.contains("graph LR"), "graph saknar mermaid-header");
@@ -244,7 +250,14 @@ fn ingest_skapar_sida_och_arkiverar_inboxen() {
     );
 
     let nu = Local.with_ymd_and_hms(2026, 10, 21, 12, 0, 0).unwrap();
-    let report = wiki::ingest(dir.path(), &wiki::IngestOptions { now: Some(nu), ..Default::default() }).expect("ingest");
+    let report = wiki::ingest(
+        dir.path(),
+        &wiki::IngestOptions {
+            now: Some(nu),
+            ..Default::default()
+        },
+    )
+    .expect("ingest");
 
     assert_eq!(report.created, vec!["notes/ny-not".to_string()]);
     assert_eq!(report.archived.len(), 1);
@@ -288,13 +301,19 @@ fn ingest_lägger_till_på_existerande_sida() {
     );
 
     let nu = Local.with_ymd_and_hms(2026, 10, 21, 12, 0, 0).unwrap();
-    let report = wiki::ingest(dir.path(), &wiki::IngestOptions { now: Some(nu), ..Default::default() }).expect("ingest");
+    let report = wiki::ingest(
+        dir.path(),
+        &wiki::IngestOptions {
+            now: Some(nu),
+            ..Default::default()
+        },
+    )
+    .expect("ingest");
 
     assert_eq!(report.updated, vec!["notes/befintlig".to_string()]);
     assert!(report.created.is_empty());
 
-    let note =
-        wiki::parse_note(&dir.path().join("wiki/notes/befintlig.md")).expect("parse_note");
+    let note = wiki::parse_note(&dir.path().join("wiki/notes/befintlig.md")).expect("parse_note");
 
     assert!(note.body.contains("Första versionen."));
     assert!(note.body.contains("Andra versionen."));
@@ -383,11 +402,7 @@ fn resolve_dir_hittar_wikin_uppåt() {
     std::env::set_current_dir(previous).expect("chdir tillbaka");
 
     let dir = result.expect("resolve_dir");
-    assert_eq!(
-        dir,
-        root.path().join("wiki"),
-        "resolve_dir pekade fel"
-    );
+    assert_eq!(dir, root.path().join("wiki"), "resolve_dir pekade fel");
 }
 
 #[test]
@@ -431,7 +446,7 @@ fn detect_project_hittar_repots_namn() {
         return;
     }
 
-    assert_eq!(project, bas(&dir.path().to_path_buf()));
+    assert_eq!(project, bas(dir.path()));
 }
 
 #[test]
@@ -529,7 +544,8 @@ fn write_page_skapar_sida() {
 
     assert_eq!(id, "concepts/kyverno-cel");
 
-    let note = wiki::parse_note(&dir.path().join("wiki/concepts/kyverno-cel.md")).expect("parse_note");
+    let note =
+        wiki::parse_note(&dir.path().join("wiki/concepts/kyverno-cel.md")).expect("parse_note");
 
     assert_eq!(note.note_type, "concept");
     assert_eq!(note.summary, "CEL är standarden för policies.");
@@ -678,7 +694,8 @@ fn source_file_lägger_till_råkälla() {
     .expect("source_file");
 
     assert_eq!(
-        dest.file_name().map(|namn| namn.to_string_lossy().to_string()),
+        dest.file_name()
+            .map(|namn| namn.to_string_lossy().to_string()),
         Some("2026-10-23-min-kalla.md".to_string())
     );
 
@@ -702,16 +719,20 @@ fn lint_hittar_ödelapp_och_ointegrerad_källa() {
     let src = dir.path().join("kalla.md");
     std::fs::write(&src, "Råtext.\n").expect("skrev källa");
 
-    wiki::source_file(dir.path(), src.to_str().unwrap_or_default(), "Källa", "", Local::now())
-        .expect("source_file");
+    wiki::source_file(
+        dir.path(),
+        src.to_str().unwrap_or_default(),
+        "Källa",
+        "",
+        Local::now(),
+    )
+    .expect("source_file");
 
     let w = wiki::open(dir.path()).expect("open");
     let findings = wiki::lint(&w, &wiki::LintOptions::default());
 
     assert!(
-        findings
-            .iter()
-            .any(|f| f.kind == wiki::LintKind::Orphan),
+        findings.iter().any(|f| f.kind == wiki::LintKind::Orphan),
         "lint hittade inte ödelapp"
     );
     assert!(
@@ -809,7 +830,7 @@ fn source_add_i_raw_flyttar_i_stället_för_kopiera() {
 
 /// Hjälpfunktion för att hitta en fils sista segment.
 #[allow(dead_code)]
-fn bas(sökväg: &PathBuf) -> String {
+fn bas(sökväg: &Path) -> String {
     sökväg
         .file_name()
         .map(|namn| namn.to_string_lossy().to_string())

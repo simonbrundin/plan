@@ -53,18 +53,15 @@ pub fn open(dir: &Path) -> Result<Wiki, String> {
 }
 
 /// Går igenom en katalog rekursivt och läser alla markdownfiler.
-fn samla_sidor(
-    rot: &Path,
-    aktuell: &Path,
-    anteckningar: &mut Vec<Note>,
-) -> Result<(), String> {
+fn samla_sidor(rot: &Path, aktuell: &Path, anteckningar: &mut Vec<Note>) -> Result<(), String> {
     let poster = match std::fs::read_dir(aktuell) {
         Ok(poster) => poster,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
         Err(err) => {
             return Err(format!(
-                "kunde inte läsa {}: {err}",
-                aktuell.display()
+                "kunde inte läsa {}: {}",
+                aktuell.display(),
+                go_filfel("open", aktuell, &err)
             ))
         }
     };
@@ -103,7 +100,13 @@ fn samla_sidor(
     // Underkataloger kommer efter sidorna i samma katalog - ordningen
     // påverkar inte innehållet, bara läsningen.
     let under: Vec<PathBuf> = std::fs::read_dir(aktuell)
-        .map_err(|err| format!("kunde inte läsa {}: {err}", aktuell.display()))?
+        .map_err(|err| {
+            format!(
+                "kunde inte läsa {}: {}",
+                aktuell.display(),
+                go_filfel("open", aktuell, &err)
+            )
+        })?
         .filter_map(|poster| poster.ok())
         .map(|poster| poster.path())
         .filter(|sökväg| sökväg.is_dir())
@@ -119,8 +122,7 @@ fn samla_sidor(
 impl Wiki {
     /// Sorterar sidorna på id.
     fn sort_notes(&mut self) {
-        self.notes
-            .sort_by(|a, b| a.id.cmp(&b.id));
+        self.notes.sort_by(|a, b| a.id.cmp(&b.id));
     }
 
     /// Returnerar anteckningen med givet id, eller ingenting.
@@ -168,14 +170,12 @@ impl Wiki {
         // 3. Samma slug - "Longhorn disk guide" -> "longhorn-disk-guide".
         let target_slug = crate::note::slug(&target_base);
 
-        self.notes
-            .iter()
-            .find(|anteckning| {
-                Path::new(&anteckning.id)
-                    .file_name()
-                    .map(|namn| crate::note::slug(&namn.to_string_lossy()) == target_slug)
-                    .unwrap_or(false)
-            })
+        self.notes.iter().find(|anteckning| {
+            Path::new(&anteckning.id)
+                .file_name()
+                .map(|namn| crate::note::slug(&namn.to_string_lossy()) == target_slug)
+                .unwrap_or(false)
+        })
     }
 
     /// Hittar sidor som matchar frågan, rangordnade efter relevans.
@@ -376,11 +376,7 @@ impl Wiki {
                 .map(|anteckning| format!("[[{}]]", anteckning.id))
                 .collect();
 
-            ut.push_str(&format!(
-                "- **{}** <- {}\n",
-                anteckning.id,
-                namn.join(", ")
-            ));
+            ut.push_str(&format!("- **{}** <- {}\n", anteckning.id, namn.join(", ")));
         }
 
         ut
@@ -442,13 +438,7 @@ fn context_lines(anteckning: &Note, terms: &[String]) -> Vec<String> {
 
 /// Gör ett id säkert att använda som mermaid-nod.
 fn node_id(id: &str) -> String {
-    format!(
-        "n_{}",
-        id.replace('/', "_")
-            .replace(' ', "_")
-            .replace('-', "_")
-            .replace('.', "_")
-    )
+    format!("n_{}", id.replace(['/', ' ', '-', '.'], "_"))
 }
 
 /// Escapes citattecken i mermaid-etiketter.
@@ -459,12 +449,65 @@ fn escape_label(label: &str) -> String {
 /// Skriver en fil och skapar föräldrakatalogerna vid behov.
 pub fn write_file(sökväg: &Path, innehåll: &str) -> Result<(), String> {
     if let Some(förälder) = sökväg.parent() {
-        std::fs::create_dir_all(förälder)
-            .map_err(|err| format!("kunde inte skapa {}: {err}", förälder.display()))?;
+        std::fs::create_dir_all(förälder).map_err(|err| {
+            format!(
+                "kunde inte skapa {}: {go_filfel}",
+                förälder.display(),
+                go_filfel = go_filfel("mkdir", förälder, &err)
+            )
+        })?;
     }
 
-    std::fs::write(sökväg, innehåll)
-        .map_err(|err| format!("kunde inte skriva {}: {err}", sökväg.display()))
+    std::fs::write(sökväg, innehåll).map_err(|err| {
+        format!(
+            "kunde inte skriva {}: {go_filfel}",
+            sökväg.display(),
+            go_filfel = go_filfel("open", sökväg, &err)
+        )
+    })
+}
+
+/// Formaterar ett filfel på samma sätt som Go gör.
+///
+/// Go använder `open filnamn: no such file or directory` - Rust ger
+/// `No such file or directory (os error 2)`. Skillnaden syns i
+/// felmeddelandena, så den måste matchas.
+///
+/// Go: `open <sökväg>: <errno>`.
+pub fn go_filfel(verb: &str, sökväg: &Path, err: &std::io::Error) -> String {
+    format!("{verb} {}: {}", sökväg.display(), go_errno(err))
+}
+
+/// Go:s errno-texter.
+pub fn go_errno(err: &std::io::Error) -> String {
+    match err.raw_os_error() {
+        Some(1) => "operation not permitted".to_string(),
+        Some(2) => "no such file or directory".to_string(),
+        Some(13) => "permission denied".to_string(),
+        Some(17) => "file exists".to_string(),
+        Some(20) => "not a directory".to_string(),
+        Some(21) => "is a directory".to_string(),
+        Some(22) => "invalid argument".to_string(),
+        Some(39) => "directory not empty".to_string(),
+        _ => err.to_string(),
+    }
+}
+
+/// Sätter ihop sökvägar som Go:s `filepath.Join` gör.
+pub fn go_join(base: &str, namn: &str) -> String {
+    let samman = if base.is_empty() {
+        namn.to_string()
+    } else {
+        format!("{base}/{namn}")
+    };
+
+    let mut städad = samman.replace("//", "/");
+
+    while städad.starts_with("./") {
+        städad = städad[2..].to_string();
+    }
+
+    städad
 }
 
 /// Hittar wikin.
@@ -483,8 +526,8 @@ pub fn resolve_dir(explicit: &str) -> Result<PathBuf, String> {
         return Ok(PathBuf::from(env));
     }
 
-    let mut dir = std::env::current_dir()
-        .map_err(|err| format!("kunde inte läsa arbetskatalogen: {err}"))?;
+    let mut dir =
+        std::env::current_dir().map_err(|err| format!("kunde inte läsa arbetskatalogen: {err}"))?;
 
     loop {
         let kandidat = dir.join(PAGES_DIR);

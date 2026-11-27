@@ -142,8 +142,15 @@ jmför_skrivning() {
 
   local go_utdata rust_utdata
 
-  go_utdata=$("$GO_BIN" --wiki "$go_dir" "$@" 2>&1)
-  rust_utdata=$("$RUST_BIN" --wiki "$rust_dir" "$@" 2>&1)
+  # init lägger in AGENTS.md i den aktuella katalogen - kör därför
+  # kommandot i fixture-katalogen.
+  if [ "$1" = "init" ]; then
+    go_utdata=$(cd "$go_dir" && "$GO_BIN" --wiki "$go_dir" "$@" 2>&1)
+    rust_utdata=$(cd "$rust_dir" && "$RUST_BIN" --wiki "$rust_dir" "$@" 2>&1)
+  else
+    go_utdata=$("$GO_BIN" --wiki "$go_dir" "$@" 2>&1)
+    rust_utdata=$("$RUST_BIN" --wiki "$rust_dir" "$@" 2>&1)
+  fi
 
   go_utdata="${go_utdata//$go_dir/WIKI}"
   rust_utdata="${rust_utdata//$rust_dir/WIKI}"
@@ -194,7 +201,8 @@ jmför_skrivning "source add" source add --file kalla.md --title "Min källa" --
 jmför_skrivning "ingest" ingest
 jmför_skrivning "ingest --dry-run" ingest --dry-run
 jmför_skrivning "index" index
-jmför_skrivning "init" init .
+# init körs i fixture-katalogen - aldrig i repot.
+jmför_skrivning "init" init
 
 if [ "$fel" -ne 0 ]; then
   echo

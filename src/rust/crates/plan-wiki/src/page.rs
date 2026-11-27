@@ -142,7 +142,10 @@ pub fn write_page(dir: &Path, opts: &WriteOptions) -> Result<String, String> {
     }
 
     let page_id = format!("{}/{id}", kind.kind_dir());
-    let path = dir.join(PAGES_DIR).join(kind.kind_dir()).join(format!("{id}.md"));
+    let path = dir
+        .join(PAGES_DIR)
+        .join(kind.kind_dir())
+        .join(format!("{id}.md"));
 
     let existing = match parse_note(&path) {
         Ok(anteckning) => Some(anteckning),
@@ -333,7 +336,10 @@ fn append_related(body: &str, to_id: &str) -> String {
         // Den nya posten hamnar först i listan.
         poster.insert(0, post);
 
-        let mut ut: Vec<String> = rader[..index + 1].iter().map(|rad| rad.to_string()).collect();
+        let mut ut: Vec<String> = rader[..index + 1]
+            .iter()
+            .map(|rad| rad.to_string())
+            .collect();
 
         ut.push(String::new());
         ut.extend(poster);
@@ -370,5 +376,7 @@ fn remove_related(body: &str, to_id: &str) -> String {
 
 /// Sökvägen till en sida i en katalog.
 pub fn page_path(dir: &Path, kind: PageKind, id: &str) -> PathBuf {
-    dir.join(PAGES_DIR).join(kind.kind_dir()).join(format!("{id}.md"))
+    dir.join(PAGES_DIR)
+        .join(kind.kind_dir())
+        .join(format!("{id}.md"))
 }

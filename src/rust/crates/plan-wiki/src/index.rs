@@ -22,7 +22,7 @@ pub fn pages_of_kind(wiki: &Wiki, kind: PageKind) -> Vec<&Note> {
         .filter(|anteckning| kind_of(anteckning) == kind)
         .collect();
 
-    sidor.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
+    sidor.sort_by_key(|a| a.title.to_lowercase());
 
     sidor
 }
