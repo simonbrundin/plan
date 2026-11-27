@@ -48,6 +48,7 @@ finns i `index.md`.
 | [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] | Agentprofiler som teknisk policy utanför prompten | note | plan, agent, profil, policy, behörighet, säkerhet, projekt:simon | 2026-11-24 | 0 |
 | [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] | Agents-repot arkiverat och mergens mål kompletterade | note | arkiv, repo, agent, ci, migrering, projekt:simon | 2026-11-25 | 1 |
 | [[notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier]] | Användningsgränser är tier-bundna och ska aldrig visas utan sin tier | note | dashboard, modeller, granser, kvoter, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/api-servern-i-cluster1-spatar-inte-managedfields-ssa-konflikter-upptacks-inte]] | API-servern i cluster1 spatar inte managedFields - SSA-konflikter upptacks inte | note | kubernetes, ssa, flux, managedfields, api-server, projekt:infrastructure | 2026-11-27 | 1 |
 | [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] | Arbetsstationen ar Omarchy/Arch - apt-get finns inte, anvand pacman/yay | note | verktyg, omarchy, bygg, projekt:infrastructure | 2026-10-24 | 2 |
 | [[notes/arkitektur]] | Arkitektur | note | arkitektur, go, oversikt | 2026-11-26 | 7 |
 | [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] | Artikeln om agentic software factory - vad som är relevant för agentsystemet | note | artikel, arkitektur, wiki, governance, projekt:agents | 2026-11-23 | 1 |
@@ -90,6 +91,7 @@ finns i `index.md`.
 | [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] | Dashboard ranking utökad med benchmark- och kostnadstäckning | note | dashboard, ranking, benchmark, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] | Dashboard: rekommendationsvyn som enda forstavy | note | dashboard, ux, recommendation, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8]] | Dedikerad USB-SSD per worker: validerat flöde for worker-3 till worker-8 | note | longhorn, talos, flux, worker, disk, incident, projekt:infrastructure | 2026-11-27 | 3 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]] | DNS och DHCP har skilda agar: dnsmasq pa pxe ager DHCP, UniFi pa 10.10.10.1 ager DNS - och worker-9:s lease-hostname ar klientens eget | note | dns, dhcp, unifi, dnsmasq, worker-9, coredns, projekt:infrastructure | 2026-11-27 | 3 |
@@ -185,6 +187,7 @@ finns i `index.md`.
 | [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
+| [[notes/kubectl-hanger-nar-current-context-ar-oidc-cluster1-och-oidc-token-gatt-ut]] | kubectl hanger nar current-context ar oidc-cluster1 och OIDC-token gatt ut | note | kubeconfig, oidc, felsokning, kubectl, projekt:infrastructure | 2026-11-27 | 1 |
 | [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] | Kubeletts logg-API svarade med tls: internal error i prod | note | diagnostik, talos, kubernetes, projekt:infrastructure | 2026-11-24 | 0 |
 | [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-27 | 8 |
 | [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] | kunskaps-wikin-och-dess-verktyg-har-portats-till-rust | - | - | - | 3 |
@@ -206,6 +209,7 @@ finns i `index.md`.
 | [[notes/linkedin-lankar-for-217-av-230-personer-13-kvarvarande-oroliga]] | LinkedIn-länkar för 217 av 230 personer - 13 kvarvarande oroliga | note | linkedin, pappa, sourcing, manuell-verifiering, projekt:pappa | 2026-11-19 | 0 |
 | [[notes/linkedin-relationer-i-pappa-422-svaga-samband-inlagda-och-linkedin-bot-sp-u00e4rr-kontot]] | LinkedIn-relationer i pappa - 422 svaga samband inlagda, och LinkedIn bot-sp\u00e4rr kontot | note | pappa, relationer, linkedin, gdpr, sourcing, bug, projekt:pappa | 2026-11-18 | 0 |
 | [[notes/lokal-expansion-kan-verifieras-mot-serverns-expansion]] | Lokal expansion kan verifieras mot serverns expansion | note | kalender, test, rrule, projekt:plan | 2026-11-17 | 1 |
+| [[notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod]] | Longhorns manager-DaemonSet saknar tolerations - en tainted worker blir aldrig en Longhorn-nod | note | longhorn, worker-8, taint, daemonset, felsokning, projekt:infrastructure | 2026-11-27 | 1 |
 | [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]] | Lösning: 1Password-backed env-variabel för MCP-tokens | note | säkerhet, dotfiles, mcp, 1password, projekt:simon | 2026-11-17 | 1 |
 | [[notes/lunchdeploy-triggas-fran-cronjob-pa-pxe]] | Lunchdeploy triggas från cronjob på pxe | note | ci, lunch, github-actions, pxe, projekt:stk | 2026-11-23 | 0 |
 | [[notes/lunchmenyn-delar-en-modell-mellan-byggskript-och-webblasare]] | Lunchmenyn delar en modell mellan byggskript och webblasare | note | lunch, arkitektur, beslut, projekt:stk | 2026-11-06 | 0 |
@@ -363,6 +367,7 @@ finns i `index.md`.
 | [[notes/serveragd-ko-for-stegvis-mailgranskning]] | Serverägd kö för stegvis mailgranskning | note | mail, go, granskning, kö, projekt:pappa | 2026-11-20 | 0 |
 | [[notes/session-livscykel]] | Sessionens livscykel | note | session, tui, bubbletea, tillstand | 2026-10-21 | 5 |
 | [[notes/sessionen-saknade-executor-varje-godkand-atgard-kraschade-med-502]] | Sessionen saknade executor - varje godkänd åtgärd kraschade med 502 | note | bug, mail, mcp, projekt:pappa | 2026-11-18 | 0 |
+| [[notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26]] | Sex faultade Longhorn-volymer sedan Longhorn-reinstallen 2026-11-26 | note | longhorn, incident, data, pvc, arr-stack, foodflow, projekt:infrastructure | 2026-11-27 | 1 |
 | [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]] | simon kvm: CLI-kommando för att byta HDMI-KVM-port från PXE-värd | note | kvm, feature, cli, projekt:simon | 2026-11-20 | 3 |
 | [[notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner]] | simon pxe flash: clean code-omgång 2 - fokuserade funktioner | note | clean-code, refactor, pxe, cli, projekt:simon | 2026-10-23 | 1 |
 | [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]] | simon pxe flash - flashar PXE-först-U-Boot till SD-kort i PXE-servern | note | pxe, cli, uboot, feature, projekt:simon | 2026-10-23 | 4 |
@@ -495,11 +500,13 @@ finns i `index.md`.
 - `animation` (2)
 - `api` (10)
 - `api-nyckel` (1)
+- `api-server` (1)
 - `appimage` (1)
 - `arbetsflöde` (1)
 - `arch` (1)
 - `arkitektur` (4)
 - `arkiv` (2)
+- `arr-stack` (1)
 - `artificialanalysis` (1)
 - `artikel` (1)
 - `auth` (7)
@@ -560,10 +567,11 @@ finns i `index.md`.
 - `csi` (1)
 - `csr` (1)
 - `css` (3)
+- `daemonset` (1)
 - `dammsugare` (2)
 - `dark-mode` (1)
 - `dashboard` (21)
-- `data` (2)
+- `data` (3)
 - `databas` (11)
 - `database` (4)
 - `datamodell` (2)
@@ -581,7 +589,7 @@ finns i `index.md`.
 - `diagnostik` (1)
 - `dialog` (1)
 - `discovery` (1)
-- `disk` (1)
+- `disk` (2)
 - `distributed-storage` (1)
 - `dns` (10)
 - `dnsmasq` (3)
@@ -609,17 +617,18 @@ finns i `index.md`.
 - `feature` (87)
 - `feedback` (1)
 - `felle` (1)
-- `felsokning` (20)
+- `felsokning` (22)
 - `felsökning` (1)
 - `figma` (1)
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (13)
+- `flux` (15)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
 - `fonts` (1)
+- `foodflow` (1)
 - `frontend` (19)
 - `fråga` (1)
 - `fälla` (1)
@@ -668,7 +677,7 @@ finns i `index.md`.
 - `image-factory` (2)
 - `imap` (11)
 - `import` (2)
-- `incident` (24)
+- `incident` (26)
 - `incidents` (1)
 - `infra` (2)
 - `infrastructure` (4)
@@ -703,9 +712,10 @@ finns i `index.md`.
 - `korrigering` (2)
 - `kortkommandon` (4)
 - `kostnad` (2)
-- `kubeconfig` (3)
+- `kubeconfig` (4)
+- `kubectl` (1)
 - `kubelet` (1)
-- `kubernetes` (26)
+- `kubernetes` (27)
 - `kunskapsbas` (2)
 - `kurering` (1)
 - `kustomize` (5)
@@ -731,7 +741,7 @@ finns i `index.md`.
 - `linux` (2)
 - `llm` (1)
 - `load-balancer` (1)
-- `longhorn` (9)
+- `longhorn` (12)
 - `lunch` (2)
 - `lärdom` (1)
 - `mac-mini` (1)
@@ -741,6 +751,7 @@ finns i `index.md`.
 - `mailmaster` (8)
 - `mainline` (4)
 - `mal` (1)
+- `managedfields` (1)
 - `manuell-verifiering` (1)
 - `markdown` (1)
 - `matchbox` (3)
@@ -783,7 +794,7 @@ finns i `index.md`.
 - `oauth2` (3)
 - `observability` (1)
 - `offen` (1)
-- `oidc` (7)
+- `oidc` (8)
 - `omarchy` (11)
 - `omdöping` (1)
 - `one.com` (1)
@@ -834,7 +845,7 @@ finns i `index.md`.
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
 - `projekt:dotfiles` (5)
-- `projekt:infrastructure` (83)
+- `projekt:infrastructure` (88)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
@@ -850,6 +861,7 @@ finns i `index.md`.
 - `prometheus` (1)
 - `protokoll` (1)
 - `push` (1)
+- `pvc` (1)
 - `pxe` (58)
 - `pxe-first` (1)
 - `python` (1)
@@ -908,7 +920,7 @@ finns i `index.md`.
 - `sourcing` (12)
 - `sprint` (1)
 - `sqlx` (1)
-- `ssa` (1)
+- `ssa` (2)
 - `ssd` (1)
 - `ssh` (4)
 - `ssl` (1)
@@ -937,7 +949,8 @@ finns i `index.md`.
 - `säkerhet` (9)
 - `tags` (1)
 - `tailwind` (2)
-- `talos` (38)
+- `taint` (1)
+- `talos` (39)
 - `talosctl` (1)
 - `tangent` (1)
 - `tangentbord` (4)
@@ -982,12 +995,12 @@ finns i `index.md`.
 - `wan` (1)
 - `webbapp` (1)
 - `wiki` (7)
-- `worker` (11)
+- `worker` (12)
 - `worker-1` (5)
 - `worker-2` (2)
 - `worker-3` (5)
 - `worker-4` (3)
-- `worker-8` (1)
+- `worker-8` (2)
 - `worker-9` (7)
 - `workers` (2)
 - `workflow` (2)

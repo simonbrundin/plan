@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 8 |
-| Noter | 435 |
+| Noter | 440 |
 
 ## Entiteter
 
@@ -46,7 +46,7 @@ och gå sedan ner på sidorna som är relevanta.
 ## Sammanfattningar
 
 - [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] - PostgreSQL-lager för Learn implementerat enligt store.Repository, med DATABASE_URL som växlare och egna testdatabaser per test. _(uppdaterad 2026-11-03)_
-- [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] - Källa: TESmart-manualen för HKS801/HKS1601 (kapitel 10.3), som är referensmanualen för en stor grupp OEM-byggen av 16-portars HDMI KVM-sw... _(uppdaterad 2026-11-13)_
+- [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] - Källa: TESmart-manualen för HKS801/HKS1601 (kapitel 10.3), som är referensmanualen för en stor grupp OEM-byggen av 16-portars HDMI KV... _(uppdaterad 2026-11-13)_
 - [[summaries/kalenderns-detaljnivaer-och-lane-packning]] - Kalenderns fem detaljnivåer väljs efter tidsfönstrets storlek, inte efter händelsens vikt - och överlapp löses med pixelmätt lane-packning. _(uppdaterad 2026-11-17)_
 - [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]] - PinchBench (Kilo Code) mäter LLM:er som OpenClaw-agenter. _(uppdaterad 2026-11-26)_
 - [[summaries/longhorn-disk-guide]] - `docs/add-disk-to-longhorn.md` — Komplett guide med arkitektur, steg-för-steg, och felsökning. _(uppdaterad 2026-10-24)_
@@ -61,7 +61,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]] - Rättelse: en tidigare version av den här noten påstodde en "50/50-uppdelning" _(uppdaterad 2026-11-18)_
 - [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] - **Status 2026-11-02: löst.** Simons har vidarebefordrat port 22 i stugans router. _(uppdaterad 2026-11-25)_
 - [[notes/goals-listar-bara-grundmal-scroll-vid-j-k]] - Ändring i plan-repot (commit 36b89d8, 9ae273a, 9be938f). _(uppdaterad 2026-11-16)_
-- [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] - 1Password:s desktop-app exponerar Environments-MCP via en IPC-relay ( abstrakt unix-socket @1PASSWORD_MCP ) som bara startar när 'Setting... _(uppdaterad 2026-11-23)_
+- [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] - 1Password:s desktop-app exponerar Environments-MCP via en IPC-relay ( abstrakt unix-socket @1PASSWORD_MCP ) som bara startar när 'Settin... _(uppdaterad 2026-11-23)_
 - [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]] - 2026-11-25: Artificial Analysis pensionerade /api/v2/data/* (410 Gone sedan 4 nov 2026). _(uppdaterad 2026-11-26)_
 - [[notes/aa-intelligence-index-api-och-webb-ar-samsta-aldre-index-finns-bara-i-krypterade-chartfiler]] - Gransking av 'modeller saknar intelligence-poang trots att AA visar dem': (1) AA free-API har index for 155 av 766 modeller, och dashboar... _(uppdaterad 2026-11-26)_
 - [[notes/accuracy-fel-omstart]] - Så här upptäcktes att omstart behöver skiljas från skrivfel, och varför sekvensfelet inte gav en tydlig signal. _(uppdaterad 2026-11-17)_
@@ -71,27 +71,28 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]] - Tilt (environments/dev i agents-repot) visade bara Plan-appen. _(uppdaterad 2026-11-23)_
 - [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] - Agentens egen API-nyckel har scope 'agent' i prod (hashen sätts in av environments/prod/secrets/plan-api-key.sql). _(uppdaterad 2026-11-25)_
 - [[notes/agentens-kodandringsflode-portat-till-rust]] - Agentens kodändringsflöde är nu portat till Rust: workspace, executor, _(uppdaterad 2026-11-27)_
-- [[notes/agentens-maldefinition-gar-via-human-gate]] - Agenten kan nu föreslå hur ett mål ska se ut - titel, beskrivning, ikon, now/eternal/agent, datum, uppskattad tid, status, taggar, platse... _(uppdaterad 2026-11-26)_
-- [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] - Mål har nu en agent-flagga (goals.agent i databasen) som visas med AgentBadge (blått när på) och växlas med leader + a (mellanslag + a) p... _(uppdaterad 2026-11-20)_
+- [[notes/agentens-maldefinition-gar-via-human-gate]] - Agenten kan nu föreslå hur ett mål ska se ut - titel, beskrivning, ikon, now/eternal/agent, datum, uppskattad tid, status, taggar, pla... _(uppdaterad 2026-11-26)_
+- [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] - Mål har nu en agent-flagga (goals.agent i databasen) som visas med AgentBadge (blått när på) och växlas med leader + a (mellanslag +... _(uppdaterad 2026-11-20)_
 - [[notes/agentmal-flaggan-blev-levande-mvp]] - Plan hade redan goals.agent men ingen agent läste flaggan. _(uppdaterad 2026-11-24)_
 - [[notes/agentprofiler-som-teknisk-policy-utanfor-prompten]] - I ~/repos/plan (Fas 4 i mål 497) ligger agentprofilerna i src/agent/internal/profile och är tekniska gränser - inte text i prompten. _(uppdaterad 2026-11-24)_
 - [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]] - 2026-11-25: agents-repot är arkiverat och sammanslagningen med plan-repot är helt avslutad. _(uppdaterad 2026-11-25)_
 - [[notes/anvandningsgranser-ar-tier-bundna-och-ska-aldrig-visas-utan-sin-tier]] - Dashboardens modellsida visar nu publicerade användningsgränser per modell: timgräns _(uppdaterad 2026-11-26)_
+- [[notes/api-servern-i-cluster1-spatar-inte-managedfields-ssa-konflikter-upptacks-inte]] - I cluster1 spatar API-servern inte managedFields alls. _(uppdaterad 2026-11-27)_
 - [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] - Arbetstationen (datorn jag sitter pa) ar Omarchy, dvs Arch-baserat. _(uppdaterad 2026-10-24)_
 - [[notes/arkitektur]] - TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session. _(uppdaterad 2026-11-26)_
 - [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] - Källa: https://levelup.gitconnected.com/build-an-agentic-software-factory-f995f79221ef (Akshay Kokane, del 3 i AI-Native SWE-serien). _(uppdaterad 2026-11-23)_
 - [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] - Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10). _(uppdaterad 2026-11-17)_
 - [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] - Första implementationen sökte Iconify med hela målens titel. _(uppdaterad 2026-11-17)_
-- [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] - Verifierat 2026-11-24 i ~/repos/plan med mål #540: Plan-mål -> köad AgentRun -> Kubernetes Job -> förslag -> human gate -> isolerad works... _(uppdaterad 2026-11-24)_
+- [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] - Verifierat 2026-11-24 i ~/repos/plan med mål #540: Plan-mål -> köad AgentRun -> Kubernetes Job -> förslag -> human gate -> isolerad w... _(uppdaterad 2026-11-24)_
 - [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] - Önskemål: överallt där ett mål visas ska det framgå hur många barn (undermål) det har. _(uppdaterad 2026-11-22)_
 - [[notes/barnordning-foljer-beroenden-i-malsidan]] - Undermål som väntar på ett annat undermål i samma lista ska ligga nedanför det _(uppdaterad 2026-11-20)_
 - [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]] - Två bash-fallgropar som nästan släppte igenom i `simon pxe flash` _(uppdaterad 2026-10-23)_
-- [[notes/beroendevaljare-med-tangenten-w]] - Ny tangent 'w' på målsidan och mållistan: det markerade målet (förälder, huvudmål eller undermål) kan göras beroende av ett valfritt anna... _(uppdaterad 2026-11-22)_
+- [[notes/beroendevaljare-med-tangenten-w]] - Ny tangent 'w' på målsidan och mållistan: det markerade målet (förälder, huvudmål eller undermål) kan göras beroende av ett valf... _(uppdaterad 2026-11-22)_
 - [[notes/beroendevaljaren-kan-ta-bort-befintliga-beroenden]] - Uppföljning på beroendeväljaren: när användaren trycker w visas nu befintliga beroenden överst i GoalDependencyPicker.vue. _(uppdaterad 2026-11-22)_
 - [[notes/beslut-pi-durable-satts-pa-hyllan-for-tillfallet]] - Efter att ha byggt och verifierat en fungerande Pi Durable-demo (~/repos/pi-durable-demo, demo.ts + full.ts, körs med MiniMax via PD_PROV... _(uppdaterad 2026-10-24)_
 - [[notes/bigram-algoritmen]] - Hur bigram-statistiken lagras, rankas och används för att välja ord som tränar svaga teckenpar. _(uppdaterad 2026-10-21)_
 - [[notes/boka-enskild-kommunbokning-i-matchi-fran-bookings]] - Ny knapp "Boka i MATCHi" på /bookings i stk (repo: stk). _(uppdaterad 2026-11-06)_
-- [[notes/brevladelistan-maste-hamtas-innan-granskningslaget-startar]] - 2026-11-19: I pappa/appens granskningsvy försvann brevlådelistan helt när granskningen startade, och den kom inte tillbaka när man tryckt... _(uppdaterad 2026-11-20)_
+- [[notes/brevladelistan-maste-hamtas-innan-granskningslaget-startar]] - 2026-11-19: I pappa/appens granskningsvy försvann brevlådelistan helt när granskningen startade, och den kom inte tillbaka när man tr... _(uppdaterad 2026-11-20)_
 - [[notes/bulkmarkering-av-mal]] - Mållistan och Gör nu-listan har nu checkboxar för att markera flera mål samtidigt. _(uppdaterad 2026-11-26)_
 - [[notes/bulkmarkering-pa-malsidor]] - Bulkmarkeringen utökades till målsidorna. _(uppdaterad 2026-11-26)_
 - [[notes/cachade-imap-sessioner-kraver-hantering-av-doda-anslutningar]] - När man cachar IMAP-sessioner per konto (i stället för att stänga och _(uppdaterad 2026-10-29)_
@@ -106,34 +107,35 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] - Bakgrund: neuro (github.com/simonbrundin/neuro) är ett offentligt repo. _(uppdaterad 2026-11-17)_
 - [[notes/crd-beroende-resurser-maste-synkas-i-ett-andra-steg]] - Kustomex och Flux kan inte installera en CRD och använda den i samma synkning. _(uppdaterad 2026-11-24)_
 - [[notes/ctrl-backspace-i-foot-skickar-ctrl-w-till-pi]] - Foot skickade Ctrl+Backspace som rå byte 0x08. _(uppdaterad 2026-11-25)_
-- [[notes/dashboard-importerar-hela-aa-katalogen-766-modeller]] - Orsak till att bara 141 modeller importerades: isRankableModel-filtret i artificialAnalysis.ts tog bort modeller utan både Intelligence I... _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-importerar-hela-aa-katalogen-766-modeller]] - Orsak till att bara 141 modeller importerades: isRankableModel-filtret i artificialAnalysis.ts tog bort modeller utan både Intelligence ... _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-plans-visar-och-raknar-anvandningskvoter]] - Dashboardens prenumerationsjämförelse har nu plan-kvoter som data. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-ranking-anvander-benchmark-matchade-kostnader]] - Prisvärdhetsrankingen isolerar varje benchmark och undviker blandade score/kostnad-pairs. _(uppdaterad 2026-11-26)_
-- [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] - Dashboardens modellranking använder nu separata, effort-matchade data för DeepSWE v1.1, Terminal-Bench 4.1/4.0, AA Coding Agent och BenchLM. _(uppdaterad 2026-11-26)_
+- [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] - Dashboardens modellranking använder nu separata, effort-matchade data för DeepSWE v1.1, Terminal-Bench 4.1/4.0, AA Coding Agent och Ben... _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-budget-finder-och-prenumerationsjamforelse]] - Användarens egentliga behov: 'billigaste modellen som är tillräckligt smart för kod' + jämföra prenumerationsmodeller. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-en-synk-knapp-i-stallet-for-tre-forvirrande]] - Användaren upplevde de tre knapparna (Synka modeller/Hämta priser/Uppdatera priser) som otydliga. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel]] - Efter katalogimporten (766 modeller) upptaktes tva UX-buggar: (1) estimateCostPerTask returnerade null nar kostnaden blev 0, sa 15 gratis... _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] - Slutbehovet kristalliserades: 'vilken modell ska jag köra genom vilken provider eller prenumeration'. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-tydlighetslyft-av-jamforelserna]] - Användaren upplevde jamforeelserna som 'sjukt otydliga'. _(uppdaterad 2026-11-26)_
-- [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna användb... _(uppdaterad 2026-11-17)_
+- [[notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8]] - Malet var att ge varje worker en dedikerad USB-SSD till Longhorn och att aterstalla de två 100 GiB-mediavolymerna (immich/immich-library... _(uppdaterad 2026-11-27)_
+- [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]] - Kartlagt 2026-11-27. _(uppdaterad 2026-11-27)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
 - [[notes/dokumentationssidor-i-granssnittet-docs]] - Plan har fått en inbyggd dokumentation: undersidor på /docs/[undersida] + översikt på /docs. _(uppdaterad 2026-11-26)_
 - [[notes/dold-skrivbordsmeny-med-leader-kommando]] - Plan: skrivbordsmenyn använder nu samma slideover-beteende som mobilmenyn och är dold tills den öppnas med menyikonen. _(uppdaterad 2026-11-20)_
-- [[notes/dolda-ikoner-i-barnmalsrader-pa-malsidan-visa-vid-hover]] - Varje målrad (barnmål på målsidan, huvudmålets ikonrad, /goals-listan) hade en handfull ikoner även om målet inte använde agent, plats, d... _(uppdaterad 2026-11-20)_
+- [[notes/dolda-ikoner-i-barnmalsrader-pa-malsidan-visa-vid-hover]] - Varje målrad (barnmål på målsidan, huvudmålets ikonrad, /goals-listan) hade en handfull ikoner även om målet inte använde agent, ... _(uppdaterad 2026-11-20)_
 - [[notes/en-talos-efi-partition-pa-kortet-blockerar-pxe-booten-bootflow-loaded-fore-natverket]] - 2026-11-20, worker-3 (ROCK 4C+): varför kortet med Talos-EFI-partition inte går PXE _(uppdaterad 2026-11-20)_
 - [[notes/en-uttunnad-forekomst-maste-vara-synlig-aven-om-den-ligger-utanfor-fonstret]] - När en serie tunnas ut behålls en förekomst per period, och den förekomsten ligger i periodens början. _(uppdaterad 2026-11-18)_
-- [[notes/enhet-per-lyckad-uppgift-prenumerationer-kostar-per-forsok-och-maste-omraknas-med-pass-rate]] - Ett byte som är lätt att missa: planpriset sprids över ANTALET AGENTKÖRNINGAR (försök), medan API-kostnaden jämförs som kostnad per LYCKA... _(uppdaterad 2026-11-26)_
-- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]] - Ändring i src/nuxt/app/pages/goals/index.vue: tangenten Enter (och en + -knapp i sidhuvudet) öppnar nu en inline-rad där man skriver ett ... _(uppdaterad 2026-11-17)_
-- [[notes/enter-skapar-alltid-nytt-mal-piltangenterna-markerar-befintligt-mal-i-sokfalt]] - PROBLEM: När man söker efter ett mål (undermål/förälder på målsidan, eller föräldersökningen i snabbfältet) och trycker Enter valdes det ... _(uppdaterad 2026-11-23)_
+- [[notes/enhet-per-lyckad-uppgift-prenumerationer-kostar-per-forsok-och-maste-omraknas-med-pass-rate]] - Ett byte som är lätt att missa: planpriset sprids över ANTALET AGENTKÖRNINGAR (försök), medan API-kostnaden jämförs som kostnad p... _(uppdaterad 2026-11-26)_
+- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]] - Ändring i src/nuxt/app/pages/goals/index.vue: tangenten Enter (och en + -knapp i sidhuvudet) öppnar nu en inline-rad där man skriver e... _(uppdaterad 2026-11-17)_
+- [[notes/enter-skapar-alltid-nytt-mal-piltangenterna-markerar-befintligt-mal-i-sokfalt]] - PROBLEM: När man söker efter ett mål (undermål/förälder på målsidan, eller föräldersökningen i snabbfältet) och trycker Enter... _(uppdaterad 2026-11-23)_
 - [[notes/envoy-vip-10-10-10-101-stulen-av-agentgateway-admin-plan-simonbrundin-com-onabar]] - Symtom: plan.simonbrundin.com (och övriga *.simonbrundin.com) nås inte trots att klustret, HTTPRoutes, cert och app-pods är friska. _(uppdaterad 2026-11-26)_
 - [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]] - 2026-11-03: önskemål om ett filter som sorterar bort personer som inte jobbat _(uppdaterad 2026-11-03)_
 - [[notes/escape-i-datum-popup-maste-hanteras-fore-leader-listenern]] - Datum-popupens Escape stängdes inte eftersom leader-keydown lyssnar i capture-fasen och konsumerade Escape innan popupens egen listener. _(uppdaterad 2026-11-20)_
 - [[notes/ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning]] - Anledning: dashboardens modellsida var "helt oduglig" för att få ut information. _(uppdaterad 2026-11-26)_
 - [[notes/eviga-mal-i-plan-kan-inte-slutforas]] - Mål i plan kan nu markeras som EVIGA (eternal): de pågår hela livet (t.ex. _(uppdaterad 2026-11-17)_
 - [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] - Förra versionen av .eml-expansionen (se [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]]) _(uppdaterad 2026-11-19)_
-- [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] - 2026-11-19 (pappa/mailagent): Istället för en "Neka"-knapp kan användaren nu starta en konversation med AI:t om vad som inte fungerade me... _(uppdaterad 2026-11-19)_
+- [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] - 2026-11-19 (pappa/mailagent): Istället för en "Neka"-knapp kan användaren nu starta en konversation med AI:t om vad som inte fungerade... _(uppdaterad 2026-11-19)_
 - [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] - Figma har ingen officiell Font Helper på Linux (FigmaAgent finns bara för macOS/Windows). _(uppdaterad 2026-11-23)_
 - [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] - 2026-11-26: controlplane-2 och controlplane-3 annonserar och använder samma Flannel VXLAN-MAC e2:92:15:e2:0e:30. _(uppdaterad 2026-11-26)_
 - [[notes/flera-kalendrar-med-egna-farger-i-plan]] - Användaren kan nu skapa hur många kalendrar som helst (t.ex. _(uppdaterad 2026-11-18)_
@@ -144,16 +146,16 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] - Vid felsökning av cluster1 exponerades en GitHub-token och en privat SOPS age-nyckel i agentens verktygsutdata. _(uppdaterad 2026-11-26)_
 - [[notes/foot-bindningen-kraver-omstart-av-foot]] - Konfigurationen \x17=Control+BackSpace validerar korrekt, men foot läser foot.ini vid uppstart. _(uppdaterad 2026-11-25)_
 - [[notes/fyra-paritetsfallor-i-agentdomanens-port-till-rust]] - Agentdomänen i Plan-API:t portades till Rust (körningar, händelser, godkännanden, budgetar, användning, API-nycklar). _(uppdaterad 2026-11-26)_
-- [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] - 2026-11-25, efter kubeconfig-städningen (se [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]]):... _(uppdaterad 2026-11-25)_
+- [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] - 2026-11-25, efter kubeconfig-städningen (se [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]])... _(uppdaterad 2026-11-25)_
 - [[notes/foraldrar-syns-pa-mal-i-now]] - Målsidan /now (Gör nu) visar nu vilka föräldrar ett mål ligger under. _(uppdaterad 2026-11-22)_
 - [[notes/globala-agentinstruktioner-deployas-via-dotfiles]] - Globala agentinstruktioner bor i dotfiles-repot och deployas med stow till agenternas konfigurationskataloger. _(uppdaterad 2026-10-21)_
-- [[notes/go-imap-uidstore-istallet-for-store-med-uid-mangd]] - 2026-11-19: Bugfix i src/go/imap/client.go - MarkAsRead och MarkAsUnread använde UidSearch (som returnerar UIDs) och skickade sedan dessa... _(uppdaterad 2026-11-20)_
-- [[notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen]] - 2026-11-20 (16:11 UTC): Neon dev-branchen tömdes igen - den här gången försvann 17 av 18 kalenderhändelser (bara "Esters kalas" var kvar,... _(uppdaterad 2026-11-20)_
+- [[notes/go-imap-uidstore-istallet-for-store-med-uid-mangd]] - 2026-11-19: Bugfix i src/go/imap/client.go - MarkAsRead och MarkAsUnread använde UidSearch (som returnerar UIDs) och skickade sedan dess... _(uppdaterad 2026-11-20)_
+- [[notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen]] - 2026-11-20 (16:11 UTC): Neon dev-branchen tömdes igen - den här gången försvann 17 av 18 kalenderhändelser (bara "Esters kalas" var ... _(uppdaterad 2026-11-20)_
 - [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]] - Nodernas PXE-configer ar maintenance-configer (ingen machine.install-sektion), sa en PXE-start landar i Talos maintenance mode och skrive... _(uppdaterad 2026-11-17)_
-- [[notes/gron-markering-av-tider-som-ar-bokade-i-matchi-skrivlasande-jamforelse]] - Nytt GET /matchi/bookings i Go API:t (paket internal/occupancy) jämför kommunens bokningar med MATCHis schema och returnerar de bokningar... _(uppdaterad 2026-11-06)_
+- [[notes/gron-markering-av-tider-som-ar-bokade-i-matchi-skrivlasande-jamforelse]] - Nytt GET /matchi/bookings i Go API:t (paket internal/occupancy) jämför kommunens bokningar med MATCHis schema och returnerar de bokning... _(uppdaterad 2026-11-06)_
 - [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]] - Automationer skapade via HA:s config-API: POST /api/config/automation/config/<id> med JSON-body (alias/triggers/conditions/actions). _(uppdaterad 2026-11-25)_
-- [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]] - Felsökning 2026-11-25 av Krokviken (10.20.20.20): UniFi visar Tesvor S6 som online på 10.20.20.175 (Wi-Fi IoT, MAC d8:c0:a6:75:7a:8d, sen... _(uppdaterad 2026-11-25)_
-- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]] - Problem som upptäcktes 2026-11-03 i Skogsduvans HA: en temperatureautomation som styrs av minsta temperaturen ska "äga" rätt tillstånd äv... _(uppdaterad 2026-11-03)_
+- [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]] - Felsökning 2026-11-25 av Krokviken (10.20.20.20): UniFi visar Tesvor S6 som online på 10.20.20.175 (Wi-Fi IoT, MAC d8:c0:a6:75:7a:8d, s... _(uppdaterad 2026-11-25)_
+- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]] - Problem som upptäcktes 2026-11-03 i Skogsduvans HA: en temperatureautomation som styrs av minsta temperaturen ska "äga" rätt tillstån... _(uppdaterad 2026-11-03)_
 - [[notes/hierarki-i-gor-nu-listan-now]] - Mål i /now som har en förälder som också syns i /now visas nu indenterade under föräldern. _(uppdaterad 2026-11-23)_
 - [[notes/hjalpmodalen-for-kortkommandon-fick-sokfilter]] - 2026-11-20: HelpModal.vue fick ett sökfilter. _(uppdaterad 2026-11-20)_
 - [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]] - HAOS 18.4 'Krokviken' på 10.20.20.20 (aarch64). _(uppdaterad 2026-11-25)_
@@ -184,82 +186,84 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kalenderns-detaljnivaer-fem-nivaer-och-lane-packning]] - Den vertikala kalendern har nu fem detaljnivåer som väljs utifrån hur mycket _(uppdaterad 2026-11-17)_
 - [[notes/kalenderns-handelser-lag-over-modaler-och-escape-var-dovt]] - Två buggar hittade när kortkommando-hjälpen (HelpModal) skulle visas ovanpå kalendern 2026-11-20. _(uppdaterad 2026-11-20)_
 - [[notes/kalenderns-nivavaxling-animeras-crossfade-pop-in-och-hysteresis]] - Kalendern byter presentationsnivå (full, compact, daily, monthly, yearly) när _(uppdaterad 2026-11-17)_
-- [[notes/kalenderns-scroll-axlar-bytta-lodrat-zoomar-vagratt-panorerar]] - Användaren bad om att byta ordning på scrollaxlarna i den vertikala kalendern (VerticalCalendar.vue): lodrät skrollning ska zooma tiden o... _(uppdaterad 2026-11-17)_
+- [[notes/kalenderns-scroll-axlar-bytta-lodrat-zoomar-vagratt-panorerar]] - Användaren bad om att byta ordning på scrollaxlarna i den vertikala kalendern (VerticalCalendar.vue): lodrät skrollning ska zooma tide... _(uppdaterad 2026-11-17)_
 - [[notes/kalenderns-tangentbordskontroller-ska-inte-stora-malnavigering]] - VerticalCalendar ligger permanent i default-layouten och har därför en global keydown-lyssnare. _(uppdaterad 2026-11-20)_
 - [[notes/kalenderns-tidsaxelrader-animeras-vid-zoom]] - Tidsaxelns tick-rader och månadsgränser renderas i egna Vue TransitionGroup-lager i VerticalCalendar.vue. _(uppdaterad 2026-11-17)_
 - [[notes/kalenderns-zoom-styrs-av-vertikal-scrollning]] - Kalenderdesignen ändrades efter implementation: horisontell zoom tas bort. _(uppdaterad 2026-11-17)_
-- [[notes/kalenderrutorna-har-ingen-maxhojd-langre]] - Användaren klagade på att en händelse i kalendern såg ut att ha en maxhöjd: längden på raden stämde inte med hur mycket tid som visades f... _(uppdaterad 2026-11-20)_
-- [[notes/kameo-ranteutbetalning-redan-utbetald-samlingsuttag-pa-47-29-kr]] - Kameo-flodet for ranteutbetalningar hittade fyra aktuella rantebetalningsmejl i INBOX.Deleted Messages (lån 5041, 5116, 5066, 5012 - 11,6... _(uppdaterad 2026-11-16)_
+- [[notes/kalenderrutorna-har-ingen-maxhojd-langre]] - Användaren klagade på att en händelse i kalendern såg ut att ha en maxhöjd: längden på raden stämde inte med hur mycket tid som v... _(uppdaterad 2026-11-20)_
+- [[notes/kameo-ranteutbetalning-redan-utbetald-samlingsuttag-pa-47-29-kr]] - Kameo-flodet for ranteutbetalningar hittade fyra aktuella rantebetalningsmejl i INBOX.Deleted Messages (lån 5041, 5116, 5066, 5012 - 11,... _(uppdaterad 2026-11-16)_
 - [[notes/kameo-utbetalningar-nuxt-sida-som-laser-lan-fran-kameo]] - Skapade sidan /kameo-utbetalningar i src/nuxt (Nuxt/Nitro). _(uppdaterad 2026-11-17)_
 - [[notes/kameo-beloppet-kommer-fran-transaktionerna-inte-fran-mejlet]] - Rantebetalningsmejlet fran Kameo innehaller bara amne ('Rantebetalning - lon 5133'), lantagare och datum - INTE beloppet. _(uppdaterad 2026-11-17)_
-- [[notes/kameo-sidan-flyttad-till-toppniva-och-delad-i-flikar]] - Kameo-utbetalningar flyttades från /mail/kameo-utbetalningar till /kameo-utbetalningar eftersom sidan inte är en del av mailagenten - den... _(uppdaterad 2026-11-16)_
-- [[notes/kameo-uppgifter-synkas-till-fil-sa-docker-slipper-op-cli]] - Lösning på felet 'Executable not found in PATH: op' i containern: 1Password-appen finns bara på värden, så uppgifterna synkas dit med 'bu... _(uppdaterad 2026-10-29)_
+- [[notes/kameo-sidan-flyttad-till-toppniva-och-delad-i-flikar]] - Kameo-utbetalningar flyttades från /mail/kameo-utbetalningar till /kameo-utbetalningar eftersom sidan inte är en del av mailagenten - d... _(uppdaterad 2026-11-16)_
+- [[notes/kameo-uppgifter-synkas-till-fil-sa-docker-slipper-op-cli]] - Lösning på felet 'Executable not found in PATH: op' i containern: 1Password-appen finns bara på värden, så uppgifterna synkas dit me... _(uppdaterad 2026-10-29)_
 - [[notes/kanata-switch-session-tmuxinator-fonster-oppnades-inte]] - Symtom: tangenterna i kanatas tmux-lager (t.ex. _(uppdaterad 2026-10-22)_
 - [[notes/kandidatlistan-heter-nu-personer]] - Sidan som tidigare hette /kandidater heter nu /personer (2026-11-17). _(uppdaterad 2026-11-17)_
 - [[notes/klustret-anvander-sops-via-flux-inte-vault-eso]] - Klustret (Talos, home) har EN secret-vag: SOPS + age, dekrypterat av Flux kustomize-controller via spec.decryption.provider: sops (patch ... _(uppdaterad 2026-11-23)_
 - [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-25)_
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
-- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] - ÖNSKEMÅL: ett kortkommando som ändrar ett måls status (målfas) och som fungerar överallt där man kan markera mål - både för ett enskilt m... _(uppdaterad 2026-11-27)_
+- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] - ÖNSKEMÅL: ett kortkommando som ändrar ett måls status (målfas) och som fungerar överallt där man kan markera mål - både för ett... _(uppdaterad 2026-11-27)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
 - [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] - 2026-11-25: ~/.kube/config innehöll 8 kontexter mot samma Talos-kluster. _(uppdaterad 2026-11-25)_
+- [[notes/kubectl-hanger-nar-current-context-ar-oidc-cluster1-och-oidc-token-gatt-ut]] - kubectl mot cluster1 hangde meddelandet "Command timed out" trots att API-servern svarade pa /healthz med ok. _(uppdaterad 2026-11-27)_
 - [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] - I prod-klustret gick det inte att läsa poddarnas loggar med 'kubectl logs' på noderna worker-4, worker-5, worker-6 och worker-7. _(uppdaterad 2026-11-24)_
 - [[notes/kunskaps-wiki]] - Så fungerar den globala kunskaps-wikin, vilka lager den har och hur agenter använder verktyget. _(uppdaterad 2026-11-27)_
 - [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] - title: Kunskaps-wikin och dess verktyg har portats till Rust _(uppdaterad -)_
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] - Under omsättningen till Karpathys tre-lagers-modell granskades varje sida mot den faktiska infrastrukturen i ~/repos/infrastructure. _(uppdaterad 2026-10-24)_
 - [[notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel]] - 2026-11-20: Den KVM-portmappning som var deployad pa PXE-Pi:n var FEL och ledde _(uppdaterad 2026-11-20)_
 - [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]] - Köpt 16-portars HDMI KVM-switch (MLEEDA, Amazon ASIN B0GCD38QN9) - samma OEM-familj som TESmart/EZNH. _(uppdaterad 2026-11-20)_
-- [[notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar]] - MiniMax Token Plan och M Plan har kvoter i anrop per 5-timmarsfönster (1 500 anrop för Starter) respektive relativa enheter (Go 1x, Explo... _(uppdaterad 2026-11-26)_
+- [[notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar]] - MiniMax Token Plan och M Plan har kvoter i anrop per 5-timmarsfönster (1 500 anrop för Starter) respektive relativa enheter (Go 1x, Exp... _(uppdaterad 2026-11-26)_
 - [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] - Två brister hittades när flera mål kördes parallellt i dev (AgentRun #65, #66, #67, #68, #69): _(uppdaterad 2026-11-24)_
 - [[notes/leader-d-oppnar-gemensam-datum-popup-for-mal]] - Leader + D (SPACE, sedan D) öppnar en gemensam popup på /goal/:id, /goals och /priority för markerat mål. _(uppdaterad 2026-11-20)_
 - [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]] - Leader-läget (mellanslag) fanns tidigare bara på målsidan och delades i två _(uppdaterad 2026-11-19)_
 - [[notes/leader-laget-kunde-inte-oppnas-efter-musklick-pa-en-knapp]] - Symtom: på /now (och andra sidor) verkade leader-kommandona inte fungera - mellanslag öppnade inte leader-modalen. _(uppdaterad 2026-11-22)_
 - [[notes/learn-calibre-synk-och-automatisk-import-via-systemd]] - Användaren bad om att få sina Calibre-böcker in i Learn och att de skulle importeras automatiskt. _(uppdaterad 2026-11-03)_
-- [[notes/learn-designsystem-a3-folio-i-nuxt]] - Learn-SPA:t har fått en validerad designriktning 'A3 Folio' (väljd av användaren 2026-11-03 efter tre förslag: A1 varm studio, A2 nattbib... _(uppdaterad 2026-11-03)_
-- [[notes/learn-korsanalys-av-varje-bok-mot-den-samlade-kunskapsbasen]] - Användaren bad om en "nätverkar" som plockar ut kunskap ur varje importerad bok och jämför den med den samlade kunskapsdatabasen: vad bok... _(uppdaterad 2026-11-03)_
-- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]] - Varför: AGENTS.md i learn-repot beskriver PostgreSQL (CNPG) och Atlas som produktionsdatabas, och kunskapsbasen ska kunna delas mellan mi... _(uppdaterad 2026-11-17)_
+- [[notes/learn-designsystem-a3-folio-i-nuxt]] - Learn-SPA:t har fått en validerad designriktning 'A3 Folio' (väljd av användaren 2026-11-03 efter tre förslag: A1 varm studio, A2 nat... _(uppdaterad 2026-11-03)_
+- [[notes/learn-korsanalys-av-varje-bok-mot-den-samlade-kunskapsbasen]] - Användaren bad om en "nätverkar" som plockar ut kunskap ur varje importerad bok och jämför den med den samlade kunskapsdatabasen: vad... _(uppdaterad 2026-11-03)_
+- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]] - Varför: AGENTS.md i learn-repot beskriver PostgreSQL (CNPG) och Atlas som produktionsdatabas, och kunskapsbasen ska kunna delas mellan m... _(uppdaterad 2026-11-17)_
 - [[notes/learn-kunskapssystem-implementerat-i-src-python]] - Repo 'learn' hade en README med visionen om ett e-pub-baserat kunskapssystem, men koden var enbart Go/Nuxt-template. _(uppdaterad 2026-11-17)_
 - [[notes/learn-kunskapssystemet-portat-fran-python-till-go]] - Användaren ville inte ha Python i repot 'learn'. _(uppdaterad 2026-11-17)_
 - [[notes/learn-rest-api-och-nuxt-spa-mot-samma-kunskapsbas]] - Kunskapssystemet i 'learn' exponerades nu även över HTTP. _(uppdaterad 2026-11-17)_
-- [[notes/lightcraft-photocraft-installerade-pa-omarchy-workstation-utan-sudo]] - Båda ArtCraft-appar installerades 2026-11-16 från GitHub Releases (storytold/lightcraft v0.21.1, storytold/photocraft v0.23.1) som .pkg.t... _(uppdaterad 2026-11-17)_
-- [[notes/linkedin-lankar-for-217-av-230-personer-13-kvarvarande-oroliga]] - Slutligt resultat av LinkedIn-kopplingen i pappa: 217 av 230 personer i frölistan har nu en verifierad /in/-länk, databasen har 218 av 23... _(uppdaterad 2026-11-19)_
+- [[notes/lightcraft-photocraft-installerade-pa-omarchy-workstation-utan-sudo]] - Båda ArtCraft-appar installerades 2026-11-16 från GitHub Releases (storytold/lightcraft v0.21.1, storytold/photocraft v0.23.1) som .pkg... _(uppdaterad 2026-11-17)_
+- [[notes/linkedin-lankar-for-217-av-230-personer-13-kvarvarande-oroliga]] - Slutligt resultat av LinkedIn-kopplingen i pappa: 217 av 230 personer i frölistan har nu en verifierad /in/-länk, databasen har 218 av ... _(uppdaterad 2026-11-19)_
 - [[notes/linkedin-relationer-i-pappa-422-svaga-samband-inlagda-och-linkedin-bot-sp-u00e4rr-kontot]] - 2026-11-18: Frågan var "kan du kolla på linkedin och lägga in alla personers relationer som finns i min databas?". _(uppdaterad 2026-11-18)_
-- [[notes/lokal-expansion-kan-verifieras-mot-serverns-expansion]] - När kalendern expanderar serier lokalt (se notes/kalendern-hamtar-alla-handelser-en-gang-och-expanderar-serier-lokalt) är det viktigt att... _(uppdaterad 2026-11-17)_
+- [[notes/lokal-expansion-kan-verifieras-mot-serverns-expansion]] - När kalendern expanderar serier lokalt (se notes/kalendern-hamtar-alla-handelser-en-gang-och-expanderar-serier-lokalt) är det viktigt a... _(uppdaterad 2026-11-17)_
+- [[notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod]] - Worker-8 var Kubernetes Ready och Talos-disken var korrekt monterad pa /var/mnt/ssd-1, men Longhorn sag "Manager pod is missing: node wor... _(uppdaterad 2026-11-27)_
 - [[notes/lunchdeploy-triggas-fran-cronjob-pa-pxe]] - Veckovis deploy av lunchsidan triggas från **pxe-serven** (Raspberry Pi, _(uppdaterad 2026-11-23)_
 - [[notes/lunchmenyn-delar-en-modell-mellan-byggskript-och-webblasare]] - Hamtningen av matochmat.se ligger nu i src/nuxt/app/utils/lunchSource.ts och anvands av bade scripts/fetch-lunch.ts (byggtid, skriver app... _(uppdaterad 2026-11-06)_
 - [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]] - Efter att Neon-token hamnat i git-historiken i dotfiles (privat repo) roterades nyckeln: gammal nyckel (id 3491077) revokerad via console... _(uppdaterad 2026-11-17)_
 - [[notes/mac-mini-worker-9-har-en-bootbar-talos-usb-och-dog-under-inspektion-2026-11-24]] - ENDAST Apple-filer (EFI/APPLE/...) - ingen Talos bootloader där. _(uppdaterad 2026-11-24)_
 - [[notes/mac-mini-worker-9-kraschar-vid-tyngre-usb-i-o-pa-talos-stickan]] - Tre incidenter 2026-11-24: Mac minin (worker-9, 10.10.10.29) hänger/kraschar när _(uppdaterad 2026-11-25)_
 - [[notes/mac-mini-crashar-varje-gang-man-monterar-den-externa-usb-stickan-msdosfs-2026-11-24]] - 1. _(uppdaterad 2026-11-24)_
-- [[notes/mailagent-bygget-brot-pa-ofardig-kameo-integration]] - Dockerbygget för mailagent bröt eftersom en pågående Kameo-integration hade lämnat src/go/kameo/client.go med oanvänd os/exec-import och ... _(uppdaterad 2026-11-16)_
+- [[notes/mailagent-bygget-brot-pa-ofardig-kameo-integration]] - Dockerbygget för mailagent bröt eftersom en pågående Kameo-integration hade lämnat src/go/kameo/client.go med oanvänd os/exec-impor... _(uppdaterad 2026-11-16)_
 - [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]] - När inkorgen hämtas (/mail -> "Hämta mejl") expanderas nu bifogade .eml-filer _(uppdaterad 2026-11-18)_
 - [[notes/mailagenten-flyttad-fran-mailmaster-repot-in-i-pappa]] - Mailmaster-repot (~/repos/mailmaster) är nu arkiv. _(uppdaterad 2026-11-17)_
 - [[notes/mailagentens-kontodropdown-renderades-aldrig-nuxt-prefixade-komponenter]] - 2026-11-16: pappa:s mailagent (flyttad från mailmaster) hade en kontodropdown i koden, men den syntes ALDRIG i webbappen. _(uppdaterad 2026-11-17)_
 - [[notes/mailagentens-kontofel-gav-alltid-http-500-och-listan-foljde-inte-kontot]] - 2026-11-16: Efter att kontovalet lades till i mailagenten i pappa kom tre smarare saker: _(uppdaterad 2026-11-16)_
-- [[notes/mailagentens-mcp-verktygen-saknade-konto-och-hade-fel-schema]] - 2026-11-16: Alla sju MCP-verktygen i pappa/src/go/mcp gick mot det FÖRSTA kontoet - det fanns ingen möjlighet för en agent att välja kont... _(uppdaterad 2026-11-17)_
-- [[notes/mailgranskningen-visar-ett-mejl-i-taget]] - 2026-11-19: Efter att 'Processa mejl' körts i pappa/appen visas numera ett mejl i taget i en granskningsvy (src/nuxt/app/components/mail/... _(uppdaterad 2026-11-19)_
+- [[notes/mailagentens-mcp-verktygen-saknade-konto-och-hade-fel-schema]] - 2026-11-16: Alla sju MCP-verktygen i pappa/src/go/mcp gick mot det FÖRSTA kontoet - det fanns ingen möjlighet för en agent att välja ... _(uppdaterad 2026-11-17)_
+- [[notes/mailgranskningen-visar-ett-mejl-i-taget]] - 2026-11-19: Efter att 'Processa mejl' körts i pappa/appen visas numera ett mejl i taget i en granskningsvy (src/nuxt/app/components/mail... _(uppdaterad 2026-11-19)_
 - [[notes/mailmaster-api-v1-gav-failed-to-fetch-go-servern-panickade-och-saknade-cors]] - Symtom: frontend (Nuxt, port 8400) fick '[GET] http://localhost:8401/api/v1/accounts/.../emails?limit=50: <no response> Failed to fetch'. _(uppdaterad 2026-10-28)_
-- [[notes/mailmaster-gammal-container-build-korde-process-och-arkiverade-mejl]] - Symtom: efter att granskningsflödet (analysera + OK/Neka) implementerats syntes fortfarande den gamla UI:n, och mejl försvann ur listan d... _(uppdaterad 2026-10-29)_
+- [[notes/mailmaster-gammal-container-build-korde-process-och-arkiverade-mejl]] - Symtom: efter att granskningsflödet (analysera + OK/Neka) implementerats syntes fortfarande den gamla UI:n, och mejl försvann ur listan... _(uppdaterad 2026-10-29)_
 - [[notes/mailmaster-granskning-av-ai-atgarder-fore-utforande]] - Processa mejl-knappen kör nu inte längre åtgärder direkt. _(uppdaterad 2026-10-29)_
 - [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]] - Nuxt-UI:t har nu en dropdown med alla e-postkonton och en inloggningsknapp _(uppdaterad 2026-11-17)_
 - [[notes/mailmaster-svarmejl-fick-fel-brodtext-tre-buggar-i-svarttextskedjan]] - Symtom: MailAgent skickade svarmejl men brödtexten var ofta fel (t.ex. _(uppdaterad 2026-11-17)_
-- [[notes/mailvyn-mail-omstegad-till-tailwind-tema]] - Sidorna /mail och komponenterna AccountSelector, EmailControls, EmailList använde handskrivet scoped-CSS med en egen reset (:deep(*)) och... _(uppdaterad 2026-11-17)_
+- [[notes/mailvyn-mail-omstegad-till-tailwind-tema]] - Sidorna /mail och komponenterna AccountSelector, EmailControls, EmailList använde handskrivet scoped-CSS med en egen reset (:deep(*)) oc... _(uppdaterad 2026-11-17)_
 - [[notes/mal-540-slutfort-agentens-readme-andring-granskad-och-mergead]] - 2026-11-25: mal #540 (Dokumentera agentplattformen i README) gick fran verify till completed. _(uppdaterad 2026-11-26)_
 - [[notes/manuell-sortering-av-mal-pa-priority]] - På /priority kan det markerade målet nu flyttas med ArrowUp/ArrowDown. _(uppdaterad 2026-11-17)_
 - [[notes/marknadslage-panel-hogst-upp-pa-personer-i-pappa]] - Ny panel (MarknadPanel.vue) högst upp på /personer i pappa: uppskattad population (SCB Yrkesregister BAS 2024) vs. _(uppdaterad 2026-11-18)_
 - [[notes/masterdatabas-i-postgres-schema-import-och-drift-for-it-rekryteringen]] - Projekt 'pappa' har nu en riktig masterdatabas i stället för bara en YAML-fil. _(uppdaterad 2026-11-03)_
-- [[notes/matchi-keycloak-session-code-maste-fangas-med-generell-teckenklass]] - Symtom: Go-klientens inloggning mot MATCHi (auth.matchi.com) misslyckades intermittent - ca 40% av försöken - med felet 'inloggning missl... _(uppdaterad 2026-11-17)_
+- [[notes/matchi-keycloak-session-code-maste-fangas-med-generell-teckenklass]] - Symtom: Go-klientens inloggning mot MATCHi (auth.matchi.com) misslyckades intermittent - ca 40% av försöken - med felet 'inloggning mis... _(uppdaterad 2026-11-17)_
 - [[notes/matchi-bokning-slot-id-andras-nar-bokningen-skapas]] - Efter att en bokning skapas i MATCHi (/facility/booking/book) får den ett NYTT slot-id. _(uppdaterad 2026-11-17)_
 - [[notes/matchi-inloggningen-ar-flaky-klienten-forsoker-om-och-dev-klustret-behover-ombyggnad]] - Symtom: efter att frontend-funktionen 'markera tider som är bokade i MATCHi' deployats till dev-klustret syntes inga gröna rader. _(uppdaterad 2026-11-06)_
 - [[notes/md-viewer-tauri-installerades-men-avinstallerades-igen]] - MD Viewer (Tauri) installerades och avinstallerades direkt - fråga först vilken markdown-app användaren redan har. _(uppdaterad 2026-10-24)_
 - [[notes/median-i-stallet-for-snitt-for-wpm]] - TypeTrainer visar nu median i stället för aritmetiskt snitt för WPM, Raw WPM och score i statistikvyn och WPM-grafen. _(uppdaterad 2026-11-03)_
 - [[notes/mejlbrodtext-renderas-som-markdown-i-granskningsvyn]] - 2026-11-19: I granskningsvyn (EmailReview.vue) visas mejlets brödtext nu som renderad markdown i stället för rå text i ett pre-block. _(uppdaterad 2026-11-19)_
-- [[notes/mellanslag-blockerades-i-malbeskrivningen]] - Global navigation i src/nuxt/app/composables/useGlobalNavigation.ts hanterade event.key === ' ' och körde preventDefault innan isInputFoc... _(uppdaterad 2026-11-19)_
+- [[notes/mellanslag-blockerades-i-malbeskrivningen]] - Global navigation i src/nuxt/app/composables/useGlobalNavigation.ts hanterade event.key === ' ' och körde preventDefault innan isInputFo... _(uppdaterad 2026-11-19)_
 - [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]] - Katalogen 'Radxa Rock 4C+' i repot innehaller mellanslag. _(uppdaterad 2026-10-23)_
 - [[notes/michael-brundin-blir-en-personnod-i-relationsgrafen]] - Beslut: ersätt den separata my_contact/my_contact_relation-modellen med vanliga person- och person_relation-rader. _(uppdaterad 2026-11-18)_
-- [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] - 2026-11-10: Efter ägarskapet kom nästa fråga: 'jag vill kunna lägga till vilka personer som jag känner (alltså michael brundin känner)'. _(uppdaterad 2026-11-17)_
+- [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] - 2026-11-10: Efter ägarskapet kom nästa fråga: 'jag vill kunna lägga till vilka personer som jag känner (alltså michael brundin kän... _(uppdaterad 2026-11-17)_
 - [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] - Användaren kör MiniMax M2.7 via 'MiniMax Starter Plan'. _(uppdaterad 2026-11-26)_
 - [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] - Föregående version (se [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]]) _(uppdaterad 2026-11-19)_
 - [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]] - Verifiering 2026-11-26 i dev-klustret (kind-dev, agent-api). _(uppdaterad 2026-11-26)_
@@ -271,7 +275,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan]] - Plan använder samma fem faser för varje mål: define → plan → execute → verify → completed. _(uppdaterad 2026-11-24)_
 - [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]] - PROBLEM: Att byta målsida i plan tog 2-7 sekunder. _(uppdaterad 2026-11-20)_
 - [[notes/malikoner-anvander-enkel-oversattning-fore-iconify]] - Lösningen använder npm-paketet translate i Nuxt-serverrouten /api/icons. _(uppdaterad 2026-11-17)_
-- [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] - De sista 76 Go-vägarna är nu portade till Rust: auth-endpoints (login, callback, dev-login, session, logout) och målens kompletteringar (... _(uppdaterad 2026-11-26)_
+- [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] - De sista 76 Go-vägarna är nu portade till Rust: auth-endpoints (login, callback, dev-login, session, logout) och målens kompletteringa... _(uppdaterad 2026-11-26)_
 - [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] - Buggen hittades när användaren frågade vad "agentkörningar" betyder - frågan avslöjade _(uppdaterad 2026-11-26)_
 - [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] - I pi/.pi/agent/mcp.json och opencode/.config/opencode/opencode.json ligger Neon MCP-tokens i klartext, och de committades 2026-11-17 i do... _(uppdaterad 2026-11-17)_
 - [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] - NeuroQuant har byggts om. _(uppdaterad 2026-11-03)_
@@ -279,16 +283,16 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]] - Bakgrund: 2026-11-03 kördes monitorn på pxe och skickade ett mejl 12:12 trots att portföljen inte hade publicerats om. _(uppdaterad 2026-11-03)_
 - [[notes/nu-marke-pa-mal-leader-n-styr-gor-nu-listan]] - Mål har nu en 'now'-flagga (BOOLEAN, samma mönster som 'agent'). _(uppdaterad 2026-11-22)_
 - [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]] - Webappen ligger i src/nuxt (Nuxt 4.6 + Tailwind v4 via @tailwindcss/vite) och _(uppdaterad 2026-11-17)_
-- [[notes/nuxt-cli-via-bun-run-dev-gar-sonder-i-stk]] - I stk (och repo-template) är bun's .bin/-shim för nuxt trasig: bun kopierar binärfilen istället för att symlänka den, så node_modules/.bi... _(uppdaterad 2026-11-06)_
+- [[notes/nuxt-cli-via-bun-run-dev-gar-sonder-i-stk]] - I stk (och repo-template) är bun's .bin/-shim för nuxt trasig: bun kopierar binärfilen istället för att symlänka den, så node_modu... _(uppdaterad 2026-11-06)_
 - [[notes/nuxt-sidomeny-kandidater-som-startsida-i-pappa]] - Alla sidor i pappa:s Nuxt-app ligger nu under en default-layout med sidebar (src/nuxt/app/layouts/default.vue). _(uppdaterad 2026-11-17)_
-- [[notes/ny-rs232-hardvara-ak-co-02-db9-breakout-och-kopplingen-till-kvm-ns-3-pin]] - Inköp 2026-11-20: AKYGA AK-CO-02 (B07TXJXWJ3) = USB-A hane -> DB9 **hane** RS-232-kabel, 1 m, chip oklart (Akyga-länken pekar på FT232-dr... _(uppdaterad 2026-11-20)_
-- [[notes/ny-terminal-i-tmux-fragade-efter-datorns-losenord]] - Varje ny shell (tmux-fönster/tab, ny terminal) startade ~/.config/secrets/load.sh, som KÖRDE `op read op://Private/Neon API key/credentia... _(uppdaterad 2026-11-20)_
+- [[notes/ny-rs232-hardvara-ak-co-02-db9-breakout-och-kopplingen-till-kvm-ns-3-pin]] - Inköp 2026-11-20: AKYGA AK-CO-02 (B07TXJXWJ3) = USB-A hane -> DB9 **hane** RS-232-kabel, 1 m, chip oklart (Akyga-länken pekar på FT232... _(uppdaterad 2026-11-20)_
+- [[notes/ny-terminal-i-tmux-fragade-efter-datorns-losenord]] - Varje ny shell (tmux-fönster/tab, ny terminal) startade ~/.config/secrets/load.sh, som KÖRDE `op read op://Private/Neon API key/credent... _(uppdaterad 2026-11-20)_
 - [[notes/nya-mal-far-ikon-fran-titeln]] - När ett mål skapas via Nuxts useGoalApi söks Iconify med målens titel via /api/icons. _(uppdaterad 2026-11-17)_
 - [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] - `kubectl --context oidc-cluster1` gav "You must be logged in to the server (Unauthorized)" _(uppdaterad 2026-11-25)_
-- [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn lås... _(uppdaterad 2026-11-23)_
+- [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_
 - [[notes/wordlist-kallor]] - Ordlistan finns på två ställen och måste hållas i synk. _(uppdaterad 2026-10-21)_
-- [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] - Fynd: usePriorityToggle växlade prioritetssidan vid varje tryck på 'p', samtidigt som usePriorityMode försökte aktivera viktläget med sam... _(uppdaterad 2026-11-20)_
+- [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] - Fynd: usePriorityToggle växlade prioritetssidan vid varje tryck på 'p', samtidigt som usePriorityMode försökte aktivera viktläget me... _(uppdaterad 2026-11-20)_
 - [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]] - 2026-11-02: pappa-databasen provisionerad på Neon (projekt 'konsulter', _(uppdaterad 2026-11-03)_
 - [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]] - Felet "Satt NUXT_ADMIN_TOKEN i appens miljo for att kunna spara _(uppdaterad 2026-11-17)_
 - [[notes/pappa-anstallningshistorik-i-cv-format-fix-av-kompetensordboken]] - 2026-11-03: Användaren föreslog en tabell med kandidaternas arbeten ("var, vad, _(uppdaterad 2026-11-03)_
@@ -299,12 +303,12 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/pappa-vyn-uppdrag-kravformular-och-rankad-kandidatlista]] - Efter att ha byggt matchningen i SQL (fn_match_candidates + job_profile) byggdes _(uppdaterad 2026-11-03)_
 - [[notes/pappa-yaml-frolistan-kan-aterskapas-ur-masterdatabasen]] - 2026-11-08: data/sundsvall-it-people.yaml skadades under en textskriptning (skriptet skrev över filen utan att ta med filhuvudet). _(uppdaterad 2026-11-03)_
 - [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]] - 2026-11-02: environments/ i pappa var orörd boilerplate från repo-template (go-api, _(uppdaterad 2026-11-17)_
-- [[notes/pappas-grundare-ar-michael-brundin-inte-git-anvandaren-simon-brundin]] - 2026-11-10: När redigerarlistan för relationer skulle seedas tog jag namnet från git config (user.name = 'Simon Brundin') och lade in Sim... _(uppdaterad 2026-11-17)_
+- [[notes/pappas-grundare-ar-michael-brundin-inte-git-anvandaren-simon-brundin]] - 2026-11-10: När redigerarlistan för relationer skulle seedas tog jag namnet från git config (user.name = 'Simon Brundin') och lade in ... _(uppdaterad 2026-11-17)_
 - [[notes/parallella-agent-sessioner-i-samma-repo-och-databas]] - Det har visat sig finnas flera parallella agent-sessioner som arbetar i _(uppdaterad 2026-11-17)_
 - [[notes/paritetstest-gatear-rust-migreringen-mot-go-kallan]] - Under migreringen från Go till Rust jämförs Rust-tabellerna mot route-registreringarna i Go-källan programmatiskt, i CI. _(uppdaterad 2026-11-26)_
-- [[notes/personer-kan-laggas-in-manuellt-i-pappa]] - Masterdatabasen fylls normalt från YAML-importen, men ibland vet vi om någon innan hen finns i någon fil - en kandidat från ett samtal, e... _(uppdaterad 2026-11-17)_
-- [[notes/photocraft-agentstyrning-via-control-protokoll-control-7878]] - För att låta en AI-agent redigera BILDEN SOM ÄR ÖPPEN i PhotoCraft (inte headless) måste appen startas med --control och en tokenfil, och... _(uppdaterad 2026-11-17)_
-- [[notes/photocraft-kamerans-look-varning-vid-raw-oppning-och-hur-den-hanteras]] - Varningen 'colour fitted to the camera's embedded JPEG (mean ΔE 0.8 against it; 11.0 with the neutral fallback)' är INTE ett fel utan en ... _(uppdaterad 2026-11-17)_
+- [[notes/personer-kan-laggas-in-manuellt-i-pappa]] - Masterdatabasen fylls normalt från YAML-importen, men ibland vet vi om någon innan hen finns i någon fil - en kandidat från ett samta... _(uppdaterad 2026-11-17)_
+- [[notes/photocraft-agentstyrning-via-control-protokoll-control-7878]] - För att låta en AI-agent redigera BILDEN SOM ÄR ÖPPEN i PhotoCraft (inte headless) måste appen startas med --control och en tokenfil... _(uppdaterad 2026-11-17)_
+- [[notes/photocraft-kamerans-look-varning-vid-raw-oppning-och-hur-den-hanteras]] - Varningen 'colour fitted to the camera's embedded JPEG (mean ΔE 0.8 against it; 11.0 with the neutral fallback)' är INTE ett fel utan e... _(uppdaterad 2026-11-17)_
 - [[notes/pi-desktop-notis-nar-agent-ar-klar]] - Ny extension ~/.pi/agent/extensions/done-notify.ts: på agent_settled körs notify-send med titel 'Pi är klar' och en kort sammanfattning a... _(uppdaterad 2026-10-22)_
 - [[notes/pi-durable-1-4-0-api-avvikelser-fran-blogginlagget-och-tva-gotchas]] - Blogginlägget https://earendil.com/posts/pi-durable/ beskriver API som det såg ut vid release; paketet @earendil-works/pi-durable@1.4.0 s... _(uppdaterad 2026-10-23)_
 - [[notes/pi-durable-fungerar-med-minimax-coding-plan-anthropic-messages-api]] - Pi Durable (harness-biblioteket från earendil.com/posts/pi-durable/) kan köras direkt mot MiniMax coding plan. _(uppdaterad 2026-10-23)_
@@ -324,7 +328,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
 - [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] - Anledning: användaren frågade "menar du att Gemini 4 Neon är lika billig som MiniMax _(uppdaterad 2026-11-26)_
 - [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] - Title: Platser på mål och kalenderhändelser (ny OpenSpec-change add-places) _(uppdaterad 2026-11-20)_
-- [[notes/platsvaljaren-flyttade-till-leader-p]] - Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /now, /goals... _(uppdaterad 2026-11-26)_
+- [[notes/platsvaljaren-flyttade-till-leader-p]] - Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /no... _(uppdaterad 2026-11-26)_
 - [[notes/popcorn-time-installerad-som-appimage-i-local]] - Efter qBittorrent (se noten om mime-kopplingar) bad användaren om Popcorn Time. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] - Symtom: Popcorn Time 0.5.1 (AppImage) startar men listan är tom och felet 'The remote movies API failed to respond' visas. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] - Fakta (verifierat 2026-10-24 mot API-servrarna fusme.link/jfper.link/uxert.link/yrkde.link): katalogen (Filmer/Serier/Anime) har INGA sve... _(uppdaterad 2026-11-17)_
@@ -336,7 +340,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
 - [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] - Diagnos 2026-11-25 13:40 (prod-klustret, context admin@cluster1): _(uppdaterad 2026-11-25)_
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] - worker-2 startade om i en bootloop for att noden hade en Talos-installation pa eMMC - U-Boot ska boota disk forst. _(uppdaterad 2026-11-17)_
-- [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade välja... _(uppdaterad 2026-11-20)_
+- [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade v... _(uppdaterad 2026-11-20)_
 - [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]] - Radxa ROCK 4C+ har ingen UEFI-meny - U-Boot i SPI-flash väljer bootkälla via boot_targets. _(uppdaterad 2026-10-22)_
 - [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]] - Klustret uppgraderades till Talos v1.14 den 22 oktober, och då **rotades _(uppdaterad 2026-11-17)_
 - [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]] - Verifiering av hela kedjan serverside (2026-10-23): _(uppdaterad 2026-10-23)_
@@ -358,7 +362,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/reglerna-i-pappa-lag-i-containerns-filysystem-sparade-regler-forsvann-vid-omstart]] - Symtom: I /mail/rules (pappa) såg det ut som att "Spara regler" inte funkade - samma regler syntes igen efter en uppdatering av sidan. _(uppdaterad 2026-11-18)_
 - [[notes/rekrytering-av-it-personal-i-sundsvall-marknadsbild-och-frolista]] - Projekt 'pappa' (tomt repo) - automatisering av IT-rekrytering for ett 50-personersforetag i Sundsvall. _(uppdaterad 2026-11-03)_
 - [[notes/rekryteringspipeline-board-per-person-sourcing-som-attribut]] - Pappa har nu en kanban för rekryteringsflödet (/pipeline, commit 1285d2f). _(uppdaterad 2026-11-16)_
-- [[notes/relationer-kan-nu-laggas-till-fran-oversikten-dialogen-har-par-lage]] - 2026-11-10: 'jag vill ju kunna lägga till fler relationer jag har i den listan' - alltså: från relationsöversikten, utan att gå via ett k... _(uppdaterad 2026-11-17)_
+- [[notes/relationer-kan-nu-laggas-till-fran-oversikten-dialogen-har-par-lage]] - 2026-11-10: 'jag vill ju kunna lägga till fler relationer jag har i den listan' - alltså: från relationsöversikten, utan att gå via ... _(uppdaterad 2026-11-17)_
 - [[notes/relationer-mellan-kandidater-i-pappa-symmetriska-par-med-styrka-1-10]] - 2026-11-10: Kandidater kan nu ha relationer till varandra ('känner varandra') med styrka 1-10. _(uppdaterad 2026-11-17)_
 - [[notes/relationsgrafen-anvander-fast-michael-id-utan-person-kind]] - Beslutet om person_kind ändrades: det behövs inte. _(uppdaterad 2026-11-18)_
 - [[notes/relationsoversikt-i-pappa-var-ser-jag-mina-egna-relationer]] - 2026-11-10: Efter att ägarskapet infördes kom frågan 'var ser jag alla mina (Michael Brundins) relationer?'. _(uppdaterad 2026-11-17)_
@@ -378,22 +382,23 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_
 - [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] - I /home/simon/repos/rust (simonbrundin/rust) lades den klonade repot 'learn-to-code-with-rust' in som en riktig git-submodule (.gitmodule... _(uppdaterad 2026-11-17)_
 - [[notes/rust-utvecklingsmiljo-pa-workstationen]] - Vi satte upp en komplett Rust-miljö på maskinen (2026-11-02). _(uppdaterad 2026-11-17)_
-- [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] - För att kunna committa egna lösningar utan att sönderdela tredjepartsrepot skapades en fork: github.com/simonbrundin/learn-to-code-with-r... _(uppdaterad 2026-11-17)_
+- [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] - För att kunna committa egna lösningar utan att sönderdela tredjepartsrepot skapades en fork: github.com/simonbrundin/learn-to-code-wit... _(uppdaterad 2026-11-17)_
 - [[notes/sales-soulmate-se-appen-kan-inte-logga-in-oauth-clienten-saknas-i-soulmate-tenanten]] - Undersökning 2026-11-16 (pappa/mailagent): kan applikationen logga in mot sales@soulmate.se? _(uppdaterad 2026-11-16)_
 - [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]] - Fas 5 i mål 497 (mål 520) slutfördes 2026-11-24. _(uppdaterad 2026-11-26)_
-- [[notes/serveragd-ko-for-stegvis-mailgranskning]] - 2026-11-19 (uppdaterad): Efter att "Processa mejl" körts i pappa/appen visas ett mejl i taget i en granskningsvy (src/nuxt/app/components... _(uppdaterad 2026-11-20)_
+- [[notes/serveragd-ko-for-stegvis-mailgranskning]] - 2026-11-19 (uppdaterad): Efter att "Processa mejl" körts i pappa/appen visas ett mejl i taget i en granskningsvy (src/nuxt/app/component... _(uppdaterad 2026-11-20)_
 - [[notes/sessionen-saknade-executor-varje-godkand-atgard-kraschade-med-502]] - Symtom: i /mail gav "ok" på en föreslagen åtgärd 502 Bad Gateway från _(uppdaterad 2026-11-18)_
 - [[notes/session-livscykel]] - Sessionens tillstånd, tangentflöde, freeze och omstart i TypeTrainers TUI. _(uppdaterad 2026-10-21)_
+- [[notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26]] - Efter att Longhorn installerades om 2026-11-26 skapades flera nya Longhorn-volymer for PVC:er som redan fanns. _(uppdaterad 2026-11-27)_
 - [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]] - 2026-11-20: Nytt CLI-kommando 'simon kvm' i simon-cli (scripts/kvm.sh + tests/kvm-test.sh). _(uppdaterad 2026-11-20)_
 - [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]] - Nytt kommando i simon-cli: `simon pxe flash` (scripts/pxe.sh, main_pxe_flash). _(uppdaterad 2026-10-23)_
 - [[notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner]] - Andra refaktoreringen av simon-cli/scripts/pxe-flash.sh (efter första _(uppdaterad 2026-10-23)_
-- [[notes/simonbrundin-gmail-com-inkorgen-kan-lasas-via-imap-begbot-losenordet]] - För att gå igenom inkorgen för simonbrundin@gmail.com används IMAP (imap.gmail.com:993) med app-lösenordet som ligger i ~/repos/begbot/.e... _(uppdaterad 2026-11-13)_
-- [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]] - 2026-11-03: Användaren ville att Elementet (Shelly "Element", switch.element) ska slås av NÄR det kallaste värdet bland de sensorer som s... _(uppdaterad 2026-11-03)_
-- [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]] - Diagnos 2026-11-02: HA-loggen säger 'Config entry X for shelly integration not ready yet: Device communication error' for FYRA shelly-con... _(uppdaterad 2026-11-02)_
+- [[notes/simonbrundin-gmail-com-inkorgen-kan-lasas-via-imap-begbot-losenordet]] - För att gå igenom inkorgen för simonbrundin@gmail.com används IMAP (imap.gmail.com:993) med app-lösenordet som ligger i ~/repos/begb... _(uppdaterad 2026-11-13)_
+- [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]] - 2026-11-03: Användaren ville att Elementet (Shelly "Element", switch.element) ska slås av NÄR det kallaste värdet bland de sensorer s... _(uppdaterad 2026-11-03)_
+- [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]] - Diagnos 2026-11-02: HA-loggen säger 'Config entry X for shelly integration not ready yet: Device communication error' for FYRA shelly-co... _(uppdaterad 2026-11-02)_
 - [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]] - 2026-11-03: Anvandaren bad om push-larm nar en enhet i stugan tyst forsvinner.lost igang, sa att en dod sensor inte upptacktes forst nar ... _(uppdaterad 2026-11-03)_
 - [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] - Kaskad som byggdes 2026-11-02 (kvall) i Skogsduvans HA, styrd av EN sanningskalla: template-sensorn sensor.hemmet_kallaste_rum (minsta te... _(uppdaterad 2026-11-17)_
-- [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] - 2026-11-03: I Home Assistants logg på Skogsduvan syntes WARNINGar från homeassistant.components.http.security_filter om filtrerade förfrå... _(uppdaterad 2026-11-03)_
-- [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] - Kontext: HA Green (2026.10.1) i stugan, näs via 'ssh skogsduvan' -> Terminal&SSH-addon-container (core-ssh), config i /homeassistant (/co... _(uppdaterad 2026-11-03)_
+- [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] - 2026-11-03: I Home Assistants logg på Skogsduvan syntes WARNINGar från homeassistant.components.http.security_filter om filtrerade för... _(uppdaterad 2026-11-03)_
+- [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] - Kontext: HA Green (2026.10.1) i stugan, näs via 'ssh skogsduvan' -> Terminal&SSH-addon-container (core-ssh), config i /homeassistant (/c... _(uppdaterad 2026-11-03)_
 - [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] - Efter sammanslagningen (mål 520) gick hela kedjan igenom i dev med mål #540: _(uppdaterad 2026-11-24)_
 - [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] - Snabbtillägget som öppnas med N stöder nu både händelser och mål via lägesknapparna/auto-läget. _(uppdaterad 2026-11-20)_
 - [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] - Snabbtillägget stängs nu med Escape från titel-, föräldrasök- och övriga popupfält. _(uppdaterad 2026-11-20)_
@@ -402,20 +407,20 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan]] - Symtom: piltangenterna (ArrowUp/ArrowDown) som flyttar undermål fungerade ibland, ibland inte. _(uppdaterad 2026-11-16)_
 - [[notes/soulmate-teamet-i-sundsvall-importerades]] - 31 konsulter från https://soulmate.se/soulmates-sundsvall lades till i data/sundsvall-it-people.yaml och importerades till Neon. _(uppdaterad 2026-11-17)_
 - [[notes/sprint-timer-saknas]] - Sprint-läget saknar timer, så tidsåtgången går inte att mäta per session. _(uppdaterad 2026-10-21)_
-- [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]] - Varför: src/ bestod av sex mappar med oklar namn - src/go (Plan API), src/agent (agenten, ALSO Go), src/nuxt, src/commands, src/contracts... _(uppdaterad 2026-11-26)_
-- [[notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9]] - Mac mini i datacentret (10.10.10.29, UniFi 'MinisomhorSIMON', MAC a0:ce:c8:d9:0d:02) är samma maskin som worker-9 i Talos-klustret, men b... _(uppdaterad 2026-11-24)_
+- [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]] - Varför: src/ bestod av sex mappar med oklar namn - src/go (Plan API), src/agent (agenten, ALSO Go), src/nuxt, src/commands, src/contract... _(uppdaterad 2026-11-26)_
+- [[notes/ssh-nyckelatkomst-till-mac-mini-10-10-10-29-worker-9]] - Mac mini i datacentret (10.10.10.29, UniFi 'MinisomhorSIMON', MAC a0:ce:c8:d9:0d:02) är samma maskin som worker-9 i Talos-klustret, men ... _(uppdaterad 2026-11-24)_
 - [[notes/stabiliserat-vertikalt-viktlage]] - Fixade problem där undermål kunde försvinna vid dragning av segmentgränser. _(uppdaterad 2026-11-20)_
 - [[notes/standardkalender-i-plan]] - Användaren kan nu sätta en av sina kalendrar som standardkalender. _(uppdaterad 2026-11-18)_
 - [[notes/started-finished-kunde-inte-rensas-i-plan-null-ignorerades-i-go-api-t]] - Bug: frontend skickade {started: null} vid avmarkering, men Go-modellen UpdateGoalRequest hade Started *string med omitempty - JSON null ... _(uppdaterad 2026-11-16)_
-- [[notes/stk-matchi-synk-sjalvaterstallande-synk-och-var-database-url-satts]] - Synkroniseringen mellan Sundsvalls kommuns bokningssystem (Actor Smartbook) och MATCHi är självåterställande: om en bokning flyttats elle... _(uppdaterad 2026-11-06)_
+- [[notes/stk-matchi-synk-sjalvaterstallande-synk-och-var-database-url-satts]] - Synkroniseringen mellan Sundsvalls kommuns bokningssystem (Actor Smartbook) och MATCHi är självåterställande: om en bokning flyttats ... _(uppdaterad 2026-11-06)_
 - [[notes/stk-och-sundsvall-padelklubb-styrelsemotesschema-2026-och-var-handlingarna-finns]] - Genomgång av simonbrundin@gmail.com (IMAP, app-lösenord i ~/repos/begbot/.env) 22 nov 2026. _(uppdaterad 2026-11-22)_
-- [[notes/stk-dev-miljon-kor-mot-neon-istallet-for-cnpg]] - I repo-template/stk byttes dev-databasen ut från ett CNPG-kluster i klustret till Neon (Lakebase Postgres, ep-odd-bar-b9q2tfon.eu-central... _(uppdaterad 2026-11-06)_
+- [[notes/stk-dev-miljon-kor-mot-neon-istallet-for-cnpg]] - I repo-template/stk byttes dev-databasen ut från ett CNPG-kluster i klustret till Neon (Lakebase Postgres, ep-odd-bar-b9q2tfon.eu-centra... _(uppdaterad 2026-11-06)_
 - [[notes/stow-fallgropar-dotfiles-i-repos-dotfiles-stow-path-repos-dotfiles]] - Stow-paketen ligger i ~/repos/dotfiles och stowas till $HOME (~/.stowrc: --target=$HOME, --dir=$HOME/repos/dotfiles). _(uppdaterad 2026-11-23)_
 - [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]] - I typetrainer-repot finns en oversionerad katalog `wiki/` med en genererad `index.md` från 2026-10-22. _(uppdaterad 2026-11-03)_
-- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]] - Nytt projekt i stk: synka hallbokningar från Sundsvalls kommuns bokningssystem (Actor Smartbook, https://sundsvall.actorsmartbook.se) til... _(uppdaterad 2026-11-17)_
+- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]] - Nytt projekt i stk: synka hallbokningar från Sundsvalls kommuns bokningssystem (Actor Smartbook, https://sundsvall.actorsmartbook.se) ti... _(uppdaterad 2026-11-17)_
 - [[notes/sa-dampas-bada-rust-analyzer-popupen-no-project-root-found]] - Fas 3: rustaceanvim har TVÅ notiser för filer utan Cargo.toml, beroende på _(uppdaterad 2026-11-02)_
 - [[notes/taggar-pa-mal-i-plan-tangenten-g]] - ÖNSKEMÅL: kunna lägga till taggar på mål (t.ex. _(uppdaterad 2026-11-23)_
-- [[notes/taggar-via-leader-t-pa-alla-malsidor]] - Kommandot för att sätta taggar har flyttat från tangenten 'g' på målsidan till leader+t, och fungerar nu på alla sidor där ett mål är mar... _(uppdaterad 2026-11-23)_
+- [[notes/taggar-via-leader-t-pa-alla-malsidor]] - Kommandot för att sätta taggar har flyttat från tangenten 'g' på målsidan till leader+t, och fungerar nu på alla sidor där ett må... _(uppdaterad 2026-11-23)_
 - [[notes/talos-certifikat-kortlivade-servercertifikat-roteras-automatiskt]] - Talos v1.14-dokumentationen verifierades. _(uppdaterad 2026-11-26)_
 - [[notes/talos-dns-fallback-mot-publika-resolvrar]] - Flera Talos-noder loggade 'error serving dns request' med read udp <nod>:<port>->10.10.10.1:53: i/o timeout och DiscoveryService rapporte... _(uppdaterad 2026-11-20)_
 - [[notes/talos-etcd-en-gammal-ephemeral-kopia-pa-controlplanet-ger-en-trasig-raft-log]] - Symtom: controlplane-3 crash-loopar etcd med 'task "etcd" failed: exit code 2' och loggen slutar i 'panic: tocommit(1556432) is out of ra... _(uppdaterad 2026-10-25)_
@@ -429,7 +434,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]] - Funktion: alla mål i Plan kan ha en uppskattad tidsåtgång i minuter (nullable estimated_minutes). _(uppdaterad 2026-11-20)_
 - [[notes/tillfalliga-felsokningspoddar-rensade]] - Inventering av cluster1 hittade kvarvarande unowned debug-poddar i default, flux-system och kube-system: np-controlplane-2/3, np-worker-3... _(uppdaterad 2026-11-26)_
 - [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] - En långlivad Nuxt-server ska vara en Tilt serve_cmd-resurs, inte ett avslutande cmd-build. _(uppdaterad 2026-11-26)_
-- [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] - Symtom: en långvarig 'tilt up'-instans i environments/dev upphörde att bygga om bilden när källfiler ändrades (inga nya byggloggar, deplo... _(uppdaterad 2026-11-26)_
+- [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] - Symtom: en långvarig 'tilt up'-instans i environments/dev upphörde att bygga om bilden när källfiler ändrades (inga nya byggloggar, ... _(uppdaterad 2026-11-26)_
 - [[notes/transienta-502-fra-go-api-t-nar-poddar-startar-om-i-dev-klustret]] - I stk:s dev-klustret (namespace repo-template) proxar nginx i nuxt-imageen /api/ -> go-api-service:8080/. _(uppdaterad 2026-11-06)_
 - [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]] - Radxa:s egen PXE-wiki (wiki.radxa.com/Rockpi4/dev/u-boot/pxe) beskriver U-Boot-native PXE: TFTP med kernel+initrd+dtbs/ och pxelinux.cfg/... _(uppdaterad 2026-10-23)_
 - [[notes/twingate-anslutaren-for-10-10-10-0-24-var-nere-recovery-floden-kan-inte-koras-fran-arbetsstationen]] - Varfor: under forsoket att aterstalla worker-1 (10.10.10.21) visade det sig att hela datacentersegmentet 10.10.10.0/24 var onatbart fran ... _(uppdaterad 2026-11-17)_
@@ -462,7 +467,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/windows-1252-avkodning-av-mejlens-amnesrad]] - 2026-11-19: Ämnen på Outlook-mejl visades rått MIME-kodat i pappa, t.ex. _(uppdaterad 2026-11-20)_
 - [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]] - Radxa ROCK 4C+ (worker-1..3) bootar via U-Boot i SPI-flash, inte UEFI. _(uppdaterad 2026-10-22)_
 - [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]] - worker-1 (ROCK 4C+, 10.10.10.21) startar inte: ingen skarmbild, ingen ARP/DHCP/TFTP, ingen klient i UniFi. _(uppdaterad 2026-10-23)_
-- [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] - worker-1 (ROCK 4C+, 10.10.10.21, PoE-port 21) bootar numera PXE med matchbox och har gått med i cluster1 som Ready (Kubernetes) och som L... _(uppdaterad 2026-11-27)_
+- [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] - worker-1 (ROCK 4C+, 10.10.10.21, PoE-port 21) bootar numera PXE med matchbox och har gått med i cluster1 som Ready (Kubernetes) och som ... _(uppdaterad 2026-11-27)_
 - [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] - Kartlagt 2026-11-26 efter att worker-1 gick med i cluster1. _(uppdaterad 2026-11-27)_
 - [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]] - Status 2026-10-23: worker-1 (10.10.10.21, PoE-port 21) och worker-2 (10.10.10.22, PoE-port 22) ar INCOMPLETE i ARP-tabell och svarar inte... _(uppdaterad 2026-10-23)_
 - [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]] - Status 2026-10-27: en fysisk omstart av worker-1 och en kontrollerad PoE-cykel med 1 Hz-strommalning visar att boarden far strom, forhandlar PHY-link pa 1 Gbit/s men aldrig skickar ett enda eget paket - DHCP-rader saknas sedan 2026-10-23... _(uppdaterad 2026-10-27)_
@@ -477,7 +482,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/worker-4-rock-4se-talos-bootar-lokal-nvme-installation-apid-startar-aldrig-pxe-kedjan-redo-bootordningen-kravs-fysiskt]] - Diagnos 2026-11-20 (worker-4, 10.10.10.24, ROCK 4SE, MAC a2:83:f9:db:93:13). _(uppdaterad 2026-11-20)_
 - [[notes/worker-4-utan-pxe-talos-installation-pa-microsd-kortet-via-image-factory-grub-layout]] - Beslut 2026-11-20 (svar pa anvandaren: "jag vill inte anvanda pxe, bara att den ska boota fran sitt sd-kort"). _(uppdaterad 2026-11-22)_
 - [[notes/worker-4-ateransluten-till-cluster1-via-lokalt-sd-kort]] - worker-4 bootade från sitt lokala SD-kort utan PXE. _(uppdaterad 2026-11-22)_
-- [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]] - Worker-7 (10.10.10.27) svarar på port 10250 med ett kubelet-serving-certifikat (CN=system:node:worker-7, O=system:nodes, EKU serverAuth, ... _(uppdaterad 2026-11-23)_
+- [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]] - Worker-7 (10.10.10.27) svarar på port 10250 med ett kubelet-serving-certifikat (CN=system:node:worker-7, O=system:nodes, EKU serverAuth,... _(uppdaterad 2026-11-23)_
 - [[notes/worker-8-ater-ready-worker-1-och-worker-2-saknar-fysisk-lank]] - Efter CP1-återställningen power-cyklades UniFi-portarna 21, 22 och 28 med hela port_overrides-listan bevarad. _(uppdaterad 2026-11-26)_
 - [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]] - Symtom (2026-11-23): worker-8 (10.10.10.28) var medlem i Talos-klustret (talosctl get members) och svarade pa Talos-API:t, men syntes int... _(uppdaterad 2026-11-23)_
 - [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] - Noden 10.10.10.29 (MAC a0:ce:c8:d9:0d:02, UniFi 'MinisomhorSIMON') ar UP: _(uppdaterad 2026-11-27)_
@@ -485,10 +490,10 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
 - [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] - Vid ZITADELs officiella Cloud->self-hosted-import bevarades application-ID:n (t.ex. _(uppdaterad 2026-11-26)_
 - [[notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin]] - Symtom: loginvyn på auth.simonbrundin.com svarar 'User not found in the system' när loginname 'simonbrundin' skrivs. _(uppdaterad 2026-11-27)_
-- [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] - Den self-hosade ZITADEL-instansen på auth.simonbrundin.com hade en tom databas (ny installation 2026-11-26) och saknade den historiska in... _(uppdaterad 2026-11-26)_
-- [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] - Efter importen av en användare utan lösenord skapade ZITADEL eventet 'user.human.initialization.code.added', vilket sätter user state til... _(uppdaterad 2026-11-26)_
+- [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] - Den self-hosade ZITADEL-instansen på auth.simonbrundin.com hade en tom databas (ny installation 2026-11-26) och saknade den historiska i... _(uppdaterad 2026-11-26)_
+- [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] - Efter importen av en användare utan lösenord skapade ZITADEL eventet 'user.human.initialization.code.added', vilket sätter user state ... _(uppdaterad 2026-11-26)_
 - [[notes/aterkommande-mal-samma-malobjekt-med-upprepningsregel]] - Återkommande mål (t.ex. _(uppdaterad 2026-11-18)_
-- [[notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva]] - Tidigare begränsades varje återkommande serie till 8 förekomster innan händelserna grupperades per månad/år (limitRecurringOccurrences). _(uppdaterad 2026-11-18)_
-- [[notes/aterstaende-funktioner-i-agentplattformen]] - 2026-11-25: Efter sammanslagningen av agents-repot och verifieringen av AgentRun-kontraktet bedöms följande funktioner återstå under mål ... _(uppdaterad 2026-11-25)_
-- [[notes/atta-feature-commits-pushade-till-det-arkiverade-mailmaster-repot]] - Arbetet låg som ocommittade ändringar i arbetsytan i det arkiverade mailmaster-repot och skickades i 8 commits (regelparsering, AI-svar m... _(uppdaterad 2026-11-20)_
+- [[notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva]] - Tidigare begränsades varje återkommande serie till 8 förekomster innan händelserna grupperades per månad/år (limitRecurringOccurren... _(uppdaterad 2026-11-18)_
+- [[notes/aterstaende-funktioner-i-agentplattformen]] - 2026-11-25: Efter sammanslagningen av agents-repot och verifieringen av AgentRun-kontraktet bedöms följande funktioner återstå under ... _(uppdaterad 2026-11-25)_
+- [[notes/atta-feature-commits-pushade-till-det-arkiverade-mailmaster-repot]] - Arbetet låg som ocommittade ändringar i arbetsytan i det arkiverade mailmaster-repot och skickades i 8 commits (regelparsering, AI-svar... _(uppdaterad 2026-11-20)_
 

@@ -3183,3 +3183,41 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [archive] 2026-11-27-kunskaps-wikin-och-dess-verktyg-har-portats-till-rust.md
 - [merge?] notes/kunskaps-wiki + notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust (delade taggar: wiki, agent, verktyg)
 
+
+## [2026-11-27] ingest | create notes/api-servern-i-cluster1-spatar-inte-managedfields-ssa-konflikter-upptacks-inte
+- [create] [[notes/api-servern-i-cluster1-spatar-inte-managedfields-ssa-konflikter-upptacks-inte]] — ny sida från inboxen
+- [create] [[notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8]] — ny sida från inboxen
+- [create] [[notes/kubectl-hanger-nar-current-context-ar-oidc-cluster1-och-oidc-token-gatt-ut]] — ny sida från inboxen
+- [create] [[notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod]] — ny sida från inboxen
+- [create] [[notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26]] — ny sida från inboxen
+- [archive] 2026-11-27-api-servern-i-cluster1-spatar-inte-managedfields-ssa-konflikter-upptacks-inte.md
+- [archive] 2026-11-27-dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8.md
+- [archive] 2026-11-27-kubectl-hanger-nar-current-context-ar-oidc-cluster1-och-oidc-token-gatt-ut.md
+- [archive] 2026-11-27-longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod.md
+- [archive] 2026-11-27-sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26.md
+## [2026-11-27] ingest | create notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8
+## [2026-11-27] ingest | create notes/kubectl-hanger-nar-current-context-ar-oidc-cluster1-och-oidc-token-gatt-ut
+## [2026-11-27] ingest | create notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod
+## [2026-11-27] ingest | create notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26
+
+
+## [2026-11-27] link | notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8 -> concepts/longhorn
+
+
+## [2026-11-27] link | notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8 -> notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker
+
+
+## [2026-11-27] link | notes/longhorns-manager-daemonset-saknar-tolerations-en-tainted-worker-blir-aldrig-en-longhorn-nod -> concepts/longhorn
+
+
+## [2026-11-27] link | notes/api-servern-i-cluster1-spatar-inte-managedfields-ssa-konflikter-upptacks-inte -> concepts/gitops
+
+
+## [2026-11-27] link | notes/kubectl-hanger-nar-current-context-ar-oidc-cluster1-och-oidc-token-gatt-ut -> entities/talos-linux
+
+
+## [2026-11-27] link | notes/sex-faultade-longhorn-volymer-sedan-longhorn-reinstallen-2026-11-26 -> concepts/longhorn
+
+
+## [2026-11-27] link | notes/dedikerad-usb-ssd-per-worker-validerat-flode-for-worker-3-till-worker-8 -> entities/talos-linux
+
