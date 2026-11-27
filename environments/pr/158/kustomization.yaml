@@ -14,7 +14,7 @@ patches:
     name: plan
 - patch: "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: nuxt-app\n  labels:\n\
     \    app: plan\n    preview: 'true'\nspec:\n  replicas: 1\n  template:\n    spec:\n\
-    \      containers:\n      - name: plan\n        image: ghcr.io/simonbrundin/plan/pr-preview:158-db42c1a6ce3ec0067a37d820fb3e019b1dda500a@sha256:bf48c4543941a7699a11b877431d4d1005d0c11973ca26afe704977083d405a9\n\
+    \      containers:\n      - name: plan\n        image: ghcr.io/simonbrundin/plan/pr-preview:158-769019a73b56663d9aa5e910b356f8390eeff30a@sha256:8e90ea1b356a6d0129ca2a4ce7d2f8cd7084163b03c7c394936a4ed956f45bfe\n\
     \        resources:\n          requests:\n            memory: 64Mi\n         \
     \   cpu: 50m\n          limits:\n            memory: 128Mi\n            cpu: 200m\n"
   target:
