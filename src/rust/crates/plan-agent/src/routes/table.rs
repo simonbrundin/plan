@@ -130,6 +130,8 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("GET", "/api/v1/approvals/{goal_id}") => get(crate::routes::approvals::get),
         ("POST", "/api/v1/approvals/{goal_id}/decision") => post(crate::routes::approvals::decide),
 
+        ("GET", "/api/v1/ws/chat") => get(crate::routes::ws::chat),
+
         ("GET", "/api/v1/api-keys") => get(crate::routes::api_keys::list),
         ("POST", "/api/v1/api-keys") => post(crate::routes::api_keys::set),
         ("DELETE", "/api/v1/api-keys/{provider}") => delete(crate::routes::api_keys::delete),

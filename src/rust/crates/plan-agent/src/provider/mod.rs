@@ -3,6 +3,7 @@
 //! Go-agentens `internal/core/provider`. Leverantörerna strömmar svar
 //! från språkmodeller - MiniMax och OpenAI-liknande API:er.
 
+pub mod anthropic;
 pub mod minimax;
 pub mod openai;
 
