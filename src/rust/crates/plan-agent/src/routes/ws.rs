@@ -249,6 +249,10 @@ async fn hantera_chat(socket: &mut WebSocket, req: &WsChatRequest, conv_id: &str
 
 /// Strömmar modellens svar till klienten.
 async fn strömma_svar(socket: &mut WebSocket, req: &WsChatRequest, meddelande: &str) {
+    // Go mäter latensen från början av anropet - även felmeddelandet
+    // bär den tiden.
+    let start = std::time::Instant::now();
+
     let klient = AnthropicClient::från_miljö();
 
     let (sändare, mut mottagare) = tokio::sync::mpsc::channel::<AnthropicStycke>(32);
@@ -296,6 +300,7 @@ async fn strömma_svar(socket: &mut WebSocket, req: &WsChatRequest, meddelande: 
                 &WsStrömmStycke {
                     typ: "error".to_string(),
                     error: fel,
+                    latency: start.elapsed().as_millis() as i64,
                     ..Default::default()
                 },
             )
@@ -307,6 +312,7 @@ async fn strömma_svar(socket: &mut WebSocket, req: &WsChatRequest, meddelande: 
                 &WsStrömmStycke {
                     typ: "error".to_string(),
                     error: fel.to_string(),
+                    latency: start.elapsed().as_millis() as i64,
                     ..Default::default()
                 },
             )

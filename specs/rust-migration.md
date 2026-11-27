@@ -108,8 +108,32 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 
 ### Vad som återstår i agenten
 
-- Orchestratorns kvarvarande delar (minne, hemligheter, self-improve).
 - Att skicka in agenten i produktion och ta bort Go-tjänsterna.
+
+### Död kod som inte portas
+
+Importgrafen över `src/` räknas ut av `scripts/go-reachability.py`. Ett
+paket som ingen körande tjänst (`api/cmd/api`, `agent/cmd/agent-api`,
+`agent/cmd/agent-worker`) når är död kod och behöver inte portas - det
+raderas när Go-modulen tas bort.
+
+| Go-paket | Varför det inte behövs |
+| --- | --- |
+| `agent/cmd/wikictl`, `agent/internal/wiki` | Portat till `plan-wiki` (bibliotek + `wikictl`) |
+| `agent/internal/api/auth` | JWT-inloggning som aldrig registreras i agentens route-tabell |
+| `agent/internal/core/commands` | Kommandoregistry utan anropare |
+| `agent/internal/core/logging` | Loggnytt utan anropare |
+| `agent/internal/core/memory` | Minneslager utan anropare |
+| `agent/internal/core/secrets` | Hemlighetslager utan anropare |
+| `agent/internal/core/selfimprove` | Självförbättring utan anropare |
+| `agent/internal/infrastructure/k8sjob` | Duplicerad Kubernetes-klient; den körande `jobrunner` har sin egen |
+| `agent/features_test` | Testfixtures |
+
+Gate-paketet (`internal/core/gate`) importeras av orchestratorn, men
+gates körs aldrig: ingen körande tjänst anropar checkpoint-exekveringen,
+och `SubmitHumanDecision` är en no-op i Go. Rust håller samma beteende -
+planer skapas utan checkpoints eftersom ingen checkpointplanner är
+konfigurerad.
 
 ### Vad som återstår i API:t
 
