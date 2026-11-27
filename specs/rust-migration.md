@@ -105,9 +105,12 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | Agentens kodändringsflöde (workspace, executor, proposer, coder) | klar |
 | Agentens wiki, scheduler, Kubernetes-stöd | klar |
 | Kunskaps-wikin (`plan-wiki` + `wikictl`) | klar |
+| Workerparitet (Go vs Rust, mockad modell) | klar |
 
 ### Vad som återstår i agenten
 
+- Checkpointkörning med gates och subagenter i orchestratorn, samt
+  learningshanteringen.
 - Att skicka in agenten i produktion och ta bort Go-tjänsterna.
 
 ### Död kod som inte portas
@@ -199,8 +202,30 @@ src/rust/
   crates/plan-agent/      # agenttjänsten (fas 4)
   crates/plan-parity/     # paritetsverktyg: jämför Rust-routes mot Go-källan
   crates/plan-recurrence/ # RRULE-motor - port av Go-tjänstens rrule-go-användning
+  crates/plan-wiki/       # kunskaps-wikin och wikictl
 ```
 
 `plan-parity` läser route-registreringarna ur Go-källan och jämför dem med
 Rust-tabellerna. Det är det som fångar en glömd endpoint i CI, innan den
 nått produktion.
+
+## Verifiering
+
+Pariteten mäts med fyra skript. De jämför Go och Rust mot samma
+databas och samma begäranden.
+
+| Skript | Vad det jämför |
+| --- | --- |
+| `scripts/compare-api-parity.sh` | Plan-API:t - vägar, statuskoder och svarsfält |
+| `scripts/compare-agent-parity.sh` | Agent-API:t, inklusive WebSocket-chatten via `ws_parity` |
+| `scripts/compare-worker-parity.sh` | Workerns definitioner, felvägar och mänskliga beslut |
+| `scripts/compare-wiki-parity.sh` | `wikictl` - läsande och skrivande kommandon |
+
+`ws_parity` (i `plan-parity`) ansluter till båda agenttjänsterna och
+jämför ramer i följd. Samtalets id och latensen normaliseras bort - de
+skiljer sig mellan körningarna.
+
+`compare-worker-parity.sh` ersätter modellen med en mock
+(`scripts/mock-llm.py`) som svarar med ett bestämt svar. Då kan samma
+felväg köras i båda workerna: giltig definition, trasigt modellsvar,
+ogiltig ikon, ogiltig upprepningsregel och ett avslaget förslag.
