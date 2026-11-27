@@ -177,6 +177,10 @@ const {
   defaultCalendarId,
 } = useCalendars()
 const { revision: quickAddRevision } = useQuickAdd()
+// En händelse som valts i kommandopaletten ska visas i kalendern.
+const { request: focusRequest, clearFocus } = useCalendarFocus()
+// Begäran som redan hanterats av den här kalendern.
+const handledFocusIds = new Set<number>()
 let eventRequest = 0
 
 let nowTimer: ReturnType<typeof setInterval> | undefined
@@ -996,6 +1000,9 @@ const openEditEvent = (event: CalendarEvent) => {
 
 const closeEditEvent = () => {
   editingEvent.value = null
+  // Fokusbegäran har gjort sitt. Annars kan kalendern öppna samma
+  // händelse igen när den monteras på nytt.
+  clearFocus()
 }
 
 /**
@@ -1333,6 +1340,28 @@ onMounted(async () => {
 
 // Något som skapats via det globala snabbfältet ska synas direkt.
 watch(quickAddRevision, loadEvents)
+
+// Kommandopaletten kan hitta en händelse och be kalendern att visa den.
+// Tidslinjen zoomar dit och händelsen öppnas för redigering.
+watch(
+  focusRequest,
+  (request) => {
+    if (!request) return
+    if (handledFocusIds.has(request.id)) return
+    handledFocusIds.add(request.id)
+
+    const event = request.event
+    const start = Date.parse(event.start_at)
+
+    if (!Number.isNaN(start)) {
+      startTime.value = start - 60 * 60 * 1000
+      zoomTo(24 * 60 * 60 * 1000)
+    }
+
+    openEditEvent(event)
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   if (nowTimer) clearInterval(nowTimer)

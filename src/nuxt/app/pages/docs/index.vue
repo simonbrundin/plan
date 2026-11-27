@@ -3,6 +3,7 @@ import type { DocMeta } from "~/utils/docs";
 
 definePageMeta({
   ssr: false,
+  layout: "docs",
 });
 
 const { list, groups } = useDocs();

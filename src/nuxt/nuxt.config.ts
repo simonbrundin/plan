@@ -24,6 +24,8 @@ export default defineNuxtConfig({
 		"leaflet/dist/leaflet.css",
 		// Typografin för dokumentationssidorna (markdown -> HTML).
 		"@/assets/css/docs.css",
+		// Typografin för chattmeddelanden från agenten (markdown -> HTML).
+		"@/assets/css/chat.css",
 	],
 	ui: {
 		colors: {

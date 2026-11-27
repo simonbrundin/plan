@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AgentConversation, AgentMessage, AgentRun } from '~/types/agent';
+import { renderMarkdown } from '~/utils/markdown';
 
 // Chattpanelen - Plan är agentens gränssnitt. Slack används inte.
 const props = defineProps<{
@@ -307,16 +308,22 @@ const reject = async () => {
 					<!-- Vanliga meddelanden -->
 					<div v-else class="max-w-[90%]">
 						<div
-							class="rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words"
+							class="rounded-2xl px-3.5 py-2 text-sm break-words"
 							:class="
 								message.role === 'user'
-									? 'bg-accent-strong text-white'
+									? 'bg-accent-strong text-white whitespace-pre-wrap'
 									: message.role === 'system'
-										? 'border border-line bg-surface-2 text-ink-muted'
+										? 'border border-line bg-surface-2 text-ink-muted whitespace-pre-wrap'
 										: 'bg-surface-2 text-ink'
 							"
 						>
-							{{ message.content }}
+							<!-- Agentens svar är markdown och renderas som HTML -->
+							<div
+								v-if="message.role === 'assistant'"
+								class="chat-markdown"
+								v-html="renderMarkdown(message.content)"
+							/>
+							<template v-else>{{ message.content }}</template>
 						</div>
 						<p
 							class="mt-0.5 px-1 text-[10px] text-ink-dim"
