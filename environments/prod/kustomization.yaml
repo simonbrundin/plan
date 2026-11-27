@@ -9,6 +9,7 @@ resources:
 
 patches:
   - path: patches/api-deployment.yaml
+  - path: patches/agent-deployment.yaml
   - path: patches/deployment.yaml
   - path: patches/http-route.yaml
   - path: patches/db-instances-patch.yaml

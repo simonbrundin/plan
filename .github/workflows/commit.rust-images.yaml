@@ -83,3 +83,41 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Taggen på bilderna skrivs in i de manifest som prod deployar.
+      # Pr-set granskas innan det slås ihop - bytet till Rust ska vara
+      # ett medvetet beslut, inte en sidoeffekt av ett bygg.
+      - name: Get short sha
+        id: sha
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "short-sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Uppdatera bilderna i produktion
+        env:
+          API_IMAGE: ghcr.io/simonbrundin/rust-api:sha-${{ steps.sha.outputs.short-sha }}
+          AGENT_IMAGE: ghcr.io/simonbrundin/rust-agent:sha-${{ steps.sha.outputs.short-sha }}
+        run: |
+          sed -i "s|image: ghcr.io/simonbrundin/rust-api.*|image: $API_IMAGE|" \
+            environments/prod/patches/api-deployment.yaml
+          sed -i "s|image: ghcr.io/simonbrundin/rust-agent.*|image: $AGENT_IMAGE|" \
+            environments/prod/patches/agent-deployment.yaml
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: uppdatera Rust-imagerna"
+          branch: bot/update-rust-images
+          delete-branch: true
+          title: "chore: uppdatera Rust-imagerna"
+          body: |
+            Uppdaterar API:t och agenten till den senaste Rust-imagen.
+            - API: `ghcr.io/simonbrundin/rust-api:sha-${{ steps.sha.outputs.short-sha }}`
+            - Agent: `ghcr.io/simonbrundin/rust-agent:sha-${{ steps.sha.outputs.short-sha }}`
+          labels: |
+            ci
+            skip-review
+          add-paths: |
+            environments/prod/patches/api-deployment.yaml
+            environments/prod/patches/agent-deployment.yaml

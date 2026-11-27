@@ -1,0 +1,14 @@
+# Agent-API:t i produktion kör Rust-imagen.
+#
+# Go-agentens image ligger i base/ - dev kör fortfarande Go, så bytet
+# ligger här i stället. Base-imagen ändras bara när Go-modulen raderas.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: agent-api
+          image: ghcr.io/simonbrundin/rust-agent:sha-1fdc501
