@@ -391,6 +391,7 @@ finns i `index.md`.
 | [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]] | Skogsduvan: larm när sensorer/Shelly-enheter faller ur online | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-03 | 1 |
 | [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] | "Skogsduvan: SSH via duckdns fungerar (port 22 forwardad 2026-11-02)" | note | ssh, homeassistant, duckdns, drift, projekt:infrastructure | 2026-11-25 | 2 |
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
+| [[notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24]] | Skogsduvan: värmepumpen styrs från högra sidofältet (IR + trappa 5-7-17-20-24) | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-27 | 2 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
 | [[notes/skrivbordswidget-som-visar-gor-nu-malet]] | Skrivbordswidget som visar Gör-nu-målet | note | widget, quickshell, plan, gnistring, projekt:plan | 2026-11-27 | 3 |
@@ -532,7 +533,7 @@ finns i `index.md`.
 - `authentik` (1)
 - `automatik` (1)
 - `automation` (1)
-- `automatisering` (5)
+- `automatisering` (6)
 - `axum` (1)
 - `backend` (2)
 - `bare-metal` (1)
@@ -680,7 +681,7 @@ finns i `index.md`.
 - `helpmodal` (2)
 - `hemligheter` (2)
 - `heuristik` (1)
-- `home-assistant` (12)
+- `home-assistant` (13)
 - `homeassistant` (1)
 - `hostname` (1)
 - `http` (2)
@@ -872,7 +873,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (93)
+- `projekt:simon` (94)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -927,9 +928,9 @@ finns i `index.md`.
 - `secret` (1)
 - `secrets` (4)
 - `security` (4)
-- `session` (41)
+- `session` (42)
 - `shell` (1)
-- `skogsduvan` (6)
+- `skogsduvan` (7)
 - `slack` (1)
 - `solution` (1)
 - `sops` (5)

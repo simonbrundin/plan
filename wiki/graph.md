@@ -390,6 +390,7 @@ graph LR
   n_notes_skogsduvan_larm_nar_sensorer_shelly_enheter_faller_ur_online["Skogsduvan: larm när sensorer/Shelly-enheter faller ur online"]
   n_notes_skogsduvan_ssh_via_duckdns_fungerar_port_22_forwardad_2026_11_02["'Skogsduvan: SSH via duckdns fungerar (port 22 forwardad 2026-11-02)'"]
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen["Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen"]
+  n_notes_skogsduvan_varmepumpen_styrs_fran_hogra_sidofaltet_ir_trappa_5_7_17_20_24["Skogsduvan: värmepumpen styrs från högra sidofältet (IR + trappa 5-7-17-20-24)"]
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer["Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer"]
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet["Skogsduvans HA utsätts för automatiserade skannningar från internet"]
   n_notes_skrivbordswidget_som_visar_gor_nu_malet["Skrivbordswidget som visar Gör-nu-målet"]
@@ -1086,6 +1087,8 @@ graph LR
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen --> n_notes_skogsduvan_elementet_styrs_av_minsta_temperaturen_fail_open
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen --> n_notes_ha_automationer_behover_en_startv_g_for_att_aterstalla_laget_och_tre_syntaxfallor
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen --> n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet
+  n_notes_skogsduvan_varmepumpen_styrs_fran_hogra_sidofaltet_ir_trappa_5_7_17_20_24 --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
+  n_notes_skogsduvan_varmepumpen_styrs_fran_hogra_sidofaltet_ir_trappa_5_7_17_20_24 --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_fyra_shelly_enheter_svarar_inte_pa_natet
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
@@ -1506,8 +1509,8 @@ graph LR
 - **notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet** <- [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
 - **notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02** <- [[entities/home-assistant]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
-- **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
-- **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
+- **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
+- **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
 - **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]], [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
 - **notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden** <- [[concepts/sops]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]

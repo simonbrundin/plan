@@ -3279,3 +3279,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux -> notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
 
+
+## [2026-11-27] ingest | create notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24
+- [create] [[notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24]] — ny sida från inboxen
+- [archive] 2026-11-27-skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24.md
+

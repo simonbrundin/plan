@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 456 |
+| Noter | 457 |
 
 ## Entiteter
 
@@ -414,6 +414,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]] - Diagnos 2026-11-02: HA-loggen säger 'Config entry X for shelly integration not ready yet: Device communication error' for FYRA shelly-co... _(uppdaterad 2026-11-02)_
 - [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]] - 2026-11-03: Anvandaren bad om push-larm nar en enhet i stugan tyst forsvinner.lost igang, sa att en dod sensor inte upptacktes forst nar ... _(uppdaterad 2026-11-03)_
 - [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] - Kaskad som byggdes 2026-11-02 (kvall) i Skogsduvans HA, styrd av EN sanningskalla: template-sensorn sensor.hemmet_kallaste_rum (minsta te... _(uppdaterad 2026-11-17)_
+- [[notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24]] - 2026-11-27: Byggde ett värmepump-kort i högra sidofältet ("Vår vy" -> vyn "Standard") i Skogsduvans HA. _(uppdaterad 2026-11-27)_
 - [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] - 2026-11-03: I Home Assistants logg på Skogsduvan syntes WARNINGar från homeassistant.components.http.security_filter om filtrerade för... _(uppdaterad 2026-11-03)_
 - [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] - Kontext: HA Green (2026.10.1) i stugan, näs via 'ssh skogsduvan' -> Terminal&SSH-addon-container (core-ssh), config i /homeassistant (/c... _(uppdaterad 2026-11-03)_
 - [[notes/skrivbordswidget-som-visar-gor-nu-malet]] - En liten ruta nederst i mitten av skärmen visar det mål som ligger högst upp _(uppdaterad 2026-11-27)_
