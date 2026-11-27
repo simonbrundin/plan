@@ -197,11 +197,3 @@ func isAgentRequest(c *gin.Context) bool {
 	value, ok := scope.(string)
 	return ok && value == "agent"
 }
-
-// actorFor beskriver vem som utförde övergången.
-func actorFor(c *gin.Context) string {
-	if isAgentRequest(c) {
-		return "agent"
-	}
-	return "human"
-}

@@ -256,8 +256,7 @@ func (h *GoalVerificationHandler) RunVerification(c *gin.Context) {
 		}
 	}
 
-	var verificationID *int64
-	verificationID = &plan.ID
+	verificationID := &plan.ID
 
 	result, err := h.verification.CreateResult(ctx, goalID, verificationID, outcome, "")
 	if err != nil {
