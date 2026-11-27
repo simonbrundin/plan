@@ -6,7 +6,7 @@ finns i `index.md`.
 
 | Sida | Titel | Typ | Taggar | Uppdaterad | Länkar |
 |---|---|---|---|---|---|
-| [[concepts/anvanda-agenter-i-plan]] | Använda agenter i Plan | concept | agent, gränssnitt, human-gate, nuxt, projekt:plan | 2026-11-26 | 3 |
+| [[concepts/anvanda-agenter-i-plan]] | Använda agenter i Plan | concept | agent, gränssnitt, human-gate, nuxt, projekt:plan | 2026-11-27 | 4 |
 | [[concepts/authentik]] | Authentik | concept | authentik, identity-provider, oidc, saml, sso, deprecated | 2026-10-23 | 4 |
 | [[concepts/cert-manager]] | Cert-Manager | concept | cert-manager, tls, certificates, lets-encrypt, ssl | 2026-10-24 | 3 |
 | [[concepts/cloudflare-tunnel]] | Cloudflare Tunnel (cloudflared) | concept | cloudflare, tunnel, cfd, dns, ingress | 2026-11-26 | 4 |
@@ -25,7 +25,7 @@ finns i `index.md`.
 | [[concepts/oidc]] | OIDC | concept | oidc, oauth2, identity-provider, authentication, rbac, kubernetes | 2026-10-23 | 4 |
 | [[concepts/poolad-eller-direkt-anslutning-mot-neon]] | Poolad eller direkt anslutning mot Neon | concept | neon, postgres, pgbouncer, drift, projekt:tmp | 2026-11-02 | 1 |
 | [[concepts/sops]] | SOPS | concept | secrets, encryption, age, kubernetes, gitops | 2026-11-23 | 5 |
-| [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-26 | 8 |
+| [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-27 | 9 |
 | [[entities/flux-gitops]] | Flux GitOps | entity | flux, gitops, infrastructure, kubernetes | 2026-10-24 | 6 |
 | [[entities/hdmi-kvm-switch-16-port-labbet]] | HDMI KVM-switch 16 port (labbet) | entity | kvm, hardware, labb, projekt:infrastructure, projekt:simon | 2026-11-15 | 2 |
 | [[entities/home-assistant]] | Home Assistant | entity | home-assistant, ssh, hassio, supervisor, drift, projekt:simon | 2026-11-25 | 5 |
@@ -181,6 +181,7 @@ finns i `index.md`.
 | [[notes/konventioner]] | Konventioner i repot | note | konventioner, stil, go | 2026-10-21 | 3 |
 | [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] | Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image | note | pxe, uboot, radxa, korrigering, projekt:simon | 2026-10-22 | 4 |
 | [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] | Kortkommando-hjälpen i HelpModal måste följa tangentändringar | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
+| [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] | Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål | note | feature, goals, tangentbord, status, projekt:plan | 2026-11-27 | 1 |
 | [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
@@ -464,6 +465,7 @@ finns i `index.md`.
 | [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] | ZITADEL-återställning: historisk installation återställd från ZITADEL Cloud-export | note | zitadel, oidc, incident, migrering, projekt:simon | 2026-11-26 | 1 |
 | [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] | ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om | note | zitadel, oidc, lesson, migrering, projekt:simon | 2026-11-26 | 1 |
 | [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] | ZITADEL: importerad användare krävde init-code-event för att kunna logga in | note | zitadel, bug, lesson, projekt:simon | 2026-11-26 | 1 |
+| [[notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin]] | Zitadel-loginname för simonbrundin är e-postadressen, inte 'simonbrundin' | note | zitadel, oidc, bug, lesson, projekt:infrastructure | 2026-11-27 | 1 |
 | [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] | 16x1 HDMI KVM - RS232/LAN-protokoll | summary | kvm, rs232, protokoll, projekt:simon | 2026-11-13 | 2 |
 | [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] | "Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL" | summary | learn, postgres, lagring, go | 2026-11-03 | 0 |
 | [[summaries/flux-components]] | Sammanfattning: Flux-komponenter | summary | flux, gitops, components, kubernetes | 2026-10-24 | 3 |
@@ -521,7 +523,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (99)
+- `bug` (100)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -603,7 +605,7 @@ finns i `index.md`.
 - `extension` (2)
 - `extensions` (1)
 - `fakta` (4)
-- `feature` (86)
+- `feature` (87)
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (20)
@@ -632,7 +634,7 @@ finns i `index.md`.
 - `gitops` (12)
 - `gmail` (1)
 - `go` (33)
-- `goals` (31)
+- `goals` (32)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -721,7 +723,7 @@ finns i `index.md`.
 - `leaflet` (1)
 - `learn` (6)
 - `leetcode` (4)
-- `lesson` (8)
+- `lesson` (9)
 - `lets-encrypt` (1)
 - `lightcraft` (1)
 - `linkedin` (2)
@@ -780,7 +782,7 @@ finns i `index.md`.
 - `oauth2` (3)
 - `observability` (1)
 - `offen` (1)
-- `oidc` (6)
+- `oidc` (7)
 - `omarchy` (11)
 - `omdöping` (1)
 - `one.com` (1)
@@ -831,12 +833,12 @@ finns i `index.md`.
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
 - `projekt:dotfiles` (5)
-- `projekt:infrastructure` (82)
+- `projekt:infrastructure` (83)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (125)
+- `projekt:plan` (126)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -915,6 +917,7 @@ finns i `index.md`.
 - `state` (1)
 - `statistik` (4)
 - `stats` (1)
+- `status` (1)
 - `stil` (1)
 - `stk` (6)
 - `storage` (2)
@@ -936,7 +939,7 @@ finns i `index.md`.
 - `talos` (38)
 - `talosctl` (1)
 - `tangent` (1)
-- `tangentbord` (3)
+- `tangentbord` (4)
 - `teknik` (1)
 - `terminal` (2)
 - `test` (4)
@@ -996,6 +999,6 @@ finns i `index.md`.
 - `xfs` (1)
 - `yaml` (1)
 - `z-index` (1)
-- `zitadel` (7)
+- `zitadel` (8)
 - `zoom` (6)
 - `återställning` (1)

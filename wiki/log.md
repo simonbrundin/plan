@@ -3155,3 +3155,25 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie -> notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget
 
+
+## [2026-11-27] ingest | create notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin
+- [create] [[notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin]] — ny sida från inboxen
+- [archive] 2026-11-27-zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin.md
+
+
+## [2026-11-27] link | notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin -> concepts/zitadel
+
+
+## [2026-11-27] link | concepts/zitadel -> notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin
+
+
+## [2026-11-27] ingest | create notes/kortkommando-f-byta-malfas-status-for-ett-eller-flera-mal
+- [create] [[notes/kortkommando-f-byta-malfas-status-for-ett-eller-flera-mal]] — ny sida från inboxen
+- [archive] 2026-11-27-kortkommando-f-byta-malfas-status-for-ett-eller-flera-mal.md
+
+
+## [2026-11-27] link | notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | concepts/anvanda-agenter-i-plan -> notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart
+

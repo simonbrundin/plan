@@ -180,6 +180,7 @@ graph LR
   n_notes_konventioner["Konventioner i repot"]
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image["Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image"]
   n_notes_kortkommando_hjalpen_i_helpmodal_maste_folja_tangentandringar["Kortkommando-hjälpen i HelpModal måste följa tangentändringar"]
+  n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart["Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål"]
   n_notes_kostnad_och_budget_for_agentkorningar["Kostnad och budget för agentkörningar"]
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force["Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force"]
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna["Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna"]
@@ -463,6 +464,7 @@ graph LR
   n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export["ZITADEL-återställning: historisk installation återställd från ZITADEL Cloud-export"]
   n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om["ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om"]
   n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in["ZITADEL: importerad användare krävde init-code-event för att kunna logga in"]
+  n_notes_zitadel_loginname_for_simonbrundin_ar_e_postadressen_inte_simonbrundin["Zitadel-loginname för simonbrundin är e-postadressen, inte 'simonbrundin'"]
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll["16x1 HDMI KVM - RS232/LAN-protokoll"]
   n_summaries_2026_11_03_learn_kunskapsbasen_kan_lagras_i_postgresql["'Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL'"]
   n_summaries_flux_components["Sammanfattning: Flux-komponenter"]
@@ -473,6 +475,7 @@ graph LR
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn["PinchBench: verifierade API-fakta och datafel i Value-vyn"]
   n_concepts_anvanda_agenter_i_plan --> n_notes_dokumentationssidor_i_granssnittet_docs
   n_concepts_anvanda_agenter_i_plan --> n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln
+  n_concepts_anvanda_agenter_i_plan --> n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart
   n_concepts_anvanda_agenter_i_plan --> n_notes_agent_dock_pa_malsiden_ersatter_de_tre_agentpanelerna
   n_concepts_authentik --> n_concepts_oidc
   n_concepts_authentik --> n_concepts_zitadel
@@ -543,6 +546,7 @@ graph LR
   n_concepts_zitadel --> n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export
   n_concepts_zitadel --> n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om
   n_concepts_zitadel --> n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in
+  n_concepts_zitadel --> n_notes_zitadel_loginname_for_simonbrundin_ar_e_postadressen_inte_simonbrundin
   n_concepts_zitadel --> n_concepts_authentik
   n_concepts_zitadel --> n_concepts_envoy_gateway
   n_concepts_zitadel --> n_concepts_cloudnative_pg
@@ -753,6 +757,7 @@ graph LR
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_rock_4c_och_4se_har_ingen_spi_flash_i_fabrik_u_boot_ligger_pa_microsd_emmc
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
+  n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart --> n_concepts_anvanda_agenter_i_plan
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force --> n_notes_synk_hallbokningar_kommunens_actor_smartbook_matchi
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
@@ -1143,6 +1148,7 @@ graph LR
   n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export --> n_concepts_zitadel
   n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om --> n_concepts_zitadel
   n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in --> n_concepts_zitadel
+  n_notes_zitadel_loginname_for_simonbrundin_ar_e_postadressen_inte_simonbrundin --> n_concepts_zitadel
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_entities_hdmi_kvm_switch_16_port_labbet
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm
   n_summaries_flux_components --> n_concepts_flux_operator
@@ -1166,7 +1172,7 @@ graph LR
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1185,7 +1191,7 @@ graph LR
 - **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/zitadel]], [[entities/kubernetes]]
 - **concepts/poolad-eller-direkt-anslutning-mot-neon** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/sops** <- [[concepts/cloudflare-tunnel]], [[concepts/flux-operator]], [[concepts/gitops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]]
-- **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
+- **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]], [[notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin]]
 - **entities/flux-gitops** <- [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/sops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]]
 - **entities/hdmi-kvm-switch-16-port-labbet** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
 - **entities/home-assistant** <- [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]], [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]], [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]], [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]]
@@ -1267,6 +1273,7 @@ graph LR
 - **notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga** <- [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]]
 - **notes/konventioner** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image** <- [[entities/pxe-server]]
+- **notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart** <- [[concepts/anvanda-agenter-i-plan]]
 - **notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force** <- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]]
 - **notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
 - **notes/kunskaps-wiki** <- [[notes/arkitektur]], [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]], [[notes/utvecklingsflode]], [[summaries/llm-wiki-karpathy]]
@@ -1472,6 +1479,7 @@ graph LR
 - **notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export** <- [[concepts/zitadel]]
 - **notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om** <- [[concepts/zitadel]]
 - **notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in** <- [[concepts/zitadel]]
+- **notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin** <- [[concepts/zitadel]]
 - **summaries/16x1-hdmi-kvm-rs232-lan-protokoll** <- [[entities/hdmi-kvm-switch-16-port-labbet]], [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql** <- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]]
 - **summaries/flux-components** <- [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]]

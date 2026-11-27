@@ -3,9 +3,9 @@ title: Använda agenter i Plan
 type: concept
 tags: [agent, gränssnitt, human-gate, nuxt, projekt:plan]
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 status: active
-related: [notes/dokumentationssidor-i-granssnittet-docs, notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln]
+related: [notes/dokumentationssidor-i-granssnittet-docs, notes/human-gate-som-teknisk-grans-scope-pa-api-nyckeln, notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]
 ---
 
 # Använda agenter i Plan
@@ -76,6 +76,6 @@ hantera API-nycklar. Beslutet fattas alltså alltid av en människa via Plan.
 
 ## Relaterade
 
+- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]]
 - [[notes/dokumentationssidor-i-granssnittet-docs]]
 - [[notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna]]
-

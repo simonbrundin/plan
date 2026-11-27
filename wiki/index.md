@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 8 |
-| Noter | 432 |
+| Noter | 434 |
 
 ## Entiteter
 
@@ -22,7 +22,7 @@ och gå sedan ner på sidorna som är relevanta.
 
 ## Koncept
 
-- [[concepts/anvanda-agenter-i-plan]] - Så här använder en människa agenterna i Plan-gränssnittet (Nuxt, `src/nuxt`). _(uppdaterad 2026-11-26)_
+- [[concepts/anvanda-agenter-i-plan]] - Så här använder en människa agenterna i Plan-gränssnittet (Nuxt, `src/nuxt`). _(uppdaterad 2026-11-27)_
 - [[concepts/authentik]] - Authentik var tidigare identity provider i klustret och är nu ersatt av Zitadel. _(uppdaterad 2026-10-23)_
 - [[concepts/cert-manager]] - cert-manager är en Kubernetes-operator som automatiserar hantering av TLS-certifikat. _(uppdaterad 2026-10-24)_
 - [[concepts/cloudflare-tunnel]] - Cloudflare Tunnel är aktiverat (2026-11-26) och serverar plan.simonbrundin.com publikt - den enda fungerande publika ingressen sedan Starlink-CGNAT. _(uppdaterad 2026-11-26)_
@@ -41,7 +41,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/oidc]] - OIDC är protokollet som låter Zitadel-autentiserade användare få åtkomst till Kubernetes API-servern. _(uppdaterad 2026-10-23)_
 - [[concepts/poolad-eller-direkt-anslutning-mot-neon]] - Neon ger TVÅ endpoints för samma databas. _(uppdaterad 2026-11-02)_
 - [[concepts/sops]] - SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-age och provider: sops. _(uppdaterad 2026-11-23)_
-- [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-26)_
+- [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-27)_
 
 ## Sammanfattningar
 
@@ -200,6 +200,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-25)_
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
+- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] - ÖNSKEMÅL: ett kortkommando som ändrar ett måls status (målfas) och som fungerar överallt där man kan markera mål - både för ett... _(uppdaterad 2026-11-27)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
@@ -482,6 +483,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] - Status 2026-11-13: PXE-servern (10.10.10.2, UniFi-switch port 8, hostname 'pxe', MAC 2c:cf:67:43:f3:b0) var igang och serverkedaan ar hel... _(uppdaterad 2026-11-20)_
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
 - [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] - Vid ZITADELs officiella Cloud->self-hosted-import bevarades application-ID:n (t.ex. _(uppdaterad 2026-11-26)_
+- [[notes/zitadel-loginname-for-simonbrundin-ar-e-postadressen-inte-simonbrundin]] - Symtom: loginvyn på auth.simonbrundin.com svarar 'User not found in the system' när loginname 'simonbrundin' skrivs. _(uppdaterad 2026-11-27)_
 - [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] - Den self-hosade ZITADEL-instansen på auth.simonbrundin.com hade en tom databas (ny installation 2026-11-26) och saknade den historiska i... _(uppdaterad 2026-11-26)_
 - [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] - Efter importen av en användare utan lösenord skapade ZITADEL eventet 'user.human.initialization.code.added', vilket sätter user state ... _(uppdaterad 2026-11-26)_
 - [[notes/aterkommande-mal-samma-malobjekt-med-upprepningsregel]] - Återkommande mål (t.ex. _(uppdaterad 2026-11-18)_
