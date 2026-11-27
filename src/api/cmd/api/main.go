@@ -160,7 +160,6 @@ func main() {
 		// Goals endpoints
 		api.GET("/goals", goalHandler.GetGoals)
 		api.GET("/goals/prioritized", goalHandler.GetPrioritizedGoals)
-		api.GET("/goals/now", goalHandler.GetNowGoals)
 		api.GET("/goals/graph", goalHandler.GetGoalGraph)
 		api.POST("/goals", goalHandler.CreateGoal)
 		api.GET("/goals/:id", goalHandler.GetGoal)
