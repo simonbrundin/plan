@@ -23,7 +23,7 @@ Allt i den här beskrivningen är **hur det är idag**. Avsnittet
 10. [Hemligheter](#hemligheter)
 11. [Ingress, TLS och DNS](#ingress-tls-och-dns)
 12. [Agentkörningar i drift](#agentkörningar-i-drift)
-13. [Rust-migreringen: två parallella spår](#rust-migreringen-två-parallella-spår)
+13. [Rust-migreringen: Rust är huvudspåret](#rust-migreringen-rust-är-huvudspåret)
 14. [PR-preview](#pr-preview)
 15. [Verifiering](#verifiering)
 16. [Rollback](#rollback)
@@ -44,11 +44,13 @@ Allt i den här beskrivningen är **hur det är idag**. Avsnittet
                             ▼
 ┌─ GitHub Actions ───────────────────────────────────────────────┐
 │  ci.yaml            test + typecheck-gate (Nuxt)                │
-│  commit.api.yaml    go vet/test + lint  → bygg Go-API-image     │
+│  commit.api.yaml    go vet/test + lint  (Go, ingen image)       │
 │  commit.nuxt.yaml  bun-test          → bygg Nuxt-image          │
-│  commit.agent.yaml go vet/test       → bygg Go-agent-image      │
+│  commit.agent.yaml go vet/test       (Go, ingen image)          │
 │  commit.rust.yaml  fmt/clippy/test   (Rust, ingen image)       │
-│  commit.rust-images.yaml             → bygg rust-api + rust-agent│
+│  commit.rust-images.yaml  → bygg rust-api + rust-agent          │
+│                           (amd64 + arm64) → bot-PR              │
+│  pr-preview.yaml    → bygg preview-images → previews-branchen   │
 │                                                                  │
 │  Varje byggworkflow → GHCR → bot-PR som byter image-raden i    │
 │  environments/prod/patches/*.yaml                               │
@@ -63,7 +65,8 @@ Allt i den här beskrivningen är **hur det är idag**. Avsnittet
                             ▼
 ┌─ Produktion (cluster1, namespace "plan") ───────────────────────┐
 │  nuxt-app   → plan-service   → HTTPRoute plan-route            │
-│  go-api     → go-api-service → HTTPRoute go-api-route (/api/v1)│
+│  go-api     → go-api-service → HTTPRoute go-api-route (/api/v1) │
+│              (namnet är legacy - imagen är rust-api)            │
 │  agent-api  → agent-api      (intern)                          │
 │  plan-db        (CloudNativePG, 3 instanser, Longhorn)          │
 │  plan-agent-db  (CloudNativePG, 1 instans)                     │
@@ -82,11 +85,11 @@ klustret. Det gör att produktionsläget alltid går att läsa ut av git.
 | Del | Lager | Repo/katalog | Ansvar |
 | --- | --- | --- | --- |
 | Gränssnitt | Nuxt 4 | `src/nuxt` | Byggs till `ghcr.io/simonbrundin/plan` |
-| Plan API | Go → Rust | `src/api` → `src/rust/crates/plan-api` | Byggs till `go-api` / `rust-api` |
-| Agent | Go → Rust | `src/agent` → `src/rust/crates/plan-agent` | Byggs till `plan-agent` / `rust-agent` |
+| Plan API | Rust (Go under migrering) | `src/rust/crates/plan-api` | Byggs till `rust-api` |
+| Agent | Rust (Go under migrering) | `src/rust/crates/plan-agent` | Byggs till `rust-agent` |
 | Manifest (bas) | Kustomize | `environments/base` | Gemensam definition av alla resurser |
 | Manifest (dev) | Kustomize | `environments/dev` | Tilt-overlay mot Neon |
-| Manifest (PR) | Kustomize | `environments/pr/<nr>` | Bot-skapade overlays |
+| Manifest (PR) | Kustomize | `environments/pr-template/` | Mall för PR-overlays (genereras av `pr-preview-resources.py`) |
 | Manifest (prod) | Kustomize | `environments/prod` | Kustomize-patcher + krypterade secrets |
 | Pipelines | GitHub Actions | `.github/workflows/` | Test, bygg, publicera, bot-PR |
 | Återanvända pipelines | GitHub Actions | `simonbrundin/deployment-pipeline` | `run-tests-bun`, `commit.build-publish-image` |
@@ -115,8 +118,12 @@ Tilt bygger tre images lokalt och applicerar `environments/dev`-overlayen:
 | Image | Byggcontext | Byggs från |
 | --- | --- | --- |
 | `plan-nuxt` | `src/nuxt` | `src/nuxt/Dockerfile` |
-| `plan-go-api` | `src` | `src/api/Dockerfile` |
-| `plan-agent` | repo-roten | `src/agent/Dockerfile` |
+| `plan-api` | `src` | `src/rust/Dockerfile` |
+| `plan-agent` | repo-roten | `src/rust/Dockerfile.agent` |
+
+Dev bygger de **samma Rust-images** som produktion kör - samma
+Dockerfiles, samma binary. Skillnaden mot prod är databasen (Neon mot
+CNPG) och inloggningen (dev-login mot Zitadel), inte koden.
 
 Skillnader mot produktion som är viktiga att känna till:
 
@@ -125,14 +132,15 @@ Skillnader mot produktion som är viktiga att känna till:
 | Databas | Neon (branch `dev`) | CloudNativePG `plan-db` (3 instanser) |
 | Schema | Atlas Operator mot Neon | Atlas Operator mot CNPG |
 | Hemligheter | `environments/dev/secrets/*.yaml` (okrypterade) | `environments/prod/secrets/*.enc.yaml` (SOPS) |
-| API-tjänst | Go (`plan-go-api`) | Rust (`rust-api`) |
-| Agent | Go (`plan-agent`) | Rust (`rust-agent`) |
+| API-tjänst | Rust (`plan-api`) | Rust (`rust-api`) |
+| Agent | Rust (`plan-agent`) | Rust (`rust-agent`) |
 | Inloggning | dev-login eller Zitadel | Zitadel |
 | Ingress | port-forward via Tilt | Gateway API + Envoy + Cloudflare |
 
-> Dev kör fortfarande Go-tjänsterna medan produktion kör Rust. Pariteten
-> hålls av paritetstesterna i `src/rust/crates/plan-parity` och
-> `scripts/compare-*-parity.sh` - se [Kända luckor](#kända-luckor).
+> Dev och produktion kör **samma Rust-images**, byggda ur samma
+> Dockerfiles. Go-koden finns kvar och testas i CI, så att pariteten mot
+> Rust går att verifiera - men den deployas inte. Se
+> [Rust-migreringen](#rust-migreringen-rust-är-huvudspåret).
 
 ---
 
@@ -151,9 +159,11 @@ Alla workflows triggas av `push` och filtrerar på sökvägar, så att en
 
 ### `commit.api.yaml` (`src/api/**`, `src/go.mod`, `src/contracts/**`)
 
-`go vet ./api/...` → `go test ./api/...` → golangci-lint v2 →
-bygg och push `ghcr.io/simonbrundin/go-api` (amd64 + arm64) →
-bot-PR.
+`go vet ./api/...` → `go test ./api/...` → golangci-lint v2.
+
+**Bygger ingen image och rör inga manifest.** Go-API:t är den gamla
+koden under migreringen - den testas fortfarande, eftersom paritetstester
+jämför den mot Rust, men den publiceras inte längre.
 
 ### `commit.nuxt.yaml` (`src/nuxt/**`)
 
@@ -162,8 +172,10 @@ Delade `run-tests-bun.yaml` → delad `commit.build-publish-image.yaml`
 
 ### `commit.agent.yaml` (`src/agent/**`)
 
-`go vet ./agent/...` → `go test ./agent/...` → bygg och push
-`ghcr.io/simonbrundin/plan-agent` → bot-PR.
+`go vet ./agent/...` → `go test ./agent/...`.
+
+**Bygger ingen image och rör inga manifest** - samma som för Go-API:t.
+Agenten i drift är Rust-imagen (`rust-agent`).
 
 ### `commit.rust.yaml` (`src/rust/**`)
 
@@ -177,8 +189,17 @@ route-registreringarna i Go-källan och kontraktet
 ### `commit.rust-images.yaml` (`src/rust/**`)
 
 Bygger och publicerar `ghcr.io/simonbrundin/rust-api` och
-`ghcr.io/simonbrundin/rust-agent` (bara amd64 - arm64 under QEMU tar
-timmar för en Rust-kompilering) → bot-PR.
+`ghcr.io/simonbrundin/rust-agent` → bot-PR.
+
+**Båda arkitekturerna byggs.** Jobbet kör i en matris: `linux/amd64` på
+`ubuntu-latest` och `linux/arm64` på `ubuntu-24.04-arm`. Arm64 byggs på
+en riktig arm64-runner, inte under QEMU - en Rust-kompilering under
+emulering tar timmar. Ett efterföljande jobb sätter ihop manifestlistan,
+så en och samma tagg pekar på båda arkitekturerna.
+
+Det är **enda workflowen som skriver in images i prod-manifesten**. Den
+är därmed den som bestämmer vilken Rust-image som körs i prod - och
+ingen Go-workflow kan längre avinstallera den.
 
 ### `agent-go.yml`
 
@@ -200,16 +221,22 @@ byggworkflowen).
 | Image | Byggcontext | Dockerfile | Plattformar | Referens i manifest |
 | --- | --- | --- | --- | --- |
 | Nuxt | `src/nuxt` | `src/nuxt/Dockerfile` | amd64, arm64 | `environments/prod/patches/deployment.yaml` |
-| Go API | `src` | `src/api/Dockerfile` | amd64, arm64 | `environments/prod/patches/api-deployment.yaml` |
-| Go agent | repo-roten | `src/agent/Dockerfile` | amd64, arm64 | `environments/base/agent-deployment.yaml` |
-| Rust API | `src` | `src/rust/Dockerfile` | amd64 | `environments/prod/patches/api-deployment.yaml` |
-| Rust agent | repo-roten | `src/rust/Dockerfile.agent` | amd64 | `environments/prod/patches/agent-deployment.yaml` |
+| Rust API | `src` | `src/rust/Dockerfile` | amd64, arm64 | `environments/prod/patches/api-deployment.yaml` |
+| Rust agent | repo-roten | `src/rust/Dockerfile.agent` | amd64, arm64 | `environments/prod/patches/agent-deployment.yaml` |
+| Go API | `src` | `src/api/Dockerfile` | - | byggs inte längre |
+| Go agent | repo-roten | `src/agent/Dockerfile` | - | byggs inte längre |
+
+**Klustret kör arm64.** En image som bara finns för amd64 ger
+`no match for platform in manifest` vid pull - därför byggs allt i
+matris, per arkitektur, med egna runners.
 
 Taggar:
 
 - Nuxt: `:${github.sha}` (full sha) - manifestet refererar **digesten**:
   `ghcr.io/simonbrundin/plan@sha256:…`
-- Go/Rust: `:sha-<kort sha>` plus `:latest`
+- Rust: `:sha-<kort sha>` plus `:latest`
+- Preview: `plan/pr-preview:<pr-nr>-<sha>` och
+  `rust-api/pr-preview:<pr-nr>-<sha>`
 
 Pinning:
 
@@ -232,13 +259,16 @@ det manifest som styr den tjänsten, och öppnar en PR med boten.
 | Workflow | Manifest som ändras | Branch | PR-etikett |
 | --- | --- | --- | --- |
 | `commit.nuxt.yaml` | `environments/prod/patches/deployment.yaml` | `bot/update-plan-app-image` | `ci`, `skip-review` |
-| `commit.api.yaml` | `environments/prod/patches/api-deployment.yaml` | `bot/update-plan-api-image` | `ci`, `skip-review` |
-| `commit.agent.yaml` | `environments/base/agent-deployment.yaml` | `bot/update-plan-agent-image` | `ci`, `skip-review` |
 | `commit.rust-images.yaml` | `environments/prod/patches/api-deployment.yaml` + `.../agent-deployment.yaml` | `bot/update-rust-images` | `ci`, `skip-review` |
 
-Notera att `commit.agent.yaml` skriver **Go-agentens** image till `base/`, medan
-produktion patchar över med Rust-imagen i `environments/prod/patches/agent-deployment.yaml`.
-Base-imagen ändras bara när Go-modulen tas bort helt.
+`commit.rust-images.yaml` är den **enda** workflow som skriver in images i
+prod-manifesten. Go-workflows (`commit.api.yaml`, `commit.agent.yaml`) bygger
+inte längre några images och öppnar inga bot-PR:er - de testar bara Go-koden
+så att pariteten mot Rust går att verifiera.
+
+Base-imagen (`environments/base/agent-deployment.yaml`) pekar fortfarande på
+Go-agentens image, och prod patchar över den med Rust-imagen. Base-imagen
+ändras först när Go-modulen tas bort helt.
 
 Attributet `skip-review` är viktigt: `pr-preview.yaml` hoppar över PR:er med
 den etiketten, annars skulle städjobbet skapa en ny PR för varje PR - en
@@ -358,7 +388,7 @@ Browser
     → cloudflared-tunnel
       → Envoy Gateway "simons-gateway" (ns envoy, VIP 10.10.10.101)
         → HTTPRoute "plan-route"  (host plan.simonbrundin.com) → plan-service → nuxt-app
-        → HTTPRoute "go-api-route" (/api/v1, /docs)                → go-api-service → go-api
+        → HTTPRoute "go-api-route" (/api/v1, /docs)                 → go-api-service → go-api
 ```
 
 ---
@@ -447,7 +477,8 @@ sops --decrypt environments/prod/secrets/auth.enc.yaml
 
 - HTTPRouten `plan-route` ligger i `environments/base/http-route.yaml` och
   pekar på Gatewayn `simons-gateway` i namespace `envoy`.
-- `go-api-route` skickar `/api/v1` och `/docs` till API-tjänsten.
+- `go-api-route` skickar `/api/v1` och `/docs` till API-tjänsten. Namnet
+  är legacy - tjänsten kör `rust-api`-imagen sedan migreringen.
 - TLS: cert-manager utfärdar `simonbrundin` (wildcard) med
   `cloudflare-clusterissuer` (DNS-01 via Cloudflare-API-token).
 - Cloudflare proxar trafiken in via cloudflared-tunneln.
@@ -486,19 +517,22 @@ kubectl --context admin@cluster1 logs -n plan job/<job-namn>
 
 ---
 
-## Rust-migreringen: två parallella spår
+## Rust-migreringen: Rust är huvudspåret
 
-`specs/rust-migration.md` beskriver migreringen från Go till Rust. Under
-migreringen lever **två** pipelines parallellt:
+`specs/rust-migration.md` beskriver migreringen från Go till Rust.
+**Rust är den spår som körs i dev och i produktion.** Go-koden finns kvar
+som referens och testas i CI (därför att pariteten ska gå att verifiera),
+men den byggs inte till images och den deployas inte.
 
-| Spår | Bygger | Deployar till prod | Används i prod just nu |
+| Spår | Status i CI | Deployar till prod | Används i prod just nu |
 | --- | --- | --- | --- |
-| Go | `go-api`, `plan-agent` | `api-deployment.yaml`, `base/agent-deployment.yaml` | Nej - patchas över |
-| Rust | `rust-api`, `rust-agent` | `api-deployment.yaml`, `agent-deployment.yaml` | Ja |
+| Rust (`rust-api`, `rust-agent`) | bygg + publicerar | `api-deployment.yaml`, `agent-deployment.yaml` | Ja |
+| Go (`go-api`, `plan-agent`) | testas bara | Nej | Nej |
 
-Eftersom båda spåren skriver till `environments/prod/patches/api-deployment.yaml`
-(rad för rad med `sed`) är det **senaste mergen som vinner**. Det är den
-viktigaste konflikten i kedjan just nu - se [Kända luckor](#kända-luckor).
+Eftersom bara `commit.rust-images.yaml` skriver till
+`environments/prod/patches/api-deployment.yaml` finns ingen konkurrens
+om manifestraden längre - tidigare kunde en Go-build avinstallera
+Rust-imagen i prod.
 
 Pariteten mellan Go och Rust hålls av:
 
@@ -509,28 +543,62 @@ Pariteten mellan Go och Rust hålls av:
 - `scripts/compare-api-parity.sh`, `scripts/compare-agent-parity.sh`,
   `scripts/compare-worker-parity.sh`
 
+Paritetstesterna körs i `commit.rust.yaml` (och `commit.api.yaml` /
+`commit.agent.yaml` för Go-sidan). De är grinden - en endpoint som glöms
+bort i migreringen failar i CI, inte i prod.
+
 ---
 
 ## PR-preview
 
-`pr-preview.yaml` ska ge varje PR en egen miljö:
+Varje PR får en egen, kastbar miljö: eget namespace, egen databas, egen
+URL. Flödet går genom GitOps - Actions bygger och committar, **Flux
+applicerar**.
 
-1. Bygger Nuxt-imagen med taggen `pr-<nr>-<sha>` och publicerar den.
-2. Kör `.github/scripts/pr-preview-resources.py`, som skapar
-   `environments/pr/<nr>/kustomization.yaml` (namespace `plan-pr-<nr>`,
-   egen hostname `plan-pr-<nr>.simonbrundin.com`) och lägger in PR:en i
-   `environments/pr/kustomization.yaml`.
-3. Committar till PR-branchen och kommenterar i PR:en.
-4. Vid stängning rensar `.github/scripts/pr-preview-cleanup.py` bort overlayen
-   via ett PR med etiketten `skip-review`.
+```
+PR öppnas
+   │
+   ├── pr-preview.yaml: bygger Nuxt + Rust-API (amd64 + arm64) → GHCR
+   │
+   ├── pr-preview-resources.py: skapar environments/pr/<nr>/
+   │     (overlay: namespace, services, routes, secrets, CNPG, Atlas)
+   │
+   └── commit → branchen "previews"
+                  │
+                  ▼
+        Flux: GitRepository "plan-previews" (branch: previews)
+               Kustomization "plan-preview" (path: environments/pr,
+               prune: true)
+                  │
+                  ▼
+        namespace plan-pr-<nr>, URL https://plan-pr-<nr>.simonbrundin.com
+```
 
-**Verkligheten idag:** det finns ingen Flux `Kustomization` som pekar på
-`environments/pr`, och klustret har inga `plan-pr-*`-namespaces. Ingenting
-deployas. Se [Kända luckor](#kända-luckor).
+Detaljer:
 
-Dessutom är `.github/pr.yaml` en **inaktiv** workflow - GitHub läser bara
-`.github/workflows/*.yml`. Den pekar dessutom på
-`environments/kubernetes/overlays/template-ephemeral`, som inte finns.
+- **Branchen `previews`** innehåller bara overlays - ingen kod. GitRepository
+  `plan` läser bara `main`, och en PR-branch följs inte av en källkontroll.
+- **Overlayen är självständig.** Den refererar inte till `environments/base`,
+  eftersom basen inte finns på `previews`-branchen. Schemat kopieras in av
+  skriptet från `environments/base/db/schema.yaml` - en enda källa.
+- **Båda arkitekturerna byggs**, i en matris per arkitektur, eftersom
+  klustret kör arm64.
+- **Dev-login** aktiveras i previewen (`DEV_AUTH_ENABLED=true`), så en PR
+  kan testas utan Zitadel. API:t och databasen är separata från prod.
+- **Städning:** när PR:en stängs tas overlayen bort från `previews`, och
+  Flux prunar namespace, databas och routes. `environments/pr/README.md`
+  håller katalogen ifylld - en tom katalog ger "no resources" i kustomize
+  och ingenting prunas.
+
+Flux-konfigurationen ligger i infrastructure-repot:
+`apps/plan/preview-gitrepository.yaml` och `apps/plan/preview-flux-kustomization.yaml`.
+
+Verifiera en preview:
+
+```bash
+kubectl --context admin@cluster1 get pods -n plan-pr-<nr>
+curl -sS https://plan-pr-<nr>.simonbrundin.com/api/health
+```
 
 ---
 
@@ -545,6 +613,7 @@ kubectl --context admin@cluster1 get kustomization plan -n flux-system \
 
 # 2. Poddarna rullar ut
 kubectl --context admin@cluster1 rollout status deploy/nuxt-app -n plan --timeout=5m
+# API:t heter fortfarande "go-api" i manifesten, men kör Rust-imagen.
 kubectl --context admin@cluster1 rollout status deploy/go-api   -n plan --timeout=5m
 kubectl --context admin@cluster1 rollout status deploy/agent-api -n plan --timeout=5m
 
@@ -616,30 +685,30 @@ kubectl --context admin@cluster1 exec -n plan plan-db-1 -- \
 Saker som är trasiga, halvbreda eller riskfyllda just nu - samlat på ett
 ställe så att de inte glöms.
 
-1. **PR-preview deployar ingenting.** `pr-preview.yaml` skapar overlayer i
-   `environments/pr/`, men ingen Flux `Kustomization` pekar på den sökvägen.
-   Klustret har inga `plan-pr-*`-namespaces. Fix: lägg till en
-   `Kustomization` (t.ex. `apps/plan/flux-kustomization-pr.yaml`) med
-   `path: environments/pr` och `prune: true`.
-2. **Go- och Rust-flöden konkurrerar om samma manifest-rad.**
-   `commit.api.yaml` och `commit.rust-images.yaml` skriver båda image-raden i
-   `environments/prod/patches/api-deployment.yaml`. Den senaste mergen vinner,
-   och en Go-build kan alltså avinstallera Rust-imagen i prod. Fix: låt
-   `commit.api.yaml` sluta röra prod-manifesten när Rust är i drift (eller
-   peka om den på en egen patch).
-3. **Dev kör Go, prod kör Rust.** Paritetsrisken bärs av paritetstesterna, men
-   dev-miljön verifierar inte exakt det som körs i prod.
-4. **Ingen byggning av images på PR.** Bara Nuxt byggs (för previewen, som
-   inte fungerar). Rust- och agent-imagerna testas inte före merge.
+1. **API:t startar i mock-läge om Postgres inte är klar.** Rust-API:t
+   föll tillbaka till mock-läge när databasen inte svarade vid start, och
+   stannade där. Nu väntar API:t i stället på databasen
+   (`DB_CONNECT_TIMEOUT_SECONDS`, default 120s) och avslutar om den
+   inte kommer - podden startar om och försöker igen. Utan fixen fick en
+   nytt kluster (CNPG kör initdb, Atlas applicerar schemat efteråt) ett
+   API som svarade "Failed to create user" trots att databasen var
+   frisk.
+2. **Ingen automatisk smoke-test efter rollout.** Verifieringen är manuell
+   (se [Verifiering](#verifiering)).
+3. **Previewen saknar agenten.** `environments/pr-template/` innehåller
+   API, Nuxt och databas - men inte agenten. Agentens Rust-image har
+   dessutom en egen databas och egna jobb, så det är en egen bit.
+4. **Go-flödena finns kvar utan att göra jobbet.** `commit.api.yaml` och
+   `commit.agent.yaml` testar Go-koden men bygger inga images. De behövs
+   så länge paritetstesterna jämför mot Go-källan - men de bör tas bort
+   när migreringen är klar.
 5. **`.github/workflows/acceptance.yaml` är en död stub** - den refererar
    `frontend/`, en katalog som inte finns i repot.
 6. **`.github/pr.yaml` är en inaktiv workflow** - GitHub läser bara
    `.github/workflows/`.
-7. **Ingen automatisk smoke-test efter rollout.** Verifieringen är manuell
-   (se [Verifiering](#verifiering)).
-8. **`environments/kubernetes/overlays/dev`** är en gammal Flux-baserad
+7. **`environments/kubernetes/overlays/dev`** är en gammal Flux-baserad
    dev-overlay som inte längre används - dev går via Tilt och kind.
-9. **Atlas-apply raderar tabeller som saknas i `schema.sql`.** Ett misstag i
+8. **Atlas-apply raderar tabeller som saknas i `schema.sql`.** Ett misstag i
    schemafilen är en destruktiv ändring i prod.
 
 ---
