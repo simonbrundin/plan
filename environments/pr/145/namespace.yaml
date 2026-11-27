@@ -1,0 +1,12 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 145 - https://plan-pr-145.simonbrundin.com
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plan-pr-145
+  labels:
+    app.kubernetes.io/managed-by: flux
+    preview: "true"
+    pr-number: "145"
