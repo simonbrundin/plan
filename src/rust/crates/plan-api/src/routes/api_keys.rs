@@ -71,12 +71,19 @@ pub struct ApiKeyResponse {
     /// Scopet.
     pub scope: String,
     /// När nyckeln skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created: chrono::DateTime<chrono::Utc>,
     /// När nyckeln sist användes.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "crate::models::go_time::serialize_option"
+    )]
     pub last_used: Option<chrono::DateTime<chrono::Utc>>,
     /// När nyckeln går ut.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "crate::models::go_time::serialize_option"
+    )]
     pub expires: Option<chrono::DateTime<chrono::Utc>>,
 }
 

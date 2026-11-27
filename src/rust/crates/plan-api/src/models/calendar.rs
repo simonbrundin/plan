@@ -32,8 +32,10 @@ pub struct Calendar {
     /// Kalenderns placering i listan.
     pub sort_order: i32,
     /// När kalendern skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// När kalendern senast ändrades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
