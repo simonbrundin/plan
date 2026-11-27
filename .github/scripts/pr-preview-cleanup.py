@@ -20,3 +20,15 @@ if OUT_DIR.exists():
     print(f"✓ Tog bort {OUT_DIR}")
 else:
     print(f"- {OUT_DIR} fanns inte")
+
+# README-filen ligger kvar så att katalogen aldrig blir tom. En tom
+# katalog gör att Flux bygger "no resources" och ingenting prunas -
+# previewen skulle bli kvar i klustret.
+README = Path("environments/pr/README.md")
+if not README.exists():
+    README.write_text(
+        "# PR-previews\n\n"
+        "Overlayer per PR, genererade av .github/scripts/pr-preview-resources.py.\n",
+        encoding="utf-8",
+    )
+    print(f"✓ Skapade {README}")

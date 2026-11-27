@@ -33,6 +33,9 @@ GHCR_SECRET_NAME = "ghcr-secret.enc.yaml"
 SCHEMA_SOURCE = Path("environments/base/db/schema.yaml")
 SCHEMA_NAME = "schema-configmap.yaml"
 
+# README i environments/pr/ - se ensure_readme().
+README = Path("environments/pr/README.md")
+
 NAMESPACE = f"plan-pr-{PR_NUM}"
 HOSTNAME = f"plan-pr-{PR_NUM}.simonbrundin.com"
 
@@ -86,6 +89,23 @@ def write_overlay() -> None:
     print(f"✓ Kopierade {SCHEMA_SOURCE} -> {schema_target}")
 
 
+def ensure_readme() -> None:
+    """Skapar environments/pr/README.md om den saknas.
+
+    Filen håller katalogen ifylld när den sista previewen tas bort. Utan
+    den skulle kustomize bygga "no resources" och Flux inte prunade
+    något - previewen skulle bli kvar i klustret.
+    """
+    if not README.exists():
+        README.write_text(
+            "# PR-previews\n\n"
+            "Overlayer per PR, genererade av .github/scripts/pr-preview-resources.py.\n",
+            encoding="utf-8",
+        )
+        print(f"✓ Skapade {README}")
+
+
 if __name__ == "__main__":
     write_overlay()
+    ensure_readme()
     print(f"Previewen deployas till namespace {NAMESPACE} med URL https://{HOSTNAME}")
