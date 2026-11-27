@@ -11,10 +11,13 @@ import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, re
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_ACCENT_HOVER, ETERNAL_TEXT } from '~/utils/eternalStyle'
 import { useGoalSelection } from '~/composables/useGoalSelection'
+import { useGoalPhase } from '~/composables/useGoalPhase'
 
 const router = useRouter()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, setGoalRecurrence, deleteGoal, loadAllGoals, createGoal, reorderGoals, updateGoalDescription, completeGoalOccurrence, addDependency, removeDependency } = useGoalApi()
 const goalSelection = useGoalSelection()
+// Byte av målfas (status) med tangenten 's'.
+const { cyclePhases } = useGoalPhase()
 const { revision: quickAddRevision } = useQuickAdd()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
@@ -598,6 +601,54 @@ async function toggleBulk(action: 'now' | 'started' | 'agent' | 'eternal') {
   }
 }
 
+// Slutför (eller öppna) flera markerade mål på en gång.
+//
+// Om alla valda mål redan är klara tas klarmarkeringen bort, annars sätts
+// den på - samma princip som övriga bulkändringar.
+async function toggleBulkFinished() {
+  const goalsToUpdate = selectedGoals.value
+  if (!goalsToUpdate.length || bulkBusy.value) return
+
+  const allFinished = goalsToUpdate.every((goal) => !!goal.finished)
+  bulkBusy.value = true
+  try {
+    await Promise.all(goalsToUpdate.map(async (goal) => {
+      // Eviga mål kan inte slutföras.
+      if (!canBeFinished(goal)) return
+
+      // Ett återkommande mål slutförs en förekomst i taget. Det går inte att
+      // "öppna" en sådan förekomst - då hoppar vi över målet.
+      if (isRecurringGoal(goal)) {
+        if (allFinished) return
+        if (isWaitingForNextOccurrence(goal)) return
+        await completeOccurrence(goal)
+        return
+      }
+
+      const newFinishedValue = allFinished ? null : new Date().toISOString()
+      await toggleGoalFinished(goal.id, newFinishedValue)
+      const idx = localGoals.value.findIndex(g => g.id === goal.id)
+      const current = idx !== -1 ? localGoals.value[idx] : undefined
+      if (current) current.finished = newFinishedValue
+    }))
+    goalSelection.clear()
+  } catch (err) {
+    console.error('Failed to apply bulk finished change:', err)
+    await refreshGoals()
+  } finally {
+    bulkBusy.value = false
+  }
+}
+
+// Knappen i bulkverktyget och tangenten 'd' går via samma funktion.
+function handleBulkAction(action: 'now' | 'started' | 'agent' | 'eternal' | 'finished') {
+  if (action === 'finished') {
+    void toggleBulkFinished()
+    return
+  }
+  void toggleBulk(action)
+}
+
 // Delete goal
 async function handleDelete(goal: Goal) {
   try {
@@ -710,7 +761,9 @@ function handleKeydown(event: KeyboardEvent) {
   // d - toggle finished
   if (event.key === 'd') {
     event.preventDefault()
-    if (filteredGoals.value.length > 0) {
+    if (goalSelection.count.value > 0) {
+      void toggleBulkFinished()
+    } else if (filteredGoals.value.length > 0) {
       toggleFinished(filteredGoals.value[selectedIndex.value])
     }
     return
@@ -723,6 +776,23 @@ function handleKeydown(event: KeyboardEvent) {
       void toggleBulk('eternal')
     } else if (filteredGoals.value.length > 0) {
       toggleEternal(filteredGoals.value[selectedIndex.value])
+    }
+    return
+  }
+
+  // s - växla målfas (status) för det markerade målet eller alla
+  // Tab-markerade mål. Shift+S går bakåt i faserna.
+  if (event.key === 's' || event.key === 'S') {
+    event.preventDefault()
+    const direction = event.key === 'S' ? -1 : 1
+    const marked = filteredGoals.value[selectedIndex.value]
+    const targets: Goal[] = goalSelection.count.value > 0
+      ? selectedGoals.value
+      : marked
+        ? [marked]
+        : []
+    if (targets.length > 0) {
+      void cyclePhases(targets, direction)
     }
     return
   }
@@ -986,7 +1056,7 @@ definePageMeta({
             :style="{ opacity: showStarted ? 1 : 0.3 }" />
         </button>
         <span class="hidden md:inline-flex ml-2 px-3 py-1.5 rounded-full bg-surface-2 border border-line text-xs text-ink-dim">
-          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent · space+s påbörjat · space+t taggar
+          j/k navigera · ↑↓ sortera · l öppna · Enter nytt · d klar · e evigt · s status · c deadline · b startdatum · m tidsåtgång · t beskrivning · x ta bort · space+a agent · space+s påbörjat · space+t taggar
         </span>
       </div>
     </div>
@@ -1023,7 +1093,7 @@ definePageMeta({
         :all-selected="allVisibleSelected"
         :busy="bulkBusy"
         @toggle-all="goalSelection.setAll(filteredGoals, !allVisibleSelected)"
-        @action="toggleBulk"
+        @action="handleBulkAction"
         @clear="goalSelection.clear"
       />
 
@@ -1094,7 +1164,7 @@ definePageMeta({
           </div>
           <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
           <div class="flex items-center gap-1 flex-shrink-0">
-          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
             @updated="statusId => updateGoalPhase(goal, statusId)" />
           <!-- Started (klicka eller s) -->
           <span class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">

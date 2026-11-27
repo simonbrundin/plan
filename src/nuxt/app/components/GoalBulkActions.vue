@@ -7,7 +7,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: "toggle-all"): void;
-  (event: "action", action: "now" | "started" | "agent" | "eternal"): void;
+  (
+    event: "action",
+    action: "now" | "started" | "agent" | "eternal" | "finished",
+  ): void;
   (event: "clear"): void;
 }>();
 </script>
@@ -26,6 +29,7 @@ const emit = defineEmits<{
       {{ props.allSelected ? 'Avmarkera alla' : 'Markera alla' }}
     </button>
     <span class="text-sm text-ink-muted">{{ props.selectedCount }} markerade:</span>
+    <button type="button" :disabled="props.busy" class="rounded-lg border border-accent/40 bg-surface-2 px-2.5 py-1.5 text-sm text-accent transition-colors hover:border-accent hover:bg-accent/10 disabled:cursor-wait disabled:opacity-50" @click="emit('action', 'finished')">Klar</button>
     <button type="button" :disabled="props.busy" class="rounded-lg border border-accent/40 bg-surface-2 px-2.5 py-1.5 text-sm text-accent transition-colors hover:border-accent hover:bg-accent/10 disabled:cursor-wait disabled:opacity-50" @click="emit('action', 'now')">Nu</button>
     <button type="button" :disabled="props.busy" class="rounded-lg border border-accent/40 bg-surface-2 px-2.5 py-1.5 text-sm text-accent transition-colors hover:border-accent hover:bg-accent/10 disabled:cursor-wait disabled:opacity-50" @click="emit('action', 'started')">Påbörjat</button>
     <button type="button" :disabled="props.busy" class="rounded-lg border border-accent/40 bg-surface-2 px-2.5 py-1.5 text-sm text-accent transition-colors hover:border-accent hover:bg-accent/10 disabled:cursor-wait disabled:opacity-50" @click="emit('action', 'agent')">Agent</button>

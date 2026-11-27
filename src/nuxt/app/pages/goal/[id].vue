@@ -26,6 +26,7 @@ import { normalizeGoalWeights } from '~/utils/goalWeights'
 import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent'
 import { useAgentApi } from '~/composables/useAgentApi'
 import { useGoalSelection } from '~/composables/useGoalSelection'
+import { useGoalPhase } from '~/composables/useGoalPhase'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -39,6 +40,8 @@ const { user } = useUserSession();
 const { updateGoalTitle, updateGoalIcon: updateGoalIconApi, toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, deleteGoal, addParentRelation, removeParentRelation, addChildRelation, reorderChildren, updateGoalWeights, createGoal, addDependency, removeDependency, updateGoalDescription, setGoalRecurrence, completeGoalOccurrence } = useGoalApi();
 const { startDrag: startGoalDrag } = useGoalDrag();
 const goalSelection = useGoalSelection();
+// Byte av målfas (status) med tangenten 's'.
+const { cyclePhases } = useGoalPhase();
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
@@ -1852,6 +1855,61 @@ async function toggleBulk(action: 'now' | 'started' | 'agent' | 'eternal') {
   }
 }
 
+// Slutför (eller öppna) flera markerade undermål på en gång.
+//
+// Om alla valda mål redan är klara tas klarmarkeringen bort, annars sätts
+// den på - samma princip som övriga bulkändringar.
+async function toggleBulkFinished() {
+  const childrenToUpdate = selectedChildren.value;
+  if (!childrenToUpdate.length || bulkBusy.value) return;
+
+  const allFinished = childrenToUpdate.every((child) => !!child.finished);
+  bulkBusy.value = true;
+  try {
+    await Promise.all(
+      childrenToUpdate.map(async (child) => {
+        // Eviga mål kan inte slutföras.
+        if (!canBeFinished(child)) return;
+
+        // Ett återkommande mål slutförs en förekomst i taget. Det går inte att
+        // "öppna" en sådan förekomst - då hoppar vi över målet.
+        if (isRecurringGoal(child)) {
+          if (allFinished) return;
+          if (isWaitingForNextOccurrence(child)) return;
+          await completeGoalOccurrence(
+            child.id,
+            child.recurrence_next ?? undefined,
+            todayDateString(),
+          );
+          return;
+        }
+
+        const newFinishedValue = allFinished ? null : new Date().toISOString();
+        await toggleGoalFinished(child.id, newFinishedValue);
+        Object.assign(child, { finished: newFinishedValue });
+        goalsStore.updateGoal(child.id, { finished: newFinishedValue });
+      }),
+    );
+    goalSelection.clear();
+  } catch (error) {
+    console.error("Failed to apply bulk finished change:", error);
+    await refresh(true);
+  } finally {
+    bulkBusy.value = false;
+  }
+}
+
+// Knappen i bulkverktyget och tangenten 'd' går via samma funktion.
+function handleBulkAction(
+  action: "now" | "started" | "agent" | "eternal" | "finished",
+) {
+  if (action === "finished") {
+    void toggleBulkFinished();
+    return;
+  }
+  void toggleBulk(action);
+}
+
 // Toggla started status på ett mål
 function updateGoalPhase(goalToUpdate: Goal | null | undefined, statusId: number) {
   if (!goalToUpdate) return
@@ -2106,6 +2164,28 @@ onUnmounted(() => {
   unregisterLeaderCommands = null;
 });
 
+// De mål som tangenten 's' ska ändra fas på.
+//
+// Föregående prioritet: Tab-markerade mål, sedan förälder i föräldrläge,
+// sedan själva målet, sedan det markerade undermålet.
+function phaseTargets(): Goal[] {
+  if (goalSelection.count.value > 0) {
+    return filteredChildren.value.filter((child) =>
+      goalSelection.isSelected(child.id),
+    );
+  }
+  if (isParentMode.value && parents.value.length > 0) {
+    const parent = parents.value[selectedParentIndex.value];
+    return parent ? [parent] : [];
+  }
+  if (isGoalSelected.value && goal.value) {
+    return [goal.value];
+  }
+  const child = filteredChildren.value[selectedChildIndex.value];
+  if (child) return [child];
+  return goal.value ? [goal.value] : [];
+}
+
 // Hantera Vim-kommandon
 function handleKeydown(event: KeyboardEvent) {
   // Don't handle keys when search is open
@@ -2170,7 +2250,9 @@ function handleKeydown(event: KeyboardEvent) {
   // Hantera 'd' för att toggla finished status
   if (event.key === "d") {
     event.preventDefault();
-    if (isParentMode.value && parents.value.length > 0) {
+    if (goalSelection.count.value > 0) {
+      void toggleBulkFinished();
+    } else if (isParentMode.value && parents.value.length > 0) {
       const parent = parents.value[selectedParentIndex.value];
       toggleFinished(parent);
     } else if (
@@ -2198,6 +2280,17 @@ function handleKeydown(event: KeyboardEvent) {
       selectedChildIndex.value < filteredChildren.value.length
     ) {
       toggleEternal(filteredChildren.value[selectedChildIndex.value]);
+    }
+    return;
+  }
+
+  // Hantera 's' för att växla målfas (status)
+  if (event.key === "s" || event.key === "S") {
+    event.preventDefault();
+    const direction = event.key === "S" ? -1 : 1;
+    const targets = phaseTargets();
+    if (targets.length > 0) {
+      void cyclePhases(targets, direction);
     }
     return;
   }
@@ -2717,7 +2810,7 @@ watch(selectedParentIndex, async () => {
           </button>
         </span>
         <GoalPhaseBadge v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          :goal-id="goal.id" :status-id="goal.status_id"
+          :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
           @updated="statusId => updateGoalPhase(goal, statusId)" />
         <!-- Agent-märke -->
         <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
@@ -3011,7 +3104,7 @@ watch(selectedParentIndex, async () => {
           :all-selected="allVisibleChildrenSelected"
           :busy="bulkBusy"
           @toggle-all="goalSelection.setAll(filteredChildren, !allVisibleChildrenSelected)"
-          @action="toggleBulk"
+          @action="handleBulkAction"
           @clear="goalSelection.clear"
         />
 
@@ -3144,7 +3237,7 @@ watch(selectedParentIndex, async () => {
                        :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
                    </button>
                  </span>
-                 <GoalPhaseBadge :goal-id="child.id" :status-id="child.status_id"
+                 <GoalPhaseBadge :goal-id="child.id" :status-id="child.status_id" :eternal="child.eternal"
                    @updated="statusId => updateGoalPhase(child, statusId)" />
                  <!-- Agent-märke -->
                  <span class="opt-icon" :class="{ 'is-on': !!child.agent }">
