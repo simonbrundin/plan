@@ -1,0 +1,40 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 183 - https://plan-pr-183.simonbrundin.com
+
+# Mall för en PR-preview.
+#
+# Skriptet .github/scripts/pr-preview-resources.py kopierar den här
+# katalogen till environments/pr/<pr-nummer>/ och byter ut platshållarna.
+#
+# Overlayen är självständig - den refererar inte till environments/base.
+# Det beror på att den publiceras på branchen "previews", som bara
+# innehåller preview-overlays: en referens till basen skulle kräva att
+# basen följde med, och då skulle branchen behöva synkas med main.
+# Schemat kopieras in av skriptet i stället, från basen - en enda källa.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: plan-pr-183
+
+resources:
+  - namespace.yaml
+  - nuxt-deployment.yaml
+  - api-deployment.yaml
+  - services.yaml
+  - secrets.yaml
+  - routes.yaml
+  - db-cluster.yaml
+  - atlas-schema.yaml
+  # Applicerar schemat när databasen är klar - se kommentaren i filen.
+  - schema-job.yaml
+  # Kopieras in av skriptet från environments/base/db/schema.yaml.
+  - schema-configmap.yaml
+  # Registry-uppgifter för GHCR. Kopieras in av skriptet (krypterad) och
+  # dekrypteras av Flux.
+  - ghcr-secret.enc.yaml
+
+labels:
+  - pairs:
+      preview: "true"
+      pr-number: "183"
