@@ -50,6 +50,12 @@ const handleKeydown = (event: KeyboardEvent) => {
 const goalActionShortcuts: Shortcut[] = [
   { keys: ["d"], description: "Toggle slutfört" },
   { keys: ["e"], description: "Toggle evigt-märke på markerat mål eller alla Tab-markerade mål" },
+  {
+    keys: ["s"],
+    description:
+      "Växla målfas framåt (Definiera → Planera → Genomföra → Verifiera → Klar) på markerat mål eller alla Tab-markerade mål",
+  },
+  { keys: ["Shift+S"], description: "Växla målfas bakåt" },
   { keys: ["t"], description: "Redigera beskrivning" },
   { keys: ["c"], description: "Sätt deadline (due-datum)" },
   { keys: ["b"], description: "Sätt startdatum" },
@@ -71,8 +77,7 @@ const sections = computed<Section[]>(() => {
         { keys: ["z"], description: "Ångra senaste handlingen" },
         {
           keys: ["p"],
-          description:
-            "Växla till/från Gör nu (på målsidan används p för plats)",
+          description: "Växla till/från Gör nu",
         },
         { keys: ["Space"], description: "Leader-läge (se nedan)" },
         { keys: ["Esc"], description: "Stäng modal / avbryt" },
@@ -111,7 +116,6 @@ const sections = computed<Section[]>(() => {
         { keys: ["↓"], description: "Flytta markerat undermål ner" },
         { keys: ["i"], description: "Redigera titel (i början)" },
         { keys: ["a"], description: "Redigera titel (i slutet)" },
-        { keys: ["p"], description: "Sätt plats (var målet kan slutföras)" },
         {
           keys: ["w"],
           description: "Gör markerat mål beroende av ett annat mål (sök bland alla mål)",
@@ -206,6 +210,11 @@ const sections = computed<Section[]>(() => {
         {
           keys: ["t"],
           description: "Sätt taggar på markerat mål (målsidan, /goals, /now)",
+        },
+        {
+          keys: ["p"],
+          description:
+            "Sätt plats på markerat mål - var målet kan slutföras (målsidan, /goals, /now)",
         },
         {
           keys: ["s"],

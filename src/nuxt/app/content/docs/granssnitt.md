@@ -65,7 +65,7 @@ hjälpmodalen. Snabbtolkningen:
 | `Ctrl+K` | Sök bland mål |
 | `n` | Snabbt lägg till |
 | `z` | Ångra senaste handlingen |
-| `p` | Växla till/från Gör nu (på målsidan: sätt plats) |
+| `p` | Växla till/från Gör nu |
 | `Space` | Leader-läge - tryck `Space` och sedan en tangent |
 | `Esc` | Stäng modal / avbryt |
 
@@ -88,11 +88,12 @@ På målsidan:
 | `Space` + `x` | Ta bort mål |
 | `Space` + `s` | Toggle "påbörjat" |
 | `Space` + `t` | Taggar på markerat mål |
+| `Space` + `p` | Platser på markerat mål |
 
 Utan leaderläge på målsidan: `j`/`k` för att navigera mellan
 undermål, `h`/`l` för att gå till förälder eller öppna mål, `Enter`
-för att lägga till undermål, `i`/`a` för att redigera titeln, `p` för
-att sätta plats och `w` för att göra målet beroende av ett annat.
+för att lägga till undermål, `i`/`a` för att redigera titeln och `w`
+för att göra målet beroende av ett annat.
 
 ## Målens utseende
 
@@ -106,13 +107,14 @@ Funktioner som kan sättas på ett mål:
 | Funktion | Snabb tangent | Betydelse |
 | --- | --- | --- |
 | Slutförd | `d` | Målet är klart |
+| Fas (status) | `s` / `Shift` + `s` | Definiera → Planera → Genomföra → Verifiera → Klar (framåt/bakåt) |
 | Påbörjat | `Space` + `s` | Du har börjat på det |
 | Evigt | `e` | Målet har ingen slutdatum - det pågår |
 | Deadline | `c` | Senast då målet ska vara klart |
 | Startdatum | `b` | När arbetet ska börja |
 | Tidsåtgång | `m` | Uppskattad minuter |
 | Upprepning | `r` | Återkommande - dagligen, varje vecka ... |
-| Plats | `p` | Var målet kan slutföras |
+| Plats | `Space` + `p` | Var målet kan slutföras |
 | Taggar | `Space` + `t` | Etiketter som "ute", "hem", "vinter" |
 | Beroende | `w` | Ett annat mål måste vara klart först |
 
