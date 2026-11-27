@@ -1166,6 +1166,7 @@ definePageMeta({
           <div class="flex items-center gap-1 flex-shrink-0">
           <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
             @updated="statusId => updateGoalPhase(goal, statusId)" />
+          <CompletionBadge :completion-kind="goal.completion_kind" />
           <!-- Started (klicka eller s) -->
           <span class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">
             <button @click.stop="toggleStarted(goal)"

@@ -64,19 +64,23 @@ databasen, så att både fasendpointern och statusendpointern går samma väg.
 
 ## 6. Gränssnitt
 
-- [ ] 6.1 "Jag är klar" - avslutar ett mål med en handling, även från `define`
-- [ ] 6.2 Verifieringsplan syns på målsidan - typ, villkor, styrka - och kan
+- [x] 6.1 "Jag är klar" - avslutar ett mål med en handling, även från `define`
+- [x] 6.2 Verifieringsplan syns på målsidan - typ, villkor, styrka - och kan
       läggas till, ändras eller tas bort
-- [ ] 6.3 Bevislista på målet med möjlighet att lägga till bevis
-- [ ] 6.4 Omdöme syns i agent-docken med knappar godkänn/avslå
-- [ ] 6.5 Agentens förslag visar profilen och beviset innan godkännande
-- [ ] 6.6 Målets "avslutades som" - deklarerat eller verifierat - syns på
+- [x] 6.3 Bevislista på målet med möjlighet att lägga till bevis
+- [x] 6.4 Omdöme syns i agent-docken med knappar godkänn/avslå
+- [x] 6.5 Agentens förslag visar profilen och beviset innan godkännande
+- [x] 6.6 Målets "avslutades som" - deklarerat eller verifierat - syns på
       målet och i listan av avslutade mål
+
+Extra: `POST /api/v1/verification-results/:id/reject` - ett avslaget
+omdöme är också ett beslut, och det ogiltigförklarar de godkända omdömen
+som fanns innan.
 
 ## 7. Dokumentation och wiki
 
-- [ ] 7.1 `docs/agent-platform.md` - fasmaskinen, verifieringen, profilerna
+- [x] 7.1 `docs/agent-platform.md` - fasmaskinen, verifieringen, profilerna
       och de nya anropen
-- [ ] 7.2 Wikinoter om besluten (fasmaskin i Plan, verifierare som data,
+- [x] 7.2 Wikinoter om besluten (fasmaskin i Plan, verifierare som data,
       profil per uppgift)
-- [ ] 7.3 `src/nuxt` in-app docs uppdateras
+- [x] 7.3 `src/nuxt` in-app docs uppdateras

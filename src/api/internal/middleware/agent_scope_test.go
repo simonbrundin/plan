@@ -34,6 +34,8 @@ func TestAgentScopeAllows(t *testing.T) {
 		{"köra verifiering", http.MethodPost, "/api/v1/goals/42/verification/run", true},
 		{"lägga bevis", http.MethodPost, "/api/v1/goals/42/evidence", true},
 		{"godkänna omdöme", http.MethodPost, "/api/v1/verification-results/3/approve", false},
+		{"avslå omdöme", http.MethodPost, "/api/v1/verification-results/3/reject", false},
+		{"ta bort verifieringsplan", http.MethodDelete, "/api/v1/goals/42/verification", false},
 		{"läsa statusar", http.MethodGet, "/api/v1/statuses", true},
 		{"skapa körning", http.MethodPost, "/api/v1/agent-runs", true},
 		{"läsa körning", http.MethodGet, "/api/v1/agent-runs/7", true},

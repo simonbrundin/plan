@@ -120,6 +120,88 @@ func TestGoalPhaseFactsIntegration(t *testing.T) {
 	}
 }
 
+// TestVerificationRejectIntegration verifierar att ett avslaget omdöme
+// inte räknas som verifierat, och att det ogiltigförklarar de godkända
+// omdömen som fanns innan.
+//
+// Avslaget är ett beslut av en människa. Ett mål som en människa har
+// sagt "det här stämmer inte" ska inte kunna räknas som verifierat.
+func TestVerificationRejectIntegration(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("no DATABASE_URL")
+	}
+	ctx := context.Background()
+	if err := database.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	goals := NewGoalRepository()
+	verificationRepo := NewGoalVerificationRepository()
+
+	userID := testUserID(t)
+
+	goal, err := goals.CreateGoal(ctx, userID, fmt.Sprintf("[test] reject %d", time.Now().UnixNano()), "lucide:check-square")
+	if err != nil {
+		t.Fatal("create test goal:", err)
+	}
+	defer func() {
+		if err := goals.DeleteGoal(ctx, goal.ID); err != nil {
+			t.Errorf("delete test goal: %v", err)
+		}
+	}()
+
+	plan, err := verificationRepo.Upsert(ctx, goal.ID, models.VerificationTypeEvidence, "ett bevis", models.VerificationStrengthWeak)
+	if err != nil {
+		t.Fatal("upsert verification:", err)
+	}
+
+	// Ett godkänt omdöme - målet räknas som verifierat.
+	godkant, err := verificationRepo.CreateResult(ctx, goal.ID, &plan.ID, models.VerificationOutcomePassed, "")
+	if err != nil {
+		t.Fatal("create result:", err)
+	}
+	if _, err := verificationRepo.ApproveResult(ctx, godkant.ID, userID); err != nil {
+		t.Fatal("approve result:", err)
+	}
+
+	passed, err := verificationRepo.HasPassedVerification(ctx, goal.ID)
+	if err != nil {
+		t.Fatal("check verification:", err)
+	}
+	if !passed {
+		t.Fatal("ett godkänt omdöme ska räknas som verifierat")
+	}
+
+	// Ett nytt omdöme som en människa avslår.
+	avslaget, err := verificationRepo.CreateResult(ctx, goal.ID, &plan.ID, models.VerificationOutcomePassed, "")
+	if err != nil {
+		t.Fatal("create result:", err)
+	}
+
+	result, err := verificationRepo.RejectResult(ctx, avslaget.ID, userID)
+	if err != nil {
+		t.Fatal("reject result:", err)
+	}
+	if result == nil {
+		t.Fatal("avslaget omdömet ska finnas")
+	}
+	if result.Outcome != models.VerificationOutcomeRejected {
+		t.Errorf("utfallet ska vara %q, fick %q", models.VerificationOutcomeRejected, result.Outcome)
+	}
+	if result.DecidedBy == nil || result.DecidedAt == nil {
+		t.Error("ett avslaget omdöme ska vara beslutat av en människa")
+	}
+
+	passed, err = verificationRepo.HasPassedVerification(ctx, goal.ID)
+	if err != nil {
+		t.Fatal("check verification:", err)
+	}
+	if passed {
+		t.Error("ett avslaget omdöme ska inte räknas som verifierat")
+	}
+}
+
 // TestGoalPhaseEventIntegration verifierar att fasloggen skrivs.
 func TestGoalPhaseEventIntegration(t *testing.T) {
 	if os.Getenv("DATABASE_URL") == "" {

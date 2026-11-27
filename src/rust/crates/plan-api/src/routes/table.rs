@@ -55,9 +55,11 @@ pub const ROUTES: &[(&str, &str)] = &[
     ("POST", "/api/v1/goals/{id}/complete"),
     ("GET", "/api/v1/goals/{id}/verification"),
     ("PUT", "/api/v1/goals/{id}/verification"),
+    ("DELETE", "/api/v1/goals/{id}/verification"),
     ("POST", "/api/v1/goals/{id}/evidence"),
     ("POST", "/api/v1/goals/{id}/verification/run"),
     ("POST", "/api/v1/verification-results/{id}/approve"),
+    ("POST", "/api/v1/verification-results/{id}/reject"),
     // Relationer
     ("POST", "/api/v1/goals/relations"),
     ("PATCH", "/api/v1/goals/relations"),
@@ -230,11 +232,17 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("POST", "/api/v1/goals/{id}/complete") => post(crate::routes::handlers::not_implemented),
         ("GET", "/api/v1/goals/{id}/verification") => get(crate::routes::handlers::not_implemented),
         ("PUT", "/api/v1/goals/{id}/verification") => put(crate::routes::handlers::not_implemented),
+        ("DELETE", "/api/v1/goals/{id}/verification") => {
+            delete(crate::routes::handlers::not_implemented)
+        }
         ("POST", "/api/v1/goals/{id}/evidence") => post(crate::routes::handlers::not_implemented),
         ("POST", "/api/v1/goals/{id}/verification/run") => {
             post(crate::routes::handlers::not_implemented)
         }
         ("POST", "/api/v1/verification-results/{id}/approve") => {
+            post(crate::routes::handlers::not_implemented)
+        }
+        ("POST", "/api/v1/verification-results/{id}/reject") => {
             post(crate::routes::handlers::not_implemented)
         }
 

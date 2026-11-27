@@ -84,10 +84,17 @@ func (h *GoalVerificationHandler) GetVerification(c *gin.Context) {
 		plan.DecidedAt = result.DecidedAt
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	svarbody := gin.H{
 		"verification": plan,
 		"evidence":     evidence,
-	})
+	}
+	if result != nil {
+		// Omdömet skickas med i sin helhet - annars kan klienten inte
+		// godkänna det (godkännandet gäller ett resultat, inte ett
+		// utfall).
+		svarbody["result"] = result
+	}
+	c.JSON(http.StatusOK, svarbody)
 }
 
 // UpdateVerification godoc
@@ -142,6 +149,39 @@ func (h *GoalVerificationHandler) UpdateVerification(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, plan)
+}
+
+// DeleteVerification tar bort verifieringsplanen från ett mål.
+//
+// Planen är valfri - att ta bort den lämnar målet som det var, bara
+// utan verifiering.
+// @Summary Remove the verification plan from a goal
+// @Description Removes the verification plan. The goal keeps working - the plan is optional.
+// @Tags goals
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Goal ID"
+// @Success 204
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/v1/goals/{id}/verification [delete]
+func (h *GoalVerificationHandler) DeleteVerification(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	_, goalID, ok := h.goalAccess(c)
+	if !ok {
+		return
+	}
+
+	if err := h.verification.Delete(c.Request.Context(), goalID); err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // AddEvidence godoc
@@ -297,6 +337,48 @@ func (h *GoalVerificationHandler) ApproveVerificationResult(c *gin.Context) {
 	}
 
 	result, err := h.verification.ApproveResult(c.Request.Context(), resultID, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if result == nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "verification result not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// RejectVerificationResult godoc
+// @Summary Reject a verification outcome
+// @Description Rejects a verification outcome. Only a person can do this - an agent may create outcomes but never decide on them.
+// @Tags goals
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Verification result ID"
+// @Success 200 {object} models.GoalVerificationResult
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /api/v1/verification-results/{id}/reject [post]
+func (h *GoalVerificationHandler) RejectVerificationResult(c *gin.Context) {
+	if !h.checkDb(c) {
+		return
+	}
+
+	userID := getUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Message: "Unauthorized"})
+		return
+	}
+
+	resultID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "Invalid result ID"})
+		return
+	}
+
+	result, err := h.verification.RejectResult(c.Request.Context(), resultID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
 		return

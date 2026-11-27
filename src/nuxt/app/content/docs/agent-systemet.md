@@ -3,7 +3,7 @@ title: Agentsystemet
 description: Plan har en egen agent - en motor som kan specificera, planera, utföra och verifiera mål, med human gate, profiler och kostnadskontroll.
 order: 4
 icon: i-lucide-bot
-updated: 2026-11-25
+updated: 2026-11-28
 group: Agenten
 ---
 
@@ -137,6 +137,68 @@ Ett godkännande ska visa:
 
 Inte bara det tekniska kommandot. Beslutet sparas i `agent_approvals`
 med `feedback`, `consequence` och `verification_plan`.
+
+## Fasmaskinen - Plan bestämmer faserna
+
+Faserna är inte bara en modell i agentens prompt. De är en maskin i
+Plan (`src/api/internal/phase`), och alla vägar till en fas går genom
+den - även den gamla `PATCH /goals/:id/status`.
+
+```text
+define ──▶ plan ──▶ execute ──▶ verify ──▶ completed
+```
+
+Människan och agenten har olika rättigheter, inte olika regler:
+
+| Övergång | Människa | Agent |
+| --- | --- | --- |
+| Framåt | Får, även om den hoppar över faser | Får, men måste uppfylla fasens villkor |
+| Bakåt | Får - loggas som avvikelse | Får inte |
+| Avsluta | Får, från vilken fas som helst | Får inte - ska godkännas av en människa |
+
+Villkoren för agenten är: en godkänd definition (`define` → `plan`),
+planerade delmål (`plan` → `execute`), lösta delmål (`execute` →
+`verify`).
+
+En stoppad övergång ger `409` med en stabil skälkod - `phase_skipped`,
+`backwards_transition`, `missing_planned_children`, `unresolved_children`,
+`definition_not_approved` eller `approval_required`. Koderna är
+kontraktet mellan agenten och Plan: agenten kan svara på dem i stället
+för att gissa.
+
+## Verifieringsplanen - valfri, men den ger skillnaden
+
+En verifieringsplan anger **hur** ett mål ska räknas som klart: typ
+(`checklista`, `delmal`, `kalender`, `bevis`, `matvarde`, `kod`),
+villkor och styrka (`stark` / `svag`).
+
+Planen är valfri. Utan plan fungerar målet precis som i dag - bara
+räknas det aldrig som "verifierat", bara som "deklarerat".
+
+```text
+mål med plan ──▶ verifieringen körs ──▶ omdöme ──▶ människan beslutar
+                                                              │
+                                        godkänt ─────────────┴──▶ "verifierat"
+                                        avslaget ────────────────▶ "deklarerat"
+```
+
+Agenten får lämna bevis och köra verifieringen. Den får **inte** godkänna
+eller avslå omdömet - det är human gate, precis som att godkänna ett
+förslag. API:t blockerar agentens nyckel från båda anropen.
+
+## Åtgärdsprofilen - vad agenten får göra
+
+Profilerna är tekniska gränser, inte instruktioner till modellen. De
+väljs per körning och följer med i målets definition.
+
+| Profil | Får |
+| --- | --- |
+| `planering` | Prata, bryta ner, föreslå - skriver ingenting |
+| `research` | Läsa och samla - skriver ingenting |
+| `arbete` | Arbeta i en isolerad kopia, skriva kod, föreslå ändringar |
+
+Standardprofilen är `planering`. Kodaren körs bara när profilen får
+ändra kod - så en livsgoal kan inte råka dra in kodaren.
 
 ## Måldefinitionen - vad agenten föreslår
 

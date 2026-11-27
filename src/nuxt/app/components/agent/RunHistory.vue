@@ -37,6 +37,14 @@ const pendingApproval = computed<AgentApproval | null>(() => {
 // Föreslagna ändringar - exakt det som kommer att skrivas.
 const proposedChanges = computed(() => pendingApproval.value?.payload?.changes ?? []);
 
+// Fält som agenten föreslår ändrade på målet - till exempel verifieringsplan
+// och åtgärdsprofil. De visas innan beslutet, så att man vet vad man
+// godkänner.
+const proposedFields = computed(() => pendingApproval.value?.payload?.fields ?? []);
+
+// Noteringar om värden agenten hoppade över.
+const proposalNotes = computed(() => pendingApproval.value?.payload?.notes ?? []);
+
 // Testet som föreslogs, och hur det gick när agenten testade själv.
 const testCommand = computed(() => pendingApproval.value?.payload?.test_command ?? '');
 const preVerification = computed(() => pendingApproval.value?.payload?.pre_verification);
@@ -169,6 +177,27 @@ async function cancel() {
 					</li>
 				</ul>
 			</details>
+
+			<!-- Fält agenten föreslår - t.ex. verifieringsplan och profil. -->
+			<div v-if="proposedFields.length" class="mt-3" data-testid="proposal-fields">
+				<p class="text-xs font-medium text-ink">Förslaget ändrar</p>
+				<dl class="mt-1 space-y-1">
+					<div v-for="field in proposedFields" :key="field.field" class="flex items-baseline gap-2 text-xs">
+						<dt class="shrink-0 text-ink-dim">{{ field.label }}</dt>
+						<dd class="text-ink">
+							<span v-if="field.from" class="text-ink-dim line-through">{{ field.from }}</span>
+							<span v-if="field.from" class="mx-1">→</span>
+							<span>{{ field.to }}</span>
+						</dd>
+					</div>
+				</dl>
+			</div>
+
+			<ul v-if="proposalNotes.length" class="mt-2 space-y-0.5">
+				<li v-for="(note, index) in proposalNotes" :key="index" class="text-[11px] text-ink-dim">
+					{{ note }}
+				</li>
+			</ul>
 
 			<textarea
 				v-model="feedback"

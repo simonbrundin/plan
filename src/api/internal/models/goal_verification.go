@@ -38,6 +38,9 @@ const (
 	VerificationOutcomeFailed = "failed"
 	// VerificationOutcomePending betyder att bevis saknas.
 	VerificationOutcomePending = "pending"
+	// VerificationOutcomeRejected betyder att en människa har avslagit
+	// omdömet. Det är ett beslut - inte ett nytt omdöme.
+	VerificationOutcomeRejected = "avslagen"
 )
 
 // GoalVerification är en verifieringsplan för ett mål.

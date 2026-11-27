@@ -319,17 +319,29 @@ bestämmer.
 | `GET /api/v1/goals/:id/verification` | planen med senaste omdöme och bevis |
 | `PUT /api/v1/goals/:id/verification` | sätter planen (typ, villkor, styrka) |
 | `POST /api/v1/goals/:id/evidence` | lägger till bevis |
+| `DELETE /api/v1/goals/:id/verification` | tar bort planen - målet blir ett vanligt mål igen |
 | `POST /api/v1/goals/:id/verification/run` | kör verifieringen och ger ett omdöme |
 | `POST /api/v1/verification-results/:id/approve` | en människa godkänner omdömet |
+| `POST /api/v1/verification-results/:id/reject` | en människa avslår omdömet |
 
 Planens typ är en av `checklista`, `delmal`, `kalender`, `bevis`, `matvarde`
 och `kod`, och styrkan är `stark` eller `svag`. Kodmålens verifierare
 definieras senare - typen finns redan i databasen.
 
 Ett omdöme blir först giltigt när en människa godkänner det. En agent får
-köra verifieringen och lämna bevis, men aldrig godkänna - det är human gate
-i API:t, inte i en prompt. När planen ändras ogiltigförklaras tidigare
-omdömen: de gällde den gamla planen.
+köra verifieringen och lämna bevis, men aldrig godkänna eller avslå - det är
+human gate i API:t, inte i en prompt. När planen ändras ogiltigförklaras
+tidigare omdömen: de gällde den gamla planen. Ett avslaget omdöme
+(`avslagen`) ogiltigförklarar de godkända omdömen som fanns innan - annars
+skulle målet räknas som verifierat trots att människan just sa att
+omdömet inte håller.
+
+I gränssnittet ligger verifieringen på målsidan: planen (typ, villkor,
+styrka), bevislistan och omdömet med knapparna **Godkänn** och **Avslå**.
+Samma information syns i agent-docken under fliken **Körning**, så att
+beslutet kan fattas där agentens arbete redan är öppet. Målets "avslutades
+som" - `deklarerat` eller `verifierat` - syns på målet och i listan av
+avslutade mål.
 
 Data ligger i `goal_verifications`, `goal_evidence`,
 `goal_verification_results` och `goal_phase_events`, och hur ett mål

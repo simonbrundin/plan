@@ -162,6 +162,8 @@ endpoints:
   - method: PUT
     path: /api/v1/goals/{id}/verification
     agent: true
+  - method: DELETE
+    path: /api/v1/goals/{id}/verification
   - method: POST
     path: /api/v1/goals/{id}/evidence
     agent: true
@@ -175,6 +177,8 @@ endpoints:
     path: /api/v1/goals/{id}/complete
   - method: POST
     path: /api/v1/verification-results/{id}/approve
+  - method: POST
+    path: /api/v1/verification-results/{id}/reject
   - method: GET
     path: /api/v1/statuses
     agent: true

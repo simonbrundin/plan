@@ -187,9 +187,11 @@ func main() {
 		// fungerar precis som ett mål med en plan.
 		api.GET("/goals/:id/verification", goalVerificationHandler.GetVerification)
 		api.PUT("/goals/:id/verification", goalVerificationHandler.UpdateVerification)
+		api.DELETE("/goals/:id/verification", goalVerificationHandler.DeleteVerification)
 		api.POST("/goals/:id/evidence", goalVerificationHandler.AddEvidence)
 		api.POST("/goals/:id/verification/run", goalVerificationHandler.RunVerification)
 		api.POST("/verification-results/:id/approve", goalVerificationHandler.ApproveVerificationResult)
+		api.POST("/verification-results/:id/reject", goalVerificationHandler.RejectVerificationResult)
 
 		// Relations endpoints
 		api.POST("/goals/relations", goalHandler.CreateRelation)

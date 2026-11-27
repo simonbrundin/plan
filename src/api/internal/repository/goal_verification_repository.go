@@ -184,6 +184,54 @@ func (r *GoalVerificationRepository) ApproveResult(
 	return &res, nil
 }
 
+// RejectResult avslår ett omdöme åt en människa.
+//
+// Ett avslaget omdöme är ett beslut - det räknas inte som "godkänt", så
+// målet kan inte avslutas som verifierat på grund av det.
+func (r *GoalVerificationRepository) RejectResult(
+	ctx context.Context, resultID, userID int64,
+) (*models.GoalVerificationResult, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	query := `
+		UPDATE goal_verification_results
+		SET outcome = 'avslagen', decided_by = $2, decided_at = NOW()
+		WHERE id = $1
+		RETURNING id, goal_id, verification_id, outcome, note, decided_by, decided_at, created_at`
+
+	var res models.GoalVerificationResult
+	err = tx.QueryRow(ctx, query, resultID, userID).Scan(
+		&res.ID, &res.GoalID, &res.VerificationID, &res.Outcome, &res.Note,
+		&res.DecidedBy, &res.DecidedAt, &res.CreatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to reject verification result: %w", err)
+	}
+
+	// Ett avslaget omdöme ogiltigförklarar de godkända omdömen som fanns
+	// innan - annars skulle målet räknas som verifierat trots att
+	// människan just sa att omdömet inte håller.
+	if _, err := tx.Exec(ctx,
+		`DELETE FROM goal_verification_results WHERE goal_id = $1 AND id <> $2`,
+		res.GoalID, res.ID,
+	); err != nil {
+		return nil, fmt.Errorf("failed to clear verification results: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit rejection: %w", err)
+	}
+
+	return &res, nil
+}
+
 // LatestResult ger det senaste omdömet för ett mål, eller nil.
 func (r *GoalVerificationRepository) LatestResult(ctx context.Context, goalID int64) (*models.GoalVerificationResult, error) {
 	query := `

@@ -43,8 +43,8 @@ func AgentScopeAllows(method, path string) bool {
 		return method == http.MethodGet && len(rest) == 1
 
 	case "verification-results":
-		// Ett verifieringsomdöme godkänns alltid av en människa - en
-		// agent får inte godkänna sig själv.
+		// Ett verifieringsomdöme godkänns och avslås alltid av en människa
+		// - en agent får inte besluta om sitt eget omdöme.
 		return false
 	}
 

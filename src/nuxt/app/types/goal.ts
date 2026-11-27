@@ -34,6 +34,10 @@ export interface Goal {
 	agent?: boolean;
 	// Sant om målet ska göras nu. Sådana mål syns på "Gör nu"-sidan.
 	now?: boolean;
+	// CompletionKind säger hur målet avslutades: "deklarerat" när en
+	// människa sa att det var klart, "verifierat" när en godkänd
+	// verifiering gått igenom. Tom sträng = inte avslutat.
+	completion_kind?: string;
 	// Sant om målet har en förälder. Endast grundmål (has_parent = false)
 	// listas under /goals.
 	has_parent?: boolean;
