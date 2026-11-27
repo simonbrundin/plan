@@ -317,10 +317,14 @@ jobs:
           git checkout -B previews origin/previews
           python3 /tmp/pr-preview-cleanup.py
 
+          # Stagea FÖRE kontrollen. Annars jämförs indexet med HEAD,
+          # medan borttagningen bara finns i arbetskopian - och git
+          # säger "ingen ändring" fast overlayen är borta.
+          git add -A environments/pr
+
           if git diff --cached --quiet; then
             echo "Ingen ändring att committa"
           else
-            git add -A environments/pr
             git commit -m "chore: ta bort preview för PR ${PR_NUMBER}"
             git push origin previews
             echo "✓ Städade bort previewen"
