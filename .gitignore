@@ -66,3 +66,9 @@ server/
 
 # Rust
 /src/rust/target/
+
+# Kärndumpfiler från krascher (skapas i repo-roten)
+/core.*
+
+# Byggda binärer för agentens verktyg (t.ex. wikictl)
+/src/agent/bin/
