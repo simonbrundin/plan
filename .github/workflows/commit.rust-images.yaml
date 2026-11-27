@@ -39,11 +39,13 @@ jobs:
           - image: rust-api
             runner: ubuntu-latest
             platform: linux/amd64
+            arch: amd64
             context: src
             file: src/rust/Dockerfile
           - image: rust-api
             runner: ubuntu-24.04-arm
             platform: linux/arm64
+            arch: arm64
             context: src
             file: src/rust/Dockerfile
           # Byggkontexten är repo-roten - samma som Go-agentens image.
@@ -52,11 +54,13 @@ jobs:
           - image: rust-agent
             runner: ubuntu-latest
             platform: linux/amd64
+            arch: amd64
             context: .
             file: src/rust/Dockerfile.agent
           - image: rust-agent
             runner: ubuntu-24.04-arm
             platform: linux/arm64
+            arch: arm64
             context: .
             file: src/rust/Dockerfile.agent
     steps:
@@ -84,19 +88,18 @@ jobs:
           push: true
           outputs: type=image,push-by-digest=true,name-canonical=true
           tags: ghcr.io/simonbrundin/${{ matrix.image }}
-          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.platform }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.platform }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}
 
       - name: Spara digest
         run: |
           mkdir -p digests
-          PLATFORM="${{ matrix.platform }}"
-          echo "${{ steps.bygg.outputs.digest }}" > "digests/${{ matrix.image }}-${PLATFORM//\//-}"
+          echo "${{ steps.bygg.outputs.digest }}" > "digests/${{ matrix.image }}-${{ matrix.arch }}"
 
       - name: Ladda upp digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ matrix.image }}-${{ matrix.platform }}
+          name: digests-${{ matrix.image }}-${{ matrix.arch }}
           path: digests/
           retention-days: 1
 
@@ -147,10 +150,10 @@ jobs:
           set -euo pipefail
           SHORT_SHA="${GITHUB_SHA::7}"
 
-          API_AMD64="$(cat digests/rust-api-linux-amd64)"
-          API_ARM64="$(cat digests/rust-api-linux-arm64)"
-          AGENT_AMD64="$(cat digests/rust-agent-linux-amd64)"
-          AGENT_ARM64="$(cat digests/rust-agent-linux-arm64)"
+          API_AMD64="$(cat digests/rust-api-amd64)"
+          API_ARM64="$(cat digests/rust-api-arm64)"
+          AGENT_AMD64="$(cat digests/rust-agent-amd64)"
+          AGENT_ARM64="$(cat digests/rust-agent-arm64)"
 
           docker buildx imagetools create \
             -t "ghcr.io/simonbrundin/rust-api:sha-${SHORT_SHA}" \
