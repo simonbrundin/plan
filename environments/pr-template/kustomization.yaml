@@ -1,0 +1,71 @@
+# Mall för en PR-preview.
+#
+# Skriptet .github/scripts/pr-preview-resources.py kopierar den här
+# katalogen till environments/pr/<pr-nummer>/ och byter ut platshållarna.
+#
+# Resurserna är avsiktligt inte hela basen (environments/base): basen
+# innehåller agenten, agentens databas och HTTPRoutes med prod-hostnamn -
+# och två HTTPRoutes med samma hostname i olika namespaced är ett fel i
+# Gateway API. Databasen tas däremot från basen, så att preview, dev och
+# prod använder exakt samma schema.
+#
+# Sökvägarna nedan är relativa till den GENERERADE platsen
+# (environments/pr/<pr-nummer>/). Skriptet skriver om dem när det kopierar.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: NAMESPACE_PLACEHOLDER
+
+resources:
+  - namespace.yaml
+  - nuxt-deployment.yaml
+  - api-deployment.yaml
+  - services.yaml
+  - secrets.yaml
+  - routes.yaml
+  # Basens databas: schema, CNPG-kluster och Atlas. Namespace-transformen
+  # lägger den i preview-ns:et, så varje PR får sin egen databas.
+  - ../base/db
+  # Registry-uppgifter för GHCR. Filen kopieras in av skriptet (kustomize
+  # får inte läsa filer ovanför katalogen) och dekrypteras av Flux.
+  - ghcr-secret.enc.yaml
+
+patches:
+  # Previewen ska bara ha applikationsrollen "plan" - admin-rollen i basen
+  # hör till prod (och dess Secret finns inte här).
+  - target:
+      group: postgresql.cnpg.io
+      version: v1
+      kind: Cluster
+      name: plan-db
+    patch: |-
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
+        name: plan-db
+      spec:
+        instances: 1
+        storage:
+          size: 1Gi
+        managed:
+          roles:
+            - name: plan
+              ensure: present
+              login: true
+              passwordSecret:
+                name: plan-pr-db-user
+  # Atlas ska använda previewens egen DB-roll.
+  - target:
+      group: db.atlasgo.io
+      version: v1alpha1
+      kind: AtlasSchema
+      name: plan-db-schema
+    patch: |-
+      - op: replace
+        path: /spec/urlFrom/secretKeyRef/name
+        value: plan-pr-db-user
+
+labels:
+  - pairs:
+      preview: "true"
+      pr-number: "PR_NUMBER_PLACEHOLDER"
