@@ -183,6 +183,7 @@ finns i `index.md`.
 | [[notes/konventioner]] | Konventioner i repot | note | konventioner, stil, go | 2026-10-21 | 3 |
 | [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] | Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image | note | pxe, uboot, radxa, korrigering, projekt:simon | 2026-10-22 | 4 |
 | [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] | Kortkommando-hjälpen i HelpModal måste följa tangentändringar | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
+| [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] | Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål | note | feature, goals, tangentbord, status, projekt:plan | 2026-11-27 | 1 |
 | [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
@@ -253,7 +254,6 @@ finns i `index.md`.
 | [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] | Min kontaktlista - jag som nod i grafen (pappa) | note | pappa, relationer, graf, nätverk, introduktioner, modell, projekt:pappa | 2026-11-17 | 1 |
 | [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] | MiniMax M Plan inlagd i jamforelsen, M2.7 syns som uppskattad | note | dashboard, minimax, subscriptions, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] | Moderposten arkiveras när .eml-bilagorna har lagts in | note | feature, mail, imap, projekt:simon | 2026-11-19 | 1 |
-| [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] | Neon-anslutningen hänger när IPv6 prioriteras | note | neon, ipv6, postgres, plan, bug, projekt:plan | 2026-11-27 | 1 |
 | [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] | Neon API-token hamnade i dotfiles-git-historiken | note | säkerhet, dotfiles, secret, projekt:simon | 2026-11-17 | 1 |
 | [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] | NeuroQuant är ombyggt - tRPC-API och e-post-verifiering | note | neuro, scraper, neuroquant, projekt:neuro | 2026-11-03 | 2 |
 | [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]] | NeuroQuant-kontot låst av för många inloggningsförsök | note | bug, session, neuro, projekt:neuro | 2026-11-03 | 2 |
@@ -317,6 +317,7 @@ finns i `index.md`.
 | [[notes/priority-vyn-byter-namn-till-gor-nu]] | Priority-vyn byter namn till Gör nu | note | feature, frontend, constraints, projekt:plan | 2026-11-22 | 0 |
 | [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] | Priorityfilter ska behandla saknat started som ej påbörjat | note | bug, priority, filter, projekt:plan | 2026-11-17 | 1 |
 | [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] | Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte | note | kubernetes, talos, drift, projekt:plan | 2026-11-25 | 2 |
+| [[notes/prod-patch-utan-namespace-bryter-flux-builden]] | Prod-patch utan namespace bryter Flux-builden | note | bug, flux, kustomize, projekt:plan | 2026-11-27 | 1 |
 | [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]] | PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde | note | pxe, talos, infrastructure, worker-9, projekt:simon | 2026-11-17 | 2 |
 | [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]] | PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text | note | pxe, bug, uboot, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
 | [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] | PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC | note | pxe, talos, worker-2, felsokning, projekt:infrastructure | 2026-11-17 | 2 |
@@ -377,7 +378,6 @@ finns i `index.md`.
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
-| [[notes/skrivbordswidget-som-visar-gor-nu-malet]] | Skrivbordswidget som visar Gör-nu-målet | note | widget, quickshell, plan, gnistring, projekt:plan | 2026-11-27 | 2 |
 | [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] | Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan | note | plan, agent, verifiering, e2e, human-gate, kubernetes, wiki, projekt:simon | 2026-11-24 | 0 |
 | [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] | Snabbtillägg med mål och valbart föräldramål | note | feature, quick-add, mål, kalender, projekt:plan | 2026-11-20 | 0 |
 | [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] | Snabbtilläggets popup fick Escape och visuell polish | note | feature, quick-add, ui, projekt:plan | 2026-11-20 | 0 |
@@ -479,6 +479,7 @@ finns i `index.md`.
 | [[summaries/llm-wiki-karpathy]] | Sammanfattning: LLM Wiki (Karpathy) | summary | wiki, meta, kunskapsbas, llm, karpathy | 2026-11-23 | 4 |
 | [[summaries/longhorn-disk-guide]] | Sammanfattning: Diskar i Longhorn | summary | longhorn, storage, talos, kubernetes | 2026-10-24 | 3 |
 | [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]] | PinchBench: verifierade API-fakta och datafel i Value-vyn | summary | projekt:dashboard | 2026-11-26 | 1 |
+| [[summaries/prod-patch-utan-namespace-bryter-flux-builden]] | Sammanfattning: prod-patch utan namespace bryter Flux-builden | summary | flux, kustomize, bug, projekt:plan | 2026-11-27 | 1 |
 
 ## Taggar
 
@@ -528,7 +529,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (106)
+- `bug` (107)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -610,7 +611,7 @@ finns i `index.md`.
 - `extension` (2)
 - `extensions` (1)
 - `fakta` (4)
-- `feature` (86)
+- `feature` (87)
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (20)
@@ -619,7 +620,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (13)
+- `flux` (15)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -638,9 +639,8 @@ finns i `index.md`.
 - `github-actions` (3)
 - `gitops` (12)
 - `gmail` (1)
-- `gnistring` (1)
 - `go` (33)
-- `goals` (31)
+- `goals` (32)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -687,7 +687,7 @@ finns i `index.md`.
 - `interaktion` (1)
 - `introduktioner` (1)
 - `ip-address-pool` (1)
-- `ipv6` (3)
+- `ipv6` (2)
 - `it` (2)
 - `job` (2)
 - `jobb` (2)
@@ -712,7 +712,7 @@ finns i `index.md`.
 - `kubernetes` (27)
 - `kunskapsbas` (2)
 - `kurering` (1)
-- `kustomize` (5)
+- `kustomize` (7)
 - `kvadrat` (1)
 - `kvm` (6)
 - `kvot` (1)
@@ -771,7 +771,7 @@ finns i `index.md`.
 - `målsida` (1)
 - `navigation` (2)
 - `navigering` (2)
-- `neon` (10)
+- `neon` (9)
 - `neon.ts` (1)
 - `neovim` (5)
 - `networking` (3)
@@ -812,14 +812,14 @@ finns i `index.md`.
 - `pinchbench` (1)
 - `pipeline` (2)
 - `pki` (4)
-- `plan` (21)
+- `plan` (19)
 - `plan-api` (1)
 - `platser` (2)
 - `poe` (1)
 - `policy` (3)
 - `popcorntime` (3)
 - `port` (1)
-- `postgres` (8)
+- `postgres` (7)
 - `postgresql` (3)
 - `postmortem` (1)
 - `potential` (1)
@@ -842,7 +842,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (130)
+- `projekt:plan` (131)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -857,7 +857,6 @@ finns i `index.md`.
 - `pxe-first` (1)
 - `python` (1)
 - `quick-add` (3)
-- `quickshell` (1)
 - `radxa` (7)
 - `ranking` (4)
 - `rante` (2)
@@ -921,6 +920,7 @@ finns i `index.md`.
 - `state` (1)
 - `statistik` (4)
 - `stats` (1)
+- `status` (1)
 - `stil` (1)
 - `stk` (6)
 - `storage` (2)
@@ -942,7 +942,7 @@ finns i `index.md`.
 - `talos` (38)
 - `talosctl` (1)
 - `tangent` (1)
-- `tangentbord` (3)
+- `tangentbord` (4)
 - `teknik` (1)
 - `terminal` (2)
 - `test` (4)
@@ -983,7 +983,6 @@ finns i `index.md`.
 - `visionite` (1)
 - `wan` (1)
 - `webbapp` (1)
-- `widget` (1)
 - `wiki` (7)
 - `worker` (11)
 - `worker-1` (4)

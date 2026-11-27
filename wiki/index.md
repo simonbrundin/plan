@@ -8,7 +8,7 @@ och gå sedan ner på sidorna som är relevanta.
 |---|---|
 | Entiteter | 6 |
 | Koncept | 21 |
-| Sammanfattningar | 8 |
+| Sammanfattningar | 9 |
 | Noter | 438 |
 
 ## Entiteter
@@ -54,6 +54,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[summaries/flux-components]] - `infrastructure-flux/components/` — Alla HelmReleases och HelmRepositories. _(uppdaterad 2026-10-24)_
 - [[summaries/infrastructure-flux]] - `infrastructure-flux/README.md` — Arkitektur och konfigurationsguide. _(uppdaterad 2026-10-24)_
 - [[summaries/llm-wiki-karpathy]] - Karpathys LLM-wiki-mönster - en persistent, sammanhängande kunskapsgraf som LLMs underhåller, i tre lager. _(uppdaterad 2026-11-23)_
+- [[summaries/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars matchar kustomize ingenting och Flux stannar med en misslyckad build. _(uppdaterad 2026-11-27)_
 
 ## Noter
 
@@ -203,6 +204,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-25)_
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
+- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] - ÖNSKEMÅL: ett kortkommando som ändrar ett måls status (målfas) och som fungerar överallt där man kan markera mål - både för ett... _(uppdaterad 2026-11-27)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
@@ -276,7 +278,6 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] - De sista 76 Go-vägarna är nu portade till Rust: auth-endpoints (login, callback, dev-login, session, logout) och målens kompletteringa... _(uppdaterad 2026-11-26)_
 - [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] - Buggen hittades när användaren frågade vad "agentkörningar" betyder - frågan avslöjade _(uppdaterad 2026-11-26)_
 - [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] - I pi/.pi/agent/mcp.json och opencode/.config/opencode/opencode.json ligger Neon MCP-tokens i klartext, och de committades 2026-11-17 i do... _(uppdaterad 2026-11-17)_
-- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] - Symtom: Go API:t mot Neon (Neons dev-branch, `environments/dev/db/neon.env`) _(uppdaterad 2026-11-27)_
 - [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] - NeuroQuant har byggts om. _(uppdaterad 2026-11-03)_
 - [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]] - NeuroQuant-kontot låstes ("Account Locked", 100 misslyckade försök) 2026-11-02. _(uppdaterad 2026-11-03)_
 - [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]] - Bakgrund: 2026-11-03 kördes monitorn på pxe och skickade ett mejl 12:12 trots att portföljen inte hade publicerats om. _(uppdaterad 2026-11-03)_
@@ -339,6 +340,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/priority-vyn-byter-namn-till-gor-nu]] - Gör nu introducerades som ny route /now. _(uppdaterad 2026-11-22)_
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
 - [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] - Diagnos 2026-11-25 13:40 (prod-klustret, context admin@cluster1): _(uppdaterad 2026-11-25)_
+- [[notes/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars ma... _(uppdaterad 2026-11-27)_
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] - worker-2 startade om i en bootloop for att noden hade en Talos-installation pa eMMC - U-Boot ska boota disk forst. _(uppdaterad 2026-11-17)_
 - [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade v... _(uppdaterad 2026-11-20)_
 - [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]] - Radxa ROCK 4C+ har ingen UEFI-meny - U-Boot i SPI-flash väljer bootkälla via boot_targets. _(uppdaterad 2026-10-22)_
@@ -398,7 +400,6 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] - Kaskad som byggdes 2026-11-02 (kvall) i Skogsduvans HA, styrd av EN sanningskalla: template-sensorn sensor.hemmet_kallaste_rum (minsta te... _(uppdaterad 2026-11-17)_
 - [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] - 2026-11-03: I Home Assistants logg på Skogsduvan syntes WARNINGar från homeassistant.components.http.security_filter om filtrerade för... _(uppdaterad 2026-11-03)_
 - [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] - Kontext: HA Green (2026.10.1) i stugan, näs via 'ssh skogsduvan' -> Terminal&SSH-addon-container (core-ssh), config i /homeassistant (/c... _(uppdaterad 2026-11-03)_
-- [[notes/skrivbordswidget-som-visar-gor-nu-malet]] - En liten ruta nederst i mitten av skärmen visar det mål som ligger högst upp _(uppdaterad 2026-11-27)_
 - [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] - Efter sammanslagningen (mål 520) gick hela kedjan igenom i dev med mål #540: _(uppdaterad 2026-11-24)_
 - [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] - Snabbtillägget som öppnas med N stöder nu både händelser och mål via lägesknapparna/auto-läget. _(uppdaterad 2026-11-20)_
 - [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] - Snabbtillägget stängs nu med Escape från titel-, föräldrasök- och övriga popupfält. _(uppdaterad 2026-11-20)_
