@@ -3,9 +3,9 @@ title: Leader-key gjordes global (mellanslag + sekvenser på alla sidor)
 type: note
 tags: [feature, nuxt, keyboard, leader, projekt:plan]
 created: 2026-11-19
-updated: 2026-11-19
+updated: 2026-11-27
 status: active
-related: [notes/mellanslag-blockerades-i-malbeskrivningen]
+related: [notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning, notes/mellanslag-blockerades-i-malbeskrivningen]
 ---
 
 Leader-läget (mellanslag) fanns tidigare bara på målsidan och delades i två
@@ -39,5 +39,5 @@ den byggda appen - mellanslag öppnar modalen på /, /priority, /calendar och
 
 ## Relaterade
 
+- [[notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning]]
 - [[notes/mellanslag-blockerades-i-malbeskrivningen]]
-

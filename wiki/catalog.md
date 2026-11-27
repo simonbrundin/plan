@@ -26,7 +26,7 @@ finns i `index.md`.
 | [[concepts/openclaw]] | OpenClaw | concept | openclaw, ai, gateway, oidc, kubernetes | 2026-11-27 | 3 |
 | [[concepts/poolad-eller-direkt-anslutning-mot-neon]] | Poolad eller direkt anslutning mot Neon | concept | neon, postgres, pgbouncer, drift, projekt:tmp | 2026-11-02 | 1 |
 | [[concepts/sops]] | SOPS | concept | secrets, encryption, age, kubernetes, gitops | 2026-11-27 | 6 |
-| [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-26 | 9 |
+| [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-27 | 10 |
 | [[entities/flux-gitops]] | Flux GitOps | entity | flux, gitops, infrastructure, kubernetes | 2026-10-24 | 6 |
 | [[entities/hdmi-kvm-switch-16-port-labbet]] | HDMI KVM-switch 16 port (labbet) | entity | kvm, hardware, labb, projekt:infrastructure, projekt:simon | 2026-11-15 | 2 |
 | [[entities/home-assistant]] | Home Assistant | entity | home-assistant, ssh, hassio, supervisor, drift, projekt:simon | 2026-11-25 | 5 |
@@ -178,11 +178,13 @@ finns i `index.md`.
 | [[notes/klustret-anvander-sops-via-flux-inte-vault-eso]] | Klustret anvander SOPS via Flux - inte Vault/ESO | note | secrets, gitops, sops, projekt:infrastructure | 2026-11-23 | 0 |
 | [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] | Klustret har byggts om - bara kube-system, Flux och appar saknas (2026-11-23) | note | kubernetes, talos, gitops, projekt:infrastructure | 2026-11-25 | 1 |
 | [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] | Köda körningar är uttryckliga begäran - och en avslutad körning har alltid run_completed | note | plan, agent, jobb, worker, bugg, händelser, verifiering, projekt:simon | 2026-11-24 | 0 |
+| [[notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning]] | Kommandopaletten söker bland mål och händelser med fzf-liknande fuzzy-sökning | note | feature, nuxt, sök, kalender, projekt:plan | 2026-11-27 | 0 |
 | [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]] | "Konsulter i Sundsvall: antalet går inte att mäta - det som går att säga" | note | pappa, sourcing, statistik, scb, sundsvall, konsulter, projekt:pappa | 2026-11-18 | 2 |
 | [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]] | "[DEPRECATED] 50/50-uppdelning mellan konsulter och anställda - FEL, se den nya noten" | note | pappa, sourcing, statistik, scb, sundsvall, konsulter, projekt:pappa | 2026-11-18 | 3 |
 | [[notes/konventioner]] | Konventioner i repot | note | konventioner, stil, go | 2026-10-21 | 3 |
 | [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] | Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image | note | pxe, uboot, radxa, korrigering, projekt:simon | 2026-10-22 | 4 |
 | [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] | Kortkommando-hjälpen i HelpModal måste följa tangentändringar | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
+| [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] | Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål | note | feature, goals, tangentbord, status, projekt:plan | 2026-11-27 | 1 |
 | [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
@@ -194,7 +196,7 @@ finns i `index.md`.
 | [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]] | KVM-styrning från PXE-Pi:n (16-port HDMI KVM) | note | kvm, rs232, pxe, hardware, home-assistant, projekt:simon | 2026-11-20 | 4 |
 | [[notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar]] | Kvotmodell: anropskvoter och mjuka gränser kan inte räknas till dollar | note | dashboard, prenumeration, kvot, minmax, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/leader-d-oppnar-gemensam-datum-popup-for-mal]] | Leader D öppnar gemensam datum-popup för mål | note | feature, goals, keyboard, ui, projekt:plan | 2026-11-20 | 0 |
-| [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]] | Leader-key gjordes global (mellanslag + sekvenser på alla sidor) | note | feature, nuxt, keyboard, leader, projekt:plan | 2026-11-19 | 1 |
+| [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]] | Leader-key gjordes global (mellanslag + sekvenser på alla sidor) | note | feature, nuxt, keyboard, leader, projekt:plan | 2026-11-27 | 2 |
 | [[notes/leader-laget-kunde-inte-oppnas-efter-musklick-pa-en-knapp]] | Leader-läget kunde inte öppnas efter musklick på en knapp | note | bug, leader, keyboard, focus, projekt:plan | 2026-11-22 | 0 |
 | [[notes/learn-calibre-synk-och-automatisk-import-via-systemd]] | Learn: Calibre-synk och automatisk import via systemd | note | calibre, automatik, systemd, import, projekt:simon | 2026-11-03 | 1 |
 | [[notes/learn-designsystem-a3-folio-i-nuxt]] | Learn: designsystem A3 Folio i Nuxt | note | nuxt, design, rörelse, ui, projekt:simon | 2026-11-03 | 0 |
@@ -269,6 +271,7 @@ finns i `index.md`.
 | [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] | Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf) | note | omarchy, hyprland, bug, session, projekt:dotfiles | 2026-11-23 | 0 |
 | [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] | one.com lagrar mappar i NFD - normalisera i getFolderName | note | mail, imap, one.com, unicode, go, projekt:pappa | 2026-11-16 | 0 |
 | [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]] | OpenClaw vägrar binda till LAN utan auth - använd trusted-proxy via Envoy | note | openclaw, envoy-gateway, oidc, bug, projekt:simon | 2026-11-27 | 2 |
+| [[notes/orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go]] | Orchestratorns krokar och gate-flödet är död kod i Go | note | agent, rust, paritet, gates, projekt:plan | 2026-11-27 | 0 |
 | [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] | p-tangenten konfliktade med viktläget på /priority | note | bug, frontend, kortkommandon, projekt:plan | 2026-11-20 | 0 |
 | [[notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran]] | På Rock-plattorna finns ingen bootloader i hårdvaran | note | pxe, radxa, uboot, fakta, projekt:simon | 2026-10-22 | 4 |
 | [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]] | pappa: admin-token - ett stalle for token, inte handpallagning per miljo | note | pappa, hemligheter, drift, admin-token, projekt:pappa | 2026-11-17 | 4 |
@@ -306,7 +309,8 @@ finns i `index.md`.
 | [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] | Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg | note | ci, deploy, pipeline, docker, kustomize, projekt:plan | 2026-11-10 | 1 |
 | [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] | Planpris delat per körning går inte att jämföra mellan planer | note | dashboard, modeller, kvoter, enheter, presentation, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] | Platser på mål och kalenderhändelser (OpenSpec-change add-places) | note | feature, platser, goals, calendar, leaflet, bug, session, projekt:plan | 2026-11-20 | 1 |
-| [[notes/platsvaljaren-flyttade-till-leader-p]] | Platsväljaren flyttade till leader + p | note | ui, tangentbord, platser, session, projekt:plan | 2026-11-26 | 0 |
+| [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]] | Platsfiltret på /now: "Utan plats" visar mål utan plats | note | feature, now, goals, places, projekt:plan | 2026-11-27 | 2 |
+| [[notes/platsvaljaren-flyttade-till-leader-p]] | Platsväljaren flyttade till leader + p | note | ui, tangentbord, platser, session, projekt:plan | 2026-11-27 | 1 |
 | [[notes/popcorn-time-installerad-som-appimage-i-local]] | Popcorn Time installerad som AppImage i ~/.local | note | omarchy, workstation, popcorntime, appimage, projekt:infrastructure | 2026-11-17 | 1 |
 | [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] | Popcorn Time: 'remote movies API failed to respond' - orsak och fix | note | popcorntime, omarchy, bug, xdg, projekt:infrastructure | 2026-11-17 | 1 |
 | [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] | Popcorn Time: svenskt ljud finns INTE i katalogen - använd Torrentsamling (Torrent Collection) | note | popcorntime, svenska, torrent, bug, projekt:infrastructure | 2026-11-17 | 1 |
@@ -317,6 +321,7 @@ finns i `index.md`.
 | [[notes/priority-vyn-byter-namn-till-gor-nu]] | Priority-vyn byter namn till Gör nu | note | feature, frontend, constraints, projekt:plan | 2026-11-22 | 0 |
 | [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] | Priorityfilter ska behandla saknat started som ej påbörjat | note | bug, priority, filter, projekt:plan | 2026-11-17 | 1 |
 | [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] | Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte | note | kubernetes, talos, drift, projekt:plan | 2026-11-25 | 2 |
+| [[notes/prod-patch-utan-namespace-bryter-flux-builden]] | Prod-patch utan namespace bryter Flux-builden | note | bug, flux, kustomize, projekt:plan | 2026-11-27 | 1 |
 | [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]] | PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde | note | pxe, talos, infrastructure, worker-9, projekt:simon | 2026-11-17 | 2 |
 | [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]] | PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text | note | pxe, bug, uboot, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
 | [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] | PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC | note | pxe, talos, worker-2, felsokning, projekt:infrastructure | 2026-11-17 | 2 |
@@ -377,7 +382,7 @@ finns i `index.md`.
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
-| [[notes/skrivbordswidget-som-visar-gor-nu-malet]] | Skrivbordswidget som visar Gör-nu-målet | note | widget, quickshell, plan, gnistring, projekt:plan | 2026-11-27 | 2 |
+| [[notes/skrivbordswidget-som-visar-gor-nu-malet]] | Skrivbordswidget som visar Gör-nu-målet | note | widget, quickshell, plan, gnistring, projekt:plan | 2026-11-27 | 3 |
 | [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] | Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan | note | plan, agent, verifiering, e2e, human-gate, kubernetes, wiki, projekt:simon | 2026-11-24 | 0 |
 | [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] | Snabbtillägg med mål och valbart föräldramål | note | feature, quick-add, mål, kalender, projekt:plan | 2026-11-20 | 0 |
 | [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] | Snabbtilläggets popup fick Escape och visuell polish | note | feature, quick-add, ui, projekt:plan | 2026-11-20 | 0 |
@@ -416,6 +421,7 @@ finns i `index.md`.
 | [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] | Tilt-filbevakning kan dö - starta om tilt up | note | tilt, dev, infra, lesson, projekt:plan | 2026-11-26 | 2 |
 | [[notes/transienta-502-fra-go-api-t-nar-poddar-startar-om-i-dev-klustret]] | Transienta 502 fra Go API:t nar poddar startar om i dev-klustret | note | bug, frontend, go, kubernetes, projekt:stk | 2026-11-06 | 0 |
 | [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]] | Tre satt att PXE-boota ROCK 4C+ och varfor dhcp-metoden valdes | note | pxe, uboot, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
+| [[notes/tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27]] | Två agenter arbetade parallellt i infrastructure-repot 2026-11-27 | note | lesson, projekt:infrastructure, workflow | 2026-11-27 | 0 |
 | [[notes/twingate-anslutaren-for-10-10-10-0-24-var-nere-recovery-floden-kan-inte-koras-fran-arbetsstationen]] | Twingate-anslutaren for 10.10.10.0/24 var nere - recovery-floden kan inte koras fran arbetsstationen | note | incident, pxe, worker-1, twingate, projekt:infrastructure | 2026-11-17 | 1 |
 | [[notes/twingate-ressurserna-forsvann-pa-arbetsstationen-2026-11-04-hemnatet-10-1-1-1-och-datacenter-10-10-10-0-24-oppnarbara]] | Twingate-ressurserna forsvann pa arbetsstationen 2026-11-04 - hemnatet (10.1.1.1) och datacenter (10.10.10.0/24) oppnarbara | note | incident, twingate, unifi, projekt:infrastructure | 2026-11-13 | 0 |
 | [[notes/tydligare-hjalpmodal-for-kalenders-kortkommandon]] | Tydligare hjälpmodal för kalenders kortkommandon | note | kalender, ui, kortkommandon, projekt:plan | 2026-11-17 | 0 |
@@ -471,6 +477,7 @@ finns i `index.md`.
 | [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] | ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om | note | zitadel, oidc, lesson, migrering, projekt:simon | 2026-11-26 | 1 |
 | [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] | ZITADEL: importerad användare krävde init-code-event för att kunna logga in | note | zitadel, bug, lesson, projekt:simon | 2026-11-26 | 1 |
 | [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]] | "ZITADEL: den importerade användarens lösenordshash stämde inte med något känt lösenord" | note | zitadel, bug, lesson, projekt:simon | 2026-11-27 | 3 |
+| [[notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]] | Zitadel-lösenordet för simonbrundin återställdes till ett känt värde 2026-11-27 | note | zitadel, oidc, bug, lesson, projekt:infrastructure | 2026-11-27 | 0 |
 | [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] | 16x1 HDMI KVM - RS232/LAN-protokoll | summary | kvm, rs232, protokoll, projekt:simon | 2026-11-13 | 2 |
 | [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] | "Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL" | summary | learn, postgres, lagring, go | 2026-11-03 | 0 |
 | [[summaries/flux-components]] | Sammanfattning: Flux-komponenter | summary | flux, gitops, components, kubernetes | 2026-10-24 | 3 |
@@ -479,6 +486,7 @@ finns i `index.md`.
 | [[summaries/llm-wiki-karpathy]] | Sammanfattning: LLM Wiki (Karpathy) | summary | wiki, meta, kunskapsbas, llm, karpathy | 2026-11-23 | 4 |
 | [[summaries/longhorn-disk-guide]] | Sammanfattning: Diskar i Longhorn | summary | longhorn, storage, talos, kubernetes | 2026-10-24 | 3 |
 | [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]] | PinchBench: verifierade API-fakta och datafel i Value-vyn | summary | projekt:dashboard | 2026-11-26 | 1 |
+| [[summaries/prod-patch-utan-namespace-bryter-flux-builden]] | Sammanfattning: prod-patch utan namespace bryter Flux-builden | summary | flux, kustomize, bug, projekt:plan | 2026-11-27 | 1 |
 
 ## Taggar
 
@@ -489,7 +497,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (28)
+- `agent` (29)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (3)
@@ -528,7 +536,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (106)
+- `bug` (109)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -610,7 +618,7 @@ finns i `index.md`.
 - `extension` (2)
 - `extensions` (1)
 - `fakta` (4)
-- `feature` (86)
+- `feature` (89)
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (20)
@@ -619,7 +627,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (13)
+- `flux` (15)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -629,6 +637,7 @@ finns i `index.md`.
 - `fälla` (1)
 - `färg` (4)
 - `förenkling` (1)
+- `gates` (1)
 - `gateway` (2)
 - `gateway-api` (3)
 - `gdpr` (10)
@@ -640,7 +649,7 @@ finns i `index.md`.
 - `gmail` (1)
 - `gnistring` (1)
 - `go` (33)
-- `goals` (31)
+- `goals` (33)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -692,7 +701,7 @@ finns i `index.md`.
 - `job` (2)
 - `jobb` (2)
 - `k8s` (1)
-- `kalender` (35)
+- `kalender` (36)
 - `kameo` (7)
 - `kanata` (1)
 - `kanban` (1)
@@ -712,7 +721,7 @@ finns i `index.md`.
 - `kubernetes` (27)
 - `kunskapsbas` (2)
 - `kurering` (1)
-- `kustomize` (5)
+- `kustomize` (7)
 - `kvadrat` (1)
 - `kvm` (6)
 - `kvot` (1)
@@ -728,7 +737,7 @@ finns i `index.md`.
 - `leaflet` (1)
 - `learn` (6)
 - `leetcode` (4)
-- `lesson` (10)
+- `lesson` (12)
 - `lets-encrypt` (1)
 - `lightcraft` (1)
 - `linkedin` (2)
@@ -779,15 +788,15 @@ finns i `index.md`.
 - `neuroquant` (2)
 - `node-authentication` (1)
 - `notis` (1)
-- `now` (2)
+- `now` (3)
 - `ntp` (1)
-- `nuxt` (42)
+- `nuxt` (43)
 - `nätverk` (3)
 - `oauth` (2)
 - `oauth2` (3)
 - `observability` (1)
 - `offen` (1)
-- `oidc` (8)
+- `oidc` (9)
 - `omarchy` (11)
 - `omdöping` (1)
 - `one.com` (1)
@@ -799,7 +808,7 @@ finns i `index.md`.
 - `oversikt` (1)
 - `padel` (1)
 - `pappa` (30)
-- `paritet` (5)
+- `paritet` (6)
 - `pdf` (1)
 - `performance` (1)
 - `persistent-storage` (1)
@@ -812,6 +821,7 @@ finns i `index.md`.
 - `pinchbench` (1)
 - `pipeline` (2)
 - `pki` (4)
+- `places` (1)
 - `plan` (21)
 - `plan-api` (1)
 - `platser` (2)
@@ -837,12 +847,12 @@ finns i `index.md`.
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
 - `projekt:dotfiles` (5)
-- `projekt:infrastructure` (79)
+- `projekt:infrastructure` (81)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (130)
+- `projekt:plan` (136)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -887,7 +897,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (17)
+- `rust` (18)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)
@@ -921,6 +931,7 @@ finns i `index.md`.
 - `state` (1)
 - `statistik` (4)
 - `stats` (1)
+- `status` (1)
 - `stil` (1)
 - `stk` (6)
 - `storage` (2)
@@ -937,12 +948,13 @@ finns i `index.md`.
 - `systemd` (1)
 - `systemd-boot` (1)
 - `säkerhet` (9)
+- `sök` (1)
 - `tags` (1)
 - `tailwind` (2)
 - `talos` (38)
 - `talosctl` (1)
 - `tangent` (1)
-- `tangentbord` (3)
+- `tangentbord` (4)
 - `teknik` (1)
 - `terminal` (2)
 - `test` (4)
@@ -993,7 +1005,7 @@ finns i `index.md`.
 - `worker-8` (1)
 - `worker-9` (6)
 - `workers` (2)
-- `workflow` (2)
+- `workflow` (3)
 - `workmux` (1)
 - `workstation` (3)
 - `worktree` (1)
@@ -1002,6 +1014,6 @@ finns i `index.md`.
 - `xfs` (1)
 - `yaml` (1)
 - `z-index` (1)
-- `zitadel` (8)
+- `zitadel` (9)
 - `zoom` (6)
 - `återställning` (1)

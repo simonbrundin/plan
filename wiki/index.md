@@ -8,8 +8,8 @@ och gå sedan ner på sidorna som är relevanta.
 |---|---|
 | Entiteter | 6 |
 | Koncept | 21 |
-| Sammanfattningar | 8 |
-| Noter | 438 |
+| Sammanfattningar | 9 |
+| Noter | 445 |
 
 ## Entiteter
 
@@ -42,7 +42,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/openclaw]] - OpenClaw är AI-agent-gatewaysen i klustret - en gateway-pod med PVC, OIDC-skydd via Envoy Gateway och MiniMax som modellleverantör. _(uppdaterad 2026-11-27)_
 - [[concepts/poolad-eller-direkt-anslutning-mot-neon]] - Neon ger TVÅ endpoints för samma databas. _(uppdaterad 2026-11-02)_
 - [[concepts/sops]] - SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-age och provider: sops. _(uppdaterad 2026-11-27)_
-- [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-26)_
+- [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-27)_
 
 ## Sammanfattningar
 
@@ -54,6 +54,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[summaries/flux-components]] - `infrastructure-flux/components/` — Alla HelmReleases och HelmRepositories. _(uppdaterad 2026-10-24)_
 - [[summaries/infrastructure-flux]] - `infrastructure-flux/README.md` — Arkitektur och konfigurationsguide. _(uppdaterad 2026-10-24)_
 - [[summaries/llm-wiki-karpathy]] - Karpathys LLM-wiki-mönster - en persistent, sammanhängande kunskapsgraf som LLMs underhåller, i tre lager. _(uppdaterad 2026-11-23)_
+- [[summaries/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars matchar kustomize ingenting och Flux stannar med en misslyckad build. _(uppdaterad 2026-11-27)_
 
 ## Noter
 
@@ -201,8 +202,10 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kandidatlistan-heter-nu-personer]] - Sidan som tidigare hette /kandidater heter nu /personer (2026-11-17). _(uppdaterad 2026-11-17)_
 - [[notes/klustret-anvander-sops-via-flux-inte-vault-eso]] - Klustret (Talos, home) har EN secret-vag: SOPS + age, dekrypterat av Flux kustomize-controller via spec.decryption.provider: sops (patch ... _(uppdaterad 2026-11-23)_
 - [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-25)_
+- [[notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning]] - 2026-11-27: Ctrl+K (Cmd+K) öppnade en palett som bara sökte bland mål och navigeringslänkar. _(uppdaterad 2026-11-27)_
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
+- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] - ÖNSKEMÅL: ett kortkommando som ändrar ett måls status (målfas) och som fungerar överallt där man kan markera mål - både för ett... _(uppdaterad 2026-11-27)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
@@ -216,7 +219,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/kvotmodell-anropskvoter-och-mjuka-granser-kan-inte-raknas-till-dollar]] - MiniMax Token Plan och M Plan har kvoter i anrop per 5-timmarsfönster (1 500 anrop för Starter) respektive relativa enheter (Go 1x, Exp... _(uppdaterad 2026-11-26)_
 - [[notes/koda-korningar-ar-uttryckliga-begaran-och-en-avslutad-korning-har-alltid-run-completed]] - Två brister hittades när flera mål kördes parallellt i dev (AgentRun #65, #66, #67, #68, #69): _(uppdaterad 2026-11-24)_
 - [[notes/leader-d-oppnar-gemensam-datum-popup-for-mal]] - Leader + D (SPACE, sedan D) öppnar en gemensam popup på /goal/:id, /goals och /priority för markerat mål. _(uppdaterad 2026-11-20)_
-- [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]] - Leader-läget (mellanslag) fanns tidigare bara på målsidan och delades i två _(uppdaterad 2026-11-19)_
+- [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]] - Leader-läget (mellanslag) fanns tidigare bara på målsidan och delades i två _(uppdaterad 2026-11-27)_
 - [[notes/leader-laget-kunde-inte-oppnas-efter-musklick-pa-en-knapp]] - Symtom: på /now (och andra sidor) verkade leader-kommandona inte fungera - mellanslag öppnade inte leader-modalen. _(uppdaterad 2026-11-22)_
 - [[notes/learn-calibre-synk-och-automatisk-import-via-systemd]] - Användaren bad om att få sina Calibre-böcker in i Learn och att de skulle importeras automatiskt. _(uppdaterad 2026-11-03)_
 - [[notes/learn-designsystem-a3-folio-i-nuxt]] - Learn-SPA:t har fått en validerad designriktning 'A3 Folio' (väljd av användaren 2026-11-03 efter tre förslag: A1 varm studio, A2 nat... _(uppdaterad 2026-11-03)_
@@ -291,6 +294,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_
 - [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]] - OpenClaw crashloopar med "Refusing to bind gateway to lan without auth" eftersom auth.mode=none inte räcker. Lösningen är auth.mode=trusted-proxy plus att Envoy sätter x-forwarded-user. _(uppdaterad 2026-11-27)_
+- [[notes/orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go]] - Go-agentens orchestrator har en hel uppsättning krokar som aldrig körs: _(uppdaterad 2026-11-27)_
 - [[notes/wordlist-kallor]] - Ordlistan finns på två ställen och måste hållas i synk. _(uppdaterad 2026-10-21)_
 - [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] - Fynd: usePriorityToggle växlade prioritetssidan vid varje tryck på 'p', samtidigt som usePriorityMode försökte aktivera viktläget me... _(uppdaterad 2026-11-20)_
 - [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]] - 2026-11-02: pappa-databasen provisionerad på Neon (projekt 'konsulter', _(uppdaterad 2026-11-03)_
@@ -328,7 +332,8 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
 - [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] - Anledning: användaren frågade "menar du att Gemini 4 Neon är lika billig som MiniMax _(uppdaterad 2026-11-26)_
 - [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] - Title: Platser på mål och kalenderhändelser (ny OpenSpec-change add-places) _(uppdaterad 2026-11-20)_
-- [[notes/platsvaljaren-flyttade-till-leader-p]] - Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /no... _(uppdaterad 2026-11-26)_
+- [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]] - Symtom: med filtret 'Görbar här' på och 'Ingen plats vald' i rullmenyn 'Jag är här' tömdes listan - isDoableAtPlaceOrUnplaced retur... _(uppdaterad 2026-11-27)_
+- [[notes/platsvaljaren-flyttade-till-leader-p]] - Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /no... _(uppdaterad 2026-11-27)_
 - [[notes/popcorn-time-installerad-som-appimage-i-local]] - Efter qBittorrent (se noten om mime-kopplingar) bad användaren om Popcorn Time. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] - Symtom: Popcorn Time 0.5.1 (AppImage) startar men listan är tom och felet 'The remote movies API failed to respond' visas. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] - Fakta (verifierat 2026-10-24 mot API-servrarna fusme.link/jfper.link/uxert.link/yrkde.link): katalogen (Filmer/Serier/Anime) har INGA sve... _(uppdaterad 2026-11-17)_
@@ -339,6 +344,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/priority-vyn-byter-namn-till-gor-nu]] - Gör nu introducerades som ny route /now. _(uppdaterad 2026-11-22)_
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
 - [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] - Diagnos 2026-11-25 13:40 (prod-klustret, context admin@cluster1): _(uppdaterad 2026-11-25)_
+- [[notes/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars ma... _(uppdaterad 2026-11-27)_
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] - worker-2 startade om i en bootloop for att noden hade en Talos-installation pa eMMC - U-Boot ska boota disk forst. _(uppdaterad 2026-11-17)_
 - [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade v... _(uppdaterad 2026-11-20)_
 - [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]] - Radxa ROCK 4C+ har ingen UEFI-meny - U-Boot i SPI-flash väljer bootkälla via boot_targets. _(uppdaterad 2026-10-22)_
@@ -438,6 +444,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] - Symtom: en långvarig 'tilt up'-instans i environments/dev upphörde att bygga om bilden när källfiler ändrades (inga nya byggloggar, ... _(uppdaterad 2026-11-26)_
 - [[notes/transienta-502-fra-go-api-t-nar-poddar-startar-om-i-dev-klustret]] - I stk:s dev-klustret (namespace repo-template) proxar nginx i nuxt-imageen /api/ -> go-api-service:8080/. _(uppdaterad 2026-11-06)_
 - [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]] - Radxa:s egen PXE-wiki (wiki.radxa.com/Rockpi4/dev/u-boot/pxe) beskriver U-Boot-native PXE: TFTP med kernel+initrd+dtbs/ och pxelinux.cfg/... _(uppdaterad 2026-10-23)_
+- [[notes/tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27]] - Symtom: en parallell agents-session (startad 2026-11-26) var fortfarande aktiv 2026-11-27 och arbetade samtidigt i infrastructure-repot o... _(uppdaterad 2026-11-27)_
 - [[notes/twingate-anslutaren-for-10-10-10-0-24-var-nere-recovery-floden-kan-inte-koras-fran-arbetsstationen]] - Varfor: under forsoket att aterstalla worker-1 (10.10.10.21) visade det sig att hela datacentersegmentet 10.10.10.0/24 var onatbart fran ... _(uppdaterad 2026-11-17)_
 - [[notes/twingate-ressurserna-forsvann-pa-arbetsstationen-2026-11-04-hemnatet-10-1-1-1-och-datacenter-10-10-10-0-24-oppnarbara]] - Symtom: fran arbetsstationen (omarchy) nar inte 10.1.1.1 (UniFi-controller), _(uppdaterad 2026-11-13)_
 - [[notes/tydligare-hjalpmodal-for-kalenders-kortkommandon]] - Hjälpmodalen visar nu en separat kalendersektion när användaren står på /calendar. _(uppdaterad 2026-11-17)_
@@ -489,6 +496,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] - Status 2026-11-13: PXE-servern (10.10.10.2, UniFi-switch port 8, hostname 'pxe', MAC 2c:cf:67:43:f3:b0) var igang och serverkedaan ar hel... _(uppdaterad 2026-11-20)_
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
 - [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] - Vid ZITADELs officiella Cloud->self-hosted-import bevarades application-ID:n (t.ex. _(uppdaterad 2026-11-26)_
+- [[notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]] - Symtom: loginname 'simonbrundin' hittades inte ('User not found in the system') och efter att username bytts till 'simonbrundin' ville de... _(uppdaterad 2026-11-27)_
 - [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] - Den self-hosade ZITADEL-instansen på auth.simonbrundin.com hade en tom databas (ny installation 2026-11-26) och saknade den historiska i... _(uppdaterad 2026-11-26)_
 - [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] - Efter importen av en användare utan lösenord skapade ZITADEL eventet 'user.human.initialization.code.added', vilket sätter user state ... _(uppdaterad 2026-11-26)_
 - [[notes/aterkommande-mal-samma-malobjekt-med-upprepningsregel]] - Återkommande mål (t.ex. _(uppdaterad 2026-11-18)_

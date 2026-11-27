@@ -5,7 +5,7 @@ tags: [widget, quickshell, plan, gnistring, projekt:plan]
 created: 2026-11-27
 updated: 2026-11-27
 status: active
-related: [concepts/anvanda-agenter-i-plan, notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]
+related: [concepts/anvanda-agenter-i-plan, notes/neon-anslutningen-hanger-nar-ipv6-prioriteras, notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats, notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]
 ---
 
 # Skrivbordswidget för Gör-nu-målet (2026-11-27)
@@ -61,6 +61,12 @@ Fixen (PR #143) är `isDoableAtPlaceOrUnplaced` i `src/nuxt/app/utils/places.ts`
 flera platser har fortfarande OR-semantik, men ett mål utan platser räknas
 som görbart överallt. Widgetens `nowlist.js` har samma regel, så appen och
 widgeten visar exakt samma lista (14 mål, toppmål id 44).
+
+Senare (2026-11-27) utökades regeln: är **ingen** plats vald ("Utan plats")
+visas bara mål utan plats - de är de enda som är "görbara" när man inte vet
+var man befinner sig. Platsfiltret i appen är dessutom påslaget som
+standard, så appen och widgeten filtrerar likadant. Se
+[[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]].
 
 ## Vad siffran till höger betyder
 
@@ -161,5 +167,7 @@ om den saknas (`op item create --category=API Credential ...`).
 
 ## Relaterade
 
+- [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
+- [[notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats]]
 - [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]]
 - [[concepts/anvanda-agenter-i-plan]]

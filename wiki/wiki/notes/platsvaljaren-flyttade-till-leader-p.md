@@ -3,8 +3,9 @@ title: Platsväljaren flyttade till leader + p
 type: note
 tags: [ui, tangentbord, platser, session, projekt:plan]
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 status: active
+related: [notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]
 ---
 
 Kortkommandot för att sätta plats på ett mål är nu leader + p (Space, p) och fungerar på alla sidor där ett mål är markerat: /now, /goals och målsidan (/goal/:id).
@@ -14,3 +15,8 @@ Varför: 'p' var reserverat för platsväljaren på målsidan, vilket gjorde att
 Hur det är löst: ny global composable useGoalPlacePicker (state utanför funktionen, som useGoalTagPicker) och ny komponent GoalPlacePicker som renderas i layouts/default.vue. Varje sida registrerar ett leader-kommando 'p' via registerPageCommands och pekar på sitt markerade mål. Efter sparande skrivs platserna tillbaka i sidans eget urval via placePicker.lastSaved/savedRevision.
 
 Följd: isDoableAtPlaceOrUnplaced i app/utils/places.ts - mål utan någon plats är nu också 'görbara' och visas alltid i filtret 'Görbar här' på /now, eftersom de inte är bundna till en plats.
+
+## Relaterade
+
+- [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
+

@@ -3124,3 +3124,58 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/kunskaps-wiki -> notes/flyttalsparitet-och-orchestratorns-doda-gate-flode
 
+
+## [2026-11-27] ingest | create notes/tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27
+- [create] [[notes/tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27]] — ny sida från inboxen
+- [create] [[notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]] — ny sida från inboxen
+- [archive] 2026-11-27-tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27.md
+- [archive] 2026-11-27-zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27.md
+## [2026-11-27] ingest | create notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27
+
+
+## [2026-11-27] link | concepts/zitadel -> notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27
+
+
+## [2026-11-27] ingest | create notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning
+- [create] [[notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning]] — ny sida från inboxen
+- [archive] 2026-11-27-kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning.md
+
+
+## [2026-11-27] link | notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor -> notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning
+
+
+## [2026-11-27] ingest | create notes/orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go
+- [create] [[notes/orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go]] — ny sida från inboxen
+- [archive] 2026-11-27-orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go.md
+
+
+## [2026-11-27] ingest | create notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats
+- [create] [[notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats]] — ny sida från inboxen
+- [archive] 2026-11-27-platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats.md
+
+
+## [2026-11-27] link | notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats -> notes/skrivbordswidget-som-visar-gor-nu-malet
+
+
+## [2026-11-27] link | notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats -> notes/platsvaljaren-flyttade-till-leader-p
+
+
+## [2026-11-27] link | notes/skrivbordswidget-som-visar-gor-nu-malet -> notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats
+
+
+## [2026-11-27] source | 2026-11-27-prod-patch-utan-namespace-bryter-flux-builden.md
+
+
+## [2026-11-27] ingest | create notes/prod-patch-utan-namespace-bryter-flux-builden
+- [create] [[notes/prod-patch-utan-namespace-bryter-flux-builden]] — ny sida från inboxen
+- [archive] 2026-11-27-prod-patch-utan-namespace-bryter-flux-builden.md
+
+
+## [2026-11-27] link | summaries/prod-patch-utan-namespace-bryter-flux-builden -> notes/prod-patch-utan-namespace-bryter-flux-builden
+
+
+## [2026-11-27] link | notes/skrivbordswidget-som-visar-gor-nu-malet -> notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats
+
+
+## [2026-11-27] link | notes/platsvaljaren-flyttade-till-leader-p -> notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats
+

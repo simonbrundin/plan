@@ -177,11 +177,13 @@ graph LR
   n_notes_klustret_anvander_sops_via_flux_inte_vault_eso["Klustret anvander SOPS via Flux - inte Vault/ESO"]
   n_notes_klustret_har_byggts_om_bara_kube_system_flux_och_appar_saknas_2026_11_23["Klustret har byggts om - bara kube-system, Flux och appar saknas (2026-11-23)"]
   n_notes_koda_korningar_ar_uttryckliga_begaran_och_en_avslutad_korning_har_alltid_run_completed["Köda körningar är uttryckliga begäran - och en avslutad körning har alltid run_completed"]
+  n_notes_kommandopaletten_soker_bland_mal_och_handelser_med_fzf_liknande_fuzzy_sokning["Kommandopaletten söker bland mål och händelser med fzf-liknande fuzzy-sökning"]
   n_notes_konsulter_i_sundsvall_antalet_gar_inte_att_mata_det_som_gar_att_saga["'Konsulter i Sundsvall: antalet går inte att mäta - det som går att säga'"]
   n_notes_konsulter_vs_anstallda_i_sundsvall_halva_it_styrkan_sitter_i_konsultnara_bolag["'[DEPRECATED] 50/50-uppdelning mellan konsulter och anställda - FEL, se den nya noten'"]
   n_notes_konventioner["Konventioner i repot"]
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image["Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image"]
   n_notes_kortkommando_hjalpen_i_helpmodal_maste_folja_tangentandringar["Kortkommando-hjälpen i HelpModal måste följa tangentändringar"]
+  n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart["Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål"]
   n_notes_kostnad_och_budget_for_agentkorningar["Kostnad och budget för agentkörningar"]
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force["Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force"]
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna["Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna"]
@@ -268,6 +270,7 @@ graph LR
   n_notes_omarchy_idle_lasning_stangs_av_via_shell_json_inte_hypridle_conf["Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf)"]
   n_notes_one_com_lagrar_mappar_i_nfd_normalisera_i_getfoldername["one.com lagrar mappar i NFD - normalisera i getFolderName"]
   n_notes_openclaw_gateway_refuserar_bind_lan_utan_auth["OpenClaw vägrar binda till LAN utan auth - använd trusted-proxy via Envoy"]
+  n_notes_orchestratorns_krokar_och_gate_flodet_ar_dod_kod_i_go["Orchestratorns krokar och gate-flödet är död kod i Go"]
   n_notes_p_tangenten_konfliktade_med_viktlaget_pa_priority["p-tangenten konfliktade med viktläget på /priority"]
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran["På Rock-plattorna finns ingen bootloader i hårdvaran"]
   n_notes_pappa_admin_token_ett_stalle_for_token_inte_handpallagning_per_miljo["pappa: admin-token - ett stalle for token, inte handpallagning per miljo"]
@@ -305,6 +308,7 @@ graph LR
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg["Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg"]
   n_notes_planpris_delat_per_korning_gar_inte_att_jamfora_mellan_planer["Planpris delat per körning går inte att jämföra mellan planer"]
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places["Platser på mål och kalenderhändelser (OpenSpec-change add-places)"]
+  n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats["Platsfiltret på /now: 'Utan plats' visar mål utan plats"]
   n_notes_platsvaljaren_flyttade_till_leader_p["Platsväljaren flyttade till leader + p"]
   n_notes_popcorn_time_installerad_som_appimage_i_local["Popcorn Time installerad som AppImage i ~/.local"]
   n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix["Popcorn Time: 'remote movies API failed to respond' - orsak och fix"]
@@ -316,6 +320,7 @@ graph LR
   n_notes_priority_vyn_byter_namn_till_gor_nu["Priority-vyn byter namn till Gör nu"]
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat["Priorityfilter ska behandla saknat started som ej påbörjat"]
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte["Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte"]
+  n_notes_prod_patch_utan_namespace_bryter_flux_builden["Prod-patch utan namespace bryter Flux-builden"]
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode["PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde"]
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text["PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text"]
   n_notes_pxe_bootloop_initramfs_startar_om_for_att_boota_installerad_talos_pa_emmc["PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC"]
@@ -415,6 +420,7 @@ graph LR
   n_notes_tilt_filbevakning_kan_do_starta_om_tilt_up["Tilt-filbevakning kan dö - starta om tilt up"]
   n_notes_transienta_502_fra_go_api_t_nar_poddar_startar_om_i_dev_klustret["Transienta 502 fra Go API:t nar poddar startar om i dev-klustret"]
   n_notes_tre_satt_att_pxe_boota_rock_4c_och_varfor_dhcp_metoden_valdes["Tre satt att PXE-boota ROCK 4C+ och varfor dhcp-metoden valdes"]
+  n_notes_tva_agenter_arbetade_parallellt_i_infrastructure_repot_2026_11_27["Två agenter arbetade parallellt i infrastructure-repot 2026-11-27"]
   n_notes_twingate_anslutaren_for_10_10_10_0_24_var_nere_recovery_floden_kan_inte_koras_fran_arbetsstationen["Twingate-anslutaren for 10.10.10.0/24 var nere - recovery-floden kan inte koras fran arbetsstationen"]
   n_notes_twingate_ressurserna_forsvann_pa_arbetsstationen_2026_11_04_hemnatet_10_1_1_1_och_datacenter_10_10_10_0_24_oppnarbara["Twingate-ressurserna forsvann pa arbetsstationen 2026-11-04 - hemnatet (10.1.1.1) och datacenter (10.10.10.0/24) oppnarbara"]
   n_notes_tydligare_hjalpmodal_for_kalenders_kortkommandon["Tydligare hjälpmodal för kalenders kortkommandon"]
@@ -470,6 +476,7 @@ graph LR
   n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om["ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om"]
   n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in["ZITADEL: importerad användare krävde init-code-event för att kunna logga in"]
   n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord["'ZITADEL: den importerade användarens lösenordshash stämde inte med något känt lösenord'"]
+  n_notes_zitadel_losenordet_for_simonbrundin_aterstalldes_till_ett_kant_varde_2026_11_27["Zitadel-lösenordet för simonbrundin återställdes till ett känt värde 2026-11-27"]
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll["16x1 HDMI KVM - RS232/LAN-protokoll"]
   n_summaries_2026_11_03_learn_kunskapsbasen_kan_lagras_i_postgresql["'Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL'"]
   n_summaries_flux_components["Sammanfattning: Flux-komponenter"]
@@ -478,6 +485,7 @@ graph LR
   n_summaries_llm_wiki_karpathy["Sammanfattning: LLM Wiki (Karpathy)"]
   n_summaries_longhorn_disk_guide["Sammanfattning: Diskar i Longhorn"]
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn["PinchBench: verifierade API-fakta och datafel i Value-vyn"]
+  n_summaries_prod_patch_utan_namespace_bryter_flux_builden["Sammanfattning: prod-patch utan namespace bryter Flux-builden"]
   n_concepts_anvanda_agenter_i_plan --> n_notes_dokumentationssidor_i_granssnittet_docs
   n_concepts_anvanda_agenter_i_plan --> n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln
   n_concepts_anvanda_agenter_i_plan --> n_notes_agent_dock_pa_malsiden_ersatter_de_tre_agentpanelerna
@@ -553,6 +561,7 @@ graph LR
   n_concepts_zitadel --> n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export
   n_concepts_zitadel --> n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om
   n_concepts_zitadel --> n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in
+  n_concepts_zitadel --> n_notes_zitadel_losenordet_for_simonbrundin_aterstalldes_till_ett_kant_varde_2026_11_27
   n_concepts_zitadel --> n_concepts_authentik
   n_concepts_zitadel --> n_concepts_envoy_gateway
   n_concepts_zitadel --> n_concepts_cloudnative_pg
@@ -764,6 +773,7 @@ graph LR
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_rock_4c_och_4se_har_ingen_spi_flash_i_fabrik_u_boot_ligger_pa_microsd_emmc
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
+  n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart --> n_concepts_anvanda_agenter_i_plan
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force --> n_notes_synk_hallbokningar_kommunens_actor_smartbook_matchi
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
@@ -782,6 +792,7 @@ graph LR
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_notes_picokvm_luckfox_startar_inte_i_labbet_lite_saknar_emmc_ingen_poe
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_notes_simon_kvm_cli_kommando_for_att_byta_hdmi_kvm_port_fran_pxe_vard
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll
+  n_notes_leader_key_gjordes_global_mellanslag_sekvenser_pa_alla_sidor --> n_notes_kommandopaletten_soker_bland_mal_och_handelser_med_fzf_liknande_fuzzy_sokning
   n_notes_leader_key_gjordes_global_mellanslag_sekvenser_pa_alla_sidor --> n_notes_mellanslag_blockerades_i_malbeskrivningen
   n_notes_learn_calibre_synk_och_automatisk_import_via_systemd --> n_notes_learn_kunskapsbasen_kan_lagras_i_postgresql
   n_notes_learn_korsanalys_av_varje_bok_mot_den_samlade_kunskapsbasen --> n_notes_learn_kunskapsbasen_kan_lagras_i_postgresql
@@ -927,6 +938,9 @@ graph LR
   n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places --> n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder
+  n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats --> n_notes_platsvaljaren_flyttade_till_leader_p
+  n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats --> n_notes_skrivbordswidget_som_visar_gor_nu_malet
+  n_notes_platsvaljaren_flyttade_till_leader_p --> n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats
   n_notes_popcorn_time_installerad_som_appimage_i_local --> n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix
   n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix --> n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection
   n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection --> n_notes_qbittorrent_ar_standardhanterare_for_torrent_och_magnet_lankar
@@ -936,6 +950,7 @@ graph LR
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat --> n_notes_mal_kan_ha_due_datum_deadline
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_entities_kubernetes
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_notes_klustret_har_byggts_om_bara_kube_system_flux_och_appar_saknas_2026_11_23
+  n_notes_prod_patch_utan_namespace_bryter_flux_builden --> n_summaries_prod_patch_utan_namespace_bryter_flux_builden
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_entities_pxe_server
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_notes_recovery_av_en_rock_worker_kraver_fysisk_rattning_esp_filen_pa_emmc_fangar_booten
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text --> n_entities_pxe_server
@@ -1043,6 +1058,7 @@ graph LR
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
   n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_concepts_anvanda_agenter_i_plan
   n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras
+  n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_sops
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_flux_operator
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
@@ -1184,11 +1200,12 @@ graph LR
   n_summaries_longhorn_disk_guide --> n_concepts_flux_operator
   n_summaries_longhorn_disk_guide --> n_concepts_longhorn
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn --> n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv
+  n_summaries_prod_patch_utan_namespace_bryter_flux_builden --> n_notes_prod_patch_utan_namespace_bryter_flux_builden
 ```
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1288,6 +1305,7 @@ graph LR
 - **notes/kandidatlistan-heter-nu-personer** <- [[notes/nuxt-sidomeny-kandidater-som-startsida-i-pappa]]
 - **notes/klustret-anvander-sops-via-flux-inte-vault-eso** <- [[concepts/sops]], [[entities/kubernetes]]
 - **notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23** <- [[entities/kubernetes]], [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]]
+- **notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning** <- [[notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor]]
 - **notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga** <- [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]]
 - **notes/konventioner** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image** <- [[entities/pxe-server]]
@@ -1381,6 +1399,8 @@ graph LR
 - **notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]], [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]]
 - **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
 - **notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places** <- [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]]
+- **notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats** <- [[notes/platsvaljaren-flyttade-till-leader-p]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
+- **notes/platsvaljaren-flyttade-till-leader-p** <- [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
 - **notes/popcorn-time-installerad-som-appimage-i-local** <- [[notes/qbittorrent-installerad-pa-workstation-omarchy-arch]]
 - **notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix** <- [[notes/popcorn-time-installerad-som-appimage-i-local]]
 - **notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection** <- [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]]
@@ -1389,6 +1409,7 @@ graph LR
 - **notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko** <- [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
 - **notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
 - **notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte** <- [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]]
+- **notes/prod-patch-utan-namespace-bryter-flux-builden** <- [[summaries/prod-patch-utan-namespace-bryter-flux-builden]]
 - **notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode** <- [[entities/pxe-server]]
 - **notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text** <- [[entities/pxe-server]]
 - **notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc** <- [[entities/pxe-server]]
@@ -1442,7 +1463,7 @@ graph LR
 - **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
-- **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]]
+- **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]], [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]
 - **notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden** <- [[concepts/sops]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **notes/sortering-av-grundmal-pa-goals-med-piltangenterna** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]]
 - **notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan** <- [[notes/barnordning-foljer-beroenden-i-malsidan]], [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]], [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
@@ -1500,6 +1521,7 @@ graph LR
 - **notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om** <- [[concepts/zitadel]], [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
 - **notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in** <- [[concepts/zitadel]], [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
 - **notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord** <- [[concepts/zitadel]], [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]]
+- **notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27** <- [[concepts/zitadel]]
 - **summaries/16x1-hdmi-kvm-rs232-lan-protokoll** <- [[entities/hdmi-kvm-switch-16-port-labbet]], [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql** <- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]]
 - **summaries/flux-components** <- [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]]
@@ -1508,3 +1530,4 @@ graph LR
 - **summaries/llm-wiki-karpathy** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **summaries/longhorn-disk-guide** <- [[concepts/longhorn]], [[entities/talos-linux]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]]
 - **summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn** <- [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]]
+- **summaries/prod-patch-utan-namespace-bryter-flux-builden** <- [[notes/prod-patch-utan-namespace-bryter-flux-builden]]

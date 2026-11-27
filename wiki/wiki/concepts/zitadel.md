@@ -5,8 +5,8 @@ summary: Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-
 tags: [zitadel, identity-provider, oidc, sso, authentication, rbac]
 sources: [infrastructure-flux/components/zitadel/, infrastructure-flux/components/auth/, talos/patches/controlplane.yaml]
 created: 2026-10-23
-updated: 2026-11-26
-related: [concepts/oidc, notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export, notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om, notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]
+updated: 2026-11-27
+related: [concepts/oidc, notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export, notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om, notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in, notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]
 ---
 
 # Zitadel
@@ -162,6 +162,7 @@ management-API:t svarar `User could not be found` för dem.
 
 ## Relaterade
 
+- [[notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]]
 - [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
 - [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
 - [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]]
