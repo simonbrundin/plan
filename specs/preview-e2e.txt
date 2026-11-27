@@ -1,0 +1,2 @@
+Test av PR-previewens livscykel.
+Skapad för att verifiera att en ny preview deployas och städas bort korrekt.
