@@ -24,8 +24,8 @@ en stabil OAuth-redirect-URI och bröt bookmarks och cookies mellan omstarter.
            ▼
 ┌─────────────────────┐   cookie + Bearer   ┌──────────────────────┐
 │  Nuxt (Nitro)       │ ───────────────────▶ │  Go API (Gin)        │
-│  :3100              │   tunn proxy        │  :4100               │
-│  /api/proxy/*       │                     │  /api/v1/*           │
+│  :3100              │   direkt + CORS      │  :4100               │
+│  /api/v1/*          │                     │  /api/v1/*           │
 └──────────┬──────────┘                     └──────────┬───────────┘
            │                                           │
            │  sessionkoken i cookie                    ▼
@@ -41,9 +41,9 @@ Go äger hela inloggningen:
 
 | Steg                                   | Vem gör vad                                                                                                 |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `/auth/login` (Nuxt)                   | Vidarebefordras till Go, som bygger Zitadel-URL:en och sätter `oauth_state`                                 |
+| `/api/v1/auth/login` (Go)              | Bygger Zitadel-URL:en och sätter `oauth_state`                                                               |
 | Zitadel → `/api/v1/auth/callback` (Go) | Byter code mot token, skapar session, **sätter `plan_session` + `plan_user`** och redirectar till apparoten |
-| `/api/proxy/*` (Nuxt)                  | Vidarebefordrar cookien till Go - Go validerar sessionen                                                    |
+| `/api/v1/*` (webbläsaren)              | Anropas direkt med sessioncookien - Go validerar sessionen                                                   |
 | `/api/v1/auth/session` (Go)            | Returnerar användaren bakom sessionen                                                                       |
 | `/api/v1/auth/logout` (Go)             | Raderar sessionen och rensar cookierna                                                                      |
 
@@ -53,15 +53,26 @@ Sessionen godkänds via `plan_session`-cookien **eller** `Authorization: Bearer`
 `plan_user` är en läsbar hint-cookie (sub + email) som bara gör att UI:t kan
 rendera direkt - servern är alltid auktoritativ. Den sätts också av Go.
 
-Nuxt:s proxy ligger i `server/utils/goApi.ts` och sköter tre saker:
-vidarebefordrar `Cookie`, kopierar tillbaka `Set-Cookie` och `Location`, och
-följer inte redirects själv (annars skulle OAuth-flödet köras server-side).
+Webbläsaren anropar API:t direkt - det finns ingen proxy i Nuxt. I dev är
+det ett cross-origin-anrop (`:3100` mot `:4100`), så API:t måste svara med
+CORS-headrar för appens origin. Det styrs av `CORS_ALLOWED_ORIGINS` i
+`patches/api-deployment.yaml`:
+
+```yaml
+- name: CORS_ALLOWED_ORIGINS
+  value: "http://localhost:3100"
+```
+
+Origin echas tillbaka - aldrig `*` - eftersom anropet bär sessioncookien och
+webbläsaren blockerar credentialed requests mot en wildcard.
 
 ### URL:er
 
-- Serverinternt: `NUXT_GO_API_INTERNAL_URL`
-  (`http://go-api-service.plan:8080/api/v1`)
 - Webbläsaren: `NUXT_PUBLIC_GO_API_URL` (`http://localhost:4100/api/v1`)
+- Serverinternt: `NUXT_GO_API_INTERNAL_URL`
+  (`http://go-api-service.plan:8080/api/v1`) - används bara av Nuxt:s
+  serverdel, som pratar med agent-API:t och kontrollerar sessionen
+  server-till-server.
 
 ## Inloggning i dev
 
@@ -71,11 +82,13 @@ följer inte redirects själv (annars skulle OAuth-flödet köras server-side).
 
 Flödet:
 
-1. Nuxt:s route `/auth/dev-login` anropar `POST /api/v1/auth/dev-login` på Go
-   API:t (intern URL).
+1. Sidans knapp är ett formulär som postar till `POST /api/v1/auth/dev-login`
+   på Go API:t - webbläsaren navigerar dit (ingen XHR, så CORS spelar ingen
+   roll).
 2. Go API:t skapar/findar användaren `dev-user` (`dev@plan.local`) och skapar en
    riktig session i tabellen `sessions`.
-3. Nuxt sätter `plan_session` (httpOnly) + `plan_user` och redirectar till `/`.
+3. Go sätter `plan_session` (httpOnly) + `plan_user` och redirectar till
+   `FRONTEND_URL` (appen).
 
 Endpointen är bara aktiverad när `DEV_AUTH_ENABLED=true` (sätts i
 `patches/api-deployment.yaml` för dev). I prod svarar den 404.
@@ -90,16 +103,17 @@ registrerat i Zitadel:
 http://localhost:4100/api/v1/auth/callback
 ```
 
-Flödet: `/auth/login` (Nuxt) → Go bygger authorize-URL:en med `redirect_uri` (=
-`ZITADEL_REDIRECT_URI`) och PKCE → Zitadel → callback till Go → Go skapar
-sessionen, sätter cookierna och redirectar till `FRONTEND_URL`.
+Flödet: `/api/v1/auth/login` (webbläsaren navigerar dit) → Go bygger
+authorize-URL:en med `redirect_uri` (= `ZITADEL_REDIRECT_URI`) och PKCE →
+Zitadel → callback till Go → Go skapar sessionen, sätter cookierna och
+redirectar till `FRONTEND_URL`.
 
 `redirect_uri` måste vara **identisk** i authorize- och token-bytet, annars
 avvisar Zitadel bytet. Båda läser `ZITADEL_REDIRECT_URI`.
 
 Cookie-sättning: Go sätter `plan_session` för värdet `localhost` - porten spelar
 ingen roll för cookies, så även om cookien sätts i svaret från API:t (port 4100)
-skickas den till Nuxt (port 3100).
+skickas den till appen (port 3100).
 
 ## Kör
 

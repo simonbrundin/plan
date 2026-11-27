@@ -9,8 +9,11 @@ import {
 
 /**
  * Authen ligger i Go API:t: det skapar och validerar sessionen och sätter
- * cookierna. Nuxt är bara en tunn framför gång - den vidarebefordrar
- * requesten och kopierar tillbaka svar, cookies och redirects.
+ * cookierna.
+ *
+ * Webbläsaren anropar API:t direkt - den här filen används bara av Nuxt:s
+ * serverdel, som kontrollerar sessionen server-till-server innan den pratar
+ * med agent-API:t (agentens nyckel får inte nå webbläsaren).
  */
 
 // goApiBase returns the server-side URL to the Go API.

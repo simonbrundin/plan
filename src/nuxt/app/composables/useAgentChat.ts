@@ -1,9 +1,12 @@
 import type { AgentApproval, AgentConversation, AgentMessage } from '~/types/agent';
+import { apiRequest } from '~/utils/api';
 
 /**
  * Chatt med agenten - Plan är gränssnittet, Slack används inte.
  *
- * Samtliga anrop går via Nuxt:s server routes, som proxar till agent-API:t.
+ * Samtalen går via Nuxt:s server routes, som proxar till agent-API:t (nyckeln
+ * ska inte nå webbläsaren). Godkännanden och beslut ligger i Plan API:t och
+ * anropas direkt.
  */
 export function useAgentChat(goalId: Ref<number | undefined>) {
   const messages = ref<AgentMessage[]>([]);
@@ -40,7 +43,7 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
   const loadApproval = async () => {
     if (!goalId.value) return;
     try {
-      const response = await $fetch<{ approvals: AgentApproval[] }>('/api/agent/approvals');
+      const response = await apiRequest<{ approvals: AgentApproval[] }>('agent-approvals');
       const match = (response?.approvals ?? []).find(
         (item) => item.goal_id === goalId.value,
       );
@@ -188,7 +191,7 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
     const pending = approval.value;
     if (!pending) return;
     try {
-      await $fetch(`/api/agent/approvals/${pending.id}/decision`, {
+      await apiRequest(`agent-approvals/${pending.id}/decision`, {
         method: 'POST',
         body: { decision, feedback },
       });

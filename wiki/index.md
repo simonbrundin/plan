@@ -82,7 +82,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] - Arbetstationen (datorn jag sitter pa) ar Omarchy, dvs Arch-baserat. _(uppdaterad 2026-10-24)_
 - [[notes/arkitektur]] - TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session. _(uppdaterad 2026-11-26)_
 - [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] - Källa: https://levelup.gitconnected.com/build-an-agentic-software-factory-f995f79221ef (Akshay Kokane, del 3 i AI-Native SWE-serien). _(uppdaterad 2026-11-23)_
-- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] - Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10). _(uppdaterad 2026-11-17)_
+- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] - Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10). _(uppdaterad 2026-11-27)_
 - [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] - Första implementationen sökte Iconify med hela målens titel. _(uppdaterad 2026-11-17)_
 - [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] - Verifierat 2026-11-24 i ~/repos/plan med mål #540: Plan-mål -> köad AgentRun -> Kubernetes Job -> förslag -> human gate -> isolerad w... _(uppdaterad 2026-11-24)_
 - [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] - Önskemål: överallt där ett mål visas ska det framgå hur många barn (undermål) det har. _(uppdaterad 2026-11-22)_
@@ -203,6 +203,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]] - Observation 2026-11-23 kl 22:00: klustret (context admin@cluster1-2) har ENDAST kube-system. _(uppdaterad 2026-11-25)_
 - [[notes/konventioner]] - Språk, struktur, test- och dokumentationskonventioner för agents-repot. _(uppdaterad 2026-10-21)_
 - [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] - Fakta: pxe/Bootloaders/rock4c-plus.bin är INTE en SPI-image. _(uppdaterad 2026-10-22)_
+- [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] - ÖNSKEMÅL: ett kortkommando som ändrar ett måls status (målfas) och som fungerar överallt där man kan markera mål - både för ett... _(uppdaterad 2026-11-27)_
 - [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] - Regel: varje nytt eller ändrat kortkommando i plan-appen ska uppdatera src/nuxt/app/components/HelpModal.vue i samma PR. _(uppdaterad 2026-11-20)_
 - [[notes/kostnad-och-budget-for-agentkorningar]] - Plan äger kostnaden, agenten rapporterar bara användningen. _(uppdaterad 2026-11-24)_
 - [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] - Problem: SOPS-krypterade värden applicerades rakt av i dev-klustret (ingen Flux där). _(uppdaterad 2026-11-06)_
@@ -276,7 +277,6 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] - De sista 76 Go-vägarna är nu portade till Rust: auth-endpoints (login, callback, dev-login, session, logout) och målens kompletteringa... _(uppdaterad 2026-11-26)_
 - [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] - Buggen hittades när användaren frågade vad "agentkörningar" betyder - frågan avslöjade _(uppdaterad 2026-11-26)_
 - [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] - I pi/.pi/agent/mcp.json och opencode/.config/opencode/opencode.json ligger Neon MCP-tokens i klartext, och de committades 2026-11-17 i do... _(uppdaterad 2026-11-17)_
-- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] - Symtom: Go API:t mot Neon (Neons dev-branch, `environments/dev/db/neon.env`) _(uppdaterad 2026-11-27)_
 - [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] - NeuroQuant har byggts om. _(uppdaterad 2026-11-03)_
 - [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]] - NeuroQuant-kontot låstes ("Account Locked", 100 misslyckade försök) 2026-11-02. _(uppdaterad 2026-11-03)_
 - [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]] - Bakgrund: 2026-11-03 kördes monitorn på pxe och skickade ett mejl 12:12 trots att portföljen inte hade publicerats om. _(uppdaterad 2026-11-03)_
@@ -322,6 +322,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] - src/api och src/agent flyttades till en gemensam Go-modul med rot i src/ (modulnamn plan). _(uppdaterad 2026-11-26)_
 - [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] - Projekt: plan _(uppdaterad 2026-11-16)_
 - [[notes/plan-migreras-fran-go-till-rust]] - Beslut 2026-11-26: Plan-applikationens Go-tjänster skrivs om i Rust. _(uppdaterad 2026-11-26)_
+- [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] - Borttog Nuxt:s proxy mot Plan API:t (2026-11-27). _(uppdaterad 2026-11-27)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
 - [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-27)_
 - [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-10)_
@@ -398,7 +399,6 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] - Kaskad som byggdes 2026-11-02 (kvall) i Skogsduvans HA, styrd av EN sanningskalla: template-sensorn sensor.hemmet_kallaste_rum (minsta te... _(uppdaterad 2026-11-17)_
 - [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] - 2026-11-03: I Home Assistants logg på Skogsduvan syntes WARNINGar från homeassistant.components.http.security_filter om filtrerade för... _(uppdaterad 2026-11-03)_
 - [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] - Kontext: HA Green (2026.10.1) i stugan, näs via 'ssh skogsduvan' -> Terminal&SSH-addon-container (core-ssh), config i /homeassistant (/c... _(uppdaterad 2026-11-03)_
-- [[notes/skrivbordswidget-som-visar-gor-nu-malet]] - En liten ruta nederst i mitten av skärmen visar det mål som ligger högst upp _(uppdaterad 2026-11-27)_
 - [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] - Efter sammanslagningen (mål 520) gick hela kedjan igenom i dev med mål #540: _(uppdaterad 2026-11-24)_
 - [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] - Snabbtillägget som öppnas med N stöder nu både händelser och mål via lägesknapparna/auto-läget. _(uppdaterad 2026-11-20)_
 - [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] - Snabbtillägget stängs nu med Escape från titel-, föräldrasök- och övriga popupfält. _(uppdaterad 2026-11-20)_

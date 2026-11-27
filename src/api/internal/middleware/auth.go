@@ -371,15 +371,24 @@ func osGetenv(key, defaultVal string) string {
 	return defaultVal
 }
 
-// CORSMiddleware handles Cross-Origin Resource Sharing
+// CORSMiddleware handles Cross-Origin Resource Sharing.
+//
+// The browser calls the API directly (the Nuxt app has no proxy), so the API
+// has to answer with CORS headers when the request comes from another
+// origin - in dev the app runs on :3100 and the API on :4100.
+//
+// CORS_ALLOWED_ORIGINS is a comma-separated list of origins. "*" allows any
+// origin. The allowed origin is echoed back (never sent as a wildcard) since
+// a credentialed request - the session cookie - is rejected by the browser
+// when Access-Control-Allow-Origin is "*".
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		allowedOrigin := os.Getenv("CORS_ALLOWED_ORIGINS")
-		if allowedOrigin == "" {
-			allowedOrigin = "*"
+		origin := c.GetHeader("Origin")
+		if origin != "" && originAllowed(origin) {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Add("Vary", "Origin")
 		}
-		c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 
@@ -390,4 +399,20 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// originAllowed reports whether the given origin may call the API from a
+// browser. Origins are compared exactly - scheme, host and port.
+func originAllowed(origin string) bool {
+	for _, allowed := range strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",") {
+		allowed = strings.TrimSpace(allowed)
+		if allowed == "" {
+			continue
+		}
+		if allowed == "*" || allowed == origin {
+			return true
+		}
+	}
+
+	return false
 }

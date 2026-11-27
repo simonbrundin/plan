@@ -55,7 +55,7 @@ finns i `index.md`.
 | [[notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva]] | Återkommande serier döljs inte längre beroende på zoomnivå | note | kalender, feature, beslut, bugg, session, projekt:plan | 2026-11-18 | 1 |
 | [[notes/aterstaende-funktioner-i-agentplattformen]] | Återstående funktioner i agentplattformen | note | agent, roadmap, mål, projekt:plan | 2026-11-25 | 0 |
 | [[notes/atta-feature-commits-pushade-till-det-arkiverade-mailmaster-repot]] | Åtta feature-commits pushade till det arkiverade mailmaster-repot | note | mailmaster, arkiv, push, kameo, oauth, projekt:mailmaster | 2026-11-20 | 0 |
-| [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] | Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt | note | auth, session, nuxt, go, zitadel, cookie, dev, projekt:plan | 2026-11-17 | 3 |
+| [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] | Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt | note | auth, session, nuxt, go, zitadel, cookie, dev, projekt:plan | 2026-11-27 | 4 |
 | [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] | Automatisk målikon behövde sökord och svenska alias | note | bug, feature, icon, goals, projekt:plan | 2026-11-17 | 0 |
 | [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] | Autonoma AgentRuns som Kubernetes Jobs: lärdomar från E2E-flödet | note | plan, agent, kubernetes, job, e2e, bug, projekt:simon | 2026-11-24 | 0 |
 | [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] | Barnmärke på mål - antal undermål visas överallt | note | feature, goals, nuxt, ui, projekt:plan | 2026-11-22 | 0 |
@@ -183,6 +183,7 @@ finns i `index.md`.
 | [[notes/konventioner]] | Konventioner i repot | note | konventioner, stil, go | 2026-10-21 | 3 |
 | [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]] | Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image | note | pxe, uboot, radxa, korrigering, projekt:simon | 2026-10-22 | 4 |
 | [[notes/kortkommando-hjalpen-i-helpmodal-maste-folja-tangentandringar]] | Kortkommando-hjälpen i HelpModal måste följa tangentändringar | note | frontend, kortkommandon, helpmodal, projekt:plan | 2026-11-20 | 0 |
+| [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]] | Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål | note | feature, goals, tangentbord, status, projekt:plan | 2026-11-27 | 1 |
 | [[notes/kostnad-och-budget-for-agentkorningar]] | Kostnad och budget för agentkörningar | note | kostnad, agent, budget, lesson, projekt:plan | 2026-11-24 | 0 |
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
@@ -253,7 +254,6 @@ finns i `index.md`.
 | [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] | Min kontaktlista - jag som nod i grafen (pappa) | note | pappa, relationer, graf, nätverk, introduktioner, modell, projekt:pappa | 2026-11-17 | 1 |
 | [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] | MiniMax M Plan inlagd i jamforelsen, M2.7 syns som uppskattad | note | dashboard, minimax, subscriptions, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] | Moderposten arkiveras när .eml-bilagorna har lagts in | note | feature, mail, imap, projekt:simon | 2026-11-19 | 1 |
-| [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] | Neon-anslutningen hänger när IPv6 prioriteras | note | neon, ipv6, postgres, plan, bug, projekt:plan | 2026-11-27 | 1 |
 | [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] | Neon API-token hamnade i dotfiles-git-historiken | note | säkerhet, dotfiles, secret, projekt:simon | 2026-11-17 | 1 |
 | [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] | NeuroQuant är ombyggt - tRPC-API och e-post-verifiering | note | neuro, scraper, neuroquant, projekt:neuro | 2026-11-03 | 2 |
 | [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]] | NeuroQuant-kontot låst av för många inloggningsförsök | note | bug, session, neuro, projekt:neuro | 2026-11-03 | 2 |
@@ -297,6 +297,7 @@ finns i `index.md`.
 | [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]] | PinchBench: egen Value Score ska inte kopieras - räkna kostnad per lyckad uppgift själv | note | dashboard, modeller, benchmark, pinchbench, research, projekt:dashboard | 2026-11-26 | 1 |
 | [[notes/plan-api-anvander-scalar-for-openapi]] | Plan API använder Scalar för OpenAPI | note | openapi, scalar, go, dokumentation, projekt:plan | 2026-11-17 | 0 |
 | [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] | Plan API och agent delar Go-modul men behåller tjänstegränsen | note | arkitektur, go, agent, projekt:plan | 2026-11-26 | 0 |
+| [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] | Plan-API: webbläsaren anropar API:t direkt - Nuxt-proxyn är borttagen | note | api, nuxt, cors, auth, session, refaktor, projekt:plan | 2026-11-27 | 0 |
 | [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] | Plan-appen: mörkt designsystem med semantiska färg-token | note | plan, ui, css, tailwind, dark-mode, projekt:repos | 2026-11-17 | 1 |
 | [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] | Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none | note | bug, nuxt, cache, plan, projekt:plan | 2026-11-16 | 0 |
 | [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] | plan-db: CNPG-kluster fastnade i 'Setting up primary' på en Longhorn-volym utan replikor | note | cnpg, longhorn, incident, plan, projekt:simon | 2026-11-27 | 4 |
@@ -377,7 +378,6 @@ finns i `index.md`.
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
-| [[notes/skrivbordswidget-som-visar-gor-nu-malet]] | Skrivbordswidget som visar Gör-nu-målet | note | widget, quickshell, plan, gnistring, projekt:plan | 2026-11-27 | 2 |
 | [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] | Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan | note | plan, agent, verifiering, e2e, human-gate, kubernetes, wiki, projekt:simon | 2026-11-24 | 0 |
 | [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] | Snabbtillägg med mål och valbart föräldramål | note | feature, quick-add, mål, kalender, projekt:plan | 2026-11-20 | 0 |
 | [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] | Snabbtilläggets popup fick Escape och visuell polish | note | feature, quick-add, ui, projekt:plan | 2026-11-20 | 0 |
@@ -497,7 +497,7 @@ finns i `index.md`.
 - `algoritm` (1)
 - `analys` (1)
 - `animation` (2)
-- `api` (10)
+- `api` (11)
 - `api-nyckel` (1)
 - `appimage` (1)
 - `arbetsflöde` (1)
@@ -506,7 +506,7 @@ finns i `index.md`.
 - `arkiv` (2)
 - `artificialanalysis` (1)
 - `artikel` (1)
-- `auth` (7)
+- `auth` (8)
 - `authentication` (2)
 - `authentik` (1)
 - `automatik` (1)
@@ -528,7 +528,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (106)
+- `bug` (105)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -558,7 +558,7 @@ finns i `index.md`.
 - `container-orchestration` (1)
 - `controlplane` (3)
 - `cookie` (1)
-- `cors` (1)
+- `cors` (2)
 - `crash` (1)
 - `csi` (1)
 - `csr` (1)
@@ -610,7 +610,7 @@ finns i `index.md`.
 - `extension` (2)
 - `extensions` (1)
 - `fakta` (4)
-- `feature` (86)
+- `feature` (87)
 - `feedback` (1)
 - `felle` (1)
 - `felsokning` (20)
@@ -638,9 +638,8 @@ finns i `index.md`.
 - `github-actions` (3)
 - `gitops` (12)
 - `gmail` (1)
-- `gnistring` (1)
 - `go` (33)
-- `goals` (31)
+- `goals` (32)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -687,7 +686,7 @@ finns i `index.md`.
 - `interaktion` (1)
 - `introduktioner` (1)
 - `ip-address-pool` (1)
-- `ipv6` (3)
+- `ipv6` (2)
 - `it` (2)
 - `job` (2)
 - `jobb` (2)
@@ -771,7 +770,7 @@ finns i `index.md`.
 - `målsida` (1)
 - `navigation` (2)
 - `navigering` (2)
-- `neon` (10)
+- `neon` (9)
 - `neon.ts` (1)
 - `neovim` (5)
 - `networking` (3)
@@ -781,7 +780,7 @@ finns i `index.md`.
 - `notis` (1)
 - `now` (2)
 - `ntp` (1)
-- `nuxt` (42)
+- `nuxt` (43)
 - `nätverk` (3)
 - `oauth` (2)
 - `oauth2` (3)
@@ -812,14 +811,14 @@ finns i `index.md`.
 - `pinchbench` (1)
 - `pipeline` (2)
 - `pki` (4)
-- `plan` (21)
+- `plan` (19)
 - `plan-api` (1)
 - `platser` (2)
 - `poe` (1)
 - `policy` (3)
 - `popcorntime` (3)
 - `port` (1)
-- `postgres` (8)
+- `postgres` (7)
 - `postgresql` (3)
 - `postmortem` (1)
 - `potential` (1)
@@ -857,7 +856,6 @@ finns i `index.md`.
 - `pxe-first` (1)
 - `python` (1)
 - `quick-add` (3)
-- `quickshell` (1)
 - `radxa` (7)
 - `ranking` (4)
 - `rante` (2)
@@ -869,7 +867,7 @@ finns i `index.md`.
 - `recovery` (4)
 - `recurrence` (1)
 - `refactor` (1)
-- `refaktor` (2)
+- `refaktor` (3)
 - `refaktorering` (1)
 - `rekrytering` (6)
 - `relationer` (9)
@@ -901,7 +899,7 @@ finns i `index.md`.
 - `secret` (1)
 - `secrets` (4)
 - `security` (4)
-- `session` (40)
+- `session` (41)
 - `shell` (1)
 - `skogsduvan` (6)
 - `slack` (1)
@@ -921,6 +919,7 @@ finns i `index.md`.
 - `state` (1)
 - `statistik` (4)
 - `stats` (1)
+- `status` (1)
 - `stil` (1)
 - `stk` (6)
 - `storage` (2)
@@ -942,7 +941,7 @@ finns i `index.md`.
 - `talos` (38)
 - `talosctl` (1)
 - `tangent` (1)
-- `tangentbord` (3)
+- `tangentbord` (4)
 - `teknik` (1)
 - `terminal` (2)
 - `test` (4)
@@ -983,7 +982,6 @@ finns i `index.md`.
 - `visionite` (1)
 - `wan` (1)
 - `webbapp` (1)
-- `widget` (1)
 - `wiki` (7)
 - `worker` (11)
 - `worker-1` (4)

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Goal } from "~/types/goal";
-import { AuthenticationError, useGoalApi } from "~/composables/useGoalApi";
+import { useGoalApi } from "~/composables/useGoalApi";
+import { AuthenticationError } from "~/utils/api";
 import { useGoalsStore } from "~/stores/goals";
 
 // Avslutade mål behöver inte SSR eftersom sidan hämtar användarens mål efter

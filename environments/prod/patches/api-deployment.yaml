@@ -12,6 +12,11 @@ spec:
           env:
             - name: AUTH_DISABLED
               value: "false"
+            # Webbläsaren anropar API:t direkt. I prod ligger appen och API:t
+            # på samma host, så CORS egentligen inte behövs - men listan gör
+            # beteendet explicit och samma env används om appen flyttas.
+            - name: CORS_ALLOWED_ORIGINS
+              value: "https://plan.simonbrundin.com"
             - name: NUXT_SESSION_PASSWORD
               valueFrom:
                 secretKeyRef:

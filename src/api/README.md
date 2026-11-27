@@ -18,7 +18,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/plan
 # Optional
 PORT=8080                    # Default: 8080
 GIN_MODE=release             # Default: release
-CORS_ALLOWED_ORIGINS=https://example.com  # Default: *
+CORS_ALLOWED_ORIGINS=https://example.com  # Kommaseparerad lista. Default: ingen cross-origin
 AUTH_DISABLED=true           # For development only
 ```
 

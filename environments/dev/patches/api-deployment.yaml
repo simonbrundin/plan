@@ -37,6 +37,11 @@ spec:
               value: "localhost:4100"
             - name: FRONTEND_URL
               value: "http://localhost:3100"
+            # Webbbläsaren anropar API:t direkt, och i dev ligger appen på
+            # :3100 medan API:t ligger på :4100 - olika origin, så API:t måste
+            # svara med CORS-headrar för appens origin.
+            - name: CORS_ALLOWED_ORIGINS
+              value: "http://localhost:3100"
             # Måste vara identisk med redirect_uri i authorize- och
             # token-bytet (Zitadel avvisar annars bytet).
             - name: ZITADEL_REDIRECT_URI

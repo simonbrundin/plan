@@ -151,19 +151,25 @@ Bearer`:
 Sessionstoken får inte cirkula i URL:er - det var det gamla
 callback-flödet.
 
-### Flödet i Nuxt
+### Flödet i webbläsaren
 
-Nuxt är en tunn proxy (`server/utils/goApi.ts`): den vidarebefordrar
-cookien och kopierar tillbaka `Set-Cookie` + `Location` från Go.
+Webbläsaren anropar API:t direkt - det finns ingen proxy i Nuxt.
+Sessioncookien (`plan_session`) skickas med, och API:t validerar den.
 
 ```text
-Webbläsare → /api/proxy/goals → Nuxt (forwardToGo) → Go API
-     ↑                                                 │
-     └────────── Set-Cookie + JSON-svar ──────────────┘
+Webbläsare → /api/v1/goals → Go API
+     ↑                             │
+     └────── cookie + JSON-svar ───┘
 ```
 
+I prod ligger appen och API:t på samma host
+(`plan.simonbrundin.com`), så anropen är same-origin. I dev ligger appen
+på `:3100` och API:t på `:4100` - då är anropen cross-origin och API:t
+svarar med CORS-headrar för appens origin (`CORS_ALLOWED_ORIGINS`).
+
 Agent-API:t anropas bara server till server, med `AGENT_API_KEY` - den
-är aldrig i webbläsaren.
+är aldrig i webbläsaren. Därför finns en liten serverdel i Nuxt kvar:
+den vidarebefordrar chatt och workflow-anrop till agent-API:t.
 
 ### API-nycklar
 

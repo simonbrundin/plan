@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { apiRequest } from '~/utils/api'
+
 // Read user info from cookie set by auth callback
 const config = useRuntimeConfig()
 const userCookie = useCookie('plan_user')
+
+// API:t anropas direkt - appen och API:t ligger i prod på samma host.
+const apiBase = computed(() => (config.public.goApiUrl || '/api/v1').replace(/\/+$/, ''))
 
 const devAuthEnabled = computed(() => !!config.public.devAuthEnabled)
 
@@ -17,7 +22,7 @@ const user = computed(() => {
 const handleLogout = async () => {
   // Logouten sköts av Go API:t (sessionen raderas server side, cookierna
   // rensas) - här rensas bara den läsbara hint-cookien.
-  await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+  await apiRequest('auth/logout', { method: 'POST' }).catch(() => {})
   userCookie.value = null
   window.location.reload()
 }
@@ -49,12 +54,22 @@ const handleLogout = async () => {
         <p class="text-sm text-ink-dim mb-6">Logga in för att se dina mål.</p>
 
         <div class="flex flex-col gap-3">
-          <a href="/auth/login">
+          <!--
+            Inloggningen sker i API:t: browsern skickas dit direkt, API:t
+            redirectar vidare till Zitadel (eller tillbaka hit för dev-login).
+          -->
+          <a :href="`${apiBase}/auth/login`">
             <UButton block>Logga in med Zitadel</UButton>
           </a>
-          <a v-if="devAuthEnabled" href="/auth/dev-login" class="block">
-            <UButton block color="neutral" variant="outline">Dev-login (utan Zitadel)</UButton>
-          </a>
+          <form
+            v-if="devAuthEnabled"
+            :action="`${apiBase}/auth/dev-login`"
+            method="post"
+          >
+            <UButton block color="neutral" variant="outline" type="submit">
+              Dev-login (utan Zitadel)
+            </UButton>
+          </form>
         </div>
       </div>
     </div>

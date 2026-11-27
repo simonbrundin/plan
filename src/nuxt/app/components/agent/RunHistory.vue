@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent';
 import { agentRunEventLabel, agentRunPhaseLabel } from '~/types/agent';
+import { apiRequest } from '~/utils/api';
 
 /**
  * Körningshistoriken - en kompakt tidslinje över händelserna i den
@@ -81,7 +82,7 @@ async function decide(decision: 'approve' | 'reject') {
 	busy.value = true;
 	errorMessage.value = null;
 	try {
-		await $fetch(`/api/agent/approvals/${approval.id}/decision`, {
+		await apiRequest(`agent-approvals/${approval.id}/decision`, {
 			method: 'POST',
 			body: { decision, feedback: feedback.value },
 		});
@@ -106,7 +107,7 @@ async function cancel() {
 	busy.value = true;
 	errorMessage.value = null;
 	try {
-		await $fetch(`/api/agent/runs/${props.run.id}/cancel`, { method: 'POST' });
+		await apiRequest(`agent-runs/${props.run.id}/cancel`, { method: 'POST' });
 		emit('cancelled');
 	} catch {
 		errorMessage.value = 'Kunde inte avbryta körningen.';
