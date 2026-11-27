@@ -585,6 +585,13 @@ Detaljer:
   klustret kör arm64.
 - **Dev-login** aktiveras i previewen (`DEV_AUTH_ENABLED=true`), så en PR
   kan testas utan Zitadel. API:t och databasen är separata från prod.
+- **Schemat appliceras av ett Job**, inte bara av Atlas. Atlas Operator
+  räknar med att databasen redan svarar när den börjar - i en ny preview
+  kör CNPG initdb, och Atlas kommer före. Operatören ger upp i stället för
+  att försöka igen, och då står API:t och väntar på tabeller som aldrig
+  skapas. Jobbet `plan-db-schema` väntar på databasen och kör samma
+  `schema.sql` som dev och prod. Det är idempotent, så Atlas kan köra samma
+  sak efteråt.
 - **Städning:** när PR:en stängs tas overlayen bort från `previews`, och
   Flux prunar namespace, databas och routes. `environments/pr/README.md`
   håller katalogen ifylld - en tom katalog ger "no resources" i kustomize
@@ -599,6 +606,34 @@ Verifiera en preview:
 kubectl --context admin@cluster1 get pods -n plan-pr-<nr>
 curl -sS https://plan-pr-<nr>.simonbrundin.com/api/health
 ```
+
+Om previewen inte dyker upp - kolla i den här ordningen:
+
+```bash
+# 1. Finns overlayen på previews-branchen?
+git ls-tree --name-only origin/previews environments/pr/
+
+# 2. Har Flux sett branchen?
+kubectl --context admin@cluster1 get gitrepository plan-previews -n flux-system \
+  -o jsonpath='{.status.artifact.revision}{"\n"}{.status.conditions[-1].message}{"\n"}'
+
+# 3. Vad säger Flux om bygget?
+kubectl --context admin@cluster1 get kustomization plan-preview -n flux-system \
+  -o jsonpath='{.status.conditions[-1].message}{"\n"}'
+
+# 4. Står poddarna i namespace?
+kubectl --context admin@cluster1 get pods -n plan-pr-<nr>
+```
+
+**Om GitRepository svarar "context deadline exceeded"** är det source-controller
+som fastnat, inte repot. En omstart av podden löser det:
+
+```bash
+kubectl --context admin@cluster1 delete pod -n flux-system -l app=source-controller
+```
+
+Symtomet är att *alla* HTTPS-repositories i klustret samtidigt slutar
+uppdateras, medan SSH-repositories fungerar.
 
 ---
 
@@ -710,6 +745,12 @@ ställe så att de inte glöms.
    dev-overlay som inte längre används - dev går via Tilt och kind.
 8. **Atlas-apply raderar tabeller som saknas i `schema.sql`.** Ett misstag i
    schemafilen är en destruktiv ändring i prod.
+9. **Kyvernos `block-nodeport` blockerade radering av Services.** CEL-uttrycket
+   `has(object.spec) && object.spec.type != 'NodePort'` blir falskt vid
+   DELETE, eftersom den gamla resursen inte fylls i - och policyn blockerade
+   då radering av *alla* Services. Flux kunde inte prunna en preview. Fix:
+   policyn validerar bara CREATE och UPDATE. Detta påverkade hela klustret,
+   inte bara previewen.
 
 ---
 

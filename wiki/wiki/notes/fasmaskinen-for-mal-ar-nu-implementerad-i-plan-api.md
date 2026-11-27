@@ -5,7 +5,7 @@ tags: [agent, goals, implementation, verifiering, human-gate, projekt:plan]
 created: 2026-11-27
 updated: 2026-11-28
 status: active
-related: [concepts/anvanda-agenter-i-plan, notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det, notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]
+related: [concepts/anvanda-agenter-i-plan, notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det, notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten, notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]
 ---
 
 VAD: fasmaskinen och den valfria verifieringen finns nu i Plan API (branch feat/goal-phase-machine, OpenSpec-change add-goal-verification-and-phase-transitions).
@@ -19,10 +19,11 @@ SÅ SER DET UT: maskinen är ren logik i src/api/internal/phase (inga beroenden 
 
 VERIFIERING: planen är valfri - mal utan plan fungerar precis som mal med plan. Data ligger i goal_verifications, goal_evidence, goal_verification_results och goal_phase_events; malets avslutande registreras i goals.completion_kind (deklarerat | verifierat). Ett omdome blir giltigt forst nar en manska godkanner det - agent-scope blockerar approve-endpointen i API:t, inte i prompten. Nar planen andras ogiltigforklaras tidigare omdomen.
 
-GALLER FRAMOT: agenten (block 4 i tasks.md) ska ga via fasendpointe, respektera 409 och skapa godkannanden i stallet for att avsluta mal. Gransnittet (block 6) ska visa "jag ar klar", verifieringsplan, bevis och omdome. Kodmalens verifierare (CI eller mansklig granskning) definieras fortfarande inte - typen "kod" finns i databasen, men innehallet kommer i en egen change.
+GALLER FRAMOT: agenten (block 4) ga nu via fasendpointe och respekterar 409, och gransnittet (block 6) visar "jag ar klar", verifieringsplan, bevis och omdome. Kodmalens verifierare (CI eller mansklig granskning) definieras fortfarande inte - typen "kod" finns i databasen, men innehallet kommer i en egen change. Rust-portningen av fasmaskinen och verifieringen gor inte - under tiden svarar de nya vagarna 501 i Rust-API:t, och det ar det Rust-API:t som kor i produktion.
 
 ## Relaterade
 
 - [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]]
+- [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]]
 - [[concepts/anvanda-agenter-i-plan]]
 - [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]

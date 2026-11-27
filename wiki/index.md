@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 458 |
+| Noter | 460 |
 
 ## Entiteter
 
@@ -399,6 +399,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] - Problem: När man öppnade en leetcode.nvim-lösning i Neovim sade health-checken _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] - Fas 2 av samma problem: när standalone-läget stängdes av (server.standalone = _(uppdaterad 2026-11-17)_
 - [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_
+- [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]] - Sedan PR #172 (fix(prod): agenten i produktion kör Rust-imagen igen) kör plan-api i Rust i produktion, medan utvecklingsmiljön och API... _(uppdaterad 2026-11-28)_
 - [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] - I /home/simon/repos/rust (simonbrundin/rust) lades den klonade repot 'learn-to-code-with-rust' in som en riktig git-submodule (.gitmodule... _(uppdaterad 2026-11-17)_
 - [[notes/rust-utvecklingsmiljo-pa-workstationen]] - Vi satte upp en komplett Rust-miljö på maskinen (2026-11-02). _(uppdaterad 2026-11-17)_
 - [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] - För att kunna committa egna lösningar utan att sönderdela tredjepartsrepot skapades en fork: github.com/simonbrundin/learn-to-code-wit... _(uppdaterad 2026-11-17)_
@@ -452,6 +453,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/talos-varningar-pa-controlplanes-90-kommer-fra-talos-discovery-service-dns]] - Diagnos 2026-11-20 (session: "kolla talos-loggarna for controlplanes, finns det nagot att fixa?"). _(uppdaterad 2026-11-20)_
 - [[notes/talos-hostname-auto-i-en-generisk-config-byter-nodens-namn-och-kastar-ut-den-ur-klustret]] - Misstag: applicerade pxe/matchbox/assets/talos-config/controlplane.yaml pa _(uppdaterad 2026-10-24)_
 - [[notes/talos-noden-kan-hamna-i-maintenance-mode-om-state-volymen-hittas-efter-config-fasen]] - Symtom: controlplane-3 gick in i maintenance mode direkt efter en reboot, trots att noden redan hadde en komplett config persistad pa STA... _(uppdaterad 2026-10-25)_
+- [[notes/tidsstamplar-go-skriver-9-dar-chrono-skrev-900]] - Under Rust-migreringen visade sig att Go och Rust skrev samma _(uppdaterad 2026-11-28)_
 - [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]] - Funktion: alla mål i Plan kan ha en uppskattad tidsåtgång i minuter (nullable estimated_minutes). _(uppdaterad 2026-11-20)_
 - [[notes/tillfalliga-felsokningspoddar-rensade]] - Inventering av cluster1 hittade kvarvarande unowned debug-poddar i default, flux-system och kube-system: np-controlplane-2/3, np-worker-3... _(uppdaterad 2026-11-26)_
 - [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] - En långlivad Nuxt-server ska vara en Tilt serve_cmd-resurs, inte ett avslutande cmd-build. _(uppdaterad 2026-11-26)_

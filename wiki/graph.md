@@ -372,6 +372,7 @@ graph LR
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer["rust-analyzer standalone-läge kraschar på leetcode.nvim-filer"]
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone["rust-analyzer: tysta health-status-notisen istället för att stänga av standalone"]
   n_notes_rust_api_t_far_auth_lager_och_forsta_domanerna["Rust-API:t får auth-lager och första domänerna"]
+  n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod["Rust-API:t kör i produktion - Go-implementationer syns inte i prod"]
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux["Rust är huvudspåret och PR-previewen deployas via Flux"]
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork["rust: learning-repot lades in som submodule mot egen fork"]
   n_notes_rust_repo_learn_to_code_with_rust_som_submodule["rust-repo: learn-to-code-with-rust som submodule"]
@@ -428,6 +429,7 @@ graph LR
   n_notes_talos_v1_14_utan_unattendedinstallconfig_oinstallerad_metal_nod_bootar_om_i_en_loop["Talos v1.14 utan UnattendedInstallConfig: oinstallerad metal-nod bootar om i en loop"]
   n_notes_talos_varningar_pa_controlplanes_90_kommer_fra_talos_discovery_service_dns["Talos-varningar pa controlplanes: 90% kommer fra Talos Discovery Service + DNS"]
   n_notes_tidsatgang_pa_mal_i_plan_estimated_minutes["Tidsåtgång på mål i Plan (estimated_minutes)"]
+  n_notes_tidsstamplar_go_skriver_9_dar_chrono_skrev_900["Tidsstämplar: Go skriver .9 där Chrono skrev .900"]
   n_notes_tillfalliga_felsokningspoddar_rensade["Tillfälliga felsökningspoddar rensade"]
   n_notes_tilt_dev_server_ska_koras_som_serve_cmd["Tilt dev-server ska köras som serve_cmd"]
   n_notes_tilt_filbevakning_kan_do_starta_om_tilt_up["Tilt-filbevakning kan dö - starta om tilt up"]
@@ -740,6 +742,7 @@ graph LR
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_concepts_anvanda_agenter_i_plan
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_avsla_ett_verifieringsomdome_ar_ett_beslut_precis_som_att_godkanna_det
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten
+  n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_handelsen_har_ingen_egen_farg
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_standardkalender_i_plan
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_valfri_fargkod_pa_kalendrar
@@ -1058,6 +1061,7 @@ graph LR
   n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet --> n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer --> n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone --> n_notes_sa_dampas_bada_rust_analyzer_popupen_no_project_root_found
+  n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod --> n_notes_paritetstest_gatear_rust_migreringen_mot_go_kallan
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork --> n_notes_rust_repo_learn_to_code_with_rust_som_submodule
@@ -1434,6 +1438,7 @@ graph LR
 - **notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres** <- [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]], [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **notes/pappas-grundare-ar-michael-brundin-inte-git-anvandaren-simon-brundin** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]]
 - **notes/parallella-agent-sessioner-i-samma-repo-och-databas** <- [[notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen]], [[notes/vertikal-kalender-med-kontinuerlig-zoom]]
+- **notes/paritetstest-gatear-rust-migreringen-mot-go-kallan** <- [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]]
 - **notes/personer-kan-laggas-in-manuellt-i-pappa** <- [[notes/pappa-dubblettknapp-mansklig-granskning-och-bestandig-sammanslagning]]
 - **notes/photocraft-agentstyrning-via-control-protokoll-control-7878** <- [[notes/lightcraft-photocraft-installerade-pa-omarchy-workstation-utan-sudo]]
 - **notes/photocraft-kamerans-look-varning-vid-raw-oppning-och-hur-den-hanteras** <- [[notes/photocraft-agentstyrning-via-control-protokoll-control-7878]]
@@ -1498,6 +1503,7 @@ graph LR
 - **notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer** <- [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]]
 - **notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone** <- [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]]
+- **notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod** <- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]]
 - **notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-repo-learn-to-code-with-rust-som-submodule** <- [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]]
 - **notes/rust-utvecklingsmiljo-pa-workstationen** <- [[notes/rust-repo-learn-to-code-with-rust-som-submodule]]
