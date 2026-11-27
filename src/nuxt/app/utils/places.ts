@@ -23,6 +23,24 @@ export function isDoableAtPlace(
 }
 
 /**
+ * Samma som isDoableAtPlace, men ett mål utan någon plats räknas också
+ * som görbart.
+ *
+ * Ett mål utan plats är inte bundet till någon särskild plats och kan
+ * därför göras var som helst - det ska inte försvinna när användaren
+ * filtrerar listan på sin nuvarande plats.
+ */
+export function isDoableAtPlaceOrUnplaced(
+	goal: PlaceOwner,
+	placeId: number | null,
+): boolean {
+	if (placeId === null) return false;
+	const places = goal.places ?? [];
+	if (places.length === 0) return true;
+	return places.some((place) => place.id === placeId);
+}
+
+/**
  * Ett mål är görbart om man är på någon av de angivna platserna.
  */
 export function isDoableAtAnyPlace(
