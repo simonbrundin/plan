@@ -3268,3 +3268,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 ## [2026-11-27] link | notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg -> notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
 
 ## [2026-11-27] link | summaries/prod-patch-utan-namespace-bryter-flux-builden -> notes/prod-patch-utan-namespace-bryter-flux-builden
+
+## [2026-11-27] ingest | create notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux
+- [create] [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] — ny sida från inboxen
+- [archive] 2026-11-27-rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux.md
+
+
+## [2026-11-27] link | notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux -> notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg
+
+
+## [2026-11-27] link | notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux -> notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
+

@@ -371,6 +371,7 @@ graph LR
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer["rust-analyzer standalone-läge kraschar på leetcode.nvim-filer"]
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone["rust-analyzer: tysta health-status-notisen istället för att stänga av standalone"]
   n_notes_rust_api_t_far_auth_lager_och_forsta_domanerna["Rust-API:t får auth-lager och första domänerna"]
+  n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux["Rust är huvudspåret och PR-previewen deployas via Flux"]
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork["rust: learning-repot lades in som submodule mot egen fork"]
   n_notes_rust_repo_learn_to_code_with_rust_som_submodule["rust-repo: learn-to-code-with-rust som submodule"]
   n_notes_rust_utvecklingsmiljo_pa_workstationen["Rust-utvecklingsmiljö på workstationen"]
@@ -1053,6 +1054,8 @@ graph LR
   n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet --> n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer --> n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone --> n_notes_sa_dampas_bada_rust_analyzer_popupen_no_project_root_found
+  n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad
+  n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork --> n_notes_rust_repo_learn_to_code_with_rust_som_submodule
   n_notes_rust_repo_learn_to_code_with_rust_som_submodule --> n_notes_rust_utvecklingsmiljo_pa_workstationen
   n_notes_rust_utvecklingsmiljo_pa_workstationen --> n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet
@@ -1298,7 +1301,7 @@ graph LR
 - **notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo** <- [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/dashboard-ranking-anvander-benchmark-matchade-kostnader** <- [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]]
 - **notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt** <- [[summaries/definitionsassistent-for-mal-define-fasen]]
-- **notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad** <- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]]
+- **notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad** <- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]], [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]]
 - **notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]], [[notes/relationer-mellan-kandidater-i-pappa-symmetriska-par-med-styrka-1-10]]
 - **notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er** <- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
 - **notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor** <- [[entities/pxe-server]]
@@ -1440,7 +1443,7 @@ graph LR
 - **notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none** <- [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]]
 - **notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor** <- [[concepts/cloudnative-pg]], [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]]
 - **notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]], [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]]
-- **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]], [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
+- **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]], [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]], [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]]
 - **notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places** <- [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]]
 - **notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats** <- [[notes/platsvaljaren-flyttade-till-leader-p]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **notes/platsvaljaren-flyttade-till-leader-p** <- [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]

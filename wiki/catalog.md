@@ -372,6 +372,7 @@ finns i `index.md`.
 | [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] | rust-analyzer standalone-läge kraschar på leetcode.nvim-filer | note | rust, neovim, rust-analyzer, bug, leetcode, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] | rust-analyzer: tysta health-status-notisen istället för att stänga av standalone | note | rust, neovim, rust-analyzer, leetcode, bug, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] | Rust-API:t får auth-lager och första domänerna | note | rust, migration, auth, paritet, projekt:plan | 2026-11-26 | 0 |
+| [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] | Rust är huvudspåret och PR-previewen deployas via Flux | note | ci, rust, flux, preview, arm64, projekt:plan | 2026-11-27 | 2 |
 | [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] | rust: learning-repot lades in som submodule mot egen fork | note | rust, git, submodule, solution, projekt:simon | 2026-11-17 | 1 |
 | [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] | rust-repo: learn-to-code-with-rust som submodule | note | rust, git, submodule, projekt:simon | 2026-11-17 | 1 |
 | [[notes/rust-utvecklingsmiljo-pa-workstationen]] | Rust-utvecklingsmiljö på workstationen | note | rust, toolchain, mise, neovim, projekt:rust | 2026-11-17 | 2 |
@@ -523,6 +524,7 @@ finns i `index.md`.
 - `arch` (1)
 - `arkitektur` (4)
 - `arkiv` (2)
+- `arm64` (1)
 - `artificialanalysis` (1)
 - `artikel` (1)
 - `auth` (8)
@@ -564,7 +566,7 @@ finns i `index.md`.
 - `cgNAT` (1)
 - `chat` (2)
 - `chatt` (1)
-- `ci` (11)
+- `ci` (12)
 - `clean-code` (1)
 - `cleanup` (1)
 - `cli` (5)
@@ -639,7 +641,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (16)
+- `flux` (17)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -851,6 +853,7 @@ finns i `index.md`.
 - `prenumerationer` (1)
 - `presentation` (1)
 - `prestanda` (3)
+- `preview` (1)
 - `pricing` (1)
 - `prioritetssida` (2)
 - `priority` (3)
@@ -865,7 +868,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (147)
+- `projekt:plan` (148)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -910,7 +913,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (19)
+- `rust` (20)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)

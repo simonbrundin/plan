@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 455 |
+| Noter | 456 |
 
 ## Entiteter
 
@@ -394,6 +394,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]] - Kontrollerat pa PXE-varden (Ubuntu 25.04) 2026-10-23: mainline-defconfigen rock-pi-4-rk3399_defconfig bygger en bild med DTB for 'Radxa R... _(uppdaterad 2026-10-23)_
 - [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]] - Slutlig fix (fas 4): meddelandet "No project root found" kan undvikas helt vid _(uppdaterad 2026-11-17)_
 - [[notes/rrule-motor-i-rust-ersatter-rrule-go]] - Återkommande serier expanderades i Go med rrule-go (teambition/rrule-go v1.8.2). _(uppdaterad 2026-11-26)_
+- [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] - Rust är nu det som körs i dev och i produktion. _(uppdaterad 2026-11-27)_
 - [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] - Problem: När man öppnade en leetcode.nvim-lösning i Neovim sade health-checken _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] - Fas 2 av samma problem: när standalone-läget stängdes av (server.standalone = _(uppdaterad 2026-11-17)_
 - [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_

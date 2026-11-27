@@ -13,6 +13,13 @@ name: PR Preview Deployment
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    # En docs-ändring bygger ingen ny preview - den skulle bara kosta
+    # byggminuter. Ändras själva flödet körs det om, så att en ny
+    # byggmetod verifieras.
+    paths-ignore:
+      - "docs/**"
+      - "wiki/**"
+      - "**/*.md"
   pull_request_target:
     types: [closed]
 
