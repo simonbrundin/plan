@@ -3213,3 +3213,11 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] source | 2026-11-27-definitionsassistent-for-mal-define-fasen.md
 
+
+## [2026-11-27] ingest | create notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt
+- [create] [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] — ny sida från inboxen
+- [archive] 2026-11-27-definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt.md
+
+
+## [2026-11-27] link | summaries/definitionsassistent-for-mal-define-fasen -> notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt
+

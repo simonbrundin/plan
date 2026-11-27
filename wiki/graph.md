@@ -96,6 +96,7 @@ graph LR
   n_notes_dashboard_rekommendationsvyn_som_enda_forstavy["Dashboard: rekommendationsvyn som enda forstavy"]
   n_notes_dashboard_tydlighetslyft_av_jamforelserna["Dashboard: tydlighetslyft av jamforelserna"]
   n_notes_dashboarden_ikonerna_hamades_fran_iconifys_cdn_och_gjorde_ssr_sidladdningen_till_en_504["'Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504'"]
+  n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt["Definitionsassistent för mål: fylla define-fasen med godkännande per fält"]
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater["Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater"]
   n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er["Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er"]
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor["dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor"]
@@ -485,6 +486,7 @@ graph LR
   n_notes_zitadel_losenordet_for_simonbrundin_aterstalldes_till_ett_kant_varde_2026_11_27["Zitadel-lösenordet för simonbrundin återställdes till ett känt värde 2026-11-27"]
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll["16x1 HDMI KVM - RS232/LAN-protokoll"]
   n_summaries_2026_11_03_learn_kunskapsbasen_kan_lagras_i_postgresql["'Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL'"]
+  n_summaries_definitionsassistent_for_mal_define_fasen["'Sammanfattning: definitionsassistent för mål (define-fasen)'"]
   n_summaries_flux_components["Sammanfattning: Flux-komponenter"]
   n_summaries_infrastructure_flux["Sammanfattning: Infrastructure Flux"]
   n_summaries_kalenderns_detaljnivaer_och_lane_packning["Kalenderns detaljnivåer och lane-packning"]
@@ -1198,6 +1200,9 @@ graph LR
   n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord --> n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_entities_hdmi_kvm_switch_16_port_labbet
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm
+  n_summaries_definitionsassistent_for_mal_define_fasen --> n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt
+  n_summaries_definitionsassistent_for_mal_define_fasen --> n_notes_malfaserna_ar_gemensamma_for_alla_mal_i_plan
+  n_summaries_definitionsassistent_for_mal_define_fasen --> n_concepts_anvanda_agenter_i_plan
   n_summaries_flux_components --> n_concepts_flux_operator
   n_summaries_flux_components --> n_entities_flux_gitops
   n_summaries_flux_components --> n_entities_kubernetes
@@ -1220,7 +1225,7 @@ graph LR
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]], [[summaries/definitionsassistent-for-mal-define-fasen]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1277,6 +1282,7 @@ graph LR
 - **notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad** <- [[entities/pxe-server]]
 - **notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo** <- [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/dashboard-ranking-anvander-benchmark-matchade-kostnader** <- [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]]
+- **notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt** <- [[summaries/definitionsassistent-for-mal-define-fasen]]
 - **notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]], [[notes/relationer-mellan-kandidater-i-pappa-symmetriska-par-med-styrka-1-10]]
 - **notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er** <- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
 - **notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor** <- [[entities/pxe-server]]
@@ -1359,6 +1365,7 @@ graph LR
 - **notes/mal-kan-ha-due-datum-deadline** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]], [[notes/mal-kan-ha-startdatum-syns-i-priority-forst-nar-datumet-passerat]], [[notes/manuell-sortering-av-mal-pa-priority]], [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]]
 - **notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
 - **notes/mal-kan-ha-startdatum-syns-i-priority-forst-nar-datumet-passerat** <- [[notes/mal-kan-ha-due-datum-deadline]]
+- **notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan** <- [[summaries/definitionsassistent-for-mal-define-fasen]]
 - **notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder** <- [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]]
 - **notes/malikoner-anvander-enkel-oversattning-fore-iconify** <- [[notes/nya-mal-far-ikon-fran-titeln]]
 - **notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]]

@@ -8,8 +8,8 @@ och gå sedan ner på sidorna som är relevanta.
 |---|---|
 | Entiteter | 6 |
 | Koncept | 21 |
-| Sammanfattningar | 9 |
-| Noter | 451 |
+| Sammanfattningar | 10 |
+| Noter | 452 |
 
 ## Entiteter
 
@@ -46,6 +46,7 @@ och gå sedan ner på sidorna som är relevanta.
 
 ## Sammanfattningar
 
+- [[summaries/definitionsassistent-for-mal-define-fasen]] - En egen definitionsassistent i Plan - synkront LLM-anrop i Plan-API:t, förslag som fyller bara luckorna, godkännande per fält, och en mjuk varning i stället för ett hinder när fasen byts. _(uppdaterad 2026-11-27)_
 - [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] - PostgreSQL-lager för Learn implementerat enligt store.Repository, med DATABASE_URL som växlare och egna testdatabaser per test. _(uppdaterad 2026-11-03)_
 - [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] - Källa: TESmart-manualen för HKS801/HKS1601 (kapitel 10.3), som är referensmanualen för en stor grupp OEM-byggen av 16-portars HDMI KV... _(uppdaterad 2026-11-13)_
 - [[summaries/kalenderns-detaljnivaer-och-lane-packning]] - Kalenderns fem detaljnivåer väljs efter tidsfönstrets storlek, inte efter händelsens vikt - och överlapp löses med pixelmätt lane-packning. _(uppdaterad 2026-11-17)_
@@ -124,6 +125,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/dashboard-gratismodeller-saknade-uppskattad-kostnad-och-knapparna-lovade-fel]] - Efter katalogimporten (766 modeller) upptaktes tva UX-buggar: (1) estimateCostPerTask returnerade null nar kostnaden blev 0, sa 15 gratis... _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] - Slutbehovet kristalliserades: 'vilken modell ska jag köra genom vilken provider eller prenumeration'. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-tydlighetslyft-av-jamforelserna]] - Användaren upplevde jamforeelserna som 'sjukt otydliga'. _(uppdaterad 2026-11-26)_
+- [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] - Plan har fem målfaser (`define`, `plan`, `execute`, `verify`, `completed`) och en _(uppdaterad 2026-11-27)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
