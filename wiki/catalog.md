@@ -97,7 +97,7 @@ finns i `index.md`.
 | [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] | Dashboard: rekommendationsvyn som enda forstavy | note | dashboard, ux, recommendation, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]] | "Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504" | note | dashboard, nuxt, bug, lesson, projekt:simon | 2026-11-27 | 1 |
-| [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] | Definitionsassistent för mål: fylla define-fasen med godkännande per fält | note | feature, goals, agent, human-gate, nuxt, projekt:plan | 2026-11-27 | 1 |
+| [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] | Definitionsassistent för mål: fylla define-fasen med godkännande per fält | note | feature, goals, agent, human-gate, nuxt, projekt:plan | 2026-11-27 | 4 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
@@ -487,7 +487,7 @@ finns i `index.md`.
 | [[notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]] | Zitadel-lösenordet för simonbrundin återställdes till ett känt värde 2026-11-27 | note | zitadel, oidc, bug, lesson, projekt:infrastructure | 2026-11-27 | 0 |
 | [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] | 16x1 HDMI KVM - RS232/LAN-protokoll | summary | kvm, rs232, protokoll, projekt:simon | 2026-11-13 | 2 |
 | [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] | "Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL" | summary | learn, postgres, lagring, go | 2026-11-03 | 0 |
-| [[summaries/definitionsassistent-for-mal-define-fasen]] | "Sammanfattning: definitionsassistent för mål (define-fasen)" | summary | goals, agent, human-gate, feature, projekt:plan | 2026-11-27 | 3 |
+| [[summaries/definitionsassistent-for-mal-define-fasen]] | "Sammanfattning: definitionsassistent för mål (define-fasen)" | summary | goals, agent, human-gate, feature, projekt:plan | 2026-11-27 | 4 |
 | [[summaries/flux-components]] | Sammanfattning: Flux-komponenter | summary | flux, gitops, components, kubernetes | 2026-10-24 | 3 |
 | [[summaries/infrastructure-flux]] | Sammanfattning: Infrastructure Flux | summary | flux, gitops, kustomize, kubernetes | 2026-10-24 | 2 |
 | [[summaries/kalenderns-detaljnivaer-och-lane-packning]] | Kalenderns detaljnivåer och lane-packning | summary | kalender, feature, zoom, ui, projekt:plan | 2026-11-17 | 4 |

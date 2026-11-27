@@ -5,7 +5,7 @@ tags: [feature, goals, agent, human-gate, nuxt, projekt:plan]
 created: 2026-11-27
 updated: 2026-11-27
 status: active
-related: [summaries/definitionsassistent-for-mal-define-fasen]
+related: [concepts/anvanda-agenter-i-plan, notes/agentens-maldefinition-gar-via-human-gate, notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan, summaries/definitionsassistent-for-mal-define-fasen]
 ---
 
 # Definitionsassistent för mål (define-fasen)
@@ -67,5 +67,7 @@ kräva den. Inte blockerande - de två förslagen ska samordnas.
 
 ## Relaterade
 
+- [[notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan]]
+- [[concepts/anvanda-agenter-i-plan]]
+- [[notes/agentens-maldefinition-gar-via-human-gate]]
 - [[summaries/definitionsassistent-for-mal-define-fasen]]
-

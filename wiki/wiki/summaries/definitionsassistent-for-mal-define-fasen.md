@@ -7,7 +7,7 @@ sources: [raw/2026-11-27-definitionsassistent-for-mal-define-fasen.md]
 created: 2026-11-27
 updated: 2026-11-27
 status: active
-related: [notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]
+related: [notes/agentens-maldefinition-gar-via-human-gate, notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]
 ---
 
 ## Källa
@@ -41,3 +41,8 @@ related: [notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-
 - [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]]
 - [[notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan]]
 - [[concepts/anvanda-agenter-i-plan]]
+
+## Relaterade
+
+- [[notes/agentens-maldefinition-gar-via-human-gate]]
+

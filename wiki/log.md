@@ -3221,3 +3221,18 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | summaries/definitionsassistent-for-mal-define-fasen -> notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt
 
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> summaries/definitionsassistent-for-mal-define-fasen
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> notes/agentens-maldefinition-gar-via-human-gate
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan
+
+
+## [2026-11-27] link | summaries/definitionsassistent-for-mal-define-fasen -> notes/agentens-maldefinition-gar-via-human-gate
+
