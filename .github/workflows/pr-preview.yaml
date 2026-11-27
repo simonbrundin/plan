@@ -304,13 +304,18 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
+          # Spara skriptet utanför repot. Branchen "previews" innehåller
+          # bara overlays - skriptet finns inte kvar i arbetskopian när
+          # branchen byts.
+          cp .github/scripts/pr-preview-cleanup.py /tmp/pr-preview-cleanup.py
+
           if ! git fetch origin previews; then
             echo "Branchen 'previews' finns inte - inget att städa"
             exit 0
           fi
 
           git checkout -B previews origin/previews
-          python3 .github/scripts/pr-preview-cleanup.py
+          python3 /tmp/pr-preview-cleanup.py
 
           if git diff --cached --quiet; then
             echo "Ingen ändring att committa"
