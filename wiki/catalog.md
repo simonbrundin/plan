@@ -186,7 +186,8 @@ finns i `index.md`.
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
 | [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] | Kubeletts logg-API svarade med tls: internal error i prod | note | diagnostik, talos, kubernetes, projekt:infrastructure | 2026-11-24 | 0 |
-| [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-17 | 7 |
+| [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-27 | 8 |
+| [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] | kunskaps-wikin-och-dess-verktyg-har-portats-till-rust | - | - | - | 3 |
 | [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] | Kureringspasset hittade foraldrad kunskap i wikin | note | wiki, kurering, karpathy, projekt:agents | 2026-10-24 | 0 |
 | [[notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel]] | KVM-portmappning: worker-N = port N - den deployade configen pa Pi:n var fel | note | kvm, bug, projekt:infrastructure | 2026-11-20 | 0 |
 | [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]] | KVM-styrning från PXE-Pi:n (16-port HDMI KVM) | note | kvm, rs232, pxe, hardware, home-assistant, projekt:simon | 2026-11-20 | 4 |

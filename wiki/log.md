@@ -3088,3 +3088,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] — ny sida från inboxen
 - [archive] 2026-11-26-malkompletteringar-och-auth-i-rust-de-sista-api-vagarna.md
 
+
+## [2026-11-27] ingest | create notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust
+- [create] [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] — ny sida från inboxen
+- [archive] 2026-11-27-kunskaps-wikin-och-dess-verktyg-har-portats-till-rust.md
+- [merge?] notes/kunskaps-wiki + notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust (delade taggar: wiki, agent, verktyg)

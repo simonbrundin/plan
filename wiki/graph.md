@@ -186,6 +186,7 @@ graph LR
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna["Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna"]
   n_notes_kubeletts_logg_api_svarade_med_tls_internal_error_i_prod["Kubeletts logg-API svarade med tls: internal error i prod"]
   n_notes_kunskaps_wiki["Kunskaps-wikin"]
+  n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust["kunskaps-wikin-och-dess-verktyg-har-portats-till-rust"]
   n_notes_kureringspasset_hittade_foraldrad_kunskap_i_wikin["Kureringspasset hittade foraldrad kunskap i wikin"]
   n_notes_kvm_portmappning_worker_n_port_n_den_deployade_configen_pa_pi_n_var_fel["KVM-portmappning: worker-N = port N - den deployade configen pa Pi:n var fel"]
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm["KVM-styrning från PXE-Pi:n (16-port HDMI KVM)"]
@@ -765,9 +766,13 @@ graph LR
   n_notes_kunskaps_wiki --> n_notes_infrastructure_agents_md_uppdaterad_tre_fallor_for_agenter
   n_notes_kunskaps_wiki --> n_notes_konventioner
   n_notes_kunskaps_wiki --> n_notes_kureringspasset_hittade_foraldrad_kunskap_i_wikin
+  n_notes_kunskaps_wiki --> n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust
   n_notes_kunskaps_wiki --> n_notes_stray_wiki_i_typetrainer_repot_ar_inte_kallan_for_wikin
   n_notes_kunskaps_wiki --> n_notes_utvecklingsflode
   n_notes_kunskaps_wiki --> n_summaries_llm_wiki_karpathy
+  n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust --> n_notes_kunskaps_wiki
+  n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust --> n_notes_sammanslagning_av_agents_repot_in_i_plan_vad_som_flyttades_och_vad_som_medvetet_inte_gjorde_det
+  n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust --> n_notes_agentens_kodandringsflode_portat_till_rust
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_entities_hdmi_kvm_switch_16_port_labbet
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_notes_picokvm_luckfox_startar_inte_i_labbet_lite_saknar_emmc_ingen_poe
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_notes_simon_kvm_cli_kommando_for_att_byta_hdmi_kvm_port_fran_pxe_vard
@@ -1209,6 +1214,7 @@ graph LR
 - **notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna** <- [[concepts/anvanda-agenter-i-plan]]
 - **notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876** <- [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]]
 - **notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet** <- [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]]
+- **notes/agentens-kodandringsflode-portat-till-rust** <- [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]]
 - **notes/agents-repot-arkiverat-och-mergens-mal-kompletterade** <- [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]]
 - **notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay** <- [[notes/utvecklingsflode]]
 - **notes/arkitektur** <- [[notes/bigram-algoritmen]], [[notes/konventioner]], [[notes/session-livscykel]], [[notes/utvecklingsflode]]
@@ -1279,7 +1285,8 @@ graph LR
 - **notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image** <- [[entities/pxe-server]]
 - **notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force** <- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]]
 - **notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
-- **notes/kunskaps-wiki** <- [[notes/arkitektur]], [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]], [[notes/utvecklingsflode]], [[summaries/llm-wiki-karpathy]]
+- **notes/kunskaps-wiki** <- [[notes/arkitektur]], [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]], [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]], [[notes/utvecklingsflode]], [[summaries/llm-wiki-karpathy]]
+- **notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust** <- [[notes/kunskaps-wiki]]
 - **notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin** <- [[notes/kunskaps-wiki]], [[summaries/llm-wiki-karpathy]]
 - **notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel** <- [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]]
 - **notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm** <- [[entities/hdmi-kvm-switch-16-port-labbet]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
@@ -1413,7 +1420,7 @@ graph LR
 - **notes/rust-utvecklingsmiljo-pa-workstationen** <- [[notes/rust-repo-learn-to-code-with-rust-som-submodule]]
 - **notes/sa-dampas-bada-rust-analyzer-popupen-no-project-root-found** <- [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]]
 - **notes/sales-soulmate-se-appen-kan-inte-logga-in-oauth-clienten-saknas-i-soulmate-tenanten** <- [[notes/imap-inloggning-for-michael-brundin-soulmate-se-kraver-admin-consent]]
-- **notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det** <- [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]], [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]]
+- **notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det** <- [[notes/agents-repot-arkiverat-och-mergens-mal-kompletterade]], [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]], [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]]
 - **notes/session-livscykel** <- [[notes/accuracy-fel-omstart]], [[notes/arkitektur]], [[notes/sprint-timer-saknas]]
 - **notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner** <- [[entities/pxe-server]]
