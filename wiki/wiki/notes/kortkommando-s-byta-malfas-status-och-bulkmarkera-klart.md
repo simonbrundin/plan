@@ -16,7 +16,7 @@ HUR: tangenten 's' växlar målfasen framåt i cykeln Definiera -> Planera -> Ge
 - /goals: det markerade målet, eller alla Tab-markerade mål om något är markerat
 - /now: samma logik
 - /goal/:id: Tab-markerade undermål, annars förälder i föräldrläge, annars huvudmålet, annars det markerade undermålet
-Eviga mål hoppas över (de har ingen fas - ikonen döljs för dem).
+Eviga mål har också en fas - de kan gå från Definiera till Planera och vidare. Bara klarmarkeringen (bulk-'d') gäller dem inte: eviga mål kan inte slutföras.
 
 TANGENTEN ÄNDRAD: första versionen använde 'f'/'Shift+F'. Användaren valde 's'/'Shift+S' eftersom 'f' kunde misstas för något annat. 's' är ledig utan leader på alla tre sidor - 'Space'+'s' (påbörjat) och 'Space'+'f'+'d' (visa/dölj avslutade mål) krockar inte eftersom ledern kräver Space först.
 
