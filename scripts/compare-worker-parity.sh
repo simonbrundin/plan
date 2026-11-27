@@ -49,6 +49,8 @@ SCENARIER=(
   "ogiltig-ikon|{\"title\":\"Paritetsmål\",\"description\":\"Ett mål\",\"icon\":\"inte-en-ikon\"}"
   "ogiltig-regel|{\"title\":\"Paritetsmål\",\"description\":\"Ett mål\",\"recurrence_rule\":\"FREQ=XYLOO\"}"
   "avslagen|{\"title\":\"Paritetsmål\",\"description\":\"Ett mål för paritetstest\",\"icon\":\"🎯\"}"
+  "saknad-provider|{\"title\":\"Paritetsmål\",\"description\":\"Ett mål för paritetstest\",\"icon\":\"🎯\"}|utan-provider"
+  "avbruten|{\"title\":\"Paritetsmål\",\"description\":\"Ett mål för paritetstest\",\"icon\":\"🎯\"}"
 )
 
 # --- Hjälpfunktioner -------------------------------------------------
@@ -169,19 +171,43 @@ avslaga() {
     -d '{"decision":"reject","feedback":"Gör om så här"}' >/dev/null
 }
 
+# avbryter körningen - som en människa som trycker avbryt i gränssnittet.
+avbryt_korning() {
+  local mal_id="$1"
+  local kor_id
+
+  kor_id=$(curl -s -H "X-API-Key: $FULL_KEY" \
+    "$PLAN_URL/api/v1/agent-runs?goal_id=$mal_id" | jq -r '.[0].id // empty')
+
+  if [ -z "$kor_id" ]; then
+    return 1
+  fi
+
+  curl -s -X POST -H "X-API-Key: $FULL_KEY" \
+    "$PLAN_URL/api/v1/agent-runs/$kor_id/cancel" >/dev/null
+}
+
 # startar workern mot ett mål och väntar in definitionen.
 #
 # Tidsgränsen sätts per scenario - efter ett avslag behöver workern bara
 # hinna se beslutet.
+#
+# Varianten "utan-provider" tar bort alla nycklar - då ska workern
+# sakna leverantör och felmeddelandet jämförs.
 kor_workern() {
-  local binar="$1" mal_id="$2" logg="$3" tidsgrans="${4:-25}"
+  local binar="$1" mal_id="$2" logg="$3" tidsgrans="${4:-25}" variant="${5:-}"
+  local OPENAI_API_KEY="mock"
+
+  if [ "$variant" = "utan-provider" ]; then
+    OPENAI_API_KEY=""
+  fi
 
   PLAN_API_URL="$PLAN_URL" \
   PLAN_API_KEY="$PLAN_KEY" \
   MINIMAX_API_KEY="" \
   MINIMAX_ENDPOINT="" \
   ANTHROPIC_API_KEY="" \
-  OPENAI_API_KEY="mock" \
+  OPENAI_API_KEY="$OPENAI_API_KEY" \
   OPENAI_BASE_URL="http://127.0.0.1:$MOCK_PORT/v1" \
   OPENAI_MODEL="mockmodell" \
   AGENT_GOAL_ID="$mal_id" \
@@ -224,16 +250,16 @@ fi
 
 # Kör ett scenario mot en workern och skriver ut ögonblicksbilden.
 kör_scenario() {
-  local namn="$1" binar="$2" logg="$3"
+  local namn="$1" binar="$2" logg="$3" variant="${4:-}"
   local mal_id bild
 
   mal_id=$(skapa_mal)
 
   if [ -z "$mal_id" ]; then
-    return 1
+    return
   fi
 
-  kor_workern "$binar" "$mal_id" "$logg"
+  kor_workern "$binar" "$mal_id" "$logg" 25 "$variant"
 
   # Ett avslaget förslag ska inte köras om - workern får köra igen
   # efter beslutet och då ska inget nytt hända.
@@ -242,7 +268,22 @@ kör_scenario() {
     kor_workern "$binar" "$mal_id" "$logg.2" 8
   fi
 
+  # En avbruten körning ska inte återupptas - workern får köra igen
+  # efter avbrottet och då ska inget nytt hända.
+  if [ "$namn" = "avbruten" ]; then
+    avbryt_korning "$mal_id"
+    kor_workern "$binar" "$mal_id" "$logg.2" 8
+  fi
+
   bild=$(ogonblicksbild "$mal_id")
+
+  # Saknas leverantören skriver båda en feltext - den jämförs också, men
+  # utan loggformatet (Go använder log, Rust tracing).
+  if [ "$variant" = "utan-provider" ]; then
+    meddelande=$(grep -o "Failed to create LLM provider:.*" "$logg" | head -1)
+    bild=$(echo "$bild" | jq --arg meddelande "$meddelande" '. + {meddelande: $meddelande}')
+  fi
+
   stada "$mal_id"
 
   echo "$bild"
@@ -251,13 +292,20 @@ kör_scenario() {
 for scenarie in "${SCENARIER[@]}"; do
   namn="${scenarie%%|*}"
   svar="${scenarie#*|}"
+  variant=""
+
+  # Sista fältet, om det finns, är varianten (t.ex. "utan-provider").
+  if [[ "$svar" == *"|"* ]]; then
+    variant="${svar##*|}"
+    svar="${svar%|*}"
+  fi
 
   printf '%s' "$svar" > "$WORKDIR/svar.json"
 
   echo "== $namn"
 
   # Go-workern.
-  go_bild=$(kör_scenario "$namn" "$GO_WORKER" "$WORKDIR/go.log")
+  go_bild=$(kör_scenario "$namn" "$GO_WORKER" "$WORKDIR/go.log" "$variant")
 
   if [ -z "$go_bild" ]; then
     echo "Kunde inte köra scenariot med Go-workern - hoppar över $namn"
@@ -266,7 +314,7 @@ for scenarie in "${SCENARIER[@]}"; do
   fi
 
   # Rust-workern.
-  rust_bild=$(kör_scenario "$namn" "$RUST_WORKER" "$WORKDIR/rust.log")
+  rust_bild=$(kör_scenario "$namn" "$RUST_WORKER" "$WORKDIR/rust.log" "$variant")
 
   if [ "$go_bild" = "$rust_bild" ]; then
     echo "OK: $namn"
