@@ -145,7 +145,7 @@ onMounted(async () => {
             </span>
             <Icon name="i-lucide-chevron-right" class="h-5 w-5 shrink-0 text-ink-dim" />
           </NuxtLink>
-          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
             @updated="statusId => updateGoalPhase(goal, statusId)" />
         </li>
       </ul>

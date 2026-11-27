@@ -5,7 +5,6 @@ import { GOAL_PHASES, getGoalPhasePresentation } from "~/utils/goalPhase";
 const props = defineProps<{
 	goalId: number;
 	statusId: number;
-	eternal?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -17,13 +16,6 @@ const { updateGoalStatus } = useGoalApi();
 const selectElement = ref<HTMLSelectElement | null>(null);
 const isSaving = ref(false);
 const errorMessage = ref("");
-
-// Eviga mål kan aldrig avslutas, så deras fas har ingen mening.
-// Därför visas ingen status-ikon alls för dem.
-const isEternal = computed(
-	() =>
-		props.eternal ?? !!goalsStore.getGoalById(props.goalId)?.eternal,
-);
 
 const currentStatus = computed(() =>
 	goalsStore.statuses.find((status) => status.id === props.statusId),
@@ -66,7 +58,6 @@ async function changePhase(event: Event): Promise<void> {
 
 <template>
 	<span
-		v-if="!isEternal"
 		class="relative inline-flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded transition-colors hover:bg-surface-2 focus-within:ring-2 focus-within:ring-accent/50"
 		:class="presentation.colorClass"
 		:title="errorMessage || `Fas: ${presentation.label}`"

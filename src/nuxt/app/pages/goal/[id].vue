@@ -2810,7 +2810,7 @@ watch(selectedParentIndex, async () => {
           </button>
         </span>
         <GoalPhaseBadge v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
-          :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
+          :goal-id="goal.id" :status-id="goal.status_id"
           @updated="statusId => updateGoalPhase(goal, statusId)" />
         <!-- Agent-märke -->
         <span v-if="goal && !(mode === 'insert' && editingGoalId === goal?.id)"
@@ -3237,7 +3237,7 @@ watch(selectedParentIndex, async () => {
                        :style="{ opacity: isChildBlocked(child.id) || child.finished ? 0.6 : child.started ? 1 : 0.25 }" />
                    </button>
                  </span>
-                 <GoalPhaseBadge :goal-id="child.id" :status-id="child.status_id" :eternal="child.eternal"
+                 <GoalPhaseBadge :goal-id="child.id" :status-id="child.status_id"
                    @updated="statusId => updateGoalPhase(child, statusId)" />
                  <!-- Agent-märke -->
                  <span class="opt-icon" :class="{ 'is-on': !!child.agent }">

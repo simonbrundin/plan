@@ -1164,7 +1164,7 @@ definePageMeta({
           </div>
           <!-- Ikonerna grupperas tätt ihop så att raden inte ser utsträckt ut. -->
           <div class="flex items-center gap-1 flex-shrink-0">
-          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
             @updated="statusId => updateGoalPhase(goal, statusId)" />
           <!-- Started (klicka eller s) -->
           <span class="opt-icon" :class="{ 'is-on': !!goal.started && !goal.finished }">

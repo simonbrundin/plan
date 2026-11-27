@@ -921,7 +921,7 @@ const filterOptions = [
             </button>
           </span>
 
-          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
             @updated="statusId => updateGoalPhase(goal, statusId)" />
           <span class="opt-icon" :class="{ 'is-on': !!goal.agent }">
             <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />

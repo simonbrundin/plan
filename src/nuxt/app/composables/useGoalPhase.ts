@@ -8,7 +8,9 @@ import { GOAL_PHASES, nextPhase, type GoalPhase } from "~/utils/goalPhase";
  * markerade mål samtidigt - den som anropar composablen bestämmer vilka
  * mål som är aktuella.
  *
- * Eviga mål hoppas över: de har ingen fas (fasen visas inte för dem).
+ * Eviga mål har också en fas: de kan inte slutföras, men de kan gå från
+ * Definiera till Planera och vidare. Bara klarmarkeringen (bulk-'d') gäller
+ * dem inte.
  */
 export function useGoalPhase() {
 	const goalsStore = useGoalsStore();
@@ -60,11 +62,10 @@ export function useGoalPhase() {
 		if (goals.length === 0) return 0;
 		await ensureStatuses();
 
-		const targets = goals.filter((goal) => !goal.eternal);
 		let changed = 0;
 
 		await Promise.all(
-			targets.map(async (goal) => {
+			goals.map(async (goal) => {
 				const next = nextPhase(phaseOf(goal), direction);
 				if (await setPhase(goal, next)) {
 					changed += 1;
