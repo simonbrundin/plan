@@ -137,6 +137,8 @@ func main() {
 	})
 	{
 		goalHandler := handlers.NewGoalHandler(dbConnected)
+		goalPhaseHandler := handlers.NewGoalPhaseHandler(dbConnected)
+		goalVerificationHandler := handlers.NewGoalVerificationHandler(dbConnected)
 		calendarEventHandler := handlers.NewCalendarEventHandler(dbConnected)
 		calendarHandler := handlers.NewCalendarHandler(dbConnected)
 		placeHandler := handlers.NewPlaceHandler(dbConnected)
@@ -175,6 +177,19 @@ func main() {
 		api.GET("/goals/:id/status", goalHandler.GetGoalStatus)
 		api.PATCH("/goals/:id/status", goalHandler.UpdateGoalStatus)
 		api.GET("/goals/:id/status/history", goalHandler.GetStatusHistory)
+
+		// Fasmaskinen. Övergångarna har villkor - ett villkor som inte är
+		// uppfyllt svarar med 409 och en skälkod.
+		api.POST("/goals/:id/phase", goalPhaseHandler.TransitionPhase)
+		api.POST("/goals/:id/complete", goalPhaseHandler.CompleteGoal)
+
+		// Verifiering och bevis. Planen är valfri - ett mål utan plan
+		// fungerar precis som ett mål med en plan.
+		api.GET("/goals/:id/verification", goalVerificationHandler.GetVerification)
+		api.PUT("/goals/:id/verification", goalVerificationHandler.UpdateVerification)
+		api.POST("/goals/:id/evidence", goalVerificationHandler.AddEvidence)
+		api.POST("/goals/:id/verification/run", goalVerificationHandler.RunVerification)
+		api.POST("/verification-results/:id/approve", goalVerificationHandler.ApproveVerificationResult)
 
 		// Relations endpoints
 		api.POST("/goals/relations", goalHandler.CreateRelation)

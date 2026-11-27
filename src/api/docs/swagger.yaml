@@ -799,6 +799,12 @@ definitions:
       weight:
         type: integer
     type: object
+  models.CompleteGoalRequest:
+    properties:
+      reason:
+        example: klart
+        type: string
+    type: object
   models.CompleteOccurrenceRequest:
     properties:
       completed_on:
@@ -1001,6 +1007,20 @@ definitions:
     required:
     - dependsOnId
     - goalId
+    type: object
+  models.CreateGoalEvidenceRequest:
+    properties:
+      source:
+        example: user
+        type: string
+      type:
+        example: text
+        type: string
+      value:
+        type: string
+    required:
+    - type
+    - value
     type: object
   models.CreateGoalRequest:
     properties:
@@ -1292,6 +1312,28 @@ definitions:
         example: 1
         type: integer
     type: object
+  models.GoalEvidence:
+    properties:
+      created_at:
+        type: string
+      goal_id:
+        example: 449
+        type: integer
+      id:
+        example: 1
+        type: integer
+      source:
+        example: user
+        type: string
+      type:
+        example: text
+        type: string
+      value:
+        example: Köpt 6 glödlampor
+        type: string
+      verification_id:
+        type: integer
+    type: object
   models.GoalGraphResponse:
     properties:
       dependencies:
@@ -1325,6 +1367,57 @@ definitions:
       parent_id:
         type: integer
       weight:
+        type: integer
+    type: object
+  models.GoalVerification:
+    properties:
+      created_at:
+        type: string
+      criterion:
+        example: 3 av 4 moment avbockade
+        type: string
+      decided_at:
+        type: string
+      decided_by:
+        type: integer
+      goal_id:
+        example: 449
+        type: integer
+      id:
+        example: 1
+        type: integer
+      outcome:
+        example: passed
+        type: string
+      strength:
+        example: svag
+        type: string
+      type:
+        example: checklista
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.GoalVerificationResult:
+    properties:
+      created_at:
+        type: string
+      decided_at:
+        type: string
+      decided_by:
+        type: integer
+      goal_id:
+        example: 449
+        type: integer
+      id:
+        example: 1
+        type: integer
+      note:
+        type: string
+      outcome:
+        example: passed
+        type: string
+      verification_id:
         type: integer
     type: object
   models.GoalWithRelations:
@@ -1484,6 +1577,35 @@ definitions:
       set:
         type: boolean
       value:
+        type: string
+    type: object
+  models.PhaseTransitionRequest:
+    properties:
+      override_reason:
+        example: vill hinna ikapp
+        type: string
+      to:
+        example: plan
+        type: string
+    required:
+    - to
+    type: object
+  models.PhaseTransitionResponse:
+    properties:
+      completion_kind:
+        example: deklarerat
+        type: string
+      forced:
+        example: false
+        type: boolean
+      from:
+        example: define
+        type: string
+      goal_id:
+        example: 449
+        type: integer
+      to:
+        example: plan
         type: string
     type: object
   models.Place:
@@ -1919,6 +2041,21 @@ definitions:
         type: integer
       title:
         type: string
+    type: object
+  models.UpdateGoalVerificationRequest:
+    properties:
+      criterion:
+        example: 3 av 4 moment avbockade
+        type: string
+      strength:
+        example: svag
+        type: string
+      type:
+        example: checklista
+        type: string
+    required:
+    - criterion
+    - type
     type: object
   models.UpdatePlaceRequest:
     properties:
@@ -3818,6 +3955,53 @@ paths:
       summary: Update a goal
       tags:
       - goals
+  /api/v1/goals/{id}/complete:
+    post:
+      consumes:
+      - application/json
+      description: Completes a goal in one step, from any phase. This is the human
+        path - the goal is completed as "deklarerat", or as "verifierat" if a verification
+        has passed.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompleteGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PhaseTransitionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Complete a goal directly
+      tags:
+      - goals
   /api/v1/goals/{id}/completions:
     delete:
       consumes:
@@ -3893,6 +4077,103 @@ paths:
       security:
       - BearerAuth: []
       summary: Complete the current occurrence of a recurring goal
+      tags:
+      - goals
+  /api/v1/goals/{id}/evidence:
+    post:
+      consumes:
+      - application/json
+      description: Stores evidence for a goal - the proof that a goal was actually
+        reached.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Evidence
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateGoalEvidenceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.GoalEvidence'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add evidence to a goal
+      tags:
+      - goals
+  /api/v1/goals/{id}/phase:
+    post:
+      consumes:
+      - application/json
+      description: Moves a goal between the phases define, plan, execute, verify and
+        completed. The transition rules live in the phase machine - a missing precondition
+        is answered with 409 and a stable reason code.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Target phase
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.PhaseTransitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PhaseTransitionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Move a goal to another phase
       tags:
       - goals
   /api/v1/goals/{id}/places:
@@ -4197,6 +4478,123 @@ paths:
       summary: Remove a tag from a goal
       tags:
       - tags
+  /api/v1/goals/{id}/verification:
+    get:
+      description: Returns the goal's verification plan with its latest outcome and
+        evidence. A goal without a plan returns an empty plan.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GoalVerification'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a goal's verification plan
+      tags:
+      - goals
+    put:
+      consumes:
+      - application/json
+      description: Sets the verification plan for a goal. The plan is optional - changing
+        it invalidates earlier outcomes.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Verification plan
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateGoalVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GoalVerification'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set a goal's verification plan
+      tags:
+      - goals
+  /api/v1/goals/{id}/verification/run:
+    post:
+      description: Runs the goal's verification and stores the outcome. The outcome
+        is not approved - a person has to approve it before it counts as verified.
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GoalVerificationResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Run a goal's verification
+      tags:
+      - goals
   /api/v1/goals/dependencies:
     delete:
       consumes:
@@ -4991,6 +5389,40 @@ paths:
       summary: Usage statistics
       tags:
       - usage
+  /api/v1/verification-results/{id}/approve:
+    post:
+      description: Approves a verification outcome. Only a person can do this - an
+        agent may create outcomes but never approve them.
+      parameters:
+      - description: Verification result ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GoalVerificationResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Approve a verification outcome
+      tags:
+      - goals
   /api/v1/workflow:
     post:
       consumes:

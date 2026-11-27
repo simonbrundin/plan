@@ -41,6 +41,11 @@ func agentScopeAllows(method, path string) bool {
 	case "agent-approvals":
 		// Läsa ett godkännande är ok, att besluta om det är det inte.
 		return method == http.MethodGet && len(rest) == 1
+
+	case "verification-results":
+		// Ett verifieringsomdöme godkänns alltid av en människa - en
+		// agent får inte godkänna sig själv.
+		return false
 	}
 
 	return false
@@ -66,10 +71,31 @@ func agentScopeAllowsGoals(method string, rest []string) bool {
 		case "status":
 			// Statusen på ett mål.
 			return method == http.MethodGet || method == http.MethodPatch
+		case "phase":
+			// Fasmaskinen. Agenten får begära en övergång - villkoren
+			// kontrolleras i API:t, precis som för en människa. Men
+			// agenten får inte avsluta ett mål själv, så "complete"
+			// (som ligger under målen, inte under ett mål) är inte
+			// tillåtet.
+			return method == http.MethodPost
+		case "verification":
+			// Verifieringsplanen och körningen av den. Agenten får
+			// föreslå en plan och samla bevis - men inte godkänna ett
+			// omdöme.
+			return method == http.MethodGet || method == http.MethodPut || method == http.MethodPost
+		case "evidence":
+			// Bevis på målet.
+			return method == http.MethodPost
 		case "tags", "places":
 			// Agenten får sätta taggar och platser på ett mål - de är
 			// en del av måldefinitionen. Den får inte radera dem.
 			return method == http.MethodPut
+		}
+	case 3:
+		// "/verification/run" - köra verifieringen. Agenten får göra det,
+		// men omdömet blir först giltigt när en människa godkänner det.
+		if rest[1] == "verification" && rest[2] == "run" {
+			return method == http.MethodPost
 		}
 	}
 

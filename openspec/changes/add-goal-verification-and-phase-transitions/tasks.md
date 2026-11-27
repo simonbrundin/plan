@@ -1,41 +1,48 @@
 ## 1. Datamodell
 
-- [ ] 1.1 `goals.approval_mode` (`plan` | `varje_atgard`, default `plan`) i
+- [x] 1.1 `goals.approval_mode` (`plan` | `varje_atgard`, default `plan`) i
       `environments/base/db/schema.yaml`
-- [ ] 1.2 Tabell `goal_verifications` (mål, typ, villkor, styrka, skapad)
-- [ ] 1.3 Tabell `goal_evidence` (mål, verifiering, typ, värde, tidsstämpel,
+- [x] 1.2 Tabell `goal_verifications` (mål, typ, villkor, styrka, skapad)
+- [x] 1.3 Tabell `goal_evidence` (mål, verifiering, typ, värde, tidsstämpel,
       källa)
-- [ ] 1.4 Tabell `goal_verification_results` (mål, verifiering, utfall,
+- [x] 1.4 Tabell `goal_verification_results` (mål, verifiering, utfall,
       godkänd-av, godkänd-am, orsak)
-- [ ] 1.5 Kolumn för hur ett mål avslutades (`deklarerat` | `verifierat`)
-- [ ] 1.6 Idempotent migrering i `src/api/internal/database/db.go` - samma
+- [x] 1.5 Kolumn för hur ett mål avslutades (`deklarerat` | `verifierat`)
+- [x] 1.6 Idempotent migrering i `src/api/internal/database/db.go` - samma
       mönster som tidigare statusmigreringar
+
+Extra: `goal_phase_events` (mål, från, till, vem, tvingad, orsak) - loggen
+som svarar på "varför gjorde agenten det här?".
 
 ## 2. Fasmaskin i Plan API
 
-- [ ] 2.1 `POST /api/v1/goals/:id/phase` med body `{to, override_reason?}`
-- [ ] 2.2 Villkor per övergång i `src/api/internal/handlers/goals.go` (eller
-      ny `phase.go`) - `define`→`plan`, `plan`→`execute`,
+- [x] 2.1 `POST /api/v1/goals/:id/phase` med body `{to, override_reason?}`
+- [x] 2.2 Villkor per övergång i `src/api/internal/phase/phase.go` (ren logik,
+      utan databas) - `define`→`plan`, `plan`→`execute`,
       `execute`→`verify`
-- [ ] 2.3 `POST /api/v1/goals/:id/complete` - genväg för människan: avslutar
+- [x] 2.3 `POST /api/v1/goals/:id/complete` - genväg för människan: avslutar
       målet oavsett fas, registrerar `deklarerat`/`verifierat`
-- [ ] 2.4 409 med `reason` och saknat villkor i svaret
-- [ ] 2.5 Loggning i `status_updates` (från, till, vem) + avvikelseevent vid
-      override och bakåtgång
-- [ ] 2.6 Befintliga `PATCH /api/v1/goals/:id/status` går via samma maskin
-- [ ] 2.7 Enhetstester för varje villkor, inklusive agent-scope
+- [x] 2.4 409 med `code` (stabil skälkod) och saknat villkor i svaret
+- [x] 2.5 Loggning i `status_updates` (från, till, vem) + `goal_phase_events`
+      vid override, bakåtgång och fashopp
+- [x] 2.6 Befintliga `PATCH /api/v1/goals/:id/status` går via samma maskin
+- [x] 2.7 Enhetstester för varje villkor, inklusive agent-scope
+
+Extra: `src/api/internal/phaseservice` - bindningen mellan maskinen och
+databasen, så att både fasendpointern och statusendpointern går samma väg.
 
 ## 3. Verifiering och bevis
 
-- [ ] 3.1 `GET/PUT /api/v1/goals/:id/verification` - valfri plan
-- [ ] 3.2 `POST /api/v1/goals/:id/evidence`
-- [ ] 3.3 `POST /api/v1/goals/:id/verification/run` - kör verifieringen och
+- [x] 3.1 `GET/PUT /api/v1/goals/:id/verification` - valfri plan
+- [x] 3.2 `POST /api/v1/goals/:id/evidence`
+- [x] 3.3 `POST /api/v1/goals/:id/verification/run` - kör verifieringen och
       ger omdöme
-- [ ] 3.4 `POST /api/v1/verification-results/:id/approve` - kräver
+- [x] 3.4 `POST /api/v1/verification-results/:id/approve` - kräver
       människasession, agent-scope får 403
-- [ ] 3.5 Ogiltigförklarande av omdöme när verifieringsplanen ändras
-- [ ] 3.6 Agentens förslag att avsluta kräver godkänd verifiering NÄR målet
-      har en plan; annars går förslaget fram men markeras "utan bevis"
+- [x] 3.5 Ogiltigförklarande av omdöme när verifieringsplanen ändras
+- [x] 3.6 Agentens förslag att avsluta kräver ett mänskligt beslut - maskinen
+      svarar `approval_required` (409) när en agent försöker avsluta. Blir
+      målet "verifierat" krävs ett godkänt omdöme, annars "deklarerat"
 
 ## 4. Agenten
 

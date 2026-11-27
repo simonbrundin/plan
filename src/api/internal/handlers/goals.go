@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"plan/api/internal/models"
+	"plan/api/internal/phase"
+	"plan/api/internal/phaseservice"
 	"plan/api/internal/recurrence"
 	"plan/api/internal/repository"
 
@@ -20,6 +22,7 @@ type GoalHandler struct {
 	repo        *repository.GoalRepository
 	places      *repository.PlaceRepository
 	tags        *repository.TagRepository
+	phases      *phaseservice.Service
 	dbConnected bool
 }
 
@@ -28,6 +31,7 @@ func NewGoalHandler(dbConnected bool) *GoalHandler {
 		repo:        repository.NewGoalRepository(),
 		places:      repository.NewPlaceRepository(),
 		tags:        repository.NewTagRepository(),
+		phases:      phaseservice.New(),
 		dbConnected: dbConnected,
 	}
 }
@@ -1262,6 +1266,40 @@ func (h *GoalHandler) UpdateGoalStatus(c *gin.Context) {
 	var req models.UpdateStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "status_id is required"})
+		return
+	}
+
+	// En fasstatus går via fasmaskinen - annars skulle den kunna
+	// kringgås genom den gamla statusendpointern. Övriga statuser
+	// (tillfälliga, uppskjutna) sätts som tidigare.
+	status, err := h.repo.GetStatusByID(c.Request.Context(), int64(req.StatusID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+		return
+	}
+	if status != nil && phase.Known(status.Name) {
+		outcome, err := h.phases.Apply(c.Request.Context(), goalID, status.Name, !isAgentRequest(c), "")
+		if err != nil {
+			if errors.Is(err, phaseservice.ErrGoalNotFound) {
+				c.JSON(http.StatusNotFound, models.ErrorResponse{Message: "goal not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{Message: err.Error()})
+			return
+		}
+		if !outcome.Result.Allowed {
+			code := http.StatusConflict
+			if outcome.Result.Code == phase.ReasonUnknownPhase {
+				code = http.StatusBadRequest
+			}
+			c.JSON(code, gin.H{
+				"error":   http.StatusText(code),
+				"message": outcome.Result.Message,
+				"code":    outcome.Result.Code,
+			})
+			return
+		}
+		c.JSON(http.StatusOK, outcome.Update)
 		return
 	}
 
