@@ -198,6 +198,12 @@ jobs:
           mkdir -p /tmp/preview-overlay
           cp -r "environments/pr/${PR_NUMBER}/." /tmp/preview-overlay/
 
+          # Ta bort den genererade katalogen ur arbetskopian. Annars
+          # vägrar git byta branch - den genererade katalogen är
+          # oversionerad, och branchen innehåller en katalog med samma
+          # namn.
+          rm -rf "environments/pr/${PR_NUMBER}"
+
           for attempt in 1 2 3 4 5; do
             if git fetch origin previews; then
               git checkout -B previews origin/previews
