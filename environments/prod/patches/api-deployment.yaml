@@ -8,7 +8,7 @@ spec:
       containers:
         - name: api
           # Rust-imagen byggs av .github/workflows/commit.rust-images.yaml.
-          image: ghcr.io/simonbrundin/rust-api:sha-e92f3de
+          image: ghcr.io/simonbrundin/rust-api:sha-361a26b
           env:
             - name: AUTH_DISABLED
               value: "false"
