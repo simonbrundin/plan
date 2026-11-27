@@ -16,12 +16,14 @@ pub const API_KEY_QUERY_PARAM: &str = "api_key";
 pub const SCOPE_FULL: &str = "full";
 /// Nyckelns scope: bara agentens egna anrop.
 pub const SCOPE_AGENT: &str = "agent";
+/// Nyckelns scope: får läsa men inte skriva.
+pub const SCOPE_READONLY: &str = "readonly";
 
 /// Kontrollerar att ett scope är känt.
 ///
 /// En okänd scope ger inga rättigheter - därför är listan sluten.
 pub fn giltig_scope(scope: &str) -> bool {
-    scope == SCOPE_FULL || scope == SCOPE_AGENT
+    scope == SCOPE_FULL || scope == SCOPE_AGENT || scope == SCOPE_READONLY
 }
 
 /// Resultatet av en nyckelvalidering.

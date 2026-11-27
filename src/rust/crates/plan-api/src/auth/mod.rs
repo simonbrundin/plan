@@ -122,6 +122,11 @@ pub async fn authenticate(
                     return forbidden();
                 }
 
+                // 4. Läs-scope - får bara läsa.
+                if caller.scope == apikey::SCOPE_READONLY && method != "GET" {
+                    return forbidden();
+                }
+
                 request.extensions_mut().insert(caller);
                 return next.run(request).await;
             }
