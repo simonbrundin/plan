@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS "api_keys" (
   "last_used" TIMESTAMPTZ,
   "expires" TIMESTAMPTZ,
   PRIMARY KEY("id"),
-  CONSTRAINT api_keys_valid_scope CHECK ("scope" IN ('full', 'agent')),
+  CONSTRAINT api_keys_valid_scope CHECK ("scope" IN ('full', 'agent', 'readonly')),
   FOREIGN KEY("user_id") REFERENCES "users"("id") ON DELETE SET NULL
 );
 

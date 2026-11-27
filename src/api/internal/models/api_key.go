@@ -15,12 +15,17 @@ const (
 	// ScopeAgent begränsar nyckeln till agentens arbete med mål och
 	// agentkörningar.
 	ScopeAgent APIKeyScope = "agent"
+
+	// ScopeReadonly ger nyckeln rätt att läsa, men inte att skriva.
+	// Den används av integrationer som bara visar data - t.ex. en
+	// widget på skrivbordet.
+	ScopeReadonly APIKeyScope = "readonly"
 )
 
 // ValidAPIKeyScope svarar på om ett scope är känt.
 func ValidAPIKeyScope(scope string) bool {
 	switch APIKeyScope(scope) {
-	case ScopeFull, ScopeAgent:
+	case ScopeFull, ScopeAgent, ScopeReadonly:
 		return true
 	default:
 		return false

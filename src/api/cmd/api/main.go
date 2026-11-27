@@ -130,6 +130,7 @@ func main() {
 	api.Use(middleware.APIKeyAuth())     // Try API key first
 	api.Use(middleware.AuthMiddleware()) // Fall back to session auth
 	api.Use(middleware.RestrictToAgentScope())
+	api.Use(middleware.RestrictToReadScope())
 	api.Use(func(c *gin.Context) {
 		c.Set("dbConnected", dbConnected)
 		c.Next()
