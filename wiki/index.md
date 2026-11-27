@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 458 |
+| Noter | 459 |
 
 ## Entiteter
 

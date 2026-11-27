@@ -917,7 +917,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (21)
+- `rust` (22)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)

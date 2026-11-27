@@ -44,7 +44,30 @@ i mock-läge och svara "Failed to create user" trots frisk databas. Nu
 väntar API:t på databasen (DB_CONNECT_TIMEOUT_SECONDS, default 120s) och
 avslutar sedan, så att podden startar om.
 
+Tre fynd från att köra kedjan på riktigt:
+
+1. Atlas Operator ger upp om databasen inte svarar när den börjar. I en
+   ny preview kör CNPG initdb, och Atlas kommer före - operatören
+   försöker inte igen. API:t står då och väntar på tabeller som aldrig
+   skapas. Previewen applicerar därför schemat med ett Job
+   (plan-db-schema) som väntar på databasen och kör samma schema.sql.
+   Jobbet är idempotent, så Atlas kan köra samma sak efteråt.
+
+2. Kyverno-policyn block-nodeport blockerade radering av ALLA Services.
+   CEL-uttrycket "has(object.spec) && object.spec.type != 'NodePort'"
+   blir falskt vid DELETE, eftersom den gamla resursen inte fylls i.
+   Flux kunde därför inte prunna en preview-namespace. Policyn
+   validerar nu bara CREATE och UPDATE.
+
+3. source-controller kan fastna i git-operationer mot GitHub. Symptomet
+   är att alla HTTPS-repositories i klustret samtidigt slutar
+   uppdateras ("context deadline exceeded") medan SSH-repositories
+   fungerar. En omstart av podden (kubectl delete pod -n flux-system
+   -l app=source-controller) löser det. Nätverket i sig är friskt -
+   wget mot github.com fungerar från poddar på samma nod.
+
 Regler som gäller framöver:
+
 
 - Ingen bild får byggas med en enda arkitektur. Klustret är arm64.
 - Ingen workflow får skriva till prod-manifesten utom commit.rust-images.yaml.
