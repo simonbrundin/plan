@@ -63,6 +63,9 @@ pub fn router(pool: Option<sqlx::postgres::PgPool>, config: &Config) -> Router {
 
     Router::new()
         .route("/docs", get(docs_redirect))
+        // "/docs/" måste ha en egen route - axums jokertecken matchar
+        // inte en tom segfault. Gin serverar sidan på "/docs/".
+        .route("/docs/", get(scalar_ui))
         .route("/docs/{*any}", get(scalar_ui))
         .route("/docs/openapi.json", get(openapi_json))
         .merge(api)
