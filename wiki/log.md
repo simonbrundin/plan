@@ -3177,3 +3177,9 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | concepts/anvanda-agenter-i-plan -> notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart
 
+
+## [2026-11-27] ingest | create notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust
+- [create] [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] — ny sida från inboxen
+- [archive] 2026-11-27-kunskaps-wikin-och-dess-verktyg-har-portats-till-rust.md
+- [merge?] notes/kunskaps-wiki + notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust (delade taggar: wiki, agent, verktyg)
+

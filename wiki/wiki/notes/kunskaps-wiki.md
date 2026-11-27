@@ -4,9 +4,9 @@ type: note
 summary: Så fungerar den globala kunskaps-wikin, vilka lager den har och hur agenter använder verktyget.
 tags: [wiki, minne, agent, verktyg]
 created: 2026-10-21
-updated: 2026-11-17
+updated: 2026-11-27
 status: active
-related: [notes/globala-agentinstruktioner-deployas-via-dotfiles, notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter, notes/konventioner, notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin, notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin, notes/utvecklingsflode, summaries/llm-wiki-karpathy]
+related: [notes/globala-agentinstruktioner-deployas-via-dotfiles, notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter, notes/konventioner, notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin, notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust, notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin, notes/utvecklingsflode, summaries/llm-wiki-karpathy]
 ---
 
 Wikin är **global** och ligger i `~/repos/agents/wiki` (symlänkad som
@@ -42,7 +42,10 @@ Wikin bor i `agents`-repot men används av alla repor:
 
 ## Verktyget
 
-`src/agent/cmd/wikictl` i plan-repot (paketet `internal/wiki`). Kommandot är
+`src/rust/crates/plan-wiki` i plan-repot (crate:t `plan-wiki` med
+binären `wikictl`). Go-versionen finns kvar under `src/agent/cmd/wikictl`
+under migreringen; `scripts/compare-wiki-parity.sh` jämför dem
+kommando för kommando. Kommandot är
 `wikictl` - installerat i `~/.local/bin`:
 
 | Kommando | Gör |
@@ -113,6 +116,7 @@ beskrivet i [[summaries/llm-wiki-karpathy]].
 
 ## Relaterade
 
+- [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]]
 - [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]]
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]]
 - [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]]
