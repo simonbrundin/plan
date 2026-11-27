@@ -12,7 +12,9 @@ import os
 import shutil
 from pathlib import Path
 
-PR_NUM = os.environ["PR_NUM"]
+# PR_NUM och PR_NUMBER är samma sak - olika steg i kedjan har använt
+# olika namn. Acceptera båda.
+PR_NUM = os.environ.get("PR_NUM") or os.environ["PR_NUMBER"]
 OUT_DIR = Path(f"environments/pr/{PR_NUM}")
 
 if OUT_DIR.exists():

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Skapar kustomize-overlays för en PR-preview.
 
-Skriptet körs av GitHub Actions. Miljövariablerna PR_NUM, NUXT_IMAGE och
+Skriptet körs av GitHub Actions. Miljövariablerna PR_NUM (eller
+PR_NUMBER), NUXT_IMAGE och
 API_IMAGE kommer från workflow-steget.
 
 Overlayen hamnar i environments/pr/<pr-nummer>/ på branchen "previews".
@@ -14,7 +15,9 @@ import os
 import shutil
 from pathlib import Path
 
-PR_NUM = os.environ["PR_NUM"]
+# PR_NUM och PR_NUMBER är samma sak - olika steg i kedjan har använt
+# olika namn. Acceptera båda, så att skriptet inte är känsligt för det.
+PR_NUM = os.environ.get("PR_NUM") or os.environ["PR_NUMBER"]
 NUXT_IMAGE = os.environ["NUXT_IMAGE"]
 API_IMAGE = os.environ["API_IMAGE"]
 
