@@ -1,0 +1,26 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 145 - https://plan-pr-145.simonbrundin.com
+
+# Atlas applicerar samma schema som dev och prod. Schemat kopieras in
+# av skriptet från environments/base/db/schema.yaml - en enda källa.
+#
+# Bara DDL körs - raderna (statusar, Root-målet) seedar API:t själv vid
+# start.
+apiVersion: db.atlasgo.io/v1alpha1
+kind: AtlasSchema
+metadata:
+  name: plan-db-schema
+  labels:
+    preview: "true"
+spec:
+  urlFrom:
+    secretKeyRef:
+      key: uri
+      name: plan-pr-db-user
+  schema:
+    configMapKeyRef:
+      key: schema.sql
+      name: plan-db-schema
+  schemas:
+    - "public"
