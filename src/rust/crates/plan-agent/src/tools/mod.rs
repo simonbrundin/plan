@@ -6,6 +6,7 @@
 pub mod cancel;
 pub mod fs;
 pub mod glob;
+pub mod learnings;
 pub mod sanitize;
 pub mod schemas;
 pub mod validator;
