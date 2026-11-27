@@ -5,8 +5,8 @@ summary: SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-ag
 tags: [secrets, encryption, age, kubernetes, gitops]
 sources: [infrastructure-flux/components/secrets/sops.age.pub, infrastructure-flux/components/flux/flux-instance.yaml]
 created: 2026-06-02
-updated: 2026-11-23
-related: [entities/kubernetes, entities/talos-linux, notes/klustret-anvander-sops-via-flux-inte-vault-eso]
+updated: 2026-11-27
+related: [entities/kubernetes, entities/talos-linux, notes/klustret-anvander-sops-via-flux-inte-vault-eso, notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]
 ---
 
 # SOPS
@@ -70,6 +70,24 @@ kubectl get ns vault                                      # No resources found
 grep -ri "vault\|external-secret" ~/repos/infrastructure/infrastructure-flux/
 ```
 
+## Kubernetes Secrets: kryptera bara payloaden
+
+För Kubernetes Secrets ska `encrypted_regex` begränsa krypteringen till
+`data`/`stringData`:
+
+```yaml
+sops:
+  encrypted_regex: ^(data|stringData)$
+  age:
+    - recipient: age1e6cmv0vp3ymmhnqv7rrgy2a7wpnnutawqy509wqm3cn7467cps6qupp354
+  version: 3.13.3
+```
+
+Utan regex krypteras även `metadata`, och Flux' SOPS-dekryptering + kustomize
+bygget faller isär med
+`number of previous names, number of previous namespaces, number of previous kinds not equal`.
+Se [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]].
+
 ## Nycklar och repos
 
 Samma age-nyckel används i hela "estate":
@@ -129,3 +147,4 @@ Den privata nyckeln ska aldrig committas.
 - [[entities/flux-gitops]]
 - [[entities/kubernetes]]
 - [[entities/talos-linux]]
+- [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]]

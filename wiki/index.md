@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 8 |
-| Noter | 428 |
+| Noter | 431 |
 
 ## Entiteter
 
@@ -26,7 +26,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/authentik]] - Authentik var tidigare identity provider i klustret och är nu ersatt av Zitadel. _(uppdaterad 2026-10-23)_
 - [[concepts/cert-manager]] - cert-manager är en Kubernetes-operator som automatiserar hantering av TLS-certifikat. _(uppdaterad 2026-10-24)_
 - [[concepts/cloudflare-tunnel]] - Cloudflare Tunnel är aktiverat (2026-11-26) och serverar plan.simonbrundin.com publikt - den enda fungerande publika ingressen sedan Starlink-CGNAT. _(uppdaterad 2026-11-26)_
-- [[concepts/cloudnative-pg]] - CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhandahåller automatiserad hantering av PostgreSQL-databaser. _(uppdaterad 2026-11-26)_
+- [[concepts/cloudnative-pg]] - CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhandahåller automatiserad hantering av PostgreSQL-databaser. _(uppdaterad 2026-11-27)_
 - [[concepts/envoy-gateway]] - Envoy Gateway är en implementation av Kubernetes Gateway API som använder Envoy proxy som control plane och data plane. _(uppdaterad 2026-10-24)_
 - [[concepts/flux-operator]] - Operator som installerar och styr Flux via FluxInstance-CRD istället för flux bootstrap. _(uppdaterad 2026-11-26)_
 - [[concepts/gitops]] - Git är enda sanningskällan för infrastruktur; Flux/FluxOperator applicerar ändringarna till klustret. _(uppdaterad 2026-10-24)_
@@ -40,7 +40,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/neon-cli-var-neon-och-neon-ts-maste-ligga]] - Neons CLI hittar projektkopplingen och policyfilen genom två separata regler: _(uppdaterad 2026-11-02)_
 - [[concepts/oidc]] - OIDC är protokollet som låter Zitadel-autentiserade användare få åtkomst till Kubernetes API-servern. _(uppdaterad 2026-10-23)_
 - [[concepts/poolad-eller-direkt-anslutning-mot-neon]] - Neon ger TVÅ endpoints för samma databas. _(uppdaterad 2026-11-02)_
-- [[concepts/sops]] - SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-age och provider: sops. _(uppdaterad 2026-11-23)_
+- [[concepts/sops]] - SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-age och provider: sops. _(uppdaterad 2026-11-27)_
 - [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-26)_
 
 ## Sammanfattningar
@@ -100,6 +100,8 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] - Läge: publik IPv4 är död (Starlink CGNAT), så Cloudflare Tunnel aktiverades som publik ingress. _(uppdaterad 2026-11-26)_
 - [[notes/cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad]] - Worker-4 hade intermittenta CRI/kubelet-problem och Longhorn engine-image kunde inte starta. _(uppdaterad 2026-11-26)_
 - [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] - Diagnos 2026-11-11 (session: felsökning av 'workers ansluter inte'). _(uppdaterad 2026-11-23)_
+- [[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]] - Om username i managed role-sekretet skiljer sig från rollnamnet vägrar CNPG synka rollen ("wrong username ... expected ...") och rollen får aldrig något lösenord. _(uppdaterad 2026-11-26)_
+- [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]] - postInitSQL i CloudNativePG körs före managed.roles, så GRANT-satser mot en managed role ger 'role does not exist'. Lösningen är bootstrap.initdb.owner. _(uppdaterad 2026-11-26)_
 - [[notes/controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3]] - controlplane-1 (10.10.10.11) fastnade i Raspberry Pi DHCP/TFTP-boot när PXE-värden 10.10.10.2 var död. _(uppdaterad 2026-11-26)_
 - [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] - Matchbox-profilerna node-controlplane-1..3 pekar på /assets/talos-config/nodes/controlplane-N.yaml, men den filen genereras inte: pxe/gen... _(uppdaterad 2026-11-17)_
 - [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] - Bakgrund: neuro (github.com/simonbrundin/neuro) är ett offentligt repo. _(uppdaterad 2026-11-17)_
@@ -314,7 +316,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] - Projekt: plan _(uppdaterad 2026-11-16)_
 - [[notes/plan-migreras-fran-go-till-rust]] - Beslut 2026-11-26: Plan-applikationens Go-tjänster skrivs om i Rust. _(uppdaterad 2026-11-26)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
-- [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-26)_
+- [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-27)_
 - [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-10)_
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
 - [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] - Anledning: användaren frågade "menar du att Gemini 4 Neon är lika billig som MiniMax _(uppdaterad 2026-11-26)_
@@ -392,6 +394,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] - Efter sammanslagningen (mål 520) gick hela kedjan igenom i dev med mål #540: _(uppdaterad 2026-11-24)_
 - [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] - Snabbtillägget som öppnas med N stöder nu både händelser och mål via lägesknapparna/auto-läget. _(uppdaterad 2026-11-20)_
 - [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] - Snabbtillägget stängs nu med Escape från titel-, föräldrasök- och övriga popupfält. _(uppdaterad 2026-11-20)_
+- [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]] - Med SOPS' standard encrypted_regex krypteras även metadata, och Flux' SOPS-decryption panikar i kustomize-builden med "number of previous names, number of previous namespaces, number of previous kinds not equal". _(uppdaterad 2026-11-26)_
 - [[notes/sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops]] - SOPS-nyckeln roterades 2026-11-26 (commit 423e78a9 + docs(secrets) 9e25a79f i infrastructure). _(uppdaterad 2026-11-26)_
 - [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]] - Grundmål på /goals kan nu sorteras med ArrowUp/ArrowDown, precis som undermålen _(uppdaterad 2026-11-23)_
 - [[notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan]] - Symtom: piltangenterna (ArrowUp/ArrowDown) som flyttar undermål fungerade ibland, ibland inte. _(uppdaterad 2026-11-16)_

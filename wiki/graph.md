@@ -74,6 +74,8 @@ graph LR
   n_notes_cloudflare_tunnel_aktiverat_plan_simonbrundin_com_publikt_nabar["Cloudflare Tunnel aktiverat - plan.simonbrundin.com publikt nåbar"]
   n_notes_cluster1_longhorn_worker_4_aterstalld_och_flux_stabiliserad["Cluster1: Longhorn worker-4 återställd och Flux stabiliserad"]
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11["cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11"]
+  n_notes_cnpg_initdb_agarollen_skapas_fore_postinitsql["CNPG skapar initdb-ägarrollen innan postInitSQL körs - managed.roles kommer för sent"]
+  n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet["CNPG managed roles - sekretets username måste matcha rollnamnet"]
   n_notes_controlplane_1_ateransluten_via_temporar_pxe_pa_controlplane_3["controlplane-1 återansluten via temporär PXE på controlplane-3"]
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad["Controlplane-recovery via PXE är inte konfigurerad"]
   n_notes_cookies_json_var_versionsstyrd_i_offentligt_neuro_repo["cookies.json var versionsstyrd i offentligt neuro-repo"]
@@ -372,6 +374,7 @@ graph LR
   n_notes_snabbtillagg_med_mal_och_valbart_foraldramal["Snabbtillägg med mål och valbart föräldramål"]
   n_notes_snabbtillaggets_popup_fick_escape_och_visuell_polish["Snabbtilläggets popup fick Escape och visuell polish"]
   n_notes_sops_age_nyckelroterad_privat_nyckel_i_1password_item_sops["SOPS age-nyckelroterad; privat nyckel i 1Password item SOPS"]
+  n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden["SOPS - kryptera bara stringData i Kubernetes-secrets, annars kraschar Flux-builden"]
   n_notes_sortering_av_grundmal_pa_goals_med_piltangenterna["Sortering av grundmål på /goals med piltangenterna"]
   n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan["Sortering av undermål med piltangenterna var trasig i plan"]
   n_notes_soulmate_teamet_i_sundsvall_importerades["Soulmate-teamet i Sundsvall importerades"]
@@ -483,6 +486,8 @@ graph LR
   n_concepts_cloudflare_tunnel --> n_concepts_sops
   n_concepts_cloudnative_pg --> n_concepts_zitadel
   n_concepts_cloudnative_pg --> n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor
+  n_concepts_cloudnative_pg --> n_notes_cnpg_initdb_agarollen_skapas_fore_postinitsql
+  n_concepts_cloudnative_pg --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
   n_concepts_cloudnative_pg --> n_entities_kubernetes
   n_concepts_cloudnative_pg --> n_concepts_longhorn
   n_concepts_envoy_gateway --> n_concepts_http_routing_flow
@@ -530,6 +535,7 @@ graph LR
   n_concepts_sops --> n_entities_kubernetes
   n_concepts_sops --> n_entities_talos_linux
   n_concepts_sops --> n_notes_klustret_anvander_sops_via_flux_inte_vault_eso
+  n_concepts_sops --> n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden
   n_concepts_sops --> n_concepts_flux_operator
   n_concepts_sops --> n_entities_flux_gitops
   n_concepts_zitadel --> n_concepts_oidc
@@ -655,6 +661,10 @@ graph LR
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs
   n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11 --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
+  n_notes_cnpg_initdb_agarollen_skapas_fore_postinitsql --> n_concepts_cloudnative_pg
+  n_notes_cnpg_initdb_agarollen_skapas_fore_postinitsql --> n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor
+  n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet --> n_concepts_cloudnative_pg
+  n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet --> n_notes_cnpg_initdb_agarollen_skapas_fore_postinitsql
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad --> n_entities_pxe_server
   n_notes_controlplane_recovery_via_pxe_ar_inte_konfigurerad --> n_notes_talos_etcd_en_gammal_ephemeral_kopia_pa_controlplanet_ger_en_trasig_raft_log
   n_notes_cookies_json_var_versionsstyrd_i_offentligt_neuro_repo --> n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken
@@ -890,6 +900,9 @@ graph LR
   n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv --> n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn
   n_notes_plan_appen_morkt_designsystem_med_semantiska_farg_token --> n_notes_mailvyn_mail_omstegad_till_tailwind_tema
   n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_concepts_cloudnative_pg
+  n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_cnpg_initdb_agarollen_skapas_fore_postinitsql
+  n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
+  n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places --> n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder
   n_notes_popcorn_time_installerad_som_appimage_i_local --> n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix
@@ -1006,6 +1019,9 @@ graph LR
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_fyra_shelly_enheter_svarar_inte_pa_natet
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
+  n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_sops
+  n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_flux_operator
+  n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
   n_notes_sortering_av_grundmal_pa_goals_med_piltangenterna --> n_notes_prioriteringsordningen_pa_now_sparades_inte_bulk_update_och_spar_ko
   n_notes_sortering_av_grundmal_pa_goals_med_piltangenterna --> n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan
   n_notes_sprint_timer_saknas --> n_notes_session_livscykel
@@ -1149,9 +1165,9 @@ graph LR
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
-- **concepts/cloudnative-pg** <- [[concepts/authentik]], [[concepts/zitadel]], [[entities/kubernetes]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
+- **concepts/cloudnative-pg** <- [[concepts/authentik]], [[concepts/zitadel]], [[entities/kubernetes]], [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]], [[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **concepts/envoy-gateway** <- [[concepts/http-routing-flow]], [[concepts/kube-prometheus]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/zitadel]], [[entities/kubernetes]]
-- **concepts/flux-operator** <- [[concepts/gitops]], [[concepts/kyverno-policies]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]], [[summaries/infrastructure-flux]], [[summaries/longhorn-disk-guide]]
+- **concepts/flux-operator** <- [[concepts/gitops]], [[concepts/kyverno-policies]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]], [[summaries/flux-components]], [[summaries/infrastructure-flux]], [[summaries/longhorn-disk-guide]]
 - **concepts/gitops** <- [[concepts/cert-manager]], [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[summaries/infrastructure-flux]]
 - **concepts/http-routing-flow** <- [[concepts/cloudflare-tunnel]], [[concepts/envoy-gateway]], [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]]
 - **concepts/kube-prometheus** <- [[entities/kubernetes]]
@@ -1163,7 +1179,7 @@ graph LR
 - **concepts/neon-cli-var-neon-och-neon-ts-maste-ligga** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/zitadel]], [[entities/kubernetes]]
 - **concepts/poolad-eller-direkt-anslutning-mot-neon** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
-- **concepts/sops** <- [[concepts/cloudflare-tunnel]], [[concepts/flux-operator]], [[concepts/gitops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]]
+- **concepts/sops** <- [[concepts/cloudflare-tunnel]], [[concepts/flux-operator]], [[concepts/gitops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]]
 - **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
 - **entities/flux-gitops** <- [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/sops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]]
 - **entities/hdmi-kvm-switch-16-port-labbet** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
@@ -1194,6 +1210,8 @@ graph LR
 - **notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt** <- [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]], [[notes/src-strukturen-stadades-src-go-blev-src-api-kommandon-flyttade-till-src-agent-commands]]
 - **notes/ci-saknade-inloggning-mot-ghcr-alla-image-pushar-misslyckades** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
 - **notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11** <- [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]], [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]]
+- **notes/cnpg-initdb-agarollen-skapas-fore-postinitsql** <- [[concepts/cloudnative-pg]], [[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
+- **notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet** <- [[concepts/cloudnative-pg]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]], [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]]
 - **notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad** <- [[entities/pxe-server]]
 - **notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo** <- [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/dashboard-ranking-anvander-benchmark-matchade-kostnader** <- [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]]
@@ -1327,7 +1345,7 @@ graph LR
 - **notes/plan-api-anvander-scalar-for-openapi** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/plan-appen-morkt-designsystem-med-semantiska-farg-token** <- [[notes/mailvyn-mail-omstegad-till-tailwind-tema]]
 - **notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none** <- [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]]
-- **notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor** <- [[concepts/cloudnative-pg]]
+- **notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor** <- [[concepts/cloudnative-pg]], [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]]
 - **notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]], [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]]
 - **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
 - **notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places** <- [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]]
@@ -1392,6 +1410,7 @@ graph LR
 - **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
+- **notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden** <- [[concepts/sops]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **notes/sortering-av-grundmal-pa-goals-med-piltangenterna** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]]
 - **notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan** <- [[notes/barnordning-foljer-beroenden-i-malsidan]], [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]], [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
 - **notes/sprint-timer-saknas** <- [[notes/session-livscykel]]

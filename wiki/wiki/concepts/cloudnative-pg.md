@@ -5,8 +5,8 @@ summary: CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhand
 tags: [postgresql, database, postgres, cloudnativepg, cnpg]
 sources: [infrastructure-flux/components/cloudnative-pg/]
 created: 2026-06-02
-updated: 2026-11-26
-related: [concepts/zitadel, notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]
+updated: 2026-11-27
+related: [concepts/zitadel, notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor, notes/cnpg-initdb-agarollen-skapas-fore-postinitsql, notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]
 ---
 
 # CloudNativePG (CNPG)
@@ -89,6 +89,29 @@ spec:
           name: s3-creds
           key: secret-key
 ```
+
+### Initdb, roller och postInitSQL
+
+Bootstrapen i CloudNativePG körs i en bestämd ordning, och den ordningen
+avgör vad `postInitSQL` får referera till:
+
+1. `bootstrap.initdb.owner` skapas som databasens ägare.
+2. `postInitSQL` körs.
+3. `managed.roles` skapas.
+
+Villkor:
+
+- En roll som `postInitSQL` gör `GRANT` mot måste vara `bootstrap.initdb.owner`
+  - annars: `ERROR: role "..." does not exist (SQLSTATE 42704)`.
+- CNPG delar upp `postInitSQL` på semikolon och kör varje del separat.
+  Dollarquoting (`DO $$ ... $$`) ger därför `syntax error at or near "$"`
+  (SQLSTATE 42601).
+- En managed role får sitt lösenord från ett Secret. `username` i sekretet måste
+  vara **identiskt** med rollnamnet, annars vägrar operatören synka rollen och
+  den får aldrig något lösenord.
+
+Se [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]] och
+[[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]].
 
 ### High Availability
 
@@ -175,6 +198,9 @@ kubectl cnp backup <cluster-name> -n <namespace>
 | Replication lag | Nätverksproblem eller tung belastning | Kolla `pg_stat_replication` |
 | `FencingActive` | Failsafe aktiverad | Kontrollera pod-status |
 | Backup misslyckad | BUCKET/path saknas | Verifiera S3-konfiguration |
+| Initdb: `role "x" does not exist` | `postInitSQL` körs före `managed.roles` | Sätt `bootstrap.initdb.owner` |
+| Initdb: `syntax error at or near "$"` | `DO $$ ... $$` i `postInitSQL` | Använd initdb-ägarrollen i stället |
+| Roll saknar lösenord | Sekretets `username` != rollnamn | Låt dem matcha |
 
 ## Kopplingar
 
@@ -185,4 +211,6 @@ kubectl cnp backup <cluster-name> -n <namespace>
 ## Relaterade
 
 - [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
+- [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]]
+- [[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]]
 
