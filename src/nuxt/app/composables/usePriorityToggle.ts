@@ -67,10 +67,8 @@ export function usePriorityToggle() {
 		const { isSearchOpen } = useSearchState();
 		if (isSearchOpen.value) return;
 
-		// På målsidan är 'p' platsväljarens tangent (platsen där målet
-		// kan slutföras). Gör nu nås då via tangentmenyn.
-		if (route.path.startsWith("/goal/")) return;
-
+		// Platsväljaren har flyttat till leader + p, så 'p' är fritt på
+		// alla sidor och växlar alltid till/från Gör nu.
 		// Toggle on 'p' key press (not hold). Shift+P används för
 		// ordningsläget på Gör nu och ska inte växla sida.
 		if (

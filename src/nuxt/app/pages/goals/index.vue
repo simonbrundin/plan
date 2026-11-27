@@ -22,6 +22,8 @@ const goalDates = useGoalDatesModal()
 // Taggväljaren (leader + t) renderas i layouten - här öppnas den för det
 // markerade målet.
 const tagPicker = useGoalTagPicker()
+// Platsväljaren (leader + p) renderas också i layouten.
+const placePicker = useGoalPlacePicker()
 // Målet kan dras in i kalendern för att schemaläggas.
 const { startDrag } = useGoalDrag()
 
@@ -233,6 +235,14 @@ watch(tagPicker.savedRevision, () => {
   if (idx !== -1) {
     goals.value[idx] = { ...goals.value[idx], tags: saved.tags }
   }
+})
+
+// Samma sak för platser - platsikonen i raden uppdateras direkt.
+watch(placePicker.savedRevision, () => {
+  const saved = placePicker.lastSaved.value
+  if (!saved) return
+  const goal = goals.value.find(g => g.id === saved.id)
+  if (goal) goal.places = saved.places
 })
 
 // Navigera till mål
@@ -916,6 +926,17 @@ onMounted(() => {
         const goal = filteredGoals.value[selectedIndex.value]
         if (goal) {
           void tagPicker.openFor(goal)
+        }
+      },
+    },
+    {
+      keys: 'p',
+      label: 'P',
+      title: 'Sätt plats',
+      run: () => {
+        const goal = filteredGoals.value[selectedIndex.value]
+        if (goal) {
+          void placePicker.openFor(goal)
         }
       },
     },

@@ -259,6 +259,9 @@ await fetchTags().catch(() => {
 // layouten - här öppnas den bara för det markerade målet.
 const tagPicker = useGoalTagPicker();
 
+// Platsväljaren (leader + p) renderas på samma sätt.
+const placePicker = useGoalPlacePicker();
+
 // Målet vars platser just nu redigeras. Null = ingen öppen platsväljare.
 const placeTargetId = ref<number | null>(null);
 const placeDraft = ref<Place[]>([]);
@@ -341,6 +344,13 @@ watch(tagPicker.savedRevision, () => {
   if (child) child.tags = saved.tags;
   const parent = data.parents?.find((p) => p.id === saved.id);
   if (parent) parent.tags = saved.tags;
+});
+
+// När platser har sparats skrivs de tillbaka i den hämtade måldatan.
+watch(placePicker.savedRevision, () => {
+  const saved = placePicker.lastSaved.value;
+  if (!saved) return;
+  applyPlaces(saved.id, saved.places);
 });
 
 // Byt målsida när ett nytt mål väljs - utan serverfråga, grafen räcker.
@@ -2081,6 +2091,17 @@ onMounted(() => {
       },
     },
     {
+      keys: "p",
+      label: "P",
+      title: "Sätt plats",
+      run: () => {
+        const target = tagTarget();
+        if (target) {
+          void placePicker.openFor(target);
+        }
+      },
+    },
+    {
       keys: "s",
       label: "S",
       title: "Toggle påbörjat",
@@ -2213,28 +2234,6 @@ function handleKeydown(event: KeyboardEvent) {
       selectedChildIndex.value < filteredChildren.value.length
     ) {
       startEditDescription(filteredChildren.value[selectedChildIndex.value]);
-    }
-    return;
-  }
-
-  // Hantera 'p' för att sätta plats (var målet kan slutföras)
-  if (event.key === "p") {
-    event.preventDefault();
-    // Tangenten följer det markerade målet: förälder (parent-läge),
-    // huvudmålet eller det markerade undermålet.
-    if (isParentMode.value && parents.value.length > 0) {
-      togglePlacePicker(parents.value[selectedParentIndex.value].id);
-    } else if (isGoalSelected.value && goal.value) {
-      togglePlacePicker(goal.value.id);
-    } else if (
-      filteredChildren.value.length > 0 &&
-      selectedChildIndex.value >= 0 &&
-      selectedChildIndex.value < filteredChildren.value.length
-    ) {
-      togglePlacePicker(filteredChildren.value[selectedChildIndex.value].id);
-    } else if (goal.value) {
-      // Inga undermål att markera - då gäller platsen huvudmålet.
-      togglePlacePicker(goal.value.id);
     }
     return;
   }
@@ -2520,15 +2519,16 @@ watch(selectedParentIndex, async () => {
 </script>
 
 <template>
-  <div v-if="user" class="h-screen flex flex-col overflow-hidden" :class="weightMode ? '' : 'max-w-4xl mx-auto px-6 py-6'">
+  <div v-if="user" class="h-screen flex flex-col overflow-hidden" :class="weightMode ? '' : 'max-w-4xl mx-auto px-6 py-4'">
     <div v-if="!goal" class="text-center py-12">
       <p class="text-ink-dim">Laddar mål...</p>
     </div>
 
-    <div v-else-if="!weightMode" class="flex flex-col h-full gap-5">
+    <div v-else-if="!weightMode" class="flex flex-col h-full gap-3">
       <!-- Breadcrumb / Föräldrar -->
       <div class="flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-1.5 text-sm flex-wrap">
+          <UDashboardSidebarToggle class="mr-1 hidden !flex-shrink-0 lg:!flex" />
           <NuxtLink v-if="parents.length === 0" to="/goals"
             class="px-2.5 py-1 rounded-lg bg-surface-2 border border-line text-accent hover:text-accent-light hover:border-line-strong transition-colors font-medium">
             Root
@@ -2599,7 +2599,7 @@ watch(selectedParentIndex, async () => {
                 <button @click.stop="togglePlacePicker(parent.id)"
                   class="rounded-lg p-1 transition-colors"
                   :class="parent.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
-                  :title="parent.places?.length ? `Platser: ${parent.places.map((p) => p.name).join(', ')}` : 'Sätt plats (p)'">
+                  :title="parent.places?.length ? `Platser: ${parent.places.map((p) => p.name).join(', ')}` : 'Sätt plats'">
                   <Icon name="lucide:map-pin" class="w-4 h-4"
                     :style="{ opacity: parent.places?.length ? 1 : 0.25 }" />
                 </button>
@@ -2826,7 +2826,7 @@ watch(selectedParentIndex, async () => {
           <button @click.stop="togglePlacePicker(goal.id)"
             class="rounded-lg p-1.5 transition-colors hover:bg-elevated"
             :class="goal.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
-            :title="goal.places?.length ? `Platser: ${goal.places.map((p) => p.name).join(', ')}` : 'Sätt plats (p)'">
+            :title="goal.places?.length ? `Platser: ${goal.places.map((p) => p.name).join(', ')}` : 'Sätt plats'">
             <Icon name="lucide:map-pin" class="w-6 h-6"
               :style="{ opacity: goal.places?.length ? 1 : 0.25 }" />
           </button>
@@ -3051,7 +3051,7 @@ watch(selectedParentIndex, async () => {
           </div>
         </div>
 
-        <ul v-else-if="filteredChildren.length > 0" class="space-y-2">
+        <ul v-else-if="filteredChildren.length > 0" class="space-y-1.5">
           <li v-for="(child, index) in filteredChildren" :key="child.id" :data-child-index="index" draggable="true"
             @dragstart="handleDragStart($event, child.id)" @dragover="handleDragOver($event, child.id)"
             @dragleave="handleDragLeave" @drop="handleDrop($event, child.id)"
@@ -3116,7 +3116,7 @@ watch(selectedParentIndex, async () => {
                     <Icon :name="child.icon || 'heroicons:star'" class="w-5 h-5" :style="child.eternal ? { color: ETERNAL_COLOR } : isChildBlocked(child.id) || child.finished ? { color: '#63708a' } : { color: getWeightStyle(child.weight).color, opacity: getWeightStyle(child.weight).opacity }" />
                  </button>
                  <div class="flex-1 min-w-0">
-                  <NuxtLink :to="`/goal/${child.id}`" class="py-1.5 block cursor-pointer">
+                  <NuxtLink :to="`/goal/${child.id}`" class="py-1 block cursor-pointer">
                     <div class="flex items-center gap-2 min-w-0">
                       <h3 class="text-base font-normal select-none truncate min-w-0" :class="child.eternal ? ETERNAL_TEXT : child.finished || isChildBlocked(child.id) ? 'text-ink-dim' : 'text-ink'" :style="child.eternal ? { color: ETERNAL_COLOR } : child.finished || isChildBlocked(child.id) ? {} : getWeightStyle(child.weight)">
                         {{ child.title }}
@@ -3228,7 +3228,7 @@ watch(selectedParentIndex, async () => {
                   <button @click.stop="togglePlacePicker(child.id)"
                     class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
                     :class="child.places?.length ? 'text-accent' : 'text-ink-dim hover:text-ink-muted'"
-                    :title="child.places?.length ? `Platser: ${child.places.map((p) => p.name).join(', ')}` : 'Sätt plats (p)'">
+                    :title="child.places?.length ? `Platser: ${child.places.map((p) => p.name).join(', ')}` : 'Sätt plats'">
                     <Icon name="lucide:map-pin" class="w-5 h-5"
                       :style="{ opacity: child.places?.length ? 1 : 0.25 }" />
                   </button>

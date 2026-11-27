@@ -44,6 +44,10 @@ const goalDates = useGoalDatesModal();
 // från alla sidor där ett mål är markerat.
 const tagPicker = useGoalTagPicker();
 
+// Platsväljaren (leader + p). Renderas här av samma skäl som
+// taggväljaren.
+const placePicker = useGoalPlacePicker();
+
 // Leader-listenern körs i capture-fasen och kan annars konsumera Escape
 // innan datum-popupens egen listener hinner få tangenten.
 function handleLeaderKeydown(event: KeyboardEvent): boolean {
@@ -411,6 +415,15 @@ onUnmounted(() => {
       @update:selected="tagPicker.save($event)"
       @close="tagPicker.close()" />
 
+    <!-- Platsväljaren (leader + p). -->
+    <GoalPlacePicker
+      :open="placePicker.isOpen.value"
+      :target-title="placePicker.target.value?.title ?? ''"
+      :selected="placePicker.draft.value"
+      :available="placePicker.available.value"
+      @update:selected="placePicker.save($event)"
+      @close="placePicker.close()" />
+
     <QuickAdd @created="closeQuickAdd" @closed="closeQuickAdd" />
 
     <Transition name="fade">
@@ -434,7 +447,7 @@ onUnmounted(() => {
       class="!overflow-y-auto !h-screen min-w-0"
       :class="route.path === '/calendar' ? 'bg-transparent' : 'bg-canvas'"
     >
-      <UDashboardNavbar class="hidden bg-transparent lg:flex">
+      <UDashboardNavbar v-if="!route.path.startsWith('/goal/')" class="hidden bg-transparent lg:flex">
         <template #toggle>
           <UDashboardSidebarToggle class="!flex" />
         </template>

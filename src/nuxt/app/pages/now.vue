@@ -21,6 +21,8 @@ const goalDates = useGoalDatesModal()
 // Taggväljaren (leader + t) renderas i layouten - här öppnas den för det
 // markerade målet.
 const tagPicker = useGoalTagPicker()
+// Platsväljaren (leader + p) renderas också i layouten.
+const placePicker = useGoalPlacePicker()
 // Målet kan dras in i kalendern för att schemaläggas.
 const { startDrag } = useGoalDrag()
 
@@ -49,6 +51,7 @@ const {
   loadPrioritizedGoals,
   selectGoal,
   updateTags,
+  updatePlaces,
   setNowFilter,
   setFilterByCurrentPlace,
 } = usePriorityMode()
@@ -138,6 +141,12 @@ watch(tagPicker.savedRevision, () => {
   const saved = tagPicker.lastSaved.value
   if (!saved) return
   updateTags(saved.id, saved.tags)
+})
+// Samma sak för platser - den markerade platsen syns i raden.
+watch(placePicker.savedRevision, () => {
+  const saved = placePicker.lastSaved.value
+  if (!saved) return
+  updatePlaces(saved.id, saved.places)
 })
 watch(visibleGoals, (goals) => goalSelection.prune(goals))
 
@@ -421,6 +430,17 @@ onMounted(() => {
         }
       },
     },
+    {
+      keys: 'p',
+      label: 'P',
+      title: 'Sätt plats',
+      run: () => {
+        const goal = visibleGoals.value.find(g => g.id === selectedGoalId.value)
+        if (goal) {
+          void placePicker.openFor(goal)
+        }
+      },
+    },
   ])
 })
 
@@ -697,6 +717,7 @@ const filterOptions = [
           ? 'bg-accent-strong text-white border-accent-strong'
           : 'bg-surface-2 text-ink-muted border-line hover:border-line-strong hover:text-ink'"
         @click="setFilterByCurrentPlace(!filterByCurrentPlace)"
+        title="Visa mål som gäller den valda platsen. Mål utan någon plats visas alltid."
       >
         Görbar här
       </button>

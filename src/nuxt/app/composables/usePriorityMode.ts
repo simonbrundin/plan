@@ -1,6 +1,7 @@
 import type { Goal, GoalParent } from "~/types/goal";
+import type { Place } from "~/types/place";
 import { matchesNowFilter, type NowFilter } from "~/utils/goalFilters";
-import { isDoableAtPlace } from "~/utils/places";
+import { isDoableAtPlaceOrUnplaced } from "~/utils/places";
 import {
 	buildDisplayTree,
 	buildHierarchy,
@@ -49,9 +50,10 @@ const DEFAULT_NOW_FILTER: NowFilter = "now";
 
 const nowFilter = ref<NowFilter>(DEFAULT_NOW_FILTER);
 
-// Filter "görbar här": visa bara mål som har den plats användaren
-// befinner sig på. Flera platser på ett mål har OR-semantik - det
-// räcker att vara på någon av dem.
+// Filter "görbar här": visa mål som har den plats användaren befinner
+// sig på. Flera platser på ett mål har OR-semantik - det räcker att
+// vara på någon av dem. Mål utan någon plats är inte bundna till en
+// plats och visas därför alltid.
 const filterByCurrentPlace = useState<boolean>(
 	"now-filter-current-place",
 	() => false,
@@ -108,7 +110,9 @@ export function usePriorityMode() {
 
 	function matchesCurrentPlace(goal: PrioritizedGoal): boolean {
 		if (!filterByCurrentPlace.value) return true;
-		return isDoableAtPlace(goal, currentPlaceId.value);
+		// Mål utan någon plats är inte bundna till en plats och visas
+		// därför alltid, oavsett var användaren befinner sig.
+		return isDoableAtPlaceOrUnplaced(goal, currentPlaceId.value);
 	}
 
 	const visibleGoals = computed(() =>
@@ -353,6 +357,16 @@ export function usePriorityMode() {
 		if (goal) goal.tags = tags;
 	}
 
+	/**
+	 * Skriver tillbaka sparade platser på ett mål i prioritetslistan.
+	 *
+	 * Listan som exponeras är readonly, så ändringen måste göras här inne.
+	 */
+	function updatePlaces(goalId: number, places: Place[]) {
+		const goal = prioritizedGoals.value.find((g) => g.id === goalId);
+		if (goal) goal.places = places;
+	}
+
 	function getSelectedIndex(): number {
 		return displayOrder.value.indexOf(selectedGoalId.value);
 	}
@@ -395,6 +409,7 @@ export function usePriorityMode() {
 		handleKeyup,
 		selectGoal,
 		updateTags,
+		updatePlaces,
 		getSelectedIndex,
 		setNowFilter,
 		setFilterByCurrentPlace,
