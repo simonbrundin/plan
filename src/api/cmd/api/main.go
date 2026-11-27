@@ -130,6 +130,7 @@ func main() {
 	api.Use(middleware.APIKeyAuth())     // Try API key first
 	api.Use(middleware.AuthMiddleware()) // Fall back to session auth
 	api.Use(middleware.RestrictToAgentScope())
+	api.Use(middleware.RestrictToReadScope())
 	api.Use(func(c *gin.Context) {
 		c.Set("dbConnected", dbConnected)
 		c.Next()
@@ -159,6 +160,7 @@ func main() {
 		// Goals endpoints
 		api.GET("/goals", goalHandler.GetGoals)
 		api.GET("/goals/prioritized", goalHandler.GetPrioritizedGoals)
+		api.GET("/goals/now", goalHandler.GetNowGoals)
 		api.GET("/goals/graph", goalHandler.GetGoalGraph)
 		api.POST("/goals", goalHandler.CreateGoal)
 		api.GET("/goals/:id", goalHandler.GetGoal)
