@@ -21,7 +21,9 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: agent-api
-          image: ghcr.io/simonbrundin/plan-agent:sha-a1226a0
+          # Lokalt image-namn. Tilt bygger detta i dev; produktion patchar
+          # över raden med den publicerade Rust-imagen.
+          image: plan-agent:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

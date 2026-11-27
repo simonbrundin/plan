@@ -307,6 +307,7 @@ graph LR
   n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv["PinchBench: egen Value Score ska inte kopieras - räkna kostnad per lyckad uppgift själv"]
   n_notes_plan_api_anvander_scalar_for_openapi["Plan API använder Scalar för OpenAPI"]
   n_notes_plan_api_och_agent_delar_go_modul_men_behaller_tjanstegransen["Plan API och agent delar Go-modul men behåller tjänstegränsen"]
+  n_notes_plan_api_webblasaren_anropar_api_t_direkt_nuxt_proxyn_ar_borttagen["Plan-API: webbläsaren anropar API:t direkt - Nuxt-proxyn är borttagen"]
   n_notes_plan_appen_morkt_designsystem_med_semantiska_farg_token["Plan-appen: mörkt designsystem med semantiska färg-token"]
   n_notes_plan_cachad_spa_skal_gjorde_att_webblasaren_korde_gammalt_js_bundle_med_ikon_provider_none["Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none"]
   n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor["plan-db: CNPG-kluster fastnade i 'Setting up primary' på en Longhorn-volym utan replikor"]
@@ -680,6 +681,7 @@ graph LR
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_concepts_zitadel
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_started_finished_kunde_inte_rensas_i_plan_null_ignorerades_i_go_api_t
+  n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_plan_api_webblasaren_anropar_api_t_direkt_nuxt_proxyn_ar_borttagen
   n_notes_barnordning_foljer_beroenden_i_malsidan --> n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan
   n_notes_bash_fallgropar_i_pxe_flash_tab_som_ifs_whitespace_och_read_med_for_fa_variabler --> n_entities_pxe_server
   n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi --> n_concepts_anvanda_agenter_i_plan
@@ -1433,6 +1435,7 @@ graph LR
 - **notes/picokvm-luckfox-startar-inte-i-labbet-lite-saknar-emmc-ingen-poe** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv** <- [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]]
 - **notes/plan-api-anvander-scalar-for-openapi** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
+- **notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen** <- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
 - **notes/plan-appen-morkt-designsystem-med-semantiska-farg-token** <- [[notes/mailvyn-mail-omstegad-till-tailwind-tema]]
 - **notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none** <- [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]]
 - **notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor** <- [[concepts/cloudnative-pg]], [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]]

@@ -56,7 +56,7 @@ finns i `index.md`.
 | [[notes/aterkommande-serier-doljs-inte-langre-beroende-pa-zoomniva]] | Återkommande serier döljs inte längre beroende på zoomnivå | note | kalender, feature, beslut, bugg, session, projekt:plan | 2026-11-18 | 1 |
 | [[notes/aterstaende-funktioner-i-agentplattformen]] | Återstående funktioner i agentplattformen | note | agent, roadmap, mål, projekt:plan | 2026-11-25 | 0 |
 | [[notes/atta-feature-commits-pushade-till-det-arkiverade-mailmaster-repot]] | Åtta feature-commits pushade till det arkiverade mailmaster-repot | note | mailmaster, arkiv, push, kameo, oauth, projekt:mailmaster | 2026-11-20 | 0 |
-| [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] | Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt | note | auth, session, nuxt, go, zitadel, cookie, dev, projekt:plan | 2026-11-17 | 3 |
+| [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] | Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt | note | auth, session, nuxt, go, zitadel, cookie, dev, projekt:plan | 2026-11-27 | 4 |
 | [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] | Automatisk målikon behövde sökord och svenska alias | note | bug, feature, icon, goals, projekt:plan | 2026-11-17 | 0 |
 | [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] | Autonoma AgentRuns som Kubernetes Jobs: lärdomar från E2E-flödet | note | plan, agent, kubernetes, job, e2e, bug, projekt:simon | 2026-11-24 | 0 |
 | [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] | Barnmärke på mål - antal undermål visas överallt | note | feature, goals, nuxt, ui, projekt:plan | 2026-11-22 | 0 |
@@ -308,6 +308,7 @@ finns i `index.md`.
 | [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]] | PinchBench: egen Value Score ska inte kopieras - räkna kostnad per lyckad uppgift själv | note | dashboard, modeller, benchmark, pinchbench, research, projekt:dashboard | 2026-11-26 | 1 |
 | [[notes/plan-api-anvander-scalar-for-openapi]] | Plan API använder Scalar för OpenAPI | note | openapi, scalar, go, dokumentation, projekt:plan | 2026-11-17 | 0 |
 | [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] | Plan API och agent delar Go-modul men behåller tjänstegränsen | note | arkitektur, go, agent, projekt:plan | 2026-11-26 | 0 |
+| [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] | Plan-API: webbläsaren anropar API:t direkt - Nuxt-proxyn är borttagen | note | api, nuxt, cors, auth, session, refaktor, projekt:plan | 2026-11-27 | 0 |
 | [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] | Plan-appen: mörkt designsystem med semantiska färg-token | note | plan, ui, css, tailwind, dark-mode, projekt:repos | 2026-11-17 | 1 |
 | [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] | Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none | note | bug, nuxt, cache, plan, projekt:plan | 2026-11-16 | 0 |
 | [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] | plan-db: CNPG-kluster fastnade i 'Setting up primary' på en Longhorn-volym utan replikor | note | cnpg, longhorn, incident, plan, projekt:simon | 2026-11-27 | 4 |
@@ -515,7 +516,7 @@ finns i `index.md`.
 - `algoritm` (1)
 - `analys` (1)
 - `animation` (2)
-- `api` (10)
+- `api` (11)
 - `api-nyckel` (1)
 - `appimage` (1)
 - `arbetsflöde` (1)
@@ -524,7 +525,7 @@ finns i `index.md`.
 - `arkiv` (2)
 - `artificialanalysis` (1)
 - `artikel` (1)
-- `auth` (7)
+- `auth` (8)
 - `authentication` (2)
 - `authentik` (1)
 - `automatik` (1)
@@ -577,7 +578,7 @@ finns i `index.md`.
 - `container-orchestration` (1)
 - `controlplane` (3)
 - `cookie` (1)
-- `cors` (1)
+- `cors` (2)
 - `crash` (1)
 - `csi` (1)
 - `csr` (1)
@@ -802,7 +803,7 @@ finns i `index.md`.
 - `notis` (1)
 - `now` (3)
 - `ntp` (1)
-- `nuxt` (44)
+- `nuxt` (45)
 - `nätverk` (3)
 - `oauth` (2)
 - `oauth2` (3)
@@ -864,7 +865,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (146)
+- `projekt:plan` (147)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -891,7 +892,7 @@ finns i `index.md`.
 - `recovery` (4)
 - `recurrence` (1)
 - `refactor` (1)
-- `refaktor` (2)
+- `refaktor` (3)
 - `refaktorering` (1)
 - `rekrytering` (6)
 - `relationer` (9)
@@ -923,7 +924,7 @@ finns i `index.md`.
 - `secret` (1)
 - `secrets` (4)
 - `security` (4)
-- `session` (40)
+- `session` (41)
 - `shell` (1)
 - `skogsduvan` (6)
 - `slack` (1)

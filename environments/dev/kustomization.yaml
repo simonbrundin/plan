@@ -45,17 +45,18 @@ patches:
         path: /spec/urlFrom/secretKeyRef/key
         value: uri
 
-# Images byggda av Tilt
+# Images byggda av Tilt. Det är samma Rust-imager som CI bygger och
+# publicerar - dev och prod kör alltså samma kod.
 images:
   - name: ghcr.io/simonbrundin/plan
     newName: plan-nuxt
     newTag: latest
-  - name: ghcr.io/simonbrundin/plan:frontend-202606121357
-    newName: plan-nuxt
+  # API:t (Rust) - byggcontexten är src/, Dockerfile src/rust/Dockerfile.
+  - name: plan-api
+    newName: plan-api
     newTag: latest
-  - name: plan-go-api
-    newName: plan-go-api
-  # Agent-imagen byggs av Tilt och finns i den lokala registret.
-  - name: ghcr.io/simonbrundin/plan-agent
+  # Agenten (Rust) - byggcontexten är repo-roten, Dockerfile
+  # src/rust/Dockerfile.agent.
+  - name: plan-agent
     newName: plan-agent
     newTag: latest

@@ -1,4 +1,5 @@
 import type { Goal, GoalParent } from "~/types/goal";
+import { apiRequest } from "~/utils/api";
 import { matchesNowFilter, type NowFilter } from "~/utils/goalFilters";
 import { isDoableAtPlaceOrUnplaced } from "~/utils/places";
 import {
@@ -84,7 +85,7 @@ function flushOrderOnUnload() {
 	const ids = pendingOrder;
 	pendingOrder = null;
 
-	void fetch("/api/proxy/goals/priority/reorder", {
+	void apiRequest("goals/priority/reorder", {
 		method: "PATCH",
 		headers: { "content-type": "application/json" },
 		body: JSON.stringify({ goalIds: ids }),
@@ -163,8 +164,8 @@ export function usePriorityMode() {
 			// Backend returnerar redan filtrerade och sorterade goals med
 			// weight från goal_relations, så vi behöver inte mappa om eller
 			// sortera client-side.
-			// Via our own server route so the session cookie is attached.
-			const goals = await $fetch<PrioritizedGoal[]>('/api/proxy/goals/prioritized');
+			// Anropet går direkt mot API:t, som validerar sessioncookien.
+			const goals = await apiRequest<PrioritizedGoal[]>('goals/prioritized');
 
 			prioritizedGoals.value = goals;
 
@@ -377,7 +378,7 @@ export function usePriorityMode() {
 		}
 	}
 
-	// Slår på och av platsfiltret.
+	// Slår på och av filtret "görbar här".
 	function setFilterByCurrentPlace(enabled: boolean) {
 		filterByCurrentPlace.value = enabled;
 		const list = displayOrder.value;

@@ -3,9 +3,9 @@ title: Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt
 type: note
 tags: [auth, session, nuxt, go, zitadel, cookie, dev, projekt:plan]
 created: 2026-11-10
-updated: 2026-11-17
+updated: 2026-11-27
 status: active
-related: [concepts/zitadel, notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er, notes/started-finished-kunde-inte-rensas-i-plan-null-ignorerades-i-go-api-t]
+related: [concepts/zitadel, notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er, notes/started-finished-kunde-inte-rensas-i-plan-null-ignorerades-i-go-api-t, notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]
 ---
 
 Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10).
@@ -20,9 +20,11 @@ Nu:
   (lasbar hint) direkt i svaret. Sessionen valideras från cookie ELLER
   Authorization: Bearer (SessionTokenFromRequest).
 - Go har GET /api/v1/auth/session och POST /api/v1/auth/logout.
-- Nuxt är en tunn proxy (server/utils/goApi.ts): vidarebefordrar Cookie,
-  kopierar tillbaka Set-Cookie och Location, och foljer inte redirects
-  (annars kor OAuth-floden server-side).
+- Nuxt var en tunn proxy (server/utils/goApi.ts): vidarebefordrade Cookie,
+  kopierade tillbaka Set-Cookie och Location, och foljde inte redirects
+  (annars kor OAuth-floden server-side). Proxyn togs bort 2026-11-27 -
+  webbläsaren anropar nu API:t direkt, se
+  [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]].
 - Nuxt-routen /api/auth/callback ar borttagen - Go redirectar direkt till
   appens rot.
 - Cookien sattas for host "localhost" (porten spelar ingen roll for

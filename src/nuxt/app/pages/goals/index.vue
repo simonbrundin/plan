@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Goal } from '~/types/goal'
-import { AuthenticationError } from '~/composables/useGoalApi'
+import { AuthenticationError } from '~/utils/api'
 import { canBeFinished } from '~/utils/goalRules'
 import { isRootGoal, isUnfinishedGoal, matchesStartedFilter } from '~/utils/goalFilters'
 import { moveChildId } from '~/utils/childOrder'

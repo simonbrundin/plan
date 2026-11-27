@@ -1,3 +1,5 @@
+import { apiRequest } from '~/utils/api'
+
 interface UserSession {
   sub?: string
   email?: string
@@ -36,7 +38,7 @@ export function useUserSession() {
   /** Confirms the session with the Go API and refreshes the hint cookie. */
   const fetch = async () => {
     try {
-      const data = await $fetch<{ sub?: string; email?: string }>('/api/auth/session')
+      const data = await apiRequest<{ sub?: string; email?: string }>('auth/session')
       const payload = JSON.stringify({ sub: data.sub, email: data.email })
       userCookie.value = btoa(payload)
       return data
@@ -48,7 +50,7 @@ export function useUserSession() {
 
   /** Ends the session server side and clears the local hint cookie. */
   const clear = async () => {
-    await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+    await apiRequest('auth/logout', { method: 'POST' }).catch(() => {})
     userCookie.value = null
   }
 

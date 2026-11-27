@@ -27,37 +27,35 @@ their objectives using a modern web interface with hierarchical goal structures.
 ## Authentication
 
 The session lives in the **Go API** - not in Nuxt. Go creates, validates and
-deletes the session and sets the cookies; Nuxt is a thin proxy in front of it.
+deletes the session and sets the cookies; the browser calls the API directly.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor B as Browser
-    participant N as Nuxt (Nitro)
+    participant N as Nuxt (Nitro, static)
     participant G as Go API
     participant Z as Zitadel
     participant D as PostgreSQL
 
-    B->>N: GET /auth/login
-    N->>G: GET /api/v1/auth/login
-    G-->>N: 307 to Zitadel + Set-Cookie oauth_state
-    N-->>B: 307 to Zitadel (oauth_state)
+    B->>N: GET / (appen)
+    B->>G: GET /api/v1/auth/login
+    G-->>B: 307 to Zitadel + Set-Cookie oauth_state
     B->>Z: GET /oauth/v2/authorize (PKCE)
     Z-->>B: 302 to /api/v1/auth/callback?code=...
     B->>G: GET /api/v1/auth/callback
     G->>D: create user + session
     G-->>B: 307 to app root + Set-Cookie plan_session, plan_user
-    B->>N: GET /api/proxy/goals (Cookie: plan_session)
-    N->>G: GET /api/v1/goals (Cookie: plan_session)
+    B->>G: GET /api/v1/goals (Cookie: plan_session)
     G->>D: validate session
-    G-->>N: 200 OK
-    N-->>B: 200 OK
+    G-->>B: 200 OK
 ```
 
 ```mermaid
 flowchart LR
-    B[Browser] -->|HTTP| N["Nuxt SPA<br/>(Nitro server)"]
-    N -->|"proxy: Cookie + Set-Cookie"| G["Go API<br/>(Gin)"]
+    B[Browser] -->|HTTP| N["Nuxt SPA<br/>(statiska filer)"]
+    B -->|"JSON + sessioncookie"| G["Go API<br/>(Gin)"]
+    N -->|"server-till-server"| A["Agent-API"]
     G -->|SQL| D[("PostgreSQL<br/>(CNPG)")]
     G -->|OAuth 2.0 / PKCE| Z[Zitadel]
     G -->|session token| B
@@ -67,10 +65,11 @@ Rules:
 
 - **Go owns the session.** `plan_session` (httpOnly) is set by the Go API in the
   login response - the session token never travels in a URL.
-- **Nuxt is a thin proxy** (`server/utils/goApi.ts`): it forwards the `Cookie`
-  header and copies back `Set-Cookie` and `Location`. It never follows redirects
-  itself, otherwise the OAuth redirect would be resolved server-side instead of
-  in the browser.
+- **The browser calls the API directly.** There is no proxy in Nuxt: in
+  production the app and the API share a host (`plan.simonbrundin.com`), and in
+  dev the API answers with CORS headers for the app's origin
+  (`CORS_ALLOWED_ORIGINS`). Nuxt only keeps a server side for the agent API,
+  whose key must never reach the browser.
 - **One session, two ways in**: the `plan_session` cookie for browsers,
   `Authorization: Bearer <token>` for API clients.
 - **`plan_user`** is a readable hint cookie (sub + email) so the UI can render

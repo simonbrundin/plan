@@ -8,10 +8,15 @@ spec:
       containers:
         - name: api
           # Rust-imagen byggs av .github/workflows/commit.rust-images.yaml.
-          image: ghcr.io/simonbrundin/rust-api:sha-e92f3de
+          image: ghcr.io/simonbrundin/rust-api:sha-d720028
           env:
             - name: AUTH_DISABLED
               value: "false"
+            # Webbläsaren anropar API:t direkt. I prod ligger appen och API:t
+            # på samma host, så CORS egentligen inte behövs - men listan gör
+            # beteendet explicit och samma env används om appen flyttas.
+            - name: CORS_ALLOWED_ORIGINS
+              value: "https://plan.simonbrundin.com"
             - name: NUXT_SESSION_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -23,3 +28,16 @@ spec:
                 secretKeyRef:
                   name: auth
                   key: NUXT_SESSION_PASSWORD
+            # Nyckeln agenten använder mot Plan. API:t känner den under
+            # namnet AGENT_API_KEY - det är namnet middleware:t letar
+            # efter. Värdet är agentens egen PLAN_API_KEY, så att agenten
+            # och API:t pratar med samma nyckel.
+            #
+            # Nyckeln har agent-scope: den får arbeta med mål och
+            # körningar, men aldrig besluta om ett godkännande eller
+            # radera något. Gränsen lever i API:t, inte i en prompt.
+            - name: AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: PLAN_API_KEY

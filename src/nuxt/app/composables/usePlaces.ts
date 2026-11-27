@@ -1,20 +1,5 @@
-import type { FetchOptions } from "ofetch";
-
 import type { CurrentPlaceResponse, Place } from "~/types/place";
-import { apiProxy as proxy } from "~/utils/apiProxy";
-
-/**
- * apiProxy skickar requesten till Go API:t via Nuxt:s proxy.
- *
- * Sessionen ligger i Go API:t, så proxyn vidarebefordrar cookien och
- * valideringen sker där.
- */
-const apiProxy = async <T>(
-	path: string,
-	options: FetchOptions = {},
-): Promise<T> => {
-	return await proxy<T>(path, options);
-};
+import { apiRequest } from "~/utils/api";
 
 export interface CreatePlaceInput {
 	name: string;
@@ -45,19 +30,19 @@ export function usePlaces() {
 
 	/** Laddar platserna och den nuvarande platsen. */
 	const fetchPlaces = async (): Promise<void> => {
-		const result = await apiProxy<Place[]>("places");
+		const result = await apiRequest<Place[]>("places");
 		places.value = result ?? [];
 	};
 
 	/** Laddar den nuvarande platsen ("jag är här"). */
 	const fetchCurrentPlace = async (): Promise<void> => {
-		const result = await apiProxy<CurrentPlaceResponse>("me/current-place");
+		const result = await apiRequest<CurrentPlaceResponse>("me/current-place");
 		currentPlaceId.value = result?.place?.id ?? null;
 	};
 
 	/** Skapar en ny plats. */
 	const createPlace = async (input: CreatePlaceInput): Promise<Place> => {
-		const place = await apiProxy<Place>("places", {
+		const place = await apiRequest<Place>("places", {
 			method: "POST",
 			body: input,
 		});
@@ -70,7 +55,7 @@ export function usePlaces() {
 		placeId: number,
 		input: UpdatePlaceInput,
 	): Promise<Place> => {
-		const place = await apiProxy<Place>(`places/${placeId}`, {
+		const place = await apiRequest<Place>(`places/${placeId}`, {
 			method: "PATCH",
 			body: input,
 		});
@@ -80,13 +65,13 @@ export function usePlaces() {
 
 	/** Tar bort en plats. Kopplingar till mål och händelser försvinner. */
 	const deletePlace = async (placeId: number): Promise<void> => {
-		await apiProxy(`places/${placeId}`, { method: "DELETE" });
+		await apiRequest(`places/${placeId}`, { method: "DELETE" });
 		await fetchPlaces();
 	};
 
 	/** Sätter (eller rensar) användarens "jag är här"-plats. */
 	const setCurrentPlace = async (placeId: number | null): Promise<void> => {
-		await apiProxy("me/current-place", {
+		await apiRequest("me/current-place", {
 			method: "PUT",
 			body: { place_id: placeId },
 		});
@@ -103,7 +88,7 @@ export function usePlaces() {
 		latitude: number,
 		longitude: number,
 	): Promise<Place[]> => {
-		const result = await apiProxy<Place[]>(
+		const result = await apiRequest<Place[]>(
 			`places/nearby?lat=${latitude}&lon=${longitude}`,
 		);
 		return result ?? [];
@@ -111,7 +96,7 @@ export function usePlaces() {
 
 	/** Hämtar platserna kopplade till ett mål. */
 	const fetchGoalPlaces = async (goalId: number): Promise<Place[]> => {
-		const result = await apiProxy<Place[]>(`goals/${goalId}/places`);
+		const result = await apiRequest<Place[]>(`goals/${goalId}/places`);
 		return result ?? [];
 	};
 
@@ -120,7 +105,7 @@ export function usePlaces() {
 		goalId: number,
 		placeIds: number[],
 	): Promise<Place[]> => {
-		return await apiProxy<Place[]>(`goals/${goalId}/places`, {
+		return await apiRequest<Place[]>(`goals/${goalId}/places`, {
 			method: "PUT",
 			body: { place_ids: placeIds },
 		});
@@ -128,7 +113,7 @@ export function usePlaces() {
 
 	/** Hämtar platserna kopplade till en kalenderhändelse. */
 	const fetchEventPlaces = async (eventId: number): Promise<Place[]> => {
-		const result = await apiProxy<Place[]>(`calendar-events/${eventId}/places`);
+		const result = await apiRequest<Place[]>(`calendar-events/${eventId}/places`);
 		return result ?? [];
 	};
 
@@ -137,7 +122,7 @@ export function usePlaces() {
 		eventId: number,
 		placeIds: number[],
 	): Promise<Place[]> => {
-		return await apiProxy<Place[]>(`calendar-events/${eventId}/places`, {
+		return await apiRequest<Place[]>(`calendar-events/${eventId}/places`, {
 			method: "PUT",
 			body: { place_ids: placeIds },
 		});

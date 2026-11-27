@@ -10,7 +10,8 @@ group: Användaren
 # Gränssnitt och navigation
 
 Plan är en ensidig app (SPA) utan serverrendering. All rendering sker i
-webbläsaren, och appen pratar med Plan API:t via en proxy i Nuxt.
+webbläsaren, och appen pratar direkt med Plan API:t - det finns ingen
+proxy i Nuxt.
 
 ## Sidorna
 

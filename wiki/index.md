@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 454 |
+| Noter | 455 |
 
 ## Entiteter
 
@@ -85,7 +85,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay]] - Arbetstationen (datorn jag sitter pa) ar Omarchy, dvs Arch-baserat. _(uppdaterad 2026-10-24)_
 - [[notes/arkitektur]] - TypeTrainers paketstruktur, beroenderiktning och dataflöde genom en session. _(uppdaterad 2026-11-26)_
 - [[notes/artikeln-om-agentic-software-factory-vad-som-ar-relevant-for-agentsystemet]] - Källa: https://levelup.gitconnected.com/build-an-agentic-software-factory-f995f79221ef (Akshay Kokane, del 3 i AI-Native SWE-serien). _(uppdaterad 2026-11-23)_
-- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] - Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10). _(uppdaterad 2026-11-17)_
+- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] - Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10). _(uppdaterad 2026-11-27)_
 - [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] - Första implementationen sökte Iconify med hela målens titel. _(uppdaterad 2026-11-17)_
 - [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] - Verifierat 2026-11-24 i ~/repos/plan med mål #540: Plan-mål -> köad AgentRun -> Kubernetes Job -> förslag -> human gate -> isolerad w... _(uppdaterad 2026-11-24)_
 - [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] - Önskemål: överallt där ett mål visas ska det framgå hur många barn (undermål) det har. _(uppdaterad 2026-11-22)_
@@ -335,6 +335,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] - src/api och src/agent flyttades till en gemensam Go-modul med rot i src/ (modulnamn plan). _(uppdaterad 2026-11-26)_
 - [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] - Projekt: plan _(uppdaterad 2026-11-16)_
 - [[notes/plan-migreras-fran-go-till-rust]] - Beslut 2026-11-26: Plan-applikationens Go-tjänster skrivs om i Rust. _(uppdaterad 2026-11-26)_
+- [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] - Borttog Nuxt:s proxy mot Plan API:t (2026-11-27). _(uppdaterad 2026-11-27)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
 - [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-27)_
 - [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-27)_

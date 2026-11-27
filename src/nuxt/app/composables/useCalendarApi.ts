@@ -1,4 +1,5 @@
 import type { Calendar } from '~/types/calendar'
+import { apiRequest } from '~/utils/api'
 import type { Place } from '~/types/place'
 
 export interface CalendarEvent {
@@ -50,7 +51,7 @@ export interface CalendarEvent {
 
 export function useCalendarApi() {
   const loadCalendarEvents = async (from: Date, to: Date): Promise<CalendarEvent[]> => {
-    return await $fetch<CalendarEvent[]>('/api/proxy/calendar-events', {
+    return await apiRequest<CalendarEvent[]>('calendar-events', {
       query: {
         from: from.toISOString(),
         to: to.toISOString(),
@@ -65,7 +66,7 @@ export function useCalendarApi() {
    * dem lokalt och slippa fråga servern varje gång tidsfönstret flyttas.
    */
   const loadAllCalendarEvents = async (): Promise<CalendarEvent[]> => {
-    return await $fetch<CalendarEvent[]>('/api/proxy/calendar-events', {
+    return await apiRequest<CalendarEvent[]>('calendar-events', {
       query: {
         scope: 'all',
       },
@@ -85,7 +86,7 @@ export function useCalendarApi() {
     calendar_id?: number
     recurrence_rule?: string
   }) => {
-    return await $fetch<CalendarEvent>(`/api/proxy/calendar-events/${eventId}`, {
+    return await apiRequest<CalendarEvent>(`calendar-events/${eventId}`, {
       method: 'PATCH',
       body: event,
     })
@@ -104,7 +105,7 @@ export function useCalendarApi() {
     goal_id?: number
     calendar_id?: number
   }) => {
-    return await $fetch<CalendarEvent>(`/api/proxy/calendar-events/${eventId}/occurrences`, {
+    return await apiRequest<CalendarEvent>(`calendar-events/${eventId}/occurrences`, {
       method: 'POST',
       body: event,
     })
@@ -123,7 +124,7 @@ export function useCalendarApi() {
     goal_id?: number
     calendar_id?: number
   }) => {
-    return await $fetch<CalendarEvent>(`/api/proxy/calendar-events/${eventId}/split`, {
+    return await apiRequest<CalendarEvent>(`calendar-events/${eventId}/split`, {
       method: 'POST',
       body: event,
     })
@@ -141,7 +142,7 @@ export function useCalendarApi() {
     calendar_id?: number
     recurrence_rule?: string
   }) => {
-    return await $fetch<CalendarEvent>('/api/proxy/calendar-events', {
+    return await apiRequest<CalendarEvent>('calendar-events', {
       method: 'POST',
       body: event,
     })
@@ -155,12 +156,12 @@ export function useCalendarApi() {
    * se `createCalendarOccurrenceOverride`.
    */
   const deleteCalendarEvent = async (eventId: number): Promise<void> => {
-    await $fetch(`/api/proxy/calendar-events/${eventId}`, { method: "DELETE" })
+    await apiRequest(`calendar-events/${eventId}`, { method: "DELETE" })
   }
 
   /** Hämtar användarens kalendrar. */
   const loadCalendars = async (): Promise<Calendar[]> => {
-    return await $fetch<Calendar[]>('/api/proxy/calendars')
+    return await apiRequest<Calendar[]>('calendars')
   }
 
   /** Skapar en ny kalender med eget namn och färg. */
@@ -170,7 +171,7 @@ export function useCalendarApi() {
     icon?: string
     is_default?: boolean
   }): Promise<Calendar> => {
-    return await $fetch<Calendar>('/api/proxy/calendars', {
+    return await apiRequest<Calendar>('calendars', {
       method: 'POST',
       body: calendar,
     })
@@ -181,7 +182,7 @@ export function useCalendarApi() {
     calendarId: number,
     calendar: { name?: string; color?: string; icon?: string; is_default?: boolean },
   ): Promise<Calendar> => {
-    return await $fetch<Calendar>(`/api/proxy/calendars/${calendarId}`, {
+    return await apiRequest<Calendar>(`calendars/${calendarId}`, {
       method: 'PATCH',
       body: calendar,
     })
@@ -189,7 +190,7 @@ export function useCalendarApi() {
 
   /** Tar bort en kalender. Händelserna i den finns kvar utan kalender. */
   const deleteCalendar = async (calendarId: number): Promise<void> => {
-    await $fetch(`/api/proxy/calendars/${calendarId}`, { method: 'DELETE' })
+    await apiRequest(`calendars/${calendarId}`, { method: 'DELETE' })
   }
 
   return {
