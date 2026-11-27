@@ -23,3 +23,16 @@ spec:
                 secretKeyRef:
                   name: auth
                   key: NUXT_SESSION_PASSWORD
+            # Nyckeln agenten använder mot Plan. API:t känner den under
+            # namnet AGENT_API_KEY - det är namnet middleware:t letar
+            # efter. Värdet är agentens egen PLAN_API_KEY, så att agenten
+            # och API:t pratar med samma nyckel.
+            #
+            # Nyckeln har agent-scope: den får arbeta med mål och
+            # körningar, men aldrig besluta om ett godkännande eller
+            # radera något. Gränsen lever i API:t, inte i en prompt.
+            - name: AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: PLAN_API_KEY
