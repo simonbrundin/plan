@@ -19,8 +19,10 @@ pub struct Place {
     /// Platsens namn.
     pub name: String,
     /// Cirkelns mittpunkt i latitud.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub latitude: f64,
     /// Cirkelns mittpunkt i longitud.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub longitude: f64,
     /// Cirkelns radie i meter.
     pub radius_meters: i32,

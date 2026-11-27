@@ -13,6 +13,7 @@ pub mod db;
 pub mod definer;
 pub mod error;
 pub mod executor;
+pub mod go_num;
 pub mod goaldefinition;
 pub mod handlers;
 pub mod jobcontroller;

@@ -81,6 +81,7 @@ pub struct FramstegSvar {
     /// Antal gates totalt.
     total: usize,
     /// Framsteget i procent.
+    #[serde(serialize_with = "crate::go_num::serialize_f64")]
     percent: f64,
 }
 

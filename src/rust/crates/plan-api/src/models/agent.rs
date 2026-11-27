@@ -204,6 +204,7 @@ pub struct AgentRun {
     /// Länken till resultatet - en PR-länk eller ett bokningsutkast.
     pub artifact_url: Option<String>,
     /// Kostnaden för körningen hittills.
+    #[serde(serialize_with = "crate::models::go_num::serialize_opt_f64")]
     pub cost_usd: Option<f64>,
     /// Körningens konversation i agent-tjänsten.
     pub conversation_id: Option<String>,
@@ -220,6 +221,7 @@ pub struct AgentRun {
     #[serde(skip_serializing_if = "String::is_empty")]
     pub model_version: String,
     /// Kostnaden som reserverats för körningen så länge den pågår.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub reserved_cost_usd: f64,
     /// När körningen började.
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -513,6 +515,7 @@ pub struct AgentRunUsage {
     #[serde(skip_serializing_if = "är_tom_lista")]
     pub tool_names: Option<Vec<String>>,
     /// Den beräknade kostnaden.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub cost_usd: f64,
     /// Valutan kostnaden anges i.
     pub currency: String,
@@ -583,11 +586,16 @@ pub struct AgentBudget {
     /// Perioden - day, week eller month.
     pub period: String,
     /// Gränsen som stoppar nya körningar.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub hard_limit_usd: f64,
     /// Gränsen som bara varnar.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "crate::models::go_num::serialize_opt_f64"
+    )]
     pub warning_limit_usd: Option<f64>,
     /// Hur mycket en ny körning reserverar direkt.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub reservation_per_run_usd: f64,
     /// Agenten budgeten gäller. Tom gäller alla.
     #[serde(skip_serializing_if = "String::is_empty")]
@@ -659,10 +667,13 @@ pub struct BudgetStatus {
     /// Perioden.
     pub period: String,
     /// Den hårda gränsen.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub hard_limit_usd: f64,
     /// Vad som redan är använd.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub spent_usd: f64,
     /// Vad som är reserverat.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub reserved_usd: f64,
     /// Sant om gränsen är nådd.
     pub exceeded: bool,
@@ -710,6 +721,7 @@ pub struct AgentUsageSummary {
     /// Antalet körningar i urvalet.
     pub runs: i64,
     /// Summan av körningarnas kostnad.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub total_cost_usd: f64,
     /// Summan av indata-tokens.
     pub input_tokens: i64,
@@ -736,6 +748,7 @@ pub struct AgentUsageByModel {
     /// Antalet körningar.
     pub runs: i64,
     /// Kostnaden.
+    #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub cost_usd: f64,
 }
 
