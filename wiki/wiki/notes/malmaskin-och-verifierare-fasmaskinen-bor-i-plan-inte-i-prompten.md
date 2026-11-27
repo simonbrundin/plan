@@ -5,7 +5,7 @@ tags: [agent, goals, design, verifiering, human-gate, projekt:plan]
 created: 2026-11-27
 updated: 2026-11-27
 status: active
-related: [concepts/anvanda-agenter-i-plan, notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron, notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]
+related: [concepts/anvanda-agenter-i-plan, notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron, notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi, notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]
 ---
 
 ÖNSKEMÅL: ett agentiskt system som tar mål från define till completed OCH verifierat.
@@ -25,5 +25,5 @@ Relaterat: [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]]
 
 ## Relaterade
 
+- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]]
 - [[concepts/anvanda-agenter-i-plan]]
-
