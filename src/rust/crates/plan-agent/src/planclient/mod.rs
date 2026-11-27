@@ -5,3 +5,4 @@ pub mod models;
 pub mod paths;
 
 pub use client::{PlanClient, PlanClientError};
+pub use models::*;

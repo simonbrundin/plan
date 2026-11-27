@@ -48,11 +48,23 @@ pub struct Goal {
     #[serde(default)]
     pub recurrence_mode: Option<String>,
     /// Målets taggar.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_som_tom_lista")]
     pub tags: Vec<String>,
     /// Platser där målet kan slutföras.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_som_tom_lista")]
     pub places: Vec<Place>,
+}
+
+/// Läser en lista som kan vara null.
+///
+/// Plan svarar ibland med null för en tom lista - Go läser det som en
+/// tom slice, och det ska Rust göra det också.
+fn null_som_tom_lista<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: serde::Deserialize<'de>,
+{
+    Ok(Option::<Vec<T>>::deserialize(deserializer)?.unwrap_or_default())
 }
 
 /// En plats i Plan - till exempel "Hem" eller "Gymmet".
@@ -107,6 +119,28 @@ pub struct AgentRun {
     pub conversation_id: Option<String>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
+impl AgentRun {
+    /// En tom körning - används när ett mål saknar körning.
+    pub fn empty() -> Self {
+        Self {
+            id: 0,
+            goal_id: 0,
+            phase: String::new(),
+            status: String::new(),
+            trigger: String::new(),
+            initiator: String::new(),
+            agent_profile: String::new(),
+            summary: String::new(),
+            result: String::new(),
+            artifact_url: None,
+            cost_usd: None,
+            conversation_id: None,
+            created_at: chrono::Utc::now(),
+            updated_at: chrono::Utc::now(),
+        }
+    }
 }
 
 /// Skapar en agentkörning.
@@ -272,12 +306,18 @@ pub struct AgentApproval {
     pub id: i64,
     pub agent_run_id: i64,
     pub goal_id: i64,
+    #[serde(default)]
     pub title: String,
+    #[serde(default)]
     pub description: String,
+    #[serde(default)]
     pub status: String,
+    #[serde(default)]
     pub feedback: String,
+    #[serde(default)]
     pub consequence: String,
     /// Beskriver hur resultatet ska kontrolleras.
+    #[serde(default)]
     pub verification_plan: String,
     /// Innehåller exakt det som föreslogs.
     #[serde(default)]
