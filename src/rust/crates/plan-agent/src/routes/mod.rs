@@ -11,6 +11,7 @@ pub mod readme;
 pub mod table;
 pub mod tools;
 pub mod workflow;
+pub mod ws;
 
 use axum::Router;
 
