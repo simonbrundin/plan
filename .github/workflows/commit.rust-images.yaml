@@ -8,16 +8,105 @@ on:
       - src/rust/**
       - src/.dockerignore
       - .dockerignore
+      # Ändras själva byggflödet ska det köras om direkt - då är det
+      # nya byggmetoden det som ska verifieras.
+      - .github/workflows/commit.rust-images.yaml
   workflow_dispatch:
 
 jobs:
-  build-publish-image:
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
+  # Varje arkitektur byggs på en runner av samma arkitektur. Arm64
+  # under QEMU tar timmar för en Rust-kompilering, så arm64 byggs i
+  # stället på en riktig arm64-runner.
+  #
+  # Produktionsklustret kör arm64, så en image som bara finns för
+  # amd64 ger "no match for platform in manifest" vid pull.
+  bygg:
+    name: Bygg ${{ matrix.image }} för ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
     permissions:
       # "contents: write" behövs för att boten ska kunna skapa och pusha
       # branchen med de nya image-taggarna, så att gransknings-PR:t kan
       # skapas.
+      contents: write
+      packages: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Byggkontexten är src/ - samma som Go-tjänstens image.
+          - image: rust-api
+            runner: ubuntu-latest
+            platform: linux/amd64
+            context: src
+            file: src/rust/Dockerfile
+          - image: rust-api
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            context: src
+            file: src/rust/Dockerfile
+          # Byggkontexten är repo-roten - samma som Go-agentens image.
+          # Imageen innehåller både agent-api och agent-worker, och
+          # kommandofilerna som agenten läser.
+          - image: rust-agent
+            runner: ubuntu-latest
+            platform: linux/amd64
+            context: .
+            file: src/rust/Dockerfile.agent
+          - image: rust-agent
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            context: .
+            file: src/rust/Dockerfile.agent
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Vi bygger och pushar varje arkitektur separat, med digest som
+      # resultat. Manifest-listan sätts ihop i jobbet "slå ihop" nedan.
+      - name: Bygg och pusha ${{ matrix.platform }}
+        id: bygg
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          outputs: type=image,push-by-digest=true,name-canonical=true
+          tags: ghcr.io/simonbrundin/${{ matrix.image }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.platform }}
+
+      - name: Spara digest
+        run: |
+          mkdir -p digests
+          PLATFORM="${{ matrix.platform }}"
+          echo "${{ steps.bygg.outputs.digest }}" > "digests/${{ matrix.image }}-${PLATFORM//\//-}"
+
+      - name: Ladda upp digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.image }}-${{ matrix.platform }}
+          path: digests/
+          retention-days: 1
+
+  # Sätter ihop manifest-listan så att en och samma tagg pekar på båda
+  # arkitekturerna. Kubernetes väljer rätt variant ur listan.
+  slå-ihop:
+    needs: bygg
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
       contents: write
       packages: write
       pull-requests: write
@@ -35,58 +124,45 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata for API:t
-        id: meta-api
+      - name: Ladda ner digester
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-*
+          merge-multiple: true
+          path: digests/
+
+      - name: Extract metadata
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/simonbrundin/rust-api
+          images: |
+            ghcr.io/simonbrundin/rust-api
+            ghcr.io/simonbrundin/rust-agent
           tags: |
             type=sha,format=short
             type=raw,value=latest
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Slå ihop manifesten
+        run: |
+          set -euo pipefail
+          SHORT_SHA="${GITHUB_SHA::7}"
 
-      # Byggkontexten är src/ - samma som Go-tjänstens image.
-      #
-      # Bara amd64 byggs här. Klustret kör amd64, och dev-miljön bygger
-      # sina images lokalt med Tilt - arm64 under QEMU-emulering tar
-      # timmar för en Rust-kompilering.
-      - name: Build and push API:t
-        uses: docker/build-push-action@v5
-        with:
-          context: src
-          file: src/rust/Dockerfile
-          push: true
-          tags: ${{ steps.meta-api.outputs.tags }}
-          labels: ${{ steps.meta-api.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          API_AMD64="$(cat digests/rust-api-linux-amd64)"
+          API_ARM64="$(cat digests/rust-api-linux-arm64)"
+          AGENT_AMD64="$(cat digests/rust-agent-linux-amd64)"
+          AGENT_ARM64="$(cat digests/rust-agent-linux-arm64)"
 
-      - name: Extract metadata for agenten
-        id: meta-agent
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/simonbrundin/rust-agent
-          tags: |
-            type=sha,format=short
-            type=raw,value=latest
+          docker buildx imagetools create \
+            -t "ghcr.io/simonbrundin/rust-api:sha-${SHORT_SHA}" \
+            -t "ghcr.io/simonbrundin/rust-api:latest" \
+            "ghcr.io/simonbrundin/rust-api@${API_AMD64}" \
+            "ghcr.io/simonbrundin/rust-api@${API_ARM64}"
 
-      # Byggkontexten är repo-roten - samma som Go-agentens image. Imageen
-      # innehåller både agent-api och agent-worker, och kommandofilerna
-      # som agenten läser.
-      - name: Build and push agenten
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: src/rust/Dockerfile.agent
-          push: true
-          tags: ${{ steps.meta-agent.outputs.tags }}
-          labels: ${{ steps.meta-agent.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          docker buildx imagetools create \
+            -t "ghcr.io/simonbrundin/rust-agent:sha-${SHORT_SHA}" \
+            -t "ghcr.io/simonbrundin/rust-agent:latest" \
+            "ghcr.io/simonbrundin/rust-agent@${AGENT_AMD64}" \
+            "ghcr.io/simonbrundin/rust-agent@${AGENT_ARM64}"
 
       # Taggen på bilderna skrivs in i de manifest som prod deployar.
       # Pr-set granskas innan det slås ihop - bytet till Rust ska vara
@@ -119,6 +195,8 @@ jobs:
             Uppdaterar API:t och agenten till den senaste Rust-imagen.
             - API: `ghcr.io/simonbrundin/rust-api:sha-${{ steps.sha.outputs.short-sha }}`
             - Agent: `ghcr.io/simonbrundin/rust-agent:sha-${{ steps.sha.outputs.short-sha }}`
+
+            Imagen är byggd för både linux/amd64 och linux/arm64.
           labels: |
             ci
             skip-review
