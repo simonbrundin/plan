@@ -66,3 +66,6 @@ server/
 
 # Rust
 /src/rust/target/
+
+# Byggda Go-binärer (t.ex. src/agent/bin/wikictl)
+/src/agent/bin/
