@@ -627,6 +627,7 @@ pub async fn bygg_agent(
     målkontext: Option<&GoalContext>,
     plan_client: Option<&planclient::PlanClient>,
     recorder: Option<RunRecorder>,
+    orchestrator: Option<&crate::orchestrator::SharedOrchestrator>,
 ) -> Result<AgentRuntime, String> {
     let nycklar = crate::db::repository::get_api_keys(pool)
         .await
@@ -663,16 +664,240 @@ pub async fn bygg_agent(
         parameters: Default::default(),
     };
 
+    let systemprompt = bygg_systemprompt();
+
+    // Lärdomarna kan läggas till i systemprompten. Go gör det inte - dess
+    // `NewAgentWithOrchestrator` anropas aldrig, så orchestratorns krokar
+    // är död kod i den körande tjänsten. Därför är detta avstängt som
+    // standard, så att Rust svarar precis som Go. Miljövariabeln
+    // `AGENT_ORCHESTRATOR_HOOKS=true` slår på det.
+    let systemprompt = match orchestrator {
+        Some(orchestrator) if orchestrator_krokar_på() => {
+            injicera_lärdomer(&systemprompt, orchestrator)
+        }
+        _ => systemprompt,
+    };
+
+    // Krogen som uppdaterar checkpointens framsteg efter varje tur.
+    // Sätts bara på när orchestratorns krokar är aktiverade - Go har ingen
+    // sådan krok i den körande tjänsten.
+    let prepare_next_turn = match orchestrator {
+        Some(orchestrator) if orchestrator_krokar_på() => {
+            let orchestrator = orchestrator.clone();
+            Some(std::sync::Arc::new(
+                move |kontext: &crate::core::TurnContext| -> Option<crate::core::TurnUpdate> {
+                    let plan = orchestrator.current_plan()?;
+                    let checkpoint = plan
+                        .checkpoints
+                        .as_ref()
+                        .and_then(|checkpoints| {
+                            checkpoints.iter().find(|c| c.status != "completed")
+                        })
+                        .cloned()?;
+
+                    let progress = bygg_checkpoint_progress(&checkpoint);
+                    if progress.is_empty() {
+                        return None;
+                    }
+
+                    let mut agentkontext = kontext.context.clone();
+                    agentkontext.system_prompt =
+                        uppdatera_checkpoint_progress(&agentkontext.system_prompt, &progress);
+
+                    // En väntande human-gate ska utlösa ett anrop till
+                    // godkännandeverktyget.
+                    if human_gate_väntar(&checkpoint) {
+                        agentkontext.system_prompt.push_str("\n\n");
+                        agentkontext
+                            .system_prompt
+                            .push_str(&bygg_godkännandeinstruktion(&checkpoint));
+                    }
+
+                    Some(crate::core::TurnUpdate {
+                        context: Some(agentkontext),
+                        model: None,
+                    })
+                },
+            ) as crate::core::PrepareNextTurnHook)
+        }
+        _ => None,
+    };
+
     let config = AgentLoopConfig {
         model: modell,
         tools: verktyg,
-        system_prompt: bygg_systemprompt(),
+        system_prompt: systemprompt,
         provider: Some(skapa_leverantör(&vald.name, &vald.url)),
         max_turns: max_turner(),
+        prepare_next_turn,
         ..Default::default()
     };
 
     Ok(AgentRuntime::ny(config))
+}
+
+/// Ska orchestratorns krokar köras?
+///
+/// Go slår aldrig på detta - `NewAgentWithOrchestrator` anropas inte, så
+/// orchestratorns krokar är död kod i den körande tjänsten. Därför är
+/// standardvärdet "nej", så att Rust svarar precis som Go.
+///
+/// Miljövariabeln `AGENT_ORCHESTRATOR_HOOKS=true` slår på krokarna:
+/// lärdomarna läggs till i systemprompten och checkpointens framsteg
+/// uppdateras efter varje tur.
+pub fn orchestrator_krokar_på() -> bool {
+    match std::env::var("AGENT_ORCHESTRATOR_HOOKS") {
+        Ok(värde) => matches!(
+            värde.trim().to_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        ),
+        Err(_) => false,
+    }
+}
+
+/// Lägger till lärdomarna i systemprompten.
+///
+/// Go: `injectLearningsIntoPrompt` i
+/// `src/agent/internal/core/workflow/orchestrator_integration.go`.
+pub fn injicera_lärdomer(
+    systemprompt: &str,
+    orchestrator: &crate::orchestrator::SharedOrchestrator,
+) -> String {
+    let kontext = orchestrator.generate_learnings_context(&[]);
+
+    if kontext.is_empty() {
+        return systemprompt.to_string();
+    }
+
+    // Finns lärdomarna redan i prompten läggs de inte in igen.
+    if systemprompt.contains("## Relevant Learnings") {
+        return systemprompt.to_string();
+    }
+
+    if systemprompt.is_empty() {
+        return kontext;
+    }
+
+    format!("{systemprompt}\n\n{kontext}")
+}
+
+/// Bygger checkpointens framstegstext.
+///
+/// Go: `buildCheckpointProgress` i
+/// `src/agent/internal/core/workflow/orchestrator_integration.go`.
+pub fn bygg_checkpoint_progress(checkpoint: &crate::checkpoint::Checkpoint) -> String {
+    let mut rader = vec![
+        "## Current Checkpoint Progress".to_string(),
+        format!("**Checkpoint**: {}", checkpoint.name),
+        format!("**Status**: {}", checkpoint.status),
+    ];
+
+    if !checkpoint.tasks.is_empty() {
+        rader.push(String::new());
+        rader.push("**Tasks**:".to_string());
+        for (index, uppgift) in checkpoint.tasks.iter().enumerate() {
+            rader.push(format!("  {}. {}", index + 1, uppgift));
+        }
+    }
+
+    if let Some(resultat) = checkpoint.gate_results.as_ref() {
+        if !resultat.is_empty() {
+            rader.push(String::new());
+            rader.push("**Gate Status**:".to_string());
+            for (gate, result) in resultat {
+                let status = match result.status.as_str() {
+                    "passed" => format!("✅ {}", result.status),
+                    "pending" | "running" => format!("⏳ {}", result.status),
+                    _ => format!("❌ {}", result.status),
+                };
+                rader.push(format!("  - {gate}: {status}"));
+                if !result.feedback.is_empty() {
+                    rader.push(format!("    Feedback: {}", result.feedback));
+                }
+            }
+        }
+    }
+
+    let väntande = checkpoint.pending_gates();
+    if !väntande.is_empty() {
+        rader.push(format!("\n**Pending Gates**: {}", väntande.join(", ")));
+        rader.push("\nEnsure all gates pass before marking checkpoint complete.".to_string());
+    }
+
+    if checkpoint.gates.iter().any(|gate| gate == "human") {
+        rader.push(String::new());
+        rader.push(
+            "⚠️ **HUMAN APPROVAL REQUIRED** - Use `ask_human_approval` to request user input"
+                .to_string(),
+        );
+    }
+
+    rader.join("\n")
+}
+
+/// Väntar en human-gate på sitt svar?
+///
+/// Go: `hasPendingHumanGate`.
+pub fn human_gate_väntar(checkpoint: &crate::checkpoint::Checkpoint) -> bool {
+    checkpoint.gates.iter().any(|gate| {
+        gate == "human"
+            && !checkpoint
+                .gate_results
+                .as_ref()
+                .and_then(|resultat| resultat.get(gate))
+                .map(|result| result.status == crate::checkpoint::gate_status::PASSED)
+                .unwrap_or(false)
+    })
+}
+
+/// Bygger instruktionen för att be om godkännande.
+///
+/// Go: `buildHumanApprovalInstruction`.
+pub fn bygg_godkännandeinstruktion(checkpoint: &crate::checkpoint::Checkpoint) -> String {
+    [
+        "## 🚨 HUMAN APPROVAL REQUIRED".to_string(),
+        String::new(),
+        "This checkpoint requires human approval before you can continue.".to_string(),
+        String::new(),
+        "**You MUST use the `ask_human_approval` tool NOW** to request approval.".to_string(),
+        String::new(),
+        "Do NOT continue working on other tasks. Stop and call `ask_human_approval` immediately."
+            .to_string(),
+        String::new(),
+        "Example:".to_string(),
+        "```".to_string(),
+        "await ask_human_approval({".to_string(),
+        format!("  checkpoint_name: \"{}\",", checkpoint.name),
+        format!("  summary: \"Completed {} tasks\",", checkpoint.tasks.len()),
+        "  feedback_request: \"Please verify the implementation\"".to_string(),
+        "})".to_string(),
+        "```".to_string(),
+    ]
+    .join("\n")
+}
+
+/// Ersätter checkpointens framstegstext i systemprompten.
+///
+/// Go: `updateCheckpointProgress`.
+pub fn uppdatera_checkpoint_progress(systemprompt: &str, progress: &str) -> String {
+    const MARKÖR: &str = "## Current Checkpoint Progress";
+
+    let Some(start) = systemprompt.find(MARKÖR) else {
+        return format!("{systemprompt}\n\n{progress}");
+    };
+
+    // Sektionen slutar vid nästa rubrik på översta nivån.
+    let slut = systemprompt[start..]
+        .find("\n## ")
+        .map(|index| start + index)
+        .unwrap_or(systemprompt.len());
+
+    format!(
+        "{}{}{}",
+        &systemprompt[..start],
+        progress,
+        &systemprompt[slut..]
+    )
 }
 
 /// Det maximala antalet turer i en chatt.
@@ -1129,5 +1354,96 @@ mod tests {
     fn max_turner_faller_tillbaka_pa_standard() {
         // Utan AGENT_MAX_TURNS används standardvärdet.
         assert!(max_turner() >= 1);
+    }
+
+    #[test]
+    fn larmad_prompt_ger_inga_lardomar() {
+        // Go lägger aldrig in lärdomar i prompten - orchestratorns krokar
+        // anropas inte. Därför är standardvärdet av.
+        assert!(!orchestrator_krokar_på());
+    }
+
+    #[test]
+    fn lardomar_laggs_till_i_prompten() {
+        let orchestrator = orchestrator_med_tomma_lardomar();
+
+        let prompt = injicera_lärdomer("Grundinstruktioner", &orchestrator);
+
+        assert!(prompt.starts_with("Grundinstruktioner"));
+        assert!(prompt.contains("## Relevant Learnings"));
+    }
+
+    #[test]
+    fn lardomar_inte_laggs_till_tvaganger() {
+        let orchestrator = orchestrator_med_tomma_lardomar();
+
+        let en = injicera_lärdomer("Grundinstruktioner", &orchestrator);
+        let två = injicera_lärdomer(&en, &orchestrator);
+
+        assert_eq!(en, två);
+    }
+
+    /// En orchestrator med en lärdomshanterare som pekar på en tom fil.
+    fn orchestrator_med_tomma_lardomar() -> std::sync::Arc<crate::orchestrator::Orchestrator> {
+        let fil = tempfile::tempdir().expect("tempdir");
+        let lärdomar = crate::learnings::LearningsManager::ny(fil.path().join("learnings.md"));
+
+        std::sync::Arc::new(crate::orchestrator::Orchestrator::with_learnings(
+            crate::state_store::StateStore::Memory(crate::state_store::InMemoryStateStore::new()),
+            lärdomar,
+        ))
+    }
+
+    #[test]
+    fn checkpointens_framsteg_byggs_som_i_go() {
+        let mut checkpoint =
+            crate::checkpoint::Checkpoint::new("cp-1", "Bygg API", "beskrivning", "enkel");
+        checkpoint.tasks = vec!["Skriv kod".to_string(), "Kör tester".to_string()];
+        checkpoint.gates = vec!["human".to_string()];
+
+        let progress = bygg_checkpoint_progress(&checkpoint);
+
+        assert!(progress.contains("## Current Checkpoint Progress"));
+        assert!(progress.contains("**Checkpoint**: Bygg API"));
+        assert!(progress.contains("  1. Skriv kod"));
+        assert!(progress.contains("  2. Kör tester"));
+        assert!(progress.contains("**Pending Gates**: human"));
+        assert!(progress.contains("HUMAN APPROVAL REQUIRED"));
+    }
+
+    #[test]
+    fn framsteget_ersatter_den_gamla_sektionen() {
+        let prompt = "Grundinstruktioner\n\n## Current Checkpoint Progress\n**Checkpoint**: gammal\n\n## Annan sektion";
+        let progress = "## Current Checkpoint Progress\n**Checkpoint**: ny";
+
+        let resultat = uppdatera_checkpoint_progress(prompt, progress);
+
+        assert!(resultat.starts_with("Grundinstruktioner"));
+        assert!(resultat.contains("**Checkpoint**: ny"));
+        assert!(!resultat.contains("**Checkpoint**: gammal"));
+        assert!(resultat.ends_with("## Annan sektion"));
+    }
+
+    #[test]
+    fn human_gate_vantar_tills_den_ar_godkand() {
+        let mut checkpoint =
+            crate::checkpoint::Checkpoint::new("cp-1", "Bygg API", "beskrivning", "enkel");
+        checkpoint.gates = vec!["human".to_string()];
+
+        // Utan resultat väntar gaten.
+        assert!(human_gate_väntar(&checkpoint));
+
+        // En godkänd gate väntar inte längre.
+        let mut resultat = std::collections::BTreeMap::new();
+        resultat.insert(
+            "human".to_string(),
+            crate::checkpoint::GateResult {
+                status: crate::checkpoint::gate_status::PASSED.to_string(),
+                ..crate::checkpoint::GateResult::new("human")
+            },
+        );
+        checkpoint.gate_results = Some(resultat);
+
+        assert!(!human_gate_väntar(&checkpoint));
     }
 }
