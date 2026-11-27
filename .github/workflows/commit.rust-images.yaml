@@ -44,6 +44,10 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       # Byggkontexten är src/ - samma som Go-tjänstens image.
+      #
+      # Bara amd64 byggs här. Klustret kör amd64, och dev-miljön bygger
+      # sina images lokalt med Tilt - arm64 under QEMU-emulering tar
+      # timmar för en Rust-kompilering.
       - name: Build and push API:t
         uses: docker/build-push-action@v5
         with:
@@ -52,7 +56,7 @@ jobs:
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -76,6 +80,6 @@ jobs:
           push: true
           tags: ${{ steps.meta-agent.outputs.tags }}
           labels: ${{ steps.meta-agent.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
