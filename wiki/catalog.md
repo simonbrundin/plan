@@ -13,13 +13,13 @@ finns i `index.md`.
 | [[concepts/cloudnative-pg]] | CloudNativePG (CNPG) | concept | postgresql, database, postgres, cloudnativepg, cnpg | 2026-11-26 | 4 |
 | [[concepts/envoy-gateway]] | Envoy Gateway | concept | envoy, gateway-api, ingress, reverse-proxy, http-routing | 2026-10-24 | 6 |
 | [[concepts/flux-operator]] | FluxOperator | concept | flux, flux-operator, gitops, installation, kubernetes, operator | 2026-11-26 | 7 |
-| [[concepts/gitops]] | GitOps | concept | flux, gitops, deployment, infrastructure-as-code, kubernetes | 2026-10-24 | 5 |
+| [[concepts/gitops]] | GitOps | concept | flux, gitops, deployment, infrastructure-as-code, kubernetes | 2026-11-27 | 6 |
 | [[concepts/http-routing-flow]] | HTTP Routing Flow | concept | networking, routing, dns, cloudflare, duckdns, kubernetes, envoys-gateway | 2026-10-24 | 4 |
 | [[concepts/kube-prometheus]] | Kube Prometheus Stack | concept | prometheus, monitoring, alerting, grafana, observability | 2026-10-24 | 2 |
 | [[concepts/kubelet-csr-approver]] | Kubelet CSR Approver | concept | kubelet, csr, certificate, pki, node-authentication | 2026-10-24 | 2 |
 | [[concepts/kyverno-cel]] | Kyverno CEL Policies | concept | kyverno, policy, cel, kubernetes, security | 2026-10-24 | 2 |
 | [[concepts/kyverno-policies]] | Kyverno Policies | concept | kyverno, policy, kubernetes, security, validation | 2026-10-24 | 3 |
-| [[concepts/longhorn]] | Longhorn | concept | longhorn, storage, csi, persistent-storage, distributed-storage | 2026-10-24 | 4 |
+| [[concepts/longhorn]] | Longhorn | concept | longhorn, storage, csi, persistent-storage, distributed-storage | 2026-11-27 | 6 |
 | [[concepts/metallb]] | MetalLB | concept | metallb, load-balancer, networking, l2, ip-address-pool | 2026-10-24 | 2 |
 | [[concepts/neon-cli-var-neon-och-neon-ts-maste-ligga]] | Neon CLI: var .neon och neon.ts måste ligga | concept | neon, cli, neon.ts, projekt:tmp | 2026-11-02 | 0 |
 | [[concepts/oidc]] | OIDC | concept | oidc, oauth2, identity-provider, authentication, rbac, kubernetes | 2026-10-23 | 4 |
@@ -30,7 +30,7 @@ finns i `index.md`.
 | [[entities/hdmi-kvm-switch-16-port-labbet]] | HDMI KVM-switch 16 port (labbet) | entity | kvm, hardware, labb, projekt:infrastructure, projekt:simon | 2026-11-15 | 2 |
 | [[entities/home-assistant]] | Home Assistant | entity | home-assistant, ssh, hassio, supervisor, drift, projekt:simon | 2026-11-25 | 5 |
 | [[entities/kubernetes]] | Kubernetes | entity | kubernetes, k8s, container-orchestration | 2026-11-23 | 19 |
-| [[entities/pxe-server]] | PXE-server | entity | pxe, talos, uboot, matchbox, dnsmasq, boot, infrastructure | 2026-10-24 | 35 |
+| [[entities/pxe-server]] | PXE-server | entity | pxe, talos, uboot, matchbox, dnsmasq, boot, infrastructure | 2026-11-27 | 36 |
 | [[entities/talos-linux]] | Talos Linux | entity | bare-metal, baremetal, infrastructure, kubernetes, linux, pxe, talos | 2026-10-24 | 9 |
 | [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] | 1Password MCP (Environments) på Arch/Omarchy kräver setgid på 1password-mcp | note | 1password, mcp, arch, omarchy, security, projekt:tmp | 2026-11-23 | 1 |
 | [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]] | AA Data API v2/data pensionerad - dashboard migrerar till /api/v2/language/models | note | bug, dashboard, artificialanalysis, api, projekt:simon | 2026-11-26 | 1 |
@@ -92,6 +92,7 @@ finns i `index.md`.
 | [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
+| [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]] | DNS och DHCP har skilda agar: dnsmasq pa pxe ager DHCP, UniFi pa 10.10.10.1 ager DNS - och worker-9:s lease-hostname ar klientens eget | note | dns, dhcp, unifi, dnsmasq, worker-9, coredns, projekt:infrastructure | 2026-11-27 | 3 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
 | [[notes/dokumentationssidor-i-granssnittet-docs]] | Dokumentationssidor i gränssnittet (/docs) | note | dokumentation, nuxt, projekt:plan | 2026-11-26 | 0 |
 | [[notes/dold-skrivbordsmeny-med-leader-kommando]] | Dold skrivbordsmeny med leader-kommando | note | frontend, navigation, session, projekt:plan | 2026-11-20 | 0 |
@@ -113,6 +114,7 @@ finns i `index.md`.
 | [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] | Flannel VXLAN MAC-kollision blockerar controlplane-2 webhooks | note | incident, flux, flannel, networking, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/flera-kalendrar-med-egna-farger-i-plan]] | Flera kalendrar med egna färger i Plan | note | kalender, feature, färg, projekt:plan | 2026-11-18 | 4 |
 | [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] | Flerval: parkera flera kandidater samtidigt i /personer | note | feature, pappa, personer, potential, projekt:pappa | 2026-11-18 | 0 |
+| [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]] | Flux ager CoreDNS-ConfigMap och Longhorn Node-CR - ownership-reglerna som gor det saker | note | flux, coredns, longhorn, dns, ssa, projekt:infrastructure | 2026-11-27 | 3 |
 | [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] | Flux-felsökning avbruten efter exponerade hemligheter | note | incident, flux, säkerhet, projekt:plan | 2026-11-26 | 0 |
 | [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] | Flux i prod klonade ett 1,3 GB stort repo och dog | note | flux, incident, prod, projekt:infrastructure | 2026-11-26 | 2 |
 | [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] | Flux source-controller flyttad från worker-3 efter livenessfel | note | flux, incident, cluster1, projekt:infrastructure | 2026-11-26 | 0 |
@@ -418,7 +420,7 @@ finns i `index.md`.
 | [[notes/undo-stapel-i-plan-z-angrar-senaste-malhandling]] | Undo-stapel i plan: Z ångrar senaste målhandling | note | feature, undo, tangentbord, frontend, projekt:plan | 2026-11-20 | 1 |
 | [[notes/unifi-gatewayen-har-ingen-publik-ipv6-cgnat-via-starlink]] | UniFi-gatewayen har ingen publik IPv6 (CGNAT via Starlink) | note | unifi, ipv6, cgNAT, starlink, wan, projekt:infrastructure | 2026-11-17 | 1 |
 | [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]] | USB-disken 'ACER' (WD 320GB): status och Longhorn-bedömning | note | disk, longhorn, usb, hdd, projekt:simon | 2026-10-24 | 2 |
-| [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]] | USB-SSD:orna har kvar giltig Longhorn-identitet ssd-1 med gamla replikor - de är bara inte registrerade i Longhorn | note | longhorn, ssd, worker, projekt:infrastructure | 2026-11-26 | 2 |
+| [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]] | USB-SSD:orna har kvar giltig Longhorn-identitet ssd-1 med gamla replikor - de är bara inte registrerade i Longhorn | note | longhorn, ssd, worker, projekt:infrastructure | 2026-11-27 | 3 |
 | [[notes/utbyggnad-av-pappas-personlista-bolagsregister-konferensbios-gav-140-namngivna-personer]] | Utbyggnad av pappas personlista: bolagsregister + konferensbios gav 140 namngivna personer | note | pappa, sourcing, bolagsregister, gdpr, konferens, projekt:simon | 2026-11-03 | 2 |
 | [[notes/uttunnade-serier-vags-sa-att-antalen-blir-exakta]] | Uttunnade serier vägs så att antalen blir exakta | note | kalender, feature, beslut, prestanda, projekt:plan | 2026-11-18 | 1 |
 | [[notes/utvecklingsflode]] | Utvecklingsflöde | note | build, test, verktyg | 2026-10-24 | 6 |
@@ -436,16 +438,17 @@ finns i `index.md`.
 | [[notes/wildcard-dns-via-cloudflare-tunnel-alla-simonbrundin-com-gar-genom-tunneln-till-envoy]] | Wildcard DNS via Cloudflare Tunnel - alla *.simonbrundin.com går genom tunneln till Envoy | note | cloudflare, tunnel, dns, ingress, envoy, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/windows-1252-avkodning-av-mejlens-amnesrad]] | Windows-1252-avkodning av mejlens ämnesrad | note | bug, go, imap, mime, projekt:pappa | 2026-11-20 | 0 |
 | [[notes/wordlist-kallor]] | Ordlistan finns på två ställen | note | ordlista, data, risk, teknik | 2026-10-21 | 3 |
-| [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] | worker-1 ansluter till cluster1 (2026-11-26) - install-config applicerad via PXE-boot och noden gick med | note | pxe, worker-1, rock4cplus, cluster1, drift, projekt:infrastructure | 2026-11-26 | 1 |
+| [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] | worker-1 ansluter till cluster1 (2026-11-26) - install-config applicerad via PXE-boot och noden gick med | note | pxe, worker-1, rock4cplus, cluster1, drift, projekt:infrastructure | 2026-11-27 | 2 |
 | [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]] | worker-1-kortet flashat med ny mainline-build (TF-A fran repot) | note | pxe, uboot, rock4cplus, mainline, projekt:infrastructure | 2026-10-23 | 4 |
-| [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] | worker-1 Longhorn anvager EPHEMERAL-disken, inte USB-SSD:n - och alla workers far samma behandling | note | longhorn, worker-1, pxe, talos, projekt:infrastructure | 2026-11-26 | 1 |
+| [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] | worker-1 Longhorn anvager EPHEMERAL-disken, inte USB-SSD:n - och alla workers far samma behandling | note | longhorn, worker-1, pxe, talos, projekt:infrastructure | 2026-11-27 | 2 |
 | [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]] | worker-1 och worker-2 ar doda pa link-niva - PXE-kedjan ar inte blockerande | note | pxe, hardware, felsokning, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
 | [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]] | worker-1 (Rock 4C+) når PXE via U-Boot boot_targets, men PXE ligger sist | note | pxe, talos, uboot, worker, projekt:simon | 2026-10-22 | 4 |
 | [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]] | worker-1 (ROCK 4C+) tyst: mainline-U-Boot byggd, men boarden läser inte kortet | note | pxe, uboot, rock4cplus, felsokning, projekt:infrastructure | 2026-10-23 | 4 |
+| [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]] | worker-1:s ssd-1 har 200 GiB schemalagt pa 119 GiB - och de tvA volymerna ar LEVANDE media | note | longhorn, worker-1, kapacitet, overprovisioning, projekt:infrastructure | 2026-11-27 | 2 |
 | [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]] | worker-1 startar om med stram men skickar noll paket - fysisk omstart bevisar samma fel | note | pxe, hardware, felsokning, rock4cplus, unifi, projekt:infrastructure | 2026-10-27 | 3 |
 | [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]] | worker-1 svarar inte ens med en full PoE-cykel - noll paket i bade riktningar | note | pxe, hardware, felsokning, rock4cplus, unifi, projekt:infrastructure | 2026-10-27 | 3 |
 | [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]] | worker-1 svarar inte i nätet - felsökningsstatus | note | pxe, worker-1, rock4cplus, debugging, projekt:simon | 2026-10-22 | 4 |
-| [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]] | worker-2 och worker-9 saknas fortfarande som cluster1-workers - diagnos 2026-11-26 | note | worker-2, worker-9, pxe, felsokning, projekt:infrastructure | 2026-11-26 | 0 |
+| [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]] | worker-2 och worker-9 saknas fortfarande som cluster1-workers - diagnos 2026-11-26 | note | worker-2, worker-9, pxe, felsokning, projekt:infrastructure | 2026-11-27 | 1 |
 | [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]] | worker-2 utan strom - port 22 up=false poe_power=0 | note | pxe, bug, hardware, unifi, projekt:simon | 2026-10-23 | 2 |
 | [[notes/worker-3-bootade-via-pxe-men-talos-installen-nollstallde-de-forsta-11-mb-pa-microsd]] | worker-3 bootade via PXE - men Talos-installen nollstallde de forsta 11 MB pa microSD | note | pxe, talos, worker-3, bug, projekt:infrastructure | 2026-11-20 | 0 |
 | [[notes/worker-3-poe-omstart-och-talos-konfiguration-2026-11-20]] | Worker-3 PoE-omstart och Talos-konfiguration 2026-11-20 | note | felsokning, poe, projekt:agents, projekt:infrastructure, talos, worker-3 | 2026-11-20 | 0 |
@@ -455,7 +458,7 @@ finns i `index.md`.
 | [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]] | Worker-7:s kubeletcertifikat signerades av en gammal Kubernetes-CA som finns kvar i git-historiken | note | pki, kubernetes, talos, worker, git-historia, projekt:infrastructure | 2026-11-23 | 2 |
 | [[notes/worker-8-ater-ready-worker-1-och-worker-2-saknar-fysisk-lank]] | worker-8 åter Ready, worker-1 och worker-2 saknar fysisk länk | note | incident, talos, workers, unifi, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]] | worker-8: korrupt XFS pa EPHEMERAL-partitionen gjorde att kubelet aldrig startade - fix med mkfs.xfs | note | worker-8, talos, xfs, felsokning, pxe, projekt:infrastructure | 2026-11-23 | 2 |
-| [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] | worker-9 (Mac mini) bootade Talos fran USB men Talos-API:t (50000) startar inte - noden ar en zombie | note | worker-9, macmini, talos, usb, incident, felsokning, projekt:simon | 2026-11-24 | 0 |
+| [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] | worker-9 (Mac mini) bootade Talos fran USB men Talos-API:t (50000) startar inte - noden ar en zombie | note | worker-9, macmini, talos, usb, incident, felsokning, projekt:simon | 2026-11-27 | 1 |
 | [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] | Workers bootar inte via PXE trots fungerande PXE-server - UniFi PoE-styrning via rest/device | note | pxe, unifi, workers, felsokning, projekt:infrastructure | 2026-11-20 | 2 |
 | [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] | workmux merge misslyckas i huvud-worktree - kora kommandot i feature-worktreet | note | workmux, git, worktree, bug, projekt:agents | 2026-11-20 | 0 |
 | [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] | ZITADEL-återställning: historisk installation återställd från ZITADEL Cloud-export | note | zitadel, oidc, incident, migrering, projekt:simon | 2026-11-26 | 1 |
@@ -548,6 +551,7 @@ finns i `index.md`.
 - `container-orchestration` (1)
 - `controlplane` (3)
 - `cookie` (1)
+- `coredns` (2)
 - `cors` (1)
 - `crash` (1)
 - `csi` (1)
@@ -570,14 +574,14 @@ finns i `index.md`.
 - `desktop` (1)
 - `dev` (7)
 - `dev-miljo` (2)
-- `dhcp` (1)
+- `dhcp` (2)
 - `diagnostik` (1)
 - `dialog` (1)
 - `discovery` (1)
 - `disk` (1)
 - `distributed-storage` (1)
-- `dns` (8)
-- `dnsmasq` (2)
+- `dns` (10)
+- `dnsmasq` (3)
 - `docker` (3)
 - `docs` (1)
 - `dokumentation` (3)
@@ -608,7 +612,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (12)
+- `flux` (13)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -684,6 +688,7 @@ finns i `index.md`.
 - `kameo` (7)
 - `kanata` (1)
 - `kanban` (1)
+- `kapacitet` (1)
 - `karpathy` (2)
 - `keyboard` (8)
 - `keycloak` (3)
@@ -723,7 +728,7 @@ finns i `index.md`.
 - `linux` (2)
 - `llm` (1)
 - `load-balancer` (1)
-- `longhorn` (7)
+- `longhorn` (9)
 - `lunch` (2)
 - `lärdom` (1)
 - `mac-mini` (1)
@@ -783,6 +788,7 @@ finns i `index.md`.
 - `openapi` (2)
 - `operator` (1)
 - `ordlista` (2)
+- `overprovisioning` (1)
 - `oversikt` (1)
 - `padel` (1)
 - `pappa` (30)
@@ -825,7 +831,7 @@ finns i `index.md`.
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
 - `projekt:dotfiles` (5)
-- `projekt:infrastructure` (79)
+- `projekt:infrastructure` (82)
 - `projekt:learn` (4)
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
@@ -899,6 +905,7 @@ finns i `index.md`.
 - `sourcing` (12)
 - `sprint` (1)
 - `sqlx` (1)
+- `ssa` (1)
 - `ssd` (1)
 - `ssh` (4)
 - `ssl` (1)
@@ -956,7 +963,7 @@ finns i `index.md`.
 - `ui` (43)
 - `undo` (1)
 - `unicode` (1)
-- `unifi` (9)
+- `unifi` (10)
 - `uppdrag` (1)
 - `urval` (1)
 - `usb` (5)
@@ -972,12 +979,12 @@ finns i `index.md`.
 - `webbapp` (1)
 - `wiki` (7)
 - `worker` (11)
-- `worker-1` (4)
+- `worker-1` (5)
 - `worker-2` (2)
 - `worker-3` (5)
 - `worker-4` (3)
 - `worker-8` (1)
-- `worker-9` (6)
+- `worker-9` (7)
 - `workers` (2)
 - `workflow` (2)
 - `workmux` (1)

@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 8 |
-| Noter | 429 |
+| Noter | 432 |
 
 ## Entiteter
 
@@ -17,7 +17,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[entities/hdmi-kvm-switch-16-port-labbet]] - En 16-portars HDMI KVM-switch (MLEEDA, Amazon ASIN B0GCD38QN9) som ska styras från PXE-Pi:n (Raspberry Pi 5, 10.10.10.2, Ubuntu 25.04). _(uppdaterad 2026-11-15)_
 - [[entities/home-assistant]] - Två Home Assistant-instanser - "Krokviken" (10.20.20.20, HAOS 18.4) och "Skogsduvan" (stugan) - samt hur man administrations-API:t mot Supervisor nås via WebSocket. _(uppdaterad 2026-11-25)_
 - [[entities/kubernetes]] - Kubernetes (K8s) är containerorkestreringsplattformen i detta kluster. _(uppdaterad 2026-11-23)_
-- [[entities/pxe-server]] - PXE-servern i infrastructure-repot - dnsmasq, matchbox och mainline-U-Boot byggda för nätverksboot av Talos-noderna. _(uppdaterad 2026-10-24)_
+- [[entities/pxe-server]] - PXE-servern i infrastructure-repot - dnsmasq, matchbox och mainline-U-Boot byggda för nätverksboot av Talos-noderna. _(uppdaterad 2026-11-27)_
 - [[entities/talos-linux]] - Minimalt, API-drivet Linux-OS för Kubernetes; styrs deklarativt via maskinpatches. _(uppdaterad 2026-10-24)_
 
 ## Koncept
@@ -29,13 +29,13 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/cloudnative-pg]] - CloudNativePG är en Kubernetes-native PostgreSQL-operator som tillhandahåller automatiserad hantering av PostgreSQL-databaser. _(uppdaterad 2026-11-26)_
 - [[concepts/envoy-gateway]] - Envoy Gateway är en implementation av Kubernetes Gateway API som använder Envoy proxy som control plane och data plane. _(uppdaterad 2026-10-24)_
 - [[concepts/flux-operator]] - Operator som installerar och styr Flux via FluxInstance-CRD istället för flux bootstrap. _(uppdaterad 2026-11-26)_
-- [[concepts/gitops]] - Git är enda sanningskällan för infrastruktur; Flux/FluxOperator applicerar ändringarna till klustret. _(uppdaterad 2026-10-24)_
+- [[concepts/gitops]] - Git är enda sanningskällan för infrastruktur; Flux/FluxOperator applicerar ändringarna till klustret. _(uppdaterad 2026-11-27)_
 - [[concepts/http-routing-flow]] - Hur trafik flödar från internet till tjänster i Kubernetes-klustret via DNS, lastbalansering och gateway-routing. _(uppdaterad 2026-10-24)_
 - [[concepts/kube-prometheus]] - Kube Prometheus Stack är en komplett observabilitetsstack för Kubernetes baserad på Prometheus, Alertmanager och Grafana. _(uppdaterad 2026-10-24)_
 - [[concepts/kubelet-csr-approver]] - Kubelet CSR Approver är en Kubernetes-controller som automatiskt godkänner Certificate Signing Requests (CSRs) från kubelet-aracters base... _(uppdaterad 2026-10-24)_
 - [[concepts/kyverno-cel]] - CEL (Common Expression Language) är standardvalet för alla nya Kyverno-policies i denna infrastruktur. _(uppdaterad 2026-10-24)_
 - [[concepts/kyverno-policies]] - Kyverno är policy-engine som blockerar osäkra resurser i klustret - NodePort, latest-tag, skyddade namespaces och saknade resursgränser. _(uppdaterad 2026-10-24)_
-- [[concepts/longhorn]] - Longhorn är ett distribuerat block-lagringssystem för Kubernetes. _(uppdaterad 2026-10-24)_
+- [[concepts/longhorn]] - Longhorn är ett distribuerat block-lagringssystem för Kubernetes. _(uppdaterad 2026-11-27)_
 - [[concepts/metallb]] - MetalLB är en load-balancer-implementation för Kubernetes som fungerar på layer 2 (L2) i nätverksstacken. _(uppdaterad 2026-10-24)_
 - [[concepts/neon-cli-var-neon-och-neon-ts-maste-ligga]] - Neons CLI hittar projektkopplingen och policyfilen genom två separata regler: _(uppdaterad 2026-11-02)_
 - [[concepts/oidc]] - OIDC är protokollet som låter Zitadel-autentiserade användare få åtkomst till Kubernetes API-servern. _(uppdaterad 2026-10-23)_
@@ -117,6 +117,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/dashboard-tydlighetslyft-av-jamforelserna]] - Användaren upplevde jamforeelserna som 'sjukt otydliga'. _(uppdaterad 2026-11-26)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
+- [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]] - Kartlagt 2026-11-27. _(uppdaterad 2026-11-27)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
 - [[notes/dokumentationssidor-i-granssnittet-docs]] - Plan har fått en inbyggd dokumentation: undersidor på /docs/[undersida] + översikt på /docs. _(uppdaterad 2026-11-26)_
 - [[notes/dold-skrivbordsmeny-med-leader-kommando]] - Plan: skrivbordsmenyn använder nu samma slideover-beteende som mobilmenyn och är dold tills den öppnas med menyikonen. _(uppdaterad 2026-11-20)_
@@ -137,6 +138,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] - 2026-11-26: controlplane-2 och controlplane-3 annonserar och använder samma Flannel VXLAN-MAC e2:92:15:e2:0e:30. _(uppdaterad 2026-11-26)_
 - [[notes/flera-kalendrar-med-egna-farger-i-plan]] - Användaren kan nu skapa hur många kalendrar som helst (t.ex. _(uppdaterad 2026-11-18)_
 - [[notes/flerval-parkera-flera-kandidater-samtidigt-i-personer]] - Ny funktion i pappa: på /personer kan man markera flera personkort och parkera hela gänget med samma skäl och samma genomgångsdatum. _(uppdaterad 2026-11-18)_
+- [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]] - Kommittat 2026-11-27: 6c7c84f9 (talos) + 6551803b (flux). _(uppdaterad 2026-11-27)_
 - [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] - Flux GoGit-repoets stora PXE-träd fick source-controller att OOM:a; FluxInstance använder nu sparseCheckout för att bara hämta infrastructure-flux/. _(uppdaterad 2026-11-26)_
 - [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] - Resources blev först grönt efter att cert-manager-webhook flyttades till worker-3. _(uppdaterad 2026-11-26)_
 - [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] - Vid felsökning av cluster1 exponerades en GitHub-token och en privat SOPS age-nyckel i agentens verktygsutdata. _(uppdaterad 2026-11-26)_
@@ -439,7 +441,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/undo-stapel-i-plan-z-angrar-senaste-malhandling]] - På begäran: tangenten Z ångrar nu den senaste handlingen i plan (slutfört/pågående/evigt/deadline/upprepning på mål). _(uppdaterad 2026-11-20)_
 - [[notes/unifi-gatewayen-har-ingen-publik-ipv6-cgnat-via-starlink]] - Starlink **ger** IPv6 på alla planer, men bara /64 på WAN via SLAAC + /56 via DHCPv6-PD. _(uppdaterad 2026-11-17)_
 - [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]] - USB-disken ACER (WD 320 GB, 5400 rpm) ska INTE anvandas som Longhorn-disk - USB-brygga och IOPS talar emot det. _(uppdaterad 2026-10-24)_
-- [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]] - Kartlagt 2026-11-26. _(uppdaterad 2026-11-26)_
+- [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]] - Kartlagt 2026-11-26. _(uppdaterad 2026-11-27)_
 - [[notes/utbyggnad-av-pappas-personlista-bolagsregister-konferensbios-gav-140-namngivna-personer]] - 2026-11-08: pappas frölista gick från 88 till 140 namngivna personer. _(uppdaterad 2026-11-03)_
 - [[notes/uttunnade-serier-vags-sa-att-antalen-blir-exakta]] - En serie kan ha fler förekomster än expanderaren klarar (MAX_OCCURRENCES_PER_SERIES = 5000). _(uppdaterad 2026-11-18)_
 - [[notes/utvecklingsflode]] - Bygg, test och installera av TypeTrainer och wikictl, plus verktyg som inte finns. _(uppdaterad 2026-10-24)_
@@ -458,14 +460,15 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/windows-1252-avkodning-av-mejlens-amnesrad]] - 2026-11-19: Ämnen på Outlook-mejl visades rått MIME-kodat i pappa, t.ex. _(uppdaterad 2026-11-20)_
 - [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]] - Radxa ROCK 4C+ (worker-1..3) bootar via U-Boot i SPI-flash, inte UEFI. _(uppdaterad 2026-10-22)_
 - [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]] - worker-1 (ROCK 4C+, 10.10.10.21) startar inte: ingen skarmbild, ingen ARP/DHCP/TFTP, ingen klient i UniFi. _(uppdaterad 2026-10-23)_
-- [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] - worker-1 (ROCK 4C+, 10.10.10.21, PoE-port 21) bootar numera PXE med matchbox och har gått med i cluster1 som Ready (Kubernetes) och som ... _(uppdaterad 2026-11-26)_
-- [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] - Kartlagt 2026-11-26 efter att worker-1 gick med i cluster1. _(uppdaterad 2026-11-26)_
+- [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]] - worker-1 (ROCK 4C+, 10.10.10.21, PoE-port 21) bootar numera PXE med matchbox och har gått med i cluster1 som Ready (Kubernetes) och som ... _(uppdaterad 2026-11-27)_
+- [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]] - Kartlagt 2026-11-26 efter att worker-1 gick med i cluster1. _(uppdaterad 2026-11-27)_
 - [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]] - Status 2026-10-23: worker-1 (10.10.10.21, PoE-port 21) och worker-2 (10.10.10.22, PoE-port 22) ar INCOMPLETE i ARP-tabell och svarar inte... _(uppdaterad 2026-10-23)_
 - [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]] - Status 2026-10-27: en fysisk omstart av worker-1 och en kontrollerad PoE-cykel med 1 Hz-strommalning visar att boarden far strom, forhandlar PHY-link pa 1 Gbit/s men aldrig skickar ett enda eget paket - DHCP-rader saknas sedan 2026-10-23... _(uppdaterad 2026-10-27)_
 - [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]] - Status 2026-10-27: en verifierad PoE-cykel pa UniFi port 21 (45 s av, 45 s up) gav PHY-link men fortfarande noll rx-paket, tom MAC-tabell och noll DHCP/TFTP... _(uppdaterad 2026-10-27)_
 - [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]] - worker-1 (ROCK 4C+, MAC 0a:3f:39:25:2b:c8, IP 10.10.10.21, PoE-port 21) har under lång tid varit helt onåbar i nätet: ingen ARP, ingen DH... _(uppdaterad 2026-10-22)_
 - [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]] - Kortet i worker-1 flashades 2026-10-23 med ny mainline-build (TF-A f37f388 + U-Boot 2026.10, bada byggda i repot via bind-mount for att k... _(uppdaterad 2026-10-23)_
-- [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]] - Status 2026-11-26 efter att worker-1 repaired. _(uppdaterad 2026-11-26)_
+- [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]] - Kartlagt 2026-11-27 pa worker-1 (10.10.10.21), Longhorn 1.12.1. _(uppdaterad 2026-11-27)_
+- [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]] - Status 2026-11-26 efter att worker-1 repaired. _(uppdaterad 2026-11-27)_
 - [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]] - När worker-2 inte gick att PXE-boota visade sig att noden aldrig nade nätverket. _(uppdaterad 2026-10-23)_
 - [[notes/worker-3-bootade-via-pxe-men-talos-installen-nollstallde-de-forsta-11-mb-pa-microsd]] - 2026-11-20: Forsta gangen lyckades en ROCK 4C+-nod boota via PXE hela vagen. _(uppdaterad 2026-11-20)_
 - [[notes/worker-3-poe-omstart-och-talos-konfiguration-2026-11-20]] - Worker-3 på 10.10.10.23 startades om via UniFi US48P500 port 23. _(uppdaterad 2026-11-20)_
@@ -475,7 +478,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]] - Worker-7 (10.10.10.27) svarar på port 10250 med ett kubelet-serving-certifikat (CN=system:node:worker-7, O=system:nodes, EKU serverAuth,... _(uppdaterad 2026-11-23)_
 - [[notes/worker-8-ater-ready-worker-1-och-worker-2-saknar-fysisk-lank]] - Efter CP1-återställningen power-cyklades UniFi-portarna 21, 22 och 28 med hela port_overrides-listan bevarad. _(uppdaterad 2026-11-26)_
 - [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]] - Symtom (2026-11-23): worker-8 (10.10.10.28) var medlem i Talos-klustret (talosctl get members) och svarade pa Talos-API:t, men syntes int... _(uppdaterad 2026-11-23)_
-- [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] - Noden 10.10.10.29 (MAC a0:ce:c8:d9:0d:02, UniFi 'MinisomhorSIMON') ar UP: _(uppdaterad 2026-11-24)_
+- [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]] - Noden 10.10.10.29 (MAC a0:ce:c8:d9:0d:02, UniFi 'MinisomhorSIMON') ar UP: _(uppdaterad 2026-11-27)_
 - [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]] - Status 2026-11-13: PXE-servern (10.10.10.2, UniFi-switch port 8, hostname 'pxe', MAC 2c:cf:67:43:f3:b0) var igang och serverkedaan ar hel... _(uppdaterad 2026-11-20)_
 - [[notes/workmux-merge-misslyckas-i-huvud-worktree-kora-kommandot-i-feature-worktreet]] - Felet 'Cannot merge branch main because it is checked out in the main worktree' uppstar när workmux merge körs i repoets huvud-worktree. _(uppdaterad 2026-11-20)_
 - [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] - Vid ZITADELs officiella Cloud->self-hosted-import bevarades application-ID:n (t.ex. _(uppdaterad 2026-11-26)_

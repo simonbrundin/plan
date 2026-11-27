@@ -5,8 +5,8 @@ summary: PXE-servern i infrastructure-repot - dnsmasq, matchbox och mainline-U-B
 tags: [pxe, talos, uboot, matchbox, dnsmasq, boot, infrastructure]
 sources: [infrastructure/pxe/README.md]
 created: 2026-10-24
-updated: 2026-10-24
-related: [notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]
+updated: 2026-11-27
+related: [notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget, notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]
 ---
 
 # PXE-server
@@ -97,6 +97,7 @@ Se [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-sty
 
 ## Relaterade
 
+- [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]]
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]]
 - [[entities/talos-linux]]
 - [[entities/kubernetes]]

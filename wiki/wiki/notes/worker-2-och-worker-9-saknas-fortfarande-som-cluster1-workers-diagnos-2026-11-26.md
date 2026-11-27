@@ -3,8 +3,9 @@ title: worker-2 och worker-9 saknas fortfarande som cluster1-workers - diagnos 2
 type: note
 tags: [worker-2, worker-9, pxe, felsokning, projekt:infrastructure]
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 status: active
+related: [notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]
 ---
 
 Status 2026-11-26 efter att worker-1 repaired.
@@ -14,3 +15,8 @@ worker-2 (10.10.10.22, ROCK 4C+): svarar pa Talos-API:t men med ett certifikat f
 worker-9 (10.10.10.29, MacMini): svarar inte alls - 'no route to host' pa 50000, ingen ARP, ingen ping. Behover fysisk kontroll (strom/PoE/nat) innan nagonting kan goras programmatiskt.
 
 Viktigt: den serverade PXE-configen per IP (t.ex. /assets/talos-config/nodes/10.10.10.21.yaml) har fortfarande UnattendedInstallConfig med disk.serial == 0xFFFFFFFF, alltsa ingen installation - en ren PXE-start av worker-1 skulle inte installera nagon systemdisk. Den installerade noden bootar nu fran sin eMMC (/A/vmlinuz), sa detta paverkar bara en ny PXE-start (t.ex. med rescue-kort).
+
+## Relaterade
+
+- [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]]
+

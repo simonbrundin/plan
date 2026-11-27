@@ -5,8 +5,8 @@ summary: Longhorn är ett distribuerat block-lagringssystem för Kubernetes.
 tags: [longhorn, storage, csi, persistent-storage, distributed-storage]
 sources: [infrastructure-flux/components/longhorn-system/, docs/add-disk-to-longhorn.md]
 created: 2026-06-02
-updated: 2026-10-24
-related: [notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]
+updated: 2026-11-27
+related: [notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker, notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning, notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]
 ---
 
 # Longhorn
@@ -193,5 +193,6 @@ kubectl delete replicas.longhorn.io/<replica> -n longhorn-system
 
 ## Relaterade
 
+- [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]]
+- [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]]
 - [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]]
-

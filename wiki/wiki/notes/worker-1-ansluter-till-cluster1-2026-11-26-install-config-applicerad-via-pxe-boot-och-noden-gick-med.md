@@ -3,9 +3,9 @@ title: worker-1 ansluter till cluster1 (2026-11-26) - install-config applicerad 
 type: note
 tags: [pxe, worker-1, rock4cplus, cluster1, drift, projekt:infrastructure]
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 status: active
-related: [concepts/longhorn]
+related: [concepts/longhorn, notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]
 ---
 
 worker-1 (ROCK 4C+, 10.10.10.21, PoE-port 21) bootar numera PXE med matchbox och har gått med i cluster1 som Ready (Kubernetes) och som Longhorn-nod.
@@ -27,5 +27,5 @@ Kvar att gora: worker's volymconfig (worker-1-volumes.yaml) kunde inte applicera
 
 ## Relaterade
 
+- [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]]
 - [[concepts/longhorn]]
-

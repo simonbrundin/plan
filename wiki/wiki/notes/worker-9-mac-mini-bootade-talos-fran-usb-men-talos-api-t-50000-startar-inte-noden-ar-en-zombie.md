@@ -3,8 +3,9 @@ title: worker-9 (Mac mini) bootade Talos fran USB men Talos-API:t (50000) starta
 type: note
 tags: [worker-9, macmini, talos, usb, incident, felsokning, projekt:simon]
 created: 2026-11-24
-updated: 2026-11-24
+updated: 2026-11-27
 status: active
+related: [notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]
 ---
 
 ## Observation 2026-11-24 ca 18:00-18:45 (efter att anvandaren startat Mac minin med Talos)
@@ -51,3 +52,8 @@ Mogelig forklarening: gammal Talos v1.12.5 + maskinconfig frAn mars 2026.
 ESP (disk2s1) = systemd-boot (EFI/boot/BOOTX64.efi) + EFI/Linux/Talos-v1.12.4.efi & v1.12.5.efi,
 loader/loader.conf (timeout 10). Partitioner: p3 = XFS "STATE" (100 MB), p4 = XFS "EPHEMERAL" (55,6 GB).
 Klustret kor v1.14.1 -> v1.12.x pa sticken ar for gammalt for att joina.
+
+## Relaterade
+
+- [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]]
+

@@ -3,9 +3,9 @@ title: USB-SSD:orna har kvar giltig Longhorn-identitet ssd-1 med gamla replikor 
 type: note
 tags: [longhorn, ssd, worker, projekt:infrastructure]
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 status: active
-related: [concepts/longhorn, notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]
+related: [concepts/longhorn, notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling, notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]
 ---
 
 Kartlagt 2026-11-26. Undersokning av alla workers USB-SSD (mountad read-only i debug-container) visar att de INTE ar kassa: de bar giltig Longhorn-diskidentitet och gamla replikor.
@@ -28,5 +28,6 @@ Korrigering av tidigare not: EPHEMERAL rensas INTE vid reboot eller upgrade (Tal
 
 ## Relaterade
 
+- [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]]
 - [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]]
 - [[concepts/longhorn]]

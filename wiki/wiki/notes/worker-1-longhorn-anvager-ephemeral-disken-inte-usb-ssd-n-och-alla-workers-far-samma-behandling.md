@@ -3,9 +3,9 @@ title: worker-1 Longhorn anvager EPHEMERAL-disken, inte USB-SSD:n - och alla wor
 type: note
 tags: [longhorn, worker-1, pxe, talos, projekt:infrastructure]
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 status: active
-related: [concepts/longhorn]
+related: [concepts/longhorn, notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]
 ---
 
 Kartlagt 2026-11-26 efter att worker-1 gick med i cluster1.
@@ -20,5 +20,5 @@ Beslut som anser vara anvandaren: (1) ska worker-1 fa en dedikerad Longhorn-SSD 
 
 ## Relaterade
 
+- [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]]
 - [[concepts/longhorn]]
-

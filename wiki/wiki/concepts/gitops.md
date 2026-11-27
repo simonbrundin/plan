@@ -5,9 +5,9 @@ summary: Git är enda sanningskällan för infrastruktur; Flux/FluxOperator appl
 tags: [flux, gitops, deployment, infrastructure-as-code, kubernetes]
 sources: [AGENTS.md, infrastructure-flux/README.md]
 created: 2026-06-02
-updated: 2026-10-24
+updated: 2026-11-27
 status: active
-related: [entities/kubernetes, summaries/infrastructure-flux]
+related: [entities/kubernetes, notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker, summaries/infrastructure-flux]
 ---
 
 ## Definition
@@ -87,3 +87,8 @@ detaljer.
 - [[entities/kubernetes]]
 - [[concepts/sops]]
 - [[summaries/infrastructure-flux]]
+
+## Relaterade
+
+- [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]]
+

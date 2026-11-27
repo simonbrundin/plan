@@ -91,6 +91,7 @@ graph LR
   n_notes_dashboard_tydlighetslyft_av_jamforelserna["Dashboard: tydlighetslyft av jamforelserna"]
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater["Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater"]
   n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er["Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er"]
+  n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget["DNS och DHCP har skilda agar: dnsmasq pa pxe ager DHCP, UniFi pa 10.10.10.1 ager DNS - och worker-9:s lease-hostname ar klientens eget"]
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor["dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor"]
   n_notes_dokumentationssidor_i_granssnittet_docs["Dokumentationssidor i gränssnittet (/docs)"]
   n_notes_dold_skrivbordsmeny_med_leader_kommando["Dold skrivbordsmeny med leader-kommando"]
@@ -112,6 +113,7 @@ graph LR
   n_notes_flannel_vxlan_mac_kollision_blockerar_controlplane_2_webhooks["Flannel VXLAN MAC-kollision blockerar controlplane-2 webhooks"]
   n_notes_flera_kalendrar_med_egna_farger_i_plan["Flera kalendrar med egna färger i Plan"]
   n_notes_flerval_parkera_flera_kandidater_samtidigt_i_personer["Flerval: parkera flera kandidater samtidigt i /personer"]
+  n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker["Flux ager CoreDNS-ConfigMap och Longhorn Node-CR - ownership-reglerna som gor det saker"]
   n_notes_flux_felsokning_avbruten_efter_exponerade_hemligheter["Flux-felsökning avbruten efter exponerade hemligheter"]
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog["Flux i prod klonade ett 1,3 GB stort repo och dog"]
   n_notes_flux_source_controller_flyttad_fran_worker_3_efter_livenessfel["Flux source-controller flyttad från worker-3 efter livenessfel"]
@@ -441,6 +443,7 @@ graph LR
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande["worker-1 och worker-2 ar doda pa link-niva - PXE-kedjan ar inte blockerande"]
   n_notes_worker_1_rock_4c_nar_pxe_via_u_boot_boot_targets_men_pxe_ligger_sist["worker-1 (Rock 4C+) når PXE via U-Boot boot_targets, men PXE ligger sist"]
   n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet["worker-1 (ROCK 4C+) tyst: mainline-U-Boot byggd, men boarden läser inte kortet"]
+  n_notes_worker_1_s_ssd_1_har_200_gib_schemalagt_pa_119_gib_och_de_tva_volymerna_ar_levande_media["worker-1:s ssd-1 har 200 GiB schemalagt pa 119 GiB - och de tvA volymerna ar LEVANDE media"]
   n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel["worker-1 startar om med stram men skickar noll paket - fysisk omstart bevisar samma fel"]
   n_notes_worker_1_svarar_inte_ens_med_en_full_poe_cykel_noll_paket_i_bade_riktningar["worker-1 svarar inte ens med en full PoE-cykel - noll paket i bade riktningar"]
   n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus["worker-1 svarar inte i nätet - felsökningsstatus"]
@@ -500,6 +503,7 @@ graph LR
   n_concepts_flux_operator --> n_concepts_gitops
   n_concepts_flux_operator --> n_entities_flux_gitops
   n_concepts_gitops --> n_entities_kubernetes
+  n_concepts_gitops --> n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker
   n_concepts_gitops --> n_summaries_infrastructure_flux
   n_concepts_gitops --> n_entities_flux_gitops
   n_concepts_gitops --> n_concepts_flux_operator
@@ -517,7 +521,9 @@ graph LR
   n_concepts_kyverno_policies --> n_concepts_kyverno_cel
   n_concepts_kyverno_policies --> n_entities_kubernetes
   n_concepts_kyverno_policies --> n_concepts_flux_operator
+  n_concepts_longhorn --> n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker
   n_concepts_longhorn --> n_notes_usb_disken_acer_wd_320gb_status_och_longhorn_bedomning
+  n_concepts_longhorn --> n_notes_worker_1_s_ssd_1_har_200_gib_schemalagt_pa_119_gib_och_de_tva_volymerna_ar_levande_media
   n_concepts_longhorn --> n_entities_talos_linux
   n_concepts_longhorn --> n_entities_kubernetes
   n_concepts_longhorn --> n_summaries_longhorn_disk_guide
@@ -573,6 +579,7 @@ graph LR
   n_entities_kubernetes --> n_concepts_gitops
   n_entities_kubernetes --> n_entities_flux_gitops
   n_entities_kubernetes --> n_entities_talos_linux
+  n_entities_pxe_server --> n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget
   n_entities_pxe_server --> n_notes_pxe_bootloop_initramfs_startar_om_for_att_boota_installerad_talos_pa_emmc
   n_entities_pxe_server --> n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device
   n_entities_pxe_server --> n_entities_talos_linux
@@ -663,6 +670,9 @@ graph LR
   n_notes_dashboard_ranking_anvander_benchmark_matchade_kostnader --> n_notes_aa_data_api_v2_data_pensionerad_dashboard_migrerar_till_api_v2_language_models
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_redigerare_och_agarskap_for_relationer_i_pappa
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_relationer_mellan_kandidater_i_pappa_symmetriska_par_med_styrka_1_10
+  n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget --> n_entities_pxe_server
+  n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget --> n_entities_talos_linux
+  n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget --> n_notes_worker_2_och_worker_9_saknas_fortfarande_som_cluster1_workers_diagnos_2026_11_26
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor --> n_entities_pxe_server
   n_notes_en_uttunnad_forekomst_maste_vara_synlig_aven_om_den_ligger_utanfor_fonstret --> n_notes_uttunnade_serier_vags_sa_att_antalen_blir_exakta
   n_notes_enter_pa_goals_skapar_nytt_grundmal_istallet_for_att_oppna_malet --> n_notes_eviga_mal_i_plan_kan_inte_slutforas
@@ -683,6 +693,9 @@ graph LR
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_standardkalender_i_plan
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_valfri_fargkod_pa_kalendrar
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_vertikal_kalender_med_ikonstod_i_plan
+  n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker --> n_concepts_flux_operator
+  n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker --> n_concepts_longhorn
+  n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker --> n_summaries_infrastructure_flux
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog --> n_concepts_flux_operator
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog --> n_entities_flux_gitops
   n_notes_go_integrationstest_tomde_kalenderhandelserna_i_neon_igen --> n_notes_kalenderhandelser_aterstallda_fran_neon_wal_historik
@@ -1059,6 +1072,7 @@ graph LR
   n_notes_usb_disken_acer_wd_320gb_status_och_longhorn_bedomning --> n_entities_talos_linux
   n_notes_usb_ssd_orna_har_kvar_giltig_longhorn_identitet_ssd_1_med_gamla_replikor_de_ar_bara_inte_registrerade_i_longhorn --> n_concepts_longhorn
   n_notes_usb_ssd_orna_har_kvar_giltig_longhorn_identitet_ssd_1_med_gamla_replikor_de_ar_bara_inte_registrerade_i_longhorn --> n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling
+  n_notes_usb_ssd_orna_har_kvar_giltig_longhorn_identitet_ssd_1_med_gamla_replikor_de_ar_bara_inte_registrerade_i_longhorn --> n_notes_worker_1_s_ssd_1_har_200_gib_schemalagt_pa_119_gib_och_de_tva_volymerna_ar_levande_media
   n_notes_utbyggnad_av_pappas_personlista_bolagsregister_konferensbios_gav_140_namngivna_personer --> n_notes_pappa_anstallningshistorik_i_cv_format_fix_av_kompetensordboken
   n_notes_utbyggnad_av_pappas_personlista_bolagsregister_konferensbios_gav_140_namngivna_personer --> n_notes_rekrytering_av_it_personal_i_sundsvall_marknadsbild_och_frolista
   n_notes_uttunnade_serier_vags_sa_att_antalen_blir_exakta --> n_notes_aterkommande_serier_doljs_inte_langre_beroende_pa_zoomniva
@@ -1085,11 +1099,13 @@ graph LR
   n_notes_wordlist_kallor --> n_notes_utvecklingsflode
   n_notes_wordlist_kallor --> n_notes_bigram_algoritmen
   n_notes_worker_1_ansluter_till_cluster1_2026_11_26_install_config_applicerad_via_pxe_boot_och_noden_gick_med --> n_concepts_longhorn
+  n_notes_worker_1_ansluter_till_cluster1_2026_11_26_install_config_applicerad_via_pxe_boot_och_noden_gick_med --> n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_entities_pxe_server
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_notes_pxe_kedjan_for_worker_1_verifierad_serverside_pxe_metoden_failar_snabbt_utan_pxelinux_cfg
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
   n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot --> n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet
   n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling --> n_concepts_longhorn
+  n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling --> n_notes_flux_ager_coredns_configmap_och_longhorn_node_cr_ownership_reglerna_som_gor_det_saker
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande --> n_entities_pxe_server
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande --> n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet
   n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande --> n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus
@@ -1102,6 +1118,8 @@ graph LR
   n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
   n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet --> n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot
   n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet --> n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande
+  n_notes_worker_1_s_ssd_1_har_200_gib_schemalagt_pa_119_gib_och_de_tva_volymerna_ar_levande_media --> n_concepts_longhorn
+  n_notes_worker_1_s_ssd_1_har_200_gib_schemalagt_pa_119_gib_och_de_tva_volymerna_ar_levande_media --> n_notes_worker_1_longhorn_anvager_ephemeral_disken_inte_usb_ssd_n_och_alla_workers_far_samma_behandling
   n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel --> n_entities_pxe_server
   n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel --> n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande
   n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel --> n_notes_worker_1_svarar_inte_ens_med_en_full_poe_cykel_noll_paket_i_bade_riktningar
@@ -1112,12 +1130,14 @@ graph LR
   n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus --> n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot
   n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus --> n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande
   n_notes_worker_1_svarar_inte_i_natet_felsokningsstatus --> n_notes_worker_1_rock_4c_tyst_mainline_u_boot_byggd_men_boarden_laser_inte_kortet
+  n_notes_worker_2_och_worker_9_saknas_fortfarande_som_cluster1_workers_diagnos_2026_11_26 --> n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget
   n_notes_worker_2_utan_strom_port_22_up_false_poe_power_0 --> n_entities_pxe_server
   n_notes_worker_2_utan_strom_port_22_up_false_poe_power_0 --> n_notes_worker_1_och_worker_2_ar_doda_pa_link_niva_pxe_kedjan_ar_inte_blockerande
   n_notes_worker_7_s_kubeletcertifikat_signerades_av_en_gammal_kubernetes_ca_som_finns_kvar_i_git_historiken --> n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11
   n_notes_worker_7_s_kubeletcertifikat_signerades_av_en_gammal_kubernetes_ca_som_finns_kvar_i_git_historiken --> n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs
   n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs --> n_notes_cluster1_stale_kubeconfig_ca_och_noll_workers_diagnos_2026_11_11
   n_notes_worker_8_korrupt_xfs_pa_ephemeral_partitionen_gjorde_att_kubelet_aldrig_startade_fix_med_mkfs_xfs --> n_notes_worker_7_s_kubeletcertifikat_signerades_av_en_gammal_kubernetes_ca_som_finns_kvar_i_git_historiken
+  n_notes_worker_9_mac_mini_bootade_talos_fran_usb_men_talos_api_t_50000_startar_inte_noden_ar_en_zombie --> n_notes_dns_och_dhcp_har_skilda_agar_dnsmasq_pa_pxe_ager_dhcp_unifi_pa_10_10_10_1_ager_dns_och_worker_9_s_lease_hostname_ar_klientens_eget
   n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device --> n_entities_pxe_server
   n_notes_workers_bootar_inte_via_pxe_trots_fungerande_pxe_server_unifi_poe_styrning_via_rest_device --> n_notes_worker_1_startar_om_med_strom_men_skickar_noll_paket_fysisk_omstart_bevisar_samma_fel
   n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export --> n_concepts_zitadel
@@ -1152,14 +1172,14 @@ graph LR
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
 - **concepts/cloudnative-pg** <- [[concepts/authentik]], [[concepts/zitadel]], [[entities/kubernetes]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **concepts/envoy-gateway** <- [[concepts/http-routing-flow]], [[concepts/kube-prometheus]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/zitadel]], [[entities/kubernetes]]
-- **concepts/flux-operator** <- [[concepts/gitops]], [[concepts/kyverno-policies]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]], [[summaries/infrastructure-flux]], [[summaries/longhorn-disk-guide]]
+- **concepts/flux-operator** <- [[concepts/gitops]], [[concepts/kyverno-policies]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]], [[summaries/infrastructure-flux]], [[summaries/longhorn-disk-guide]]
 - **concepts/gitops** <- [[concepts/cert-manager]], [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[summaries/infrastructure-flux]]
 - **concepts/http-routing-flow** <- [[concepts/cloudflare-tunnel]], [[concepts/envoy-gateway]], [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]]
 - **concepts/kube-prometheus** <- [[entities/kubernetes]]
 - **concepts/kubelet-csr-approver** <- [[entities/kubernetes]]
 - **concepts/kyverno-cel** <- [[concepts/kyverno-policies]]
 - **concepts/kyverno-policies** <- [[concepts/kyverno-cel]], [[entities/kubernetes]]
-- **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]], [[summaries/longhorn-disk-guide]]
+- **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]], [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]], [[summaries/longhorn-disk-guide]]
 - **concepts/metallb** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/neon-cli-var-neon-och-neon-ts-maste-ligga** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/zitadel]], [[entities/kubernetes]]
@@ -1170,8 +1190,8 @@ graph LR
 - **entities/hdmi-kvm-switch-16-port-labbet** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
 - **entities/home-assistant** <- [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]], [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]], [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]], [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]]
 - **entities/kubernetes** <- [[concepts/authentik]], [[concepts/cert-manager]], [[concepts/cloudflare-tunnel]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/kube-prometheus]], [[concepts/kubelet-csr-approver]], [[concepts/kyverno-cel]], [[concepts/kyverno-policies]], [[concepts/longhorn]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/sops]], [[concepts/zitadel]], [[entities/flux-gitops]], [[entities/pxe-server]], [[entities/talos-linux]], [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]], [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]], [[summaries/flux-components]]
-- **entities/pxe-server** <- [[entities/kubernetes]], [[entities/talos-linux]], [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]], [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]], [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]], [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]], [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]], [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]], [[notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran]], [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]], [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]], [[notes/pxe-kedjan-dhcp-boot-pekar-pa-textskript-matchbox-efi-ar-uefi-vagen]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/pxe-status-fungerar-i-produktionsklustret-tftp-svarar-inte-fran-pod-natet]], [[notes/pxe-status-pa-dashboard-startsidan-tftp-gar-inte-att-kontrollera-fran-pod-natet]], [[notes/pxe-varden-korde-foraldrad-matchbox-nodconfiger-saknades-404]], [[notes/rk3399-s-bootrom-soker-spi-emmc-sd-usb-hardkodat]], [[notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc]], [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]], [[notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-2026-01-rock-4c-saknar-bootfile-boot-script-dhcp-natverksboot-dor-direkt]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/u-boot-kors-en-gang-boot-targets-styr-steg-2-inte-steg-1]], [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]], [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]], [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]], [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]], [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]]
-- **entities/talos-linux** <- [[concepts/cert-manager]], [[concepts/kubelet-csr-approver]], [[concepts/longhorn]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/pxe-server]], [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[summaries/longhorn-disk-guide]]
+- **entities/pxe-server** <- [[entities/kubernetes]], [[entities/talos-linux]], [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]], [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]], [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]], [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]], [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]], [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]], [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]], [[notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran]], [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]], [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]], [[notes/pxe-kedjan-dhcp-boot-pekar-pa-textskript-matchbox-efi-ar-uefi-vagen]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/pxe-status-fungerar-i-produktionsklustret-tftp-svarar-inte-fran-pod-natet]], [[notes/pxe-status-pa-dashboard-startsidan-tftp-gar-inte-att-kontrollera-fran-pod-natet]], [[notes/pxe-varden-korde-foraldrad-matchbox-nodconfiger-saknades-404]], [[notes/rk3399-s-bootrom-soker-spi-emmc-sd-usb-hardkodat]], [[notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc]], [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]], [[notes/simon-pxe-flash-clean-code-omgang-2-fokuserade-funktioner]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-2026-01-rock-4c-saknar-bootfile-boot-script-dhcp-natverksboot-dor-direkt]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/u-boot-kors-en-gang-boot-targets-styr-steg-2-inte-steg-1]], [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]], [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]], [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]], [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]], [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]]
+- **entities/talos-linux** <- [[concepts/cert-manager]], [[concepts/kubelet-csr-approver]], [[concepts/longhorn]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/pxe-server]], [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]], [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[summaries/longhorn-disk-guide]]
 - **notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models** <- [[notes/dashboard-ranking-anvander-benchmark-matchade-kostnader]]
 - **notes/accuracy-fel-omstart** <- [[notes/session-livscykel]]
 - **notes/admin-inloggning-via-losenord-i-stallet-for-token-i-ui-t** <- [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]]
@@ -1200,6 +1220,7 @@ graph LR
 - **notes/dashboard-ranking-anvander-benchmark-matchade-kostnader** <- [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]]
 - **notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]], [[notes/relationer-mellan-kandidater-i-pappa-symmetriska-par-med-styrka-1-10]]
 - **notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er** <- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
+- **notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget** <- [[entities/pxe-server]], [[notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26]], [[notes/worker-9-mac-mini-bootade-talos-fran-usb-men-talos-api-t-50000-startar-inte-noden-ar-en-zombie]]
 - **notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor** <- [[entities/pxe-server]]
 - **notes/dokumentationssidor-i-granssnittet-docs** <- [[concepts/anvanda-agenter-i-plan]], [[notes/arkitektur]]
 - **notes/en-talos-efi-partition-pa-kortet-blockerar-pxe-booten-bootflow-loaded-fore-natverket** <- [[notes/radxa-bradena-behover-bootmedium-men-talos-och-bootloader-maste-ligga-pa-skilda-medium]]
@@ -1210,6 +1231,7 @@ graph LR
 - **notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append** <- [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]], [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]]
 - **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
+- **notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker** <- [[concepts/gitops]], [[concepts/longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]]
 - **notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog** <- [[concepts/flux-operator]]
 - **notes/globala-agentinstruktioner-deployas-via-dotfiles** <- [[notes/kunskaps-wiki]]
 - **notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen** <- [[notes/kalenderhandelser-aterstallda-fran-neon-wal-historik]]
@@ -1434,13 +1456,15 @@ graph LR
 - **notes/vertikal-kalender-med-kontinuerlig-zoom** <- [[notes/kalenderns-detaljnivaer-fem-nivaer-och-lane-packning]], [[notes/kalenderns-nivavaxling-animeras-crossfade-pop-in-och-hysteresis]], [[notes/parallella-agent-sessioner-i-samma-repo-och-databas]], [[notes/vertikal-kalender-med-ikonstod-i-plan]], [[summaries/kalenderns-detaljnivaer-och-lane-packning]]
 - **notes/wordlist-kallor** <- [[notes/bigram-algoritmen]]
 - **notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot** <- [[entities/pxe-server]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]]
-- **notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling** <- [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]]
+- **notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling** <- [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media]]
 - **notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande** <- [[entities/pxe-server]], [[notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet]], [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]], [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]], [[notes/worker-2-utan-strom-port-22-up-false-poe-power-0]]
 - **notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist** <- [[entities/pxe-server]], [[notes/gotcha-pxe-forst-gor-noden-till-en-pxe-nod-maintenance-mode]], [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]]
 - **notes/worker-1-rock-4c-tyst-mainline-u-boot-byggd-men-boarden-laser-inte-kortet** <- [[entities/pxe-server]], [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]], [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]], [[notes/pxe-kedjan-for-worker-1-verifierad-serverside-pxe-metoden-failar-snabbt-utan-pxelinux-cfg]], [[notes/pxe-mainline-u-boots-bootefi-kraver-addr-size-for-image-och-initrd]], [[notes/simon-pxe-flash-flashar-pxe-forst-u-boot-till-sd-kort-i-pxe-servern]], [[notes/tre-satt-att-pxe-boota-rock-4c-och-varfor-dhcp-metoden-valdes]], [[notes/u-boot-for-rock-4c-built-from-mainline-with-pxe-first]], [[notes/u-boot-hamtar-alltid-boot-script-dhcp-per-nod-config-via-ipaddr]], [[notes/worker-1-kortet-flashat-med-ny-mainline-build-tf-a-fran-repot]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]], [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]], [[notes/worker-1-svarar-inte-i-natet-felsokningsstatus]]
+- **notes/worker-1-s-ssd-1-har-200-gib-schemalagt-pa-119-gib-och-de-tva-volymerna-ar-levande-media** <- [[concepts/longhorn]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]]
 - **notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel** <- [[notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device]]
 - **notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar** <- [[notes/worker-1-startar-om-med-strom-men-skickar-noll-paket-fysisk-omstart-bevisar-samma-fel]]
 - **notes/worker-1-svarar-inte-i-natet-felsokningsstatus** <- [[entities/pxe-server]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]]
+- **notes/worker-2-och-worker-9-saknas-fortfarande-som-cluster1-workers-diagnos-2026-11-26** <- [[notes/dns-och-dhcp-har-skilda-agar-dnsmasq-pa-pxe-ager-dhcp-unifi-pa-10-10-10-1-ager-dns-och-worker-9-s-lease-hostname-ar-klientens-eget]]
 - **notes/worker-2-utan-strom-port-22-up-false-poe-power-0** <- [[entities/pxe-server]], [[notes/worker-1-och-worker-2-ar-doda-pa-link-niva-pxe-kedjan-ar-inte-blockerande]]
 - **notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken** <- [[notes/worker-1-svarar-inte-ens-med-en-full-poe-cykel-noll-paket-i-bade-riktningar]], [[notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs]]
 - **notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]]
@@ -1451,7 +1475,7 @@ graph LR
 - **summaries/16x1-hdmi-kvm-rs232-lan-protokoll** <- [[entities/hdmi-kvm-switch-16-port-labbet]], [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql** <- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]]
 - **summaries/flux-components** <- [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]]
-- **summaries/infrastructure-flux** <- [[concepts/flux-operator]], [[concepts/gitops]]
+- **summaries/infrastructure-flux** <- [[concepts/flux-operator]], [[concepts/gitops]], [[notes/flux-ager-coredns-configmap-och-longhorn-node-cr-ownership-reglerna-som-gor-det-saker]]
 - **summaries/kalenderns-detaljnivaer-och-lane-packning** <- [[notes/kalenderns-detaljnivaer-fem-nivaer-och-lane-packning]]
 - **summaries/llm-wiki-karpathy** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **summaries/longhorn-disk-guide** <- [[concepts/longhorn]], [[entities/talos-linux]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]]
