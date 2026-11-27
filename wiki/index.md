@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 20 |
 | Sammanfattningar | 8 |
-| Noter | 428 |
+| Noter | 429 |
 
 ## Entiteter
 
@@ -70,6 +70,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna]] - 2026-11-26: På målsidan (/goal/:id) låg agentchatt, körningshistorik och checkpoint-plan i samma lodräta flöde som målets innehåll. _(uppdaterad 2026-11-26)_
 - [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]] - Tilt (environments/dev i agents-repot) visade bara Plan-appen. _(uppdaterad 2026-11-23)_
 - [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] - Agentens egen API-nyckel har scope 'agent' i prod (hashen sätts in av environments/prod/secrets/plan-api-key.sql). _(uppdaterad 2026-11-25)_
+- [[notes/agentens-kodandringsflode-portat-till-rust]] - Agentens kodändringsflöde är nu portat till Rust: workspace, executor, _(uppdaterad 2026-11-27)_
 - [[notes/agentens-maldefinition-gar-via-human-gate]] - Agenten kan nu föreslå hur ett mål ska se ut - titel, beskrivning, ikon, now/eternal/agent, datum, uppskattad tid, status, taggar, pla... _(uppdaterad 2026-11-26)_
 - [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] - Mål har nu en agent-flagga (goals.agent i databasen) som visas med AgentBadge (blått när på) och växlas med leader + a (mellanslag +... _(uppdaterad 2026-11-20)_
 - [[notes/agentmal-flaggan-blev-levande-mvp]] - Plan hade redan goals.agent men ingen agent läste flaggan. _(uppdaterad 2026-11-24)_

@@ -40,6 +40,7 @@ graph LR
   n_notes_agent_dock_pa_malsiden_ersatter_de_tre_agentpanelerna["Agent-dock på målsiden ersätter de tre agentpanelerna"]
   n_notes_agent_granssnittet_nuxt_saknades_helt_i_tilt_routes_forsvann_i_refaktoreringen_677b876["Agent-gränssnittet (Nuxt) saknades helt i Tilt - routes försvann i refaktoreringen 677b876"]
   n_notes_agent_scope_i_prod_allowlistan_maste_matcha_kontraktet["Agent-scope i prod: allowlistan måste matcha kontraktet"]
+  n_notes_agentens_kodandringsflode_portat_till_rust["Agentens kodändringsflöde portat till Rust"]
   n_notes_agentens_maldefinition_gar_via_human_gate["Agentens måldefinition går via human gate"]
   n_notes_agentmal_flaggan_blev_levande_mvp["Agentmål: flaggan blev levande (MVP)"]
   n_notes_agentmarke_pa_mal_tangenten_a_ar_reserverad["Agentmärke på mål - tangenten a är reserverad"]

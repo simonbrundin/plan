@@ -41,6 +41,7 @@ finns i `index.md`.
 | [[notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna]] | Agent-dock på målsiden ersätter de tre agentpanelerna | note | agent, granssnitt, ui, feature, projekt:plan | 2026-11-26 | 0 |
 | [[notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876]] | Agent-gränssnittet (Nuxt) saknades helt i Tilt - routes försvann i refaktoreringen 677b876 | note | agents, tilt, nuxt, bug, projekt:agents | 2026-11-23 | 1 |
 | [[notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet]] | Agent-scope i prod: allowlistan måste matcha kontraktet | note | agent, api, scope, bug, projekt:plan | 2026-11-25 | 2 |
+| [[notes/agentens-kodandringsflode-portat-till-rust]] | Agentens kodändringsflöde portat till Rust | note | rust, agent, workspace, parity, projekt:plan | 2026-11-27 | 0 |
 | [[notes/agentens-maldefinition-gar-via-human-gate]] | Agentens måldefinition går via human gate | note | agent, human-gate, session, projekt:plan | 2026-11-26 | 0 |
 | [[notes/agentmal-flaggan-blev-levande-mvp]] | Agentmål: flaggan blev levande (MVP) | note | feature, agent, bug, session, projekt:plan | 2026-11-24 | 0 |
 | [[notes/agentmarke-pa-mal-tangenten-a-ar-reserverad]] | Agentmärke på mål - tangenten a är reserverad | note | feature, goals, tangent, projekt:plan | 2026-11-20 | 0 |
@@ -478,7 +479,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (27)
+- `agent` (28)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (2)
@@ -786,6 +787,7 @@ finns i `index.md`.
 - `padel` (1)
 - `pappa` (30)
 - `paritet` (4)
+- `parity` (1)
 - `pdf` (1)
 - `performance` (1)
 - `persistent-storage` (1)
@@ -828,7 +830,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (124)
+- `projekt:plan` (125)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -872,7 +874,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (16)
+- `rust` (17)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)
@@ -979,6 +981,7 @@ finns i `index.md`.
 - `workers` (2)
 - `workflow` (2)
 - `workmux` (1)
+- `workspace` (1)
 - `workstation` (3)
 - `worktree` (1)
 - `wpm` (1)

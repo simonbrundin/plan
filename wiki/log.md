@@ -3088,3 +3088,8 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] — ny sida från inboxen
 - [archive] 2026-11-26-malkompletteringar-och-auth-i-rust-de-sista-api-vagarna.md
 
+
+## [2026-11-27] ingest | create notes/agentens-kodandringsflode-portat-till-rust
+- [create] [[notes/agentens-kodandringsflode-portat-till-rust]] — ny sida från inboxen
+- [archive] 2026-11-27-agentens-kodandringsflode-portat-till-rust.md
+
