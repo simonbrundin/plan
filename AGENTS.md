@@ -124,6 +124,7 @@ Var tangenterna ligger just nu:
 | Gör nu-listan (/now) (leader + a/n) | `app/pages/now.vue` + `app/composables/usePriorityMode.ts` |
 | Taggar på markerat mål (leader + t) | `app/composables/useGoalTagPicker.ts` + `app/layouts/default.vue` |
 | Toggle "påbörjat" (leader + s) | `app/pages/goal/[id].vue`, `app/pages/goals/index.vue`, `app/pages/now.vue` |
+| Växla målfas/status (s, Shift+S) | `app/composables/useGoalPhase.ts` + `app/pages/goal/[id].vue`, `app/pages/goals/index.vue`, `app/pages/now.vue` |
 | Sidorbyte till prioritetssidan (`p`) | `app/composables/usePriorityToggle.ts` |
 | Kalendern (t, r, j/k, h/l, +/−) | `app/components/VerticalCalendar.vue` |
 | Bekräftelsedialog (h/l/Enter/Esc) | `app/components/ConfirmDeleteGoalModal.vue` |
