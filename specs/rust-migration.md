@@ -99,13 +99,35 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | Versionsstyrd prislista (kostnad i Plan) | klar |
 | Handlers | 76 av 76 portade (statusar, mål, taggar, relationer, beroenden, platser, kalendrar, kalenderhändelser, agentkörningar, godkännanden, budgetar, användning, API-nycklar, auth, kompletteringar) |
 | Live-paritetsskript (Go vs Rust, samma databas) | klar |
-| Agentens API, providers, kärna, worker | inte påbörjat |
+| Agentens API, databas, godkännanden, dokumentation, workflow | klar |
+| Agentens providers, meddelanden, verktyg, chatt, WebSocket | klar |
+| Agentens workern, definierare, profiler, måldefinition | klar |
+| Agentens kodändringsflöde (workspace, executor, proposer, coder) | klar |
+| Agentens wiki, scheduler, Kubernetes-stöd | klar |
+| Kunskaps-wikin (`plan-wiki` + `wikictl`) | klar |
+
+### Vad som återstår i agenten
+
+- Orchestratorns kvarvarande delar (minne, hemligheter, self-improve).
+- Att skicka in agenten i produktion och ta bort Go-tjänsterna.
 
 ### Vad som återstår i API:t
 
 - Inget - alla Go-vägar är portade. Resterande arbete ligger i agenten
-  (API-handlers, providers, kärna, worker) och i att Go-tjänsten tas
-  bort.
+  och i att Go-tjänsten tas bort.
+
+### Noter om paritet i agenten
+
+- Modellens svar kan innehålla `null` för fält den inte har något till.
+  Go lämnar sådana fält oförändrade, så Rust läser dem som tomma värden
+  i stället för att avvisa hela svaret.
+- Ett kodförslag verifieras med sitt eget testkommando innan det lämnas
+  till en människa. Ett trasigt testkommando repareras först, sedan
+  revideras hela förslaget - samma ordning som i Go.
+- Kodändringar sker i en isolerad kopia av repot. Originalet rörs aldrig;
+  ändringen landar på en egen branch som en människa granskar.
+- Felmeddelanden från `gh` och `git` är formulerade som i Go, så att
+  händelsehistoriken är jämförbar mellan tjänsterna.
 
 ### Noter om paritet
 
