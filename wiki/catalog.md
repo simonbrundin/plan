@@ -429,6 +429,7 @@ finns i `index.md`.
 | [[notes/talos-v1-14-utan-unattendedinstallconfig-oinstallerad-metal-nod-bootar-om-i-en-loop]] | Talos v1.14 utan UnattendedInstallConfig: oinstallerad metal-nod bootar om i en loop | note | pxe, talos, reboot-loop, config, projekt:infrastructure | 2026-10-24 | 0 |
 | [[notes/talos-varningar-pa-controlplanes-90-kommer-fra-talos-discovery-service-dns]] | Talos-varningar pa controlplanes: 90% kommer fra Talos Discovery Service + DNS | note | talos, felsokning, dns, discovery, projekt:infrastructure | 2026-11-20 | 0 |
 | [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]] | Tidsåtgång på mål i Plan (estimated_minutes) | note | feature, plan, goals, schema, frontend, backend, projekt:simon | 2026-11-20 | 2 |
+| [[notes/tidsstamplar-go-skriver-9-dar-chrono-skrev-900]] | Tidsstämplar: Go skriver .9 där Chrono skrev .900 | note | rust, paritet, tidsformat, projekt:wt-rustfix | 2026-11-28 | 0 |
 | [[notes/tillfalliga-felsokningspoddar-rensade]] | Tillfälliga felsökningspoddar rensade | note | cleanup, cluster1, debugging, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] | Tilt dev-server ska köras som serve_cmd | note | arbetsflöde, dashboard, dev, projekt:dashboard, projekt:simon, tilt | 2026-11-26 | 1 |
 | [[notes/tilt-filbevakning-kan-do-starta-om-tilt-up]] | Tilt-filbevakning kan dö - starta om tilt up | note | tilt, dev, infra, lesson, projekt:plan | 2026-11-26 | 2 |
@@ -825,7 +826,7 @@ finns i `index.md`.
 - `oversikt` (1)
 - `padel` (1)
 - `pappa` (30)
-- `paritet` (6)
+- `paritet` (7)
 - `pdf` (1)
 - `performance` (1)
 - `persistent-storage` (1)
@@ -878,6 +879,7 @@ finns i `index.md`.
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
+- `projekt:wt-rustfix` (1)
 - `prometheus` (1)
 - `protokoll` (1)
 - `push` (1)
@@ -977,6 +979,7 @@ finns i `index.md`.
 - `terminal` (2)
 - `test` (4)
 - `tesvor` (1)
+- `tidsformat` (1)
 - `tillstand` (1)
 - `tilt` (7)
 - `tls` (3)

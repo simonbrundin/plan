@@ -428,6 +428,7 @@ graph LR
   n_notes_talos_v1_14_utan_unattendedinstallconfig_oinstallerad_metal_nod_bootar_om_i_en_loop["Talos v1.14 utan UnattendedInstallConfig: oinstallerad metal-nod bootar om i en loop"]
   n_notes_talos_varningar_pa_controlplanes_90_kommer_fra_talos_discovery_service_dns["Talos-varningar pa controlplanes: 90% kommer fra Talos Discovery Service + DNS"]
   n_notes_tidsatgang_pa_mal_i_plan_estimated_minutes["Tidsåtgång på mål i Plan (estimated_minutes)"]
+  n_notes_tidsstamplar_go_skriver_9_dar_chrono_skrev_900["Tidsstämplar: Go skriver .9 där Chrono skrev .900"]
   n_notes_tillfalliga_felsokningspoddar_rensade["Tillfälliga felsökningspoddar rensade"]
   n_notes_tilt_dev_server_ska_koras_som_serve_cmd["Tilt dev-server ska köras som serve_cmd"]
   n_notes_tilt_filbevakning_kan_do_starta_om_tilt_up["Tilt-filbevakning kan dö - starta om tilt up"]
