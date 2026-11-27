@@ -6,23 +6,29 @@
 # OpenAPI-specen genereras ur koden (utoipa), så ingen fil behöver
 # kopieras in - till skillnad från Go-tjänsten som laddar swagger.json
 # från disk.
+#
+# Alla workspace-medlemmars Cargo.toml kopieras in före koden, så att
+# beroendena cachas separat. Cargo kräver att varje medlem i workspace-
+# manifestet finns, även under cachebygget.
 
 FROM rust:1.99-alpine AS build
 WORKDIR /build
 
-# Beroendena cachas separat från koden, så att kodändringar inte laddar
-# ner crates igen. placeholder-main.rs behövs eftersom Cargo kräver ett
-# mål i varje gång.
 COPY rust/Cargo.toml rust/Cargo.lock ./
 COPY rust/crates/plan-api/Cargo.toml crates/plan-api/Cargo.toml
-RUN mkdir -p crates/plan-api/src \
-    && echo 'fn main() {}' > crates/plan-api/src/main.rs \
-    && cargo build --release --locked \
-    && rm -rf crates/plan-api/src
+COPY rust/crates/plan-agent/Cargo.toml crates/plan-agent/Cargo.toml
+COPY rust/crates/plan-parity/Cargo.toml crates/plan-parity/Cargo.toml
+COPY rust/crates/plan-recurrence/Cargo.toml crates/plan-recurrence/Cargo.toml
+COPY rust/crates/plan-wiki/Cargo.toml crates/plan-wiki/Cargo.toml
+
+# Cargo kräver att varje deklarerat mål finns, även under cachebygget.
+# Placeholders skapas utifrån manifestens path-fält, så att en ny bin
+# inte behöver handpåläggas här.
+COPY rust/docker/placeholders.sh ./placeholders.sh
+RUN sh ./placeholders.sh && cargo fetch --locked
 
 COPY rust/crates ./crates
-RUN touch crates/plan-api/src/main.rs \
-    && cargo build --release --locked
+RUN cargo build --release --locked --bin plan-api
 
 FROM gcr.io/distroless/static-debian12:nonroot AS production
 WORKDIR /app

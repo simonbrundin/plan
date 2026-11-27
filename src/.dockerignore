@@ -1,9 +1,11 @@
 # Byggcontexten för API-imagen är src/ (modulroten). Uteslut allt annat -
 # src/nuxt/node_modules m.m. är över 1 GB och skulle skickas som context
-# vid varje bygge. Endast Go-modulen och API-koden behövs.
+# vid varje bygge. Endast Go-modulen, API-koden och Rust-koden behövs.
 **
 
 !go.mod
 !go.sum
 !api/
 !api/**
+!rust/
+!rust/**

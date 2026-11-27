@@ -1,4 +1,4 @@
-# Byggcontexten för agent-imagen är repo-roten (Dockerfile: src/agent/Dockerfile),
+# Byggkontexten för agent-imagen är repo-roten (Dockerfile: src/agent/Dockerfile),
 # så att README.md och src/agent/commands kan kopieras in. Uteslut allt annat -
 # src/nuxt/node_modules m.m. är över 1 GB och skulle skickas som context
 # vid varje bygge.
@@ -8,6 +8,9 @@
 src/*
 !src/agent/
 !src/agent/**
+# Rust-agentens image byggs från samma context (src/rust/Dockerfile.agent).
+!src/rust/
+!src/rust/**
 # Go-modulen ligger i src/ och omfattar både api/ och agent/.
 !src/go.mod
 !src/go.sum

@@ -1,0 +1,41 @@
+# Agentens image - byggkontexten är repo-roten, som Go-agentens image.
+#
+#   docker build -f src/rust/Dockerfile.agent -t plan-agent-rust .
+#
+# Både agent-api och agent-worker byggs, som i Go-agentens image. Körande
+# behöver git, gh och python - kodagenten skapar brancher och pull requests
+# med dem.
+
+FROM rust:1.99-alpine AS build
+WORKDIR /build
+
+COPY src/rust/Cargo.toml src/rust/Cargo.lock ./
+COPY src/rust/crates/plan-api/Cargo.toml crates/plan-api/Cargo.toml
+COPY src/rust/crates/plan-agent/Cargo.toml crates/plan-agent/Cargo.toml
+COPY src/rust/crates/plan-parity/Cargo.toml crates/plan-parity/Cargo.toml
+COPY src/rust/crates/plan-recurrence/Cargo.toml crates/plan-recurrence/Cargo.toml
+COPY src/rust/crates/plan-wiki/Cargo.toml crates/plan-wiki/Cargo.toml
+
+# Cargo kräver att varje deklarerat mål finns, även under cachebygget.
+# Placeholders skapas utifrån manifestens path-fält, så att en ny bin
+# inte behöver handpåläggas här.
+COPY src/rust/docker/placeholders.sh ./placeholders.sh
+RUN sh ./placeholders.sh && cargo fetch --locked
+
+COPY src/rust/crates ./crates
+RUN cargo build --release --locked --bin agent-api --bin agent-worker
+
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates bash git github-cli python3
+WORKDIR /app
+
+COPY --from=build /build/target/release/agent-api ./agent-api
+COPY --from=build /build/target/release/agent-worker ./agent-worker
+COPY src/agent/commands ./src/agent/commands
+COPY README.md ./README.md
+
+ENV AGENT_DOCS_DIR=/app
+ENV PROJECT_ROOT=/app
+USER 65532:65532
+EXPOSE 8080
+CMD ["./agent-api"]

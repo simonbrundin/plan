@@ -1,0 +1,81 @@
+name: Bygg Rust-imagerna
+# Bygger och publicerar Plan-API:t och agenten i Rust som containerimager.
+# Deploymenten byts inte automatiskt - det är ett medvetet beslut, se
+# docs/ och specs/rust-migration.md.
+on:
+  push:
+    paths:
+      - src/rust/**
+      - src/.dockerignore
+      - .dockerignore
+  workflow_dispatch:
+
+jobs:
+  build-publish-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for API:t
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/simonbrundin/rust-api
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Byggkontexten är src/ - samma som Go-tjänstens image.
+      - name: Build and push API:t
+        uses: docker/build-push-action@v5
+        with:
+          context: src
+          file: src/rust/Dockerfile
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata for agenten
+        id: meta-agent
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/simonbrundin/rust-agent
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest
+
+      # Byggkontexten är repo-roten - samma som Go-agentens image. Imageen
+      # innehåller både agent-api och agent-worker, och kommandofilerna
+      # som agenten läser.
+      - name: Build and push agenten
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/rust/Dockerfile.agent
+          push: true
+          tags: ${{ steps.meta-agent.outputs.tags }}
+          labels: ${{ steps.meta-agent.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

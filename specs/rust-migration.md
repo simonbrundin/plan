@@ -242,3 +242,41 @@ skiljer sig mellan körningarna.
 (`scripts/mock-llm.py`) som svarar med ett bestämt svar. Då kan samma
 felväg köras i båda workerna: giltig definition, trasigt modellsvar,
 ogiltig ikon, ogiltig upprepningsregel och ett avslaget förslag.
+
+## Produktionsbyte
+
+Båda Rust-imagerna byggs av `.github/workflows/commit.rust-images.yaml`
+och publiceras som `ghcr.io/simonbrundin/rust-api` och
+`ghcr.io/simonbrundin/rust-agent`. Deploymenten byts inte automatiskt -
+det är ett medvetet beslut.
+
+Bytet sker i tre steg, med Go kvar igång emellan:
+
+1. **API:t.** I `environments/prod/patches/api-deployment.yaml` byts
+   `image:` från `ghcr.io/simonbrundin/go-api:sha-...` till
+   `ghcr.io/simonbrundin/rust-api:sha-...`. Service-namnet
+   (`go-api-service`) står kvar, så agenten och Nuxt pekar vidare som
+   nu. Poden startar om; den gamla poden finns kvar tills den nya är
+   klar.
+2. **Agenten.** I `environments/base/agent-deployment.yaml` byts `image:`
+   från `ghcr.io/simonbrundin/plan-agent:sha-...` till
+   `ghcr.io/simonbrundin/rust-agent:sha-...`. Jobbcontrollern läser
+   agentens image ur podens egen spec, så Kubernetes-jobben får samma
+   image utan extra ändring.
+3. **Go bort.** När Rust-tjänsterna varit stabila en period raderas Go-
+   modulen, Go-imagerna och deras byggflöden.
+
+Innan bytet ska shadow-testet köras: Rust-API:t och Rust-agenten mot
+samma databas som Go, med skripten ovan. Båda typerna av felvägar har
+redan jämförts live, inklusive mänskligt avslag, trasigt modellsvar
+och ogiltig upprepningsregel.
+
+Att bygga imager lokalt:
+
+```bash
+docker build -f src/rust/Dockerfile -t plan-api-rust src/
+docker build -f src/rust/Dockerfile.agent -t plan-agent-rust .
+```
+
+Byggkontexten är olika för de två - API:t byggs från `src/` och agenten
+från repo-roten, som Go-tjänsternas images.
