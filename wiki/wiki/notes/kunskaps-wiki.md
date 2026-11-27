@@ -6,7 +6,7 @@ tags: [wiki, minne, agent, verktyg]
 created: 2026-10-21
 updated: 2026-11-27
 status: active
-related: [notes/globala-agentinstruktioner-deployas-via-dotfiles, notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter, notes/konventioner, notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin, notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust, notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin, notes/utvecklingsflode, summaries/llm-wiki-karpathy]
+related: [notes/flyttalsparitet-och-orchestratorns-doda-gate-flode, notes/globala-agentinstruktioner-deployas-via-dotfiles, notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter, notes/konventioner, notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust, notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin, notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin, notes/utvecklingsflode, summaries/llm-wiki-karpathy]
 ---
 
 Wikin är **global** och ligger i `~/repos/agents/wiki` (symlänkad som
@@ -116,6 +116,7 @@ beskrivet i [[summaries/llm-wiki-karpathy]].
 
 ## Relaterade
 
+- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]]
 - [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]]
 - [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]]
 - [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]]

@@ -106,11 +106,10 @@ Agenten är två binärer: `agent-api` (HTTP-tjänsten) och `agent-worker`
 | Agentens wiki, scheduler, Kubernetes-stöd | klar |
 | Kunskaps-wikin (`plan-wiki` + `wikictl`) | klar |
 | Workerparitet (Go vs Rust, mockad modell) | klar |
+| Lärdomshanteraren i agenten | klar |
 
 ### Vad som återstår i agenten
 
-- Checkpointkörning med gates och subagenter i orchestratorn, samt
-  learningshanteringen.
 - Att skicka in agenten i produktion och ta bort Go-tjänsterna.
 
 ### Död kod som inte portas
@@ -137,6 +136,17 @@ gates körs aldrig: ingen körande tjänst anropar checkpoint-exekveringen,
 och `SubmitHumanDecision` är en no-op i Go. Rust håller samma beteende -
 planer skapas utan checkpoints eftersom ingen checkpointplanner är
 konfigurerad.
+
+Körningen av checkpoints (`Orchestrator.Execute`) nårs bara från
+`executePlan`, och den funktionen kallas ingenstans. Samma gäller
+`NewAgentWithOrchestrator`, som är det enda stället där lärdomarna
+skulle injiceras i prompten - den kallas inte heller. Därför portas
+varken gate-motorn eller subagenterna: de skulle blixtdöd kod i Rust
+också, och Rust beter sig annorlunda än Go om de börjar köra.
+
+Det som *är* nåbart - `CreatePlan`, `ApprovePlan`, `RejectPlan`,
+`GetCurrentCheckpoint`, `GetCheckpointProgress` och `ListPlans` - finns i
+Rust och gav samma svar som Go när de jämfördes live.
 
 ### Vad som återstår i API:t
 
@@ -192,6 +202,9 @@ konfigurerad.
 - Varje route i tabellen måste ha en handler - annars svarar den 501.
   Route-tabellens test kontrollerar det, så en endpoint inte kan glömmas
   bort utan att testet fallerar.
+- Go skriver ett heltal flyttal som `1`, medan serde_json skriver `1.0`.
+  Kostnader, budgetgränser och koordinater serialiseras därför med en egen
+  funktion i båda Rust-tjänsterna - annars skiljer sig svaren.
 
 ## Layout
 

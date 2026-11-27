@@ -3093,3 +3093,34 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] — ny sida från inboxen
 - [archive] 2026-11-27-kunskaps-wikin-och-dess-verktyg-har-portats-till-rust.md
 - [merge?] notes/kunskaps-wiki + notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust (delade taggar: wiki, agent, verktyg)
+
+## [2026-11-27] ingest | create notes/neon-anslutningen-hanger-nar-ipv6-prioriteras
+- [create] [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] — ny sida från inboxen
+- [create] [[notes/skrivbordswidget-som-visar-gor-nu-malet]] — ny sida från inboxen
+- [archive] 2026-11-27-neon-anslutningen-hanger-nar-ipv6-prioriteras.md
+- [archive] 2026-11-27-skrivbordswidget-som-visar-gor-nu-malet.md
+## [2026-11-27] ingest | create notes/skrivbordswidget-som-visar-gor-nu-malet
+
+
+## [2026-11-27] link | notes/skrivbordswidget-som-visar-gor-nu-malet -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/neon-anslutningen-hanger-nar-ipv6-prioriteras -> notes/skrivbordswidget-som-visar-gor-nu-malet
+
+
+## [2026-11-27] link | notes/skrivbordswidget-som-visar-gor-nu-malet -> notes/neon-anslutningen-hanger-nar-ipv6-prioriteras
+
+
+## [2026-11-27] ingest | create notes/flyttalsparitet-och-orchestratorns-doda-gate-flode
+- [create] [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]] — ny sida från inboxen
+- [archive] 2026-11-27-flyttalsparitet-och-orchestratorns-doda-gate-flode.md
+
+
+## [2026-11-27] link | notes/flyttalsparitet-och-orchestratorns-doda-gate-flode -> notes/kunskaps-wiki
+
+
+## [2026-11-27] link | notes/flyttalsparitet-och-orchestratorns-doda-gate-flode -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/kunskaps-wiki -> notes/flyttalsparitet-och-orchestratorns-doda-gate-flode
+

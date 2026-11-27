@@ -119,6 +119,7 @@ finns i `index.md`.
 | [[notes/flux-felsokning-avbruten-efter-exponerade-hemligheter]] | Flux-felsökning avbruten efter exponerade hemligheter | note | incident, flux, säkerhet, projekt:plan | 2026-11-26 | 0 |
 | [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]] | Flux i prod klonade ett 1,3 GB stort repo och dog | note | flux, incident, prod, projekt:infrastructure | 2026-11-26 | 2 |
 | [[notes/flux-source-controller-flyttad-fran-worker-3-efter-livenessfel]] | Flux source-controller flyttad från worker-3 efter livenessfel | note | flux, incident, cluster1, projekt:infrastructure | 2026-11-26 | 0 |
+| [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]] | Flyttalsparitet och orchestratorns döda gate-flöde | note | rust, paritet, agent, projekt:plan | 2026-11-27 | 2 |
 | [[notes/foot-bindningen-kraver-omstart-av-foot]] | Foot-bindningen kräver omstart av foot | note | bug, terminal, pi, projekt:dotfiles | 2026-11-25 | 0 |
 | [[notes/foraldrar-syns-pa-mal-i-now]] | Föräldrar syns på mål i /now | note | feature, now, goals, projekt:plan | 2026-11-22 | 0 |
 | [[notes/fyra-paritetsfallor-i-agentdomanens-port-till-rust]] | Fyra paritetsfällor i agentdomänens port till Rust | note | rust, migrering, agent, paritet, bug, projekt:plan | 2026-11-26 | 0 |
@@ -186,8 +187,8 @@ finns i `index.md`.
 | [[notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force]] | Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force | note | bug, sops, matchi, keycloak, lesson, gitops, projekt:tmp | 2026-11-06 | 1 |
 | [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]] | Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna | note | kubeconfig, cluster1, pki, städning, projekt:infrastructure | 2026-11-25 | 2 |
 | [[notes/kubeletts-logg-api-svarade-med-tls-internal-error-i-prod]] | Kubeletts logg-API svarade med tls: internal error i prod | note | diagnostik, talos, kubernetes, projekt:infrastructure | 2026-11-24 | 0 |
-| [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-27 | 8 |
-| [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] | kunskaps-wikin-och-dess-verktyg-har-portats-till-rust | - | - | - | 3 |
+| [[notes/kunskaps-wiki]] | Kunskaps-wikin | note | wiki, minne, agent, verktyg | 2026-11-27 | 9 |
+| [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]] | kunskaps-wikin-och-dess-verktyg-har-portats-till-rust | - | - | - | 2 |
 | [[notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin]] | Kureringspasset hittade foraldrad kunskap i wikin | note | wiki, kurering, karpathy, projekt:agents | 2026-10-24 | 0 |
 | [[notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel]] | KVM-portmappning: worker-N = port N - den deployade configen pa Pi:n var fel | note | kvm, bug, projekt:infrastructure | 2026-11-20 | 0 |
 | [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]] | KVM-styrning från PXE-Pi:n (16-port HDMI KVM) | note | kvm, rs232, pxe, hardware, home-assistant, projekt:simon | 2026-11-20 | 4 |
@@ -252,6 +253,7 @@ finns i `index.md`.
 | [[notes/min-kontaktlista-jag-som-nod-i-grafen-pappa]] | Min kontaktlista - jag som nod i grafen (pappa) | note | pappa, relationer, graf, nätverk, introduktioner, modell, projekt:pappa | 2026-11-17 | 1 |
 | [[notes/minimax-m-plan-inlagd-i-jamforelsen-m2-7-syns-som-uppskattad]] | MiniMax M Plan inlagd i jamforelsen, M2.7 syns som uppskattad | note | dashboard, minimax, subscriptions, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]] | Moderposten arkiveras när .eml-bilagorna har lagts in | note | feature, mail, imap, projekt:simon | 2026-11-19 | 1 |
+| [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]] | Neon-anslutningen hänger när IPv6 prioriteras | note | neon, ipv6, postgres, plan, bug, projekt:plan | 2026-11-27 | 1 |
 | [[notes/neon-api-token-hamnade-i-dotfiles-git-historiken]] | Neon API-token hamnade i dotfiles-git-historiken | note | säkerhet, dotfiles, secret, projekt:simon | 2026-11-17 | 1 |
 | [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]] | NeuroQuant är ombyggt - tRPC-API och e-post-verifiering | note | neuro, scraper, neuroquant, projekt:neuro | 2026-11-03 | 2 |
 | [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]] | NeuroQuant-kontot låst av för många inloggningsförsök | note | bug, session, neuro, projekt:neuro | 2026-11-03 | 2 |
@@ -375,6 +377,7 @@ finns i `index.md`.
 | [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]] | Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen | note | home-assistant, skogsduvan, automatisering, session, projekt:simon | 2026-11-17 | 6 |
 | [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]] | Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer | note | home-assistant, skogsduvan, session, automatisering, projekt:simon | 2026-11-03 | 2 |
 | [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]] | Skogsduvans HA utsätts för automatiserade skannningar från internet | note | home-assistant, skogsduvan, säkerhet, session, projekt:simon | 2026-11-03 | 1 |
+| [[notes/skrivbordswidget-som-visar-gor-nu-malet]] | Skrivbordswidget som visar Gör-nu-målet | note | widget, quickshell, plan, gnistring, projekt:plan | 2026-11-27 | 2 |
 | [[notes/slutverifiering-av-sammanslagen-plattform-mal-540-genom-hela-kedjan]] | Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan | note | plan, agent, verifiering, e2e, human-gate, kubernetes, wiki, projekt:simon | 2026-11-24 | 0 |
 | [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] | Snabbtillägg med mål och valbart föräldramål | note | feature, quick-add, mål, kalender, projekt:plan | 2026-11-20 | 0 |
 | [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] | Snabbtilläggets popup fick Escape och visuell polish | note | feature, quick-add, ui, projekt:plan | 2026-11-20 | 0 |
@@ -486,7 +489,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (27)
+- `agent` (28)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (3)
@@ -525,7 +528,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (105)
+- `bug` (106)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -635,6 +638,7 @@ finns i `index.md`.
 - `github-actions` (3)
 - `gitops` (12)
 - `gmail` (1)
+- `gnistring` (1)
 - `go` (33)
 - `goals` (31)
 - `gotcha` (3)
@@ -683,7 +687,7 @@ finns i `index.md`.
 - `interaktion` (1)
 - `introduktioner` (1)
 - `ip-address-pool` (1)
-- `ipv6` (2)
+- `ipv6` (3)
 - `it` (2)
 - `job` (2)
 - `jobb` (2)
@@ -767,7 +771,7 @@ finns i `index.md`.
 - `målsida` (1)
 - `navigation` (2)
 - `navigering` (2)
-- `neon` (9)
+- `neon` (10)
 - `neon.ts` (1)
 - `neovim` (5)
 - `networking` (3)
@@ -795,7 +799,7 @@ finns i `index.md`.
 - `oversikt` (1)
 - `padel` (1)
 - `pappa` (30)
-- `paritet` (4)
+- `paritet` (5)
 - `pdf` (1)
 - `performance` (1)
 - `persistent-storage` (1)
@@ -808,14 +812,14 @@ finns i `index.md`.
 - `pinchbench` (1)
 - `pipeline` (2)
 - `pki` (4)
-- `plan` (19)
+- `plan` (21)
 - `plan-api` (1)
 - `platser` (2)
 - `poe` (1)
 - `policy` (3)
 - `popcorntime` (3)
 - `port` (1)
-- `postgres` (7)
+- `postgres` (8)
 - `postgresql` (3)
 - `postmortem` (1)
 - `potential` (1)
@@ -838,7 +842,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (127)
+- `projekt:plan` (130)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -853,6 +857,7 @@ finns i `index.md`.
 - `pxe-first` (1)
 - `python` (1)
 - `quick-add` (3)
+- `quickshell` (1)
 - `radxa` (7)
 - `ranking` (4)
 - `rante` (2)
@@ -882,7 +887,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (16)
+- `rust` (17)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)
@@ -978,6 +983,7 @@ finns i `index.md`.
 - `visionite` (1)
 - `wan` (1)
 - `webbapp` (1)
+- `widget` (1)
 - `wiki` (7)
 - `worker` (11)
 - `worker-1` (4)

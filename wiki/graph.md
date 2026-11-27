@@ -118,6 +118,7 @@ graph LR
   n_notes_flux_felsokning_avbruten_efter_exponerade_hemligheter["Flux-felsökning avbruten efter exponerade hemligheter"]
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog["Flux i prod klonade ett 1,3 GB stort repo och dog"]
   n_notes_flux_source_controller_flyttad_fran_worker_3_efter_livenessfel["Flux source-controller flyttad från worker-3 efter livenessfel"]
+  n_notes_flyttalsparitet_och_orchestratorns_doda_gate_flode["Flyttalsparitet och orchestratorns döda gate-flöde"]
   n_notes_foot_bindningen_kraver_omstart_av_foot["Foot-bindningen kräver omstart av foot"]
   n_notes_foraldrar_syns_pa_mal_i_now["Föräldrar syns på mål i /now"]
   n_notes_fyra_paritetsfallor_i_agentdomanens_port_till_rust["Fyra paritetsfällor i agentdomänens port till Rust"]
@@ -251,6 +252,7 @@ graph LR
   n_notes_min_kontaktlista_jag_som_nod_i_grafen_pappa["Min kontaktlista - jag som nod i grafen (pappa)"]
   n_notes_minimax_m_plan_inlagd_i_jamforelsen_m2_7_syns_som_uppskattad["MiniMax M Plan inlagd i jamforelsen, M2.7 syns som uppskattad"]
   n_notes_moderposten_arkiveras_nar_eml_bilagorna_har_lagts_in["Moderposten arkiveras när .eml-bilagorna har lagts in"]
+  n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras["Neon-anslutningen hänger när IPv6 prioriteras"]
   n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken["Neon API-token hamnade i dotfiles-git-historiken"]
   n_notes_neuroquant_ar_ombyggt_trpc_api_och_e_post_verifiering["NeuroQuant är ombyggt - tRPC-API och e-post-verifiering"]
   n_notes_neuroquant_kontot_last_av_for_manga_inloggningsforsok["NeuroQuant-kontot låst av för många inloggningsförsök"]
@@ -374,6 +376,7 @@ graph LR
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen["Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen"]
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer["Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer"]
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet["Skogsduvans HA utsätts för automatiserade skannningar från internet"]
+  n_notes_skrivbordswidget_som_visar_gor_nu_malet["Skrivbordswidget som visar Gör-nu-målet"]
   n_notes_slutverifiering_av_sammanslagen_plattform_mal_540_genom_hela_kedjan["Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan"]
   n_notes_snabbtillagg_med_mal_och_valbart_foraldramal["Snabbtillägg med mål och valbart föräldramål"]
   n_notes_snabbtillaggets_popup_fick_escape_och_visuell_polish["Snabbtilläggets popup fick Escape och visuell polish"]
@@ -704,6 +707,8 @@ graph LR
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_vertikal_kalender_med_ikonstod_i_plan
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog --> n_concepts_flux_operator
   n_notes_flux_i_prod_klonade_ett_1_3_gb_stort_repo_och_dog --> n_entities_flux_gitops
+  n_notes_flyttalsparitet_och_orchestratorns_doda_gate_flode --> n_concepts_anvanda_agenter_i_plan
+  n_notes_flyttalsparitet_och_orchestratorns_doda_gate_flode --> n_notes_kunskaps_wiki
   n_notes_go_integrationstest_tomde_kalenderhandelserna_i_neon_igen --> n_notes_kalenderhandelser_aterstallda_fran_neon_wal_historik
   n_notes_go_integrationstest_tomde_kalenderhandelserna_i_neon_igen --> n_notes_parallella_agent_sessioner_i_samma_repo_och_databas
   n_notes_gotcha_pxe_forst_gor_noden_till_en_pxe_nod_maintenance_mode --> n_entities_pxe_server
@@ -762,17 +767,17 @@ graph LR
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force --> n_notes_synk_hallbokningar_kommunens_actor_smartbook_matchi
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
+  n_notes_kunskaps_wiki --> n_notes_flyttalsparitet_och_orchestratorns_doda_gate_flode
   n_notes_kunskaps_wiki --> n_notes_globala_agentinstruktioner_deployas_via_dotfiles
   n_notes_kunskaps_wiki --> n_notes_infrastructure_agents_md_uppdaterad_tre_fallor_for_agenter
   n_notes_kunskaps_wiki --> n_notes_konventioner
-  n_notes_kunskaps_wiki --> n_notes_kureringspasset_hittade_foraldrad_kunskap_i_wikin
   n_notes_kunskaps_wiki --> n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust
+  n_notes_kunskaps_wiki --> n_notes_kureringspasset_hittade_foraldrad_kunskap_i_wikin
   n_notes_kunskaps_wiki --> n_notes_stray_wiki_i_typetrainer_repot_ar_inte_kallan_for_wikin
   n_notes_kunskaps_wiki --> n_notes_utvecklingsflode
   n_notes_kunskaps_wiki --> n_summaries_llm_wiki_karpathy
   n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust --> n_notes_kunskaps_wiki
   n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust --> n_notes_sammanslagning_av_agents_repot_in_i_plan_vad_som_flyttades_och_vad_som_medvetet_inte_gjorde_det
-  n_notes_kunskaps_wikin_och_dess_verktyg_har_portats_till_rust --> n_notes_agentens_kodandringsflode_portat_till_rust
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_entities_hdmi_kvm_switch_16_port_labbet
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_notes_picokvm_luckfox_startar_inte_i_labbet_lite_saknar_emmc_ingen_poe
   n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm --> n_notes_simon_kvm_cli_kommando_for_att_byta_hdmi_kvm_port_fran_pxe_vard
@@ -838,6 +843,7 @@ graph LR
   n_notes_michael_brundin_blir_en_personnod_i_relationsgrafen --> n_notes_relationsgrafen_anvander_fast_michael_id_utan_person_kind
   n_notes_min_kontaktlista_jag_som_nod_i_grafen_pappa --> n_notes_redigerare_och_agarskap_for_relationer_i_pappa
   n_notes_moderposten_arkiveras_nar_eml_bilagorna_har_lagts_in --> n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append
+  n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras --> n_notes_skrivbordswidget_som_visar_gor_nu_malet
   n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken --> n_notes_losning_1password_backed_env_variabel_for_mcp_tokens
   n_notes_neuroquant_ar_ombyggt_trpc_api_och_e_post_verifiering --> n_notes_neuroquant_kontot_last_av_for_manga_inloggningsforsok
   n_notes_neuroquant_ar_ombyggt_trpc_api_och_e_post_verifiering --> n_notes_neuroquant_vikterna_raknas_om_dagligen_mejl_triggas_pa_publicering
@@ -1035,6 +1041,8 @@ graph LR
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_fyra_shelly_enheter_svarar_inte_pa_natet
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
+  n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_concepts_anvanda_agenter_i_plan
+  n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_sops
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_flux_operator
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
@@ -1180,7 +1188,7 @@ graph LR
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1214,7 +1222,6 @@ graph LR
 - **notes/agent-dock-pa-malsiden-ersatter-de-tre-agentpanelerna** <- [[concepts/anvanda-agenter-i-plan]]
 - **notes/agent-granssnittet-nuxt-saknades-helt-i-tilt-routes-forsvann-i-refaktoreringen-677b876** <- [[notes/agent-api-crashade-i-tilt-saknad-database-url-mot-cnpg-databasen-i-agents-dev]]
 - **notes/agent-scope-i-prod-allowlistan-maste-matcha-kontraktet** <- [[notes/ci-gates-kanonisk-agentrun-livscykel-och-versionerat-plan-agent-kontrakt]]
-- **notes/agentens-kodandringsflode-portat-till-rust** <- [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]]
 - **notes/agents-repot-arkiverat-och-mergens-mal-kompletterade** <- [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]]
 - **notes/arbetsstationen-ar-omarchy-arch-apt-get-finns-inte-anvand-pacman-yay** <- [[notes/utvecklingsflode]]
 - **notes/arkitektur** <- [[notes/bigram-algoritmen]], [[notes/konventioner]], [[notes/session-livscykel]], [[notes/utvecklingsflode]]
@@ -1249,6 +1256,7 @@ graph LR
 - **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog** <- [[concepts/flux-operator]]
+- **notes/flyttalsparitet-och-orchestratorns-doda-gate-flode** <- [[notes/kunskaps-wiki]]
 - **notes/globala-agentinstruktioner-deployas-via-dotfiles** <- [[notes/kunskaps-wiki]]
 - **notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen** <- [[notes/kalenderhandelser-aterstallda-fran-neon-wal-historik]]
 - **notes/goals-listar-bara-grundmal-scroll-vid-j-k** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]]
@@ -1285,7 +1293,7 @@ graph LR
 - **notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image** <- [[entities/pxe-server]]
 - **notes/krypterade-secrets-i-klustret-ogiltiga-inloggningar-och-keycloak-brute-force** <- [[notes/synk-hallbokningar-kommunens-actor-smartbook-matchi]]
 - **notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
-- **notes/kunskaps-wiki** <- [[notes/arkitektur]], [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]], [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]], [[notes/utvecklingsflode]], [[summaries/llm-wiki-karpathy]]
+- **notes/kunskaps-wiki** <- [[notes/arkitektur]], [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust]], [[notes/stray-wiki-i-typetrainer-repot-ar-inte-kallan-for-wikin]], [[notes/utvecklingsflode]], [[summaries/llm-wiki-karpathy]]
 - **notes/kunskaps-wikin-och-dess-verktyg-har-portats-till-rust** <- [[notes/kunskaps-wiki]]
 - **notes/kureringspasset-hittade-foraldrad-kunskap-i-wikin** <- [[notes/kunskaps-wiki]], [[summaries/llm-wiki-karpathy]]
 - **notes/kvm-portmappning-worker-n-port-n-den-deployade-configen-pa-pi-n-var-fel** <- [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]]
@@ -1331,6 +1339,7 @@ graph LR
 - **notes/michael-brundin-blir-en-personnod-i-relationsgrafen** <- [[notes/relationsgrafen-anvander-fast-michael-id-utan-person-kind]]
 - **notes/min-kontaktlista-jag-som-nod-i-grafen-pappa** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]]
 - **notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in** <- [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]]
+- **notes/neon-anslutningen-hanger-nar-ipv6-prioriteras** <- [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **notes/neon-api-token-hamnade-i-dotfiles-git-historiken** <- [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]], [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]]
 - **notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering** <- [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]], [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok** <- [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]], [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
@@ -1433,6 +1442,7 @@ graph LR
 - **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
+- **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]]
 - **notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden** <- [[concepts/sops]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **notes/sortering-av-grundmal-pa-goals-med-piltangenterna** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]]
 - **notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan** <- [[notes/barnordning-foljer-beroenden-i-malsidan]], [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]], [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
