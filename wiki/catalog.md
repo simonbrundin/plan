@@ -26,7 +26,7 @@ finns i `index.md`.
 | [[concepts/openclaw]] | OpenClaw | concept | openclaw, ai, gateway, oidc, kubernetes | 2026-11-27 | 3 |
 | [[concepts/poolad-eller-direkt-anslutning-mot-neon]] | Poolad eller direkt anslutning mot Neon | concept | neon, postgres, pgbouncer, drift, projekt:tmp | 2026-11-02 | 1 |
 | [[concepts/sops]] | SOPS | concept | secrets, encryption, age, kubernetes, gitops | 2026-11-27 | 6 |
-| [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-26 | 8 |
+| [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-26 | 9 |
 | [[entities/flux-gitops]] | Flux GitOps | entity | flux, gitops, infrastructure, kubernetes | 2026-10-24 | 6 |
 | [[entities/hdmi-kvm-switch-16-port-labbet]] | HDMI KVM-switch 16 port (labbet) | entity | kvm, hardware, labb, projekt:infrastructure, projekt:simon | 2026-11-15 | 2 |
 | [[entities/home-assistant]] | Home Assistant | entity | home-assistant, ssh, hassio, supervisor, drift, projekt:simon | 2026-11-25 | 5 |
@@ -92,6 +92,7 @@ finns i `index.md`.
 | [[notes/dashboard-ranking-utokad-med-benchmark-och-kostnadstackning]] | Dashboard ranking utökad med benchmark- och kostnadstäckning | note | dashboard, ranking, benchmark, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] | Dashboard: rekommendationsvyn som enda forstavy | note | dashboard, ux, recommendation, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
+| [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]] | "Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504" | note | dashboard, nuxt, bug, lesson, projekt:simon | 2026-11-27 | 1 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
@@ -465,6 +466,7 @@ finns i `index.md`.
 | [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]] | ZITADEL-återställning: historisk installation återställd från ZITADEL Cloud-export | note | zitadel, oidc, incident, migrering, projekt:simon | 2026-11-26 | 1 |
 | [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]] | ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om | note | zitadel, oidc, lesson, migrering, projekt:simon | 2026-11-26 | 1 |
 | [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]] | ZITADEL: importerad användare krävde init-code-event för att kunna logga in | note | zitadel, bug, lesson, projekt:simon | 2026-11-26 | 1 |
+| [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]] | "ZITADEL: den importerade användarens lösenordshash stämde inte med något känt lösenord" | note | zitadel, bug, lesson, projekt:simon | 2026-11-27 | 3 |
 | [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]] | 16x1 HDMI KVM - RS232/LAN-protokoll | summary | kvm, rs232, protokoll, projekt:simon | 2026-11-13 | 2 |
 | [[summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql]] | "Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL" | summary | learn, postgres, lagring, go | 2026-11-03 | 0 |
 | [[summaries/flux-components]] | Sammanfattning: Flux-komponenter | summary | flux, gitops, components, kubernetes | 2026-10-24 | 3 |
@@ -522,7 +524,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (103)
+- `bug` (105)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -559,7 +561,7 @@ finns i `index.md`.
 - `css` (3)
 - `dammsugare` (2)
 - `dark-mode` (1)
-- `dashboard` (21)
+- `dashboard` (22)
 - `data` (2)
 - `databas` (11)
 - `database` (4)
@@ -721,7 +723,7 @@ finns i `index.md`.
 - `leaflet` (1)
 - `learn` (6)
 - `leetcode` (4)
-- `lesson` (8)
+- `lesson` (10)
 - `lets-encrypt` (1)
 - `lightcraft` (1)
 - `linkedin` (2)
@@ -774,7 +776,7 @@ finns i `index.md`.
 - `notis` (1)
 - `now` (2)
 - `ntp` (1)
-- `nuxt` (41)
+- `nuxt` (42)
 - `nätverk` (3)
 - `oauth` (2)
 - `oauth2` (3)
@@ -839,7 +841,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (91)
+- `projekt:simon` (93)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
@@ -993,6 +995,6 @@ finns i `index.md`.
 - `xfs` (1)
 - `yaml` (1)
 - `z-index` (1)
-- `zitadel` (7)
+- `zitadel` (8)
 - `zoom` (6)
 - `återställning` (1)
