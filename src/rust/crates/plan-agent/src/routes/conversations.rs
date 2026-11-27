@@ -243,6 +243,7 @@ pub async fn create_message(
         req.goal_context.as_ref(),
         plan_client.as_ref(),
         recorder.clone(),
+        state.orchestrator.as_ref(),
     )
     .await
     .map_err(AgentError::Internal)?;
