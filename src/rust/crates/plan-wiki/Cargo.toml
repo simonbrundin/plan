@@ -1,0 +1,22 @@
+[package]
+name = "plan-wiki"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Kunskaps-wikin - ett filbaserat kunskapsgraf för agenterna"
+
+[lib]
+name = "plan_wiki"
+path = "src/lib.rs"
+
+[[bin]]
+name = "wikictl"
+path = "src/bin/wikictl.rs"
+
+[dependencies]
+chrono.workspace = true
+regex.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

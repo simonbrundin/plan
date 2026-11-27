@@ -5,6 +5,7 @@ members = [
     "crates/plan-agent",
     "crates/plan-parity",
     "crates/plan-recurrence",
+    "crates/plan-wiki",
 ]
 
 [workspace.package]
