@@ -102,7 +102,7 @@ jobs:
 
   # Sätter ihop manifest-listan så att en och samma tagg pekar på båda
   # arkitekturerna. Kubernetes väljer rätt variant ur listan.
-  slå-ihop:
+  sla-ihop:
     needs: bygg
     runs-on: ubuntu-latest
     timeout-minutes: 30
