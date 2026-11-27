@@ -19,6 +19,7 @@ pub mod handlers;
 pub mod jobcontroller;
 pub mod jobrunner;
 pub mod k8s;
+pub mod learnings;
 pub mod messages;
 pub mod orchestrator;
 pub mod planclient;

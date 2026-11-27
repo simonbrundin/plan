@@ -39,4 +39,5 @@ uuid.workspace = true
 
 [dev-dependencies]
 plan-parity = { path = "../plan-parity" }
+tempfile = "3"
 tokio = { version = "1", features = ["full", "test-util"] }

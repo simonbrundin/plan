@@ -10,6 +10,7 @@
 use std::sync::{Arc, RwLock};
 
 use crate::checkpoint::CheckpointPlan;
+use crate::learnings::LearningsManager;
 use crate::state_store::{StateError, StateStore};
 
 /// Initieringsfelet, om orchestratorn inte startade.
@@ -51,15 +52,62 @@ pub struct Orchestrator {
     lager: StateStore,
     /// Planen som körs just nu.
     aktuell_plan: RwLock<Option<CheckpointPlan>>,
+    /// Lärdomarna agenten har lärt sig.
+    lärdomar: LearningsManager,
 }
 
 impl Orchestrator {
     /// Skapar orchestratorn med ett tillståndslager.
     pub fn new(lager: StateStore) -> Self {
+        Self::with_learnings(lager, LearningsManager::ny(LearningsManager::standardfil()))
+    }
+
+    /// Skapar orchestratorn med ett tillståndslager och en lärdomsfil.
+    pub fn with_learnings(lager: StateStore, lärdomar: LearningsManager) -> Self {
         Self {
             lager,
             aktuell_plan: RwLock::new(None),
+            lärdomar,
         }
+    }
+
+    /// Lärdomshanteraren.
+    pub fn lärdomar(&self) -> &LearningsManager {
+        &self.lärdomar
+    }
+
+    /// Sparar en lärdom.
+    pub fn add_learning(
+        &self,
+        kategori: &str,
+        titel: &str,
+        beskrivning: &str,
+        lärdom: &str,
+    ) -> std::io::Result<()> {
+        self.lärdomar
+            .add_learning(kategori, titel, beskrivning, lärdom)
+    }
+
+    /// Sparar en lärdom från ett checkpoint.
+    pub fn add_checkpoint_learning(
+        &self,
+        checkpoint: &str,
+        problem: &str,
+        fix: &str,
+        lärdom: &str,
+    ) -> std::io::Result<()> {
+        self.lärdomar
+            .add_checkpoint_learning(checkpoint, problem, fix, lärdom)
+    }
+
+    /// Läser alla lärdomar.
+    pub fn get_learnings(&self) -> std::io::Result<String> {
+        self.lärdomar.get_learnings()
+    }
+
+    /// Bygger kontext till prompten av lärdomarna.
+    pub fn generate_learnings_context(&self, kategorier: &[&str]) -> String {
+        self.lärdomar.generate_prompt_context(kategorier)
     }
 
     /// Skapar en plan för en funktion.
