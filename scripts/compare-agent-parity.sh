@@ -144,5 +144,24 @@ if [ "$fel" -ne 0 ]; then
   exit 1
 fi
 
+# WebSocket-chatten jämförs med ett eget verktyg - det kan inte göras
+# med curl. Verktyget byggs om det saknas.
+WS_PARITY="src/rust/target/debug/ws_parity"
+
+if [ ! -x "$WS_PARITY" ]; then
+  echo "Bygger ws_parity-verktyget..."
+  (cd src/rust && cargo build --offline -p plan-parity --bin ws_parity) || exit 1
+fi
+
+if ! "$WS_PARITY" "$GO_URL" "$RUST_URL" "$TOKEN"; then
+  fel=1
+fi
+
+if [ "$fel" -ne 0 ]; then
+  echo
+  echo "Avvikelser hittade - se ovan."
+  exit 1
+fi
+
 echo
 echo "Alla anrop ger samma svar i båda tjänsterna."

@@ -4,3 +4,13 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 description = "Paritetsverktyg: jämför Rust-routes mot route-registreringar i Go-källan"
+
+[dependencies]
+futures-util = "0.3"
+serde_json.workspace = true
+tokio = { workspace = true }
+tokio-tungstenite = "0.29"
+
+[[bin]]
+name = "ws_parity"
+path = "src/bin/ws_parity.rs"
