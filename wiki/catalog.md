@@ -10,7 +10,7 @@ finns i `index.md`.
 | [[concepts/authentik]] | Authentik | concept | authentik, identity-provider, oidc, saml, sso, deprecated | 2026-10-23 | 4 |
 | [[concepts/cert-manager]] | Cert-Manager | concept | cert-manager, tls, certificates, lets-encrypt, ssl | 2026-10-24 | 3 |
 | [[concepts/cloudflare-tunnel]] | Cloudflare Tunnel (cloudflared) | concept | cloudflare, tunnel, cfd, dns, ingress | 2026-11-26 | 4 |
-| [[concepts/cloudnative-pg]] | CloudNativePG (CNPG) | concept | postgresql, database, postgres, cloudnativepg, cnpg | 2026-11-26 | 4 |
+| [[concepts/cloudnative-pg]] | CloudNativePG (CNPG) | concept | postgresql, database, postgres, cloudnativepg, cnpg | 2026-11-27 | 6 |
 | [[concepts/envoy-gateway]] | Envoy Gateway | concept | envoy, gateway-api, ingress, reverse-proxy, http-routing | 2026-10-24 | 6 |
 | [[concepts/flux-operator]] | FluxOperator | concept | flux, flux-operator, gitops, installation, kubernetes, operator | 2026-11-26 | 7 |
 | [[concepts/gitops]] | GitOps | concept | flux, gitops, deployment, infrastructure-as-code, kubernetes | 2026-10-24 | 5 |
@@ -24,7 +24,7 @@ finns i `index.md`.
 | [[concepts/neon-cli-var-neon-och-neon-ts-maste-ligga]] | Neon CLI: var .neon och neon.ts måste ligga | concept | neon, cli, neon.ts, projekt:tmp | 2026-11-02 | 0 |
 | [[concepts/oidc]] | OIDC | concept | oidc, oauth2, identity-provider, authentication, rbac, kubernetes | 2026-10-23 | 4 |
 | [[concepts/poolad-eller-direkt-anslutning-mot-neon]] | Poolad eller direkt anslutning mot Neon | concept | neon, postgres, pgbouncer, drift, projekt:tmp | 2026-11-02 | 1 |
-| [[concepts/sops]] | SOPS | concept | secrets, encryption, age, kubernetes, gitops | 2026-11-23 | 5 |
+| [[concepts/sops]] | SOPS | concept | secrets, encryption, age, kubernetes, gitops | 2026-11-27 | 6 |
 | [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-26 | 8 |
 | [[entities/flux-gitops]] | Flux GitOps | entity | flux, gitops, infrastructure, kubernetes | 2026-10-24 | 6 |
 | [[entities/hdmi-kvm-switch-16-port-labbet]] | HDMI KVM-switch 16 port (labbet) | entity | kvm, hardware, labb, projekt:infrastructure, projekt:simon | 2026-11-15 | 2 |
@@ -75,6 +75,8 @@ finns i `index.md`.
 | [[notes/cloudflare-tunnel-aktiverat-plan-simonbrundin-com-publikt-nabar]] | Cloudflare Tunnel aktiverat - plan.simonbrundin.com publikt nåbar | note | cloudflare, tunnel, ingress, dns, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/cluster1-longhorn-worker-4-aterstalld-och-flux-stabiliserad]] | Cluster1: Longhorn worker-4 återställd och Flux stabiliserad | note | cluster1, flux, longhorn, incident, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]] | cluster1: stale kubeconfig-CA och noll workers - diagnos 2026-11-11 | note | felsokning, pki, worker, talos, kubeconfig, projekt:infrastructure | 2026-11-23 | 3 |
+| [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]] | CNPG skapar initdb-ägarrollen innan postInitSQL körs - managed.roles kommer för sent | note | cnpg, postgresql, bug, projekt:plan | 2026-11-26 | 2 |
+| [[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]] | CNPG managed roles - sekretets username måste matcha rollnamnet | note | cnpg, postgresql, secrets, bug, projekt:plan | 2026-11-26 | 2 |
 | [[notes/controlplane-1-ateransluten-via-temporar-pxe-pa-controlplane-3]] | controlplane-1 återansluten via temporär PXE på controlplane-3 | note | incident, talos, pxe, recovery, projekt:infrastructure | 2026-11-26 | 0 |
 | [[notes/controlplane-recovery-via-pxe-ar-inte-konfigurerad]] | Controlplane-recovery via PXE är inte konfigurerad | note | pxe, talos, bug, controlplane, projekt:simon | 2026-11-17 | 2 |
 | [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]] | cookies.json var versionsstyrd i offentligt neuro-repo | note | neuro, bug, säkerhet, projekt:simon | 2026-11-17 | 2 |
@@ -291,7 +293,7 @@ finns i `index.md`.
 | [[notes/plan-api-och-agent-delar-go-modul-men-behaller-tjanstegransen]] | Plan API och agent delar Go-modul men behåller tjänstegränsen | note | arkitektur, go, agent, projekt:plan | 2026-11-26 | 0 |
 | [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] | Plan-appen: mörkt designsystem med semantiska färg-token | note | plan, ui, css, tailwind, dark-mode, projekt:repos | 2026-11-17 | 1 |
 | [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] | Plan: cachad SPA-skal gjorde att webbläsaren körde gammalt JS-bundle med ikon-provider none | note | bug, nuxt, cache, plan, projekt:plan | 2026-11-16 | 0 |
-| [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] | plan-db: CNPG-kluster fastnade i 'Setting up primary' på en Longhorn-volym utan replikor | note | cnpg, longhorn, incident, plan, projekt:simon | 2026-11-26 | 1 |
+| [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] | plan-db: CNPG-kluster fastnade i 'Setting up primary' på en Longhorn-volym utan replikor | note | cnpg, longhorn, incident, plan, projekt:simon | 2026-11-27 | 4 |
 | [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] | Plan dev kör mot Neon istället för lokal Postgres | note | neon, dev, database, plan, projekt:plan | 2026-11-16 | 0 |
 | [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] | plan /goals gav 503 - go-api startade i mock-läge när DNS inte var uppe | note | bug, incident, plan, kubernetes, projekt:simon | 2026-11-25 | 0 |
 | [[notes/plan-migreras-fran-go-till-rust]] | Plan migreras från Go till Rust | note | migration, rust, api, projekt:plan | 2026-11-26 | 0 |
@@ -373,6 +375,7 @@ finns i `index.md`.
 | [[notes/snabbtillagg-med-mal-och-valbart-foraldramal]] | Snabbtillägg med mål och valbart föräldramål | note | feature, quick-add, mål, kalender, projekt:plan | 2026-11-20 | 0 |
 | [[notes/snabbtillaggets-popup-fick-escape-och-visuell-polish]] | Snabbtilläggets popup fick Escape och visuell polish | note | feature, quick-add, ui, projekt:plan | 2026-11-20 | 0 |
 | [[notes/sops-age-nyckelroterad-privat-nyckel-i-1password-item-sops]] | SOPS age-nyckelroterad; privat nyckel i 1Password item SOPS | note | security, sops, 1password, projekt:infrastructure | 2026-11-26 | 0 |
+| [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]] | SOPS - kryptera bara stringData i Kubernetes-secrets, annars kraschar Flux-builden | note | sops, secrets, flux, bug, projekt:plan | 2026-11-26 | 3 |
 | [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]] | Sortering av grundmål på /goals med piltangenterna | note | feature, ui, goals, go, nuxt, projekt:plan | 2026-11-23 | 2 |
 | [[notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan]] | Sortering av undermål med piltangenterna var trasig i plan | note | bug, plan, nuxt, go, ui, projekt:plan | 2026-11-16 | 0 |
 | [[notes/soulmate-teamet-i-sundsvall-importerades]] | Soulmate-teamet i Sundsvall importerades | note | data, sourcing, soulmate, projekt:pappa | 2026-11-17 | 0 |
@@ -517,7 +520,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (99)
+- `bug` (102)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -540,7 +543,7 @@ finns i `index.md`.
 - `cloudflare` (5)
 - `cloudnativepg` (1)
 - `cluster1` (7)
-- `cnpg` (2)
+- `cnpg` (4)
 - `components` (1)
 - `config` (2)
 - `constraints` (1)
@@ -607,7 +610,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (12)
+- `flux` (13)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -806,7 +809,7 @@ finns i `index.md`.
 - `popcorntime` (3)
 - `port` (1)
 - `postgres` (7)
-- `postgresql` (1)
+- `postgresql` (3)
 - `postmortem` (1)
 - `potential` (1)
 - `pr-preview` (2)
@@ -828,7 +831,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (124)
+- `projekt:plan` (127)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -884,14 +887,14 @@ finns i `index.md`.
 - `scope` (1)
 - `scraper` (1)
 - `secret` (1)
-- `secrets` (2)
+- `secrets` (4)
 - `security` (4)
 - `session` (40)
 - `shell` (1)
 - `skogsduvan` (6)
 - `slack` (1)
 - `solution` (1)
-- `sops` (4)
+- `sops` (5)
 - `soring` (1)
 - `soulmate` (1)
 - `sourcing` (12)
