@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 452 |
+| Noter | 454 |
 
 ## Entiteter
 
@@ -126,6 +126,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] - Slutbehovet kristalliserades: 'vilken modell ska jag köra genom vilken provider eller prenumeration'. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-tydlighetslyft-av-jamforelserna]] - Användaren upplevde jamforeelserna som 'sjukt otydliga'. _(uppdaterad 2026-11-26)_
 - [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] - Plan har fem målfaser (`define`, `plan`, `execute`, `verify`, `completed`) och en _(uppdaterad 2026-11-27)_
+- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] - Plan-repots hela väg från dev till produktion är nu dokumenterad i _(uppdaterad 2026-11-27)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
@@ -143,6 +144,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning]] - Anledning: dashboardens modellsida var "helt oduglig" för att få ut information. _(uppdaterad 2026-11-26)_
 - [[notes/eviga-mal-i-plan-kan-inte-slutforas]] - Mål i plan kan nu markeras som EVIGA (eternal): de pågår hela livet (t.ex. _(uppdaterad 2026-11-17)_
 - [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] - Förra versionen av .eml-expansionen (se [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]]) _(uppdaterad 2026-11-19)_
+- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] - VAD: fasmaskinen och den valfria verifieringen finns nu i Plan API (branch feat/goal-phase-machine, OpenSpec-change add-goal-verification... _(uppdaterad 2026-11-27)_
 - [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] - 2026-11-19 (pappa/mailagent): Istället för en "Neka"-knapp kan användaren nu starta en konversation med AI:t om vad som inte fungerade... _(uppdaterad 2026-11-19)_
 - [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] - Figma har ingen officiell Font Helper på Linux (FigmaAgent finns bara för macOS/Windows). _(uppdaterad 2026-11-23)_
 - [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] - 2026-11-26: controlplane-2 och controlplane-3 annonserar och använder samma Flannel VXLAN-MAC e2:92:15:e2:0e:30. _(uppdaterad 2026-11-26)_
@@ -335,7 +337,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-migreras-fran-go-till-rust]] - Beslut 2026-11-26: Plan-applikationens Go-tjänster skrivs om i Rust. _(uppdaterad 2026-11-26)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
 - [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-27)_
-- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-10)_
+- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-27)_
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
 - [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] - Anledning: användaren frågade "menar du att Gemini 4 Neon är lika billig som MiniMax _(uppdaterad 2026-11-26)_
 - [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] - Title: Platser på mål och kalenderhändelser (ny OpenSpec-change add-places) _(uppdaterad 2026-11-20)_

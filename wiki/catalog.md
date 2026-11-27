@@ -98,6 +98,7 @@ finns i `index.md`.
 | [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]] | "Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504" | note | dashboard, nuxt, bug, lesson, projekt:simon | 2026-11-27 | 1 |
 | [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] | Definitionsassistent för mål: fylla define-fasen med godkännande per fält | note | feature, goals, agent, human-gate, nuxt, projekt:plan | 2026-11-27 | 4 |
+| [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] | Delivery-pipeline för Plan: från dev till prod är nu dokumenterad | note | ci, deploy, pipeline, flux, dokumentation, projekt:plan | 2026-11-27 | 1 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
@@ -116,6 +117,7 @@ finns i `index.md`.
 | [[notes/eviga-mal-i-plan-kan-inte-slutforas]] | Eviga mål i plan - kan inte slutföras | note | feature, goals, plan, ui, go, nuxt, projekt:simon | 2026-11-17 | 4 |
 | [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] | Expanderade .eml läggs in som riktiga mejl i mappen (APPEND) | note | feature, mail, imap, projekt:pappa | 2026-11-19 | 2 |
 | [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] | Fälla fixad: talosctl kubeconfig skapar inga dubbletter längre (talos-kubeconfig + shell-guard) | note | kubeconfig, cluster1, talosctl, fälla, projekt:infrastructure | 2026-11-25 | 2 |
+| [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] | Fasmaskinen for mal ar nu implementerad i Plan API | note | agent, goals, implementation, verifiering, human-gate, projekt:plan | 2026-11-27 | 2 |
 | [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] | Feedback-loop: AI uppdaterar mailreglerna och analyserar om mejlet | note | mailagent, ai, feedback, pappa, session, projekt:pappa | 2026-11-19 | 0 |
 | [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] | Figma lokala fonter på Linux: figma-agent-linux | note | figma, fonts, linux, omarchy, projekt:simon | 2026-11-23 | 0 |
 | [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] | Flannel VXLAN MAC-kollision blockerar controlplane-2 webhooks | note | incident, flux, flannel, networking, projekt:infrastructure | 2026-11-26 | 0 |
@@ -244,7 +246,7 @@ finns i `index.md`.
 | [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]] | Målgraph: navigering mellan målsidor går från sekunder till millisekunder | note | performance, goals, go, nuxt, session, projekt:plan | 2026-11-20 | 2 |
 | [[notes/malikoner-anvander-enkel-oversattning-fore-iconify]] | Målikoner använder enkel översättning före Iconify | note | feature, icon, translation, goals, projekt:plan | 2026-11-17 | 0 |
 | [[notes/malkompletteringar-och-auth-i-rust-de-sista-api-vagarna]] | Målkompletteringar och auth i Rust - de sista API-vägarna | note | rust, migration, paritet, projekt:plan | 2026-11-26 | 0 |
-| [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]] | Målmaskin och verifierare: fasmaskinen bor i Plan, inte i prompten | note | agent, goals, design, verifiering, human-gate, projekt:plan | 2026-11-27 | 3 |
+| [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]] | Målmaskin och verifierare: fasmaskinen bor i Plan, inte i prompten | note | agent, goals, design, verifiering, human-gate, projekt:plan | 2026-11-27 | 4 |
 | [[notes/manadskostnad-raknas-pa-korningar-inte-pa-losta-uppgifter]] | Månadskostnad räknas på körningar, inte på lösta uppgifter | note | dashboard, modeller, enheter, bugg, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/manuell-sortering-av-mal-pa-priority]] | Manuell sortering av mål på priority | note | feature, ui, priority, go, nuxt, projekt:plan | 2026-11-17 | 1 |
 | [[notes/marknadslage-panel-hogst-upp-pa-personer-i-pappa]] | Marknadsläge-panel högst upp på /personer i pappa | note | pappa, feature, ui, sourcing, statistik, scb, projekt:pappa | 2026-11-18 | 1 |
@@ -312,7 +314,7 @@ finns i `index.md`.
 | [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] | Plan dev kör mot Neon istället för lokal Postgres | note | neon, dev, database, plan, projekt:plan | 2026-11-16 | 0 |
 | [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] | plan /goals gav 503 - go-api startade i mock-läge när DNS inte var uppe | note | bug, incident, plan, kubernetes, projekt:simon | 2026-11-25 | 0 |
 | [[notes/plan-migreras-fran-go-till-rust]] | Plan migreras från Go till Rust | note | migration, rust, api, projekt:plan | 2026-11-26 | 0 |
-| [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] | Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg | note | ci, deploy, pipeline, docker, kustomize, projekt:plan | 2026-11-10 | 1 |
+| [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] | Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg | note | ci, deploy, pipeline, docker, kustomize, projekt:plan | 2026-11-27 | 2 |
 | [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] | Planpris delat per körning går inte att jämföra mellan planer | note | dashboard, modeller, kvoter, enheter, presentation, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] | Platser på mål och kalenderhändelser (OpenSpec-change add-places) | note | feature, platser, goals, calendar, leaflet, bug, session, projekt:plan | 2026-11-20 | 1 |
 | [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]] | Platsfiltret på /now: "Utan plats" visar mål utan plats | note | feature, now, goals, places, projekt:plan | 2026-11-27 | 2 |
@@ -505,7 +507,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (36)
+- `agent` (37)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (3)
@@ -561,7 +563,7 @@ finns i `index.md`.
 - `cgNAT` (1)
 - `chat` (2)
 - `chatt` (1)
-- `ci` (10)
+- `ci` (11)
 - `clean-code` (1)
 - `cleanup` (1)
 - `cli` (5)
@@ -590,7 +592,7 @@ finns i `index.md`.
 - `db` (6)
 - `debugging` (2)
 - `dependencies` (2)
-- `deploy` (2)
+- `deploy` (3)
 - `deployment` (2)
 - `deprecated` (1)
 - `design` (2)
@@ -607,7 +609,7 @@ finns i `index.md`.
 - `dnsmasq` (2)
 - `docker` (3)
 - `docs` (1)
-- `dokumentation` (3)
+- `dokumentation` (4)
 - `dotfiles` (3)
 - `drag` (1)
 - `drift` (8)
@@ -636,7 +638,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (15)
+- `flux` (16)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -658,7 +660,7 @@ finns i `index.md`.
 - `gmail` (1)
 - `gnistring` (1)
 - `go` (33)
-- `goals` (37)
+- `goals` (38)
 - `gotcha` (3)
 - `governance` (2)
 - `graf` (2)
@@ -680,7 +682,7 @@ finns i `index.md`.
 - `hostname` (1)
 - `http` (2)
 - `http-routing` (1)
-- `human-gate` (7)
+- `human-gate` (8)
 - `hyprland` (1)
 - `händelser` (1)
 - `icon` (5)
@@ -690,6 +692,7 @@ finns i `index.md`.
 - `image-cache` (1)
 - `image-factory` (2)
 - `imap` (11)
+- `implementation` (1)
 - `import` (2)
 - `incident` (24)
 - `incidents` (1)
@@ -828,7 +831,7 @@ finns i `index.md`.
 - `pi` (9)
 - `picokvm` (1)
 - `pinchbench` (1)
-- `pipeline` (2)
+- `pipeline` (3)
 - `pki` (4)
 - `places` (1)
 - `plan` (21)
@@ -861,7 +864,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (144)
+- `projekt:plan` (146)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -1000,7 +1003,7 @@ finns i `index.md`.
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)
-- `verifiering` (4)
+- `verifiering` (5)
 - `verktyg` (7)
 - `visionite` (1)
 - `wan` (1)

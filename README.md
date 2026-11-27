@@ -8,6 +8,7 @@ men byggs till separata binärer och körs som separata tjänster.
 | ---------------------------------------------------------------------- | ------------------------------------------- |
 | [`docs/agent-platform.md`](docs/agent-platform.md)                     | Arkitektur, körningsflöde, säkerhetsgränser |
 | [`docs/development.md`](docs/development.md)                           | Utveckling i dev, Tilt, portar              |
+| [`docs/delivery-pipeline.md`](docs/delivery-pipeline.md)             | Från dev till produktion: CI, images, Flux   |
 | [`docs/checkpoint-gate-workflow.md`](docs/checkpoint-gate-workflow.md) | Arbetsflöde för stora förändringar          |
 | [`docs/design/`](docs/design)                                          | Designspråk för gränssnittet                |
 

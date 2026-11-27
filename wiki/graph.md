@@ -97,6 +97,7 @@ graph LR
   n_notes_dashboard_tydlighetslyft_av_jamforelserna["Dashboard: tydlighetslyft av jamforelserna"]
   n_notes_dashboarden_ikonerna_hamades_fran_iconifys_cdn_och_gjorde_ssr_sidladdningen_till_en_504["'Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504'"]
   n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt["Definitionsassistent för mål: fylla define-fasen med godkännande per fält"]
+  n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad["Delivery-pipeline för Plan: från dev till prod är nu dokumenterad"]
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater["Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater"]
   n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er["Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er"]
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor["dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor"]
@@ -115,6 +116,7 @@ graph LR
   n_notes_eviga_mal_i_plan_kan_inte_slutforas["Eviga mål i plan - kan inte slutföras"]
   n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append["Expanderade .eml läggs in som riktiga mejl i mappen (APPEND)"]
   n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard["Fälla fixad: talosctl kubeconfig skapar inga dubbletter längre (talos-kubeconfig + shell-guard)"]
+  n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api["Fasmaskinen for mal ar nu implementerad i Plan API"]
   n_notes_feedback_loop_ai_uppdaterar_mailreglerna_och_analyserar_om_mejlet["Feedback-loop: AI uppdaterar mailreglerna och analyserar om mejlet"]
   n_notes_figma_lokala_fonter_pa_linux_figma_agent_linux["Figma lokala fonter på Linux: figma-agent-linux"]
   n_notes_flannel_vxlan_mac_kollision_blockerar_controlplane_2_webhooks["Flannel VXLAN MAC-kollision blockerar controlplane-2 webhooks"]
@@ -710,6 +712,7 @@ graph LR
   n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt --> n_notes_agentens_maldefinition_gar_via_human_gate
   n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt --> n_notes_malfaserna_ar_gemensamma_for_alla_mal_i_plan
   n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt --> n_summaries_definitionsassistent_for_mal_define_fasen
+  n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad --> n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_redigerare_och_agarskap_for_relationer_i_pappa
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_relationer_mellan_kandidater_i_pappa_symmetriska_par_med_styrka_1_10
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor --> n_entities_pxe_server
@@ -728,6 +731,8 @@ graph LR
   n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append --> n_notes_moderposten_arkiveras_nar_eml_bilagorna_har_lagts_in
   n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
   n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
+  n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_concepts_anvanda_agenter_i_plan
+  n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_handelsen_har_ingen_egen_farg
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_standardkalender_i_plan
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_valfri_fargkod_pa_kalendrar
@@ -854,6 +859,7 @@ graph LR
   n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_concepts_anvanda_agenter_i_plan
   n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_notes_anvandarytan_for_agenten_ska_vara_event_driven_och_asynkron
   n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi
+  n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten --> n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api
   n_notes_manuell_sortering_av_mal_pa_priority --> n_notes_mal_kan_ha_due_datum_deadline
   n_notes_marknadslage_panel_hogst_upp_pa_personer_i_pappa --> n_notes_it_arbetsplatser_i_sundsvall_3_469_enligt_scb_yrkesregistret
   n_notes_masterdatabas_i_postgres_schema_import_och_drift_for_it_rekryteringen --> n_notes_erfarenhetsfilter_i_pappa_it_experience_years_med_sparbart_grund
@@ -958,6 +964,7 @@ graph LR
   n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
   n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt
+  n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places --> n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder
   n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats --> n_notes_platsvaljaren_flyttade_till_leader_p
   n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats --> n_notes_skrivbordswidget_som_visar_gor_nu_malet
@@ -1230,7 +1237,7 @@ graph LR
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]], [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]], [[summaries/definitionsassistent-for-mal-define-fasen]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]], [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]], [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]], [[summaries/definitionsassistent-for-mal-define-fasen]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1289,6 +1296,7 @@ graph LR
 - **notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo** <- [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/dashboard-ranking-anvander-benchmark-matchade-kostnader** <- [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]]
 - **notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt** <- [[summaries/definitionsassistent-for-mal-define-fasen]]
+- **notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad** <- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]]
 - **notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]], [[notes/relationer-mellan-kandidater-i-pappa-symmetriska-par-med-styrka-1-10]]
 - **notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er** <- [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]
 - **notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor** <- [[entities/pxe-server]]
@@ -1300,6 +1308,7 @@ graph LR
 - **notes/eviga-mal-i-plan-kan-inte-slutforas** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]]
 - **notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append** <- [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]], [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]]
 - **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
+- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog** <- [[concepts/flux-operator]]
 - **notes/flyttalsparitet-och-orchestratorns-doda-gate-flode** <- [[notes/kunskaps-wiki]]
@@ -1374,7 +1383,7 @@ graph LR
 - **notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan** <- [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]], [[summaries/definitionsassistent-for-mal-define-fasen]]
 - **notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder** <- [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]]
 - **notes/malikoner-anvander-enkel-oversattning-fore-iconify** <- [[notes/nya-mal-far-ikon-fran-titeln]]
-- **notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]]
+- **notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten** <- [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]], [[notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi]], [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]]
 - **notes/manuell-sortering-av-mal-pa-priority** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
 - **notes/marknadslage-panel-hogst-upp-pa-personer-i-pappa** <- [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]], [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]]
 - **notes/masterdatabas-i-postgres-schema-import-och-drift-for-it-rekryteringen** <- [[concepts/poolad-eller-direkt-anslutning-mot-neon]], [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]], [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]], [[notes/pappa-anstallningshistorik-i-cv-format-fix-av-kompetensordboken]], [[notes/pappa-dubblettknapp-mansklig-granskning-och-bestandig-sammanslagning]], [[notes/pappa-uppdragsmatchning-delpoang-forklarande-ranking]], [[notes/pappa-yaml-frolistan-kan-aterskapas-ur-masterdatabasen]], [[notes/rekrytering-av-it-personal-i-sundsvall-marknadsbild-och-frolista]]
@@ -1428,7 +1437,7 @@ graph LR
 - **notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none** <- [[notes/ikonvaljaren-i-plan-api-icons-routen-var-borttagen-och-ikonprovider-none-gjorde-att-inga-ikoner-renderades]]
 - **notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor** <- [[concepts/cloudnative-pg]], [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]]
 - **notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]], [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]]
-- **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
+- **notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg** <- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]], [[notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres]]
 - **notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places** <- [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]]
 - **notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats** <- [[notes/platsvaljaren-flyttade-till-leader-p]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **notes/platsvaljaren-flyttade-till-leader-p** <- [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]]

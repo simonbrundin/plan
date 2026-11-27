@@ -3236,3 +3236,28 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | summaries/definitionsassistent-for-mal-define-fasen -> notes/agentens-maldefinition-gar-via-human-gate
 
+
+## [2026-11-27] ingest | create notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
+- [create] [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] — ny sida från inboxen
+- [archive] 2026-11-27-fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api.md
+
+
+## [2026-11-27] link | notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api -> notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten
+
+
+## [2026-11-27] link | notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten -> notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
+
+
+## [2026-11-27] ingest | create notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
+- [create] [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] — ny sida från inboxen
+- [archive] 2026-11-27-delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad.md
+
+
+## [2026-11-27] link | notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad -> notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg
+
+
+## [2026-11-27] link | notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg -> notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
+
