@@ -5,7 +5,7 @@
 
 use std::sync::Arc;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::messages::Message;
 use crate::provider::{LlmProvider, Model, StreamEvent};
@@ -17,53 +17,143 @@ pub const MAX_TITLE_LENGTH: usize = 50;
 ///
 /// Fälten är de målfält agenten kan fylla. Ett tomt fält betyder att
 /// agenten inte har något att föreslå - då lämnas målets värde orört.
+///
+/// Modellen svarar ofta med `null` för fält den inte har något till -
+/// det läses som tomma värden, precis som i Go.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Definition {
     /// Målets titel.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_som_tom_str")]
     pub title: String,
     /// Målets beskrivning.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_som_tom_str")]
     pub description: String,
     /// Ikonen - en emoji eller ett Iconify-namn.
-    #[serde(default, skip_serializing_if = "String::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_str",
+        skip_serializing_if = "String::is_empty"
+    )]
     pub icon: String,
     /// Om målet ska göras nu.
-    #[serde(default, skip_serializing_if = "is_false")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_false",
+        skip_serializing_if = "is_false"
+    )]
     pub now: bool,
     /// Om målet aldrig slutar.
-    #[serde(default, skip_serializing_if = "is_false")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_false",
+        skip_serializing_if = "is_false"
+    )]
     pub eternal: bool,
     /// Om målet är avsett för en agent.
-    #[serde(default, skip_serializing_if = "is_false")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_false",
+        skip_serializing_if = "is_false"
+    )]
     pub agent: bool,
     /// Slutdatumet ("YYYY-MM-DD").
-    #[serde(default, skip_serializing_if = "String::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_str",
+        skip_serializing_if = "String::is_empty"
+    )]
     pub due: String,
     /// Startdatumet ("YYYY-MM-DD").
-    #[serde(default, skip_serializing_if = "String::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_str",
+        skip_serializing_if = "String::is_empty"
+    )]
     pub start_date: String,
     /// Den uppskattade tidsåtgången, i minuter.
-    #[serde(default, skip_serializing_if = "is_zero_i32")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_noll",
+        skip_serializing_if = "is_zero_i32"
+    )]
     pub estimated_minutes: i32,
     /// Upprepningsregeln ("FREQ=WEEKLY;BYDAY=MO").
-    #[serde(default, skip_serializing_if = "String::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_str",
+        skip_serializing_if = "String::is_empty"
+    )]
     pub recurrence_rule: String,
     /// Schemaläggningsstrategin ("schedule" eller "push").
-    #[serde(default, skip_serializing_if = "String::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_str",
+        skip_serializing_if = "String::is_empty"
+    )]
     pub recurrence_mode: String,
     /// Seriens startdatum ("YYYY-MM-DD").
-    #[serde(default, skip_serializing_if = "String::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_str",
+        skip_serializing_if = "String::is_empty"
+    )]
     pub recurrence_start_date: String,
     /// Taggar som passar målet.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_lista",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     pub tags: Vec<String>,
     /// Platser där målet kan slutföras.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_lista",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     pub places: Vec<String>,
     /// Antaganden agenten gjort.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        default,
+        deserialize_with = "null_som_tom_lista",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     pub notes: Vec<String>,
+}
+
+/// Läser `null` som en tom sträng.
+///
+/// Go lämnar fältet oförändrat när det är `null` - modellen skriver ofta
+/// ut null för fält den inte har något till.
+fn null_som_tom_str<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(deserializer)?.unwrap_or_default())
+}
+
+/// Läser `null` som falskt.
+fn null_som_false<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<bool>::deserialize(deserializer)?.unwrap_or_default())
+}
+
+/// Läser `null` som noll.
+fn null_som_noll<'de, D>(deserializer: D) -> Result<i32, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<i32>::deserialize(deserializer)?.unwrap_or_default())
+}
+
+/// Läser `null` som en tom lista.
+fn null_som_tom_lista<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<Vec<String>>::deserialize(deserializer)?.unwrap_or_default())
 }
 
 /// Om värdet är falskt.
@@ -474,6 +564,21 @@ mod tests {
 
         assert_eq!(definition.title, "Rubrik");
         assert_eq!(definition.description, "Förklaringen fortsättning");
+    }
+
+    #[test]
+    fn null_läses_som_tomma_värden() {
+        let svar = r#"{"title":"Titel","due":null,"start_date":null,"estimated_minutes":null,"tags":null,"places":null,"now":null}"#;
+
+        let definition = tolka_definition(svar).unwrap();
+
+        assert_eq!(definition.title, "Titel");
+        assert_eq!(definition.due, "");
+        assert_eq!(definition.start_date, "");
+        assert_eq!(definition.estimated_minutes, 0);
+        assert!(definition.tags.is_empty());
+        assert!(definition.places.is_empty());
+        assert!(!definition.now);
     }
 
     #[test]
