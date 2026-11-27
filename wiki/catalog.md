@@ -59,6 +59,7 @@ finns i `index.md`.
 | [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] | Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt | note | auth, session, nuxt, go, zitadel, cookie, dev, projekt:plan | 2026-11-27 | 4 |
 | [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] | Automatisk målikon behövde sökord och svenska alias | note | bug, feature, icon, goals, projekt:plan | 2026-11-17 | 0 |
 | [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] | Autonoma AgentRuns som Kubernetes Jobs: lärdomar från E2E-flödet | note | plan, agent, kubernetes, job, e2e, bug, projekt:simon | 2026-11-24 | 0 |
+| [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]] | Avsla ett verifieringsomdome ar ett beslut precis som att godkanna det | note | verifiering, human-gate, agent, gransnitt, projekt:plan | 2026-11-28 | 1 |
 | [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] | Barnmärke på mål - antal undermål visas överallt | note | feature, goals, nuxt, ui, projekt:plan | 2026-11-22 | 0 |
 | [[notes/barnordning-foljer-beroenden-i-malsidan]] | Barnordning följer beroenden i målsidan | note | feature, frontend, mål, bugg, projekt:plan | 2026-11-20 | 1 |
 | [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]] | bash-fallgropar i pxe-flash: tab som IFS-whitespace och read med for få variabler | note | bash, bug, pxe, cli, projekt:simon | 2026-10-23 | 1 |
@@ -117,7 +118,7 @@ finns i `index.md`.
 | [[notes/eviga-mal-i-plan-kan-inte-slutforas]] | Eviga mål i plan - kan inte slutföras | note | feature, goals, plan, ui, go, nuxt, projekt:simon | 2026-11-17 | 4 |
 | [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] | Expanderade .eml läggs in som riktiga mejl i mappen (APPEND) | note | feature, mail, imap, projekt:pappa | 2026-11-19 | 2 |
 | [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] | Fälla fixad: talosctl kubeconfig skapar inga dubbletter längre (talos-kubeconfig + shell-guard) | note | kubeconfig, cluster1, talosctl, fälla, projekt:infrastructure | 2026-11-25 | 2 |
-| [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] | Fasmaskinen for mal ar nu implementerad i Plan API | note | agent, goals, implementation, verifiering, human-gate, projekt:plan | 2026-11-27 | 2 |
+| [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] | Fasmaskinen for mal ar nu implementerad i Plan API | note | agent, goals, implementation, verifiering, human-gate, projekt:plan | 2026-11-28 | 3 |
 | [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] | Feedback-loop: AI uppdaterar mailreglerna och analyserar om mejlet | note | mailagent, ai, feedback, pappa, session, projekt:pappa | 2026-11-19 | 0 |
 | [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] | Figma lokala fonter på Linux: figma-agent-linux | note | figma, fonts, linux, omarchy, projekt:simon | 2026-11-23 | 0 |
 | [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] | Flannel VXLAN MAC-kollision blockerar controlplane-2 webhooks | note | incident, flux, flannel, networking, projekt:infrastructure | 2026-11-26 | 0 |
@@ -510,7 +511,7 @@ finns i `index.md`.
 - `admin` (1)
 - `admin-token` (1)
 - `age` (1)
-- `agent` (37)
+- `agent` (38)
 - `agent-api` (1)
 - `agents` (2)
 - `ai` (3)
@@ -671,6 +672,7 @@ finns i `index.md`.
 - `grafana` (1)
 - `granser` (1)
 - `granskning` (3)
+- `gransnitt` (1)
 - `granssnitt` (1)
 - `grundare` (1)
 - `gränssnitt` (1)
@@ -686,7 +688,7 @@ finns i `index.md`.
 - `hostname` (1)
 - `http` (2)
 - `http-routing` (1)
-- `human-gate` (8)
+- `human-gate` (9)
 - `hyprland` (1)
 - `händelser` (1)
 - `icon` (5)
@@ -869,7 +871,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (148)
+- `projekt:plan` (149)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -1008,7 +1010,7 @@ finns i `index.md`.
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)
-- `verifiering` (5)
+- `verifiering` (6)
 - `verktyg` (7)
 - `visionite` (1)
 - `wan` (1)

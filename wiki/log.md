@@ -3284,3 +3284,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24]] — ny sida från inboxen
 - [archive] 2026-11-27-skogsduvan-varmepumpen-styrs-fran-hogra-sidofaltet-ir-trappa-5-7-17-20-24.md
 
+
+## [2026-11-28] ingest | create notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det
+- [create] [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]] — ny sida från inboxen
+- [archive] 2026-11-28-avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det.md
+
+
+## [2026-11-28] link | notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det -> notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
+
+
+## [2026-11-28] link | notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api -> notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det
+

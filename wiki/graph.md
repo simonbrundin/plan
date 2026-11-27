@@ -58,6 +58,7 @@ graph LR
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt["Authflytten i plan: sessionen ligger nu i Go API:t, inte i Nuxt"]
   n_notes_automatisk_malikon_behovde_sokord_och_svenska_alias["Automatisk målikon behövde sökord och svenska alias"]
   n_notes_autonoma_agentruns_som_kubernetes_jobs_lardomar_fran_e2e_flodet["Autonoma AgentRuns som Kubernetes Jobs: lärdomar från E2E-flödet"]
+  n_notes_avsla_ett_verifieringsomdome_ar_ett_beslut_precis_som_att_godkanna_det["Avsla ett verifieringsomdome ar ett beslut precis som att godkanna det"]
   n_notes_barnmarke_pa_mal_antal_undermal_visas_overallt["Barnmärke på mål - antal undermål visas överallt"]
   n_notes_barnordning_foljer_beroenden_i_malsidan["Barnordning följer beroenden i målsidan"]
   n_notes_bash_fallgropar_i_pxe_flash_tab_som_ifs_whitespace_och_read_med_for_fa_variabler["bash-fallgropar i pxe-flash: tab som IFS-whitespace och read med for få variabler"]
@@ -684,6 +685,7 @@ graph LR
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_started_finished_kunde_inte_rensas_i_plan_null_ignorerades_i_go_api_t
   n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt --> n_notes_plan_api_webblasaren_anropar_api_t_direkt_nuxt_proxyn_ar_borttagen
+  n_notes_avsla_ett_verifieringsomdome_ar_ett_beslut_precis_som_att_godkanna_det --> n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api
   n_notes_barnordning_foljer_beroenden_i_malsidan --> n_notes_sortering_av_undermal_med_piltangenterna_var_trasig_i_plan
   n_notes_bash_fallgropar_i_pxe_flash_tab_som_ifs_whitespace_och_read_med_for_fa_variabler --> n_entities_pxe_server
   n_notes_beslut_atgardsprofil_per_uppgift_valfri_verifiering_och_enhetlig_malterminologi --> n_concepts_anvanda_agenter_i_plan
@@ -736,6 +738,7 @@ graph LR
   n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
   n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_concepts_anvanda_agenter_i_plan
+  n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_avsla_ett_verifieringsomdome_ar_ett_beslut_precis_som_att_godkanna_det
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_handelsen_har_ingen_egen_farg
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_standardkalender_i_plan
@@ -1289,6 +1292,7 @@ graph LR
 - **notes/aterstaende-funktioner-i-agentplattformen** <- [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
 - **notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt** <- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]]
 - **notes/automatisk-malikon-behovde-sokord-och-svenska-alias** <- [[notes/nya-mal-far-ikon-fran-titeln]]
+- **notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det** <- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]]
 - **notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler** <- [[entities/pxe-server]]
 - **notes/beslut-atgardsprofil-per-uppgift-valfri-verifiering-och-enhetlig-malterminologi** <- [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
 - **notes/beslut-pi-durable-satts-pa-hyllan-for-tillfallet** <- [[notes/pi-durable-1-4-0-api-avvikelser-fran-blogginlagget-och-tva-gotchas]], [[notes/pi-durable-demo-paketet-earendil-works-pi-durable-fungerar]], [[notes/pi-durable-fungerar-med-minimax-coding-plan-anthropic-messages-api]]
@@ -1316,7 +1320,7 @@ graph LR
 - **notes/eviga-mal-i-plan-kan-inte-slutforas** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]]
 - **notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append** <- [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]], [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]]
 - **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
-- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
+- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog** <- [[concepts/flux-operator]]
 - **notes/flyttalsparitet-och-orchestratorns-doda-gate-flode** <- [[notes/kunskaps-wiki]]

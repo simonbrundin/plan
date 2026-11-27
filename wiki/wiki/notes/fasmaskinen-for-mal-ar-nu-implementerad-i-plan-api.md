@@ -3,9 +3,9 @@ title: Fasmaskinen for mal ar nu implementerad i Plan API
 type: note
 tags: [agent, goals, implementation, verifiering, human-gate, projekt:plan]
 created: 2026-11-27
-updated: 2026-11-27
+updated: 2026-11-28
 status: active
-related: [concepts/anvanda-agenter-i-plan, notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]
+related: [concepts/anvanda-agenter-i-plan, notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det, notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]
 ---
 
 VAD: fasmaskinen och den valfria verifieringen finns nu i Plan API (branch feat/goal-phase-machine, OpenSpec-change add-goal-verification-and-phase-transitions).
@@ -23,5 +23,6 @@ GALLER FRAMOT: agenten (block 4 i tasks.md) ska ga via fasendpointe, respektera 
 
 ## Relaterade
 
+- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]]
 - [[concepts/anvanda-agenter-i-plan]]
 - [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
