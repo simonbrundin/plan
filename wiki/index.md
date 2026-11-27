@@ -7,9 +7,9 @@ och gå sedan ner på sidorna som är relevanta.
 | Typ | Antal |
 |---|---|
 | Entiteter | 6 |
-| Koncept | 20 |
+| Koncept | 21 |
 | Sammanfattningar | 8 |
-| Noter | 431 |
+| Noter | 432 |
 
 ## Entiteter
 
@@ -39,6 +39,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[concepts/metallb]] - MetalLB är en load-balancer-implementation för Kubernetes som fungerar på layer 2 (L2) i nätverksstacken. _(uppdaterad 2026-10-24)_
 - [[concepts/neon-cli-var-neon-och-neon-ts-maste-ligga]] - Neons CLI hittar projektkopplingen och policyfilen genom två separata regler: _(uppdaterad 2026-11-02)_
 - [[concepts/oidc]] - OIDC är protokollet som låter Zitadel-autentiserade användare få åtkomst till Kubernetes API-servern. _(uppdaterad 2026-10-23)_
+- [[concepts/openclaw]] - OpenClaw är AI-agent-gatewaysen i klustret - en gateway-pod med PVC, OIDC-skydd via Envoy Gateway och MiniMax som modellleverantör. _(uppdaterad 2026-11-27)_
 - [[concepts/poolad-eller-direkt-anslutning-mot-neon]] - Neon ger TVÅ endpoints för samma databas. _(uppdaterad 2026-11-02)_
 - [[concepts/sops]] - SOPS krypterar secrets i git med age - Flux dekrypterar dem via sops-age och provider: sops. _(uppdaterad 2026-11-27)_
 - [[concepts/zitadel]] - Zitadel är klustrets self-hosted identity provider och utfärdar OIDC-tokens som API-servern accepterar. _(uppdaterad 2026-11-26)_
@@ -284,6 +285,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] - `kubectl --context oidc-cluster1` gav "You must be logged in to the server (Unauthorized)" _(uppdaterad 2026-11-25)_
 - [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_
+- [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]] - OpenClaw crashloopar med "Refusing to bind gateway to lan without auth" eftersom auth.mode=none inte räcker. Lösningen är auth.mode=trusted-proxy plus att Envoy sätter x-forwarded-user. _(uppdaterad 2026-11-27)_
 - [[notes/wordlist-kallor]] - Ordlistan finns på två ställen och måste hållas i synk. _(uppdaterad 2026-10-21)_
 - [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] - Fynd: usePriorityToggle växlade prioritetssidan vid varje tryck på 'p', samtidigt som usePriorityMode försökte aktivera viktläget me... _(uppdaterad 2026-11-20)_
 - [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]] - 2026-11-02: pappa-databasen provisionerad på Neon (projekt 'konsulter', _(uppdaterad 2026-11-03)_

@@ -22,6 +22,7 @@ graph LR
   n_concepts_metallb["MetalLB"]
   n_concepts_neon_cli_var_neon_och_neon_ts_maste_ligga["Neon CLI: var .neon och neon.ts måste ligga"]
   n_concepts_oidc["OIDC"]
+  n_concepts_openclaw["OpenClaw"]
   n_concepts_poolad_eller_direkt_anslutning_mot_neon["Poolad eller direkt anslutning mot Neon"]
   n_concepts_sops["SOPS"]
   n_concepts_zitadel["Zitadel"]
@@ -262,6 +263,7 @@ graph LR
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat["OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat"]
   n_notes_omarchy_idle_lasning_stangs_av_via_shell_json_inte_hypridle_conf["Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf)"]
   n_notes_one_com_lagrar_mappar_i_nfd_normalisera_i_getfoldername["one.com lagrar mappar i NFD - normalisera i getFolderName"]
+  n_notes_openclaw_gateway_refuserar_bind_lan_utan_auth["OpenClaw vägrar binda till LAN utan auth - använd trusted-proxy via Envoy"]
   n_notes_p_tangenten_konfliktade_med_viktlaget_pa_priority["p-tangenten konfliktade med viktläget på /priority"]
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran["På Rock-plattorna finns ingen bootloader i hårdvaran"]
   n_notes_pappa_admin_token_ett_stalle_for_token_inte_handpallagning_per_miljo["pappa: admin-token - ett stalle for token, inte handpallagning per miljo"]
@@ -531,6 +533,9 @@ graph LR
   n_concepts_oidc --> n_concepts_authentik
   n_concepts_oidc --> n_concepts_envoy_gateway
   n_concepts_oidc --> n_entities_kubernetes
+  n_concepts_openclaw --> n_concepts_envoy_gateway
+  n_concepts_openclaw --> n_concepts_oidc
+  n_concepts_openclaw --> n_notes_openclaw_gateway_refuserar_bind_lan_utan_auth
   n_concepts_poolad_eller_direkt_anslutning_mot_neon --> n_notes_masterdatabas_i_postgres_schema_import_och_drift_for_it_rekryteringen
   n_concepts_sops --> n_entities_kubernetes
   n_concepts_sops --> n_entities_talos_linux
@@ -843,6 +848,8 @@ graph LR
   n_notes_nya_mal_far_ikon_fran_titeln --> n_notes_malikoner_anvander_enkel_oversattning_fore_iconify
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
+  n_notes_openclaw_gateway_refuserar_bind_lan_utan_auth --> n_concepts_openclaw
+  n_notes_openclaw_gateway_refuserar_bind_lan_utan_auth --> n_concepts_envoy_gateway
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_entities_pxe_server
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_notes_rk3399_s_bootrom_soker_spi_emmc_sd_usb_hardkodat
   n_notes_pa_rock_plattorna_finns_ingen_bootloader_i_hardvaran --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
@@ -1166,7 +1173,7 @@ graph LR
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
 - **concepts/cloudnative-pg** <- [[concepts/authentik]], [[concepts/zitadel]], [[entities/kubernetes]], [[notes/cnpg-initdb-agarollen-skapas-fore-postinitsql]], [[notes/cnpg-managed-roles-secretet-saknar-losenord-om-username-avviker-fran-rollnamnet]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
-- **concepts/envoy-gateway** <- [[concepts/http-routing-flow]], [[concepts/kube-prometheus]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/zitadel]], [[entities/kubernetes]]
+- **concepts/envoy-gateway** <- [[concepts/http-routing-flow]], [[concepts/kube-prometheus]], [[concepts/metallb]], [[concepts/oidc]], [[concepts/openclaw]], [[concepts/zitadel]], [[entities/kubernetes]], [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]]
 - **concepts/flux-operator** <- [[concepts/gitops]], [[concepts/kyverno-policies]], [[concepts/sops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]], [[summaries/flux-components]], [[summaries/infrastructure-flux]], [[summaries/longhorn-disk-guide]]
 - **concepts/gitops** <- [[concepts/cert-manager]], [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[summaries/infrastructure-flux]]
 - **concepts/http-routing-flow** <- [[concepts/cloudflare-tunnel]], [[concepts/envoy-gateway]], [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]]
@@ -1177,7 +1184,8 @@ graph LR
 - **concepts/longhorn** <- [[concepts/cloudnative-pg]], [[entities/kubernetes]], [[notes/usb-disken-acer-wd-320gb-status-och-longhorn-bedomning]], [[notes/usb-ssd-orna-har-kvar-giltig-longhorn-identitet-ssd-1-med-gamla-replikor-de-ar-bara-inte-registrerade-i-longhorn]], [[notes/worker-1-ansluter-till-cluster1-2026-11-26-install-config-applicerad-via-pxe-boot-och-noden-gick-med]], [[notes/worker-1-longhorn-anvager-ephemeral-disken-inte-usb-ssd-n-och-alla-workers-far-samma-behandling]], [[summaries/longhorn-disk-guide]]
 - **concepts/metallb** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/neon-cli-var-neon-och-neon-ts-maste-ligga** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
-- **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/zitadel]], [[entities/kubernetes]]
+- **concepts/oidc** <- [[concepts/authentik]], [[concepts/envoy-gateway]], [[concepts/openclaw]], [[concepts/zitadel]], [[entities/kubernetes]]
+- **concepts/openclaw** <- [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]]
 - **concepts/poolad-eller-direkt-anslutning-mot-neon** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/sops** <- [[concepts/cloudflare-tunnel]], [[concepts/flux-operator]], [[concepts/gitops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]]
 - **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
@@ -1319,6 +1327,7 @@ graph LR
 - **notes/nya-mal-far-ikon-fran-titeln** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat** <- [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]]
 - **notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername** <- [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]]
+- **notes/openclaw-gateway-refuserar-bind-lan-utan-auth** <- [[concepts/openclaw]]
 - **notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran** <- [[entities/pxe-server]], [[notes/radxa-bradena-behover-bootmedium-men-talos-och-bootloader-maste-ligga-pa-skilda-medium]], [[notes/rk3399-s-bootrom-soker-spi-emmc-sd-usb-hardkodat]], [[notes/u-boot-2026-01-rock-4c-saknar-bootfile-boot-script-dhcp-natverksboot-dor-direkt]]
 - **notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo** <- [[notes/pappa-hemlighet-i-build-context-env-i-docker-imagen]]
 - **notes/pappa-anstallningshistorik-i-cv-format-fix-av-kompetensordboken** <- [[notes/erfarenhetsfilter-i-pappa-it-experience-years-med-sparbart-grund]], [[notes/masterdatabas-i-postgres-schema-import-och-drift-for-it-rekryteringen]], [[notes/pappa-yaml-frolistan-kan-aterskapas-ur-masterdatabasen]], [[notes/rekrytering-av-it-personal-i-sundsvall-marknadsbild-och-frolista]], [[notes/utbyggnad-av-pappas-personlista-bolagsregister-konferensbios-gav-140-namngivna-personer]]

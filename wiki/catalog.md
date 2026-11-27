@@ -23,6 +23,7 @@ finns i `index.md`.
 | [[concepts/metallb]] | MetalLB | concept | metallb, load-balancer, networking, l2, ip-address-pool | 2026-10-24 | 2 |
 | [[concepts/neon-cli-var-neon-och-neon-ts-maste-ligga]] | Neon CLI: var .neon och neon.ts måste ligga | concept | neon, cli, neon.ts, projekt:tmp | 2026-11-02 | 0 |
 | [[concepts/oidc]] | OIDC | concept | oidc, oauth2, identity-provider, authentication, rbac, kubernetes | 2026-10-23 | 4 |
+| [[concepts/openclaw]] | OpenClaw | concept | openclaw, ai, gateway, oidc, kubernetes | 2026-11-27 | 3 |
 | [[concepts/poolad-eller-direkt-anslutning-mot-neon]] | Poolad eller direkt anslutning mot Neon | concept | neon, postgres, pgbouncer, drift, projekt:tmp | 2026-11-02 | 1 |
 | [[concepts/sops]] | SOPS | concept | secrets, encryption, age, kubernetes, gitops | 2026-11-27 | 6 |
 | [[concepts/zitadel]] | Zitadel | concept | zitadel, identity-provider, oidc, sso, authentication, rbac | 2026-11-26 | 8 |
@@ -263,6 +264,7 @@ finns i `index.md`.
 | [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] | OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat | note | oidc, auth, zitadel, cluster1, incident, projekt:simon | 2026-11-25 | 2 |
 | [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] | Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf) | note | omarchy, hyprland, bug, session, projekt:dotfiles | 2026-11-23 | 0 |
 | [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] | one.com lagrar mappar i NFD - normalisera i getFolderName | note | mail, imap, one.com, unicode, go, projekt:pappa | 2026-11-16 | 0 |
+| [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]] | OpenClaw vägrar binda till LAN utan auth - använd trusted-proxy via Envoy | note | openclaw, envoy-gateway, oidc, bug, projekt:simon | 2026-11-27 | 2 |
 | [[notes/p-tangenten-konfliktade-med-viktlaget-pa-priority]] | p-tangenten konfliktade med viktläget på /priority | note | bug, frontend, kortkommandon, projekt:plan | 2026-11-20 | 0 |
 | [[notes/pa-rock-plattorna-finns-ingen-bootloader-i-hardvaran]] | På Rock-plattorna finns ingen bootloader i hårdvaran | note | pxe, radxa, uboot, fakta, projekt:simon | 2026-10-22 | 4 |
 | [[notes/pappa-admin-token-ett-stalle-for-token-inte-handpallagning-per-miljo]] | pappa: admin-token - ett stalle for token, inte handpallagning per miljo | note | pappa, hemligheter, drift, admin-token, projekt:pappa | 2026-11-17 | 4 |
@@ -484,7 +486,7 @@ finns i `index.md`.
 - `agent` (27)
 - `agent-api` (1)
 - `agents` (2)
-- `ai` (2)
+- `ai` (3)
 - `alerting` (1)
 - `algoritm` (1)
 - `analys` (1)
@@ -520,7 +522,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (102)
+- `bug` (103)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -595,6 +597,7 @@ finns i `index.md`.
 - `enhet` (1)
 - `enheter` (2)
 - `envoy` (4)
+- `envoy-gateway` (1)
 - `envoys-gateway` (1)
 - `estimated-cost` (1)
 - `etcd` (1)
@@ -620,7 +623,7 @@ finns i `index.md`.
 - `fälla` (1)
 - `färg` (4)
 - `förenkling` (1)
-- `gateway` (1)
+- `gateway` (2)
 - `gateway-api` (3)
 - `gdpr` (10)
 - `ghcr` (1)
@@ -699,7 +702,7 @@ finns i `index.md`.
 - `kostnad` (2)
 - `kubeconfig` (3)
 - `kubelet` (1)
-- `kubernetes` (26)
+- `kubernetes` (27)
 - `kunskapsbas` (2)
 - `kurering` (1)
 - `kustomize` (5)
@@ -777,12 +780,13 @@ finns i `index.md`.
 - `oauth2` (3)
 - `observability` (1)
 - `offen` (1)
-- `oidc` (6)
+- `oidc` (8)
 - `omarchy` (11)
 - `omdöping` (1)
 - `one.com` (1)
 - `op` (1)
 - `openapi` (2)
+- `openclaw` (2)
 - `operator` (1)
 - `ordlista` (2)
 - `oversikt` (1)
@@ -835,7 +839,7 @@ finns i `index.md`.
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
-- `projekt:simon` (90)
+- `projekt:simon` (91)
 - `projekt:stk` (11)
 - `projekt:tmp` (11)
 - `projekt:typetrainer` (1)
