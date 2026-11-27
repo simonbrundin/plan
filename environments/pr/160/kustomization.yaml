@@ -1,0 +1,28 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base
+namespace: plan-pr-160
+patches:
+- patch: "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: plan-pr-160\n  labels:\n\
+    \    app.kubernetes.io/managed-by: flux\n    preview: 'true'\n    pr-number: '160'\n"
+  target:
+    kind: Namespace
+    name: plan
+- patch: "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: nuxt-app\n  labels:\n\
+    \    app: plan\n    preview: 'true'\nspec:\n  replicas: 1\n  template:\n    spec:\n\
+    \      containers:\n      - name: plan\n        image: ghcr.io/simonbrundin/plan/pr-preview:160-9ce4fa56afd716249e8482677e9c59c41735159b@sha256:9053a81e215543a64b8f144e8db13d63543baea4ab68237be3b4b2e7f4813c2b\n\
+    \        resources:\n          requests:\n            memory: 64Mi\n         \
+    \   cpu: 50m\n          limits:\n            memory: 128Mi\n            cpu: 200m\n"
+  target:
+    kind: Deployment
+    name: nuxt-app
+- patch: "apiVersion: gateway.networking.k8s.io/v1\nkind: HTTPRoute\nmetadata:\n \
+    \ name: plan-route\n  annotations:\n    external-dns.alpha.kubernetes.io/hostname:\
+    \ plan-pr-160.simonbrundin.com.\nspec:\n  hostnames:\n  - plan-pr-160.simonbrundin.com\n"
+  target:
+    kind: HTTPRoute
+    name: plan-route
