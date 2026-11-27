@@ -19,10 +19,11 @@ import {
 // goApiBase returns the server-side URL to the Go API.
 export function goApiBase(): string {
   const config = useRuntimeConfig();
+  const publicUrl = config.public.goApiUrl || "";
+  // En relativ URL fungerar inte server-side - fetch kräver en absolut URL.
+  const absoluteUrl = publicUrl.startsWith("http") ? publicUrl : "";
   return (
-    config.goApiInternalUrl ||
-    config.public.goApiUrl ||
-    "http://localhost:8080/api/v1"
+    config.goApiInternalUrl || absoluteUrl || "http://localhost:8080/api/v1"
   );
 }
 
