@@ -3124,8 +3124,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/kunskaps-wiki -> notes/flyttalsparitet-och-orchestratorns-doda-gate-flode
 
-
 ## [2026-11-27] ingest | create notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen
 - [create] [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] — ny sida från inboxen
 - [archive] 2026-11-27-plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen.md
 
+## [2026-11-27] source | 2026-11-27-prod-patch-utan-namespace-bryter-flux-builden.md
+
+## [2026-11-27] ingest | create notes/prod-patch-utan-namespace-bryter-flux-builden
+- [create] [[notes/prod-patch-utan-namespace-bryter-flux-builden]] — ny sida från inboxen
+- [archive] 2026-11-27-prod-patch-utan-namespace-bryter-flux-builden.md
+
+## [2026-11-27] link | summaries/prod-patch-utan-namespace-bryter-flux-builden -> notes/prod-patch-utan-namespace-bryter-flux-builden

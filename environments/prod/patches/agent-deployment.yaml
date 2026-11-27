@@ -6,9 +6,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: agent-api
+  # Basen sätter namespace på agent-API:t, så patchen måste matcha
+  # samma namespace - annars hittar kustomize inget att patcha.
+  namespace: plan
 spec:
   template:
     spec:
       containers:
         - name: agent-api
-          image: ghcr.io/simonbrundin/rust-agent:sha-1fdc501
+          image: ghcr.io/simonbrundin/plan-agent:sha-a1226a0

@@ -9,6 +9,11 @@
 # Tidsstämplar normaliseras till epok innan jämförelsen: Go renderar dem i
 # serverns tidszon, Rust i UTC. Det är samma tidpunkt, men olika text.
 #
+# Kalenderhändelser sorteras om före jämförelsen. Go lägger de överrides som
+# inte matchar någon expanderad förekomst sist i listan, i Go-kartans
+# iterationordning - som är slumpmässig. Rust gör samma sak, men i en annan
+# slumpordning. Utan sortering är jämförelsen flitig.
+#
 # Användning:
 #   scripts/compare-api-parity.sh [go-url] [rust-url]
 #
@@ -124,7 +129,12 @@ def normalisera_tid:
         | $bas - $offset)
   else . end;
 
-walk(normalisera_tid)
+def sortera_händelser:
+  if type == "array" and length > 0 and (.[0] | type == "object" and has("occurrence_id"))
+  then sort_by(.id, .occurrence_id)
+  else . end;
+
+walk(normalisera_tid) | walk(sortera_händelser)
 JQ
 ) 2>/dev/null
 }

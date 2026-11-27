@@ -317,6 +317,7 @@ graph LR
   n_notes_priority_vyn_byter_namn_till_gor_nu["Priority-vyn byter namn till Gör nu"]
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat["Priorityfilter ska behandla saknat started som ej påbörjat"]
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte["Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte"]
+  n_notes_prod_patch_utan_namespace_bryter_flux_builden["Prod-patch utan namespace bryter Flux-builden"]
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode["PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde"]
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text["PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text"]
   n_notes_pxe_bootloop_initramfs_startar_om_for_att_boota_installerad_talos_pa_emmc["PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC"]
@@ -478,6 +479,7 @@ graph LR
   n_summaries_llm_wiki_karpathy["Sammanfattning: LLM Wiki (Karpathy)"]
   n_summaries_longhorn_disk_guide["Sammanfattning: Diskar i Longhorn"]
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn["PinchBench: verifierade API-fakta och datafel i Value-vyn"]
+  n_summaries_prod_patch_utan_namespace_bryter_flux_builden["Sammanfattning: prod-patch utan namespace bryter Flux-builden"]
   n_concepts_anvanda_agenter_i_plan --> n_notes_dokumentationssidor_i_granssnittet_docs
   n_concepts_anvanda_agenter_i_plan --> n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln
   n_concepts_anvanda_agenter_i_plan --> n_notes_agent_dock_pa_malsiden_ersatter_de_tre_agentpanelerna
@@ -937,6 +939,7 @@ graph LR
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat --> n_notes_mal_kan_ha_due_datum_deadline
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_entities_kubernetes
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_notes_klustret_har_byggts_om_bara_kube_system_flux_och_appar_saknas_2026_11_23
+  n_notes_prod_patch_utan_namespace_bryter_flux_builden --> n_summaries_prod_patch_utan_namespace_bryter_flux_builden
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_entities_pxe_server
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_notes_recovery_av_en_rock_worker_kraver_fysisk_rattning_esp_filen_pa_emmc_fangar_booten
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text --> n_entities_pxe_server
@@ -1183,6 +1186,7 @@ graph LR
   n_summaries_longhorn_disk_guide --> n_concepts_flux_operator
   n_summaries_longhorn_disk_guide --> n_concepts_longhorn
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn --> n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv
+  n_summaries_prod_patch_utan_namespace_bryter_flux_builden --> n_notes_prod_patch_utan_namespace_bryter_flux_builden
 ```
 
 ## Backlinks
@@ -1388,6 +1392,7 @@ graph LR
 - **notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko** <- [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
 - **notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
 - **notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte** <- [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]]
+- **notes/prod-patch-utan-namespace-bryter-flux-builden** <- [[summaries/prod-patch-utan-namespace-bryter-flux-builden]]
 - **notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode** <- [[entities/pxe-server]]
 - **notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text** <- [[entities/pxe-server]]
 - **notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc** <- [[entities/pxe-server]]
@@ -1506,3 +1511,4 @@ graph LR
 - **summaries/llm-wiki-karpathy** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **summaries/longhorn-disk-guide** <- [[concepts/longhorn]], [[entities/talos-linux]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]]
 - **summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn** <- [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]]
+- **summaries/prod-patch-utan-namespace-bryter-flux-builden** <- [[notes/prod-patch-utan-namespace-bryter-flux-builden]]

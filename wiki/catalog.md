@@ -318,6 +318,7 @@ finns i `index.md`.
 | [[notes/priority-vyn-byter-namn-till-gor-nu]] | Priority-vyn byter namn till Gör nu | note | feature, frontend, constraints, projekt:plan | 2026-11-22 | 0 |
 | [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] | Priorityfilter ska behandla saknat started som ej påbörjat | note | bug, priority, filter, projekt:plan | 2026-11-17 | 1 |
 | [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] | Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte | note | kubernetes, talos, drift, projekt:plan | 2026-11-25 | 2 |
+| [[notes/prod-patch-utan-namespace-bryter-flux-builden]] | Prod-patch utan namespace bryter Flux-builden | note | bug, flux, kustomize, projekt:plan | 2026-11-27 | 1 |
 | [[notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode]] | PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde | note | pxe, talos, infrastructure, worker-9, projekt:simon | 2026-11-17 | 2 |
 | [[notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text]] | PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text | note | pxe, bug, uboot, rock4cplus, projekt:infrastructure | 2026-10-23 | 4 |
 | [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] | PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC | note | pxe, talos, worker-2, felsokning, projekt:infrastructure | 2026-11-17 | 2 |
@@ -479,6 +480,7 @@ finns i `index.md`.
 | [[summaries/llm-wiki-karpathy]] | Sammanfattning: LLM Wiki (Karpathy) | summary | wiki, meta, kunskapsbas, llm, karpathy | 2026-11-23 | 4 |
 | [[summaries/longhorn-disk-guide]] | Sammanfattning: Diskar i Longhorn | summary | longhorn, storage, talos, kubernetes | 2026-10-24 | 3 |
 | [[summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn]] | PinchBench: verifierade API-fakta och datafel i Value-vyn | summary | projekt:dashboard | 2026-11-26 | 1 |
+| [[summaries/prod-patch-utan-namespace-bryter-flux-builden]] | Sammanfattning: prod-patch utan namespace bryter Flux-builden | summary | flux, kustomize, bug, projekt:plan | 2026-11-27 | 1 |
 
 ## Taggar
 
@@ -528,7 +530,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (105)
+- `bug` (107)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -619,7 +621,7 @@ finns i `index.md`.
 - `filter` (2)
 - `fix` (1)
 - `flannel` (1)
-- `flux` (13)
+- `flux` (15)
 - `flux-operator` (1)
 - `flytt` (1)
 - `focus` (1)
@@ -711,7 +713,7 @@ finns i `index.md`.
 - `kubernetes` (27)
 - `kunskapsbas` (2)
 - `kurering` (1)
-- `kustomize` (5)
+- `kustomize` (7)
 - `kvadrat` (1)
 - `kvm` (6)
 - `kvot` (1)
@@ -841,7 +843,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (130)
+- `projekt:plan` (132)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)

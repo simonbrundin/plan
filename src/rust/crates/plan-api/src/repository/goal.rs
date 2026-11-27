@@ -404,7 +404,9 @@ pub async fn get_all_dependencies(
     Ok(rader
         .iter()
         .map(|rad| crate::models::goal::GoalDependency {
-            id: rad.get::<i64, _>(0),
+            // goal_dependencies.id är INTEGER i schemat - läses som i32
+            // och görs om till i64, som API-modellen använder.
+            id: rad.get::<i32, _>(0) as i64,
             goal_id: rad.get::<i32, _>(1) as i64,
             depends_on_id: rad.get::<i32, _>(2) as i64,
             created: rad.get::<chrono::DateTime<chrono::Utc>, _>(3),

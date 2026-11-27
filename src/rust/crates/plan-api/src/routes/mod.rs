@@ -63,14 +63,44 @@ pub fn router(pool: Option<sqlx::postgres::PgPool>, config: &Config) -> Router {
 
     Router::new()
         .route("/docs", get(docs_redirect))
+        // "/docs/" måste ha en egen route - axums jokertecken matchar
+        // inte en tom segfault. Gin serverar sidan på "/docs/".
+        .route("/docs/", get(scalar_ui))
         .route("/docs/{*any}", get(scalar_ui))
         .route("/docs/openapi.json", get(openapi_json))
         .merge(api)
         .fallback(gins_svar)
         .method_not_allowed_fallback(gins_svar)
         .layer(axum::middleware::from_fn(cors))
+        .layer(axum::middleware::from_fn(panikfångare))
         .layer(TraceLayer::new_for_http())
         .with_state(state)
+}
+
+/// Fångar paniker i handlerna och svarar med 500.
+///
+/// Go läser rader med `lib/pq`, som klarar både INT4 och INT8 i samma
+/// fält. Rust läser kolumner med exakt typ - en kolumn av fel typ ger
+/// då en panic, och anropet hänger bara. Med den här lagren blir
+/// svaret i stället ett 500, som i Go.
+async fn panikfångare(request: axum::extract::Request, next: axum::middleware::Next) -> Response {
+    use futures_util::FutureExt;
+
+    let svar = std::panic::AssertUnwindSafe(next.run(request))
+        .catch_unwind()
+        .await;
+
+    match svar {
+        Ok(svar) => svar,
+        Err(_) => {
+            tracing::error!("Panik i en handler - svarar med 500");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({ "message": "internal server error" })),
+            )
+                .into_response()
+        }
+    }
 }
 
 /// Gin skickar vidare "/docs" till "/docs/" - samma sak gör Rust.

@@ -1,7 +1,7 @@
 import type { Goal, GoalParent } from "~/types/goal";
 import { apiRequest } from "~/utils/api";
 import { matchesNowFilter, type NowFilter } from "~/utils/goalFilters";
-import { isDoableAtPlace } from "~/utils/places";
+import { isDoableAtPlaceOrUnplaced } from "~/utils/places";
 import {
 	buildDisplayTree,
 	buildHierarchy,
@@ -109,7 +109,9 @@ export function usePriorityMode() {
 
 	function matchesCurrentPlace(goal: PrioritizedGoal): boolean {
 		if (!filterByCurrentPlace.value) return true;
-		return isDoableAtPlace(goal, currentPlaceId.value);
+		// Mål utan plats är inte bundna till någon särskild plats och
+		// ska därför inte försvinna ur listan.
+		return isDoableAtPlaceOrUnplaced(goal, currentPlaceId.value);
 	}
 
 	const visibleGoals = computed(() =>

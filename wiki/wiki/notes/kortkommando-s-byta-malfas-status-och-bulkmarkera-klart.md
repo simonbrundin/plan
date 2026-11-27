@@ -20,6 +20,8 @@ Eviga mål har också en fas - de kan gå från Definiera till Planera och vidar
 
 TANGENTEN ÄNDRAD: första versionen använde 'f'/'Shift+F'. Användaren valde 's'/'Shift+S' eftersom 'f' kunde misstas för något annat. 's' är ledig utan leader på alla tre sidor - 'Space'+'s' (påbörjat) och 'Space'+'f'+'d' (visa/dölj avslutade mål) krockar inte eftersom ledern kräver Space först.
 
+KONFLIKT MED 'påbörjad': på /now fanns sedan tidigare 's' = påbörjad (started). Eftersom målfasen skulle ligga på 's' flyttades påbörjad till leader+'s' (Space+s), precis som på /goals. Hintraden på /now uppdaterades så att den visar "s status" och "space+s påbörjad" - annars pekade den på en tangent som gjorde något annat.
+
 BULK KLART ('d'): tangenten 'd' (slutförd) tog tidigare bara hand om ett mål i taget. Nu gäller den hela Tab-urvalet: om alla valda mål redan är klara tas klarmarkeringen bort, annars sätts den på - samma princip som övriga bulkändringar (nu/påbörjat/agent/evigt). Eviga mål hoppas över. Återkommande mål slutförs en förekomst i taget (via completeGoalOccurrence) och kan inte "öppnas" igen - så de hoppas över när klarmarkeringen ska tas bort. Detta gäller på /goals, /now och /goal/:id. Bulkverktyget har fått en "Klar"-knapp som går via samma funktion.
 
 IMPLEMENTATION: ny composable src/nuxt/app/composables/useGoalPhase.ts (cyclePhases/setPhase, delar fas-cykeln mellan sidor), rent hjälpfunktion nextPhase() i src/nuxt/app/utils/goalPhase.ts (enhetstestad), tangenterna i goals/index.vue, now.vue och goal/[id].vue. Bulk-klart: toggleBulkFinished() per sida + emit-typen i GoalBulkActions.vue ('finished').

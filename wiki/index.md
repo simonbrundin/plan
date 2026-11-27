@@ -8,8 +8,8 @@ och gå sedan ner på sidorna som är relevanta.
 |---|---|
 | Entiteter | 6 |
 | Koncept | 21 |
-| Sammanfattningar | 8 |
-| Noter | 438 |
+| Sammanfattningar | 9 |
+| Noter | 439 |
 
 ## Entiteter
 
@@ -54,6 +54,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[summaries/flux-components]] - `infrastructure-flux/components/` — Alla HelmReleases och HelmRepositories. _(uppdaterad 2026-10-24)_
 - [[summaries/infrastructure-flux]] - `infrastructure-flux/README.md` — Arkitektur och konfigurationsguide. _(uppdaterad 2026-10-24)_
 - [[summaries/llm-wiki-karpathy]] - Karpathys LLM-wiki-mönster - en persistent, sammanhängande kunskapsgraf som LLMs underhåller, i tre lager. _(uppdaterad 2026-11-23)_
+- [[summaries/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars matchar kustomize ingenting och Flux stannar med en misslyckad build. _(uppdaterad 2026-11-27)_
 
 ## Noter
 
@@ -340,6 +341,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/priority-vyn-byter-namn-till-gor-nu]] - Gör nu introducerades som ny route /now. _(uppdaterad 2026-11-22)_
 - [[notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat]] - På /priority matchade filtret Påbörjade mål utan startdatum när Go-modellen serialiserade started med omitempty. _(uppdaterad 2026-11-17)_
 - [[notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte]] - Diagnos 2026-11-25 13:40 (prod-klustret, context admin@cluster1): _(uppdaterad 2026-11-25)_
+- [[notes/prod-patch-utan-namespace-bryter-flux-builden]] - En strategisk merge-patch i environments/prod/patches/ måste ange namespace i metadata om resursen i basen har ett namespace - annars ma... _(uppdaterad 2026-11-27)_
 - [[notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc]] - worker-2 startade om i en bootloop for att noden hade en Talos-installation pa eMMC - U-Boot ska boota disk forst. _(uppdaterad 2026-11-17)_
 - [[notes/pxe-flash-hanterar-divergerat-infrastructure-repo]] - simon flash misslyckades på PXE-servern eftersom ~/infrastructure låg 978 commits före och 1072 efter origin/main; git pull vägrade v... _(uppdaterad 2026-11-20)_
 - [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]] - Radxa ROCK 4C+ har ingen UEFI-meny - U-Boot i SPI-flash väljer bootkälla via boot_targets. _(uppdaterad 2026-10-22)_
