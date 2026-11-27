@@ -5,6 +5,7 @@
 //! i synk.
 
 use std::process::ExitCode;
+use std::sync::Arc;
 use std::time::Duration;
 
 use axum::http::{header, HeaderValue, Method, StatusCode};
@@ -88,7 +89,7 @@ async fn main() -> ExitCode {
     // Store:n med förslag som väntar på ett beslut. Den finns alltid -
     // den kan användas utan Plan-koppling.
     let approval_store = match plan_agent::approvals::Store::new() {
-        Ok(store) => Some(store),
+        Ok(store) => Some(Arc::new(store)),
         Err(err) => {
             tracing::error!("Kunde inte skapa godkännandestoren: {err}");
             None
@@ -113,12 +114,47 @@ async fn main() -> ExitCode {
     );
 
     let state = AppState {
-        plan_client,
+        plan_client: plan_client.clone(),
         api_key,
         db: Some(db),
-        approval_store,
+        approval_store: approval_store.clone(),
         orchestrator: Some(orchestrator),
     };
+
+    // Vad som startas styrs av AGENT_WORKER_ENABLED och
+    // AGENT_SCHEDULER_ENABLED. I klustret är båda avstängda - där går
+    // arbetet via Kubernetes Jobs i stället.
+    //
+    // AGENT_GOAL_MODE är deprecated. Den används bara om ingen av
+    // flaggorna är satta, så att en gammal deployment inte tyst slutar
+    // att starta något.
+    let mut worker_enabled = std::env::var("AGENT_WORKER_ENABLED").ok();
+    let mut scheduler_enabled = std::env::var("AGENT_SCHEDULER_ENABLED").ok();
+
+    if worker_enabled.as_deref() == Some("") && scheduler_enabled.as_deref() == Some("") {
+        match std::env::var("AGENT_GOAL_MODE").ok().as_deref() {
+            Some("worker") => worker_enabled = Some("true".to_string()),
+            Some("") | Some("approval") => scheduler_enabled = Some("true".to_string()),
+            _ => {
+                tracing::warn!("Unknown AGENT_GOAL_MODE - starting approval scheduler");
+                scheduler_enabled = Some("true".to_string());
+            }
+        }
+    }
+
+    if worker_enabled.as_deref() == Some("true") {
+        starta_workern(plan_client.clone());
+    }
+
+    if scheduler_enabled.as_deref() == Some("true") {
+        starta_schemaläggaren(plan_client.clone(), approval_store.clone());
+    }
+
+    // Jobbcontrollern startar Kubernetes Jobs för mål som behöver en
+    // agentkörning. Den kan stängas av när jobb inte ska köras.
+    if std::env::var("AGENT_JOB_CONTROLLER_ENABLED").as_deref() == Ok("true") {
+        starta_jobbcontrollern(plan_client.clone());
+    }
 
     let app = Router::new()
         .merge(table::build())
@@ -232,6 +268,343 @@ async fn cors(request: axum::extract::Request, next: axum::middleware::Next) -> 
     response
 }
 
+/// Startar workern som tar sig an mål med agentflaggan.
+///
+/// Den här workern är skild från schemaläggaren: schemaläggaren
+/// definierar mål och lämnar förslaget till en människa, workern tar sig
+/// an de mål som är markerade med agentflaggan.
+///
+/// Go: `startAgentWorker`.
+fn starta_workern(plan: Option<PlanClient>) {
+    let Some(plan) = plan else {
+        tracing::info!("Plan client is nil, agent worker not started");
+
+        return;
+    };
+
+    let (leverantör, modell) = match plan_agent::provider::Factory::skapa_från_miljö() {
+        Ok(leverans) => leverans,
+        Err(err) => {
+            tracing::error!("Failed to create LLM provider: {err}");
+            tracing::info!("Agent worker not started (set MINIMAX_API_KEY or OPENAI_API_KEY)");
+
+            return;
+        }
+    };
+
+    tracing::info!(
+        "Agent worker using LLM provider: {} ({})",
+        modell.provider,
+        modell.name
+    );
+
+    let definierare = Arc::new(plan_agent::definer::Definer::ny(leverantör, modell.clone()));
+    let worker = plan_agent::worker::Worker::ny(
+        plan,
+        definierare,
+        plan_agent::worker::Config {
+            pollintervall: plan_agent::worker::pollintervall_ur_miljö(),
+            leverantör: modell.provider.clone(),
+            modell: modell.name.clone(),
+            agent_id: agent_id_ur_miljö(),
+            ..Default::default()
+        },
+    );
+
+    tokio::spawn(async move {
+        worker.run().await;
+    });
+}
+
+/// Startar schemaläggaren som definierar mål och ber om godkännande.
+///
+/// Go: `startGoalScheduler`.
+fn starta_schemaläggaren(
+    plan: Option<PlanClient>,
+    approval_store: Option<Arc<plan_agent::approvals::Store>>,
+) {
+    let Some(plan) = plan else {
+        tracing::info!("Plan client is nil, scheduler not started");
+
+        return;
+    };
+
+    let Some(approval_store) = approval_store else {
+        tracing::info!("Approval store is nil, scheduler not started");
+
+        return;
+    };
+
+    tracing::info!("Starting goal scheduler...");
+
+    let (leverantör, modell) = match plan_agent::provider::Factory::skapa_från_miljö() {
+        Ok(leverans) => leverans,
+        Err(err) => {
+            tracing::error!("Failed to create LLM provider: {err}");
+            tracing::info!("Goal scheduler not started (set MINIMAX_API_KEY or OPENAI_API_KEY)");
+
+            return;
+        }
+    };
+
+    tracing::info!(
+        "LLM provider created: {} ({})",
+        modell.provider,
+        modell.name
+    );
+
+    let definierare = Arc::new(plan_agent::definer::Definer::ny(leverantör, modell));
+
+    let scheduler = plan_agent::scheduler::Scheduler::ny(
+        plan,
+        approval_store,
+        definierare,
+        plan_agent::scheduler::Config {
+            initiator: "scheduler:agent-api".to_string(),
+            ..Default::default()
+        },
+    );
+
+    tokio::spawn(async move {
+        scheduler.run().await;
+    });
+}
+
+/// Vilken agent som kör.
+///
+/// Namnet används för att filtrera kostnader per agent.
+fn agent_id_ur_miljö() -> String {
+    if let Some(raw) = std::env::var("AGENT_ID").ok().filter(|v| !v.is_empty()) {
+        return raw;
+    }
+
+    if let Some(värdnamn) = värdnamn() {
+        if !värdnamn.is_empty() {
+            return format!("agent:{värdnamn}");
+        }
+    }
+
+    "agent:agent-api".to_string()
+}
+
+/// Värdnamnet på maskinen.
+fn värdnamn() -> Option<String> {
+    std::fs::read_to_string("/etc/hostname")
+        .ok()
+        .map(|namn| namn.trim().to_string())
+        .filter(|namn| !namn.is_empty())
+}
+
+/// Startar controllern som skapar Kubernetes Jobs.
+///
+/// Controllern är kopplad mellan Plan och klustret: Plan äger målen,
+/// klustret utför arbetet. Den behöver rättigheter att skapa jobb - inga
+/// andra.
+///
+/// Go: `startJobController`.
+fn starta_jobbcontrollern(plan: Option<PlanClient>) {
+    let Some(plan) = plan else {
+        tracing::info!("Plan client is nil, job controller not started");
+
+        return;
+    };
+
+    let klient = match plan_agent::k8s::Client::in_cluster() {
+        Ok(klient) => klient,
+        Err(err) => {
+            tracing::error!("Failed to read in-cluster config: {err}");
+            tracing::info!("Job controller not started");
+
+            return;
+        }
+    };
+
+    let runner = plan_agent::jobrunner::Runner::ny(klient, jobbkonfiguration_ur_miljö());
+
+    let controller = plan_agent::jobcontroller::Controller::ny(
+        plan,
+        runner,
+        plan_agent::jobcontroller::Config {
+            pollintervall: jobb_pollintervall_ur_miljö(),
+            namespace: std::env::var("AGENT_JOB_NAMESPACE").unwrap_or_default(),
+            max_concurrent_jobs: jobb_max_parallellt_ur_miljö(),
+        },
+    );
+
+    tokio::spawn(async move {
+        controller.run().await;
+    });
+}
+
+/// Bygger jobbkonfigurationen från miljön.
+///
+/// Go: `jobConfigFromEnv`.
+fn jobbkonfiguration_ur_miljö() -> plan_agent::jobrunner::Config {
+    let mut config = plan_agent::jobrunner::Config::default();
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_NAMESPACE") {
+        config.namespace = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_IMAGE") {
+        config.image = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_SERVICE_ACCOUNT") {
+        config.service_account = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_REPO_URL") {
+        config.repo_url = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_REPO_BRANCH") {
+        config.repo_branch = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_PLAN_API_URL") {
+        config.plan_api_url = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_API_KEY_SECRET") {
+        config.api_key_secret_name = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_LLM_SECRET") {
+        config.llm_secret_name = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_GIT_SECRET") {
+        config.git_secret_name = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_CPU_LIMIT") {
+        config.cpu_limit = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_MEMORY_LIMIT") {
+        config.memory_limit = värde;
+    }
+
+    if let Some(värde) = miljö_värde("AGENT_JOB_DEADLINE_SECONDS") {
+        if let Ok(seconds) = värde.parse::<i64>() {
+            config.active_deadline_seconds = seconds;
+        }
+    }
+
+    config
+}
+
+/// Läser den globala jobbkapaciteten.
+///
+/// Go: `jobMaxConcurrentJobsFromEnv`.
+fn jobb_max_parallellt_ur_miljö() -> usize {
+    let rå = std::env::var("AGENT_JOB_MAX_CONCURRENT").unwrap_or_default();
+
+    if rå.is_empty() {
+        return 4;
+    }
+
+    match rå.parse::<usize>() {
+        Ok(värde) if värde >= 1 => värde,
+        _ => {
+            tracing::warn!("Invalid AGENT_JOB_MAX_CONCURRENT {rå:?}, using 4");
+
+            4
+        }
+    }
+}
+
+/// Läser hur ofta controllern läser Plan och klustret.
+///
+/// Go: `jobPollIntervalFromEnv`.
+fn jobb_pollintervall_ur_miljö() -> Duration {
+    let rå = std::env::var("AGENT_JOB_POLL_INTERVAL").unwrap_or_default();
+
+    if rå.is_empty() {
+        return Duration::from_secs(30);
+    }
+
+    match parse_go_duration(&rå) {
+        Some(interval) => interval,
+        None => {
+            tracing::warn!("Invalid AGENT_JOB_POLL_INTERVAL {rå:?}, using 30s");
+
+            Duration::from_secs(30)
+        }
+    }
+}
+
+/// Läser en miljövariabel som inte är tom.
+///
+/// Go: `os.Getenv` med `value != ""`.
+fn miljö_värde(namn: &str) -> Option<String> {
+    std::env::var(namn).ok().filter(|värde| !värde.is_empty())
+}
+
+/// Tolkar en Go-duration ("30s", "2m", "1h30m").
+///
+/// Go använder `time.ParseDuration` - formatet ska tolkas likadant.
+fn parse_go_duration(text: &str) -> Option<Duration> {
+    // Go godkänner "0" utan enhet.
+    if text == "0" {
+        return Some(Duration::ZERO);
+    }
+
+    let mut total = Duration::ZERO;
+    let mut tal = String::new();
+    let mut enhet = String::new();
+
+    for tecken in text.chars() {
+        if tecken.is_ascii_digit() || tecken == '.' {
+            if !enhet.is_empty() {
+                // Enheten är slut - siffran efter den hör till nästa del.
+                total += längd_för(&tal, &enhet)?;
+                tal.clear();
+                enhet.clear();
+            }
+
+            tal.push(tecken);
+
+            continue;
+        }
+
+        if tecken == ' ' {
+            continue;
+        }
+
+        enhet.push(tecken);
+    }
+
+    if !tal.is_empty() {
+        total += längd_för(&tal, &enhet)?;
+    } else if !enhet.is_empty() {
+        // En enhet utan tal är ett fel.
+        return None;
+    }
+
+    Some(total)
+}
+
+/// Gör om ett tal med en enhet till en längd.
+///
+/// Go: enheterna i `time.ParseDuration`.
+fn längd_för(tal: &str, enhet: &str) -> Option<Duration> {
+    let värde: f64 = tal.parse().ok()?;
+
+    let längd = match enhet {
+        "ns" => Duration::from_nanos(värde as u64),
+        "us" | "µs" => Duration::from_micros(värde as u64),
+        "ms" => Duration::from_millis(värde as u64),
+        "s" => Duration::from_secs_f64(värde),
+        "m" => Duration::from_secs_f64(värde * 60.0),
+        "h" => Duration::from_secs_f64(värde * 3_600.0),
+        _ => return None,
+    };
+
+    Some(längd)
+}
+
 /// TCP-probe mot den egna porten. Returnerar exit-kod 0/1.
 fn healthcheck(port: u16) -> i32 {
     let adress = format!("127.0.0.1:{port}");
@@ -269,5 +642,23 @@ async fn shutdown_signal() {
     tokio::select! {
         _ = ctrl_c => tracing::info!("Fick Ctrl-C, stänger av"),
         _ = terminate => tracing::info!("Fick SIGTERM, stänger av"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn go_durationer_tolkas() {
+        assert_eq!(parse_go_duration("30s"), Some(Duration::from_secs(30)));
+        assert_eq!(parse_go_duration("2m"), Some(Duration::from_secs(120)));
+        assert_eq!(parse_go_duration("1h30m"), Some(Duration::from_secs(5400)));
+        assert_eq!(parse_go_duration("500ms"), Some(Duration::from_millis(500)));
+        assert_eq!(parse_go_duration("0"), Some(Duration::ZERO));
+
+        assert_eq!(parse_go_duration("30"), None);
+        assert_eq!(parse_go_duration("abc"), None);
+        assert_eq!(parse_go_duration("30x"), None);
     }
 }

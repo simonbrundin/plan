@@ -18,7 +18,7 @@ pub struct AppState {
     /// då svarar samtalen och nycklarna med ett internt fel.
     pub db: Option<AgentDb>,
     /// Store:n med förslag som väntar på ett beslut.
-    pub approval_store: Option<Store>,
+    pub approval_store: Option<std::sync::Arc<Store>>,
     /// Agentens orchestrator. `None` betyder att den inte startade.
     pub orchestrator: Option<SharedOrchestrator>,
 }

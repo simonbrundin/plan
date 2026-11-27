@@ -1,0 +1,201 @@
+{
+  "metadata": {
+    "labels": {
+      "app": "agent-worker",
+      "plan.dev/agent-run-id": "7",
+      "plan.dev/goal-id": "42"
+    },
+    "name": "agent-worker-run-7",
+    "namespace": "plan"
+  },
+  "spec": {
+    "activeDeadlineSeconds": 3600,
+    "backoffLimit": 0,
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "agent-worker",
+          "plan.dev/agent-run-id": "7",
+          "plan.dev/goal-id": "42"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "command": [
+              "/app/agent-worker"
+            ],
+            "env": [
+              {
+                "name": "AGENT_GOAL_ID",
+                "value": "42"
+              },
+              {
+                "name": "AGENT_REPO_PATH",
+                "value": "/workspace/repo"
+              },
+              {
+                "name": "AGENT_PROFILE",
+                "value": "coding"
+              },
+              {
+                "name": "AGENT_INITIATOR",
+                "value": "job:agent-worker-run-7"
+              },
+              {
+                "name": "AGENT_POLL_INTERVAL",
+                "value": "15s"
+              },
+              {
+                "name": "AGENT_STOP_WHEN_FINISHED",
+                "value": "true"
+              },
+              {
+                "name": "HOME",
+                "value": "/tmp"
+              },
+              {
+                "name": "PLAN_API_URL",
+                "value": "http://plan.plan.svc.cluster.local"
+              },
+              {
+                "name": "PLAN_API_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "PLAN_API_KEY",
+                    "name": "plan-api-key"
+                  }
+                }
+              },
+              {
+                "name": "GIT_AUTH_HEADER",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "GIT_AUTH_HEADER",
+                    "name": "plan-git"
+                  }
+                }
+              },
+              {
+                "name": "MINIMAX_API_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "MINIMAX_API_KEY",
+                    "name": "plan-llm"
+                  }
+                }
+              }
+            ],
+            "image": "plan/agent:test",
+            "imagePullPolicy": "IfNotPresent",
+            "name": "agent-worker",
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "2Gi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "memory": "256Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              },
+              "readOnlyRootFilesystem": true,
+              "runAsNonRoot": true,
+              "runAsUser": 65532,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "volumeMounts": [
+              {
+                "mountPath": "/workspace",
+                "name": "workspace"
+              },
+              {
+                "mountPath": "/tmp",
+                "name": "tmp"
+              }
+            ]
+          }
+        ],
+        "initContainers": [
+          {
+            "command": [
+              "sh",
+              "-c",
+              "set -eu\ngit clone --depth 1 --branch main https://github.com/simon/plan.git /workspace/repo\n"
+            ],
+            "image": "plan/agent:test",
+            "imagePullPolicy": "IfNotPresent",
+            "name": "clone",
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "2Gi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "memory": "256Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              },
+              "readOnlyRootFilesystem": true,
+              "runAsNonRoot": true,
+              "runAsUser": 65532,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "volumeMounts": [
+              {
+                "mountPath": "/workspace",
+                "name": "workspace"
+              },
+              {
+                "mountPath": "/tmp",
+                "name": "tmp"
+              }
+            ]
+          }
+        ],
+        "restartPolicy": "Never",
+        "securityContext": {
+          "fsGroup": 65532,
+          "runAsGroup": 65532,
+          "runAsNonRoot": true,
+          "runAsUser": 65532,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "serviceAccountName": "plan-agent-worker",
+        "volumes": [
+          {
+            "emptyDir": {},
+            "name": "workspace"
+          },
+          {
+            "emptyDir": {},
+            "name": "tmp"
+          }
+        ]
+      }
+    },
+    "ttlSecondsAfterFinished": 3600
+  },
+  "status": {}
+}
