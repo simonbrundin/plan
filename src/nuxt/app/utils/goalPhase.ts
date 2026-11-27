@@ -48,6 +48,25 @@ const phasePresentations: Record<GoalPhase, GoalPhasePresentation> = {
 	},
 };
 
+/**
+ * Nästa fas i cykeln.
+ *
+ * Faserna är ordnade i en cykel: Definiera -> Planera -> Genomföra ->
+ * Verifiera -> Klar -> tillbaka till Definiera. En okänd fas börjar om
+ * på första fasen, så att tangenten alltid leder någonstans.
+ *
+ * direction = 1 går framåt, -1 bakåt.
+ */
+export function nextPhase(
+	current: GoalPhase | string | null | undefined,
+	direction: 1 | -1 = 1,
+): GoalPhase {
+	const index = GOAL_PHASES.indexOf(current as GoalPhase);
+	const from = index === -1 ? 0 : index;
+	const next = (from + direction + GOAL_PHASES.length) % GOAL_PHASES.length;
+	return GOAL_PHASES[next] ?? GOAL_PHASES[0];
+}
+
 export function getGoalPhasePresentation(
 	phase: string | null | undefined,
 ): GoalPhasePresentation {

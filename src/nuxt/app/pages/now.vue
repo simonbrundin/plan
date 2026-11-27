@@ -6,6 +6,7 @@ import { describeGoalRecurrence, isRecurringGoal, isWaitingForNextOccurrence, re
 import type { RecurrenceMode } from '~/utils/recurrence'
 import { ETERNAL_ACCENT, ETERNAL_TEXT, ETERNAL_TEXT_HOVER } from '~/utils/eternalStyle'
 import { useGoalSelection } from '~/composables/useGoalSelection'
+import { useGoalPhase } from '~/composables/useGoalPhase'
 
 definePageMeta({
   ssr: false,
@@ -14,6 +15,8 @@ definePageMeta({
 const { user } = useUserSession()
 const { toggleGoalFinished, toggleGoalStarted, setGoalEternal, setGoalAgent, setGoalNow, setGoalDue, setGoalStartDate, setGoalEstimate, updateGoalDescription, deleteGoal, completeGoalOccurrence, setGoalRecurrence } = useGoalApi()
 const goalSelection = useGoalSelection()
+// Byte av målfas (status) med tangenten 's'.
+const { cyclePhases } = useGoalPhase()
 const goalsStore = useGoalsStore()
 const { revision: undoRevision } = useUndoStack()
 const { undoFinished, undoOccurrence, undoStarted, undoEternal, undoAgent, undoNow, undoDue, undoStartDate, undoEstimate, undoRecurrence } = useGoalUndo()
@@ -193,7 +196,8 @@ onMounted(() => {
     // d = klar, e = evigt, c = deadline, t = beskrivning, x = ta bort
     if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault()
-      if (goal) toggleFinished(goal)
+      if (goalSelection.count.value > 0) void toggleBulkFinished()
+      else if (goal) toggleFinished(goal)
       return
     }
 
@@ -201,6 +205,20 @@ onMounted(() => {
       e.preventDefault()
       if (goalSelection.count.value > 0) void toggleBulk('eternal')
       else if (goal) toggleEternal(goal)
+      return
+    }
+
+    if (e.key === 's' || e.key === 'S') {
+      e.preventDefault()
+      const direction = e.key === 'S' ? -1 : 1
+      const targets: Goal[] = goalSelection.count.value > 0
+        ? selectedGoals.value
+        : goal
+          ? [goal]
+          : []
+      if (targets.length > 0) {
+        void cyclePhases(targets, direction)
+      }
       return
     }
 
@@ -279,6 +297,51 @@ async function toggleFinished(goal: PrioritizedGoalRow) {
   } catch (err) {
     console.error('Failed to toggle goal finished:', err)
   }
+}
+
+// Slutför (eller öppna) flera markerade mål på en gång.
+//
+// Om alla valda mål redan är klara tas klarmarkeringen bort, annars sätts
+// den på - samma princip som övriga bulkändringar.
+async function toggleBulkFinished() {
+  const goalsToUpdate = selectedGoals.value
+  if (!goalsToUpdate.length || bulkBusy.value) return
+
+  const allFinished = goalsToUpdate.every((goal) => !!goal.finished)
+  bulkBusy.value = true
+  try {
+    await Promise.all(goalsToUpdate.map(async (goal) => {
+      // Eviga mål kan inte slutföras.
+      if (!canBeFinished(goal)) return
+
+      // Ett återkommande mål slutförs en förekomst i taget. Det går inte att
+      // "öppna" en sådan förekomst - då hoppar vi över målet.
+      if (isRecurringGoal(goal)) {
+        if (allFinished) return
+        if (isWaitingForNextOccurrence(goal)) return
+        await completeGoalOccurrence(goal.id, goal.recurrence_next ?? undefined, todayDateString())
+        return
+      }
+
+      await toggleGoalFinished(goal.id, allFinished ? null : new Date().toISOString())
+    }))
+    await loadPrioritizedGoals()
+    goalSelection.clear()
+  } catch (err) {
+    console.error('Failed to apply bulk finished change:', err)
+    await loadPrioritizedGoals()
+  } finally {
+    bulkBusy.value = false
+  }
+}
+
+// Knappen i bulkverktyget och tangenten 'd' går via samma funktion.
+function handleBulkAction(action: 'now' | 'started' | 'agent' | 'eternal' | 'finished') {
+  if (action === 'finished') {
+    void toggleBulkFinished()
+    return
+  }
+  void toggleBulk(action)
 }
 
 function updateGoalPhase(goal: PrioritizedGoalRow, statusId: number) {
@@ -774,7 +837,7 @@ const filterOptions = [
         :all-selected="allVisibleSelected"
         :busy="bulkBusy"
         @toggle-all="goalSelection.setAll(visibleGoals, !allVisibleSelected)"
-        @action="toggleBulk"
+        @action="handleBulkAction"
         @clear="goalSelection.clear"
       />
       <div
@@ -879,7 +942,7 @@ const filterOptions = [
             </button>
           </span>
 
-          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id"
+          <GoalPhaseBadge :goal-id="goal.id" :status-id="goal.status_id" :eternal="goal.eternal"
             @updated="statusId => updateGoalPhase(goal, statusId)" />
           <span class="opt-icon" :class="{ 'is-on': !!goal.agent }">
             <AgentBadge :active="!!goal.agent" @toggle="toggleAgent(goal)" />
