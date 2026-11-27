@@ -97,6 +97,10 @@ fn route_for(method: &str, path: &str) -> MethodRouter<AppState> {
         ("GET", "/api/v1/conversations/{id}/messages") => {
             get(crate::routes::conversations::messages)
         }
+        ("POST", "/api/v1/conversations/{id}/messages") => {
+            post(crate::routes::conversations::create_message)
+        }
+        ("GET", "/api/v1/conversations/{id}/stream") => get(crate::routes::conversations::stream),
 
         ("GET", "/api/v1/health") => get(crate::routes::health::health),
         ("GET", "/api/v1/status") => get(crate::routes::health::status),

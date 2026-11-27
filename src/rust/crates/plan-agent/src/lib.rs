@@ -7,11 +7,14 @@
 pub mod approvals;
 pub mod checkpoint;
 pub mod contract;
+pub mod core;
 pub mod db;
 pub mod error;
 pub mod handlers;
+pub mod messages;
 pub mod orchestrator;
 pub mod planclient;
+pub mod provider;
 pub mod routes;
 pub mod state;
 pub mod state_store;

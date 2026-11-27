@@ -31,6 +31,7 @@ ANROP=(
   "GET /api/v1/approvals"
   "GET /api/v1/approvals/540"
   "GET /api/v1/approvals/fel"
+  "GET /api/v1/conversations/fel/stream"
 )
 
 # Anrop som skickar en body. Endast felmeddelanden jämförs - de ändrar
@@ -49,6 +50,10 @@ ANROP_BODY=(
   "POST /api/v1/workflow/saknas/approve {}"
   "POST /api/v1/workflow/saknas/reject {}"
   "POST /api/v1/workflow/decision {}"
+  "POST /api/v1/conversations/fel/messages {\"content\":\"x\"}"
+  "POST /api/v1/conversations/saknas/messages {\"content\":123}"
+  "POST /api/v1/conversations/saknas/messages {\"content\":\"x\"}"
+  "POST /api/v1/conversations/saknas/messages [1,2]"
 )
 
 # Normaliserar tidsstämplar och gör JSON stabilt att jämföra.

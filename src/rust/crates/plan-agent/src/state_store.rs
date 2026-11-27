@@ -607,7 +607,7 @@ impl CheckpointStore {
             FROM goals WHERE id = $1
             "#,
         )
-        .bind(minska_uuid(id)?)
+        .bind(minska_uuid(id).map_err(|_| StateError::NotFound(id.to_string()))?)
         .fetch_optional(&self.pool)
         .await
         .map_err(|_| StateError::NotFound(id.to_string()))?;
