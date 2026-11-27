@@ -117,7 +117,7 @@ finns i `index.md`.
 | [[notes/eviga-mal-i-plan-kan-inte-slutforas]] | Eviga mål i plan - kan inte slutföras | note | feature, goals, plan, ui, go, nuxt, projekt:simon | 2026-11-17 | 4 |
 | [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] | Expanderade .eml läggs in som riktiga mejl i mappen (APPEND) | note | feature, mail, imap, projekt:pappa | 2026-11-19 | 2 |
 | [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]] | Fälla fixad: talosctl kubeconfig skapar inga dubbletter längre (talos-kubeconfig + shell-guard) | note | kubeconfig, cluster1, talosctl, fälla, projekt:infrastructure | 2026-11-25 | 2 |
-| [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] | Fasmaskinen for mal ar nu implementerad i Plan API | note | agent, goals, implementation, verifiering, human-gate, projekt:plan | 2026-11-27 | 2 |
+| [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] | Fasmaskinen for mal ar nu implementerad i Plan API | note | agent, goals, implementation, verifiering, human-gate, projekt:plan | 2026-11-28 | 3 |
 | [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] | Feedback-loop: AI uppdaterar mailreglerna och analyserar om mejlet | note | mailagent, ai, feedback, pappa, session, projekt:pappa | 2026-11-19 | 0 |
 | [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] | Figma lokala fonter på Linux: figma-agent-linux | note | figma, fonts, linux, omarchy, projekt:simon | 2026-11-23 | 0 |
 | [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] | Flannel VXLAN MAC-kollision blockerar controlplane-2 webhooks | note | incident, flux, flannel, networking, projekt:infrastructure | 2026-11-26 | 0 |
@@ -372,6 +372,7 @@ finns i `index.md`.
 | [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] | rust-analyzer standalone-läge kraschar på leetcode.nvim-filer | note | rust, neovim, rust-analyzer, bug, leetcode, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] | rust-analyzer: tysta health-status-notisen istället för att stänga av standalone | note | rust, neovim, rust-analyzer, leetcode, bug, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] | Rust-API:t får auth-lager och första domänerna | note | rust, migration, auth, paritet, projekt:plan | 2026-11-26 | 0 |
+| [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]] | Rust-API:t kör i produktion - Go-implementationer syns inte i prod | note | rust, migration, produktion, projekt:plan | 2026-11-28 | 1 |
 | [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] | Rust är huvudspåret och PR-previewen deployas via Flux | note | ci, rust, flux, preview, arm64, projekt:plan | 2026-11-27 | 2 |
 | [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] | rust: learning-repot lades in som submodule mot egen fork | note | rust, git, submodule, solution, projekt:simon | 2026-11-17 | 1 |
 | [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] | rust-repo: learn-to-code-with-rust som submodule | note | rust, git, submodule, projekt:simon | 2026-11-17 | 1 |
@@ -780,7 +781,7 @@ finns i `index.md`.
 - `metallb` (3)
 - `metodik` (3)
 - `microsoft365` (2)
-- `migration` (5)
+- `migration` (6)
 - `migrering` (6)
 - `mime` (1)
 - `minimax` (3)
@@ -859,7 +860,7 @@ finns i `index.md`.
 - `prioritetssida` (2)
 - `priority` (3)
 - `prod` (1)
-- `produktion` (2)
+- `produktion` (3)
 - `profil` (1)
 - `projekt:agents` (13)
 - `projekt:dashboard` (19)
@@ -869,7 +870,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (148)
+- `projekt:plan` (149)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -914,7 +915,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (20)
+- `rust` (21)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)

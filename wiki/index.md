@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 457 |
+| Noter | 458 |
 
 ## Entiteter
 
@@ -144,7 +144,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/ett-antagande-far-aldrig-vinna-en-jamforelse-mot-en-matning]] - Anledning: dashboardens modellsida var "helt oduglig" för att få ut information. _(uppdaterad 2026-11-26)_
 - [[notes/eviga-mal-i-plan-kan-inte-slutforas]] - Mål i plan kan nu markeras som EVIGA (eternal): de pågår hela livet (t.ex. _(uppdaterad 2026-11-17)_
 - [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]] - Förra versionen av .eml-expansionen (se [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]]) _(uppdaterad 2026-11-19)_
-- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] - VAD: fasmaskinen och den valfria verifieringen finns nu i Plan API (branch feat/goal-phase-machine, OpenSpec-change add-goal-verification... _(uppdaterad 2026-11-27)_
+- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] - VAD: fasmaskinen och den valfria verifieringen finns nu i Plan API (branch feat/goal-phase-machine, OpenSpec-change add-goal-verification... _(uppdaterad 2026-11-28)_
 - [[notes/feedback-loop-ai-uppdaterar-mailreglerna-och-analyserar-om-mejlet]] - 2026-11-19 (pappa/mailagent): Istället för en "Neka"-knapp kan användaren nu starta en konversation med AI:t om vad som inte fungerade... _(uppdaterad 2026-11-19)_
 - [[notes/figma-lokala-fonter-pa-linux-figma-agent-linux]] - Figma har ingen officiell Font Helper på Linux (FigmaAgent finns bara för macOS/Windows). _(uppdaterad 2026-11-23)_
 - [[notes/flannel-vxlan-mac-kollision-blockerar-controlplane-2-webhooks]] - 2026-11-26: controlplane-2 och controlplane-3 annonserar och använder samma Flannel VXLAN-MAC e2:92:15:e2:0e:30. _(uppdaterad 2026-11-26)_
@@ -398,6 +398,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] - Problem: När man öppnade en leetcode.nvim-lösning i Neovim sade health-checken _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] - Fas 2 av samma problem: när standalone-läget stängdes av (server.standalone = _(uppdaterad 2026-11-17)_
 - [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_
+- [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]] - Sedan PR #172 (fix(prod): agenten i produktion kör Rust-imagen igen) kör plan-api i Rust i produktion, medan utvecklingsmiljön och API... _(uppdaterad 2026-11-28)_
 - [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] - I /home/simon/repos/rust (simonbrundin/rust) lades den klonade repot 'learn-to-code-with-rust' in som en riktig git-submodule (.gitmodule... _(uppdaterad 2026-11-17)_
 - [[notes/rust-utvecklingsmiljo-pa-workstationen]] - Vi satte upp en komplett Rust-miljö på maskinen (2026-11-02). _(uppdaterad 2026-11-17)_
 - [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] - För att kunna committa egna lösningar utan att sönderdela tredjepartsrepot skapades en fork: github.com/simonbrundin/learn-to-code-wit... _(uppdaterad 2026-11-17)_

@@ -371,6 +371,7 @@ graph LR
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer["rust-analyzer standalone-läge kraschar på leetcode.nvim-filer"]
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone["rust-analyzer: tysta health-status-notisen istället för att stänga av standalone"]
   n_notes_rust_api_t_far_auth_lager_och_forsta_domanerna["Rust-API:t får auth-lager och första domänerna"]
+  n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod["Rust-API:t kör i produktion - Go-implementationer syns inte i prod"]
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux["Rust är huvudspåret och PR-previewen deployas via Flux"]
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork["rust: learning-repot lades in som submodule mot egen fork"]
   n_notes_rust_repo_learn_to_code_with_rust_som_submodule["rust-repo: learn-to-code-with-rust som submodule"]
@@ -737,6 +738,7 @@ graph LR
   n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_concepts_anvanda_agenter_i_plan
   n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_malmaskin_och_verifierare_fasmaskinen_bor_i_plan_inte_i_prompten
+  n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api --> n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_handelsen_har_ingen_egen_farg
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_standardkalender_i_plan
   n_notes_flera_kalendrar_med_egna_farger_i_plan --> n_notes_valfri_fargkod_pa_kalendrar
@@ -1055,6 +1057,7 @@ graph LR
   n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet --> n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer --> n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone --> n_notes_sa_dampas_bada_rust_analyzer_popupen_no_project_root_found
+  n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod --> n_notes_paritetstest_gatear_rust_migreringen_mot_go_kallan
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork --> n_notes_rust_repo_learn_to_code_with_rust_som_submodule
@@ -1430,6 +1433,7 @@ graph LR
 - **notes/pappas-dev-miljo-kor-mot-neon-i-stallet-for-in-kluster-postgres** <- [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]], [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **notes/pappas-grundare-ar-michael-brundin-inte-git-anvandaren-simon-brundin** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]]
 - **notes/parallella-agent-sessioner-i-samma-repo-och-databas** <- [[notes/go-integrationstest-tomde-kalenderhandelserna-i-neon-igen]], [[notes/vertikal-kalender-med-kontinuerlig-zoom]]
+- **notes/paritetstest-gatear-rust-migreringen-mot-go-kallan** <- [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]]
 - **notes/personer-kan-laggas-in-manuellt-i-pappa** <- [[notes/pappa-dubblettknapp-mansklig-granskning-och-bestandig-sammanslagning]]
 - **notes/photocraft-agentstyrning-via-control-protokoll-control-7878** <- [[notes/lightcraft-photocraft-installerade-pa-omarchy-workstation-utan-sudo]]
 - **notes/photocraft-kamerans-look-varning-vid-raw-oppning-och-hur-den-hanteras** <- [[notes/photocraft-agentstyrning-via-control-protokoll-control-7878]]
@@ -1494,6 +1498,7 @@ graph LR
 - **notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer** <- [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]]
 - **notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone** <- [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]]
+- **notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod** <- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]]
 - **notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-repo-learn-to-code-with-rust-som-submodule** <- [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]]
 - **notes/rust-utvecklingsmiljo-pa-workstationen** <- [[notes/rust-repo-learn-to-code-with-rust-som-submodule]]
