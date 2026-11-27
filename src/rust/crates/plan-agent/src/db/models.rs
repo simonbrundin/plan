@@ -23,6 +23,11 @@ pub struct Conversation {
     pub model: String,
     /// Leverantören som används.
     pub provider: String,
+    /// Målet i Plan som samtalet gäller.
+    ///
+    /// Utan det hittas samtalet inte tillbaka från målsidan.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub goal_id: Option<i64>,
 }
 
 /// Ett meddelande i ett samtal.

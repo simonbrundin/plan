@@ -126,6 +126,9 @@ export interface AgentConversation {
   provider: string;
   created_at?: string;
   updated_at?: string;
+  // Målet i Plan som samtalet gäller. Det är så samtalet hittas
+  // tillbaka när målsidan öppnas igen.
+  goal_id?: number | null;
 }
 
 // Kostnaden för en agentkörning. Plan räknar fram den ur en

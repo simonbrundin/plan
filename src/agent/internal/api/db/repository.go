@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +16,9 @@ type Conversation struct {
 	Title     string    `json:"title"`
 	Model     string    `json:"model"`
 	Provider  string    `json:"provider"`
+	// GoalID pekar ut det Plan-mål som samtalet gäller. Det är så
+	// samtalet hittas tillbaka när målsidan öppnas igen.
+	GoalID *int64 `json:"goal_id,omitempty"`
 }
 
 // Message represents a single message in a conversation
@@ -33,15 +37,18 @@ type Message struct {
 	CreatedAt      time.Time `json:"created_at"`
 }
 
-// CreateConversation creates a new conversation
-func CreateConversation(ctx context.Context, model, provider string) (*Conversation, error) {
+// CreateConversation creates a new conversation.
+//
+// goalID är det Plan-mål som samtalet gäller. Det får vara nil - då
+// är samtalet inte kopplat till något mål.
+func CreateConversation(ctx context.Context, model, provider string, goalID *int64) (*Conversation, error) {
 	var conv Conversation
 	err := pool.QueryRow(ctx,
-		`INSERT INTO conversations (model, provider) 
-		 VALUES ($1, $2) 
-		 RETURNING id, created_at, updated_at, title, model, provider`,
-		model, provider,
-	).Scan(&conv.ID, &conv.CreatedAt, &conv.UpdatedAt, &conv.Title, &conv.Model, &conv.Provider)
+		`INSERT INTO conversations (model, provider, goal_id) 
+		 VALUES ($1, $2, $3) 
+		 RETURNING id, created_at, updated_at, title, model, provider, goal_id`,
+		model, provider, goalID,
+	).Scan(&conv.ID, &conv.CreatedAt, &conv.UpdatedAt, &conv.Title, &conv.Model, &conv.Provider, &conv.GoalID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,25 +59,33 @@ func CreateConversation(ctx context.Context, model, provider string) (*Conversat
 func GetConversation(ctx context.Context, id uuid.UUID) (*Conversation, error) {
 	var conv Conversation
 	err := pool.QueryRow(ctx,
-		`SELECT id, created_at, updated_at, title, model, provider 
+		`SELECT id, created_at, updated_at, title, model, provider, goal_id 
 		 FROM conversations WHERE id = $1`,
 		id,
-	).Scan(&conv.ID, &conv.CreatedAt, &conv.UpdatedAt, &conv.Title, &conv.Model, &conv.Provider)
+	).Scan(&conv.ID, &conv.CreatedAt, &conv.UpdatedAt, &conv.Title, &conv.Model, &conv.Provider, &conv.GoalID)
 	if err != nil {
 		return nil, err
 	}
 	return &conv, nil
 }
 
-// ListConversations returns all conversations, newest first
-func ListConversations(ctx context.Context, limit, offset int) ([]*Conversation, error) {
-	rows, err := pool.Query(ctx,
-		`SELECT id, created_at, updated_at, title, model, provider 
-		 FROM conversations 
-		 ORDER BY created_at DESC 
-		 LIMIT $1 OFFSET $2`,
-		limit, offset,
-	)
+// ListConversations returns conversations, newest first.
+//
+// goalID filtrerar på det mål som samtalet gäller. Är det nil listas
+// alla samtal.
+func ListConversations(ctx context.Context, limit, offset int, goalID *int64) ([]*Conversation, error) {
+	query := `SELECT id, created_at, updated_at, title, model, provider, goal_id 
+		 FROM conversations `
+	args := []any{}
+	if goalID != nil {
+		query += `WHERE goal_id = $1 `
+		args = append(args, *goalID)
+	}
+	query += `ORDER BY created_at DESC `
+	args = append(args, limit, offset)
+	query += fmt.Sprintf(`LIMIT $%d OFFSET $%d`, len(args)-1, len(args))
+
+	rows, err := pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +94,7 @@ func ListConversations(ctx context.Context, limit, offset int) ([]*Conversation,
 	var conversations []*Conversation
 	for rows.Next() {
 		var conv Conversation
-		if err := rows.Scan(&conv.ID, &conv.CreatedAt, &conv.UpdatedAt, &conv.Title, &conv.Model, &conv.Provider); err != nil {
+		if err := rows.Scan(&conv.ID, &conv.CreatedAt, &conv.UpdatedAt, &conv.Title, &conv.Model, &conv.Provider, &conv.GoalID); err != nil {
 			return nil, err
 		}
 		conversations = append(conversations, &conv)

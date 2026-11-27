@@ -37,6 +37,9 @@ type CreateConversationRequest struct {
 	Model    string `json:"model"`
 	Provider string `json:"provider"`
 	Title    string `json:"title"`
+	// GoalID är det Plan-mål som samtalet gäller. Utan det hittas
+	// samtalet inte tillbaka från målsidan.
+	GoalID *int64 `json:"goal_id,omitempty"`
 }
 
 // UpdateConversationRequest is the request body for updating a conversation
@@ -50,6 +53,7 @@ type UpdateConversationRequest struct {
 // @Produce json
 // @Param limit query int false "Limit" default(50)
 // @Param offset query int false "Offset" default(0)
+// @Param goal_id query int false "Only conversations for this Plan goal"
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/conversations [get]
@@ -57,7 +61,18 @@ func ListConversations(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
-	conversations, err := db.ListConversations(c.Request.Context(), limit, offset)
+	// goal_id är valfritt - utan det listas alla samtal.
+	var goalID *int64
+	if raw := c.Query("goal_id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid goal_id"})
+			return
+		}
+		goalID = &parsed
+	}
+
+	conversations, err := db.ListConversations(c.Request.Context(), limit, offset, goalID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -92,7 +107,7 @@ func CreateConversation(c *gin.Context) {
 		req.Title = "New conversation"
 	}
 
-	conv, err := db.CreateConversation(c.Request.Context(), req.Model, req.Provider)
+	conv, err := db.CreateConversation(c.Request.Context(), req.Model, req.Provider, req.GoalID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

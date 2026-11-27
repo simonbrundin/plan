@@ -19,10 +19,16 @@ pub struct ListQuery {
     pub limit: Option<i64>,
     /// Hur många samtal som ska hoppas över.
     pub offset: Option<i64>,
+    /// Bara samtal för detta Plan-mål.
+    pub goal_id: Option<i64>,
 }
 
 /// Request för att skapa ett samtal.
+///
+/// Fälten är valfria - Go-agenten accepterar ett samtal utan dem,
+/// så det gör Rust-agenten också.
 #[derive(Debug, Default, Deserialize)]
+#[serde(default)]
 pub struct CreateConversationRequest {
     /// Modellen som ska användas.
     pub model: String,
@@ -30,6 +36,10 @@ pub struct CreateConversationRequest {
     pub provider: String,
     /// Samtalets titel.
     pub title: String,
+    /// Målet i Plan som samtalet gäller.
+    ///
+    /// Utan det hittas samtalet inte tillbaka från målsidan.
+    pub goal_id: Option<i64>,
 }
 
 /// Request för att ändra ett samtal.
@@ -77,6 +87,7 @@ pub async fn list(
         pool,
         query.limit.unwrap_or(50),
         query.offset.unwrap_or(0),
+        query.goal_id,
     )
     .await?;
 
@@ -119,7 +130,8 @@ pub async fn create(
         req.title.clone()
     };
 
-    let samtal = crate::db::repository::create_conversation(pool, &modell, &leverantör).await?;
+    let samtal =
+        crate::db::repository::create_conversation(pool, &modell, &leverantör, req.goal_id).await?;
 
     // Titeln sparas efteråt. Går det fel svarar agenten ändå ok - samtalet
     // finns, bara titeln saknas.
