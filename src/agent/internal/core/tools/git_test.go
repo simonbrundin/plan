@@ -29,8 +29,10 @@ func TestGitToolCurrentBranch(t *testing.T) {
 		t.Fatalf("CurrentBranch failed: %v", err)
 	}
 
+	// I ett utcheckat merge-commit - som CI gör - finns ingen branch.
+	// Då är det inget att testa.
 	if branch == "" {
-		t.Error("Branch name should not be empty")
+		t.Skip("Detached HEAD - ingen branch")
 	}
 
 	t.Logf("Current branch: %s", branch)

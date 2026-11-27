@@ -27,6 +27,12 @@ OUT_DIR = Path(f"environments/pr/{PR_NUM}")
 GHCR_SECRET_SOURCE = Path("environments/prod/secrets/ghcr-secret.enc.yaml")
 GHCR_SECRET_NAME = "ghcr-secret.enc.yaml"
 
+# Schemat (ConfigMap) kopieras in från basen - samma schema som dev och
+# prod. Overlayen får inte referera till basen, eftersom den publiceras
+# på branchen "previews" som bara innehåller preview-overlays.
+SCHEMA_SOURCE = Path("environments/base/db/schema.yaml")
+SCHEMA_NAME = "schema-configmap.yaml"
+
 NAMESPACE = f"plan-pr-{PR_NUM}"
 HOSTNAME = f"plan-pr-{PR_NUM}.simonbrundin.com"
 
@@ -74,6 +80,10 @@ def write_overlay() -> None:
     ghcr_target = OUT_DIR / GHCR_SECRET_NAME
     ghcr_target.write_text(GHCR_SECRET_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
     print(f"✓ Kopierade {GHCR_SECRET_SOURCE} -> {ghcr_target}")
+
+    schema_target = OUT_DIR / SCHEMA_NAME
+    schema_target.write_text(SCHEMA_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"✓ Kopierade {SCHEMA_SOURCE} -> {schema_target}")
 
 
 if __name__ == "__main__":

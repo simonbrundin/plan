@@ -392,7 +392,7 @@ func (p Proposal) Summary() string {
 		if from == "" {
 			from = "ingen"
 		}
-		sb.WriteString(fmt.Sprintf("- %s: %s → %s\n", field.Label, from, field.To))
+		fmt.Fprintf(&sb, "- %s: %s → %s\n", field.Label, from, field.To)
 	}
 
 	if len(p.Notes) > 0 {
