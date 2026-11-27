@@ -91,6 +91,7 @@ graph LR
   n_notes_dashboard_ranking_utokad_med_benchmark_och_kostnadstackning["Dashboard ranking utökad med benchmark- och kostnadstäckning"]
   n_notes_dashboard_rekommendationsvyn_som_enda_forstavy["Dashboard: rekommendationsvyn som enda forstavy"]
   n_notes_dashboard_tydlighetslyft_av_jamforelserna["Dashboard: tydlighetslyft av jamforelserna"]
+  n_notes_dashboarden_ikonerna_hamades_fran_iconifys_cdn_och_gjorde_ssr_sidladdningen_till_en_504["'Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504'"]
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater["Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater"]
   n_notes_dev_inloggning_i_plan_session_token_db_rattigheter_och_oauth_url_er["Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er"]
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor["dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor"]
@@ -464,6 +465,7 @@ graph LR
   n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export["ZITADEL-återställning: historisk installation återställd från ZITADEL Cloud-export"]
   n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om["ZITADEL-import: application-ID bevaras men OIDC client-ID genereras om"]
   n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in["ZITADEL: importerad användare krävde init-code-event för att kunna logga in"]
+  n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord["'ZITADEL: den importerade användarens lösenordshash stämde inte med något känt lösenord'"]
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll["16x1 HDMI KVM - RS232/LAN-protokoll"]
   n_summaries_2026_11_03_learn_kunskapsbasen_kan_lagras_i_postgresql["'Sammanfattning: Learn-kunskapsbasen kan lagras i PostgreSQL'"]
   n_summaries_flux_components["Sammanfattning: Flux-komponenter"]
@@ -551,6 +553,7 @@ graph LR
   n_concepts_zitadel --> n_concepts_envoy_gateway
   n_concepts_zitadel --> n_concepts_cloudnative_pg
   n_concepts_zitadel --> n_entities_kubernetes
+  n_concepts_zitadel --> n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord
   n_entities_flux_gitops --> n_entities_kubernetes
   n_entities_flux_gitops --> n_summaries_flux_components
   n_entities_flux_gitops --> n_concepts_flux_operator
@@ -675,6 +678,7 @@ graph LR
   n_notes_cookies_json_var_versionsstyrd_i_offentligt_neuro_repo --> n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken
   n_notes_cookies_json_var_versionsstyrd_i_offentligt_neuro_repo --> n_notes_neuroquant_vikterna_raknas_om_dagligen_mejl_triggas_pa_publicering
   n_notes_dashboard_ranking_anvander_benchmark_matchade_kostnader --> n_notes_aa_data_api_v2_data_pensionerad_dashboard_migrerar_till_api_v2_language_models
+  n_notes_dashboarden_ikonerna_hamades_fran_iconifys_cdn_och_gjorde_ssr_sidladdningen_till_en_504 --> n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_redigerare_och_agarskap_for_relationer_i_pappa
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_relationer_mellan_kandidater_i_pappa_symmetriska_par_med_styrka_1_10
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor --> n_entities_pxe_server
@@ -1145,6 +1149,9 @@ graph LR
   n_notes_zitadel_aterstallning_historisk_installation_aterstalld_fran_zitadel_cloud_export --> n_concepts_zitadel
   n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om --> n_concepts_zitadel
   n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in --> n_concepts_zitadel
+  n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord --> n_concepts_zitadel
+  n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord --> n_notes_zitadel_importerad_anvandare_kravde_init_code_event_for_att_kunna_logga_in
+  n_notes_zitadel_importerade_anvandarens_losenordshash_stammde_inte_med_nagot_kant_losenord --> n_notes_zitadel_import_application_id_bevaras_men_oidc_client_id_genereras_om
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_entities_hdmi_kvm_switch_16_port_labbet
   n_summaries_16x1_hdmi_kvm_rs232_lan_protokoll --> n_notes_kvm_styrning_fran_pxe_pi_n_16_port_hdmi_kvm
   n_summaries_flux_components --> n_concepts_flux_operator
@@ -1188,7 +1195,7 @@ graph LR
 - **concepts/openclaw** <- [[notes/openclaw-gateway-refuserar-bind-lan-utan-auth]]
 - **concepts/poolad-eller-direkt-anslutning-mot-neon** <- [[notes/pappa-kor-nu-pa-neon-neon-ts-env-local-och-poolad-direkt-wiring]]
 - **concepts/sops** <- [[concepts/cloudflare-tunnel]], [[concepts/flux-operator]], [[concepts/gitops]], [[entities/flux-gitops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/infrastructure-agents-md-uppdaterad-tre-fallor-for-agenter]], [[notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden]]
-- **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
+- **concepts/zitadel** <- [[concepts/authentik]], [[concepts/cloudnative-pg]], [[concepts/envoy-gateway]], [[concepts/oidc]], [[entities/kubernetes]], [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]], [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]], [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]], [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]], [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
 - **entities/flux-gitops** <- [[concepts/flux-operator]], [[concepts/gitops]], [[concepts/sops]], [[entities/kubernetes]], [[entities/talos-linux]], [[notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog]], [[summaries/flux-components]]
 - **entities/hdmi-kvm-switch-16-port-labbet** <- [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]], [[notes/simon-kvm-cli-kommando-for-att-byta-hdmi-kvm-port-fran-pxe-vard]], [[summaries/16x1-hdmi-kvm-rs232-lan-protokoll]]
 - **entities/home-assistant** <- [[notes/ha-krokviken-robotdammsugare-startar-stoppar-pa-person-entiteter]], [[notes/ha-tuya-tesvor-s6-anslutningen-fungerar-men-statusfalt-saknas]], [[notes/home-assistant-krokviken-ssh-via-terminal-ssh-addon]], [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]]
@@ -1473,8 +1480,9 @@ graph LR
 - **notes/worker-8-korrupt-xfs-pa-ephemeral-partitionen-gjorde-att-kubelet-aldrig-startade-fix-med-mkfs-xfs** <- [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/worker-7-s-kubeletcertifikat-signerades-av-en-gammal-kubernetes-ca-som-finns-kvar-i-git-historiken]]
 - **notes/workers-bootar-inte-via-pxe-trots-fungerande-pxe-server-unifi-poe-styrning-via-rest-device** <- [[entities/pxe-server]], [[notes/cluster1-stale-kubeconfig-ca-och-noll-workers-diagnos-2026-11-11]], [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]]
 - **notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export** <- [[concepts/zitadel]]
-- **notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om** <- [[concepts/zitadel]]
-- **notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in** <- [[concepts/zitadel]]
+- **notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om** <- [[concepts/zitadel]], [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
+- **notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in** <- [[concepts/zitadel]], [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
+- **notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord** <- [[concepts/zitadel]], [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]]
 - **summaries/16x1-hdmi-kvm-rs232-lan-protokoll** <- [[entities/hdmi-kvm-switch-16-port-labbet]], [[notes/kvm-styrning-fran-pxe-pi-n-16-port-hdmi-kvm]]
 - **summaries/2026-11-03-learn-kunskapsbasen-kan-lagras-i-postgresql** <- [[notes/learn-kunskapsbasen-kan-lagras-i-postgresql]]
 - **summaries/flux-components** <- [[concepts/flux-operator]], [[entities/flux-gitops]], [[entities/kubernetes]]

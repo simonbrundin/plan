@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 8 |
-| Noter | 432 |
+| Noter | 434 |
 
 ## Entiteter
 
@@ -58,9 +58,11 @@ och gå sedan ner på sidorna som är relevanta.
 ## Noter
 
 - [[notes/konsulter-vs-anstallda-i-sundsvall-halva-it-styrkan-sitter-i-konsultnara-bolag]] - RÄTTELSE 2026-11-18: den här notens 50/50-påstående var FEL. _(uppdaterad 2026-11-18)_
+- [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]] - Dashboarden på `dashboard.simonbrundin.com` svarade `504 Gateway time-out` _(uppdaterad 2026-11-27)_
 - [[notes/ipv6-ingress-till-envoy-designlage-2026-11-15]] - `*.simonbrundin.com` → publik IPv6 → vidarebefordras till Envoy Gateway, analogt med _(uppdaterad 2026-11-17)_
 - [[notes/konsulter-i-sundsvall-antalet-gar-inte-att-mata-det-som-gar-att-saga]] - Rättelse: en tidigare version av den här noten påstodde en "50/50-uppdelning" _(uppdaterad 2026-11-18)_
 - [[notes/skogsduvan-ssh-via-duckdns-fungerar-port-22-forwardad-2026-11-02]] - **Status 2026-11-02: löst.** Simons har vidarebefordrat port 22 i stugans router. _(uppdaterad 2026-11-25)_
+- [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]] - Efter att ZITADEL-installationen återställts från en export av ZITADEL Cloud _(uppdaterad 2026-11-27)_
 - [[notes/goals-listar-bara-grundmal-scroll-vid-j-k]] - Ändring i plan-repot (commit 36b89d8, 9ae273a, 9be938f). _(uppdaterad 2026-11-16)_
 - [[notes/1password-mcp-environments-pa-arch-omarchy-kraver-setgid-pa-1password-mcp]] - 1Password:s desktop-app exponerar Environments-MCP via en IPC-relay ( abstrakt unix-socket @1PASSWORD_MCP ) som bara startar när 'Settin... _(uppdaterad 2026-11-23)_
 - [[notes/aa-data-api-v2-data-pensionerad-dashboard-migrerar-till-api-v2-language-models]] - 2026-11-25: Artificial Analysis pensionerade /api/v2/data/* (410 Gone sedan 4 nov 2026). _(uppdaterad 2026-11-26)_

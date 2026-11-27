@@ -144,8 +144,25 @@ kubectl get httproute -n zitadel
 - [[concepts/cloudnative-pg]]
 - [[entities/kubernetes]]
 
+## Återställd installation
+
+Den historiska installationen (ZITADEL Cloud) är återställd i den
+self-hostade instansen via ZITADEL:s officiella export/import. Importen skapar
+en **ny instans** (`401310226394907493`) - den gamla instansens PAT och
+service account-nycklar gäller alltså inte de importerade resurserna, och
+management-API:t svarar `User could not be found` för dem.
+
+- Organisation `346062090475233657` (simon-brundin-ab), projekt `talos-oidc`,
+  `kubernetes-oidc`, `Foodflow`, `Plan`.
+- Användaren `simonbrundin@gmail.com` (`346062090475757945`).
+- `Application ID` bevaras vid import, men OIDC `client_id` genereras om -
+  se [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]].
+- Administratörens inloggning ligger krypterat i `zitadel-user-credentials`
+  (SOPS) i infrastructure-repot.
+
 ## Relaterade
 
+- [[notes/zitadel-importerade-anvandarens-losenordshash-stammde-inte-med-nagot-kant-losenord]]
 - [[notes/zitadel-importerad-anvandare-kravde-init-code-event-for-att-kunna-logga-in]]
 - [[notes/zitadel-import-application-id-bevaras-men-oidc-client-id-genereras-om]]
 - [[notes/zitadel-aterstallning-historisk-installation-aterstalld-fran-zitadel-cloud-export]]
