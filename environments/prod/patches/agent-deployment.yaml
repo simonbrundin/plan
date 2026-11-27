@@ -14,4 +14,4 @@ spec:
     spec:
       containers:
         - name: agent-api
-          image: ghcr.io/simonbrundin/rust-agent:sha-1fdc501
+          image: ghcr.io/simonbrundin/rust-agent:sha-6777b92
