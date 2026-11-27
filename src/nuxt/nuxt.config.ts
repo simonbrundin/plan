@@ -91,7 +91,7 @@ export default defineNuxtConfig({
 	},
 	runtimeConfig: {
 		// Server-side URL to the Go API (inside the cluster/network).
-		// Used by the API proxy and the auth routes. Falls back to the
+		// Used for the server-to-server session check. Falls back to the
 		// public URL when not set.
 		goApiInternalUrl: process.env.NUXT_GO_API_INTERNAL_URL || "",
 		// Agent-API:t (~/repos/agents) - chatt och godkännanden. Anropas
@@ -100,7 +100,12 @@ export default defineNuxtConfig({
 		agentApiKey: process.env.NUXT_AGENT_API_KEY || "",
 		public: {
 			appUrl: process.env.NUXT_PUBLIC_APP_URL || "",
-			goApiUrl: process.env.NUXT_PUBLIC_GO_API_URL || "http://localhost:8080/api/v1",
+			// Webbläsarens URL till API:t. Tomt = same-origin ("/api/v1"),
+			// vilket är rätt när appen och API:t ligger bakom samma host
+			// (t.ex. /api/v1-routen i Envoy). I dev sätts den till
+			// http://localhost:4100/api/v1 - då är anropen cross-origin
+			// och API:t måste svara med CORS-headrar.
+			goApiUrl: process.env.NUXT_PUBLIC_GO_API_URL || "",
 			// Enables the local dev-login button (no Zitadel needed).
 			// Env-override: NUXT_PUBLIC_DEV_AUTH_ENABLED
 			devAuthEnabled: process.env.NUXT_PUBLIC_DEV_AUTH_ENABLED === "true",

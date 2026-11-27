@@ -24,7 +24,7 @@ PostgreSQL-databas.
 │  Nuxt 4 (SPA)          plan.simonbrundin.com                │
 │  - inga SSR (routeRules /**  ssr:false)                      │
 │  - Pinia för tillstånd, Nuxt UI + Tailwind för utseende      │
-│  - tunn proxy mot Go-API:t (server/routes + server/utils)   │
+│  - pratar direkt med API:t (ingen proxy)                    │
 └───────────┬──────────────────────────────┬───────────────────┘
             │ sessioncookie / Bearer       │ intern nyckel
             ▼                              ▼
@@ -54,7 +54,7 @@ PostgreSQL-databas.
 
 | Tjänst | Kod | Image | Port | Ansvar |
 | --- | --- | --- | --- | --- |
-| Gränssnitt | `src/nuxt` | `node:lts-alpine` | 3000 | SPA, proxy mot API:erna |
+| Gränssnitt | `src/nuxt` | `node:lts-alpine` | 3000 | SPA, anropar API:t direkt |
 | Plan API | `src/api` | `gcr.io/distroless` | 8080 | Mål, kalender, agentkörningar, godkännanden, kostnad |
 | Agent-API | `src/agent` | `plan-agent` | 8080 | Verktyg, chatt, gates, jobbhantering |
 | Agent-worker | `src/agent/cmd/agent-worker` | `plan-agent` | - | Utför en körning i ett Kubernetes Job |
@@ -114,7 +114,7 @@ src/
 ## Flöde för en vanlig uppgift
 
 ```text
-1. Användaren skriver i snabb lägg till (n)   → Nuxt → proxy → Go API
+1. Användaren skriver i snabb lägg till (n)   → webbläsaren → Go API
 2. Go API skriver målet i goals               → PostgreSQL
 3. Pinia uppdateras med det nya målet         → UI ritas om
 ```

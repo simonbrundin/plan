@@ -5,6 +5,7 @@ import type {
   AgentBudget,
   BudgetStatus,
 } from "~/types/agent";
+import { apiRequest } from "~/utils/api";
 
 // Sidan visar vad agentkörningarna kostar och vilka budgetgränser som
 // gäller. Plan äger siffrorna - den här sidan läser bara.
@@ -37,8 +38,8 @@ async function load() {
   errorMessage.value = "";
   try {
     const [usageResponse, budgetResponse] = await Promise.all([
-      $fetch<UsageResponse>("/api/agent/usage"),
-      $fetch<AgentBudget[]>("/api/agent/budgets"),
+      apiRequest<UsageResponse>("agent-usage"),
+      apiRequest<AgentBudget[]>("agent-budgets"),
     ]);
     usage.value = usageResponse;
     budgets.value = budgetResponse;
@@ -55,7 +56,7 @@ async function loadBudgetStatuses() {
   const entries = await Promise.all(
     budgets.value.map(async (budget) => {
       try {
-        const status = await $fetch<BudgetStatus>(`/api/agent/budgets/${budget.id}/status`);
+        const status = await apiRequest<BudgetStatus>(`agent-budgets/${budget.id}/status`);
         return [budget.id, status] as const;
       } catch {
         return null;
@@ -71,7 +72,7 @@ async function loadBudgetStatuses() {
 // igen förrän perioden går ut.
 async function toggleBudget(budget: AgentBudget) {
   try {
-    await $fetch(`/api/agent/budgets/${budget.id}`, {
+    await apiRequest(`agent-budgets/${budget.id}`, {
       method: "PATCH",
       body: { active: !budget.active },
     });
@@ -83,7 +84,7 @@ async function toggleBudget(budget: AgentBudget) {
 
 async function removeBudget(budget: AgentBudget) {
   try {
-    await $fetch(`/api/agent/budgets/${budget.id}`, { method: "DELETE" });
+    await apiRequest(`agent-budgets/${budget.id}`, { method: "DELETE" });
     await load();
   } catch {
     errorMessage.value = "Kunde inte ta bort budgeten.";
@@ -94,7 +95,7 @@ async function createBudget() {
   newBudget.saving = true;
   errorMessage.value = "";
   try {
-    await $fetch("/api/agent/budgets", {
+    await apiRequest("agent-budgets", {
       method: "POST",
       body: {
         name: newBudget.name || "Budget",

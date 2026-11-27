@@ -43,8 +43,9 @@ pub struct CallbackQuery {
 
 /// Startar inloggningen.
 ///
-/// I utvecklingsläget (`AUTH_DISABLED=true`) skickas användaren till Nuxts
-/// dev-login. Annars byggs en PKCE-url mot Zitadel.
+/// I utvecklingsläget (`AUTH_DISABLED=true`) skickas användaren till appens
+/// inloggningssida, där dev-login-knappen loggar in utan Zitadel. Annars
+/// byggs en PKCE-url mot Zitadel.
 #[utoipa::path(
     get,
     path = "/api/v1/auth/login",
@@ -56,7 +57,7 @@ pub struct CallbackQuery {
 )]
 pub async fn login() -> Response {
     if env("AUTH_DISABLED").as_deref() == Some("true") {
-        return redirect_temporary(&format!("{}/auth/dev-login", frontend_base_url()));
+        return redirect_temporary(&format!("{}/login", frontend_base_url()));
     }
 
     let domain = env("ZITADEL_DOMAIN").unwrap_or_default();

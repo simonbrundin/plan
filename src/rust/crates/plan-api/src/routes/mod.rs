@@ -21,7 +21,7 @@ pub mod tags;
 
 use axum::body::Bytes;
 use axum::extract::State;
-use axum::http::{header, HeaderValue, Method, StatusCode};
+use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
@@ -136,44 +136,50 @@ async fn openapi_json(State(state): State<AppState>) -> Json<utoipa::openapi::Op
     Json(openapi(state.config.api_host.as_deref()))
 }
 
-/// CORS - samma headers som Go-tjänsten sätter.
+/// CORS - samma regler som Go-tjänsten.
+///
+/// Webbläsaren anropar API:t direkt (Nuxt har ingen proxy), så API:t måste
+/// svara med CORS-headrar när anropet kommer från en annan origin - i dev
+/// kör appen på :3100 och API:t på :4100.
+///
+/// `CORS_ALLOWED_ORIGINS` är en kommaseparerad lista. Origin echas tillbaka
+/// (aldrig som wildcard) - ett credentialed anrop med sessioncookien
+/// blockeras av webbläsaren om `Access-Control-Allow-Origin` är `*`.
 async fn cors(request: axum::extract::Request, next: axum::middleware::Next) -> Response {
-    let origin = std::env::var("CORS_ALLOWED_ORIGINS").unwrap_or_else(|_| "*".to_string());
+    let origin = request
+        .headers()
+        .get(header::ORIGIN)
+        .and_then(|value| value.to_str().ok())
+        .map(|value| value.to_string());
+
+    let allowed = origin.as_deref().map(origin_allowed).unwrap_or(false);
 
     if request.method() == Method::OPTIONS {
         let mut response = StatusCode::NO_CONTENT.into_response();
-        let headers = response.headers_mut();
-        headers.insert(
-            header::ACCESS_CONTROL_ALLOW_ORIGIN,
-            HeaderValue::from_str(&origin).unwrap_or(HeaderValue::from_static("*")),
-        );
-        headers.insert(
-            header::ACCESS_CONTROL_ALLOW_CREDENTIALS,
-            HeaderValue::from_static("true"),
-        );
-        headers.insert(
-            header::ACCESS_CONTROL_ALLOW_HEADERS,
-            HeaderValue::from_static(
-                "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With",
-            ),
-        );
-        headers.insert(
-            header::ACCESS_CONTROL_ALLOW_METHODS,
-            HeaderValue::from_static("POST, OPTIONS, GET, PUT, PATCH, DELETE"),
-        );
+        apply_cors_headers(response.headers_mut(), origin.as_deref(), allowed);
         return response;
     }
 
     let mut response = next.run(request).await;
-    let headers = response.headers_mut();
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_ORIGIN,
-        HeaderValue::from_str(&origin).unwrap_or(HeaderValue::from_static("*")),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_CREDENTIALS,
-        HeaderValue::from_static("true"),
-    );
+    apply_cors_headers(response.headers_mut(), origin.as_deref(), allowed);
+
+    response
+}
+
+/// Sätter CORS-headrarna på svaret.
+fn apply_cors_headers(headers: &mut HeaderMap, origin: Option<&str>, allowed: bool) {
+    if allowed {
+        if let Some(origin) = origin {
+            if let Ok(value) = HeaderValue::from_str(origin) {
+                headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, value);
+            }
+        }
+        headers.insert(
+            header::ACCESS_CONTROL_ALLOW_CREDENTIALS,
+            HeaderValue::from_static("true"),
+        );
+        headers.append(header::VARY, HeaderValue::from_static("Origin"));
+    }
     headers.insert(
         header::ACCESS_CONTROL_ALLOW_HEADERS,
         HeaderValue::from_static(
@@ -184,6 +190,113 @@ async fn cors(request: axum::extract::Request, next: axum::middleware::Next) -> 
         header::ACCESS_CONTROL_ALLOW_METHODS,
         HeaderValue::from_static("POST, OPTIONS, GET, PUT, PATCH, DELETE"),
     );
+}
 
-    response
+/// Returnerar om en origin får anropa API:t från webbläsaren. Origin jämförs
+/// exakt - scheme, värd och port.
+fn origin_allowed(origin: &str) -> bool {
+    let allowed = std::env::var("CORS_ALLOWED_ORIGINS").unwrap_or_default();
+
+    allowed.split(',').any(|entry| {
+        let entry = entry.trim();
+        !entry.is_empty() && (entry == "*" || entry == origin)
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Mutex, MutexGuard, OnceLock};
+
+    // Testerna sätter CORS_ALLOWED_ORIGINS, så de får inte köras parallellt.
+    static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    fn lock_env() -> MutexGuard<'static, ()> {
+        ENV_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .unwrap_or_else(|fel| fel.into_inner())
+    }
+
+    fn set_origins(värde: &str) {
+        std::env::set_var("CORS_ALLOWED_ORIGINS", värde);
+    }
+
+    #[test]
+    fn tillåten_origin_jämförs_exakt() {
+        let _lås = lock_env();
+        set_origins("http://localhost:3100,https://plan.simonbrundin.com");
+
+        assert!(origin_allowed("http://localhost:3100"));
+        assert!(origin_allowed("https://plan.simonbrundin.com"));
+        // Port och scheme räknas - en annan port är en annan origin.
+        assert!(!origin_allowed("http://localhost:3101"));
+        assert!(!origin_allowed("https://localhost:3100"));
+        assert!(!origin_allowed("http://evil.example"));
+    }
+
+    #[test]
+    fn wildcard_tillåter_allt() {
+        let _lås = lock_env();
+        set_origins("*");
+
+        assert!(origin_allowed("http://localhost:3100"));
+        assert!(origin_allowed("https://vem-som-helst.example"));
+    }
+
+    #[test]
+    fn tom_lista_tillåter_inget() {
+        let _lås = lock_env();
+        set_origins("");
+
+        assert!(!origin_allowed("http://localhost:3100"));
+    }
+
+    #[test]
+    fn tillåten_origin_ekas_tillbaka_med_credentials() {
+        let _lås = lock_env();
+        set_origins("http://localhost:3100");
+
+        let mut headers = HeaderMap::new();
+        apply_cors_headers(
+            &mut headers,
+            Some("http://localhost:3100"),
+            origin_allowed("http://localhost:3100"),
+        );
+
+        assert_eq!(
+            headers.get(header::ACCESS_CONTROL_ALLOW_ORIGIN).unwrap(),
+            "http://localhost:3100"
+        );
+        assert_eq!(
+            headers
+                .get(header::ACCESS_CONTROL_ALLOW_CREDENTIALS)
+                .unwrap(),
+            "true"
+        );
+        assert_eq!(headers.get(header::VARY).unwrap(), "Origin");
+    }
+
+    #[test]
+    fn otillåten_origin_får_inga_credential_headrar() {
+        let _lås = lock_env();
+        set_origins("http://localhost:3100");
+
+        let mut headers = HeaderMap::new();
+        apply_cors_headers(
+            &mut headers,
+            Some("http://evil.example"),
+            origin_allowed("http://evil.example"),
+        );
+
+        // Utan Access-Control-Allow-Origin blockeras svaret av webbläsaren,
+        // så inga credentials-headrar ska skickas.
+        assert!(headers.get(header::ACCESS_CONTROL_ALLOW_ORIGIN).is_none());
+        assert!(headers
+            .get(header::ACCESS_CONTROL_ALLOW_CREDENTIALS)
+            .is_none());
+        assert!(headers.get(header::VARY).is_none());
+        // Metoder och headrar skickas alltid - de påverkar inte credentials.
+        assert!(headers.get(header::ACCESS_CONTROL_ALLOW_METHODS).is_some());
+    }
 }

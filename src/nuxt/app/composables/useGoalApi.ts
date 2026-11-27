@@ -1,31 +1,27 @@
 import type { FetchOptions } from "ofetch";
 
 import type { Goal, GoalDependency, GoalGraphResponse, GoalStatus } from "~/types/goal";
-import { apiProxyWithAuth } from "~/utils/apiProxy";
+import { apiRequestWithAuth } from "~/utils/api";
 import type { RecurrenceMode } from "~/utils/recurrence";
 
-// Sessionens fel delas med resten av appen - sidorna fångar samma typ.
-export { AuthenticationError } from "~/utils/apiProxy";
-
-// Proxy API calls through our server route which attaches session cookie
 const FALLBACK_GOAL_ICON = "lucide:check-square";
 const ICON_LOOKUP_TIMEOUT_MS = 5000;
 
-// Alla anrop går via serverns proxy, som skickar med sessioncookien.
-const apiProxy = async <T>(path: string, options: FetchOptions = {}): Promise<T> => {
-	return await apiProxyWithAuth<T>(path, options);
+// Alla anrop går direkt mot API:t, som skickar med sessioncookien.
+const apiRequest = async <T>(path: string, options: FetchOptions = {}): Promise<T> => {
+	return await apiRequestWithAuth<T>(path, options);
 };
 
 export function useGoalApi() {
 	const updateGoalTitle = async (goalId: number, title: string) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { title },
 		});
 	};
 
 	const updateGoalIcon = async (goalId: number, icon: string) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { icon },
 		});
@@ -36,25 +32,25 @@ export function useGoalApi() {
 		goalId: number,
 		description: string,
 	) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { description },
 		});
 	};
 
 	const updateGoalStatus = async (goalId: number, statusId: number) => {
-		await apiProxy(`goals/${goalId}/status`, {
+		await apiRequest(`goals/${goalId}/status`, {
 			method: "PATCH",
 			body: { status_id: statusId },
 		});
 	};
 
 	const loadGoalStatuses = async (): Promise<GoalStatus[]> => {
-		return await apiProxy<GoalStatus[]>("statuses");
+		return await apiRequest<GoalStatus[]>("statuses");
 	};
 
 	const toggleGoalStarted = async (goalId: number, started: string | null) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { started },
 		});
@@ -64,7 +60,7 @@ export function useGoalApi() {
 		goalId: number,
 		finished: string | null,
 	) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { finished },
 		});
@@ -72,7 +68,7 @@ export function useGoalApi() {
 
 	// Sätter målets due-datum ("YYYY-MM-DD"). Null rensar datumet.
 	const setGoalDue = async (goalId: number, due: string | null) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { due },
 		});
@@ -81,7 +77,7 @@ export function useGoalApi() {
 	// Sätter målets startdatum ("YYYY-MM-DD") - det datum då målet tidigast
 	// får dyka upp i prioriteringslistan. Null rensar datumet.
 	const setGoalStartDate = async (goalId: number, startDate: string | null) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { start_date: startDate },
 		});
@@ -89,7 +85,7 @@ export function useGoalApi() {
 
 	// Sätter målets uppskattade tidsåtgång i minuter. Null rensar den.
 	const setGoalEstimate = async (goalId: number, minutes: number | null) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { estimated_minutes: minutes },
 		});
@@ -98,7 +94,7 @@ export function useGoalApi() {
 	// Markerar ett mål som evigt (eller upphäver evigt-flaggan).
 	// Ett evigt mål kan inte slutföras - API:t avvisar det.
 	const setGoalEternal = async (goalId: number, eternal: boolean) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { eternal },
 		});
@@ -107,7 +103,7 @@ export function useGoalApi() {
 	// Markerar ett mål som ett mål för en agent (eller upphäver
 	// agent-flaggan).
 	const setGoalAgent = async (goalId: number, agent: boolean) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { agent },
 		});
@@ -116,7 +112,7 @@ export function useGoalApi() {
 	// Markerar ett mål som ett mål som ska göras nu (eller upphäver
 	// nu-flaggan). Sådana mål syns på "Gör nu"-sidan.
 	const setGoalNow = async (goalId: number, now: boolean) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "PATCH",
 			body: { now },
 		});
@@ -133,7 +129,7 @@ export function useGoalApi() {
 		mode?: RecurrenceMode | null,
 		startDate?: string,
 	): Promise<Goal> => {
-		return await apiProxy<Goal>(`goals/${goalId}`, {
+		return await apiRequest<Goal>(`goals/${goalId}`, {
 			method: "PATCH",
 			body: {
 				recurrence_rule: rule,
@@ -152,7 +148,7 @@ export function useGoalApi() {
 		occurrenceDate?: string,
 		completedOn?: string,
 	): Promise<Goal> => {
-		return await apiProxy<Goal>(`goals/${goalId}/completions`, {
+		return await apiRequest<Goal>(`goals/${goalId}/completions`, {
 			method: "POST",
 			body: {
 				occurrence_date: occurrenceDate,
@@ -163,26 +159,26 @@ export function useGoalApi() {
 
 	// Avbockar den senast slutförda förekomsten av ett återkommande mål.
 	const undoGoalOccurrence = async (goalId: number): Promise<Goal> => {
-		return await apiProxy<Goal>(`goals/${goalId}/completions`, {
+		return await apiRequest<Goal>(`goals/${goalId}/completions`, {
 			method: "DELETE",
 		});
 	};
 
 	const deleteGoal = async (goalId: number) => {
-		await apiProxy(`goals/${goalId}`, {
+		await apiRequest(`goals/${goalId}`, {
 			method: "DELETE",
 		});
 	};
 
 	const addParentRelation = async (childId: number, parentId: number) => {
-		await apiProxy(`goals/relations`, {
+		await apiRequest(`goals/relations`, {
 			method: "POST",
 			body: { childId, parentId },
 		});
 	};
 
 	const removeParentRelation = async (childId: number, parentId: number) => {
-		await apiProxy(`goals/relations`, {
+		await apiRequest(`goals/relations`, {
 			method: "DELETE",
 			body: { childId, parentId },
 		});
@@ -193,7 +189,7 @@ export function useGoalApi() {
 		parentId: number,
 		order: number,
 	) => {
-		await apiProxy(`goals/relations`, {
+		await apiRequest(`goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, order },
 		});
@@ -204,7 +200,7 @@ export function useGoalApi() {
 		childId: number,
 		order: number,
 	) => {
-		await apiProxy(`goals/relations`, {
+		await apiRequest(`goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, order },
 		});
@@ -215,7 +211,7 @@ export function useGoalApi() {
 		parentId: number,
 		childIds: number[],
 	) => {
-		await apiProxy(`goals/relations/reorder`, {
+		await apiRequest(`goals/relations/reorder`, {
 			method: "PATCH",
 			body: { parentId, childIds },
 		});
@@ -223,14 +219,14 @@ export function useGoalApi() {
 
 	// Sätter en ny ordning på grundmålen (mål utan förälder) i ett svep
 	const reorderGoals = async (goalIds: number[]) => {
-		await apiProxy(`goals/reorder`, {
+		await apiRequest(`goals/reorder`, {
 			method: "PATCH",
 			body: { goalIds },
 		});
 	};
 
 	const reorderPriorityGoals = async (goalIds: number[]) => {
-		await apiProxy(`goals/priority/reorder`, {
+		await apiRequest(`goals/priority/reorder`, {
 			method: "PATCH",
 			body: { goalIds },
 		});
@@ -241,7 +237,7 @@ export function useGoalApi() {
 		childId: number,
 		weight: number,
 	) => {
-		await apiProxy(`goals/relations`, {
+		await apiRequest(`goals/relations`, {
 			method: "PATCH",
 			body: { childId, parentId, weight },
 		});
@@ -251,7 +247,7 @@ export function useGoalApi() {
 		parentId: number,
 		weights: Array<{ childId: number; weight: number }>,
 	) => {
-		await apiProxy(`goals/relations/weights`, {
+		await apiRequest(`goals/relations/weights`, {
 			method: "PATCH",
 			body: { parentId, weights },
 		});
@@ -262,14 +258,14 @@ export function useGoalApi() {
 		parentId: number,
 		weight: number,
 	) => {
-		await apiProxy(`goals/relations`, {
+		await apiRequest(`goals/relations`, {
 			method: "POST",
 			body: { childId, parentId, weight },
 		});
 	};
 
 	const loadAllGoals = async (): Promise<Goal[]> => {
-		return await apiProxy<Goal[]>(`goals`);
+		return await apiRequest<Goal[]>(`goals`);
 	};
 
 	// Hämta hela målgraphen: målen, relationerna och beroendena.
@@ -278,7 +274,7 @@ export function useGoalApi() {
 	// beroenden räknas ut lokalt. Därför behövs bara en fråga när man
 	// navigerar mellan mål.
 	const loadGoalGraph = async (): Promise<GoalGraphResponse> => {
-		return await apiProxy<GoalGraphResponse>(`goals/graph`);
+		return await apiRequest<GoalGraphResponse>(`goals/graph`);
 	};
 
 	const findIconForGoalTitle = async (title: string): Promise<string | undefined> => {
@@ -320,7 +316,7 @@ export function useGoalApi() {
 			body.recurrence_rule = recurrenceRule;
 		}
 
-		return await apiProxy<Goal>(`goals`, {
+		return await apiRequest<Goal>(`goals`, {
 			method: "POST",
 			body,
 		});
@@ -330,14 +326,14 @@ export function useGoalApi() {
 		goalId: number,
 		dependsOnId: number,
 	): Promise<GoalDependency> => {
-		return await apiProxy<GoalDependency>(`goals/dependencies`, {
+		return await apiRequest<GoalDependency>(`goals/dependencies`, {
 			method: "POST",
 			body: { goalId, dependsOnId },
 		});
 	};
 
 	const removeDependency = async (goalId: number, dependsOnId: number) => {
-		await apiProxy(`goals/dependencies`, {
+		await apiRequest(`goals/dependencies`, {
 			method: "DELETE",
 			body: { goalId, dependsOnId },
 		});

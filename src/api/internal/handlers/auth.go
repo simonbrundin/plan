@@ -42,9 +42,10 @@ type UserInfo struct {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	// Dev mode: redirect to Nuxt dev-login endpoint
+	// Dev mode: redirect to the app's login page, where the dev-login
+	// button logs in without Zitadel.
 	if os.Getenv("AUTH_DISABLED") == "true" {
-		c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/auth/dev-login", frontendBaseURL()))
+		c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/login", frontendBaseURL()))
 		return
 	}
 

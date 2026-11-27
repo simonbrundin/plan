@@ -17,8 +17,11 @@ This file contains preferences and requirements for AI coding agents working on 
 - **Authen ligger i Go API:t**, inte i Nuxt. Go skapar sessionen, sätter
   `plan_session` (httpOnly) + `plan_user` (läsbar hint) och validerar sessionen
   från cookie *eller* `Authorization: Bearer`.
-- Nuxt är en tunn proxy (`server/utils/goApi.ts`): vidarebefordrar cookien och
-  kopierar tillbaka `Set-Cookie` + `Location` från Go.
+- **Webbläsaren anropar API:t direkt** - det finns ingen proxy i Nuxt. I prod
+  ligger appen och API:t på samma host; i dev svarar API:t med CORS-headrar för
+  appens origin (`CORS_ALLOWED_ORIGINS` - origin echas tillbaka, aldrig `*`).
+- Nuxt har bara kvar en serverdel för agent-API:t, eftersom `AGENT_API_KEY`
+  inte får nå webbläsaren.
 - Sessionstoken får inte cirkula i URL:er - det var den gamla callback-flödet.
 
 ### Current Production Issues

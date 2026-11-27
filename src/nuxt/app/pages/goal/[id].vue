@@ -9,6 +9,7 @@ import ConfirmDeleteGoalModal from '~/components/ConfirmDeleteGoalModal.vue'
 import ConfirmRemoveParentModal from '~/components/ConfirmRemoveParentModal.vue'
 import type { ComputedRef, Ref } from 'vue'
 import type { Goal, GoalWithWeight, GetGoalResponse } from '~/types/goal'
+import { apiRequest } from '~/utils/api'
 import type { Place } from '~/types/place'
 import { insertChildId, newChildInsertIndex, nextChildOrder } from '~/utils/childOrder'
 import { buildDependencyTree, moveChildInTree } from '~/utils/childDependencyOrder'
@@ -141,7 +142,7 @@ function stopAgentPolling() {
 async function saveConversationId(conversationId: string) {
   if (!agentRun.value) return;
   try {
-    await $fetch(`/api/proxy/agent-runs/${agentRun.value.id}`, {
+    await apiRequest(`agent-runs/${agentRun.value.id}`, {
       method: 'PATCH',
       body: { conversation_id: conversationId },
     });

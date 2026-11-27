@@ -1,20 +1,5 @@
-import type { FetchOptions } from "ofetch";
-
 import type { Tag } from "~/types/tag";
-import { apiProxy as proxy } from "~/utils/apiProxy";
-
-/**
- * apiProxy skickar requesten till Go API:t via Nuxt:s proxy.
- *
- * Sessionen ligger i Go API:t, så proxyn vidarebefordrar cookien och
- * valideringen sker där.
- */
-const apiProxy = async <T>(
-	path: string,
-	options: FetchOptions = {},
-): Promise<T> => {
-	return await proxy<T>(path, options);
-};
+import { apiRequest } from "~/utils/api";
 
 /**
  * useTags ger åtkomst till användarens taggar och till målens tagglistor.
@@ -28,13 +13,13 @@ export function useTags() {
 
 	/** Laddar användarens taggar. */
 	const fetchTags = async (): Promise<void> => {
-		const result = await apiProxy<Tag[]>("tags");
+		const result = await apiRequest<Tag[]>("tags");
 		tags.value = result ?? [];
 	};
 
 	/** Hämtar taggarna kopplade till ett mål. */
 	const fetchGoalTags = async (goalId: number): Promise<string[]> => {
-		const result = await apiProxy<string[]>(`goals/${goalId}/tags`);
+		const result = await apiRequest<string[]>(`goals/${goalId}/tags`);
 		return result ?? [];
 	};
 
@@ -48,7 +33,7 @@ export function useTags() {
 		goalId: number,
 		names: string[],
 	): Promise<string[]> => {
-		const result = await apiProxy<string[]>(`goals/${goalId}/tags`, {
+		const result = await apiRequest<string[]>(`goals/${goalId}/tags`, {
 			method: "PUT",
 			body: { tags: names },
 		});
