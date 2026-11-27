@@ -530,6 +530,16 @@ pub fn normalisera(definition: &mut Definition) {
     }
 }
 
+impl crate::worker::GoalDefiner for Definer {
+    fn definiera<'a>(
+        &'a self,
+        input: &'a Input,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Definition, String>> + Send + 'a>>
+    {
+        Box::pin(self.definiera(input))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

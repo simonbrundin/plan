@@ -9,35 +9,14 @@
 use std::sync::Arc;
 
 use plan_agent::coder::Coder;
-use plan_agent::definer::{Definer, Input};
+use plan_agent::definer::Definer;
 use plan_agent::planclient::PlanClient;
 use plan_agent::profile;
 use plan_agent::proposer::Proposer;
 use plan_agent::provider::{Factory, LlmProvider, Model};
 use plan_agent::runusage::Recorder;
-use plan_agent::worker::{CodeRunner, Config, GoalDefiner, Worker};
+use plan_agent::worker::{CodeRunner, Config, Worker};
 use tracing::{info, warn};
-
-/// Definieraren som workern använder.
-struct DefinerAdapter {
-    /// Den egentlige definieraren.
-    definer: Definer,
-}
-
-impl GoalDefiner for DefinerAdapter {
-    fn definiera<'a>(
-        &'a self,
-        input: &'a Input,
-    ) -> std::pin::Pin<
-        Box<
-            dyn std::future::Future<Output = Result<plan_agent::definer::Definition, String>>
-                + Send
-                + 'a,
-        >,
-    > {
-        Box::pin(self.definer.definiera(input))
-    }
-}
 
 #[tokio::main]
 async fn main() {
@@ -66,9 +45,7 @@ async fn main() {
 
     info!("Using LLM provider: {} ({})", modell.provider, modell.name);
 
-    let definierare = Arc::new(DefinerAdapter {
-        definer: Definer::ny(leverantör.clone(), modell.clone()),
-    });
+    let definierare = Arc::new(Definer::ny(leverantör.clone(), modell.clone()));
 
     // Recordern samlar tokenanvändningen för körningen. Plan räknar
     // sedan fram kostnaden ur sin prislista.
