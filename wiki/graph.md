@@ -182,6 +182,7 @@ graph LR
   n_notes_konventioner["Konventioner i repot"]
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image["Korrigering: rock4c-plus.bin är ett microSD/eMMC-image, inte en SPI-image"]
   n_notes_kortkommando_hjalpen_i_helpmodal_maste_folja_tangentandringar["Kortkommando-hjälpen i HelpModal måste följa tangentändringar"]
+  n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart["Kortkommando s: byta målfas (status) och bulkmarkera klart för ett eller flera mål"]
   n_notes_kostnad_och_budget_for_agentkorningar["Kostnad och budget för agentkörningar"]
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force["Krypterade secrets i klustret: ogiltiga inloggningar och Keycloak-brute force"]
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna["Kubeconfig-städning: en kontext mot cluster1 (admin@cluster1), 6 dubbletter borttagna"]
@@ -252,7 +253,6 @@ graph LR
   n_notes_min_kontaktlista_jag_som_nod_i_grafen_pappa["Min kontaktlista - jag som nod i grafen (pappa)"]
   n_notes_minimax_m_plan_inlagd_i_jamforelsen_m2_7_syns_som_uppskattad["MiniMax M Plan inlagd i jamforelsen, M2.7 syns som uppskattad"]
   n_notes_moderposten_arkiveras_nar_eml_bilagorna_har_lagts_in["Moderposten arkiveras när .eml-bilagorna har lagts in"]
-  n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras["Neon-anslutningen hänger när IPv6 prioriteras"]
   n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken["Neon API-token hamnade i dotfiles-git-historiken"]
   n_notes_neuroquant_ar_ombyggt_trpc_api_och_e_post_verifiering["NeuroQuant är ombyggt - tRPC-API och e-post-verifiering"]
   n_notes_neuroquant_kontot_last_av_for_manga_inloggningsforsok["NeuroQuant-kontot låst av för många inloggningsförsök"]
@@ -316,6 +316,7 @@ graph LR
   n_notes_priority_vyn_byter_namn_till_gor_nu["Priority-vyn byter namn till Gör nu"]
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat["Priorityfilter ska behandla saknat started som ej påbörjat"]
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte["Prod-klustret saknar quorum: controlplane-1 och -2 svarar inte"]
+  n_notes_prod_patch_utan_namespace_bryter_flux_builden["Prod-patch utan namespace bryter Flux-builden"]
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode["PXE-återställning: nodspecifika matchbox-profiler och maintenance-mode-flöde"]
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text["PXE: boot_script_dhcp kräver mkimage-uImage, inte ren hush-text"]
   n_notes_pxe_bootloop_initramfs_startar_om_for_att_boota_installerad_talos_pa_emmc["PXE-bootloop: initramfs startar om for att boota installerad Talos pa eMMC"]
@@ -376,7 +377,6 @@ graph LR
   n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen["Skogsduvan: temperaturkaskad i tre steg, styrd av minsta temperaturen"]
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer["Skogsduvans HA: temperaturlogik ombyggd, fyra döda sensorer"]
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet["Skogsduvans HA utsätts för automatiserade skannningar från internet"]
-  n_notes_skrivbordswidget_som_visar_gor_nu_malet["Skrivbordswidget som visar Gör-nu-målet"]
   n_notes_slutverifiering_av_sammanslagen_plattform_mal_540_genom_hela_kedjan["Slutverifiering av sammanslagen plattform: mål #540 genom hela kedjan"]
   n_notes_snabbtillagg_med_mal_och_valbart_foraldramal["Snabbtillägg med mål och valbart föräldramål"]
   n_notes_snabbtillaggets_popup_fick_escape_och_visuell_polish["Snabbtilläggets popup fick Escape och visuell polish"]
@@ -478,6 +478,7 @@ graph LR
   n_summaries_llm_wiki_karpathy["Sammanfattning: LLM Wiki (Karpathy)"]
   n_summaries_longhorn_disk_guide["Sammanfattning: Diskar i Longhorn"]
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn["PinchBench: verifierade API-fakta och datafel i Value-vyn"]
+  n_summaries_prod_patch_utan_namespace_bryter_flux_builden["Sammanfattning: prod-patch utan namespace bryter Flux-builden"]
   n_concepts_anvanda_agenter_i_plan --> n_notes_dokumentationssidor_i_granssnittet_docs
   n_concepts_anvanda_agenter_i_plan --> n_notes_human_gate_som_teknisk_grans_scope_pa_api_nyckeln
   n_concepts_anvanda_agenter_i_plan --> n_notes_agent_dock_pa_malsiden_ersatter_de_tre_agentpanelerna
@@ -764,6 +765,7 @@ graph LR
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_rock_4c_och_4se_har_ingen_spi_flash_i_fabrik_u_boot_ligger_pa_microsd_emmc
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_2026_01_rock_4c_saknar_bootfile_boot_script_dhcp_natverksboot_dor_direkt
   n_notes_korrigering_rock4c_plus_bin_ar_ett_microsd_emmc_image_inte_en_spi_image --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
+  n_notes_kortkommando_s_byta_malfas_status_och_bulkmarkera_klart --> n_concepts_anvanda_agenter_i_plan
   n_notes_krypterade_secrets_i_klustret_ogiltiga_inloggningar_och_keycloak_brute_force --> n_notes_synk_hallbokningar_kommunens_actor_smartbook_matchi
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna --> n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat
@@ -843,7 +845,6 @@ graph LR
   n_notes_michael_brundin_blir_en_personnod_i_relationsgrafen --> n_notes_relationsgrafen_anvander_fast_michael_id_utan_person_kind
   n_notes_min_kontaktlista_jag_som_nod_i_grafen_pappa --> n_notes_redigerare_och_agarskap_for_relationer_i_pappa
   n_notes_moderposten_arkiveras_nar_eml_bilagorna_har_lagts_in --> n_notes_expanderade_eml_laggs_in_som_riktiga_mejl_i_mappen_append
-  n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras --> n_notes_skrivbordswidget_som_visar_gor_nu_malet
   n_notes_neon_api_token_hamnade_i_dotfiles_git_historiken --> n_notes_losning_1password_backed_env_variabel_for_mcp_tokens
   n_notes_neuroquant_ar_ombyggt_trpc_api_och_e_post_verifiering --> n_notes_neuroquant_kontot_last_av_for_manga_inloggningsforsok
   n_notes_neuroquant_ar_ombyggt_trpc_api_och_e_post_verifiering --> n_notes_neuroquant_vikterna_raknas_om_dagligen_mejl_triggas_pa_publicering
@@ -936,6 +937,7 @@ graph LR
   n_notes_priorityfilter_ska_behandla_saknat_started_som_ej_paborjat --> n_notes_mal_kan_ha_due_datum_deadline
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_entities_kubernetes
   n_notes_prod_klustret_saknar_quorum_controlplane_1_och_2_svarar_inte --> n_notes_klustret_har_byggts_om_bara_kube_system_flux_och_appar_saknas_2026_11_23
+  n_notes_prod_patch_utan_namespace_bryter_flux_builden --> n_summaries_prod_patch_utan_namespace_bryter_flux_builden
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_entities_pxe_server
   n_notes_pxe_aterstallning_nodspecifika_matchbox_profiler_och_maintenance_mode_flode --> n_notes_recovery_av_en_rock_worker_kraver_fysisk_rattning_esp_filen_pa_emmc_fangar_booten
   n_notes_pxe_boot_script_dhcp_kraver_mkimage_uimage_inte_ren_hush_text --> n_entities_pxe_server
@@ -1041,8 +1043,6 @@ graph LR
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_fyra_shelly_enheter_svarar_inte_pa_natet
   n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer --> n_notes_skogsduvan_temperaturkaskad_i_tre_steg_styrd_av_minsta_temperaturen
   n_notes_skogsduvans_ha_utsatts_for_automatiserade_skannningar_fran_internet --> n_notes_skogsduvans_ha_temperaturlogik_ombyggd_fyra_doda_sensorer
-  n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_concepts_anvanda_agenter_i_plan
-  n_notes_skrivbordswidget_som_visar_gor_nu_malet --> n_notes_neon_anslutningen_hanger_nar_ipv6_prioriteras
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_sops
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_concepts_flux_operator
   n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden --> n_notes_cnpg_managed_roles_secretet_saknar_losenord_om_username_avviker_fran_rollnamnet
@@ -1184,11 +1184,12 @@ graph LR
   n_summaries_longhorn_disk_guide --> n_concepts_flux_operator
   n_summaries_longhorn_disk_guide --> n_concepts_longhorn
   n_summaries_pinchbench_verifierade_api_fakta_och_datafel_i_value_vyn --> n_notes_pinchbench_egen_value_score_ska_inte_kopieras_rakna_kostnad_per_lyckad_uppgift_sjalv
+  n_summaries_prod_patch_utan_namespace_bryter_flux_builden --> n_notes_prod_patch_utan_namespace_bryter_flux_builden
 ```
 
 ## Backlinks
 
-- **concepts/anvanda-agenter-i-plan** <- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]], [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
+- **concepts/anvanda-agenter-i-plan** <- [[notes/flyttalsparitet-och-orchestratorns-doda-gate-flode]], [[notes/kortkommando-s-byta-malfas-status-och-bulkmarkera-klart]], [[notes/mal-568-verifierad-tva-samtidiga-agentruns-i-dev]]
 - **concepts/authentik** <- [[concepts/oidc]], [[concepts/zitadel]]
 - **concepts/cert-manager** <- [[concepts/envoy-gateway]], [[concepts/http-routing-flow]], [[entities/kubernetes]]
 - **concepts/cloudflare-tunnel** <- [[concepts/http-routing-flow]]
@@ -1339,7 +1340,6 @@ graph LR
 - **notes/michael-brundin-blir-en-personnod-i-relationsgrafen** <- [[notes/relationsgrafen-anvander-fast-michael-id-utan-person-kind]]
 - **notes/min-kontaktlista-jag-som-nod-i-grafen-pappa** <- [[notes/redigerare-och-agarskap-for-relationer-i-pappa]]
 - **notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in** <- [[notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append]]
-- **notes/neon-anslutningen-hanger-nar-ipv6-prioriteras** <- [[notes/skrivbordswidget-som-visar-gor-nu-malet]]
 - **notes/neon-api-token-hamnade-i-dotfiles-git-historiken** <- [[notes/cookies-json-var-versionsstyrd-i-offentligt-neuro-repo]], [[notes/losning-1password-backed-env-variabel-for-mcp-tokens]]
 - **notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering** <- [[notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok]], [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
 - **notes/neuroquant-kontot-last-av-for-manga-inloggningsforsok** <- [[notes/neuroquant-ar-ombyggt-trpc-api-och-e-post-verifiering]], [[notes/neuroquant-vikterna-raknas-om-dagligen-mejl-triggas-pa-publicering]]
@@ -1389,6 +1389,7 @@ graph LR
 - **notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko** <- [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
 - **notes/priorityfilter-ska-behandla-saknat-started-som-ej-paborjat** <- [[notes/eviga-mal-i-plan-kan-inte-slutforas]]
 - **notes/prod-klustret-saknar-quorum-controlplane-1-och-2-svarar-inte** <- [[notes/klustret-har-byggts-om-bara-kube-system-flux-och-appar-saknas-2026-11-23]]
+- **notes/prod-patch-utan-namespace-bryter-flux-builden** <- [[summaries/prod-patch-utan-namespace-bryter-flux-builden]]
 - **notes/pxe-aterstallning-nodspecifika-matchbox-profiler-och-maintenance-mode-flode** <- [[entities/pxe-server]]
 - **notes/pxe-boot-script-dhcp-kraver-mkimage-uimage-inte-ren-hush-text** <- [[entities/pxe-server]]
 - **notes/pxe-bootloop-initramfs-startar-om-for-att-boota-installerad-talos-pa-emmc** <- [[entities/pxe-server]]
@@ -1442,7 +1443,6 @@ graph LR
 - **notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen** <- [[notes/ha-automationer-behover-en-startv-g-for-att-aterstalla-laget-och-tre-syntaxfallor]], [[notes/skogsduvan-elementet-styrs-av-minsta-temperaturen-fail-open]], [[notes/skogsduvan-larm-nar-sensorer-shelly-enheter-faller-ur-online]], [[notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer]]
 - **notes/skogsduvans-ha-temperaturlogik-ombyggd-fyra-doda-sensorer** <- [[entities/home-assistant]], [[notes/skogsduvan-fyra-shelly-enheter-svarar-inte-pa-natet]], [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]], [[notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet]]
 - **notes/skogsduvans-ha-utsatts-for-automatiserade-skannningar-fran-internet** <- [[notes/skogsduvan-temperaturkaskad-i-tre-steg-styrd-av-minsta-temperaturen]]
-- **notes/skrivbordswidget-som-visar-gor-nu-malet** <- [[notes/neon-anslutningen-hanger-nar-ipv6-prioriteras]]
 - **notes/sops-kryptera-bara-stringdata-i-kubernetes-secrets-ellers-kraschar-flux-builden** <- [[concepts/sops]], [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]]
 - **notes/sortering-av-grundmal-pa-goals-med-piltangenterna** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]]
 - **notes/sortering-av-undermal-med-piltangenterna-var-trasig-i-plan** <- [[notes/barnordning-foljer-beroenden-i-malsidan]], [[notes/malgraph-navigering-mellan-malsidor-gar-fran-sekunder-till-millisekunder]], [[notes/sortering-av-grundmal-pa-goals-med-piltangenterna]]
@@ -1508,3 +1508,4 @@ graph LR
 - **summaries/llm-wiki-karpathy** <- [[notes/kunskaps-wiki]], [[notes/utvecklingsflode]]
 - **summaries/longhorn-disk-guide** <- [[concepts/longhorn]], [[entities/talos-linux]], [[notes/talos-v1-14-machineconfig-specen-ar-en-quoted-string-och-flera-dokument]]
 - **summaries/pinchbench-verifierade-api-fakta-och-datafel-i-value-vyn** <- [[notes/pinchbench-egen-value-score-ska-inte-kopieras-rakna-kostnad-per-lyckad-uppgift-sjalv]]
+- **summaries/prod-patch-utan-namespace-bryter-flux-builden** <- [[notes/prod-patch-utan-namespace-bryter-flux-builden]]
