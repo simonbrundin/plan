@@ -224,12 +224,16 @@ pub struct AgentRun {
     #[serde(serialize_with = "crate::models::go_num::serialize_f64")]
     pub reserved_cost_usd: f64,
     /// När körningen började.
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     /// När körningen blev klar.
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
     /// När körningen skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// När körningen senast ändrades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
@@ -279,6 +283,7 @@ pub struct CreateAgentRunRequest {
     pub model_version: String,
     /// När körningen börjar. Inget ger "nu".
     #[serde(default)]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
@@ -331,9 +336,11 @@ pub struct UpdateAgentRunRequest {
     pub model_version: Option<String>,
     /// Ny starttid.
     #[serde(default)]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     /// Ny sluttid.
     #[serde(default)]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
@@ -353,6 +360,7 @@ pub struct AgentRunEvent {
     #[serde(skip_serializing_if = "är_tom_payload")]
     pub payload: Option<serde_json::Value>,
     /// När händelsen skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
@@ -447,8 +455,10 @@ pub struct AgentApproval {
     #[serde(skip_serializing_if = "är_tom_payload")]
     pub payload: Option<serde_json::Value>,
     /// När godkännandet skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// När beslutet fattades.
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub decided_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
@@ -527,11 +537,14 @@ pub struct AgentRunUsage {
     pub status: String,
     /// När körningen startade.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     /// När körningen blev klar.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
     /// När raden skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
@@ -567,9 +580,11 @@ pub struct CreateAgentRunUsageRequest {
     pub tool_names: Option<Vec<String>>,
     /// När körningen startade.
     #[serde(default)]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     /// När körningen blev klar.
     #[serde(default)]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
@@ -603,6 +618,7 @@ pub struct AgentBudget {
     /// Om budgeten gäller.
     pub active: bool,
     /// När budgeten skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 

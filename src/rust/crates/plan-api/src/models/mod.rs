@@ -7,6 +7,7 @@ pub mod agent;
 pub mod calendar;
 pub mod calendar_event;
 pub mod go_num;
+pub mod go_time;
 pub mod goal;
 pub mod place;
 pub mod status;
