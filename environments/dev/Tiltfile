@@ -37,17 +37,21 @@ def allocate_port(service, container_port):
 default_registry("localhost:5000")
 
 # Ignorera varningar om oanvända images
-update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-go-api", "plan-agent"])
+update_settings(suppress_unused_image_warnings=["plan-nuxt", "plan-api", "plan-agent"])
 
 # =============================================================================
 # Bygg images med docker_build
 # =============================================================================
 
 docker_build("plan-nuxt", "../../src/nuxt")
-# Byggcontexten för API-imagen är src/ - Go-modulen ligger där och
-# omfattar både api/ och agent/. Se src/.dockerignore.
-docker_build("plan-go-api", "../../src", dockerfile="../../src/api/Dockerfile")
-docker_build("plan-agent", "../..", dockerfile="../../src/agent/Dockerfile")
+# API:t byggs ur Rust - samma Dockerfile som CI använder
+# (.github/workflows/commit.rust.yaml). Byggcontexten är src/ eftersom
+# Cargo-workspaceet ligger i src/rust.
+docker_build("plan-api", "../../src", dockerfile="../../src/rust/Dockerfile")
+# Agenten byggs ur Rust - samma Dockerfile som CI använder. Byggcontexten
+# är repo-roten, eftersom bilden innehåller kommandofilerna från
+# src/agent/commands.
+docker_build("plan-agent", "../..", dockerfile="../../src/rust/Dockerfile.agent")
 
 # =============================================================================
 # Databasen i dev är Neon (ingen Postgres i klustret)

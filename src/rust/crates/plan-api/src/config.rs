@@ -26,6 +26,9 @@ pub struct Config {
     pub agent_api_key: Option<String>,
     /// Utvecklingsnyckel som bypassar autentisering.
     pub api_key_bypass: Option<String>,
+    /// Hur länge API:t väntar på databasen innan den ger upp och låter
+    /// podden starta om. Default 120s.
+    pub db_connect_timeout_secs: u64,
 }
 
 impl Config {
@@ -51,6 +54,10 @@ impl Config {
             api_key_bypass: std::env::var("API_KEY_BYPASS")
                 .ok()
                 .filter(|v| !v.is_empty()),
+            db_connect_timeout_secs: std::env::var("DB_CONNECT_TIMEOUT_SECONDS")
+                .ok()
+                .and_then(|value| value.parse().ok())
+                .unwrap_or(120),
         }
     }
 

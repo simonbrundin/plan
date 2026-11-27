@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { AgentMessage, AgentRun } from '~/types/agent';
+import type { AgentConversation, AgentMessage, AgentRun } from '~/types/agent';
+import { renderMarkdown } from '~/utils/markdown';
 
 // Chattpanelen - Plan är agentens gränssnitt. Slack används inte.
 const props = defineProps<{
@@ -16,12 +17,15 @@ const emit = defineEmits<{
 const {
 	messages,
 	conversationId,
+	conversations,
 	approval,
 	streaming,
 	error,
 	available,
 	load,
 	loadApproval,
+	loadLatestForGoal,
+	openConversation,
 	startConversation,
 	send,
 	decide,
@@ -111,7 +115,10 @@ onMounted(async () => {
 	approvalTimer = setInterval(() => {
 		if (document.visibilityState === 'visible') void loadApproval();
 	}, 15000);
-	if (props.run?.conversation_id) {
+	// Samtalen för målet hämtas - de är den väg chatten hittas tillbaka
+	// på. Finns inget samtal för målet används den körningens samtal.
+	const senaste = await loadLatestForGoal(props.goalId);
+	if (!senaste && props.run?.conversation_id) {
 		conversationId.value = props.run.conversation_id;
 		await load(props.run.conversation_id);
 	}
@@ -124,11 +131,32 @@ onUnmounted(() => {
 // Startar en konversation om det inte finns en.
 const ensureConversation = async () => {
 	if (conversationId.value) return conversationId.value;
-	const id = await startConversation(props.goalTitle);
+	const id = await startConversation(props.goalTitle, props.goalId);
 	if (id) {
 		emit('conversation-started', id);
 	}
 	return id;
+};
+
+// Startar en ny chatt - den gamla behålls och kan öppnas igen.
+const startNewConversation = async () => {
+	const id = await startConversation(props.goalTitle, props.goalId);
+	if (!id) return;
+	messages.value = [];
+	emit('conversation-started', id);
+};
+
+// Öppnar en tidigare chatt för målet.
+const onSelectConversation = async (event: Event) => {
+	const target = event.target as HTMLSelectElement;
+	if (!target.value) return;
+	await openConversation(target.value);
+};
+
+// Etikett för en chatt i listan - titel och tidpunkt.
+const conversationLabel = (conversation: AgentConversation) => {
+	const time = formatTime(conversation.updated_at ?? conversation.created_at);
+	return time ? `${conversation.title} · ${time}` : conversation.title;
 };
 
 const submit = async () => {
@@ -166,20 +194,41 @@ const reject = async () => {
 
 <template>
 	<section class="flex min-h-0 flex-1 flex-col bg-surface">
-		<!-- Rubriken med agentens status ligger i docken - här visas bara
-		     knappen för att starta en konversation. -->
+		<!-- Rubriken med agentens status ligger i docken - här visas chattens
+		     samtal och knappen för att starta en ny. -->
 		<header
-			v-if="!conversationId"
 			class="flex flex-shrink-0 items-center justify-between gap-2 border-b border-line px-4 py-2"
 		>
-			<p class="text-xs text-ink-dim">Ingen konversation ännu.</p>
-			<button
-				type="button"
-				@click="ensureConversation"
-				class="text-xs text-accent transition-colors hover:text-accent-light"
-			>
-				Starta chatt
-			</button>
+			<template v-if="conversationId">
+				<select
+					v-if="conversations.length > 1"
+					:value="conversationId"
+					class="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface-2 px-2 py-1 text-xs text-ink"
+					@change="onSelectConversation"
+				>
+					<option v-for="item in conversations" :key="item.id" :value="item.id">
+						{{ conversationLabel(item) }}
+					</option>
+				</select>
+				<p v-else class="text-xs text-ink-dim">Chatt med agenten</p>
+				<button
+					type="button"
+					@click="startNewConversation"
+					class="shrink-0 text-xs text-accent transition-colors hover:text-accent-light"
+				>
+					Ny chatt
+				</button>
+			</template>
+			<template v-else>
+				<p class="text-xs text-ink-dim">Ingen konversation ännu.</p>
+				<button
+					type="button"
+					@click="ensureConversation"
+					class="text-xs text-accent transition-colors hover:text-accent-light"
+				>
+					Starta chatt
+				</button>
+			</template>
 		</header>
 
 		<!-- Förslag som väntar på beslut -->
@@ -259,16 +308,22 @@ const reject = async () => {
 					<!-- Vanliga meddelanden -->
 					<div v-else class="max-w-[90%]">
 						<div
-							class="rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words"
+							class="rounded-2xl px-3.5 py-2 text-sm break-words"
 							:class="
 								message.role === 'user'
-									? 'bg-accent-strong text-white'
+									? 'bg-accent-strong text-white whitespace-pre-wrap'
 									: message.role === 'system'
-										? 'border border-line bg-surface-2 text-ink-muted'
+										? 'border border-line bg-surface-2 text-ink-muted whitespace-pre-wrap'
 										: 'bg-surface-2 text-ink'
 							"
 						>
-							{{ message.content }}
+							<!-- Agentens svar är markdown och renderas som HTML -->
+							<div
+								v-if="message.role === 'assistant'"
+								class="chat-markdown"
+								v-html="renderMarkdown(message.content)"
+							/>
+							<template v-else>{{ message.content }}</template>
 						</div>
 						<p
 							class="mt-0.5 px-1 text-[10px] text-ink-dim"

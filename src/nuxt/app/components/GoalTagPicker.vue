@@ -11,7 +11,7 @@ const props = defineProps<{
 	/** Titeln på målet taggarna sätts på. */
 	targetTitle: string;
 	/** Taggar som redan sitter på målet. */
-	selected: string[];
+	selected: readonly string[];
 	/** Alla taggar användaren har. */
 	available: Tag[];
 }>();

@@ -1,4 +1,16 @@
 name: CI för Rust-tjänsterna
+# Rust är huvudspåret: API:t och agenten i src/rust är de som körs i
+# dev och i produktion.
+#
+# Den här workflowen är grinden - format, lint och tester. Själva
+# imagebygget ligger i commit.rust-images.yaml, som också är den enda
+# workflow som skriver in images i prod-manifesten. (Go-flödena, se
+# commit.api.yaml och commit.agent.yaml, bygger och deployar inte
+# längre - de testas bara så länge Go-koden finns kvar.)
+#
+# Viktigt: prod-klustret kör arm64, så images måste byggas för båda
+# arkitekturerna. Det gör commit.rust-images.yaml - på egna runners per
+# arkitektur, inte under QEMU.
 on:
   push:
     paths:
@@ -33,7 +45,8 @@ jobs:
             ~/.cargo/git
             src/rust/target
           key: ${{ runner.os }}-rust-${{ hashFiles('src/rust/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-rust-
+          restore-keys: |
+            ${{ runner.os }}-rust-
 
       - name: Format
         run: cargo fmt --check

@@ -370,6 +370,26 @@ strömming - då kommer både tokenantal och kostnad med.
 Översikten finns på `/agent-cost` i gränssnittet och via
 `GET /api/v1/agent-usage` samt `GET /api/v1/agent-budgets`.
 
+## Chatten sparas per mål
+
+Samtalen ligger i agentens egen databas (`plan-agent-db`), inte i Plan. Varje
+samtal bär `goal_id` - Plan-målets id - så att chatten för ett mål hittas
+tillbaka när målsidan öppnas igen.
+
+Länkningen är det som gör att chatten överlever en omladdning. Tidigare
+fanns kopplingen bara i `agent_runs.conversation_id`, och den sattes bara när
+målet redan hade en agentkörning. Ett mål utan körning fick därför en ny
+konversation varje gång, och de gamla samtalen blev spök i databasen.
+
+API:t:
+
+- `POST /api/v1/conversations` - tar `goal_id` (valfritt) och sparar det.
+- `GET /api/v1/conversations?goal_id=<id>` - listar samtalen för ett mål,
+  nyast först. Utan `goal_id` listas alla samtal.
+
+Gränssnittet laddar det senaste samtalet för målet när målsidan öppnas,
+visar en lista över tidigare chattar och erbjuder knappen "Ny chatt".
+
 ## Human gate i gränssnittet
 
 Godkännandena ligger i Plan (`agent_approvals`), inte i agentens minne. UI:t

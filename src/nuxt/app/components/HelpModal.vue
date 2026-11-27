@@ -72,7 +72,7 @@ const sections = computed<Section[]>(() => {
       accent: "text-accent",
       shortcuts: [
         { keys: ["?"], description: "Visa denna hjälp" },
-        { keys: ["Ctrl", "K"], description: "Sök bland mål (Cmd+K på Mac)" },
+        { keys: ["Ctrl", "K"], description: "Sök bland mål och händelser (Cmd+K på Mac)" },
         { keys: ["n"], description: "Snabbt lägg till (mål eller händelse)" },
         { keys: ["z"], description: "Ångra senaste handlingen" },
         {

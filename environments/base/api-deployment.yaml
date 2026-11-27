@@ -16,7 +16,9 @@ spec:
     spec:
       containers:
         - name: api
-          image: plan-go-api:latest
+          # Lokalt image-namn. Tilt bygger detta i dev; produktion patchar
+          # över raden med den publicerade Rust-imagen.
+          image: plan-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

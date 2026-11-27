@@ -469,6 +469,12 @@ const docTemplate = `{
                         "description": "Offset",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Only conversations for this Plan goal",
+                        "name": "goal_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1423,6 +1429,9 @@ const docTemplate = `{
         "handlers.CreateConversationRequest": {
             "type": "object",
             "properties": {
+                "goal_id": {
+                    "type": "integer"
+                },
                 "model": {
                     "type": "string"
                 },

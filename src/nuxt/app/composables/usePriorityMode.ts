@@ -50,12 +50,18 @@ const DEFAULT_NOW_FILTER: NowFilter = "now";
 
 const nowFilter = ref<NowFilter>(DEFAULT_NOW_FILTER);
 
-// Filter "görbar här": visa bara mål som har den plats användaren
+// Filter på plats: visa bara mål som är görbara på den plats användaren
 // befinner sig på. Flera platser på ett mål har OR-semantik - det
 // räcker att vara på någon av dem.
+//
+// Utan vald plats ("Utan plats") visas bara de mål som inte är
+// kopplade till någon plats.
+//
+// Filtret är påslaget som standard - samma regel som skrivbordswidgeten
+// använder. Slås det av visas alla mål oavsett plats.
 const filterByCurrentPlace = useState<boolean>(
 	"now-filter-current-place",
-	() => false,
+	() => true,
 );
 
 let lastUpdateTime = 0;
@@ -110,7 +116,8 @@ export function usePriorityMode() {
 	function matchesCurrentPlace(goal: PrioritizedGoal): boolean {
 		if (!filterByCurrentPlace.value) return true;
 		// Mål utan plats är inte bundna till någon särskild plats och
-		// ska därför inte försvinna ur listan.
+		// ska därför inte försvinna ur listan. Om ingen plats är vald
+		// ("Utan plats") visas bara just de målen.
 		return isDoableAtPlaceOrUnplaced(goal, currentPlaceId.value);
 	}
 

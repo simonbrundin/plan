@@ -60,7 +60,8 @@ const bulkBusy = ref(false)
 const selectedGoals = computed(() => visibleGoals.value.filter((goal) => goalSelection.isSelected(goal.id)))
 const allVisibleSelected = computed(() => visibleGoals.value.length > 0 && visibleGoals.value.every((goal) => goalSelection.isSelected(goal.id)))
 
-// Platser: "jag är här"-platsen styr filtret "görbar här".
+// Platser: "jag är här"-platsen styr platsfiltret. "Utan plats" visar
+// bara de mål som inte är kopplade till någon plats.
 const { places: allPlaces, currentPlaceId, fetchPlaces, fetchCurrentPlace, setCurrentPlace, findNearbyPlaces } = usePlaces()
 const gpsMessage = ref('')
 const locating = ref(false)
@@ -719,22 +720,6 @@ const filterOptions = [
       </NuxtLink>
     </div>
 
-    <div class="text-xs text-ink-dim mb-6">
-      <span class="text-ink-muted">j/k</span> navigera &nbsp;|&nbsp;
-      <span class="text-ink-muted">↑/↓</span> sortera &nbsp;|&nbsp;
-      <span class="text-ink-muted">l</span> öppna mål &nbsp;|&nbsp;
-      <span class="text-ink-muted">Håll Shift+P</span> + <span class="text-ink-muted">K/J</span> ändra vikt &nbsp;|&nbsp;
-      <span class="text-ink-muted">s</span> status &nbsp;|&nbsp;
-      <span class="text-ink-muted">space+s</span> påbörjad &nbsp;|&nbsp;
-      <span class="text-ink-muted">Space+N</span> nu &nbsp;|&nbsp;
-      <span class="text-ink-muted">d</span> klar &nbsp;|&nbsp;
-      <span class="text-ink-muted">e</span> evigt &nbsp;|&nbsp;
-      <span class="text-ink-muted">c</span> deadline &nbsp;|&nbsp;
-      <span class="text-ink-muted">b</span> startdatum &nbsp;|&nbsp;
-      <span class="text-ink-muted">t</span> beskrivning &nbsp;|&nbsp;
-      <span class="text-ink-muted">x</span> ta bort
-    </div>
-
     <div class="flex flex-wrap items-center gap-2 mb-3">
       <span class="text-xs text-ink-dim">Jag är här:</span>
       <select
@@ -742,7 +727,7 @@ const filterOptions = [
         class="px-2 py-1.5 rounded-lg bg-surface-2 border border-line text-ink text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
         @change="selectCurrentPlace(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
       >
-        <option value="">Ingen plats vald</option>
+        <option value="">Utan plats</option>
         <option v-for="place in allPlaces" :key="place.id" :value="place.id">
           {{ place.name }}
         </option>
@@ -762,7 +747,7 @@ const filterOptions = [
           : 'bg-surface-2 text-ink-muted border-line hover:border-line-strong hover:text-ink'"
         @click="setFilterByCurrentPlace(!filterByCurrentPlace)"
       >
-        Görbar här
+        Filtrera på plats
       </button>
     </div>
 
@@ -772,7 +757,7 @@ const filterOptions = [
       v-if="filterByCurrentPlace && currentPlaceId === null"
       class="text-xs text-ink-dim mb-3"
     >
-      Välj en plats för att se vilka mål som är görbara där.
+      Utan plats - visar mål som inte är kopplade till någon plats. Välj en plats för att se målen som är görbara där.
     </p>
 
     <div class="flex flex-wrap items-center gap-2 mb-6">

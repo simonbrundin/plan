@@ -78,6 +78,9 @@
 
 .docs-content p {
   color: var(--color-ink-muted);
+  /* Dokumentationssidan använder hela sidbredden. Brödtexten får
+     ändå en rimlig radlängd - kodblock och tabeller får vara fulla. */
+  max-width: 80ch;
 }
 
 .docs-content strong {
@@ -116,6 +119,7 @@
 
 .docs-content li {
   margin-top: 0.4em;
+  max-width: 80ch;
 }
 
 .docs-content li::marker {

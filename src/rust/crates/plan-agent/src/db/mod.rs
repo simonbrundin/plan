@@ -68,9 +68,14 @@ const MIGRATIONER: &[&str] = &[
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         title VARCHAR(255) DEFAULT 'New conversation',
         model VARCHAR(100) DEFAULT 'MiniMax-M2.7',
-        provider VARCHAR(50) DEFAULT 'minimax'
+        provider VARCHAR(50) DEFAULT 'minimax',
+        goal_id BIGINT
     )
     "#,
+    // Kolumnen läggs till separat - tabellen kan redan finnas i
+    // databaser som kör agenten sedan tidigare.
+    "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS goal_id BIGINT",
+    "CREATE INDEX IF NOT EXISTS idx_conversations_goal_id ON conversations(goal_id)",
     r#"
     CREATE TABLE IF NOT EXISTS messages (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

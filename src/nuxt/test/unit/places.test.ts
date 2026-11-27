@@ -61,6 +61,10 @@ describe("isDoableAtPlaceOrUnplaced", () => {
 	it("utan vald plats är inget mål görbart", () => {
 		expect(isDoableAtPlaceOrUnplaced({ places: [place(1, "Hem")] }, null)).toBe(false);
 	});
+
+	it("utan vald plats är ett mål utan platser görbart", () => {
+		expect(isDoableAtPlaceOrUnplaced({}, null)).toBe(true);
+	});
 });
 
 describe("isDoableAtAnyPlace", () => {

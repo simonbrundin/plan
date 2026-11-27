@@ -79,6 +79,15 @@ func runMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 		return fmt.Errorf("failed to create conversations table: %w", err)
 	}
 
+	// Migration: conversations.goal_id - kopplingen till Plan-målet.
+	// Kolumnen läggs till separat eftersom tabellen redan finns i
+	// databaser som kör agenten sedan tidigare.
+	if _, err := pool.Exec(ctx, `
+		ALTER TABLE conversations ADD COLUMN IF NOT EXISTS goal_id BIGINT
+	`); err != nil {
+		return fmt.Errorf("failed to add conversations.goal_id: %w", err)
+	}
+
 	// Create messages table
 	if _, err := pool.Exec(ctx, `
 		CREATE TABLE IF NOT EXISTS messages (
@@ -117,6 +126,8 @@ func runMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 	indexes := []string{
 		`CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_conversations_created_at ON conversations(created_at)`,
+		// Samtalen hittas tillbaka via målet - därför indexeras goal_id.
+		`CREATE INDEX IF NOT EXISTS idx_conversations_goal_id ON conversations(goal_id)`,
 	}
 
 	for _, idx := range indexes {

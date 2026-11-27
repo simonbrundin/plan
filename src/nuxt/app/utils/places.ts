@@ -29,13 +29,18 @@ export function isDoableAtPlace(
  * Ett mål utan plats är inte bundet till någon särskild plats och kan
  * därför göras var som helst - det ska inte försvinna när användaren
  * filtrerar listan på sin nuvarande plats.
+ *
+ * Om ingen plats är vald ("Utan plats") visas bara mål utan plats. De
+ * är de enda som är "görbara" när man inte har bestämt var man
+ * befinner sig - ett mål med plats hör till en specifik plats och syns
+ * när den platsen är vald.
  */
 export function isDoableAtPlaceOrUnplaced(
 	goal: PlaceOwner,
 	placeId: number | null,
 ): boolean {
-	if (placeId === null) return false;
 	const places = goal.places ?? [];
+	if (placeId === null) return places.length === 0;
 	if (places.length === 0) return true;
 	return places.some((place) => place.id === placeId);
 }

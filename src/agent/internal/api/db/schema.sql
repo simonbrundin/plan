@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS conversations (
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     title VARCHAR(255) DEFAULT 'New conversation',
     model VARCHAR(100) DEFAULT 'MiniMax-M2.7',
-    provider VARCHAR(50) DEFAULT 'minimax'
+    provider VARCHAR(50) DEFAULT 'minimax',
+    goal_id BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -26,6 +27,7 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_created_at ON conversations(created_at);
+CREATE INDEX IF NOT EXISTS idx_conversations_goal_id ON conversations(goal_id);
 
 -- API Keys for LLM providers
 CREATE TABLE IF NOT EXISTS api_keys (

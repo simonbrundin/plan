@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
+  layout: "docs",
 });
 
 const route = useRoute();
@@ -40,7 +41,7 @@ const showToc = computed(() => (page.value?.headings.length ?? 0) > 2);
 </script>
 
 <template>
-  <div v-if="page" class="mx-auto w-full max-w-7xl px-6 py-10">
+  <div v-if="page" class="mx-auto w-full px-6 py-10">
     <div class="mb-8 flex items-center gap-2 text-sm text-ink-dim">
       <NuxtLink to="/docs" class="transition-colors hover:text-ink">
         Dokumentation
@@ -49,7 +50,7 @@ const showToc = computed(() => (page.value?.headings.length ?? 0) > 2);
       <span class="text-ink-muted">{{ page.title }}</span>
     </div>
 
-    <div class="grid gap-10 lg:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[200px_minmax(0,1fr)_200px]">
+    <div class="grid gap-10 lg:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_220px]">
       <!-- Sidomeny -->
       <aside class="hidden lg:block">
         <div class="sticky top-6">

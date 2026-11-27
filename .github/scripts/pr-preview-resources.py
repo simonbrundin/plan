@@ -1,168 +1,114 @@
 #!/usr/bin/env python3
 """Skapar kustomize-overlays för en PR-preview.
 
-Skriptet körs av GitHub Actions. Miljövariablerna PR_NUM och
-IMAGE_DIGEST kommer från workflow-steget.
+Skriptet körs av GitHub Actions. Miljövariablerna PR_NUM (eller
+PR_NUMBER), NUXT_IMAGE och
+API_IMAGE kommer från workflow-steget.
 
-Overlayen pekar på basen och applicerar de patchar som gör
-preview-miljön unik: eget namespace, egen image och egen hostname.
+Overlayen hamnar i environments/pr/<pr-nummer>/ på branchen "previews".
+Flux applicerar hela environments/pr-katalogen, så varje PR får en egen
+katalog - och inget index behövs (två PR:er som rör samma fil skulle
+annars slåss om filåtkomsten).
 """
 
 import os
+import shutil
+from pathlib import Path
 
-import yaml
+# PR_NUM och PR_NUMBER är samma sak - olika steg i kedjan har använt
+# olika namn. Acceptera båda, så att skriptet inte är känsligt för det.
+PR_NUM = os.environ.get("PR_NUM") or os.environ["PR_NUMBER"]
+NUXT_IMAGE = os.environ["NUXT_IMAGE"]
+API_IMAGE = os.environ["API_IMAGE"]
 
-PR_NUM = os.environ["PR_NUM"]
-IMAGE_DIGEST = os.environ["IMAGE_DIGEST"]
+TEMPLATE_DIR = Path("environments/pr-template")
+OUT_DIR = Path(f"environments/pr/{PR_NUM}")
 
-# Image-digesten kommer som "namn@digest". Kustomize behöver hela
-# strängen, så den används som den är.
-image = IMAGE_DIGEST
+# Registry-uppgifterna för GHCR ligger krypterade i prod. Kustomize får
+# inte referera filer ovanför katalogen, så filen kopieras in i overlayen
+# i stället - krypterad, precis som i prod. Flux dekrypterar den.
+GHCR_SECRET_SOURCE = Path("environments/prod/secrets/ghcr-secret.enc.yaml")
+GHCR_SECRET_NAME = "ghcr-secret.enc.yaml"
 
-PR_DIR = f"environments/pr/{PR_NUM}"
+# Schemat (ConfigMap) kopieras in från basen - samma schema som dev och
+# prod. Overlayen får inte referera till basen, eftersom den publiceras
+# på branchen "previews" som bara innehåller preview-overlays.
+SCHEMA_SOURCE = Path("environments/base/db/schema.yaml")
+SCHEMA_NAME = "schema-configmap.yaml"
+
+# README i environments/pr/ - se ensure_readme().
+README = Path("environments/pr/README.md")
+
 NAMESPACE = f"plan-pr-{PR_NUM}"
 HOSTNAME = f"plan-pr-{PR_NUM}.simonbrundin.com"
 
-NAMESPACE_PATCH = {
-    "apiVersion": "v1",
-    "kind": "Namespace",
-    "metadata": {
-        "name": NAMESPACE,
-        "labels": {
-            "app.kubernetes.io/managed-by": "flux",
-            "preview": "true",
-            "pr-number": PR_NUM,
-        },
-    },
+# Platshållarna i mallen byts ut här. Sökvägarna i mallens
+# kustomization.yaml är relativa till mallens egen plats - i den
+# genererade katalogen ligger de ett djupare, så de skrivs om.
+REPLACEMENTS = {
+    "NAMESPACE_PLACEHOLDER": NAMESPACE,
+    "PR_NUMBER_PLACEHOLDER": PR_NUM,
+    "HOSTNAME_PLACEHOLDER": HOSTNAME,
+    "NUXT_IMAGE_PLACEHOLDER": NUXT_IMAGE,
+    "API_IMAGE_PLACEHOLDER": API_IMAGE,
+    "../base/": "../../base/",
+    "../prod/": "../../prod/",
 }
 
-DEPLOYMENT_PATCH = {
-    "apiVersion": "apps/v1",
-    "kind": "Deployment",
-    "metadata": {
-        "name": "nuxt-app",
-        "labels": {"app": "plan", "preview": "true"},
-    },
-    "spec": {
-        "replicas": 1,
-        "template": {
-            "spec": {
-                "containers": [
-                    {
-                        "name": "plan",
-                        "image": image,
-                        "resources": {
-                            "requests": {"memory": "64Mi", "cpu": "50m"},
-                            "limits": {"memory": "128Mi", "cpu": "200m"},
-                        },
-                    }
-                ]
-            }
-        },
-    },
-}
-
-ROUTE_PATCH = {
-    "apiVersion": "gateway.networking.k8s.io/v1",
-    "kind": "HTTPRoute",
-    "metadata": {
-        "name": "plan-route",
-        "annotations": {
-            "external-dns.alpha.kubernetes.io/hostname": f"{HOSTNAME}.",
-        },
-    },
-    "spec": {"hostnames": [HOSTNAME]},
-}
+HEADER = (
+    "# DO NOT EDIT MANUALLY\n"
+    "# Genereras av .github/scripts/pr-preview-resources.py\n"
+    f"# PR {PR_NUM} - https://{HOSTNAME}\n\n"
+)
 
 
-def overlay() -> dict:
-    """Bygger kustomization-filen för preview-miljön."""
-    return {
-        "apiVersion": "kustomize.config.k8s.io/v1beta1",
-        "kind": "Kustomization",
-        "resources": ["../../base"],
-        "namespace": NAMESPACE,
-        # Kustomize vill ha patchen som text - ett objekt går inte att
-        # tolka i fältet "patch".
-        "patches": [
-            {
-                "patch": yaml.dump(NAMESPACE_PATCH, default_flow_style=False, sort_keys=False),
-                "target": {"kind": "Namespace", "name": "plan"},
-            },
-            {
-                "patch": yaml.dump(DEPLOYMENT_PATCH, default_flow_style=False, sort_keys=False),
-                "target": {"kind": "Deployment", "name": "nuxt-app"},
-            },
-            {
-                "patch": yaml.dump(ROUTE_PATCH, default_flow_style=False, sort_keys=False),
-                "target": {"kind": "HTTPRoute", "name": "plan-route"},
-            },
-        ],
-    }
+def render(text: str) -> str:
+    """Byter ut platshållarna i en mallfil."""
+    for placeholder, value in REPLACEMENTS.items():
+        text = text.replace(placeholder, value)
+    return text
 
 
 def write_overlay() -> None:
-    """Skriver overlayen för PR:n."""
-    os.makedirs(PR_DIR, exist_ok=True)
-    path = f"{PR_DIR}/kustomization.yaml"
+    """Skriver overlayen för preview-miljön."""
+    if not TEMPLATE_DIR.is_dir():
+        raise SystemExit(f"FEL: mallen {TEMPLATE_DIR} saknas")
 
-    with open(path, "w") as handle:
-        handle.write("# DO NOT EDIT MANUALLY\n")
-        handle.write("# Genereras av .github/scripts/pr-preview-resources.py\n\n")
-        yaml.dump(overlay(), handle, default_flow_style=False, sort_keys=False)
+    if OUT_DIR.exists():
+        shutil.rmtree(OUT_DIR)
+    OUT_DIR.mkdir(parents=True)
 
-    print(f"✓ Skapade {path}")
+    for source in sorted(TEMPLATE_DIR.glob("*.yaml")):
+        target = OUT_DIR / source.name
+        target.write_text(HEADER + render(source.read_text()), encoding="utf-8")
+        print(f"✓ Skapade {target}")
+
+    ghcr_target = OUT_DIR / GHCR_SECRET_NAME
+    ghcr_target.write_text(GHCR_SECRET_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"✓ Kopierade {GHCR_SECRET_SOURCE} -> {ghcr_target}")
+
+    schema_target = OUT_DIR / SCHEMA_NAME
+    schema_target.write_text(SCHEMA_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"✓ Kopierade {SCHEMA_SOURCE} -> {schema_target}")
 
 
-def update_pr_index() -> list:
-    """Lägger in PR:n i environments/pr/kustomization.yaml."""
-    path = "environments/pr/kustomization.yaml"
-    resources = []
+def ensure_readme() -> None:
+    """Skapar environments/pr/README.md om den saknas.
 
-    if os.path.exists(path):
-        with open(path) as handle:
-            existing = yaml.safe_load(handle)
-        if existing and "resources" in existing:
-            resources = list(existing.get("resources", []))
-
-    # Ta bort eventuella varianter av denna PR.
-    resources = [
-        resource
-        for resource in resources
-        if not (
-            str(resource) == PR_NUM
-            or str(resource) == f"./{PR_NUM}"
-            or str(resource).endswith(f"/{PR_NUM}")
+    Filen håller katalogen ifylld när den sista previewen tas bort. Utan
+    den skulle kustomize bygga "no resources" och Flux inte prunade
+    något - previewen skulle bli kvar i klustret.
+    """
+    if not README.exists():
+        README.write_text(
+            "# PR-previews\n\n"
+            "Overlayer per PR, genererade av .github/scripts/pr-preview-resources.py.\n",
+            encoding="utf-8",
         )
-    ]
-
-    resources.append(f"./{PR_NUM}")
-    resources.sort(key=lambda resource: (not str(resource).startswith("./"), str(resource)))
-
-    with open(path, "w") as handle:
-        handle.write("# DO NOT EDIT MANUALLY\n")
-        handle.write("# Denna fil uppdateras automatiskt av GitHub Actions\n\n")
-        yaml.dump(
-            {
-                "apiVersion": "kustomize.config.k8s.io/v1beta1",
-                "kind": "Kustomization",
-                "resources": resources,
-            },
-            handle,
-            default_flow_style=False,
-            sort_keys=False,
-        )
-
-    print(f"✓ Uppdaterade {path}")
-    print(f"  Resurser: {resources}")
-    return resources
-
-
-def main() -> None:
-    write_overlay()
-    update_pr_index()
-    print(f"✓ Image: {image}")
+        print(f"✓ Skapade {README}")
 
 
 if __name__ == "__main__":
-    main()
+    write_overlay()
+    ensure_readme()
+    print(f"Previewen deployas till namespace {NAMESPACE} med URL https://{HOSTNAME}")

@@ -1,7 +1,25 @@
 name: PR Preview Deployment
+# Varje PR får en egen, kastbar miljö i klustret:
+#
+#   namespace plan-pr-<nr>, egen hostname, egen databas.
+#
+# Overlayen publiceras på branchen "previews", som Flux applicerar
+# (Kustomization "plan-preview" i infrastructure-flux). Branchen används
+# för att Flux ska kunna följa en PR - GitRepository "plan" läser bara
+# main.
+#
+# Båda imagerna byggs för amd64 och arm64. Klustret kör arm64, så en
+# amd64-only-image ger "no match for platform in manifest" vid pull.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    # En docs-ändring bygger ingen ny preview - den skulle bara kosta
+    # byggminuter. Ändras själva flödet körs det om, så att en ny
+    # byggmetod verifieras.
+    paths-ignore:
+      - "docs/**"
+      - "wiki/**"
+      - "**/*.md"
   pull_request_target:
     types: [closed]
 
@@ -12,34 +30,63 @@ permissions:
 
 env:
   REGISTRY: ghcr.io/${{ github.repository_owner }}
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  # Samma tagg för alla arkitekturer - Kubernetes väljer rätt variant.
+  IMAGE_TAG: ${{ github.event.pull_request.number }}-${{ github.sha }}
 
 jobs:
   # ============================================
-  # JOB 1: Skapa/Uppdatera PR Preview
+  # JOB 1: Bygg imagerna (en runner per arkitektur)
   # ============================================
-  create-preview:
-    name: Skapa PR Preview
-    # Bot-PR (label skip-review) får ingen preview-miljö. Annars skapar
-    # städjobbet en ny PR för varje PR, och kedjan blir oändlig.
+  # Varje arkitektur byggs på en runner av samma arkitektur. Arm64
+  # under QEMU tar timmar för en Rust-kompilering, så arm64 byggs i
+  # stället på en riktig arm64-runner.
+  bygg:
+    name: Bygg ${{ matrix.image }} för ${{ matrix.platform }}
     if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-review')
-    runs-on: ubuntu-latest
-    outputs:
-      # build-push-action v5 har ingen "image"-output - bara imageid, digest
-      # och metadata. Image-referensen sätts ihop här av tagg och digest.
-      image: ghcr.io/${{ github.repository_owner }}/plan/pr-preview:${{ github.event.pull_request.number }}-${{ github.sha }}@${{ steps.publish.outputs.digest }}
-      pr-number: ${{ steps.pr-info.outputs.pr_number }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: nuxt
+            repo: plan/pr-preview
+            runner: ubuntu-latest
+            platform: linux/amd64
+            arch: amd64
+            context: src/nuxt
+            file: src/nuxt/Dockerfile
+          - image: nuxt
+            repo: plan/pr-preview
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            arch: arm64
+            context: src/nuxt
+            file: src/nuxt/Dockerfile
+          - image: api
+            repo: rust-api/pr-preview
+            runner: ubuntu-latest
+            platform: linux/amd64
+            arch: amd64
+            context: src
+            file: src/rust/Dockerfile
+          - image: api
+            repo: rust-api/pr-preview
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            arch: arm64
+            context: src
+            file: src/rust/Dockerfile
     steps:
-      - name: Hämta PR-info
-        id: pr-info
-        run: |
-          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
-          echo "pr_branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Logga in i GHCR
         uses: docker/login-action@v3
@@ -48,20 +95,80 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bygg och publicera image
-        id: publish
+      - name: Bygg och pusha ${{ matrix.platform }}
+        id: bygg
         uses: docker/build-push-action@v5
         with:
-          context: src/nuxt
-          file: src/nuxt/Dockerfile
-          platforms: linux/amd64
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-${{ github.sha }}
-            ${{ env.REGISTRY }}/plan/pr-preview:${{ github.event.pull_request.number }}-latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: true
+          outputs: type=image,push-by-digest=true,name-canonical=true
+          tags: ${{ env.REGISTRY }}/${{ matrix.repo }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}
+
+      - name: Spara digest
+        run: |
+          mkdir -p digests
+          echo "${{ steps.bygg.outputs.digest }}" > "digests/${{ matrix.image }}-${{ matrix.arch }}"
+
+      - name: Ladda upp digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.image }}-${{ matrix.arch }}
+          path: digests/
+          retention-days: 1
+
+  # ============================================
+  # JOB 2: Slå ihop manifesten och publicera previewen
+  # ============================================
+  create-preview:
+    name: Skapa PR Preview
+    needs: bygg
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Logga in i GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ladda ner digester
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-*
+          merge-multiple: true
+          path: digests/
+
+      - name: Slå ihop manifesten
+        run: |
+          set -euo pipefail
+
+          NUXT_AMD64="$(cat digests/nuxt-amd64)"
+          NUXT_ARM64="$(cat digests/nuxt-arm64)"
+          API_AMD64="$(cat digests/api-amd64)"
+          API_ARM64="$(cat digests/api-arm64)"
+
+          docker buildx imagetools create \
+            -t "${REGISTRY}/plan/pr-preview:${IMAGE_TAG}" \
+            "${REGISTRY}/plan/pr-preview@${NUXT_AMD64}" \
+            "${REGISTRY}/plan/pr-preview@${NUXT_ARM64}"
+
+          docker buildx imagetools create \
+            -t "${REGISTRY}/rust-api/pr-preview:${IMAGE_TAG}" \
+            "${REGISTRY}/rust-api/pr-preview@${API_AMD64}" \
+            "${REGISTRY}/rust-api/pr-preview@${API_ARM64}"
 
       - name: Sätt upp Python för Git operationer
         uses: actions/setup-python@v5
@@ -73,51 +180,66 @@ jobs:
 
       - name: Skapa PR Preview resurser
         env:
-          PR_NUM: ${{ github.event.pull_request.number }}
-          IMAGE_DIGEST: ghcr.io/${{ github.repository_owner }}/plan/pr-preview:${{ github.event.pull_request.number }}-${{ github.sha }}@${{ steps.publish.outputs.digest }}
+          NUXT_IMAGE: ${{ env.REGISTRY }}/plan/pr-preview:${{ env.IMAGE_TAG }}
+          API_IMAGE: ${{ env.REGISTRY }}/rust-api/pr-preview:${{ env.IMAGE_TAG }}
         run: |
           python3 .github/scripts/pr-preview-resources.py
 
-      - name: Commit och pusha ändringar
-        env:
-          PR_NUM: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publicera overlayen på previews-branchen
         run: |
-          # Konfigurera git
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          
-          # Lägg till alla ändringar
-          git add environments/pr/
-          
-          # Kontrollera om det finns något att committa
-          if git diff --staged --quiet; then
-            echo "Inga ändringar att committa"
-            exit 0
-          fi
-          
-          # Committa
-          git commit -F - <<'MSG'
-          chore: add preview resources for PR ${{ github.event.pull_request.number }}
+          set -euo pipefail
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
 
-          Auto-generated by GitHub Actions PR Preview workflow.
-          Flux will reconcile these manifests to create a preview deployment.
+          # Overlayen ligger i arbetskopian. Spara den utanför repot -
+          # nästa steg byter branch, och den genererade katalogen ska
+          # inte följa med i checkouten.
+          rm -rf /tmp/preview-overlay
+          mkdir -p /tmp/preview-overlay
+          cp -r "environments/pr/${PR_NUMBER}/." /tmp/preview-overlay/
 
-          Image: ghcr.io/${{ github.repository_owner }}/plan/pr-preview:${{ github.event.pull_request.number }}-${{ github.sha }}@${{ steps.publish.outputs.digest }}
-          MSG
-          
-          # Pusha
-          git push origin ${{ github.event.pull_request.head.ref }}
-          
-          echo "✓ Pushade preview manifests"
+          # Ta bort den genererade katalogen ur arbetskopian. Annars
+          # vägrar git byta branch - den genererade katalogen är
+          # oversionerad, och branchen innehåller en katalog med samma
+          # namn.
+          rm -rf "environments/pr/${PR_NUMBER}"
+
+          for attempt in 1 2 3 4 5; do
+            if git fetch origin previews; then
+              git checkout -B previews origin/previews
+            else
+              # Branchen finns inte än. Den innehåller bara preview-
+              # overlays - ingen kod, ingen historik.
+              git checkout --orphan previews
+              git rm -rf . > /dev/null 2>&1 || true
+            fi
+
+            mkdir -p "environments/pr/${PR_NUMBER}"
+            cp -r /tmp/preview-overlay/. "environments/pr/${PR_NUMBER}/"
+            git add "environments/pr/${PR_NUMBER}"
+
+            if git diff --cached --quiet; then
+              echo "Ingen ändring - previewen är redan publicerad"
+              exit 0
+            fi
+
+            git commit -m "preview: PR ${PR_NUMBER}"
+            if git push origin previews; then
+              echo "✓ Pushade previewen till previews-branchen"
+              exit 0
+            fi
+
+            echo "Pushen kolliderade med en annan PR - försöker igen"
+          done
+
+          echo "Kunde inte publicera previewen" >&2
+          exit 1
 
       - name: Lägg till PR-kommentar med preview-info
         env:
-          PR_NUM: ${{ github.event.pull_request.number }}
-          IMAGE: ghcr.io/${{ github.repository_owner }}/plan/pr-preview:${{ github.event.pull_request.number }}-${{ github.sha }}@${{ steps.publish.outputs.digest }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment $PR_NUM --body-file - <<'COMMENT'
+          gh pr comment "$PR_NUMBER" --body-file - <<'COMMENT'
           ## 🚀 PR Preview Deployment
 
           En preview-miljö håller på att deployas för denna PR.
@@ -125,32 +247,34 @@ jobs:
           ### Resurser
           | Resurs | Värde |
           |--------|-------|
-          | **Namespace** | `plan-pr-$PR_NUM` |
-          | **URL** | https://plan-pr-$PR_NUM.simonbrundin.com |
-          | **Image** | `$IMAGE` |
+          | **Namespace** | `plan-pr-$PR_NUMBER` |
+          | **URL** | https://plan-pr-$PR_NUMBER.simonbrundin.com |
+          | **Nuxt-image** | `$REGISTRY/plan/pr-preview:$IMAGE_TAG` |
+          | **API-image (Rust)** | `$REGISTRY/rust-api/pr-preview:$IMAGE_TAG` |
 
-          ### GitOps Flöde
+          ### GitOps-flöde
           ```
           GitHub Actions
               │
-              ├── Build image → GHCR
+              ├── Bygger Nuxt + Rust-API (amd64 + arm64) → GHCR
               │
-              └── Commit → environments/pr/$PR_NUM/
-                            └── environments/pr/kustomization.yaml
+              └── Commit → previews-branchen
+                            └── environments/pr/$PR_NUMBER/
                                    │
                                    ▼
-                             Flux
-                               │
-                               ▼
-                        preview-plan-pr-$PR_NUM
+                             Flux (Kustomization "plan-preview")
+                                   │
+                                   ▼
+                        plan-pr-$PR_NUMBER (egen databas, dev-login)
           ```
 
           > [!NOTE]
           > Det kan ta 1-2 minuter innan Flux har reconcilat alla resurser.
+          > Logga in med dev-login - previewen kör utan Zitadel.
           COMMENT
 
   # ============================================
-  # JOB 2: Städa bort preview vid PR-stängning
+  # JOB 3: Städa bort preview vid PR-stängning
   # ============================================
   cleanup-preview:
     name: Städa upp PR Preview
@@ -158,17 +282,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Hämta PR-nummer
-        id: pr-info
         run: |
           echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
 
-      - name: Checkout main
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
-          sparse-checkout: |
-            environments/pr
-            .github/scripts
+          fetch-depth: 0
 
       - name: Sätt upp Python
         uses: actions/setup-python@v5
@@ -178,40 +298,38 @@ jobs:
       - name: Installera Python-beroenden
         run: python3 -m pip install --disable-pip-version-check pyyaml
 
-      - name: Ta bort preview-resurser och uppdatera kustomization
-        env:
-          PR_NUM: ${{ github.event.pull_request.number }}
+      - name: Ta bort previewen från previews-branchen
         run: |
+          set -euo pipefail
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          if ! git fetch origin previews; then
+            echo "Branchen 'previews' finns inte - inget att städa"
+            exit 0
+          fi
+
+          git checkout -B previews origin/previews
           python3 .github/scripts/pr-preview-cleanup.py
 
-      - name: Commit och pusha
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: remove preview resources for PR ${{ github.event.pull_request.number }}"
-          branch: bot/remove-pr-preview-${{ github.event.pull_request.number }}
-          delete-branch: true
-          title: "chore: remove preview resources for PR ${{ github.event.pull_request.number }}"
-          body: |
-            Automatically generated cleanup by GitHub Actions.
-
-            Removes the preview overlay for the closed PR.
-          labels: |
-            ci
-            skip-review
-          add-paths: |
-            environments/pr
+          if git diff --cached --quiet; then
+            echo "Ingen ändring att committa"
+          else
+            git add -A environments/pr
+            git commit -m "chore: ta bort preview för PR ${PR_NUMBER}"
+            git push origin previews
+            echo "✓ Städade bort previewen"
+          fi
 
       - name: Kommentera PR
         if: always()
         env:
-          PR_NUM: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment $PR_NUM --body-file - <<'COMMENT'
+          gh pr comment "$PR_NUMBER" --body-file - <<'COMMENT'
           ## 🧹 PR Preview Stängd
 
-          Preview-miljön `plan-pr-$PR_NUM` håller på att städas bort.
+          Preview-miljön `plan-pr-$PR_NUMBER` håller på att städas bort.
 
-          Flux tar bort alla Kubernetes-resurser.
+          Flux tar bort alla Kubernetes-resurser, inklusive previewens databas.
           COMMENT

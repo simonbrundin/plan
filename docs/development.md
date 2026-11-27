@@ -1,5 +1,8 @@
 # Utveckling i dev
 
+> Hela vägen från dev till produktion - CI, imagebygge, bot-PR och Flux -
+> beskrivs i [`delivery-pipeline.md`](delivery-pipeline.md).
+
 Plan och agenten bor i samma repository och deployas från **en** Tilt.
 Två Tilt-instanser som deployar samma manifests fightar om
 k8s-objekten - därför finns bara en.

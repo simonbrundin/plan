@@ -3124,6 +3124,48 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-27] link | notes/kunskaps-wiki -> notes/flyttalsparitet-och-orchestratorns-doda-gate-flode
 
+
+## [2026-11-27] ingest | create notes/tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27
+- [create] [[notes/tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27]] — ny sida från inboxen
+- [create] [[notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27]] — ny sida från inboxen
+- [archive] 2026-11-27-tva-agenter-arbetade-parallellt-i-infrastructure-repot-2026-11-27.md
+- [archive] 2026-11-27-zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27.md
+## [2026-11-27] ingest | create notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27
+
+
+## [2026-11-27] link | concepts/zitadel -> notes/zitadel-losenordet-for-simonbrundin-aterstalldes-till-ett-kant-varde-2026-11-27
+
+
+## [2026-11-27] ingest | create notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning
+- [create] [[notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning]] — ny sida från inboxen
+- [archive] 2026-11-27-kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning.md
+
+
+## [2026-11-27] link | notes/leader-key-gjordes-global-mellanslag-sekvenser-pa-alla-sidor -> notes/kommandopaletten-soker-bland-mal-och-handelser-med-fzf-liknande-fuzzy-sokning
+
+
+## [2026-11-27] ingest | create notes/orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go
+- [create] [[notes/orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go]] — ny sida från inboxen
+- [archive] 2026-11-27-orchestratorns-krokar-och-gate-flodet-ar-dod-kod-i-go.md
+
+
+## [2026-11-27] ingest | create notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats
+- [create] [[notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats]] — ny sida från inboxen
+- [archive] 2026-11-27-platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats.md
+
+
+## [2026-11-27] link | notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats -> notes/skrivbordswidget-som-visar-gor-nu-malet
+
+
+## [2026-11-27] link | notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats -> notes/platsvaljaren-flyttade-till-leader-p
+
+
+## [2026-11-27] link | notes/skrivbordswidget-som-visar-gor-nu-malet -> notes/platsfiltret-pa-now-ingen-plats-vald-visar-mal-utan-plats
+
+
+## [2026-11-27] source | 2026-11-27-prod-patch-utan-namespace-bryter-flux-builden.md
+
+
 ## [2026-11-27] ingest | create notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen
 - [create] [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] — ny sida från inboxen
 - [archive] 2026-11-27-plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen.md
@@ -3134,4 +3176,106 @@ Format: `## [YYYY-MM-DD] type | Title`
 - [create] [[notes/prod-patch-utan-namespace-bryter-flux-builden]] — ny sida från inboxen
 - [archive] 2026-11-27-prod-patch-utan-namespace-bryter-flux-builden.md
 
+
 ## [2026-11-27] link | summaries/prod-patch-utan-namespace-bryter-flux-builden -> notes/prod-patch-utan-namespace-bryter-flux-builden
+
+
+## [2026-11-27] link | notes/skrivbordswidget-som-visar-gor-nu-malet -> notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats
+
+
+## [2026-11-27] link | notes/platsvaljaren-flyttade-till-leader-p -> notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats
+
+
+## [2026-11-27] ingest | create notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron
+- [create] [[notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron]] — ny sida från inboxen
+- [create] [[notes/chattkonversationer-sparas-per-mal]] — ny sida från inboxen
+- [create] [[notes/chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan]] — ny sida från inboxen
+- [create] [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]] — ny sida från inboxen
+- [archive] 2026-11-27-anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron.md
+- [archive] 2026-11-27-chattkonversationer-sparas-per-mal.md
+- [archive] 2026-11-27-chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan.md
+- [archive] 2026-11-27-malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten.md
+## [2026-11-27] ingest | create notes/chattkonversationer-sparas-per-mal
+## [2026-11-27] ingest | create notes/chattmeddelanden-fran-agenten-renderas-nu-som-markdown-i-plan
+## [2026-11-27] ingest | create notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten
+
+
+## [2026-11-27] link | notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/anvandarytan-for-agenten-ska-vara-event-driven-och-asynkron -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] ingest | create notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten
+- [create] [[notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten]] — ny sida från inboxen
+- [archive] 2026-11-27-beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten.md
+
+
+## [2026-11-27] link | notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten -> notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten
+
+
+## [2026-11-27] link | notes/beslut-maltyp-godkannandepolicy-och-enhetlig-malterminologi-for-agenten -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] source | 2026-11-27-definitionsassistent-for-mal-define-fasen.md
+
+
+## [2026-11-27] ingest | create notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt
+- [create] [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] — ny sida från inboxen
+- [archive] 2026-11-27-definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt.md
+
+
+## [2026-11-27] link | summaries/definitionsassistent-for-mal-define-fasen -> notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> summaries/definitionsassistent-for-mal-define-fasen
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> notes/agentens-maldefinition-gar-via-human-gate
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt -> notes/malfaserna-ar-gemensamma-for-alla-mal-i-plan
+
+
+## [2026-11-27] link | summaries/definitionsassistent-for-mal-define-fasen -> notes/agentens-maldefinition-gar-via-human-gate
+
+
+## [2026-11-27] ingest | create notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
+- [create] [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]] — ny sida från inboxen
+- [archive] 2026-11-27-fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api.md
+
+
+## [2026-11-27] link | notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api -> notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten
+
+
+## [2026-11-27] link | notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api -> concepts/anvanda-agenter-i-plan
+
+
+## [2026-11-27] link | notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten -> notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
+
+
+## [2026-11-27] ingest | create notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
+- [create] [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] — ny sida från inboxen
+- [archive] 2026-11-27-delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad.md
+
+
+## [2026-11-27] link | notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad -> notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg
+
+
+## [2026-11-27] link | notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg -> notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
+
+## [2026-11-27] link | summaries/prod-patch-utan-namespace-bryter-flux-builden -> notes/prod-patch-utan-namespace-bryter-flux-builden
+
+## [2026-11-27] ingest | create notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux
+- [create] [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] — ny sida från inboxen
+- [archive] 2026-11-27-rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux.md
+
+
+## [2026-11-27] link | notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux -> notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg
+
+
+## [2026-11-27] link | notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux -> notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad
+

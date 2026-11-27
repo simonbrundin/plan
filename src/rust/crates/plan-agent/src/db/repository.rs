@@ -10,19 +10,24 @@ use uuid::Uuid;
 use super::models::{ApiKey, Conversation, MaskedApiKey, Message};
 
 /// Kolumnerna för ett samtal.
-const SAMTALSKOLUMNER: &str = "id, created_at, updated_at, title, model, provider";
+const SAMTALSKOLUMNER: &str = "id, created_at, updated_at, title, model, provider, goal_id";
 
 /// Skapar ett nytt samtal.
+///
+/// `goal_id` är det Plan-mål som samtalet gäller. Det får vara `None` -
+/// då är samtalet inte kopplat till något mål.
 pub async fn create_conversation(
     pool: &PgPool,
     model: &str,
     provider: &str,
+    goal_id: Option<i64>,
 ) -> Result<Conversation, sqlx::Error> {
     sqlx::query_as::<_, Conversation>(&format!(
-        "INSERT INTO conversations (model, provider) VALUES ($1, $2) RETURNING {SAMTALSKOLUMNER}"
+        "INSERT INTO conversations (model, provider, goal_id) VALUES ($1, $2, $3) RETURNING {SAMTALSKOLUMNER}"
     ))
     .bind(model)
     .bind(provider)
+    .bind(goal_id)
     .fetch_one(pool)
     .await
 }
@@ -41,18 +46,27 @@ pub async fn get_conversation(
 }
 
 /// Listar samtalen, nyast först.
+///
+/// `goal_id` filtrerar på det mål som samtalet gäller. `None` listar
+/// alla samtal.
 pub async fn list_conversations(
     pool: &PgPool,
     limit: i64,
     offset: i64,
+    goal_id: Option<i64>,
 ) -> Result<Vec<Conversation>, sqlx::Error> {
-    sqlx::query_as::<_, Conversation>(&format!(
-        "SELECT {SAMTALSKOLUMNER} FROM conversations ORDER BY created_at DESC LIMIT $1 OFFSET $2"
-    ))
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(pool)
-    .await
+    let mut sql = format!("SELECT {SAMTALSKOLUMNER} FROM conversations");
+    if goal_id.is_some() {
+        sql.push_str(" WHERE goal_id = $1");
+    }
+    sql.push_str(" ORDER BY created_at DESC LIMIT $2 OFFSET $3");
+
+    sqlx::query_as::<_, Conversation>(&sql)
+        .bind(goal_id)
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(pool)
+        .await
 }
 
 /// Sätter samtalets titel.

@@ -695,7 +695,9 @@ func (w *Worker) resumeDefinition(ctx context.Context, run planclient.AgentRun, 
 			return true, nil
 		}
 
-		w.finishDefinition(ctx, goal, run)
+		if err := w.finishDefinition(ctx, goal, run); err != nil {
+			return false, fmt.Errorf("failed to finish the definition: %w", err)
+		}
 		return true, nil
 	case "rejected":
 		// Ett avslaget förslag körs inte om - det är människan som

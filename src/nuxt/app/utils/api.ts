@@ -6,11 +6,18 @@ import type { FetchOptions } from 'ofetch';
  * $fetch castas till en enkel funktion. Den typade varianten jämför varje
  * anrop mot varje route i appen, och med dynamiska sökvägar blir
  * jämförelsen så djup att TypeScript ger upp ("excessive stack depth").
+ *
+ * Anropet sker först när funktionen körs - inte när modulen laddas. Då kan
+ * modulen importeras utan en Nuxt-runtime (t.ex. i enhetstester), där
+ * $fetch inte finns.
  */
-const request = $fetch as unknown as <T>(
-  url: string,
-  options?: FetchOptions
-) => Promise<T>;
+function request<T>(url: string, options?: FetchOptions): Promise<T> {
+  const fetch = $fetch as unknown as <T>(
+    url: string,
+    options?: FetchOptions
+  ) => Promise<T>;
+  return fetch(url, options);
+}
 
 /**
  * Bas-URL:en till API:t.

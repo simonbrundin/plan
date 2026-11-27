@@ -1,3 +1,4 @@
+import { ref, type Ref } from 'vue';
 import type { AgentApproval, AgentConversation, AgentMessage } from '~/types/agent';
 import { apiRequest } from '~/utils/api';
 
@@ -11,6 +12,7 @@ import { apiRequest } from '~/utils/api';
 export function useAgentChat(goalId: Ref<number | undefined>) {
   const messages = ref<AgentMessage[]>([]);
   const conversationId = ref<string | null>(null);
+  const conversations = ref<AgentConversation[]>([]);
   const approval = ref<AgentApproval | null>(null);
   const streaming = ref(false);
   const error = ref<string | null>(null);
@@ -55,19 +57,73 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
   };
 
   // Startar en konversation för målet.
-  const startConversation = async (title: string): Promise<string | null> => {
+  //
+  // goal_id sparas i agentens databas - utan det hittas inte samtalet
+  // tillbaka när målsidan öppnas igen.
+  const startConversation = async (
+    title: string,
+    forGoalId?: number | undefined,
+  ): Promise<string | null> => {
     try {
       const response = await $fetch<AgentConversation>('/api/agent/conversations', {
         method: 'POST',
-        body: { title, model: '', provider: '' },
+        body: {
+          title,
+          model: '',
+          provider: '',
+          goal_id: forGoalId ?? goalId.value ?? null,
+        },
       });
       conversationId.value = response?.id ?? null;
+      if (response?.id) {
+        // Titeln sparas i agentens databas efter att samtalet skapats -
+        // svaret innehåller därför fortfarande "New conversation".
+        conversations.value = [{ ...response, title }, ...conversations.value];
+      }
       return conversationId.value;
     } catch (err: any) {
       available.value = false;
       error.value = 'Kunde inte starta en konversation med agenten.';
       return null;
     }
+  };
+
+  // Listar samtalen för ett mål - nyast först.
+  const listConversations = async (forGoalId?: number | undefined) => {
+    const id = forGoalId ?? goalId.value;
+    if (!id) return [] as AgentConversation[];
+
+    try {
+      const response = await $fetch<{ conversations?: AgentConversation[] }>(
+        '/api/agent/conversations',
+        { query: { goal_id: id } },
+      );
+      conversations.value = response?.conversations ?? [];
+    } catch {
+      // Listan är extra - chatten ska fungera även utan den.
+      conversations.value = [];
+    }
+    return conversations.value;
+  };
+
+  // Laddar det senaste samtalet för målet.
+  //
+  // Det här är vägen tillbaka till chatten: samtalet ligger i agentens
+  // databas och hittas via målets id.
+  const loadLatestForGoal = async (forGoalId?: number | undefined) => {
+    const list = await listConversations(forGoalId);
+    const latest = list[0];
+    if (!latest) return null;
+
+    conversationId.value = latest.id;
+    await load(latest.id);
+    return latest.id;
+  };
+
+  // Öppnar ett tidigare samtal för målet.
+  const openConversation = async (id: string) => {
+    conversationId.value = id;
+    await load(id);
   };
 
   // Skickar ett meddelande och strömmar svaret in i chatten.
@@ -204,12 +260,16 @@ export function useAgentChat(goalId: Ref<number | undefined>) {
   return {
     messages,
     conversationId,
+    conversations,
     approval,
     streaming,
     error,
     available,
     load,
     loadApproval,
+    listConversations,
+    loadLatestForGoal,
+    openConversation,
     startConversation,
     send,
     decide,

@@ -36,19 +36,31 @@ async fn main() -> ExitCode {
     // Databasen är valfri i Go-tjänsten ("mock mode"). Samma beteende här:
     // utan DATABASE_URL startar API:t, men endpoints som behöver data
     // svarar med ett tydligt fel i stället för att krascha.
-    let pool = match db::connect(&config).await {
-        Ok(pool) => {
-            tracing::info!("Ansluten till databasen");
-            if let Err(err) = db::ensure_seed_data(&pool).await {
-                tracing::warn!("Kunde inte seeda data: {err}");
-            } else {
-                tracing::info!("Seed-data verifierad");
+    //
+    // Med DATABASE_URL satt väntar API:t i stället på databasen. Annars
+    // startar en pod bakom en ny Postgres (CNPG kör initdb, Atlas
+    // applicerar schemat) i mock-läge - och blir det ligga kvar där,
+    // med "Failed to create user" som följd.
+    let pool = match config.database_url.is_some() {
+        true => match connect_with_retry(&config).await {
+            Ok(pool) => {
+                if let Err(err) = db::ensure_seed_data(&pool).await {
+                    tracing::warn!("Kunde inte seeda data: {err}");
+                } else {
+                    tracing::info!("Seed-data verifierad");
+                }
+                Some(pool)
             }
-            Some(pool)
-        }
-        Err(err) => {
-            tracing::warn!("Kunde inte ansluta till databasen: {err}");
-            tracing::warn!("Startar i mock-läge utan databasåtkomst");
+            Err(err) => {
+                tracing::error!(
+                    "Kunde inte ansluta till databasen inom tidsgränsen: {err}. \
+                     Startar om - podden körs om och försöker igen."
+                );
+                return ExitCode::FAILURE;
+            }
+        },
+        false => {
+            tracing::warn!("DATABASE_URL saknas - startar i mock-läge");
             None
         }
     };
@@ -77,6 +89,38 @@ async fn main() -> ExitCode {
 
     tracing::info!("Servern avslutad");
     ExitCode::SUCCESS
+}
+
+/// Försöker ansluta till databasen tills den svarar eller tidsgränsen
+/// går ut.
+///
+/// En ny Postgres behöver tid: CNPG kör initdb, Atlas applicerar
+/// schemat efteråt. Utan väntan startar API:t i mock-läge och förblir
+/// det - felen syns först när någon loggar in.
+async fn connect_with_retry(config: &Config) -> Result<sqlx::postgres::PgPool, sqlx::Error> {
+    let timeout = Duration::from_secs(config.db_connect_timeout_secs);
+    let start = std::time::Instant::now();
+    let mut attempt: u32 = 1;
+
+    loop {
+        match db::connect(config).await {
+            Ok(pool) => {
+                tracing::info!("Ansluten till databasen (försök {attempt})");
+                return Ok(pool);
+            }
+            Err(err) => {
+                if start.elapsed() >= timeout {
+                    return Err(err);
+                }
+                tracing::warn!(
+                    "Kunde inte ansluta till databasen (försök {attempt}): {err} - \
+                     väntar 3s och försöker igen"
+                );
+                tokio::time::sleep(Duration::from_secs(3)).await;
+                attempt += 1;
+            }
+        }
+    }
 }
 
 /// TCP-probe mot den egna API-porten. Returnerar exit-kod 0/1.
