@@ -23,7 +23,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: plan-app
-          image: ghcr.io/simonbrundin/plan/pr-preview:183-b2fc3f5d188f554047bc07a4907aa37ccd59cb40
+          image: ghcr.io/simonbrundin/plan/pr-preview:183-8bac922d20888e08c3582836f16bfb8e0a0f0d50
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
