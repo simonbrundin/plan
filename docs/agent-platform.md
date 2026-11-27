@@ -228,6 +228,84 @@ gränssnittet - ett nytt namn utan migrering ger två sanningar. 2026-11-25 bytt
 `blocked` till `waiting_approval` och `done` till `succeeded`; migreringen sker
 idempotent i `src/api/internal/database/db.go` vid uppstart.
 
+## Fasmaskinen för mål
+
+Ett mål har faser: `define` → `plan` → `execute` → `verify` → `completed`.
+Övergångarna går genom en maskin i API:t, inte genom att någon skriver
+statusen fritt. Maskinen ligger i `src/api/internal/phase` och är ren logik
+- den tar fakta om målet och svarar om övergången är tillåten. Bindningen
+mot databasen ligger i `src/api/internal/phaseservice`, så att både
+fasendpointern och den gamla `PATCH /api/v1/goals/:id/status` går samma väg
+och maskinen inte kan kringgås.
+
+| Anrop | Vem | Vad |
+| --- | --- | --- |
+| `POST /api/v1/goals/:id/phase` | människa och agent | byter fas, med `{to, override_reason?}` |
+| `POST /api/v1/goals/:id/complete` | människa | avslutar målet direkt, oavsett fas |
+
+**Agentens villkor.** Framåt går agenten en fas i taget, och varje steg har
+ett villkor:
+
+| Övergång | Villkor |
+| --- | --- |
+| `define` → `plan` | målet har en godkänd agentdefinition |
+| `plan` → `execute` | målet har delmål med datum eller uppskattad tid |
+| `execute` → `verify` | varje delmål har fått ett resultat |
+
+Agenten får inte hoppa över faser, inte gå bakåt och inte avsluta ett mål
+själv. Den sista regeln är den viktigaste: agenten får föreslå, en människa
+bestämmer.
+
+**Människans genväg.** En människa får hoppa över faser och gå bakåt - men
+det loggas som en avvikelse i `goal_phase_events`. När hon avslutar ett mål
+direkt registreras hur målet avslutades: `deklarerat` om ingen verifiering
+gått igenom, `verifierat` om det gjort det.
+
+**Stoppade övergångar** svarar med `409` och en stabil skälkod i svaret, så
+att klienten kan visa vad som saknas:
+
+| Kod | Betyder |
+| --- | --- |
+| `definition_not_approved` | målet saknar en godkänd definition |
+| `missing_planned_children` | målet saknar delmål att arbeta med |
+| `unresolved_children` | ett delmål saknar resultat |
+| `phase_skipped` | en agent försökte hoppa över en fas |
+| `backwards_transition` | en agent försökte gå bakåt |
+| `approval_required` | en agent försökte avsluta ett mål själv |
+| `unknown_phase` | fasen finns inte |
+
+## Verifiering och bevis
+
+Verifieringen är **valfri**. Ett mål utan verifieringsplan fungerar precis
+som ett mål med en plan - planen är bara villkoret för att agenten ska få
+föreslå att målet är klart, och beviset som människan vill se innan hon
+bestämmer.
+
+| Anrop | Vad |
+| --- | --- |
+| `GET /api/v1/goals/:id/verification` | planen med senaste omdöme och bevis |
+| `PUT /api/v1/goals/:id/verification` | sätter planen (typ, villkor, styrka) |
+| `POST /api/v1/goals/:id/evidence` | lägger till bevis |
+| `POST /api/v1/goals/:id/verification/run` | kör verifieringen och ger ett omdöme |
+| `POST /api/v1/verification-results/:id/approve` | en människa godkänner omdömet |
+
+Planens typ är en av `checklista`, `delmal`, `kalender`, `bevis`, `matvarde`
+och `kod`, och styrkan är `stark` eller `svag`. Kodmålens verifierare
+definieras senare - typen finns redan i databasen.
+
+Ett omdöme blir först giltigt när en människa godkänner det. En agent får
+köra verifieringen och lämna bevis, men aldrig godkänna - det är human gate
+i API:t, inte i en prompt. När planen ändras ogiltigförklaras tidigare
+omdömen: de gällde den gamla planen.
+
+Data ligger i `goal_verifications`, `goal_evidence`,
+`goal_verification_results` och `goal_phase_events`, och hur ett mål
+avslutades i `goals.completion_kind`. Målets godkännandedisciplin ligger i
+`goals.approval_mode` (`plan` som standard, `varje_atgard` för mer
+restriktivt). Tabellerna och kolumnerna skapas idempotent vid uppstart i
+`src/api/internal/database/db.go` - samma mönster som tidigare
+statusmigreringar.
+
 ## Kontraktet mellan Plan och agenten
 
 Plan äger agentkörningarna, men agenten och Plan pratar via HTTP - och de två
