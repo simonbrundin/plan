@@ -452,6 +452,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/talos-varningar-pa-controlplanes-90-kommer-fra-talos-discovery-service-dns]] - Diagnos 2026-11-20 (session: "kolla talos-loggarna for controlplanes, finns det nagot att fixa?"). _(uppdaterad 2026-11-20)_
 - [[notes/talos-hostname-auto-i-en-generisk-config-byter-nodens-namn-och-kastar-ut-den-ur-klustret]] - Misstag: applicerade pxe/matchbox/assets/talos-config/controlplane.yaml pa _(uppdaterad 2026-10-24)_
 - [[notes/talos-noden-kan-hamna-i-maintenance-mode-om-state-volymen-hittas-efter-config-fasen]] - Symtom: controlplane-3 gick in i maintenance mode direkt efter en reboot, trots att noden redan hadde en komplett config persistad pa STA... _(uppdaterad 2026-10-25)_
+- [[notes/tidsstamplar-go-skriver-9-dar-chrono-skrev-900]] - Under Rust-migreringen visade sig att Go och Rust skrev samma _(uppdaterad 2026-11-28)_
 - [[notes/tidsatgang-pa-mal-i-plan-estimated-minutes]] - Funktion: alla mål i Plan kan ha en uppskattad tidsåtgång i minuter (nullable estimated_minutes). _(uppdaterad 2026-11-20)_
 - [[notes/tillfalliga-felsokningspoddar-rensade]] - Inventering av cluster1 hittade kvarvarande unowned debug-poddar i default, flux-system och kube-system: np-controlplane-2/3, np-worker-3... _(uppdaterad 2026-11-26)_
 - [[notes/tilt-dev-server-ska-koras-som-serve-cmd]] - En långlivad Nuxt-server ska vara en Tilt serve_cmd-resurs, inte ett avslutande cmd-build. _(uppdaterad 2026-11-26)_

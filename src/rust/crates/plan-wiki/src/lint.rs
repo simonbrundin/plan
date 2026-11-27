@@ -70,7 +70,7 @@ pub struct LintOptions {
     /// Noll betyder att ingen ålderskontroll körs.
     pub stale_after: Option<Duration>,
     /// Nuvarande tid - används för att göra körningen reproducerbar.
-    pub now: Option<chrono::DateTime<chrono::Local>>,
+    pub now: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 /// Undersöker wikin och returnerar en lista med problem.
@@ -156,7 +156,7 @@ pub fn lint(wiki: &Wiki, opts: &LintOptions) -> Vec<LintFinding> {
 
     // Föråldrade sidor.
     if let Some(stale_after) = opts.stale_after {
-        let now = opts.now.unwrap_or_else(chrono::Local::now);
+        let now = opts.now.unwrap_or_else(chrono::Utc::now);
         let cutoff = now - chrono::Duration::from_std(stale_after).unwrap_or_default();
 
         for anteckning in &wiki.notes {
@@ -171,7 +171,10 @@ pub fn lint(wiki: &Wiki, opts: &LintOptions) -> Vec<LintFinding> {
                 continue;
             };
 
-            if updated < cutoff.naive_local() {
+            // Go tolkar datumet som midnat i UTC och jämför mot
+            // `now - stale_after`. Att jämföra mot ett lokalt klockslag
+            // ger ett annat svar vid gränsen, så tiden hålls i UTC här.
+            if updated.and_utc() < cutoff {
                 findings.push(LintFinding {
                     kind: LintKind::Stale,
                     page: anteckning.id.clone(),
