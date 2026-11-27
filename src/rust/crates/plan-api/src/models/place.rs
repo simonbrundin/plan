@@ -30,8 +30,10 @@ pub struct Place {
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub icon: String,
     /// När platsen skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// När platsen senast ändrades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 

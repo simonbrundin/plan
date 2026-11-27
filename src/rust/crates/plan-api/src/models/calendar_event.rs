@@ -40,8 +40,10 @@ pub struct CalendarEvent {
     #[serde(skip_serializing_if = "String::is_empty")]
     pub icon: String,
     /// När händelsen börjar.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub start_at: chrono::DateTime<chrono::Utc>,
     /// När händelsen slutar.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub end_at: chrono::DateTime<chrono::Utc>,
     /// Tidszonen händelsen ligger i.
     pub time_zone: String,
@@ -57,10 +59,13 @@ pub struct CalendarEvent {
     pub parent_event_id: Option<i64>,
     /// Förekomstens ursprungliga start, om händelsen är en override.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub original_start_at: Option<chrono::DateTime<chrono::Utc>>,
     /// När händelsen skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// När händelsen senast ändrades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub updated_at: chrono::DateTime<chrono::Utc>,
     /// Platser där händelsen sker.
     ///

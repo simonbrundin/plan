@@ -33,6 +33,7 @@ pub struct StatusUpdate {
     /// Statusen målet har nu.
     pub to_status_id: i64,
     /// När ändringen skedde.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub changed_at: chrono::DateTime<chrono::Utc>,
     /// Namnet på den gamla statusen - tom sträng om den saknas.
     #[serde(default, skip_serializing_if = "String::is_empty")]

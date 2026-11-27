@@ -14,8 +14,10 @@ pub struct Conversation {
     /// Samtalets id.
     pub id: Uuid,
     /// När samtalet skapades.
+    #[serde(serialize_with = "crate::go_time::serialize")]
     pub created_at: DateTime<Utc>,
     /// När samtalet senast ändrades.
+    #[serde(serialize_with = "crate::go_time::serialize")]
     pub updated_at: DateTime<Utc>,
     /// Samtalets titel.
     pub title: String,
@@ -61,6 +63,7 @@ pub struct Message {
     /// Latensen i millisekunder.
     pub latency_ms: i32,
     /// När meddelandet skapades.
+    #[serde(serialize_with = "crate::go_time::serialize")]
     pub created_at: DateTime<Utc>,
 }
 
@@ -81,8 +84,10 @@ pub struct ApiKey {
     /// Modellen nyckeln gäller.
     pub model: String,
     /// När nyckeln skapades.
+    #[serde(serialize_with = "crate::go_time::serialize")]
     pub created_at: DateTime<Utc>,
     /// När nyckeln senast ändrades.
+    #[serde(serialize_with = "crate::go_time::serialize")]
     pub updated_at: DateTime<Utc>,
 }
 

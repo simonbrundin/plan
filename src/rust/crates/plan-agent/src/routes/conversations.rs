@@ -414,5 +414,6 @@ pub struct MeddelandeHändelse {
     /// Meddelandets innehåll.
     pub content: String,
     /// När meddelandet skapades.
+    #[serde(serialize_with = "crate::go_time::serialize")]
     pub created_at: chrono::DateTime<chrono::Utc>,
 }

@@ -23,10 +23,13 @@ pub struct Goal {
     /// Statusens id.
     pub status_id: i32,
     /// När målet skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created: chrono::DateTime<chrono::Utc>,
     /// När arbetet började - null om det inte börjat.
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub started: Option<chrono::DateTime<chrono::Utc>>,
     /// När målet slutfördes - null om det inte är klart.
+    #[serde(serialize_with = "crate::models::go_time::serialize_option")]
     pub finished: Option<chrono::DateTime<chrono::Utc>>,
     /// Datumet målet ska vara klart - null om det saknas.
     pub due: Option<chrono::NaiveDate>,
@@ -255,6 +258,7 @@ pub struct GoalDependency {
     /// Målet som det beror på.
     pub depends_on_id: i64,
     /// När beroendet skapades.
+    #[serde(serialize_with = "crate::models::go_time::serialize")]
     pub created: chrono::DateTime<chrono::Utc>,
 }
 
