@@ -122,10 +122,7 @@ async fn cors(request: axum::extract::Request, next: axum::middleware::Next) -> 
         .and_then(|value| value.to_str().ok())
         .map(|value| value.to_string());
 
-    let allowed = origin
-        .as_deref()
-        .map(|origin| origin_allowed(origin))
-        .unwrap_or(false);
+    let allowed = origin.as_deref().map(origin_allowed).unwrap_or(false);
 
     if request.method() == Method::OPTIONS {
         let mut response = StatusCode::NO_CONTENT.into_response();
@@ -174,4 +171,102 @@ fn origin_allowed(origin: &str) -> bool {
         let entry = entry.trim();
         !entry.is_empty() && (entry == "*" || entry == origin)
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Mutex, MutexGuard, OnceLock};
+
+    // Testerna sätter CORS_ALLOWED_ORIGINS, så de får inte köras parallellt.
+    static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    fn lock_env() -> MutexGuard<'static, ()> {
+        ENV_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .unwrap_or_else(|fel| fel.into_inner())
+    }
+
+    fn set_origins(värde: &str) {
+        std::env::set_var("CORS_ALLOWED_ORIGINS", värde);
+    }
+
+    #[test]
+    fn tillåten_origin_jämförs_exakt() {
+        let _lås = lock_env();
+        set_origins("http://localhost:3100,https://plan.simonbrundin.com");
+
+        assert!(origin_allowed("http://localhost:3100"));
+        assert!(origin_allowed("https://plan.simonbrundin.com"));
+        // Port och scheme räknas - en annan port är en annan origin.
+        assert!(!origin_allowed("http://localhost:3101"));
+        assert!(!origin_allowed("https://localhost:3100"));
+        assert!(!origin_allowed("http://evil.example"));
+    }
+
+    #[test]
+    fn wildcard_tillåter_allt() {
+        let _lås = lock_env();
+        set_origins("*");
+
+        assert!(origin_allowed("http://localhost:3100"));
+        assert!(origin_allowed("https://vem-som-helst.example"));
+    }
+
+    #[test]
+    fn tom_lista_tillåter_inget() {
+        let _lås = lock_env();
+        set_origins("");
+
+        assert!(!origin_allowed("http://localhost:3100"));
+    }
+
+    #[test]
+    fn tillåten_origin_ekas_tillbaka_med_credentials() {
+        let _lås = lock_env();
+        set_origins("http://localhost:3100");
+
+        let mut headers = HeaderMap::new();
+        apply_cors_headers(
+            &mut headers,
+            Some("http://localhost:3100"),
+            origin_allowed("http://localhost:3100"),
+        );
+
+        assert_eq!(
+            headers.get(header::ACCESS_CONTROL_ALLOW_ORIGIN).unwrap(),
+            "http://localhost:3100"
+        );
+        assert_eq!(
+            headers
+                .get(header::ACCESS_CONTROL_ALLOW_CREDENTIALS)
+                .unwrap(),
+            "true"
+        );
+        assert_eq!(headers.get(header::VARY).unwrap(), "Origin");
+    }
+
+    #[test]
+    fn otillåten_origin_får_inga_credential_headrar() {
+        let _lås = lock_env();
+        set_origins("http://localhost:3100");
+
+        let mut headers = HeaderMap::new();
+        apply_cors_headers(
+            &mut headers,
+            Some("http://evil.example"),
+            origin_allowed("http://evil.example"),
+        );
+
+        // Utan Access-Control-Allow-Origin blockeras svaret av webbläsaren,
+        // så inga credentials-headrar ska skickas.
+        assert!(headers.get(header::ACCESS_CONTROL_ALLOW_ORIGIN).is_none());
+        assert!(headers
+            .get(header::ACCESS_CONTROL_ALLOW_CREDENTIALS)
+            .is_none());
+        assert!(headers.get(header::VARY).is_none());
+        // Metoder och headrar skickas alltid - de påverkar inte credentials.
+        assert!(headers.get(header::ACCESS_CONTROL_ALLOW_METHODS).is_some());
+    }
 }
