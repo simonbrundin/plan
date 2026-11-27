@@ -333,3 +333,32 @@ pub const STATUS_COMPLETED: i32 = 5;
 
 /// Fasnamnen som målen går igenom.
 pub const GOAL_PHASES: &[&str] = &["define", "plan", "execute", "verify", "completed"];
+
+/// Händelsetyper som agenten skriver till Plan.
+///
+/// Go: `internal/planclient/events.go`.
+pub const EVENT_RUN_STARTED: &str = "run_started";
+/// Agenten har definierat målet.
+pub const EVENT_DEFINITION_CREATED: &str = "definition_created";
+/// Körningen har bytt fas.
+pub const EVENT_PHASE_CHANGED: &str = "phase_changed";
+/// Ett verktyg anropades.
+pub const EVENT_TOOL_CALL: &str = "tool_call";
+/// Ett verktyg gav ett resultat.
+pub const EVENT_TOOL_RESULT: &str = "tool_result";
+/// Agenten skapade ett undermål.
+pub const EVENT_SUBGOAL_CREATED: &str = "subgoal_created";
+/// Agenten begär ett mänskligt beslut.
+pub const EVENT_APPROVAL_REQUESTED: &str = "approval_requested";
+/// En människa fattade beslutet.
+pub const EVENT_APPROVAL_DECIDED: &str = "approval_decided";
+/// En verifiering utfördes.
+pub const EVENT_VERIFICATION: &str = "verification";
+/// En artefakt skapades.
+pub const EVENT_ARTIFACT: &str = "artifact";
+/// Något gick fel under körningen.
+pub const EVENT_ERROR: &str = "error";
+/// Körningen misslyckades.
+pub const EVENT_RUN_FAILED: &str = "run_failed";
+/// Körningen var klar.
+pub const EVENT_RUN_COMPLETED: &str = "run_completed";

@@ -96,13 +96,8 @@ pub async fn start(
     State(state): State<AppState>,
     body: axum::body::Bytes,
 ) -> Result<Json<PlanSvar>, AgentError> {
-    let req: StartWorkflowRequest = serde_json::from_slice(&body).map_err(|err| {
-        AgentError::BadRequest(super::json_fel::json_fel(
-            &body,
-            "handlers.StartWorkflowRequest",
-            &err,
-        ))
-    })?;
+    let req: StartWorkflowRequest = super::json_fel::tolka(&body, "handlers.StartWorkflowRequest")
+        .map_err(AgentError::BadRequest)?;
 
     if req.feature.is_empty() {
         return Err(AgentError::BadRequest(
@@ -271,13 +266,9 @@ pub async fn decision(
     State(state): State<AppState>,
     body: axum::body::Bytes,
 ) -> Result<Json<MeddelandeSvar>, AgentError> {
-    let req: SubmitDecisionRequest = serde_json::from_slice(&body).map_err(|err| {
-        AgentError::BadRequest(super::json_fel::json_fel(
-            &body,
-            "handlers.SubmitDecisionRequest",
-            &err,
-        ))
-    })?;
+    let req: SubmitDecisionRequest =
+        super::json_fel::tolka(&body, "handlers.SubmitDecisionRequest")
+            .map_err(AgentError::BadRequest)?;
 
     if req.checkpoint_id.is_empty() {
         return Err(AgentError::BadRequest(

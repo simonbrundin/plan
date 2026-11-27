@@ -3,6 +3,7 @@
 //! SQL:en är densamma som Go-agentens `internal/api/db/repository.go`, så
 //! att båda kan köra mot samma databas.
 
+use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -174,4 +175,83 @@ pub async fn list_masked_api_keys(pool: &PgPool) -> Result<Vec<MaskedApiKey>, sq
             model: nyckel.model,
         })
         .collect())
+}
+
+/// Sparar ett verktygsmeddelande i ett samtal.
+///
+/// Go: `db.CreateToolMessage`.
+pub async fn create_tool_message(
+    pool: &PgPool,
+    conversation_id: Uuid,
+    role: &str,
+    tool_name: &str,
+    tool_args: &str,
+    tool_result: &str,
+    is_error: bool,
+) -> Result<Message, sqlx::Error> {
+    let meddelande = sqlx::query_as::<_, Message>(&format!(
+        "INSERT INTO messages (conversation_id, role, content, tool_name, tool_args, tool_result, is_error) \
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING {MEDDELANDEKOLUMNER}"
+    ))
+    .bind(conversation_id)
+    .bind(role)
+    .bind(" ")
+    .bind(tool_name)
+    .bind(tool_args)
+    .bind(tool_result)
+    .bind(is_error)
+    .fetch_one(pool)
+    .await?;
+
+    let _ = sqlx::query("UPDATE conversations SET updated_at = NOW() WHERE id = $1")
+        .bind(conversation_id)
+        .execute(pool)
+        .await;
+
+    Ok(meddelande)
+}
+
+/// Sparar ett resonemangsmeddelande i ett samtal.
+///
+/// Go: `db.CreateThinkingMessage`.
+pub async fn create_thinking_message(
+    pool: &PgPool,
+    conversation_id: Uuid,
+    thinking: &str,
+) -> Result<Message, sqlx::Error> {
+    let meddelande = sqlx::query_as::<_, Message>(&format!(
+        "INSERT INTO messages (conversation_id, role, content, thinking) \
+         VALUES ($1, $2, $3, $4) RETURNING {MEDDELANDEKOLUMNER}"
+    ))
+    .bind(conversation_id)
+    .bind("thinking")
+    .bind("")
+    .bind(thinking)
+    .fetch_one(pool)
+    .await?;
+
+    let _ = sqlx::query("UPDATE conversations SET updated_at = NOW() WHERE id = $1")
+        .bind(conversation_id)
+        .execute(pool)
+        .await;
+
+    Ok(meddelande)
+}
+
+/// Hämtar meddelandena som sparats efter en tidpunkt.
+///
+/// Go: `db.GetMessagesSince`.
+pub async fn get_messages_since(
+    pool: &PgPool,
+    conversation_id: Uuid,
+    since: DateTime<Utc>,
+) -> Result<Vec<Message>, sqlx::Error> {
+    sqlx::query_as::<_, Message>(&format!(
+        "SELECT {MEDDELANDEKOLUMNER} FROM messages WHERE conversation_id = $1 \
+             AND created_at > $2 ORDER BY created_at ASC"
+    ))
+    .bind(conversation_id)
+    .bind(since)
+    .fetch_all(pool)
+    .await
 }

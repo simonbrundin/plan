@@ -2,6 +2,7 @@
 
 pub mod api_keys;
 pub mod approvals;
+pub mod chat;
 pub mod conversations;
 pub mod docs;
 pub mod health;
