@@ -43,7 +43,7 @@ const showToc = computed(() => (page.value?.headings.length ?? 0) > 2);
 <template>
   <div v-if="page" class="mx-auto w-full px-6 py-10">
     <div class="mb-8 flex items-center gap-2 text-sm text-ink-dim">
-      <NuxtLink to="/docs" class="transition-colors hover:text-ink">
+      <NuxtLink to="/dokumentation" class="transition-colors hover:text-ink">
         Dokumentation
       </NuxtLink>
       <UIcon name="i-lucide-chevron-right" class="size-3.5" />
@@ -88,7 +88,7 @@ const showToc = computed(() => (page.value?.headings.length ?? 0) > 2);
         >
           <NuxtLink
             v-if="neighbours.previous"
-            :to="`/docs/${neighbours.previous.slug}`"
+            :to="`/dokumentation/${neighbours.previous.slug}`"
             class="group rounded-xl border border-line bg-surface p-4 transition-colors hover:border-line-strong hover:bg-surface-2"
           >
             <span class="flex items-center gap-1 text-xs text-ink-dim">
@@ -103,7 +103,7 @@ const showToc = computed(() => (page.value?.headings.length ?? 0) > 2);
 
           <NuxtLink
             v-if="neighbours.next"
-            :to="`/docs/${neighbours.next.slug}`"
+            :to="`/dokumentation/${neighbours.next.slug}`"
             class="group rounded-xl border border-line bg-surface p-4 text-right transition-colors hover:border-line-strong hover:bg-surface-2 sm:col-start-2"
           >
             <span class="flex items-center justify-end gap-1 text-xs text-ink-dim">

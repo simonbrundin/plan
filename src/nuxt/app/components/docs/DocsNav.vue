@@ -24,7 +24,7 @@ function isActive(slug: string): boolean {
       <ul class="space-y-0.5">
         <li v-for="doc in docs" :key="doc.slug">
           <NuxtLink
-            :to="`/docs/${doc.slug}`"
+            :to="`/dokumentation/${doc.slug}`"
             class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors"
             :class="
               isActive(doc.slug)

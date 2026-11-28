@@ -157,7 +157,7 @@ Gränssnittet visar körningen och eventuella godkännanden
 
 Flux synkar `environments/*` till klustret. Hemligheter krypteras med
 **SOPS + age** och dekrypteras av Flux - inga hemligheter finns i git.
-Läs mer i [Utveckling och drift](/docs/utveckling).
+Läs mer i [Utveckling och drift](/dokumentation/utveckling).
 
 ## Designprinciper
 

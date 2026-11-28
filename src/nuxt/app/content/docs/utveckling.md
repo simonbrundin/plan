@@ -182,6 +182,6 @@ Reglerna för wikin - råkällor, syntes, schema - finns i `wiki/AGENTS.md`.
 
 ## Se också
 
-- [Arkitektur](/docs/arkitektur) - tjänsterna och deras ansvar.
-- [API och autentisering](/docs/api) - endpoints, sessioner, scopes.
-- [Agentsystemet](/docs/agent-systemet) - faserna och profilerna.
+- [Arkitektur](/dokumentation/arkitektur) - tjänsterna och deras ansvar.
+- [API och autentisering](/dokumentation/api) - endpoints, sessioner, scopes.
+- [Agentsystemet](/dokumentation/agent-systemet) - faserna och profilerna.
