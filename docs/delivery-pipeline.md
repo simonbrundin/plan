@@ -812,7 +812,9 @@ ställe så att de inte glöms.
    publika URL:en, och i produktion finns ingen dev-login - authen ger
    401, vilket visar att API:t lever men inte att databasen svarar. Ett
    in-kluster-prov (ett CronJob i prod-ns) skulle kunna kolla
-   databasberoende anrop med agentens API-nyckel.
+   databasberoende anrop med agentens API-nyckel. I previewläget testas
+   databasen i stället på riktigt (dev-login + läsning av mål), så
+   databasen är i praktiken testad - men bara för previewens databas.
 3. **Go-flödena finns kvar utan att göra jobbet.** `commit.api.yaml` och
    `commit.agent.yaml` testar Go-koden men bygger inga images. De behövs
    så länge paritetstesterna jämför mot Go-källan - men de bör tas bort
