@@ -688,7 +688,7 @@ Det finns ett rökprov som körs efter varje deploy:
 
 | Flöde | När | Vad det testar |
 |-------|-----|----------------|
-| `.github/workflows/smoke-test.yaml` | När bot-PR:en med nya images mergas | Den publika URL:en: appen, `/api/health`, och att auth ger 401 utan session |
+| `.github/workflows/smoke-test.yaml` | När bot-PR:en med nya images mergas | Den publika URL:en: appen, Nuxt:s `/api/health`, API:ts `/health` (med build-sha), och att auth ger 401 utan session |
 | `pr-preview.yaml` | Efter att overlayen publicerats | Samma + dev-login, databasberoende anrop och agentens endpoint |
 
 Resultatet kommenteras på PR:et, så att både rollouten och provets
@@ -702,15 +702,15 @@ utfall syns i samma tråd.
 
 **Provet väntar in sig på rätt version.** API:t och agenten rapporterar
 vilken build som kör (`PLAN_BUILD_SHA`, satt av Dockerfilen via
-`--build-arg`). Rökprovet väntar tills `/api/health` svarar med den
-sha:image-tagen pekar på - annars skulle provet bara bekräfta att den
+`--build-arg`). Rökprovet väntar tills `/health` svarar med den sha som
+image-tagen pekar på - annars skulle provet bara bekräfta att den
 gamla versionen svarar.
 
 ```bash
 # Vilken build svarar just nu? (/health är API:t:s egen kontroll -
 # /api/health tillhör Nuxt och säger ingenting om builden)
 curl -sS https://plan.simonbrundin.com/health
-# {"status":"ok","build_sha":"02fcc55..."}
+# {"status":"ok","build_sha":"4b952cf21549..."}
 ```
 
 `/health` exponeras via routern mot API:t (i både prod och preview), så
