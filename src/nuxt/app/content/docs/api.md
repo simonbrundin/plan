@@ -3,7 +3,7 @@ title: API och autentisering
 description: Plan API:t, agent-API:t, hur sessioner och API-nycklar fungerar, och vilka scopes agenten får.
 order: 6
 icon: i-lucide-plug
-updated: 2026-11-25
+updated: 2026-11-28
 group: Utvecklare
 ---
 
@@ -59,6 +59,25 @@ Go + Gin, bas `/api/v1`, port 8080. Ligger i `src/api`.
 | PATCH | `/api/v1/goals/relations/reorder` |
 | POST | `/api/v1/goals/dependencies` |
 | DELETE | `/api/v1/goals/dependencies` |
+
+### Faser och verifiering
+
+| Metod | Sökväg | Beskrivning |
+| --- | --- | --- |
+| POST | `/api/v1/goals/:id/phase` | Begär en fasövergång - maskinen i Plan avgör om den tillåts |
+| POST | `/api/v1/goals/:id/complete` | Avsluta målet direkt, från vilken fas som helst (människans väg) |
+| GET | `/api/v1/goals/:id/verification` | Planen med senaste omdöme och bevis |
+| PUT | `/api/v1/goals/:id/verification` | Sätt planen - en ändring ogiltigförklarar tidigare omdömen |
+| DELETE | `/api/v1/goals/:id/verification` | Ta bort planen - målet blir ett vanligt mål igen |
+| POST | `/api/v1/goals/:id/evidence` | Lämna ett bevis |
+| POST | `/api/v1/goals/:id/verification/run` | Kör verifieringen och få ett omdöme |
+| POST | `/api/v1/verification-results/:id/approve` | Godkänn ett omdöme (människans beslut) |
+| POST | `/api/v1/verification-results/:id/reject` | Avslå ett omdöme (människans beslut) |
+
+En stoppad fasövergång ger `409` med en stabil skälkod i svaret:
+`phase_skipped`, `backwards_transition`, `missing_planned_children`,
+`unresolved_children`, `definition_not_approved`, `approval_required`
+eller `unknown_phase`.
 
 ### Kalender, platser och taggar
 

@@ -132,6 +132,39 @@ Profilmoten följer med AgentRun (`agent_profile`) och sätts i jobbets miljö s
 `AGENT_PROFILE`. En okänd profil ger kodprofilen - den strängaste - så ett
 fel aldrig ger fler rättigheter än avsett.
 
+### Åtgärdsprofiler
+
+Profilerna ovan är tekniska gränser i agentens kod. Det som styr vad agenten
+får göra i en **körning** är åtgärdsprofilen - den följer uppgiften, inte
+målets ämne. Ett livsmål kan kräva kod och ett kodmål kan kräva research.
+
+| Profil | Vad agenten får |
+| --- | --- |
+| `planering` (standard) | prata, bryta ned, föreslå, fråga - skriver ingenting |
+| `research` | läsa och samla underlag - skriver ingenting |
+| `arbete` | arbeta i en isolerad kopia, skriva kod, föreslå ändringar |
+
+Profilen föreslås av agenten i måldefinitionen och godkänns av användaren
+i samma godkännande som resten av definitionen. `planering` och `research`
+mappar mot livsprofilens rättigheter, `arbete` mot kodprofilens - mappningen
+ligger i `src/agent/internal/profile` (`ActionPolicy`).
+
+En okänd eller saknad profil ger den strängaste rättigheten. Kodaren körs
+bara om profilen får röra kod, så en definition utan profil behåller den
+tekniska profilen - äldre förslag fungerar som de gjorde för.
+
+### Agenten går via fasmaskinen
+
+Agenten byter inte längre status själv. Den begär en fasövergång med
+`POST /api/v1/goals/:id/phase`, och villkoren kontrolleras i API:t. Ett
+stoppat byte svarar med `409` och en skälkod, och då:
+
+- körningen markeras som `waiting_approval` - inte som ett fel,
+- skälet sparas i körningens händelser, så att människan ser vad som saknas,
+- agenten går inte vidare på egen hand.
+
+Det är skillnaden mellan "något gick fel" och "en människa bestämmer".
+
 Varje körning publicerar sin egen branch, `agent/goal-<mål>-run-<körning>`.
 Då kan flera försök granskas side by side utan att krocka.
 
@@ -228,6 +261,96 @@ gränssnittet - ett nytt namn utan migrering ger två sanningar. 2026-11-25 bytt
 `blocked` till `waiting_approval` och `done` till `succeeded`; migreringen sker
 idempotent i `src/api/internal/database/db.go` vid uppstart.
 
+## Fasmaskinen för mål
+
+Ett mål har faser: `define` → `plan` → `execute` → `verify` → `completed`.
+Övergångarna går genom en maskin i API:t, inte genom att någon skriver
+statusen fritt. Maskinen ligger i `src/api/internal/phase` och är ren logik
+- den tar fakta om målet och svarar om övergången är tillåten. Bindningen
+mot databasen ligger i `src/api/internal/phaseservice`, så att både
+fasendpointern och den gamla `PATCH /api/v1/goals/:id/status` går samma väg
+och maskinen inte kan kringgås.
+
+| Anrop | Vem | Vad |
+| --- | --- | --- |
+| `POST /api/v1/goals/:id/phase` | människa och agent | byter fas, med `{to, override_reason?}` |
+| `POST /api/v1/goals/:id/complete` | människa | avslutar målet direkt, oavsett fas |
+
+**Agentens villkor.** Framåt går agenten en fas i taget, och varje steg har
+ett villkor:
+
+| Övergång | Villkor |
+| --- | --- |
+| `define` → `plan` | målet har en godkänd agentdefinition |
+| `plan` → `execute` | målet har delmål med datum eller uppskattad tid |
+| `execute` → `verify` | varje delmål har fått ett resultat |
+
+Agenten får inte hoppa över faser, inte gå bakåt och inte avsluta ett mål
+själv. Den sista regeln är den viktigaste: agenten får föreslå, en människa
+bestämmer.
+
+**Människans genväg.** En människa får hoppa över faser och gå bakåt - men
+det loggas som en avvikelse i `goal_phase_events`. När hon avslutar ett mål
+direkt registreras hur målet avslutades: `deklarerat` om ingen verifiering
+gått igenom, `verifierat` om det gjort det.
+
+**Stoppade övergångar** svarar med `409` och en stabil skälkod i svaret, så
+att klienten kan visa vad som saknas:
+
+| Kod | Betyder |
+| --- | --- |
+| `definition_not_approved` | målet saknar en godkänd definition |
+| `missing_planned_children` | målet saknar delmål att arbeta med |
+| `unresolved_children` | ett delmål saknar resultat |
+| `phase_skipped` | en agent försökte hoppa över en fas |
+| `backwards_transition` | en agent försökte gå bakåt |
+| `approval_required` | en agent försökte avsluta ett mål själv |
+| `unknown_phase` | fasen finns inte |
+
+## Verifiering och bevis
+
+Verifieringen är **valfri**. Ett mål utan verifieringsplan fungerar precis
+som ett mål med en plan - planen är bara villkoret för att agenten ska få
+föreslå att målet är klart, och beviset som människan vill se innan hon
+bestämmer.
+
+| Anrop | Vad |
+| --- | --- |
+| `GET /api/v1/goals/:id/verification` | planen med senaste omdöme och bevis |
+| `PUT /api/v1/goals/:id/verification` | sätter planen (typ, villkor, styrka) |
+| `POST /api/v1/goals/:id/evidence` | lägger till bevis |
+| `DELETE /api/v1/goals/:id/verification` | tar bort planen - målet blir ett vanligt mål igen |
+| `POST /api/v1/goals/:id/verification/run` | kör verifieringen och ger ett omdöme |
+| `POST /api/v1/verification-results/:id/approve` | en människa godkänner omdömet |
+| `POST /api/v1/verification-results/:id/reject` | en människa avslår omdömet |
+
+Planens typ är en av `checklista`, `delmal`, `kalender`, `bevis`, `matvarde`
+och `kod`, och styrkan är `stark` eller `svag`. Kodmålens verifierare
+definieras senare - typen finns redan i databasen.
+
+Ett omdöme blir först giltigt när en människa godkänner det. En agent får
+köra verifieringen och lämna bevis, men aldrig godkänna eller avslå - det är
+human gate i API:t, inte i en prompt. När planen ändras ogiltigförklaras
+tidigare omdömen: de gällde den gamla planen. Ett avslaget omdöme
+(`avslagen`) ogiltigförklarar de godkända omdömen som fanns innan - annars
+skulle målet räknas som verifierat trots att människan just sa att
+omdömet inte håller.
+
+I gränssnittet ligger verifieringen på målsidan: planen (typ, villkor,
+styrka), bevislistan och omdömet med knapparna **Godkänn** och **Avslå**.
+Samma information syns i agent-docken under fliken **Körning**, så att
+beslutet kan fattas där agentens arbete redan är öppet. Målets "avslutades
+som" - `deklarerat` eller `verifierat` - syns på målet och i listan av
+avslutade mål.
+
+Data ligger i `goal_verifications`, `goal_evidence`,
+`goal_verification_results` och `goal_phase_events`, och hur ett mål
+avslutades i `goals.completion_kind`. Målets godkännandedisciplin ligger i
+`goals.approval_mode` (`plan` som standard, `varje_atgard` för mer
+restriktivt). Tabellerna och kolumnerna skapas idempotent vid uppstart i
+`src/api/internal/database/db.go` - samma mönster som tidigare
+statusmigreringar.
+
 ## Kontraktet mellan Plan och agenten
 
 Plan äger agentkörningarna, men agenten och Plan pratar via HTTP - och de två
@@ -235,17 +358,18 @@ sidorna ligger i samma repo. Därför finns kontraktet som en fil:
 `src/contracts/plan-agent.yaml`.
 
 Filen beskriver de delar agenten använder: faser, tillstånd, terminala
-tillstånd, tillstånd där en människa måste agera, triggrar, profiler och de
-API-anrop agenten gör. Den är versionsstyrd - `version: 1` beskriver första
-versionen, som samtidigt bytte `blocked` till `waiting_approval` och `done` till
-`succeeded`.
+tillstånd, tillstånd där en människa måste agera, triggrar, profiler,
+åtgärdsprofiler, fasövergångarnas villkor och de API-anrop agenten gör. Den
+är versionsstyrd - `version: 1` beskriver första versionen, som samtidigt bytte
+`blocked` till `waiting_approval` och `done` till `succeeded`. Version 4
+kom med fasmaskinen och verifieringen.
 
 Båda sidor testar mot samma fil:
 
 | Sida | Test | Vad det fångar |
 | --- | --- | --- |
-| Plan | `src/api/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, och att varje anrop i kontraktet finns i OpenAPI-specifikationen |
-| Agent | `src/agent/internal/planclient` | att agentens statuskonstanter och sökvägar stämmer med kontraktet, och att kontraktets anrop finns i Plan |
+| Plan | `src/api/internal/contracts` | att faser, tillstånd och övergångar i modellen stämmer med kontraktet, att varje anrop i kontraktet finns i OpenAPI-specifikationen, att fasövergångarnas skälkoder stämmer med maskinen och att agentens anrop går att göra med agent-scope |
+| Agent | `src/agent/internal/planclient` | att agentens statuskonstanter, sökvägar och åtgärdsprofiler stämmer med kontraktet, och att kontraktets anrop finns i Plan |
 
 Sökvägarna i agentens klient ligger i `src/agent/internal/planclient/paths.go`
 som namngivna konstanter - annars går det inte att jämföra dem mot kontraktet.

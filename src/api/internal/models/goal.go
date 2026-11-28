@@ -115,6 +115,10 @@ type Goal struct {
 	RecurrenceNext *DueDate `json:"recurrence_next"`
 	// RecurrenceCount är antalet slutförda förekomster.
 	RecurrenceCount int `json:"recurrence_count"`
+	// CompletionKind säger hur målet avslutades: "deklarerat" när en
+	// människa sa att det var klart, "verifierat" när en godkänd
+	// verifiering gått igenom. Tom sträng = målet är inte avslutat.
+	CompletionKind string `json:"completion_kind"`
 }
 
 // Status represents a goal status

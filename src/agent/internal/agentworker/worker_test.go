@@ -12,30 +12,28 @@ import (
 
 func TestSyncPhaseKeepsGoalAndRunPhaseAligned(t *testing.T) {
 	phases := []string{PhaseDefine, PhasePlan, PhaseExecute, PhaseVerify, PhaseCompleted}
-	statusIDs := map[string]int{"define": 5, "plan": 8, "execute": 13, "verify": 21, "completed": 34}
-	goalUpdates := make(map[int]string)
+	goalUpdates := make(map[string]bool)
 	runUpdates := make(map[string]bool)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			statuses := make([]planclient.Status, 0, len(phases))
-			for _, phase := range phases {
-				statuses = append(statuses, planclient.Status{ID: int64(statusIDs[phase]), Name: phase})
+			for i, phase := range phases {
+				statuses = append(statuses, planclient.Status{ID: int64(i + 1), Name: phase})
 			}
 			_ = json.NewEncoder(w).Encode(statuses)
-		case "/api/v1/goals/42/status":
+		case "/api/v1/goals/42/phase":
+			// Fasbytet går via fasmaskinen - villkoren kontrolleras
+			// i API:t, inte här.
 			var request struct {
-				StatusID int `json:"status_id"`
+				To string `json:"to"`
 			}
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-				t.Errorf("decode goal status: %v", err)
+				t.Errorf("decode goal phase: %v", err)
 			}
-			for phase, statusID := range statusIDs {
-				if statusID == request.StatusID {
-					goalUpdates[request.StatusID] = phase
-				}
-			}
+			goalUpdates[request.To] = true
+			_ = json.NewEncoder(w).Encode(planclient.PhaseTransition{GoalID: 42, To: request.To})
 		case "/api/v1/agent-runs/7":
 			var request planclient.UpdateAgentRunRequest
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -71,8 +69,8 @@ func TestSyncPhaseKeepsGoalAndRunPhaseAligned(t *testing.T) {
 		t.Fatalf("goal updates = %v, run updates = %v", goalUpdates, runUpdates)
 	}
 	for _, phase := range phases {
-		if got := goalUpdates[statusIDs[phase]]; got != phase {
-			t.Errorf("goal phase for status %d = %q, want %q", statusIDs[phase], got, phase)
+		if !goalUpdates[phase] {
+			t.Errorf("goal phase %q was not updated", phase)
 		}
 		if !runUpdates[phase] {
 			t.Errorf("agent run phase %q was not updated", phase)

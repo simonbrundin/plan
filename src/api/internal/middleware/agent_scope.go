@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// agentScopeAllows svarar på om en agent-nyckel får göra anropet.
+// AgentScopeAllows svarar på om en agent-nyckel får göra anropet.
 //
 // Allowlisten är medvetet liten. Agenten får arbeta med mål och
 // agentkörningar, men får aldrig besluta om ett godkännande - det är
 // human gate, och den ska alltid göras av en människa. Den får inte heller
 // radera något, eftersom allt som en människa har skapat ska överleva.
-func agentScopeAllows(method, path string) bool {
+func AgentScopeAllows(method, path string) bool {
 	segments := strings.Split(strings.Trim(path, "/"), "/")
 	if len(segments) < 3 || segments[0] != "api" || segments[1] != "v1" {
 		return false
@@ -33,21 +33,26 @@ func agentScopeAllows(method, path string) bool {
 		return method == http.MethodGet
 
 	case "goals":
-		return agentScopeAllowsGoals(method, rest)
+		return AgentScopeAllowsGoals(method, rest)
 
 	case "agent-runs":
-		return agentScopeAllowsAgentRuns(method, rest)
+		return AgentScopeAllowsAgentRuns(method, rest)
 
 	case "agent-approvals":
 		// Läsa ett godkännande är ok, att besluta om det är det inte.
 		return method == http.MethodGet && len(rest) == 1
+
+	case "verification-results":
+		// Ett verifieringsomdöme godkänns och avslås alltid av en människa
+		// - en agent får inte besluta om sitt eget omdöme.
+		return false
 	}
 
 	return false
 }
 
-// agentScopeAllowsGoals gäller målen.
-func agentScopeAllowsGoals(method string, rest []string) bool {
+// AgentScopeAllowsGoals gäller målen.
+func AgentScopeAllowsGoals(method string, rest []string) bool {
 	switch len(rest) {
 	case 0:
 		// Lista och skapa mål - undermål skapas genom Plan, inte genom
@@ -66,19 +71,40 @@ func agentScopeAllowsGoals(method string, rest []string) bool {
 		case "status":
 			// Statusen på ett mål.
 			return method == http.MethodGet || method == http.MethodPatch
+		case "phase":
+			// Fasmaskinen. Agenten får begära en övergång - villkoren
+			// kontrolleras i API:t, precis som för en människa. Men
+			// agenten får inte avsluta ett mål själv, så "complete"
+			// (som ligger under målen, inte under ett mål) är inte
+			// tillåtet.
+			return method == http.MethodPost
+		case "verification":
+			// Verifieringsplanen och körningen av den. Agenten får
+			// föreslå en plan och samla bevis - men inte godkänna ett
+			// omdöme.
+			return method == http.MethodGet || method == http.MethodPut || method == http.MethodPost
+		case "evidence":
+			// Bevis på målet.
+			return method == http.MethodPost
 		case "tags", "places":
 			// Agenten får sätta taggar och platser på ett mål - de är
 			// en del av måldefinitionen. Den får inte radera dem.
 			return method == http.MethodPut
+		}
+	case 3:
+		// "/verification/run" - köra verifieringen. Agenten får göra det,
+		// men omdömet blir först giltigt när en människa godkänner det.
+		if rest[1] == "verification" && rest[2] == "run" {
+			return method == http.MethodPost
 		}
 	}
 
 	return false
 }
 
-// agentScopeAllowsAgentRuns gäller agentkörningarna och deras händelser
+// AgentScopeAllowsAgentRuns gäller agentkörningarna och deras händelser
 // och godkännanden.
-func agentScopeAllowsAgentRuns(method string, rest []string) bool {
+func AgentScopeAllowsAgentRuns(method string, rest []string) bool {
 	switch len(rest) {
 	case 0:
 		return method == http.MethodGet || method == http.MethodPost
@@ -113,7 +139,7 @@ func RestrictToAgentScope() gin.HandlerFunc {
 			return
 		}
 
-		if !agentScopeAllows(c.Request.Method, c.Request.URL.Path) {
+		if !AgentScopeAllows(c.Request.Method, c.Request.URL.Path) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error":   "Forbidden",
 				"message": "Agent API-nyckeln får inte göra det här anropet",

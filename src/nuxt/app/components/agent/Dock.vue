@@ -140,15 +140,18 @@ const tabs = computed(() => [
 				:run="run"
 				@conversation-started="emit('conversation-started', $event)"
 			/>
-			<AgentRunHistory
-				v-show="activeTab === 'run'"
-				class="min-h-0 flex-1"
-				:events="events"
-				:run="run"
-				:approvals="approvals"
-				@decided="emit('decided')"
-				@cancelled="emit('cancelled')"
-			/>
+			<!-- Körningen: verifieringen ligger överst, sedan historiken. -->
+			<div v-show="activeTab === 'run'" class="flex min-h-0 flex-1 flex-col">
+				<AgentVerificationState :goal-id="goalId" @changed="emit('decided')" />
+				<AgentRunHistory
+					class="min-h-0 flex-1"
+					:events="events"
+					:run="run"
+					:approvals="approvals"
+					@decided="emit('decided')"
+					@cancelled="emit('cancelled')"
+				/>
+			</div>
 			<AgentCheckpointWorkflowPanel
 				v-show="activeTab === 'plan'"
 				:feature="goalTitle"

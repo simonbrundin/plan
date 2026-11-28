@@ -24,8 +24,13 @@
 #       code_change) så att en människa och agenten kan skilja på vad som
 #       föreslogs. Lade också till de anrop agenten behöver för en rik
 #       måldefinition: platser, taggar och platser på ett mål.
+#   4 - 2026-11-28 - fasmaskinen och den valfria verifieringen. Lade till
+#       fasövergångarna med sina villkor, åtgärdsprofilerna och anropen för
+#       fasbyten, verifieringsplan, bevis och verifieringsomdömen. Agenten
+#       får inte avsluta ett mål eller godkänna ett omdöme - de anropen
+#       står i kontraktet utan agent: true.
 
-version: 3
+version: 4
 
 # Agentkörningens faser, i den ordning de sker.
 phases:
@@ -62,9 +67,51 @@ triggers:
   - agent
 
 # Vilken sorts agent som utför körningen.
+#
+# De här profilerna är tekniska gränser i agentens kod. Det är
+# åtgärdsprofilerna nedan som styr vad agenten får göra i en viss
+# körning - de följer uppgiften, inte målets ämne.
 profiles:
   - coding
   - life
+
+# Åtgärdsprofilerna - vad agenten får göra i en körning.
+#
+# Profilen föreslås av agenten i definitionen och godkänns av användaren.
+# Standardprofilen är den strängaste.
+#
+#   planering - prata, bryta ned, föreslå, fråga. Skriver ingenting.
+#   research  - läsa och samla underlag. Skriver ingenting.
+#   arbete    - arbeta i en isolerad kopia, skriva kod, föreslå ändringar.
+action_profiles:
+  - planering
+  - research
+  - arbete
+
+# Villkor för att en målfas får bytas.
+#
+# Plan API:t kollar villkoren - en agent får gå en fas framåt i taget och
+# måste ha det som står i requires. En människa får hoppa över faser, men
+# hoppet loggas som en avvikelse.
+#
+# reason är skälkoden API:t svarar med om villkoret inte är uppfyllt.
+phase_transitions:
+  - from: define
+    to: plan
+    requires: approved_definition
+    reason: definition_not_approved
+  - from: plan
+    to: execute
+    requires: planned_children
+    reason: missing_planned_children
+  - from: execute
+    to: verify
+    requires: resolved_children
+    reason: unresolved_children
+  - from: verify
+    to: completed
+    requires: human_decision
+    reason: approval_required
 
 # Typer av godkännanden. Typen ligger i godkännandets payload ("kind") så
 # att en människa ser vad som föreslogs och att agenten inte blandar ihop
@@ -101,6 +148,37 @@ endpoints:
   - method: PATCH
     path: /api/v1/goals/{id}/status
     agent: true
+  # Fasmaskinen. Agenten får begära en övergång - villkoren kontrolleras
+  # i API:t, precis som för en människa. Ett stoppat byte svarar med 409
+  # och en skälkod.
+  - method: POST
+    path: /api/v1/goals/{id}/phase
+    agent: true
+  # Verifieringsplanen, bevisen och omdömet. Planen är valfri - ett mål
+  # utan plan fungerar precis som ett mål med plan.
+  - method: GET
+    path: /api/v1/goals/{id}/verification
+    agent: true
+  - method: PUT
+    path: /api/v1/goals/{id}/verification
+    agent: true
+  - method: DELETE
+    path: /api/v1/goals/{id}/verification
+  - method: POST
+    path: /api/v1/goals/{id}/evidence
+    agent: true
+  - method: POST
+    path: /api/v1/goals/{id}/verification/run
+    agent: true
+  # Målsidan: att avsluta ett mål och att godkänna ett omdöme är
+  # människans beslut. Agenten får inte göra det - därför står de här
+  # utan agent: true.
+  - method: POST
+    path: /api/v1/goals/{id}/complete
+  - method: POST
+    path: /api/v1/verification-results/{id}/approve
+  - method: POST
+    path: /api/v1/verification-results/{id}/reject
   - method: GET
     path: /api/v1/statuses
     agent: true

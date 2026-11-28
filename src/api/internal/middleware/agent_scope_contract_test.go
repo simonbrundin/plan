@@ -32,7 +32,7 @@ func TestAgentScopeTillaterKontraktetsAnrop(t *testing.T) {
 		// {id} i kontraktet blir ett konkret id i ett anrop.
 		sökväg := strings.ReplaceAll(endpoint.Path, "{id}", "1")
 
-		if !agentScopeAllows(endpoint.Method, sökväg) {
+		if !AgentScopeAllows(endpoint.Method, sökväg) {
 			t.Errorf("agenten gör %s %s, men agent-scope tillåter det inte", endpoint.Method, sökväg)
 		}
 	}

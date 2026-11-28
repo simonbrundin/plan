@@ -75,7 +75,8 @@ func (r *GoalRepository) GetGoalsFiltered(ctx context.Context, userID int64, fil
 		SELECT g.id, g.title, COALESCE(g.description, ''), g.icon, g.status_id, g.created, g.started, g.finished, g.due, g.start_date, g.estimated_minutes, g.inbox, g.eternal, g.agent, g.now, g."order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = g.id) AS has_parent,
 			g.recurrence_rule, g.recurrence_mode, g.recurrence_next,
-			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = g.id) AS recurrence_count,
+			COALESCE(g.completion_kind, '') AS completion_kind
 		FROM goals g
 		INNER JOIN user_goals ug ON g.id = ug.goal_id
 		WHERE ug.user_id = $1`
@@ -107,7 +108,7 @@ func (r *GoalRepository) GetGoalsFiltered(ctx context.Context, userID int64, fil
 		var estimatedMinutes *int
 		var recurrenceNext *time.Time
 		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Icon, &g.StatusID, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now, &g.Order, &g.HasParent,
-			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
+			&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount, &g.CompletionKind)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan goal: %w", err)
 		}
@@ -127,7 +128,8 @@ func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models
 		SELECT id, title, COALESCE(description, ''), icon, status_id, created, started, finished, due, start_date, estimated_minutes, inbox, eternal, agent, now, "order",
 			EXISTS (SELECT 1 FROM goal_relations gr WHERE gr.child_id = goals.id) AS has_parent,
 			recurrence_rule, recurrence_mode, recurrence_next,
-			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = goals.id) AS recurrence_count
+			(SELECT COUNT(*) FROM goal_completions gc WHERE gc.goal_id = goals.id) AS recurrence_count,
+			COALESCE(completion_kind, '') AS completion_kind
 		FROM goals WHERE id = $1`
 
 	var g models.Goal
@@ -137,7 +139,7 @@ func (r *GoalRepository) GetGoalByID(ctx context.Context, goalID int64) (*models
 	var recurrenceNext *time.Time
 	err := r.pool.QueryRow(ctx, query, goalID).Scan(
 		&g.ID, &g.Title, &g.Description, &g.Icon, &g.StatusID, &g.Created, &g.Started, &g.Finished, &due, &startDate, &estimatedMinutes, &g.Inbox, &g.Eternal, &g.Agent, &g.Now, &g.Order, &g.HasParent,
-		&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount)
+		&g.RecurrenceRule, &g.RecurrenceMode, &recurrenceNext, &g.RecurrenceCount, &g.CompletionKind)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil

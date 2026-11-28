@@ -3,7 +3,7 @@ title: Mål och datamodell
 description: Så ser databasen ut - mål, hierarki, beroenden, upprepningar, taggar, platser, kalender och agentkörningar.
 order: 3
 icon: i-lucide-database
-updated: 2026-11-25
+updated: 2026-11-28
 group: Användaren
 ---
 
@@ -44,6 +44,8 @@ gränssnittet:
 | `recurrence_mode` | `schedule` eller `push` |
 | `recurrence_anchor` / `recurrence_next` | Referensdatum och nästa förekomst |
 | `order` / `priority_order` | Sortering i mållistan respektive prioritetslistan |
+| `completion_kind` | Hur målet avslutades: `deklarerat` eller `verifierat` |
+| `approval_mode` | `plan` (huvudregeln) eller `varje_atgard` |
 
 ### Relationer
 
@@ -85,6 +87,28 @@ kolumnerna bevarar den absoluta tidpunkten. Återkommande händelser
 lagras som en serie (`recurrence_rule`) med undantag i
 `parent_event_id` + `original_start_at`.
 
+### Fasmaskin och verifiering
+
+| Tabell | Innehåll |
+| --- | --- |
+| `goal_verifications` | Verifieringsplanen: typ, villkor, styrka - **valfri** |
+| `goal_evidence` | Bevisen: text, källa, tidsstämpel |
+| `goal_verification_results` | Omdömena: `passed`, `failed`, `pending`, `avslagen` |
+| `goal_phase_events` | Fasloggen: från, till, vem, tvingad, orsak |
+
+Verifieringsplanen är valfri. Ett mål utan plan fungerar precis som ett
+mål med plan - skillnaden är bara att det då aldrig kan räknas som
+"verifierat", bara som "deklarerat".
+
+Ett mål avslutas på två sätt:
+
+- **Deklarerat** - en människa säger att målet är klart.
+- **Verifierat** - en verifiering gått igenom och en människa godkänt
+  omdömet.
+
+Byter du verifieringsplanen blir tidigare omdömen ogiltiga - de gällde
+den gamla planen.
+
 ### Agentkörningar
 
 | Tabell | Innehåll |
@@ -122,6 +146,9 @@ inte tillsammans passerar gränsen.
 | `goals_valid_trigger` / `goals_valid_profile` | Okänd trigger eller profil |
 | `agent_approvals_valid_status` | Okänt beslutstillstånd |
 | `no_self_reference` | Ett mål som är beroende av sig självt |
+| `goal_verifications_valid_type` / `goal_verifications_valid_strength` | Okänd verifieringstyp eller styrka |
+| `goal_verification_results_valid_outcome` | Okänt omdöme |
+| `goals_valid_completion_kind` / `goals_valid_approval_mode` | Okänt sätt att avsluta eller okänt godkännandeläge |
 | `calendars_user_default_idx` | Två standardkalendrar per användare |
 
 ## Utveckla schemat

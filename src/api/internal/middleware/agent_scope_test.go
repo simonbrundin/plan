@@ -27,6 +27,15 @@ func TestAgentScopeAllows(t *testing.T) {
 		{"sätta målstatus", http.MethodPatch, "/api/v1/goals/42/status", true},
 		{"läsa målstatus", http.MethodGet, "/api/v1/goals/42/status", true},
 		{"radera målstatus", http.MethodDelete, "/api/v1/goals/42/status", false},
+		{"begära fasövergång", http.MethodPost, "/api/v1/goals/42/phase", true},
+		{"avsluta mål", http.MethodPost, "/api/v1/goals/42/complete", false},
+		{"läsa verifieringsplan", http.MethodGet, "/api/v1/goals/42/verification", true},
+		{"sätta verifieringsplan", http.MethodPut, "/api/v1/goals/42/verification", true},
+		{"köra verifiering", http.MethodPost, "/api/v1/goals/42/verification/run", true},
+		{"lägga bevis", http.MethodPost, "/api/v1/goals/42/evidence", true},
+		{"godkänna omdöme", http.MethodPost, "/api/v1/verification-results/3/approve", false},
+		{"avslå omdöme", http.MethodPost, "/api/v1/verification-results/3/reject", false},
+		{"ta bort verifieringsplan", http.MethodDelete, "/api/v1/goals/42/verification", false},
 		{"läsa statusar", http.MethodGet, "/api/v1/statuses", true},
 		{"skapa körning", http.MethodPost, "/api/v1/agent-runs", true},
 		{"läsa körning", http.MethodGet, "/api/v1/agent-runs/7", true},
@@ -45,8 +54,8 @@ func TestAgentScopeAllows(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := agentScopeAllows(tt.method, tt.path); got != tt.want {
-				t.Errorf("agentScopeAllows(%q, %q) = %v, vill ha %v", tt.method, tt.path, got, tt.want)
+			if got := AgentScopeAllows(tt.method, tt.path); got != tt.want {
+				t.Errorf("AgentScopeAllows(%q, %q) = %v, vill ha %v", tt.method, tt.path, got, tt.want)
 			}
 		})
 	}

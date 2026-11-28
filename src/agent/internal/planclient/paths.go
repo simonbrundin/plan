@@ -9,6 +9,10 @@ const (
 	pathGoals             = "/api/v1/goals"
 	pathGoal              = "/api/v1/goals/%d"
 	pathGoalStatus        = "/api/v1/goals/%d/status"
+	pathGoalPhase         = "/api/v1/goals/%d/phase"
+	pathGoalVerification  = "/api/v1/goals/%d/verification"
+	pathGoalEvidence      = "/api/v1/goals/%d/evidence"
+	pathGoalVerifyRun     = "/api/v1/goals/%d/verification/run"
 	pathGoalTags          = "/api/v1/goals/%d/tags"
 	pathGoalPlaces        = "/api/v1/goals/%d/places"
 	pathGoalRelations     = "/api/v1/goals/relations"
@@ -23,10 +27,17 @@ const (
 
 // AllaSökvägar är de sökvägar agenten använder. Testet mot kontraktet
 // går igenom listan.
+//
+// Agenten använder inte "/complete" och inte "/verification-results/:id/approve" -
+// att avsluta ett mål och att godkänna ett omdöme är människans beslut.
 var AllaSökvägar = []string{
 	pathGoals,
 	pathGoal,
 	pathGoalStatus,
+	pathGoalPhase,
+	pathGoalVerification,
+	pathGoalEvidence,
+	pathGoalVerifyRun,
 	pathGoalTags,
 	pathGoalPlaces,
 	pathGoalRelations,

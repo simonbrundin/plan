@@ -56,6 +56,20 @@ type Definition struct {
 	Places []string `json:"places,omitempty"`
 	// Notes är antaganden agenten gjort, som en människa bör känna till.
 	Notes []string `json:"notes,omitempty"`
+	// VerificationType är typen av verifiering agenten föreslår.
+	//
+	// Den är valfri - ett mål utan verifieringsplan fungerar precis som
+	// ett mål med plan.
+	VerificationType string `json:"verification_type,omitempty"`
+	// VerificationCriterion är villkoret som ska gälla för att målet
+	// ska räknas som klart.
+	VerificationCriterion string `json:"verification_criterion,omitempty"`
+	// VerificationStrength är "stark" (objektivt bevis) eller "svag"
+	// (användarens eget intyg).
+	VerificationStrength string `json:"verification_strength,omitempty"`
+	// ActionProfile är åtgärdsprofilen agenten föreslår: "planering",
+	// "research" eller "arbete".
+	ActionProfile string `json:"action_profile,omitempty"`
 }
 
 // Input är målet som ska definieras, tillsammans med de värden som
@@ -123,6 +137,10 @@ The object has these fields:
   "recurrence_start_date": "YYYY-MM-DD or null",
   "tags": ["short tags"],
   "places": ["names of places the goal applies to"],
+  "verification_type": "checklista, delmal, kalender, bevis, matvarde or kod - or null",
+  "verification_criterion": "the condition that must hold for the goal to be done, or null",
+  "verification_strength": "stark or svag",
+  "action_profile": "planering, research or arbete",
   "notes": ["assumptions you made"]
 }
 
@@ -134,6 +152,10 @@ Rules:
 - now is true only for something that should be done right now. eternal is true for goals that never end.
 - agent is true when a person should hand the goal over to an agent.
 - tags are short and lowercase.
+- verification_type is null when the goal needs no proof beyond the person saying it is done. Prefer the simplest type that fits:
+  checklista (the person ticks off steps), delmal (sub-goals), kalender (a calendar event has passed), bevis (the person uploads or writes a proof), matvarde (a measured number), kod (code, tests and CI).
+- verification_criterion is one short sentence that says what must be true. verification_strength is stark when the proof is objective (a number, a test run, a timestamp) and svag when it is the person's own word.
+- action_profile is what the agent may do for this goal: planering (talk, break down, propose - writes nothing), research (read and gather - writes nothing), arbete (work in an isolated copy, write code, propose changes). Use arbete only when the goal really needs code written.
 
 Be specific and actionable. Avoid vague language like "improve" or "optimize" without specifics.`
 

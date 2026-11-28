@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"gopkg.in/yaml.v3"
+
+	"plan/agent/internal/profile"
 )
 
 // kontraktet är filen som beskriver vad agenten får använda.
@@ -19,6 +21,7 @@ type kontrakt struct {
 	StatusNeedingHuman []string   `yaml:"status_needing_human"`
 	Triggers           []string   `yaml:"triggers"`
 	Profiles           []string   `yaml:"profiles"`
+	ActionProfiles     []string   `yaml:"action_profiles"`
 	ApprovalKinds      []string   `yaml:"approval_kinds"`
 	Endpoints          []endpoint `yaml:"endpoints"`
 }
@@ -240,4 +243,42 @@ func läsSwagger(t *testing.T) map[string]any {
 		t.Fatalf("kan inte tolka swagger-specifikationen: %v", err)
 	}
 	return spec
+}
+
+// TestAtgardsprofilernaMatcharKontraktet kontrollerar att kontraktets
+// åtgärdsprofiler är de agenten faktiskt kan använda.
+//
+// Kontraktet är det en människa läser när den godkänner en profil. Om
+// kontraktet anger en profil agenten inte känner igen blir godkännandet
+// meningslöst - agenten skulle köra med fel rättigheter.
+func TestAtgardsprofilernaMatcharKontraktet(t *testing.T) {
+	k := läsKontrakt(t)
+
+	if len(k.ActionProfiles) == 0 {
+		t.Fatal("kontraktet ska ange åtgärdsprofilerna")
+	}
+
+	for _, profil := range k.ActionProfiles {
+		if !profile.ActionKnown(profil) {
+			t.Errorf("kontraktet anger åtgärdsprofilen %q, som agenten inte känner igen", profil)
+		}
+	}
+}
+
+// TestFasovergangarnaMatcharMaskinen kontrollerar att kontraktets
+// fasövergångar är de API:t faktiskt stödjer.
+//
+// Kontraktet innehåller samma faser som maskinen - annars kan agenten
+// föreslå en övergång som Plan inte gör.
+func TestFasovergangarnaMatcharMaskinen(t *testing.T) {
+	k := läsKontrakt(t)
+
+	kända := map[string]bool{
+		"define": true, "plan": true, "execute": true, "verify": true, "completed": true,
+	}
+	for _, fas := range k.Phases {
+		if !kända[fas] {
+			t.Errorf("kontraktet har en okänd fas %q", fas)
+		}
+	}
 }

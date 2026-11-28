@@ -3,7 +3,7 @@ title: Gränssnitt och navigation
 description: Sidor, vyindelning, sök och tangentbordsgenvägar i Plan - kortfattat så att du kan navigera utan att leta.
 order: 2
 icon: i-lucide-monitor
-updated: 2026-11-25
+updated: 2026-11-28
 group: Användaren
 ---
 
@@ -118,6 +118,35 @@ Funktioner som kan sättas på ett mål:
 | Plats | `Space` + `p` | Var målet kan slutföras |
 | Taggar | `Space` + `t` | Etiketter som "ute", "hem", "vinter" |
 | Beroende | `w` | Ett annat mål måste vara klart först |
+
+## Verifiering och "jag är klar"
+
+På målsidan ligger en panel med verifieringen. Den har tre delar:
+
+- **Verifieringsplan** - typ, villkor och styrka. Planen är valfri och
+  kan läggas till, ändras eller tas bort. Utan plan fungerar målet
+  precis som i dag.
+- **Bevis** - det som faktiskt visar att målet blev gjort. Du kan
+  skriva ett bevis, och agenten kan lämna ett.
+- **Omdöme** - resultatet av verifieringen. Omdömet blir giltigt först
+  när du godkänner det; du kan också avslå det.
+
+Överst i panelen finns **Jag är klar** - en handling som avslutar
+målet direkt, från vilken fas som helst. Det fungerar även för ett
+mål som aldrig haft någon verifieringsplan.
+
+Målet registrerar då hur det avslutades:
+
+| Avslutades som | Betyder |
+| --- | --- |
+| Deklarerat | En människa sa att målet var klart |
+| Verifierat | En verifiering gått igenom och en människa godkänt omdömet |
+
+Det syns på målet och i listan av avslutade mål - skillnaden mellan
+"jag tror det är klart" och "det här är bevisat" ska gå att se direkt.
+
+I agent-docken, under fliken **Körning**, ligger samma information:
+planen, bevisen och omdömet - med knapparna **Godkänn** och **Avslå**.
 
 ## Upprepning
 

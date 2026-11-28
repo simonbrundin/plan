@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 459 |
+| Noter | 461 |
 
 ## Entiteter
 
@@ -88,6 +88,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]] - Flyttade authen från Nuxt till Go API:t i plan-repot (2026-11-10). _(uppdaterad 2026-11-27)_
 - [[notes/automatisk-malikon-behovde-sokord-och-svenska-alias]] - Första implementationen sökte Iconify med hela målens titel. _(uppdaterad 2026-11-17)_
 - [[notes/autonoma-agentruns-som-kubernetes-jobs-lardomar-fran-e2e-flodet]] - Verifierat 2026-11-24 i ~/repos/plan med mål #540: Plan-mål -> köad AgentRun -> Kubernetes Job -> förslag -> human gate -> isolerad w... _(uppdaterad 2026-11-24)_
+- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]] - VAD: ett verifieringsomdome kan nu avslas av en manska, inte bara godkannas. _(uppdaterad 2026-11-28)_
 - [[notes/barnmarke-pa-mal-antal-undermal-visas-overallt]] - Önskemål: överallt där ett mål visas ska det framgå hur många barn (undermål) det har. _(uppdaterad 2026-11-22)_
 - [[notes/barnordning-foljer-beroenden-i-malsidan]] - Undermål som väntar på ett annat undermål i samma lista ska ligga nedanför det _(uppdaterad 2026-11-20)_
 - [[notes/bash-fallgropar-i-pxe-flash-tab-som-ifs-whitespace-och-read-med-for-fa-variabler]] - Två bash-fallgropar som nästan släppte igenom i `simon pxe flash` _(uppdaterad 2026-10-23)_
@@ -299,6 +300,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/ny-rs232-hardvara-ak-co-02-db9-breakout-och-kopplingen-till-kvm-ns-3-pin]] - Inköp 2026-11-20: AKYGA AK-CO-02 (B07TXJXWJ3) = USB-A hane -> DB9 **hane** RS-232-kabel, 1 m, chip oklart (Akyga-länken pekar på FT232... _(uppdaterad 2026-11-20)_
 - [[notes/ny-terminal-i-tmux-fragade-efter-datorns-losenord]] - Varje ny shell (tmux-fönster/tab, ny terminal) startade ~/.config/secrets/load.sh, som KÖRDE `op read op://Private/Neon API key/credent... _(uppdaterad 2026-11-20)_
 - [[notes/nya-mal-far-ikon-fran-titeln]] - När ett mål skapas via Nuxts useGoalApi söks Iconify med målens titel via /api/icons. _(uppdaterad 2026-11-17)_
+- [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]] - VAD: fasmaskinen och verifieringen finns i Go-API:t (PR 179), men de nya vagarna svarar 501 i Rust-API:t - och det ar Rust-imagen som kor... _(uppdaterad 2026-11-28)_
 - [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] - `kubectl --context oidc-cluster1` gav "You must be logged in to the server (Unauthorized)" _(uppdaterad 2026-11-25)_
 - [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_

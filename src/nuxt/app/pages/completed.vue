@@ -140,6 +140,9 @@ onMounted(async () => {
                 <ChildCountBadge :goal-id="goal.id" />
               </span>
               <span class="mt-1 block text-sm text-ink-muted">{{ formatFinished(goal.finished!) }}</span>
+              <span class="mt-1 flex items-center gap-2 text-sm text-ink-dim">
+                <CompletionBadge :completion-kind="goal.completion_kind" />
+              </span>
               <span class="mt-1 block truncate text-sm text-ink-dim">
                 {{ parentTitles.get(goal.id)?.join(", ") || "Ingen" }}
               </span>

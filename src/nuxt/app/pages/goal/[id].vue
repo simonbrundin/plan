@@ -28,6 +28,8 @@ import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent'
 import { useAgentApi } from '~/composables/useAgentApi'
 import { useGoalSelection } from '~/composables/useGoalSelection'
 import { useGoalPhase } from '~/composables/useGoalPhase'
+import { isApiFeatureMissing, useGoalVerification } from '~/composables/useGoalVerification'
+import type { GoalEvidence, VerificationPlan, VerificationResult } from '~/utils/goalVerification'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
 definePageMeta({
@@ -43,6 +45,144 @@ const { startDrag: startGoalDrag } = useGoalDrag();
 const goalSelection = useGoalSelection();
 // Byte av målfas (status) med tangenten 's'.
 const { cyclePhases } = useGoalPhase();
+
+// Verifiering och bevis.
+//
+// Planen är valfri - ett mål utan plan fungerar precis som ett mål med
+// plan. Därför är allt här nullable, och knappen "Jag är klar" fungerar
+// oavsett om det finns en plan eller inte.
+const {
+  loadVerification,
+  saveVerification,
+  removeVerification,
+  addEvidence,
+  runVerification,
+  approveResult,
+  rejectResult,
+  completeGoal,
+} = useGoalVerification();
+const verificationPlan = ref<VerificationPlan | null>(null);
+const verificationEvidence = ref<GoalEvidence[]>([]);
+const verificationResult = ref<VerificationResult | null>(null);
+const verificationBusy = ref(false);
+const completingGoal = ref(false);
+// Sant om API:t som kör inte stödjer verifieringen ännu (Rust-API:t
+// svarar 501 tills funktionerna portats).
+const verificationUnsupported = ref(false);
+
+async function refreshVerification() {
+  try {
+    const state = await loadVerification(goalId.value);
+    // API:t svarar med en tom plan när målet saknar plan - då ska
+    // vyn visa "ingen plan", inte en tom rad.
+    verificationUnsupported.value = state.unsupported === true;
+    verificationPlan.value = state.verification?.id ? state.verification : null;
+    verificationEvidence.value = state.evidence;
+    verificationResult.value = state.result ?? null;
+  } catch (error) {
+    console.error('Failed to load verification:', error);
+  }
+}
+
+async function onSaveVerification(plan: { type: string; criterion: string; strength: string }) {
+  verificationBusy.value = true;
+  try {
+    await saveVerification(goalId.value, plan);
+    await refreshVerification();
+  } catch (error) {
+    console.error('Failed to save verification plan:', error);
+  } finally {
+    verificationBusy.value = false;
+  }
+}
+
+async function onRemoveVerification() {
+  verificationBusy.value = true;
+  try {
+    await removeVerification(goalId.value);
+    await refreshVerification();
+  } catch (error) {
+    console.error('Failed to remove verification plan:', error);
+  } finally {
+    verificationBusy.value = false;
+  }
+}
+
+async function onAddEvidence(evidence: { type: string; value: string }) {
+  verificationBusy.value = true;
+  try {
+    await addEvidence(goalId.value, evidence);
+    await refreshVerification();
+  } catch (error) {
+    console.error('Failed to add evidence:', error);
+  } finally {
+    verificationBusy.value = false;
+  }
+}
+
+async function onRunVerification() {
+  verificationBusy.value = true;
+  try {
+    await runVerification(goalId.value);
+    await refreshVerification();
+  } catch (error) {
+    console.error('Failed to run verification:', error);
+  } finally {
+    verificationBusy.value = false;
+  }
+}
+
+async function onApproveResult(resultId: number) {
+  verificationBusy.value = true;
+  try {
+    await approveResult(resultId);
+    await refreshVerification();
+  } catch (error) {
+    console.error('Failed to approve verification result:', error);
+  } finally {
+    verificationBusy.value = false;
+  }
+}
+
+async function onRejectResult(resultId: number) {
+  verificationBusy.value = true;
+  try {
+    await rejectResult(resultId);
+    await refreshVerification();
+  } catch (error) {
+    console.error('Failed to reject verification result:', error);
+  } finally {
+    verificationBusy.value = false;
+  }
+}
+
+// "Jag är klar" - avslutar målet med en handling.
+//
+// Målet kan avslutas från vilken fas som helst, och utan verifieringsplan.
+// När en verifiering har gått igenom registreras målet som "verifierat",
+// annars som "deklarerat".
+async function onCompleteGoal() {
+  completingGoal.value = true;
+  try {
+    const outcome = await completeGoal(goalId.value);
+    const completedId = goalsStore.statuses.find((entry) => entry.name === 'completed')?.id;
+    if (completedId !== undefined) {
+      goalsStore.updateGoal(goalId.value, { status_id: completedId });
+    }
+    if (outcome.completion_kind) {
+      goalsStore.updateGoal(goalId.value, { completion_kind: outcome.completion_kind });
+    }
+    await refreshVerification();
+  } catch (error) {
+    if (isApiFeatureMissing(error)) {
+      verificationUnsupported.value = true;
+      return;
+    }
+    console.error('Failed to complete goal:', error);
+  } finally {
+    completingGoal.value = false;
+  }
+}
 
 // Ångra-stapeln - tangenten "z" kan ångra handlingar från alla sidor.
 const { revision: undoRevision } = useUndoStack();
@@ -96,6 +236,10 @@ onMounted(() => {
     // På breda skärmar finns plats för både målet och agenten.
     agentDockOpen.value = window.matchMedia('(min-width: 1024px)').matches;
   }
+
+  // Verifieringsplanen och bevisen hör till målet - de laddas när
+  // målet visas.
+  void refreshVerification();
 });
 
 watch(agentDockOpen, (value) => {
@@ -1183,6 +1327,7 @@ const descriptionExpanded = ref(false);
 watch(goalId, () => {
   descriptionExpanded.value = false;
   void loadAgentRun();
+  void refreshVerification();
 });
 
 function startEditDescription(target: { id: number; description?: string }) {
@@ -2987,6 +3132,54 @@ watch(selectedParentIndex, async () => {
           @click="descriptionExpanded = !descriptionExpanded">
           {{ goal.description }}
         </button>
+      </div>
+
+      <!-- Verifiering, bevis och "jag är klar".
+           Planen är valfri - målet fungerar likadant utan den. -->
+      <div v-if="goal" class="flex-shrink-0 rounded-2xl border border-line bg-surface p-4 space-y-4">
+        <!-- API:t som kör saknar stödet ännu. Då säger vi det rakt ut
+             i stället för att låta knapparna göra ingenting. -->
+        <p
+          v-if="verificationUnsupported"
+          class="text-xs text-ink-dim"
+          data-testid="goal-verification-unsupported">
+          Det här API:t stödjer inte verifiering och "jag är klar" ännu.
+          Funktionerna finns i Plan API:t och portas till Rust-API:t.
+        </p>
+
+        <template v-else>
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-medium text-ink">Klart?</h3>
+            <p class="text-xs text-ink-dim">
+              Avslutar målet direkt. Med en godkänd verifiering räknas det som
+              verifierat, annars som deklarerat.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="rounded-lg bg-accent-strong hover:bg-accent px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
+            :disabled="completingGoal"
+            data-testid="goal-complete"
+            @click="onCompleteGoal">
+            Jag är klar
+          </button>
+        </div>
+
+        <GoalVerificationPanel
+          :goal-id="goal.id"
+          :plan="verificationPlan"
+          :evidence="verificationEvidence"
+          :result="verificationResult"
+          :completion-kind="goal.completion_kind"
+          :goal-title="goal.title"
+          @save="onSaveVerification"
+          @remove="onRemoveVerification"
+          @evidence="onAddEvidence"
+          @run="onRunVerification"
+          @approve="onApproveResult"
+          @reject="onRejectResult" />
+        </template>
       </div>
 
       <!-- Agentchatt, körningshistorik och checkpoint-plan ligger i
