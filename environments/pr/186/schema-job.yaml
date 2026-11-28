@@ -1,0 +1,87 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 186 - https://plan-pr-186.simonbrundin.com
+
+# Applicerar schemat i previewens databas.
+#
+# Atlas Operator gör samma sak, men den räknar med att databasen
+# redan svarar när den börjar. I en ny preview kör CNPG initdb och
+# Atlas kommer före - och operatören ger upp i stället för att försöka
+# igen. Då står API:t och väntar på tabeller som aldrig skapas.
+#
+# Jobbet väntar på databasen och kör sedan samma schema.sql som dev och
+# prod. Det är idempotent, så Atlas kan köra samma sak efteråt utan
+# att göra något.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: plan-db-schema
+  labels:
+    preview: "true"
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        preview: "true"
+    spec:
+      restartPolicy: OnFailure
+      # Namespaces har PodSecurity "restricted" - podden ska följa
+      # samma regler som resten av klustret.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: schema
+          image: postgres:17-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: PGHOST
+              value: plan-db-rw.plan-pr-186.svc.cluster.local
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: plan-pr-db-user
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: plan-pr-db-user
+                  key: password
+            - name: PGDATABASE
+              value: plan
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              echo "Väntar på att databasen ska svara..."
+              until pg_isready -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE"; do
+                sleep 2
+              done
+              echo "Kör schemat..."
+              psql -v ON_ERROR_STOP=1 -f /schema/schema.sql
+              echo "Schemat är applicerat"
+          volumeMounts:
+            - name: schema
+              mountPath: /schema
+              readOnly: true
+            # Root-filsystemet är skrivskyddat - psql skriver ibland
+            # temporärt i /tmp.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: schema
+          configMap:
+            name: plan-db-schema
+        - name: tmp
+          emptyDir: {}

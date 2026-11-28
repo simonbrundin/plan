@@ -1,0 +1,46 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 186 - https://plan-pr-186.simonbrundin.com
+
+# Agentens egen databas i previewen.
+#
+# Agenten har en egen databas, skild från Plan-databasen - så att
+# agentens samtal inte blandas med målen. Här är det CNPG-klustret
+# "plan-agent-db" med databasen "agent".
+#
+# Lösenordet är inte en hemlighet - det är en engångslapp i en kastbar
+# miljö med inga riktiga data.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: plan-agent-db-app
+type: kubernetes.io/basic-auth
+stringData:
+  username: agent
+  password: preview-agent-db-password
+  uri: postgres://agent:preview-agent-db-password@plan-agent-db-rw.plan-pr-186.svc.cluster.local:5432/agent?sslmode=require
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: plan-agent-db
+  labels:
+    preview: "true"
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: agent
+      owner: agent
+      secret:
+        name: plan-agent-db-app
+  storage:
+    storageClass: cnpg
+    size: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
