@@ -180,6 +180,21 @@ async fn halsokontrollen_kraver_inget_tillstand() {
 }
 
 #[tokio::test]
+async fn halsokontrollen_visar_build_sha_nar_den_finns() {
+    let _lås = lås().lock().await;
+    forbered();
+    std::env::set_var("PLAN_BUILD_SHA", "abc1234");
+
+    let app = app();
+    let (status, body) = anrop(&app, "GET", "/health", &[]).await;
+
+    std::env::remove_var("PLAN_BUILD_SHA");
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body, r#"{"status":"ok","build_sha":"abc1234"}"#);
+}
+
+#[tokio::test]
 async fn inloggningsvagen_ar_publik() {
     let _lås = lås().lock().await;
     forbered();

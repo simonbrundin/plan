@@ -119,6 +119,9 @@ jobs:
           push: true
           outputs: type=image,push-by-digest=true,name-canonical=true
           tags: ${{ env.REGISTRY }}/${{ matrix.repo }}
+          # PR:ens head-sha - smoke-testen jämför den mot det som
+          # /api/health rapporterar.
+          build-args: BUILD_SHA=${{ github.event.pull_request.head.sha }}
           cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}
 
@@ -265,43 +268,48 @@ jobs:
           echo "Kunde inte publicera previewen" >&2
           exit 1
 
+      # Rökprov efter att overlayen publicerats. Flux applicerar
+      # previewen, och det tar en tid - skriptet väntar in sig på den
+      # nya build-versionen innan det testar API, dev-login och
+      # databasberoende anrop.
+      - name: Rökprov mot previewen
+        env:
+          PREVIEW_URL: https://plan-pr-${{ env.PR_NUMBER }}.simonbrundin.com
+          EXPECT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          .github/scripts/smoke-test.sh \
+            --url "$PREVIEW_URL" \
+            --mode preview \
+            --expect "$EXPECT_SHA" \
+            --wait 420 | tee /tmp/smoke-result.txt
+
       - name: Lägg till PR-kommentar med preview-info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment "$PR_NUMBER" --body-file - <<'COMMENT'
-          ## 🚀 PR Preview Deployment
+          {
+            echo "## 🚀 PR Preview Deployment"
+            echo ""
+            echo "### Resurser"
+            echo "| Resurs | Värde |"
+            echo "|--------|-------|"
+            echo "| **Namespace** | \`plan-pr-$PR_NUMBER\` |"
+            echo "| **URL** | https://plan-pr-$PR_NUMBER.simonbrundin.com |"
+            echo "| **Nuxt-image** | \`$REGISTRY/plan/pr-preview:$IMAGE_TAG\` |"
+            echo "| **API-image (Rust)** | \`$REGISTRY/rust-api/pr-preview:$IMAGE_TAG\` |"
+            echo "| **Agent-image (Rust)** | \`$REGISTRY/rust-agent/pr-preview:$IMAGE_TAG\` |"
+            echo ""
+            echo "### Rökprov"
+            echo ""
+            echo '```'
+            cat /tmp/smoke-result.txt 2>/dev/null || echo "Rökprovet kördes inte."
+            echo '```'
+            echo ""
+            echo "> [!NOTE]"
+            echo "> Logga in med dev-login - previewen kör utan Zitadel."
+          } > /tmp/pr-comment.md
 
-          En preview-miljö håller på att deployas för denna PR.
-
-          ### Resurser
-          | Resurs | Värde |
-          |--------|-------|
-          | **Namespace** | `plan-pr-$PR_NUMBER` |
-          | **URL** | https://plan-pr-$PR_NUMBER.simonbrundin.com |
-          | **Nuxt-image** | `$REGISTRY/plan/pr-preview:$IMAGE_TAG` |
-          | **API-image (Rust)** | `$REGISTRY/rust-api/pr-preview:$IMAGE_TAG` |
-
-          ### GitOps-flöde
-          ```
-          GitHub Actions
-              │
-              ├── Bygger Nuxt + Rust-API (amd64 + arm64) → GHCR
-              │
-              └── Commit → previews-branchen
-                            └── environments/pr/$PR_NUMBER/
-                                   │
-                                   ▼
-                             Flux (Kustomization "plan-preview")
-                                   │
-                                   ▼
-                        plan-pr-$PR_NUMBER (egen databas, dev-login)
-          ```
-
-          > [!NOTE]
-          > Det kan ta 1-2 minuter innan Flux har reconcilat alla resurser.
-          > Logga in med dev-login - previewen kör utan Zitadel.
-          COMMENT
+          gh pr comment "$PR_NUMBER" --body-file /tmp/pr-comment.md
 
   # ============================================
   # JOB 3: Städa bort preview vid PR-stängning

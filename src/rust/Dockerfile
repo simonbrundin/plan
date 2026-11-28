@@ -10,6 +10,10 @@
 # Alla workspace-medlemmars Cargo.toml kopieras in före koden, så att
 # beroendena cachas separat. Cargo kräver att varje medlem i workspace-
 # manifestet finns, även under cachebygget.
+#
+# Varje ny medlem i src/rust/Cargo.toml måste läggas till här - annars
+# hittar inte Cargo dess manifest, och bygget fallerar på
+# "failed to load manifest". placeholders.sh säger till om något saknas.
 
 FROM rust:1.99-alpine AS build
 WORKDIR /build
@@ -17,6 +21,7 @@ WORKDIR /build
 COPY rust/Cargo.toml rust/Cargo.lock ./
 COPY rust/crates/plan-api/Cargo.toml crates/plan-api/Cargo.toml
 COPY rust/crates/plan-agent/Cargo.toml crates/plan-agent/Cargo.toml
+COPY rust/crates/plan-definition/Cargo.toml crates/plan-definition/Cargo.toml
 COPY rust/crates/plan-parity/Cargo.toml crates/plan-parity/Cargo.toml
 COPY rust/crates/plan-recurrence/Cargo.toml crates/plan-recurrence/Cargo.toml
 COPY rust/crates/plan-wiki/Cargo.toml crates/plan-wiki/Cargo.toml
@@ -37,6 +42,11 @@ COPY --from=build /build/target/release/plan-api ./plan-api
 
 ENV PORT=8080
 EXPOSE 8080
+
+# Vilken build som körs. Sätts av byggworkflowen (--build-arg) så att
+# en smoke-test efter rollout kan se att den nya versionen svarar.
+ARG BUILD_SHA=unknown
+ENV PLAN_BUILD_SHA=${BUILD_SHA}
 
 # Distroless saknar curl/wget - samma binär gör TCP-proben.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

@@ -1,0 +1,77 @@
+name: Rökprov efter rollout (produktion)
+# Körs när en bot-PR med nya images mergas till main.
+#
+# Kedjan som testas:
+#
+#   merge → Flux (GitRepository + Kustomization, var 5:e minut)
+#         → podden startar om med den nya imagen
+#         → rökprovet utifrån
+#
+# Provet väntar in sig på den nya build-versionen (via /api/health)
+# innan det körs - annars skulle det bara bekräfta att den gamla
+# versionen svarar.
+#
+# Provet körs mot den publika URL:en, som är samma väg som användaren
+# går in genom. Auth-skyddade anrop ska ge 401 - det bekräftar att
+# API:t lever och att authen är på.
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+    paths:
+      # Bara bot-PR:er som rör image-raderna i prod-manifestet.
+      - environments/prod/patches/api-deployment.yaml
+      - environments/prod/patches/agent-deployment.yaml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  smoketest:
+    name: Rökprov mot produktion
+    # Endast när PR:en faktiskt mergades - inte när den stängdes.
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Läs förväntad build-version
+        id: sha
+        run: |
+          # Image-tagen pekar på short sha - den är samma som
+          # /api/health rapporterar (som prefix).
+          sha="$(grep -oE 'sha-[0-9a-f]+' environments/prod/patches/api-deployment.yaml | head -1 | cut -d- -f2)"
+          if [[ -z "$sha" ]]; then
+            echo "Kunde inte hitta någon image-tagg i prod-manifestet" >&2
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Väntar på build $sha"
+
+      - name: Rökprov
+        run: |
+          .github/scripts/smoke-test.sh \
+            --url https://plan.simonbrundin.com \
+            --mode prod \
+            --expect "${{ steps.sha.outputs.sha }}" \
+            --wait 600 | tee /tmp/smoke-result.txt
+
+      - name: Kommentera resultatet
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "## 🔎 Rökprov efter rollout"
+            echo ""
+            echo '```'
+            cat /tmp/smoke-result.txt 2>/dev/null || echo "Rökprovet kördes inte."
+            echo '```'
+          } > /tmp/smoke-comment.md
+
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/smoke-comment.md

@@ -12,6 +12,7 @@ WORKDIR /build
 COPY src/rust/Cargo.toml src/rust/Cargo.lock ./
 COPY src/rust/crates/plan-api/Cargo.toml crates/plan-api/Cargo.toml
 COPY src/rust/crates/plan-agent/Cargo.toml crates/plan-agent/Cargo.toml
+COPY src/rust/crates/plan-definition/Cargo.toml crates/plan-definition/Cargo.toml
 COPY src/rust/crates/plan-parity/Cargo.toml crates/plan-parity/Cargo.toml
 COPY src/rust/crates/plan-recurrence/Cargo.toml crates/plan-recurrence/Cargo.toml
 COPY src/rust/crates/plan-wiki/Cargo.toml crates/plan-wiki/Cargo.toml
@@ -36,6 +37,11 @@ COPY README.md ./README.md
 
 ENV AGENT_DOCS_DIR=/app
 ENV PROJECT_ROOT=/app
+
+# Samma build-sha som API:t - en smoke-test kan verifiera att båda
+# rollouts har kommit ut.
+ARG BUILD_SHA=unknown
+ENV PLAN_BUILD_SHA=${BUILD_SHA}
 USER 65532:65532
 EXPOSE 8080
 CMD ["./agent-api"]
