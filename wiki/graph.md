@@ -275,6 +275,7 @@ graph LR
   n_notes_ny_rs232_hardvara_ak_co_02_db9_breakout_och_kopplingen_till_kvm_ns_3_pin["Ny RS232-hårdvara: AK-CO-02 + DB9-breakout, och kopplingen till KVM:ns 3-pin"]
   n_notes_ny_terminal_i_tmux_fragade_efter_datorns_losenord["Ny terminal i tmux frågade efter datorns lösenord"]
   n_notes_nya_mal_far_ikon_fran_titeln["Nya mål får ikon från titeln"]
+  n_notes_nya_vagar_svarar_501_i_prod_eftersom_rust_api_t_kor_dar["Nya vagar svarar 501 i prod eftersom Rust-API:t kor dar"]
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat["OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat"]
   n_notes_omarchy_idle_lasning_stangs_av_via_shell_json_inte_hypridle_conf["Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf)"]
   n_notes_one_com_lagrar_mappar_i_nfd_normalisera_i_getfoldername["one.com lagrar mappar i NFD - normalisera i getFolderName"]
@@ -909,6 +910,8 @@ graph LR
   n_notes_nuxt_sidomeny_kandidater_som_startsida_i_pappa --> n_notes_kandidatlistan_heter_nu_personer
   n_notes_nya_mal_far_ikon_fran_titeln --> n_notes_automatisk_malikon_behovde_sokord_och_svenska_alias
   n_notes_nya_mal_far_ikon_fran_titeln --> n_notes_malikoner_anvander_enkel_oversattning_fore_iconify
+  n_notes_nya_vagar_svarar_501_i_prod_eftersom_rust_api_t_kor_dar --> n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api
+  n_notes_nya_vagar_svarar_501_i_prod_eftersom_rust_api_t_kor_dar --> n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_falla_fixad_talosctl_kubeconfig_skapar_inga_dubbletter_langre_talos_kubeconfig_shell_guard
   n_notes_oidc_fix_jwt_konfiguration_applicerad_pa_controlplanes_och_zitadel_rbac_applicerat --> n_notes_kubeconfig_stadning_en_kontext_mot_cluster1_admin_cluster1_6_dubbletter_borttagna
   n_notes_openclaw_gateway_refuserar_bind_lan_utan_auth --> n_concepts_openclaw
@@ -1324,7 +1327,7 @@ graph LR
 - **notes/eviga-mal-i-plan-kan-inte-slutforas** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]]
 - **notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append** <- [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]], [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]]
 - **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
-- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]]
+- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog** <- [[concepts/flux-operator]]
 - **notes/flyttalsparitet-och-orchestratorns-doda-gate-flode** <- [[notes/kunskaps-wiki]]
@@ -1503,7 +1506,7 @@ graph LR
 - **notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer** <- [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]]
 - **notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone** <- [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]]
-- **notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod** <- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]]
+- **notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod** <- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]], [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]]
 - **notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-repo-learn-to-code-with-rust-som-submodule** <- [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]]
 - **notes/rust-utvecklingsmiljo-pa-workstationen** <- [[notes/rust-repo-learn-to-code-with-rust-som-submodule]]

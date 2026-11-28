@@ -276,6 +276,7 @@ finns i `index.md`.
 | [[notes/ny-rs232-hardvara-ak-co-02-db9-breakout-och-kopplingen-till-kvm-ns-3-pin]] | Ny RS232-hårdvara: AK-CO-02 + DB9-breakout, och kopplingen till KVM:ns 3-pin | note | kvm, rs232, hardware, bug, projekt:simon | 2026-11-20 | 0 |
 | [[notes/ny-terminal-i-tmux-fragade-efter-datorns-losenord]] | Ny terminal i tmux frågade efter datorns lösenord | note | bug, shell, 1password, op, tmux, projekt:simon | 2026-11-20 | 0 |
 | [[notes/nya-mal-far-ikon-fran-titeln]] | Nya mål får ikon från titeln | note | feature, nuxt, icon, goals, projekt:plan | 2026-11-17 | 2 |
+| [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]] | Nya vagar svarar 501 i prod eftersom Rust-API:t kor dar | note | drift, rust, verifiering, fasmaskin, projekt:plan | 2026-11-28 | 2 |
 | [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] | OIDC-fix: jwt-konfiguration applicerad pa controlplanes och Zitadel-RBAC applicerat | note | oidc, auth, zitadel, cluster1, incident, projekt:simon | 2026-11-25 | 2 |
 | [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] | Omarchy: idle-låsning stängs av via shell.json (inte hypridle.conf) | note | omarchy, hyprland, bug, session, projekt:dotfiles | 2026-11-23 | 0 |
 | [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] | one.com lagrar mappar i NFD - normalisera i getFolderName | note | mail, imap, one.com, unicode, go, projekt:pappa | 2026-11-16 | 0 |
@@ -619,7 +620,7 @@ finns i `index.md`.
 - `dokumentation` (4)
 - `dotfiles` (3)
 - `drag` (1)
-- `drift` (8)
+- `drift` (9)
 - `dubbeluttag` (1)
 - `duckdns` (2)
 - `durable` (4)
@@ -636,6 +637,7 @@ finns i `index.md`.
 - `extension` (2)
 - `extensions` (1)
 - `fakta` (4)
+- `fasmaskin` (1)
 - `feature` (93)
 - `feedback` (1)
 - `felle` (1)
@@ -873,7 +875,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (150)
+- `projekt:plan` (151)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -919,7 +921,7 @@ finns i `index.md`.
 - `rrule` (1)
 - `rs232` (3)
 - `rtc` (1)
-- `rust` (22)
+- `rust` (23)
 - `rust-analyzer` (4)
 - `rörelse` (1)
 - `sakerhet` (1)
@@ -1014,7 +1016,7 @@ finns i `index.md`.
 - `v1.14` (2)
 - `validation` (1)
 - `varning` (1)
-- `verifiering` (6)
+- `verifiering` (7)
 - `verktyg` (7)
 - `visionite` (1)
 - `wan` (1)

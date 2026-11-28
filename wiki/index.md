@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 460 |
+| Noter | 461 |
 
 ## Entiteter
 
@@ -300,6 +300,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/ny-rs232-hardvara-ak-co-02-db9-breakout-och-kopplingen-till-kvm-ns-3-pin]] - Inköp 2026-11-20: AKYGA AK-CO-02 (B07TXJXWJ3) = USB-A hane -> DB9 **hane** RS-232-kabel, 1 m, chip oklart (Akyga-länken pekar på FT232... _(uppdaterad 2026-11-20)_
 - [[notes/ny-terminal-i-tmux-fragade-efter-datorns-losenord]] - Varje ny shell (tmux-fönster/tab, ny terminal) startade ~/.config/secrets/load.sh, som KÖRDE `op read op://Private/Neon API key/credent... _(uppdaterad 2026-11-20)_
 - [[notes/nya-mal-far-ikon-fran-titeln]] - När ett mål skapas via Nuxts useGoalApi söks Iconify med målens titel via /api/icons. _(uppdaterad 2026-11-17)_
+- [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]] - VAD: fasmaskinen och verifieringen finns i Go-API:t (PR 179), men de nya vagarna svarar 501 i Rust-API:t - och det ar Rust-imagen som kor... _(uppdaterad 2026-11-28)_
 - [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]] - `kubectl --context oidc-cluster1` gav "You must be logged in to the server (Unauthorized)" _(uppdaterad 2026-11-25)_
 - [[notes/omarchy-idle-lasning-stangs-av-via-shell-json-inte-hypridle-conf]] - Anledning: hypridle.conf i ~/.config/hypr/ hade idle-listener utkommenterade (så skärmen skulle bara låsa vid lock-close), men datorn ... _(uppdaterad 2026-11-23)_
 - [[notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername]] - one.com (och IMAP i allmant) lagrar mappnamn i NFD-form. _(uppdaterad 2026-11-16)_
