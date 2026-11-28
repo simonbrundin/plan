@@ -707,10 +707,14 @@ sha:image-tagen pekar på - annars skulle provet bara bekräfta att den
 gamla versionen svarar.
 
 ```bash
-# Vilken build svarar just nu?
-curl -sS https://plan.simonbrundin.com/api/health
+# Vilken build svarar just nu? (/health är API:t:s egen kontroll -
+# /api/health tillhör Nuxt och säger ingenting om builden)
+curl -sS https://plan.simonbrundin.com/health
 # {"status":"ok","build_sha":"02fcc55..."}
 ```
+
+`/health` exponeras via routern mot API:t (i både prod och preview), så
+provet kan se vilken version som svarar utan att gå in i klustret.
 
 Fältet hoppas över när bygg-sha saknas, så svaret är fortfarande exakt
 `{"status":"ok"}` i byggnader utan sha - paritetstestet jämför svaret.
