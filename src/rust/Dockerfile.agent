@@ -12,7 +12,6 @@ WORKDIR /build
 COPY src/rust/Cargo.toml src/rust/Cargo.lock ./
 COPY src/rust/crates/plan-api/Cargo.toml crates/plan-api/Cargo.toml
 COPY src/rust/crates/plan-agent/Cargo.toml crates/plan-agent/Cargo.toml
-COPY src/rust/crates/plan-definition/Cargo.toml crates/plan-definition/Cargo.toml
 COPY src/rust/crates/plan-parity/Cargo.toml crates/plan-parity/Cargo.toml
 COPY src/rust/crates/plan-recurrence/Cargo.toml crates/plan-recurrence/Cargo.toml
 COPY src/rust/crates/plan-wiki/Cargo.toml crates/plan-wiki/Cargo.toml

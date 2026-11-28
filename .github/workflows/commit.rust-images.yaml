@@ -91,13 +91,8 @@ jobs:
           # Build-sha bakas in i bilden, så att en smoke-test efter
           # rollout kan se vilken version som svarar.
           build-args: BUILD_SHA=${{ github.sha }}
-          # Cachen är per ref - inte per image. GitHub Actions delar
-          # annars cachen mellan branchar, och en cache-lager från en
-          # branch som har fler filer (t.ex. en ny crate) kan inte
-          # återanvändas i en branch som saknar dem - bygget misslyckas
-          # med "not found" i stället för att bygga om.
-          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}
 
       - name: Spara digest
         run: |

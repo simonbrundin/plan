@@ -122,11 +122,8 @@ jobs:
           # PR:ens head-sha - smoke-testen jämför den mot det som
           # /api/health rapporterar.
           build-args: BUILD_SHA=${{ github.event.pull_request.head.sha }}
-          # Per ref - se kommentaren i commit.rust-images.yaml.
-          # Utan det kan en cache från en annan branch göra att
-          # bygget misslyckas i stället för att bygga om.
-          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}
 
       - name: Spara digest
         run: |
