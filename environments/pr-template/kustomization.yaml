@@ -26,9 +26,17 @@ resources:
   - schema-job.yaml
   # Kopieras in av skriptet från environments/base/db/schema.yaml.
   - schema-configmap.yaml
+  # Agenten: egen deployment, egen databas och egna rättigheter.
+  - agent-deployment.yaml
+  - agent-db.yaml
+  - agent-job.yaml
+  - agent-secrets.yaml
   # Registry-uppgifter för GHCR. Kopieras in av skriptet (krypterad) och
   # dekrypteras av Flux.
   - ghcr-secret.enc.yaml
+  # Modellnyckeln till agenten. Kopieras in av skriptet (krypterad) från
+  # prod - annars kan agenten inte prata med modellen.
+  - agent-llm.enc.yaml
 
 labels:
   - pairs:

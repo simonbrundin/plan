@@ -558,10 +558,12 @@ applicerar**.
 ```
 PR öppnas
    │
-   ├── pr-preview.yaml: bygger Nuxt + Rust-API (amd64 + arm64) → GHCR
+   ├── pr-preview.yaml: bygger Nuxt + Rust-API + Rust-agent
+   │     (amd64 + arm64) → GHCR
    │
    ├── pr-preview-resources.py: skapar environments/pr/<nr>/
-   │     (overlay: namespace, services, routes, secrets, CNPG, Atlas)
+   │     (overlay: namespace, services, routes, secrets, CNPG, Atlas,
+   │      agent-databas, agent-rättigheter)
    │
    └── commit → branchen "previews"
                   │
@@ -596,6 +598,41 @@ Detaljer:
   Flux prunar namespace, databas och routes. `environments/pr/README.md`
   håller katalogen ifylld - en tom katalog ger "no resources" i kustomize
   och ingenting prunas.
+
+### Agenten i previewen
+
+Previewen kör hela kedjan: API, Nuxt **och agent**.
+
+| Del | Resurs i preview-ns | Vad det är |
+|-----|--------------------|------------|
+| Agent-API | `agent-api` (Deployment + Service `plan-pr-agent-service`) | Samma Rust-image som prod, byggd för PR:en |
+| Agentens databas | `plan-agent-db` (CNPG) | Egen databas `agent`, skild från Plan-databasen |
+| Rättigheter | `plan-agent-api`, `plan-agent-worker`, Role + RoleBinding | Jobb får skapas i namespace - inget annat |
+| Nycklar | `plan-agent-api-key` | `PLAN_API_KEY` (agenten → API:t) och `AGENT_API_KEY` (Nuxt → agenten) |
+| Modellnyckel | `plan-agent-llm` (kopieras in krypterat från prod) | `MINIMAX_API_KEY` - utan den kan agenten inte prata med modellen |
+
+Sambandet mellan API:t och agenten:
+
+- API:t får `AGENT_API_KEY` från samma secret som agenten får `PLAN_API_KEY`
+  från. Nyckeln ger **agent-scope**: agenten får arbeta med mål och
+  körningar, men aldrig besluta om ett godkännande.
+- Nuxt får `NUXT_AGENT_API_INTERNAL_URL` (till `plan-pr-agent-service` i
+  samma namespace) och `NUXT_AGENT_API_KEY`. Nyckeln skickas server-side,
+  aldrig till webbläsaren.
+
+Två avsiktliga begränsningar:
+
+- **Inga git-hemligheter.** `AGENT_JOB_GIT_SECRET` sätts inte, så ett
+  agent-jobb kan läsa koden (repot är publikt) men inte committa. Kodändringar
+  ska ske i PR:en, inte i repot - en agent som committar till `main` från en
+  preview vore en skrivning utanför PR:en.
+- **Jobbens repo är PR:ens egen branch** (`AGENT_JOB_REPO_URL` /
+  `AGENT_JOB_REPO_BRANCH` sätts från PR-head), så agenten ser samma kod som
+  granskaren. Fallback är huvudrepoet.
+
+Agentens databastabeller skapas av agenten själv vid start
+(`CREATE TABLE IF NOT EXISTS`) - till skillnad från Plan-databasen, som får
+sitt schema från `schema.sql`.
 
 Flux-konfigurationen ligger i infrastructure-repot:
 `apps/plan/preview-gitrepository.yaml` och `apps/plan/preview-flux-kustomization.yaml`.
@@ -730,27 +767,27 @@ ställe så att de inte glöms.
    frisk.
 2. **Ingen automatisk smoke-test efter rollout.** Verifieringen är manuell
    (se [Verifiering](#verifiering)).
-3. **Previewen saknar agenten.** `environments/pr-template/` innehåller
-   API, Nuxt och databas - men inte agenten. Agentens Rust-image har
-   dessutom en egen databas och egna jobb, så det är en egen bit.
-4. **Go-flödena finns kvar utan att göra jobbet.** `commit.api.yaml` och
+3. **Go-flödena finns kvar utan att göra jobbet.** `commit.api.yaml` och
    `commit.agent.yaml` testar Go-koden men bygger inga images. De behövs
    så länge paritetstesterna jämför mot Go-källan - men de bör tas bort
    när migreringen är klar.
-5. **`.github/workflows/acceptance.yaml` är en död stub** - den refererar
-   `frontend/`, en katalog som inte finns i repot.
-6. **`.github/pr.yaml` är en inaktiv workflow** - GitHub läser bara
+4. **`acceptance.yaml` är en död stub** - den refererar `frontend/`, en
+   katalog som inte finns i repot.
+5. **`.github/pr.yaml` är en inaktiv workflow** - GitHub läser bara
    `.github/workflows/`.
-7. **`environments/kubernetes/overlays/dev`** är en gammal Flux-baserad
+6. **`environments/kubernetes/overlays/dev`** är en gammal Flux-baserad
    dev-overlay som inte längre används - dev går via Tilt och kind.
-8. **Atlas-apply raderar tabeller som saknas i `schema.sql`.** Ett misstag i
+7. **Atlas-apply raderar tabeller som saknas i `schema.sql`.** Ett misstag i
    schemafilen är en destruktiv ändring i prod.
-9. **Kyvernos `block-nodeport` blockerade radering av Services.** CEL-uttrycket
+8. **Kyvernos `block-nodeport` blockerade radering av Services.** CEL-uttrycket
    `has(object.spec) && object.spec.type != 'NodePort'` blir falskt vid
    DELETE, eftersom den gamla resursen inte fylls i - och policyn blockerade
    då radering av *alla* Services. Flux kunde inte prunna en preview. Fix:
    policyn validerar bara CREATE och UPDATE. Detta påverkade hela klustret,
    inte bara previewen.
+9. **En agent i en preview kör mot riktig modell.** `plan-agent-llm`
+   kopieras in krypterat från prod, så ett agent-jobb i previewen förbrukar
+   samma modellnyckel som prod. Kostnaden är liten, men nyckeln är densamma.
 
 ---
 

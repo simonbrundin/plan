@@ -71,17 +71,16 @@ async fn main() -> ExitCode {
         .filter(|url| !url.is_empty())
         .unwrap_or_else(|| DEFAULT_DATABASE_URL.to_string());
 
-    let db = match plan_agent::db::AgentDb::connect(Some(&database_url)).await {
-        Ok(Some(db)) => {
+    let db = match connect_with_retry(&database_url, db_connect_timeout()).await {
+        Ok(db) => {
             tracing::info!("Agentens databas ansluten");
             db
         }
-        Ok(None) => {
-            tracing::error!("DATABASE_URL saknas - agent-API:t kan inte starta");
-            return ExitCode::FAILURE;
-        }
         Err(err) => {
-            tracing::error!("Kunde inte ansluta agentens databas: {err}");
+            tracing::error!(
+                "Kunde inte ansluta agentens databas: {err}. \
+                 Startar om - podden körs om och försöker igen."
+            );
             return ExitCode::FAILURE;
         }
     };
@@ -184,6 +183,62 @@ async fn main() -> ExitCode {
     }
 
     ExitCode::SUCCESS
+}
+
+/// Hur länge agenten väntar på databasen innan den ger upp.
+///
+/// Samma princip som API:t: en ny CNPG-kluster behöver tid för initdb,
+/// och agenten ska vänta i stället för att starta om i en crashloop.
+fn db_connect_timeout() -> Duration {
+    Duration::from_secs(
+        std::env::var("DB_CONNECT_TIMEOUT_SECONDS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(120),
+    )
+}
+
+/// Väntar på agentens databas och kör migreringen.
+///
+/// Agentens databas är ett eget CNPG-kluster. Direkt efter att den
+/// skapats kör den initdb, och då svarar den inte. Utan väntan skulle
+/// agenten starta om i en crashloop tills databasen är klar - varje
+/// försök med en egen backoff.
+///
+/// `AgentDb::connect` skapar tabellerna om de saknas (`CREATE TABLE IF
+/// NOT EXISTS`), så agentens schema är klart när den här funktionen
+/// returnerar.
+async fn connect_with_retry(
+    database_url: &str,
+    timeout: Duration,
+) -> Result<plan_agent::db::AgentDb, sqlx::Error> {
+    let start = std::time::Instant::now();
+    let mut attempt: u32 = 1;
+
+    loop {
+        match plan_agent::db::AgentDb::connect(Some(database_url)).await {
+            Ok(Some(db)) => {
+                tracing::info!("Agentens databas ansluten (försök {attempt})");
+                return Ok(db);
+            }
+            Ok(None) => {
+                tracing::error!("DATABASE_URL saknas - agent-API:t kan inte starta");
+                return Err(sqlx::Error::Configuration("DATABASE_URL saknas".into()));
+            }
+            Err(err) => {
+                if start.elapsed() >= timeout {
+                    return Err(err);
+                }
+
+                tracing::warn!(
+                    "Kunde inte ansluta agentens databas (försök {attempt}): {err} - \
+                     väntar 3s och försöker igen"
+                );
+                tokio::time::sleep(Duration::from_secs(3)).await;
+                attempt += 1;
+            }
+        }
+    }
 }
 
 /// Kräver agentens egen nyckel på alla anrop.

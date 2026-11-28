@@ -46,6 +46,15 @@ spec:
               value: "true"
             - name: AUTH_DISABLED
               value: "false"
+            # Agentens nyckel ger agent-scope - så kan agent-jobb läsa
+            # och skapa mål i previewens databas, utan att bli fullt
+            # administratör. Det är agentens egen PLAN_API_KEY - API:t
+            # känner den under namnet AGENT_API_KEY.
+            - name: AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: PLAN_API_KEY
             - name: APP_DOMAIN
               value: "HOSTNAME_PLACEHOLDER"
             - name: FRONTEND_URL

@@ -20,6 +20,13 @@ from pathlib import Path
 PR_NUM = os.environ.get("PR_NUM") or os.environ["PR_NUMBER"]
 NUXT_IMAGE = os.environ["NUXT_IMAGE"]
 API_IMAGE = os.environ["API_IMAGE"]
+AGENT_IMAGE = os.environ["AGENT_IMAGE"]
+
+# Agentens jobb klonar repot som PR:en gäller, så att agenten ser
+# samma kod som granskaren. Utan värden faller vi tillbaka på
+# huvudrepoet.
+REPO_URL = os.environ.get("PR_HEAD_REPO_URL") or "https://github.com/simonbrundin/plan.git"
+REPO_BRANCH = os.environ.get("PR_HEAD_BRANCH") or "main"
 
 TEMPLATE_DIR = Path("environments/pr-template")
 OUT_DIR = Path(f"environments/pr/{PR_NUM}")
@@ -29,6 +36,13 @@ OUT_DIR = Path(f"environments/pr/{PR_NUM}")
 # i stället - krypterad, precis som i prod. Flux dekrypterar den.
 GHCR_SECRET_SOURCE = Path("environments/prod/secrets/ghcr-secret.enc.yaml")
 GHCR_SECRET_NAME = "ghcr-secret.enc.yaml"
+
+# Modellnyckeln till agenten (MINIMAX_API_KEY) ligger krypterad i prod.
+# Previewen kopierar in den krypterat - Flux dekrypterar den i
+# preview-ns:et. Utan nyckeln kan agenten inte prata med modellen, så
+# en preview-agent skulle sakna hela sin poäng.
+AGENT_LLM_SECRET_SOURCE = Path("environments/prod/secrets/agent-llm.enc.yaml")
+AGENT_LLM_SECRET_NAME = "agent-llm.enc.yaml"
 
 # Schemat (ConfigMap) kopieras in från basen - samma schema som dev och
 # prod. Overlayen får inte referera till basen, eftersom den publiceras
@@ -51,6 +65,9 @@ REPLACEMENTS = {
     "HOSTNAME_PLACEHOLDER": HOSTNAME,
     "NUXT_IMAGE_PLACEHOLDER": NUXT_IMAGE,
     "API_IMAGE_PLACEHOLDER": API_IMAGE,
+    "AGENT_IMAGE_PLACEHOLDER": AGENT_IMAGE,
+    "REPO_URL_PLACEHOLDER": REPO_URL,
+    "REPO_BRANCH_PLACEHOLDER": REPO_BRANCH,
     "../base/": "../../base/",
     "../prod/": "../../prod/",
 }
@@ -86,6 +103,10 @@ def write_overlay() -> None:
     ghcr_target = OUT_DIR / GHCR_SECRET_NAME
     ghcr_target.write_text(GHCR_SECRET_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
     print(f"✓ Kopierade {GHCR_SECRET_SOURCE} -> {ghcr_target}")
+
+    llm_target = OUT_DIR / AGENT_LLM_SECRET_NAME
+    llm_target.write_text(AGENT_LLM_SECRET_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"✓ Kopierade {AGENT_LLM_SECRET_SOURCE} -> {llm_target}")
 
     schema_target = OUT_DIR / SCHEMA_NAME
     schema_target.write_text(SCHEMA_SOURCE.read_text(encoding="utf-8"), encoding="utf-8")
