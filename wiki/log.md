@@ -6597,3 +6597,14 @@ Format: `## [YYYY-MM-DD] type | Title`
 
 ## [2026-11-28] link | notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar -> notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
 
+
+## [2026-11-28] ingest | create notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer
+- [create] [[notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer]] — ny sida från inboxen
+- [archive] 2026-11-28-pr-179-och-definitionsassistenten-krockar-i-sex-filer.md
+
+
+## [2026-11-28] link | notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer -> notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api
+
+
+## [2026-11-28] link | notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer -> notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar
+

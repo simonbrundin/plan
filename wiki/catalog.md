@@ -326,6 +326,7 @@ finns i `index.md`.
 | [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] | Popcorn Time: 'remote movies API failed to respond' - orsak och fix | note | popcorntime, omarchy, bug, xdg, projekt:infrastructure | 2026-11-17 | 1 |
 | [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] | Popcorn Time: svenskt ljud finns INTE i katalogen - använd Torrentsamling (Torrent Collection) | note | popcorntime, svenska, torrent, bug, projekt:infrastructure | 2026-11-17 | 1 |
 | [[notes/popup-editor-i-klickbar-rad-klicken-bubblar-och-navigerar-bort]] | Popup-editor i klickbar rad: klicken bubblar och navigerar bort | note | bug, ui, nuxt, goals, projekt:plan | 2026-11-19 | 0 |
+| [[notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer]] | PR 179 och definitionsassistenten krockar i sex filer | note | git, merge, konflikt, wiki, projekt:plan | 2026-11-28 | 2 |
 | [[notes/pr-preview-floden-var-trasig-i-fem-steg-nu-fungerar-den]] | PR-preview-floden var trasig i fem steg - nu fungerar den | note | ci, bug, pr-preview, github-actions, projekt:plan | 2026-11-26 | 1 |
 | [[notes/pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller]] | pr-preview.yaml bygger ogiltig image-tagg - alla PR-preview-floden faller | note | ci, bug, pr-preview, projekt:plan | 2026-11-26 | 1 |
 | [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]] | Prioriteringsordningen på /now sparades inte - bulk-update och spar-kö | note | bugg, go, nuxt, prioritetssida, prestanda, projekt:plan | 2026-11-23 | 1 |
@@ -662,7 +663,7 @@ finns i `index.md`.
 - `gateway-api` (3)
 - `gdpr` (10)
 - `ghcr` (1)
-- `git` (4)
+- `git` (5)
 - `git-historia` (1)
 - `github-actions` (3)
 - `gitops` (12)
@@ -732,6 +733,7 @@ finns i `index.md`.
 - `keycloak` (3)
 - `kluster` (2)
 - `konferens` (1)
+- `konflikt` (1)
 - `konsulter` (2)
 - `kontrakt` (1)
 - `konventioner` (2)
@@ -782,6 +784,7 @@ finns i `index.md`.
 - `matchi` (7)
 - `matchning` (1)
 - `mcp` (7)
+- `merge` (1)
 - `meta` (2)
 - `metallb` (3)
 - `metodik` (3)
@@ -875,7 +878,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (151)
+- `projekt:plan` (152)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -1022,7 +1025,7 @@ finns i `index.md`.
 - `wan` (1)
 - `webbapp` (1)
 - `widget` (1)
-- `wiki` (7)
+- `wiki` (8)
 - `worker` (11)
 - `worker-1` (4)
 - `worker-2` (2)
