@@ -63,7 +63,7 @@ tilt up
 ```
 
 Tilt bygger Plan och agenten och deployar dem mot Neon-branch `dev`. Se
-[Utveckling och drift](/docs/utveckling) för portar och testkommandon.
+[Utveckling och drift](/dokumentation/utveckling) för portar och testkommandon.
 
 ## CI: grindarna på push
 
@@ -199,6 +199,6 @@ databasbackup före schemaändringar.
 
 ## Se också
 
-- [Utveckling och drift](/docs/utveckling) - lokalt, tester, bygga.
-- [Arkitektur](/docs/arkitektur) - tjänsterna och deras ansvar.
-- [API och autentisering](/docs/api) - endpoints, sessioner, scopes.
+- [Utveckling och drift](/dokumentation/utveckling) - lokalt, tester, bygga.
+- [Arkitektur](/dokumentation/arkitektur) - tjänsterna och deras ansvar.
+- [API och autentisering](/dokumentation/api) - endpoints, sessioner, scopes.

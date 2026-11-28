@@ -19,7 +19,7 @@ const hero = {
 };
 
 function pageHref(doc: DocMeta): string {
-  return `/docs/${doc.slug}`;
+  return `/dokumentation/${doc.slug}`;
 }
 </script>
 
@@ -102,7 +102,7 @@ function pageHref(doc: DocMeta): string {
             Utveckling
           </p>
           <p class="mt-1.5 text-sm text-ink-muted">
-            <NuxtLink to="/docs/utveckling" class="underline underline-offset-4">
+            <NuxtLink to="/dokumentation/utveckling" class="underline underline-offset-4">
               Kör appen lokalt
             </NuxtLink>
             med Tilt eller Bun.
@@ -113,7 +113,7 @@ function pageHref(doc: DocMeta): string {
             Agenten
           </p>
           <p class="mt-1.5 text-sm text-ink-muted">
-            <NuxtLink to="/docs/agent-systemet" class="underline underline-offset-4">
+            <NuxtLink to="/dokumentation/agent-systemet" class="underline underline-offset-4">
               Så arbetar agenten
             </NuxtLink>
             med dina mål.

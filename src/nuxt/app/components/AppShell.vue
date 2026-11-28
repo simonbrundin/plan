@@ -165,7 +165,7 @@ const links = [
     {
       label: "Dokumentation",
       icon: "i-lucide-book-open",
-      to: "/docs",
+      to: "/dokumentation",
       onSelect: () => {
         open.value = false;
       },

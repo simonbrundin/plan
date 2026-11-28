@@ -16,7 +16,7 @@ export interface DocHeading {
 }
 
 export interface DocMeta {
-  /** Filnamnet utan .md - blir URL:en /docs/<slug> */
+  /** Filnamnet utan .md - blir URL:en /dokumentation/<slug> */
   slug: string;
   title: string;
   description: string;

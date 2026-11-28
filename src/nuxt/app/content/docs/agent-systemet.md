@@ -301,6 +301,6 @@ Mer om den i `~/wiki/AGENTS.md`.
 
 ## Se också
 
-- [Agentkörningar och godkännanden](/docs/agent-korningar) - det
+- [Agentkörningar och godkännanden](/dokumentation/agent-korningar) - det
   kompletta flödet från mål till Pull Request.
-- [API och autentisering](/docs/api) - anropen agenten gör.
+- [API och autentisering](/dokumentation/api) - anropen agenten gör.
