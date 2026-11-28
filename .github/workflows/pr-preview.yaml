@@ -224,6 +224,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
+          # Spara rökprovs-scriptet utanför repot. Branchen "previews"
+          # innehåller bara overlays - scriptet finns inte kvar i
+          # arbetskopian när branchen byts.
+          cp .github/scripts/smoke-test.sh /tmp/smoke-test.sh
+
           # Overlayen ligger i arbetskopian. Spara den utanför repot -
           # nästa steg byter branch, och den genererade katalogen ska
           # inte följa med i checkouten.
@@ -277,7 +282,7 @@ jobs:
           PREVIEW_URL: https://plan-pr-${{ env.PR_NUMBER }}.simonbrundin.com
           EXPECT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          .github/scripts/smoke-test.sh \
+          /tmp/smoke-test.sh \
             --url "$PREVIEW_URL" \
             --mode preview \
             --expect "$EXPECT_SHA" \
