@@ -688,7 +688,7 @@ Det finns ett rökprov som körs efter varje deploy:
 
 | Flöde | När | Vad det testar |
 |-------|-----|----------------|
-| `.github/workflows/smoke-test.yaml` | När bot-PR:en med nya images mergas | Den publika URL:en: appen, `/api/health`, och att auth ger 401 utan session |
+| `.github/workflows/smoke-test.yaml` | När bot-PR:en med nya images mergas | Den publika URL:en: appen, Nuxt:s `/api/health`, API:ts `/health` (med build-sha), och att auth ger 401 utan session |
 | `pr-preview.yaml` | Efter att overlayen publicerats | Samma + dev-login, databasberoende anrop och agentens endpoint |
 
 Resultatet kommenteras på PR:et, så att både rollouten och provets
@@ -702,15 +702,15 @@ utfall syns i samma tråd.
 
 **Provet väntar in sig på rätt version.** API:t och agenten rapporterar
 vilken build som kör (`PLAN_BUILD_SHA`, satt av Dockerfilen via
-`--build-arg`). Rökprovet väntar tills `/api/health` svarar med den
-sha:image-tagen pekar på - annars skulle provet bara bekräfta att den
+`--build-arg`). Rökprovet väntar tills `/health` svarar med den sha som
+image-tagen pekar på - annars skulle provet bara bekräfta att den
 gamla versionen svarar.
 
 ```bash
 # Vilken build svarar just nu? (/health är API:t:s egen kontroll -
 # /api/health tillhör Nuxt och säger ingenting om builden)
 curl -sS https://plan.simonbrundin.com/health
-# {"status":"ok","build_sha":"02fcc55..."}
+# {"status":"ok","build_sha":"4b952cf21549..."}
 ```
 
 `/health` exponeras via routern mot API:t (i både prod och preview), så
@@ -812,7 +812,9 @@ ställe så att de inte glöms.
    publika URL:en, och i produktion finns ingen dev-login - authen ger
    401, vilket visar att API:t lever men inte att databasen svarar. Ett
    in-kluster-prov (ett CronJob i prod-ns) skulle kunna kolla
-   databasberoende anrop med agentens API-nyckel.
+   databasberoende anrop med agentens API-nyckel. I previewläget testas
+   databasen i stället på riktigt (dev-login + läsning av mål), så
+   databasen är i praktiken testad - men bara för previewens databas.
 3. **Go-flödena finns kvar utan att göra jobbet.** `commit.api.yaml` och
    `commit.agent.yaml` testar Go-koden men bygger inga images. De behövs
    så länge paritetstesterna jämför mot Go-källan - men de bör tas bort
