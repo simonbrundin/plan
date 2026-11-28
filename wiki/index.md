@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 461 |
+| Noter | 462 |
 
 ## Entiteter
 
@@ -350,6 +350,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/popcorn-time-remote-movies-api-failed-to-respond-orsak-och-fix]] - Symtom: Popcorn Time 0.5.1 (AppImage) startar men listan är tom och felet 'The remote movies API failed to respond' visas. _(uppdaterad 2026-11-17)_
 - [[notes/popcorn-time-svenskt-ljud-finns-inte-i-katalogen-anvand-torrentsamling-torrent-collection]] - Fakta (verifierat 2026-10-24 mot API-servrarna fusme.link/jfper.link/uxert.link/yrkde.link): katalogen (Filmer/Serier/Anime) har INGA sve... _(uppdaterad 2026-11-17)_
 - [[notes/popup-editor-i-klickbar-rad-klicken-bubblar-och-navigerar-bort]] - Att rendera en editor/popup INUTI en klickbar rad gör att klick i popupen bubblar upp till radens klick-handler. _(uppdaterad 2026-11-19)_
+- [[notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer]] - VAD: nar PR 179 (fasmaskin och verifiering) mergades till main, och det parallella arbetet med definitionsassistenten sedan applicerades ... _(uppdaterad 2026-11-28)_
 - [[notes/pr-preview-floden-var-trasig-i-fem-steg-nu-fungerar-den]] - 2026-11-25: .github/workflows/pr-preview.yaml (jobbet 'Skapa PR Preview' + 'Stada upp PR Preview') var trasig i fem steg. _(uppdaterad 2026-11-26)_
 - [[notes/pr-preview-yaml-bygger-ogiltig-image-tagg-alla-pr-preview-floden-faller]] - 2026-11-25: .github/workflows/pr-preview.yaml rad 49 har taggen _(uppdaterad 2026-11-26)_
 - [[notes/prioriteringsordningen-pa-now-sparades-inte-bulk-update-och-spar-ko]] - Symtom: att ändra ordningen på /now med ArrowUp/ArrowDown såg ut att fungera, _(uppdaterad 2026-11-23)_

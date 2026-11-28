@@ -325,6 +325,7 @@ graph LR
   n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix["Popcorn Time: 'remote movies API failed to respond' - orsak och fix"]
   n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection["Popcorn Time: svenskt ljud finns INTE i katalogen - använd Torrentsamling (Torrent Collection)"]
   n_notes_popup_editor_i_klickbar_rad_klicken_bubblar_och_navigerar_bort["Popup-editor i klickbar rad: klicken bubblar och navigerar bort"]
+  n_notes_pr_179_och_definitionsassistenten_krockar_i_sex_filer["PR 179 och definitionsassistenten krockar i sex filer"]
   n_notes_pr_preview_floden_var_trasig_i_fem_steg_nu_fungerar_den["PR-preview-floden var trasig i fem steg - nu fungerar den"]
   n_notes_pr_preview_yaml_bygger_ogiltig_image_tagg_alla_pr_preview_floden_faller["pr-preview.yaml bygger ogiltig image-tagg - alla PR-preview-floden faller"]
   n_notes_prioriteringsordningen_pa_now_sparades_inte_bulk_update_och_spar_ko["Prioriteringsordningen på /now sparades inte - bulk-update och spar-kö"]
@@ -985,6 +986,8 @@ graph LR
   n_notes_popcorn_time_installerad_som_appimage_i_local --> n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix
   n_notes_popcorn_time_remote_movies_api_failed_to_respond_orsak_och_fix --> n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection
   n_notes_popcorn_time_svenskt_ljud_finns_inte_i_katalogen_anvand_torrentsamling_torrent_collection --> n_notes_qbittorrent_ar_standardhanterare_for_torrent_och_magnet_lankar
+  n_notes_pr_179_och_definitionsassistenten_krockar_i_sex_filer --> n_notes_fasmaskinen_for_mal_ar_nu_implementerad_i_plan_api
+  n_notes_pr_179_och_definitionsassistenten_krockar_i_sex_filer --> n_notes_nya_vagar_svarar_501_i_prod_eftersom_rust_api_t_kor_dar
   n_notes_pr_preview_floden_var_trasig_i_fem_steg_nu_fungerar_den --> n_notes_pr_preview_yaml_bygger_ogiltig_image_tagg_alla_pr_preview_floden_faller
   n_notes_pr_preview_yaml_bygger_ogiltig_image_tagg_alla_pr_preview_floden_faller --> n_notes_pr_preview_floden_var_trasig_i_fem_steg_nu_fungerar_den
   n_notes_prioriteringsordningen_pa_now_sparades_inte_bulk_update_och_spar_ko --> n_notes_sortering_av_grundmal_pa_goals_med_piltangenterna
@@ -1327,7 +1330,7 @@ graph LR
 - **notes/eviga-mal-i-plan-kan-inte-slutforas** <- [[notes/enter-pa-goals-skapar-nytt-grundmal-istallet-for-att-oppna-malet]], [[notes/mal-kan-ha-en-lang-beskrivning-redigerad-med-tangenten-t]]
 - **notes/expanderade-eml-laggs-in-som-riktiga-mejl-i-mappen-append** <- [[notes/mailagenten-expanderar-bifogade-eml-till-egna-mejl]], [[notes/moderposten-arkiveras-nar-eml-bilagorna-har-lagts-in]]
 - **notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard** <- [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]], [[notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat]]
-- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]]
+- **notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api** <- [[notes/avsla-ett-verifieringsomdome-ar-ett-beslut-precis-som-att-godkanna-det]], [[notes/malmaskin-och-verifierare-fasmaskinen-bor-i-plan-inte-i-prompten]], [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]], [[notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer]]
 - **notes/flera-kalendrar-med-egna-farger-i-plan** <- [[notes/handelsen-har-ingen-egen-farg]], [[notes/standardkalender-i-plan]], [[notes/valfri-fargkod-pa-kalendrar]], [[notes/vertikal-kalender-med-ikonstod-i-plan]]
 - **notes/flux-i-prod-klonade-ett-1-3-gb-stort-repo-och-dog** <- [[concepts/flux-operator]]
 - **notes/flyttalsparitet-och-orchestratorns-doda-gate-flode** <- [[notes/kunskaps-wiki]]
@@ -1425,6 +1428,7 @@ graph LR
 - **notes/nuxt-cli-via-bun-run-dev-gar-sonder-i-stk** <- [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]]
 - **notes/nuxt-sidomeny-kandidater-som-startsida-i-pappa** <- [[notes/kandidatlistan-heter-nu-personer]], [[notes/nuxt-4-webbapp-for-pappa-laser-personerna-ur-neon]]
 - **notes/nya-mal-far-ikon-fran-titeln** <- [[notes/vertikal-kalender-med-ikonstod-i-plan]]
+- **notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar** <- [[notes/pr-179-och-definitionsassistenten-krockar-i-sex-filer]]
 - **notes/oidc-fix-jwt-konfiguration-applicerad-pa-controlplanes-och-zitadel-rbac-applicerat** <- [[notes/falla-fixad-talosctl-kubeconfig-skapar-inga-dubbletter-langre-talos-kubeconfig-shell-guard]], [[notes/kubeconfig-stadning-en-kontext-mot-cluster1-admin-cluster1-6-dubbletter-borttagna]]
 - **notes/one-com-lagrar-mappar-i-nfd-normalisera-i-getfoldername** <- [[notes/mailmaster-kontodropdown-outlook-inloggning-via-device-code]]
 - **notes/openclaw-gateway-refuserar-bind-lan-utan-auth** <- [[concepts/openclaw]]
