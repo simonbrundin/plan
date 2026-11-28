@@ -6,7 +6,7 @@ import {
 	getVerificationTypePresentation,
 	needsApproval,
 } from '~/utils/goalVerification';
-import { useGoalVerification } from '~/composables/useGoalVerification';
+import { isApiFeatureMissing, useGoalVerification } from '~/composables/useGoalVerification';
 
 /**
  * Agentens bild av verifieringen - plan, bevis och omdöme.
@@ -31,6 +31,8 @@ const evidence = ref<GoalEvidence[]>([]);
 const result = ref<VerificationResult | null>(null);
 const busy = ref(false);
 const errorMessage = ref<string | null>(null);
+// Sant om API:t som kör inte stödjer verifieringen ännu.
+const unsupported = ref(false);
 
 const typePresentation = computed(() => getVerificationTypePresentation(plan.value?.type));
 const strengthPresentation = computed(() =>
@@ -44,6 +46,7 @@ const waitingForApproval = computed(() => needsApproval(result.value));
 async function refresh() {
 	try {
 		const state = await loadVerification(props.goalId);
+		unsupported.value = state.unsupported === true;
 		plan.value = state.verification?.id ? state.verification : null;
 		evidence.value = state.evidence;
 		result.value = state.result ?? null;
@@ -70,7 +73,11 @@ async function run() {
 		await runVerification(props.goalId);
 		await refresh();
 		emit('changed');
-	} catch {
+	} catch (error) {
+		if (isApiFeatureMissing(error)) {
+			unsupported.value = true;
+			return;
+		}
 		errorMessage.value = 'Kunde inte köra verifieringen.';
 	} finally {
 		busy.value = false;
@@ -84,7 +91,11 @@ async function approve(resultId: number) {
 		await approveResult(resultId);
 		await refresh();
 		emit('changed');
-	} catch {
+	} catch (error) {
+		if (isApiFeatureMissing(error)) {
+			unsupported.value = true;
+			return;
+		}
 		errorMessage.value = 'Kunde inte godkänna omdömet.';
 	} finally {
 		busy.value = false;
@@ -98,7 +109,11 @@ async function reject(resultId: number) {
 		await rejectResult(resultId);
 		await refresh();
 		emit('changed');
-	} catch {
+	} catch (error) {
+		if (isApiFeatureMissing(error)) {
+			unsupported.value = true;
+			return;
+		}
 		errorMessage.value = 'Kunde inte avslå omdömet.';
 	} finally {
 		busy.value = false;
@@ -108,6 +123,15 @@ async function reject(resultId: number) {
 
 <template>
 	<section class="flex-shrink-0 border-b border-line p-4" data-testid="agent-verification">
+		<p
+			v-if="unsupported"
+			class="text-xs text-ink-dim"
+			data-testid="agent-verification-unsupported"
+		>
+			Det här API:t stödjer inte verifiering ännu.
+		</p>
+
+		<template v-else>
 		<header class="flex items-center justify-between gap-2">
 			<h3 class="text-sm font-medium text-ink">Verifiering</h3>
 			<button
@@ -176,5 +200,6 @@ async function reject(resultId: number) {
 		</div>
 
 		<p v-if="errorMessage" class="mt-2 text-xs text-error">{{ errorMessage }}</p>
+		</template>
 	</section>
 </template>

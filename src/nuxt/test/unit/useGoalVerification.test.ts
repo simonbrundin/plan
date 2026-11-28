@@ -92,6 +92,21 @@ describe("useGoalVerification", () => {
 		expect(anrop[1].url).toBe("/api/v1/verification-results/9/approve");
 	});
 
+	it("markerar när API:t inte stödjer verifieringen", async () => {
+		svar = () => {
+			const fel: any = new Error("not implemented");
+			fel.statusCode = 501;
+			throw fel;
+		};
+
+		const api = useGoalVerification();
+		const state = await api.loadVerification(540);
+
+		expect(state.unsupported).toBe(true);
+		expect(state.evidence).toHaveLength(0);
+		expect(state.result).toBeNull();
+	});
+
 	it("avslutar målet och läser tillbaka hur det avslutades", async () => {
 		svar = () => ({ goal_id: 540, from: "verify", to: "completed", completion_kind: "verifierat" });
 

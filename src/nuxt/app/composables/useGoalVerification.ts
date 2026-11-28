@@ -15,6 +15,22 @@ export interface VerificationState {
 	verification: VerificationPlan;
 	evidence: GoalEvidence[];
 	result?: VerificationResult | null;
+	/**
+	 * Sant om API:t som kör inte stödjer verifieringen ännu.
+	 *
+	 * Rust-API:t svarar 501 på de här vägarna tills fasmaskinen och
+	 * verifieringen portats. Då ska vyn säga det rakt ut i stället för
+	 * att tyst ingenting hända.
+	 */
+	unsupported?: boolean;
+}
+
+/**
+ * Svarar på om felet betyder att API:t saknar stödet för funktionen.
+ */
+export function isApiFeatureMissing(error: any): boolean {
+	const status = error?.statusCode ?? error?.response?.status;
+	return status === 501;
 }
 
 /**
@@ -27,14 +43,28 @@ export function useGoalVerification() {
 	const loadVerification = async (
 		goalId: number,
 	): Promise<VerificationState> => {
-		const svar = await apiRequestWithAuth<VerificationState>(
-			`goals/${goalId}/verification`,
-		);
-		return {
-			verification: svar.verification,
-			evidence: svar.evidence ?? [],
-			result: svar.result ?? null,
-		};
+		try {
+			const svar = await apiRequestWithAuth<VerificationState>(
+				`goals/${goalId}/verification`,
+			);
+			return {
+				verification: svar.verification,
+				evidence: svar.evidence ?? [],
+				result: svar.result ?? null,
+			};
+		} catch (error) {
+			// 501 betyder att API:t som kör inte har den här funktionen
+			// ännu - det är inte ett fel i användarens data.
+			if (isApiFeatureMissing(error)) {
+				return {
+					verification: { id: 0, goal_id: goalId, type: "", criterion: "", strength: "" },
+					evidence: [],
+					result: null,
+					unsupported: true,
+				};
+			}
+			throw error;
+		}
 	};
 
 	const saveVerification = async (
@@ -111,6 +141,7 @@ export function useGoalVerification() {
 	};
 
 	return {
+		isApiFeatureMissing,
 		loadVerification,
 		saveVerification,
 		removeVerification,

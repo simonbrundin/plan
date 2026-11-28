@@ -28,7 +28,7 @@ import type { AgentApproval, AgentRun, AgentRunEvent } from '~/types/agent'
 import { useAgentApi } from '~/composables/useAgentApi'
 import { useGoalSelection } from '~/composables/useGoalSelection'
 import { useGoalPhase } from '~/composables/useGoalPhase'
-import { useGoalVerification } from '~/composables/useGoalVerification'
+import { isApiFeatureMissing, useGoalVerification } from '~/composables/useGoalVerification'
 import type { GoalEvidence, VerificationPlan, VerificationResult } from '~/utils/goalVerification'
 
 // Make this page client-only to ensure GraphQL requests work properly and prevent Pinia hydration issues
@@ -66,12 +66,16 @@ const verificationEvidence = ref<GoalEvidence[]>([]);
 const verificationResult = ref<VerificationResult | null>(null);
 const verificationBusy = ref(false);
 const completingGoal = ref(false);
+// Sant om API:t som kör inte stödjer verifieringen ännu (Rust-API:t
+// svarar 501 tills funktionerna portats).
+const verificationUnsupported = ref(false);
 
 async function refreshVerification() {
   try {
     const state = await loadVerification(goalId.value);
     // API:t svarar med en tom plan när målet saknar plan - då ska
     // vyn visa "ingen plan", inte en tom rad.
+    verificationUnsupported.value = state.unsupported === true;
     verificationPlan.value = state.verification?.id ? state.verification : null;
     verificationEvidence.value = state.evidence;
     verificationResult.value = state.result ?? null;
@@ -170,6 +174,10 @@ async function onCompleteGoal() {
     }
     await refreshVerification();
   } catch (error) {
+    if (isApiFeatureMissing(error)) {
+      verificationUnsupported.value = true;
+      return;
+    }
     console.error('Failed to complete goal:', error);
   } finally {
     completingGoal.value = false;
@@ -3129,6 +3137,17 @@ watch(selectedParentIndex, async () => {
       <!-- Verifiering, bevis och "jag är klar".
            Planen är valfri - målet fungerar likadant utan den. -->
       <div v-if="goal" class="flex-shrink-0 rounded-2xl border border-line bg-surface p-4 space-y-4">
+        <!-- API:t som kör saknar stödet ännu. Då säger vi det rakt ut
+             i stället för att låta knapparna göra ingenting. -->
+        <p
+          v-if="verificationUnsupported"
+          class="text-xs text-ink-dim"
+          data-testid="goal-verification-unsupported">
+          Det här API:t stödjer inte verifiering och "jag är klar" ännu.
+          Funktionerna finns i Plan API:t och portas till Rust-API:t.
+        </p>
+
+        <template v-else>
         <div class="flex items-center justify-between gap-3">
           <div>
             <h3 class="text-sm font-medium text-ink">Klart?</h3>
@@ -3160,6 +3179,7 @@ watch(selectedParentIndex, async () => {
           @run="onRunVerification"
           @approve="onApproveResult"
           @reject="onRejectResult" />
+        </template>
       </div>
 
       <!-- Agentchatt, körningshistorik och checkpoint-plan ligger i
