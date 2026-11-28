@@ -62,6 +62,10 @@ jobs:
           commit-message: "chore: update plan-app image [skip ci]"
           branch: bot/update-plan-app-image
           delete-branch: true
+          # Utan detta baseras PR:t på branchen som triggade
+          # workflowen - och bildbytet hamnar i feature-branchen
+          # istället för i main, som är det Flux läser.
+          base: main
           title: "chore: update plan-app image"
           body: |
             Automated image update from commit workflow

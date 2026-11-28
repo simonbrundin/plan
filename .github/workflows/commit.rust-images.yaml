@@ -193,6 +193,11 @@ jobs:
           commit-message: "chore: uppdatera Rust-imagerna"
           branch: bot/update-rust-images
           delete-branch: true
+          # Utan detta baseras PR:t på branchen som triggade
+          # workflowen. Mergas den då hamnar bildbytet i feature-
+          # branchen, och prod får aldrig den nya imagen. Main är
+          # enda riktiga målet - det är main som Flux läser.
+          base: main
           title: "chore: uppdatera Rust-imagerna"
           body: |
             Uppdaterar API:t och agenten till den senaste Rust-imagen.
