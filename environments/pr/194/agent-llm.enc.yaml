@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: plan-agent-llm
+    namespace: plan
+type: Opaque
+stringData:
+    MINIMAX_API_KEY: ENC[AES256_GCM,data:EFPfnJEaTT3Bke5zHI+bsv3V3pC18yx4SFkFz/QXUYBuwLXylB7cZhphEIyPIV2eCtN/7LdzX4oUPbPwHYAoSgXdTXttPbpYKWhRzcfXezbwi6rj8e2If7BkZYK+Rew1qAG7NrrV7CfwhiOcLh3KMlUziFiuinb3LYI/XgE=,iv:Cxx+/fYkeY509Xx3a2G1PuNj035ogSZ0gDuF7S2nUUk=,tag:5WSvvjWiDHnbz1WeWe661A==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBFNGlDOEdSc0hHdWc0Yks0
+            ZjhMMFdjME9WTEJLbTFVZzF1UUFOOXBuaUVRCkxYNDVZeXZCWWo4aE5Md05yTSth
+            czMrbkFhdGcrUGNxclpvcDFnNGQrbkEKLS0tIDNFbm45b2VnVGFSd1Q0QWFsR2ox
+            TnprRkEzbm51LytSUWtFaCtnQTJZd2sKyKTE51MLnf30Ec4GaOeT/0V4J8dF81He
+            m6EkR/hxVhx6EDD2paARuxii0eEBUTlfqgiLK379DhEG98VjcXHLWA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1e6cmv0vp3ymmhnqv7rrgy2a7wpnnutawqy509wqm3cn7467cps6qupp354
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-26T10:26:51Z"
+    mac: ENC[AES256_GCM,data:fxi7TKn2ggklRZjNaw/dHS391fJmACxEVosZMdRqExSLDpyJ0F8qLGNrxvkBGWB5bXYRxZLACJ1yFFJqq3T1LDI2CfoUtmbcsFVgtE/DOnV1TfWNayv8VKO8ePzkUq1hOQLJRHJmA1+6mYVBxs6dumq67scsESxbISFtHqUb00Y=,iv:2h94YW4Z+ztgcLA+tmIr5y55fEiPyLoLnOB08xHRHNI=,tag:vAJAMhMGN4TzrvdpqrdDHQ==,type:str]
+    version: 3.13.3

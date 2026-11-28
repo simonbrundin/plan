@@ -1,0 +1,72 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 194 - https://plan-pr-194.simonbrundin.com
+
+# Preview-ns:et har sin egen hostname. DNS är en wildcard
+# (*.simonbrundin.com -> Cloudflare-tunneln -> Envoy), så det finns ingen
+# DNS-post att skapa per PR - Envoy routar vidare på Host-headern.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: plan-pr-route
+  labels:
+    preview: "true"
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: simons-gateway
+      namespace: envoy
+  hostnames:
+    - "plan-pr-194.simonbrundin.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - kind: Service
+          name: plan-pr-service
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: plan-pr-api-route
+  labels:
+    preview: "true"
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: simons-gateway
+      namespace: envoy
+  hostnames:
+    - "plan-pr-194.simonbrundin.com"
+  rules:
+    # API:t:s egen hälsokontroll - den rapporterar vilken build som
+    # kör. /api/health tillhör Nuxt, så de två krockar inte.
+    - matches:
+        - path:
+            type: Exact
+            value: /health
+      backendRefs:
+        - kind: Service
+          name: plan-pr-api-service
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1
+      backendRefs:
+        - kind: Service
+          name: plan-pr-api-service
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /docs
+      backendRefs:
+        - kind: Service
+          name: plan-pr-api-service
+          port: 8080

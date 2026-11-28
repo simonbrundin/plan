@@ -1,0 +1,142 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 194 - https://plan-pr-194.simonbrundin.com
+
+# Agent-API:t i previewen.
+#
+# Samma Rust-image som produktion kör, men byggd för PR:en. Agenten får
+# en egen databas (plan-agent-db i preview-ns) och pratar mot previewens
+# eget API - aldrig mot prod.
+#
+# Viktigt: agenten får INTE några git-hemligheter i previewen. Ett
+# agent-jobb kan därför läsa koden (repot är publikt) men inte committa
+# något. Kodändringar i en PR-preview ska ske i PR:en, inte i repot.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-api
+  labels:
+    app: agent-api
+    preview: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-api
+  template:
+    metadata:
+      labels:
+        app: agent-api
+    spec:
+      # Jobbcontrollern behöver Kubernetes-API:t för att skapa Jobb.
+      # Rättigheterna begränsas till jobb i namespace - se agent-job.yaml.
+      serviceAccountName: plan-agent-api
+      automountServiceAccountToken: true
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: agent-api
+          image: ghcr.io/simonbrundin/rust-agent/pr-preview:194-0a5284de7f11b8c26287d75b7b2dc2a3d7a3bcc4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-db-app
+                  key: uri
+            # Plan-API:t i samma preview - inte prod.
+            - name: PLAN_API_URL
+              value: "http://plan-pr-api-service.plan-pr-194.svc.cluster.local:8080"
+            - name: PLAN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: PLAN_API_KEY
+            # Nyckeln som Plan (Nuxt) använder mot agent-API:t.
+            - name: AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: AGENT_API_KEY
+            # Worker och scheduler körs inte i previewen - jobbstartar
+            # controllern istället, precis som i produktion.
+            - name: AGENT_WORKER_ENABLED
+              value: "false"
+            - name: AGENT_SCHEDULER_ENABLED
+              value: "false"
+            - name: AGENT_JOB_CONTROLLER_ENABLED
+              value: "true"
+            - name: AGENT_JOB_MAX_CONCURRENT
+              value: "2"
+            - name: AGENT_JOB_NAMESPACE
+              value: "plan-pr-194"
+            # Podens namn gör att controllern kan läsa sin egen image ur
+            # podens spec - annars kan jobben köra en gammal tagg.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_JOB_SERVICE_ACCOUNT
+              value: "plan-agent-worker"
+            - name: AGENT_JOB_REPO_URL
+              value: "https://github.com/simonbrundin/plan.git"
+            - name: AGENT_JOB_REPO_BRANCH
+              value: "fix/smoke-nuxt"
+            - name: AGENT_JOB_PLAN_API_URL
+              value: "http://plan-pr-api-service.plan-pr-194.svc.cluster.local:8080"
+            - name: AGENT_JOB_API_KEY_SECRET
+              value: "plan-agent-api-key"
+            - name: AGENT_JOB_LLM_SECRET
+              value: "plan-agent-llm"
+            # Inga git-hemligheter i previewen - se kommentaren överst.
+            - name: AGENT_DATA_DIR
+              value: "/tmp/agent-data"
+            # Modellnyckeln gör att agentens chatt fungerar direkt i
+            # previewen. Nyckeln kopieras in krypterad från prod.
+            - name: MINIMAX_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-llm
+                  key: MINIMAX_API_KEY
+            - name: GIN_MODE
+              value: release
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plan-pr-agent-service
+  labels:
+    app: agent-api
+    preview: "true"
+spec:
+  selector:
+    app: agent-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
