@@ -140,6 +140,9 @@ jobs:
   create-preview:
     name: Skapa PR Preview
     needs: bygg
+    # Samma villkor som byggjobbet - annars kör det här steget utan
+    # images (byggjobbet hoppades över) och rött i bot-PR:ens checks.
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-review')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -274,6 +274,12 @@ Attributet `skip-review` är viktigt: `pr-preview.yaml` hoppar över PR:er med
 den etiketten, annars skulle städjobbet skapa en ny PR för varje PR - en
 oändlig kedja.
 
+**Base-branchen är uttryckligen `main`.** `create-pull-request` använder
+annars den branch som triggade workflowen som bas. När images byggdes på en
+feature-branch lade bot-PR:en bildbytet där, och prod fick aldrig den nya
+imagen - trots att bygget var grönt och PR:en gick att merga. Ett fynd som
+gjordes när Rust-agentens fixar byggdes från en feature-branch.
+
 ### Vad som händer när bot-PR:en mergas
 
 1. Mergen hamnar i `main`.
