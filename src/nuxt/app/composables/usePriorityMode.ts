@@ -2,6 +2,7 @@ import type { Goal, GoalParent } from "~/types/goal";
 import { apiRequest } from "~/utils/api";
 import { matchesNowFilter, type NowFilter } from "~/utils/goalFilters";
 import { isDoableAtPlaceOrUnplaced } from "~/utils/places";
+import { sortByDueFirst } from "~/utils/dueOrder";
 import {
 	buildDisplayTree,
 	buildHierarchy,
@@ -103,6 +104,7 @@ export function usePriorityMode() {
 	const { isSearchOpen } = useSearchState();
 	const { setGoalWeight, reorderPriorityGoals } = useGoalApi();
 	const { currentPlaceId } = usePlaces();
+	const { dueFirst, toggleDueFirst, setDueFirst } = useDueFirstToggle();
 
 	// Spara-funktionen sätts på modulnivå så att sidans pagehide-handler
 	// kan spara den sista ordningen även om sidan laddas om direkt.
@@ -131,9 +133,20 @@ export function usePriorityMode() {
 	// under varandra - oberoende av vilket filter som är aktivt.
 	const hierarchy = computed(() => buildHierarchy(prioritizedGoals.value));
 
+	// Ordningen som visas. Med "deadline först" på lyfts målen med
+	// deadline överst - den närmaste fristen först. Annars gäller den
+	// ordning API:t levererade (den manuella ordningen).
+	//
+	// Sorteringen görs här, före trädet byggs, så att barnmål ligger kvar
+	// under sina föräldrar. Den som har deadline hamnar överst bland
+	// syskonen, inte överst i hela listan.
+	const orderedVisibleGoals = computed(() =>
+		dueFirst.value ? sortByDueFirst(visibleGoals.value) : visibleGoals.value,
+	);
+
 	// Den lista som faktiskt visas: målen under sina föräldrar, indenterade.
 	const displayTree = computed(() =>
-		buildDisplayTree(visibleGoals.value.map((goal) => goal.id), hierarchy.value),
+		buildDisplayTree(orderedVisibleGoals.value.map((goal) => goal.id), hierarchy.value),
 	);
 
 	const displayRows = computed<DisplayGoalRow[]>(() => {
@@ -399,6 +412,9 @@ export function usePriorityMode() {
 		isLoading: readonly(isLoading),
 		nowFilter: readonly(nowFilter),
 		filterByCurrentPlace: readonly(filterByCurrentPlace),
+		dueFirst,
+		toggleDueFirst,
+		setDueFirst,
 		loadPrioritizedGoals,
 		updateWeight,
 		handleKeydown,

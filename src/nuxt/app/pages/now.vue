@@ -49,6 +49,8 @@ const {
   isLoading,
   nowFilter,
   filterByCurrentPlace,
+  dueFirst,
+  toggleDueFirst,
   loadPrioritizedGoals,
   selectGoal,
   updateTags,
@@ -778,6 +780,22 @@ const filterOptions = [
       <span class="text-xs text-ink-dim ml-2">
         {{ visibleGoals.length }} av {{ prioritizedGoals.length }} mål visas
       </span>
+      <!--
+        Deadline-först är ett val, inte en regel. Av är standard, så den
+        manuella ordningen gäller som vanligt.
+      -->
+      <button
+        type="button"
+        class="px-3 py-1.5 rounded-full text-sm transition-colors border"
+        :class="dueFirst
+          ? 'bg-accent-strong text-white border-accent-strong'
+          : 'bg-surface-2 text-ink-muted border-line hover:border-line-strong hover:text-ink'"
+        :aria-pressed="dueFirst"
+        title="Visa mål med deadline överst i listan"
+        @click="toggleDueFirst"
+      >
+        Deadline först
+      </button>
     </div>
 
     <div v-if="isLoading" class="text-center py-12">
