@@ -20,8 +20,11 @@ on:
     branches: [main]
     paths:
       # Bara bot-PR:er som rör image-raderna i prod-manifestet.
+      # Nuxt ingår också - en ny Nuxt-image ska verifieras lika bra
+      # som en ny API-image.
       - environments/prod/patches/api-deployment.yaml
       - environments/prod/patches/agent-deployment.yaml
+      - environments/prod/patches/nuxt-deployment.yaml
 
 permissions:
   contents: read
