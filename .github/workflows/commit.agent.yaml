@@ -5,8 +5,12 @@ name: CI för Go-agenten (gammal kod - testas men deployas inte)
 # Go-kod som Rust-porten jämförs mot.
 #
 # Workflowen bygger INGEN image och rör INGA manifest. Production kör
-# rust-agent, och bilden publiceras av commit.rust.yaml. Den här
+# rust-agent, och bilden publiceras av commit.rust-images.yaml. Den här
 # workflowen ska tas bort när Go-modulen raderas.
+#
+# Tillsammans med paritetstestet i src/rust/crates/plan-parity utgör
+# den här workflowen migreringens grind: Go-koden testas, och Rust
+# kontrolleras mot Go:s route-registreringar.
 on:
   push:
     paths:

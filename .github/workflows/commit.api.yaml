@@ -5,8 +5,12 @@ name: CI för Go API:t (gammal kod - testas men deployas inte)
 # jämförs mot.
 #
 # Workflowen bygger INGEN image och rör INGA manifest. Production kör
-# rust-api, och bilden publiceras av commit.rust.yaml. Den här
+# rust-api, och bilden publiceras av commit.rust-images.yaml. Den här
 # workflowen ska tas bort när Go-modulen raderas.
+#
+# Tillsammans med paritetstestet i src/rust/crates/plan-parity utgör
+# den här workflowen migreringens grind: Go-koden testas, och Rust
+# kontrolleras mot Go:s route-registreringar.
 on:
   push:
     paths:
