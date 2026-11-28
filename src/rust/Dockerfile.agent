@@ -36,6 +36,11 @@ COPY README.md ./README.md
 
 ENV AGENT_DOCS_DIR=/app
 ENV PROJECT_ROOT=/app
+
+# Samma build-sha som API:t - en smoke-test kan verifiera att båda
+# rollouts har kommit ut.
+ARG BUILD_SHA=unknown
+ENV PLAN_BUILD_SHA=${BUILD_SHA}
 USER 65532:65532
 EXPOSE 8080
 CMD ["./agent-api"]

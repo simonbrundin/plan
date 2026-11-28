@@ -88,6 +88,9 @@ jobs:
           push: true
           outputs: type=image,push-by-digest=true,name-canonical=true
           tags: ghcr.io/simonbrundin/${{ matrix.image }}
+          # Build-sha bakas in i bilden, så att en smoke-test efter
+          # rollout kan se vilken version som svarar.
+          build-args: BUILD_SHA=${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.arch }}
 

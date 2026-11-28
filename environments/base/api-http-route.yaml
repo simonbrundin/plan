@@ -13,6 +13,18 @@ spec:
   hostnames:
     - "plan.simonbrundin.com"
   rules:
+    # Hälsokontrollen på API:t - den rapporterar vilken build som
+    # kör, så att en rökprov efter rollout kan se att den nya
+    # versionen svarar. /api/health tillhör Nuxt (appens egen
+    # kontroll), så de två krockar inte.
+    - matches:
+        - path:
+            type: Exact
+            value: /health
+      backendRefs:
+        - kind: Service
+          name: go-api-service
+          port: 8080
     - matches:
         - path:
             type: PathPrefix

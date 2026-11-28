@@ -682,6 +682,43 @@ uppdateras, medan SSH-repositories fungerar.
 
 ## Verifiering
 
+### Automatisk rökprov efter rollout
+
+Det finns ett rökprov som körs efter varje deploy:
+
+| Flöde | När | Vad det testar |
+|-------|-----|----------------|
+| `.github/workflows/smoke-test.yaml` | När bot-PR:en med nya images mergas | Den publika URL:en: appen, `/api/health`, och att auth ger 401 utan session |
+| `pr-preview.yaml` | Efter att overlayen publicerats | Samma + dev-login, databasberoende anrop och agentens endpoint |
+
+Resultatet kommenteras på PR:et, så att både rollouten och provets
+utfall syns i samma tråd.
+
+```bash
+# Kör provet manuellt mot en miljö
+.github/scripts/smoke-test.sh --url https://plan.simonbrundin.com --mode prod
+.github/scripts/smoke-test.sh --url https://plan-pr-<nr>.simonbrundin.com --mode preview
+```
+
+**Provet väntar in sig på rätt version.** API:t och agenten rapporterar
+vilken build som kör (`PLAN_BUILD_SHA`, satt av Dockerfilen via
+`--build-arg`). Rökprovet väntar tills `/api/health` svarar med den
+sha:image-tagen pekar på - annars skulle provet bara bekräfta att den
+gamla versionen svarar.
+
+```bash
+# Vilken build svarar just nu? (/health är API:t:s egen kontroll -
+# /api/health tillhör Nuxt och säger ingenting om builden)
+curl -sS https://plan.simonbrundin.com/health
+# {"status":"ok","build_sha":"02fcc55..."}
+```
+
+`/health` exponeras via routern mot API:t (i både prod och preview), så
+provet kan se vilken version som svarar utan att gå in i klustret.
+
+Fältet hoppas över när bygg-sha saknas, så svaret är fortfarande exakt
+`{"status":"ok"}` i byggnader utan sha - paritetstestet jämför svaret.
+
 ### Efter att en bot-PR mergats
 
 ```bash
@@ -771,8 +808,11 @@ ställe så att de inte glöms.
    nytt kluster (CNPG kör initdb, Atlas applicerar schemat efteråt) ett
    API som svarade "Failed to create user" trots att databasen var
    frisk.
-2. **Ingen automatisk smoke-test efter rollout.** Verifieringen är manuell
-   (se [Verifiering](#verifiering)).
+2. **Rökprovet når inte databasen i produktion.** Provet körs mot den
+   publika URL:en, och i produktion finns ingen dev-login - authen ger
+   401, vilket visar att API:t lever men inte att databasen svarar. Ett
+   in-kluster-prov (ett CronJob i prod-ns) skulle kunna kolla
+   databasberoende anrop med agentens API-nyckel.
 3. **Go-flödena finns kvar utan att göra jobbet.** `commit.api.yaml` och
    `commit.agent.yaml` testar Go-koden men bygger inga images. De behövs
    så länge paritetstesterna jämför mot Go-källan - men de bör tas bort

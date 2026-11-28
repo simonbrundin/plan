@@ -40,6 +40,16 @@ spec:
   hostnames:
     - "HOSTNAME_PLACEHOLDER"
   rules:
+    # API:t:s egen hälsokontroll - den rapporterar vilken build som
+    # kör. /api/health tillhör Nuxt, så de två krockar inte.
+    - matches:
+        - path:
+            type: Exact
+            value: /health
+      backendRefs:
+        - kind: Service
+          name: plan-pr-api-service
+          port: 8080
     - matches:
         - path:
             type: PathPrefix

@@ -18,7 +18,14 @@ pub async fn health() -> Json<serde_json::Value> {
     Json(json!({
         "status": "ok",
         "service": "agent-api",
-        "version": std::env::var("APP_VERSION").unwrap_or_default(),
+        // Build-sha gör att en rollout kan verifieras utifrån: en
+        // smoke-test kan kolla att det är just den nya versionen
+        // som svarar. APP_VERSION har högre prioritet.
+        "version": std::env::var("APP_VERSION")
+            .ok()
+            .filter(|v| !v.is_empty())
+            .or_else(|| std::env::var("PLAN_BUILD_SHA").ok())
+            .unwrap_or_default(),
         // Go formaterar tiden med RFC3339 i sekundprecision - Rusts
         // `to_rfc3339` ger nanosekunder och "+00:00". Klienten jämför
         // texterna, så formaten ska vara densamma.

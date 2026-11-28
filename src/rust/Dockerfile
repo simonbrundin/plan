@@ -38,6 +38,11 @@ COPY --from=build /build/target/release/plan-api ./plan-api
 ENV PORT=8080
 EXPOSE 8080
 
+# Vilken build som körs. Sätts av byggworkflowen (--build-arg) så att
+# en smoke-test efter rollout kan se att den nya versionen svarar.
+ARG BUILD_SHA=unknown
+ENV PLAN_BUILD_SHA=${BUILD_SHA}
+
 # Distroless saknar curl/wget - samma binär gör TCP-proben.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD ["/app/plan-api", "healthcheck"]
