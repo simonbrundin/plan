@@ -155,6 +155,24 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
+      - name: Kolla att PR:en fortfarande är öppen
+        id: prstatus
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # En byggning tar minuter. Om PR:en stängs under tiden
+          # kör städscriptet - och då skulle den här körningen skapa
+          # previewen igen, efter att den redan städats bort.
+          state=$(gh api "repos/${{ github.repository }}/pulls/$PR" --jq .state)
+          if [ "$state" != "open" ]; then
+            echo "PR $PR är $state - hoppar över previewen."
+            echo "stängd=$state" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "stängd=false" >> "$GITHUB_OUTPUT"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -207,6 +225,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check pyyaml
 
       - name: Skapa PR Preview resurser
+        if: steps.prstatus.outputs.stängd != 'true'
         env:
           NUXT_IMAGE: ${{ env.REGISTRY }}/plan/pr-preview:${{ env.IMAGE_TAG }}
           API_IMAGE: ${{ env.REGISTRY }}/rust-api/pr-preview:${{ env.IMAGE_TAG }}
@@ -219,6 +238,7 @@ jobs:
           python3 .github/scripts/pr-preview-resources.py
 
       - name: Publicera overlayen på previews-branchen
+        if: steps.prstatus.outputs.stängd != 'true'
         run: |
           set -euo pipefail
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -278,6 +298,7 @@ jobs:
       # nya build-versionen innan det testar API, dev-login och
       # databasberoende anrop.
       - name: Rökprov mot previewen
+        if: steps.prstatus.outputs.stängd != 'true'
         env:
           PREVIEW_URL: https://plan-pr-${{ env.PR_NUMBER }}.simonbrundin.com
           EXPECT_SHA: ${{ github.event.pull_request.head.sha }}
