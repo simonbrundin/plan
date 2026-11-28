@@ -62,6 +62,24 @@ Tre fynd från att köra kedjan på riktigt:
    -l app=source-controller) löser det. Nätverket i sig är friskt -
    wget mot github.com fungerar från poddar på samma nod.
 
+Agenten i previewen (tillagd senare):
+
+Första försöket gav 401 när agentens nyckel skickades till API:t.
+Sambandet är två olika nycklar i samma secret (plan-agent-api-key):
+agentens PLAN_API_KEY och AGENT_API_KEY. API:t letar efter agentens
+nyckel under namnet AGENT_API_KEY, men värdet ska vara PLAN_API_KEY.
+I prod är det uttryckligen sagt i environments/prod/patches/
+api-deployment.yaml - i preview-mallen var det fel, och felet syns
+först som ett 401 i loggen.
+
+Bot-PR:er måste baseras på main:
+
+create-pull-request-actionen använder den branch som triggade
+workflowen som bas. När Rust-imagerna byggdes från en feature-branch
+lade bot-PR:en bildbytet där - och prod fick aldrig den nya imagen,
+trots att bygget var grönt och PR:en gick att merga. Workflowen sätter
+nu base: main, eftersom main är det enda Flux läser.
+
 Regler som gäller framöver:
 
 

@@ -3,9 +3,9 @@ title: Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg
 type: note
 tags: [ci, deploy, pipeline, docker, kustomize, projekt:plan]
 created: 2026-11-10
-updated: 2026-11-27
+updated: 2026-11-28
 status: active
-related: [notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt, notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]
+related: [notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt, notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad, notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]
 ---
 
 Pushar till main i plan-repot räckte inte till prod - tre oberoende
@@ -47,5 +47,6 @@ otillgängligt från laptopen, så själva rollouten kunde inte verifieras.
 
 ## Relaterade
 
+- [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]]
 - [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]]
 - [[notes/authflytten-i-plan-sessionen-ligger-nu-i-go-api-t-inte-i-nuxt]]

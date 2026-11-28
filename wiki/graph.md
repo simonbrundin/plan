@@ -369,6 +369,7 @@ graph LR
   n_notes_rock_4c_4se_utan_batteribackup_rtc_star_pa_2017_tls_mot_factory_talos_dev_misslyckas["Rock 4C+/4SE utan batteribackup: RTC står på 2017, TLS mot factory.talos.dev misslyckas"]
   n_notes_rock_4c_och_4se_har_ingen_spi_flash_i_fabrik_u_boot_ligger_pa_microsd_emmc["ROCK 4C+ och 4SE har ingen SPI-flash i fabrik - U-Boot ligger på microSD/eMMC"]
   n_notes_rock_pi_4_rk3399_defconfig_bygger_en_rock_pi_4a_for_4c_ska_rock_4c_plus_rk3399_defconfig_anvandas["rock-pi-4-rk3399_defconfig bygger en ROCK Pi 4A - for 4C+ ska rock-4c-plus-rk3399_defconfig anvandas"]
+  n_notes_rokprov_efter_rollout_och_tva_race_fynd_i_previewflodet["Rökprov efter rollout och två race-fynd i previewflödet"]
   n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet["root_dir-funktionen stoppar 'No project root found'-meddelandet"]
   n_notes_rrule_motor_i_rust_ersatter_rrule_go["RRULE-motor i Rust ersätter rrule-go"]
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer["rust-analyzer standalone-läge kraschar på leetcode.nvim-filer"]
@@ -723,6 +724,7 @@ graph LR
   n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt --> n_notes_malfaserna_ar_gemensamma_for_alla_mal_i_plan
   n_notes_definitionsassistent_for_mal_fylla_define_fasen_med_godkannande_per_falt --> n_summaries_definitionsassistent_for_mal_define_fasen
   n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad --> n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg
+  n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad --> n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_redigerare_och_agarskap_for_relationer_i_pappa
   n_notes_detaljvy_for_kandidat_i_pappa_gemensamma_vagar_mellan_kandidater --> n_notes_relationer_mellan_kandidater_i_pappa_symmetriska_par_med_styrka_1_10
   n_notes_dnsmasq_dhcp_boot_tar_bara_en_tagg_anvand_tag_if_for_villkor --> n_entities_pxe_server
@@ -979,6 +981,7 @@ graph LR
   n_notes_plan_db_cnpg_kluster_fastnade_i_setting_up_primary_pa_en_longhorn_volym_utan_replikor --> n_notes_sops_kryptera_bara_stringdata_i_kubernetes_secrets_ellers_kraschar_flux_builden
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_authflytten_i_plan_sessionen_ligger_nu_i_go_api_t_inte_i_nuxt
   n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad
+  n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg --> n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux
   n_notes_platser_pa_mal_och_kalenderhandelser_openspec_change_add_places --> n_notes_malgraph_navigering_mellan_malsidor_gar_fran_sekunder_till_millisekunder
   n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats --> n_notes_platsvaljaren_flyttade_till_leader_p
   n_notes_platsfiltret_pa_now_utan_plats_visar_mal_utan_plats --> n_notes_skrivbordswidget_som_visar_gor_nu_malet
@@ -1064,12 +1067,14 @@ graph LR
   n_notes_rock_pi_4_rk3399_defconfig_bygger_en_rock_pi_4a_for_4c_ska_rock_4c_plus_rk3399_defconfig_anvandas --> n_notes_pxe_kedjan_for_worker_1_verifierad_serverside_pxe_metoden_failar_snabbt_utan_pxelinux_cfg
   n_notes_rock_pi_4_rk3399_defconfig_bygger_en_rock_pi_4a_for_4c_ska_rock_4c_plus_rk3399_defconfig_anvandas --> n_notes_u_boot_for_rock_4c_built_from_mainline_with_pxe_first
   n_notes_rock_pi_4_rk3399_defconfig_bygger_en_rock_pi_4a_for_4c_ska_rock_4c_plus_rk3399_defconfig_anvandas --> n_notes_worker_1_kortet_flashat_med_ny_mainline_build_tf_a_fran_repot
+  n_notes_rokprov_efter_rollout_och_tva_race_fynd_i_previewflodet --> n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux
   n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet --> n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer
   n_notes_rust_analyzer_standalone_lage_kraschar_pa_leetcode_nvim_filer --> n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone
   n_notes_rust_analyzer_tysta_health_status_notisen_istallet_for_att_stanga_av_standalone --> n_notes_sa_dampas_bada_rust_analyzer_popupen_no_project_root_found
   n_notes_rust_api_t_kor_i_produktion_go_implementationer_syns_inte_i_prod --> n_notes_paritetstest_gatear_rust_migreringen_mot_go_kallan
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_delivery_pipeline_for_plan_fran_dev_till_prod_ar_nu_dokumenterad
   n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_plan_repots_ci_och_prod_pipeline_var_trasig_fixade_sokvagar_och_bygg
+  n_notes_rust_ar_huvudsparet_och_pr_previewen_deployas_via_flux --> n_notes_rokprov_efter_rollout_och_tva_race_fynd_i_previewflodet
   n_notes_rust_learning_repot_lades_in_som_submodule_mot_egen_fork --> n_notes_rust_repo_learn_to_code_with_rust_som_submodule
   n_notes_rust_repo_learn_to_code_with_rust_som_submodule --> n_notes_rust_utvecklingsmiljo_pa_workstationen
   n_notes_rust_utvecklingsmiljo_pa_workstationen --> n_notes_root_dir_funktionen_stoppar_no_project_root_found_meddelandet
@@ -1507,10 +1512,12 @@ graph LR
 - **notes/rock-4c-4se-utan-batteribackup-rtc-star-pa-2017-tls-mot-factory-talos-dev-misslyckas** <- [[notes/pxe-genererade-nodconfigs-var-stale-efter-talos-v1-14-uppgraderingen]]
 - **notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc** <- [[entities/pxe-server]], [[notes/korrigering-rock4c-plus-bin-ar-ett-microsd-emmc-image-inte-en-spi-image]], [[notes/pxe-forst-bootloader-for-rock-4c-byggd-som-patchad-u-boot-image]], [[notes/worker-1-rock-4c-nar-pxe-via-u-boot-boot-targets-men-pxe-ligger-sist]]
 - **notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas** <- [[entities/pxe-server]], [[notes/mellanslag-i-radxa-rock-4c-saboterar-byggen-losning-bind-mount]]
+- **notes/rokprov-efter-rollout-och-tva-race-fynd-i-previewflodet** <- [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]]
 - **notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer** <- [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]]
 - **notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone** <- [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]]
 - **notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod** <- [[notes/fasmaskinen-for-mal-ar-nu-implementerad-i-plan-api]], [[notes/nya-vagar-svarar-501-i-prod-eftersom-rust-api-t-kor-dar]]
+- **notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux** <- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]], [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]], [[notes/rokprov-efter-rollout-och-tva-race-fynd-i-previewflodet]]
 - **notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork** <- [[notes/rust-utvecklingsmiljo-pa-workstationen]]
 - **notes/rust-repo-learn-to-code-with-rust-som-submodule** <- [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]]
 - **notes/rust-utvecklingsmiljo-pa-workstationen** <- [[notes/rust-repo-learn-to-code-with-rust-som-submodule]]

@@ -3,9 +3,9 @@ title: Delivery-pipeline för Plan: från dev till prod är nu dokumenterad
 type: note
 tags: [ci, deploy, pipeline, flux, dokumentation, projekt:plan]
 created: 2026-11-27
-updated: 2026-11-27
+updated: 2026-11-28
 status: active
-related: [notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]
+related: [notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg, notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]
 ---
 
 Plan-repots hela väg från dev till produktion är nu dokumenterad i
@@ -47,5 +47,5 @@ i logiken utan att jämföra workflows sida vid sida.
 
 ## Relaterade
 
+- [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]]
 - [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]]
-

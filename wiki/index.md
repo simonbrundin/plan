@@ -9,7 +9,7 @@ och gå sedan ner på sidorna som är relevanta.
 | Entiteter | 6 |
 | Koncept | 21 |
 | Sammanfattningar | 10 |
-| Noter | 462 |
+| Noter | 463 |
 
 ## Entiteter
 
@@ -127,7 +127,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/dashboard-rekommendationsvyn-som-enda-forstavy]] - Slutbehovet kristalliserades: 'vilken modell ska jag köra genom vilken provider eller prenumeration'. _(uppdaterad 2026-11-26)_
 - [[notes/dashboard-tydlighetslyft-av-jamforelserna]] - Användaren upplevde jamforeelserna som 'sjukt otydliga'. _(uppdaterad 2026-11-26)_
 - [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] - Plan har fem målfaser (`define`, `plan`, `execute`, `verify`, `completed`) och en _(uppdaterad 2026-11-27)_
-- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] - Plan-repots hela väg från dev till produktion är nu dokumenterad i _(uppdaterad 2026-11-27)_
+- [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] - Plan-repots hela väg från dev till produktion är nu dokumenterad i _(uppdaterad 2026-11-28)_
 - [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] - 2026-11-10: Klick på ett kandidatkort öppnar en detaljvy (CandidateDetail.vue) med allt om personen plus det som gör relationerna anv�... _(uppdaterad 2026-11-17)_
 - [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] - Fix av dev-inloggningen i plan-repot (kind-klustret, ns plan). _(uppdaterad 2026-11-10)_
 - [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] - Fynd under arbete med pxe/dnsmasq.conf (2026-10-22). _(uppdaterad 2026-10-22)_
@@ -340,7 +340,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/plan-api-webblasaren-anropar-api-t-direkt-nuxt-proxyn-ar-borttagen]] - Borttog Nuxt:s proxy mot Plan API:t (2026-11-27). _(uppdaterad 2026-11-27)_
 - [[notes/plan-appen-morkt-designsystem-med-semantiska-farg-token]] - Omarbetad frontend-styling i src/nuxt (2026-11-16). _(uppdaterad 2026-11-17)_
 - [[notes/plan-db-cnpg-kluster-fastnade-i-setting-up-primary-pa-en-longhorn-volym-utan-replikor]] - Plan-appens databas (CNPG-kluster plan-db i namespace plan) fastnade i 'Setting up primary' i 20 timmar. _(uppdaterad 2026-11-27)_
-- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-27)_
+- [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] - Pushar till main i plan-repot räckte inte till prod - tre oberoende _(uppdaterad 2026-11-28)_
 - [[notes/plan-cachad-spa-skal-gjorde-att-webblasaren-korde-gammalt-js-bundle-med-ikon-provider-none]] - Symtom: efter att ikonfixen deployats till dev-klustret söktes ikoner korrekt men rutorna i ikonväljaren var tomma (bara grå kvadrater). _(uppdaterad 2026-11-16)_
 - [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] - Anledning: användaren frågade "menar du att Gemini 4 Neon är lika billig som MiniMax _(uppdaterad 2026-11-26)_
 - [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] - Title: Platser på mål och kalenderhändelser (ny OpenSpec-change add-places) _(uppdaterad 2026-11-20)_
@@ -397,7 +397,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]] - Kontrollerat pa PXE-varden (Ubuntu 25.04) 2026-10-23: mainline-defconfigen rock-pi-4-rk3399_defconfig bygger en bild med DTB for 'Radxa R... _(uppdaterad 2026-10-23)_
 - [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]] - Slutlig fix (fas 4): meddelandet "No project root found" kan undvikas helt vid _(uppdaterad 2026-11-17)_
 - [[notes/rrule-motor-i-rust-ersatter-rrule-go]] - Återkommande serier expanderades i Go med rrule-go (teambition/rrule-go v1.8.2). _(uppdaterad 2026-11-26)_
-- [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] - Rust är nu det som körs i dev och i produktion. _(uppdaterad 2026-11-27)_
+- [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] - Rust är nu det som körs i dev och i produktion. _(uppdaterad 2026-11-28)_
 - [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] - Problem: När man öppnade en leetcode.nvim-lösning i Neovim sade health-checken _(uppdaterad 2026-11-17)_
 - [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] - Fas 2 av samma problem: när standalone-läget stängdes av (server.standalone = _(uppdaterad 2026-11-17)_
 - [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] - Plan-migreringen från Go till Rust har tagit ett steg till: auth-lagret och _(uppdaterad 2026-11-26)_
@@ -405,6 +405,7 @@ och gå sedan ner på sidorna som är relevanta.
 - [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] - I /home/simon/repos/rust (simonbrundin/rust) lades den klonade repot 'learn-to-code-with-rust' in som en riktig git-submodule (.gitmodule... _(uppdaterad 2026-11-17)_
 - [[notes/rust-utvecklingsmiljo-pa-workstationen]] - Vi satte upp en komplett Rust-miljö på maskinen (2026-11-02). _(uppdaterad 2026-11-17)_
 - [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] - För att kunna committa egna lösningar utan att sönderdela tredjepartsrepot skapades en fork: github.com/simonbrundin/learn-to-code-wit... _(uppdaterad 2026-11-17)_
+- [[notes/rokprov-efter-rollout-och-tva-race-fynd-i-previewflodet]] - Efter att Rust blevit huvudspåret saknades en automatisk verifiering av varje rollout. _(uppdaterad 2026-11-28)_
 - [[notes/sales-soulmate-se-appen-kan-inte-logga-in-oauth-clienten-saknas-i-soulmate-tenanten]] - Undersökning 2026-11-16 (pappa/mailagent): kan applikationen logga in mot sales@soulmate.se? _(uppdaterad 2026-11-16)_
 - [[notes/sammanslagning-av-agents-repot-in-i-plan-vad-som-flyttades-och-vad-som-medvetet-inte-gjorde-det]] - Fas 5 i mål 497 (mål 520) slutfördes 2026-11-24. _(uppdaterad 2026-11-26)_
 - [[notes/serveragd-ko-for-stegvis-mailgranskning]] - 2026-11-19 (uppdaterad): Efter att "Processa mejl" körts i pappa/appen visas ett mejl i taget i en granskningsvy (src/nuxt/app/component... _(uppdaterad 2026-11-20)_

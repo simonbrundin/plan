@@ -99,7 +99,7 @@ finns i `index.md`.
 | [[notes/dashboard-tydlighetslyft-av-jamforelserna]] | Dashboard: tydlighetslyft av jamforelserna | note | dashboard, ux, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/dashboarden-ikonerna-hamades-fran-iconifys-cdn-och-gjorde-ssr-sidladdningen-till-en-504]] | "Dashboarden: ikonerna hämtades från Iconifys CDN och gjorde SSR-sidladdningen till en 504" | note | dashboard, nuxt, bug, lesson, projekt:simon | 2026-11-27 | 1 |
 | [[notes/definitionsassistent-for-mal-fylla-define-fasen-med-godkannande-per-falt]] | Definitionsassistent för mål: fylla define-fasen med godkännande per fält | note | feature, goals, agent, human-gate, nuxt, projekt:plan | 2026-11-27 | 4 |
-| [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] | Delivery-pipeline för Plan: från dev till prod är nu dokumenterad | note | ci, deploy, pipeline, flux, dokumentation, projekt:plan | 2026-11-27 | 1 |
+| [[notes/delivery-pipeline-for-plan-fran-dev-till-prod-ar-nu-dokumenterad]] | Delivery-pipeline för Plan: från dev till prod är nu dokumenterad | note | ci, deploy, pipeline, flux, dokumentation, projekt:plan | 2026-11-28 | 2 |
 | [[notes/detaljvy-for-kandidat-i-pappa-gemensamma-vagar-mellan-kandidater]] | Detaljvy för kandidat i pappa - gemensamma vägar mellan kandidater | note | pappa, feature, relationer, ui, rekrytering, graf, projekt:pappa | 2026-11-17 | 2 |
 | [[notes/dev-inloggning-i-plan-session-token-db-rattigheter-och-oauth-url-er]] | Dev-inloggning i plan: session-token, DB-rättigheter och OAuth-URL:er | note | bug, auth, dev, zitadel, session, projekt:plan | 2026-11-10 | 0 |
 | [[notes/dnsmasq-dhcp-boot-tar-bara-en-tagg-anvand-tag-if-for-villkor]] | dnsmasq --dhcp-boot tar bara EN tagg - använd tag-if för villkor | note | bug, pxe, dnsmasq, session | 2026-10-22 | 1 |
@@ -317,7 +317,7 @@ finns i `index.md`.
 | [[notes/plan-dev-kor-mot-neon-istallet-for-lokal-postgres]] | Plan dev kör mot Neon istället för lokal Postgres | note | neon, dev, database, plan, projekt:plan | 2026-11-16 | 0 |
 | [[notes/plan-goals-gav-503-go-api-startade-i-mock-lage-nar-dns-inte-var-uppe]] | plan /goals gav 503 - go-api startade i mock-läge när DNS inte var uppe | note | bug, incident, plan, kubernetes, projekt:simon | 2026-11-25 | 0 |
 | [[notes/plan-migreras-fran-go-till-rust]] | Plan migreras från Go till Rust | note | migration, rust, api, projekt:plan | 2026-11-26 | 0 |
-| [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] | Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg | note | ci, deploy, pipeline, docker, kustomize, projekt:plan | 2026-11-27 | 2 |
+| [[notes/plan-repots-ci-och-prod-pipeline-var-trasig-fixade-sokvagar-och-bygg]] | Plan-repots CI- och prod-pipeline var trasig - fixade sökvägar och bygg | note | ci, deploy, pipeline, docker, kustomize, projekt:plan | 2026-11-28 | 3 |
 | [[notes/planpris-delat-per-korning-gar-inte-att-jamfora-mellan-planer]] | Planpris delat per körning går inte att jämföra mellan planer | note | dashboard, modeller, kvoter, enheter, presentation, projekt:dashboard | 2026-11-26 | 0 |
 | [[notes/platser-pa-mal-och-kalenderhandelser-openspec-change-add-places]] | Platser på mål och kalenderhändelser (OpenSpec-change add-places) | note | feature, platser, goals, calendar, leaflet, bug, session, projekt:plan | 2026-11-20 | 1 |
 | [[notes/platsfiltret-pa-now-utan-plats-visar-mal-utan-plats]] | Platsfiltret på /now: "Utan plats" visar mål utan plats | note | feature, now, goals, places, projekt:plan | 2026-11-27 | 2 |
@@ -370,13 +370,14 @@ finns i `index.md`.
 | [[notes/rock-4c-4se-utan-batteribackup-rtc-star-pa-2017-tls-mot-factory-talos-dev-misslyckas]] | Rock 4C+/4SE utan batteribackup: RTC står på 2017, TLS mot factory.talos.dev misslyckas | note | pxe, talos, rtc, tls, ntp, image-factory, projekt:infrastructure | 2026-10-24 | 0 |
 | [[notes/rock-4c-och-4se-har-ingen-spi-flash-i-fabrik-u-boot-ligger-pa-microsd-emmc]] | ROCK 4C+ och 4SE har ingen SPI-flash i fabrik - U-Boot ligger på microSD/eMMC | note | pxe, uboot, radxa, bug, worker, projekt:simon | 2026-10-22 | 4 |
 | [[notes/rock-pi-4-rk3399-defconfig-bygger-en-rock-pi-4a-for-4c-ska-rock-4c-plus-rk3399-defconfig-anvandas]] | rock-pi-4-rk3399_defconfig bygger en ROCK Pi 4A - for 4C+ ska rock-4c-plus-rk3399_defconfig anvandas | note | ubygg, uboot, rock4cplus, mainline, felle, projekt:infrastructure | 2026-10-23 | 4 |
+| [[notes/rokprov-efter-rollout-och-tva-race-fynd-i-previewflodet]] | Rökprov efter rollout och två race-fynd i previewflödet | note | ci, preview, smoke-test, bug, projekt:plan | 2026-11-28 | 1 |
 | [[notes/root-dir-funktionen-stoppar-no-project-root-found-meddelandet]] | root_dir-funktionen stoppar 'No project root found'-meddelandet | note | rust, neovim, rust-analyzer, leetcode, bug, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rrule-motor-i-rust-ersatter-rrule-go]] | RRULE-motor i Rust ersätter rrule-go | note | rust, migrering, kalender, paritet, projekt:plan | 2026-11-26 | 0 |
 | [[notes/rust-analyzer-standalone-lage-kraschar-pa-leetcode-nvim-filer]] | rust-analyzer standalone-läge kraschar på leetcode.nvim-filer | note | rust, neovim, rust-analyzer, bug, leetcode, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rust-analyzer-tysta-health-status-notisen-istallet-for-att-stanga-av-standalone]] | rust-analyzer: tysta health-status-notisen istället för att stänga av standalone | note | rust, neovim, rust-analyzer, leetcode, bug, projekt:rust | 2026-11-17 | 1 |
 | [[notes/rust-api-t-far-auth-lager-och-forsta-domanerna]] | Rust-API:t får auth-lager och första domänerna | note | rust, migration, auth, paritet, projekt:plan | 2026-11-26 | 0 |
 | [[notes/rust-api-t-kor-i-produktion-go-implementationer-syns-inte-i-prod]] | Rust-API:t kör i produktion - Go-implementationer syns inte i prod | note | rust, migration, produktion, projekt:plan | 2026-11-28 | 1 |
-| [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] | Rust är huvudspåret och PR-previewen deployas via Flux | note | ci, rust, flux, preview, arm64, projekt:plan | 2026-11-27 | 2 |
+| [[notes/rust-ar-huvudsparet-och-pr-previewen-deployas-via-flux]] | Rust är huvudspåret och PR-previewen deployas via Flux | note | ci, rust, flux, preview, arm64, projekt:plan | 2026-11-28 | 3 |
 | [[notes/rust-learning-repot-lades-in-som-submodule-mot-egen-fork]] | rust: learning-repot lades in som submodule mot egen fork | note | rust, git, submodule, solution, projekt:simon | 2026-11-17 | 1 |
 | [[notes/rust-repo-learn-to-code-with-rust-som-submodule]] | rust-repo: learn-to-code-with-rust som submodule | note | rust, git, submodule, projekt:simon | 2026-11-17 | 1 |
 | [[notes/rust-utvecklingsmiljo-pa-workstationen]] | Rust-utvecklingsmiljö på workstationen | note | rust, toolchain, mise, neovim, projekt:rust | 2026-11-17 | 2 |
@@ -555,7 +556,7 @@ finns i `index.md`.
 - `bootefi` (1)
 - `bubbletea` (1)
 - `budget` (1)
-- `bug` (110)
+- `bug` (111)
 - `bugg` (6)
 - `build` (2)
 - `bun` (1)
@@ -572,7 +573,7 @@ finns i `index.md`.
 - `cgNAT` (1)
 - `chat` (2)
 - `chatt` (1)
-- `ci` (12)
+- `ci` (13)
 - `clean-code` (1)
 - `cleanup` (1)
 - `cli` (5)
@@ -863,7 +864,7 @@ finns i `index.md`.
 - `prenumerationer` (1)
 - `presentation` (1)
 - `prestanda` (3)
-- `preview` (1)
+- `preview` (2)
 - `pricing` (1)
 - `prioritetssida` (2)
 - `priority` (3)
@@ -878,7 +879,7 @@ finns i `index.md`.
 - `projekt:mailmaster` (6)
 - `projekt:neuro` (2)
 - `projekt:pappa` (58)
-- `projekt:plan` (152)
+- `projekt:plan` (153)
 - `projekt:repo-template` (3)
 - `projekt:repos` (1)
 - `projekt:rust` (5)
@@ -942,6 +943,7 @@ finns i `index.md`.
 - `shell` (1)
 - `skogsduvan` (7)
 - `slack` (1)
+- `smoke-test` (1)
 - `solution` (1)
 - `sops` (5)
 - `soring` (1)
