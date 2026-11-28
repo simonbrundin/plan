@@ -76,7 +76,9 @@ wait_for_build() {
 
   while (( SECONDS < deadline )); do
     local body sha
-    body="$(curl -sS --max-time 10 "${URL}/api/health" 2>/dev/null || echo "")"
+    # /health är API:t:s egen kontroll - den rapporterar build-sha.
+    # /api/health tillhör Nuxt och säger ingenting om builden.
+    body="$(curl -sS --max-time 10 "${URL}/health" 2>/dev/null || echo "")"
     sha="$(printf '%s' "$body" | grep -o '"build_sha":"[^"]*"' | cut -d'"' -f4)"
     # Image-tagen använder kort sha, API:t rapporterar full - jämför
     # så att kort-sha är ett prefix av den rapporterade.
@@ -96,7 +98,8 @@ wait_for_build
 
 # Grundläggande: appen svarar, API:t svarar.
 check "appen (root)" "200" "${URL}/"
-check "api /api/health" "200" "${URL}/api/health"
+check "nuxt /api/health" "200" "${URL}/api/health"
+check "api /health" "200" "${URL}/health"
 
 if [[ "$MODE" == "preview" ]]; then
   # Dev-login: en session skapas utan Zitadel. Sedan används sessionen
