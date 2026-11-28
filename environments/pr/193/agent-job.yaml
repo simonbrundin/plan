@@ -1,0 +1,63 @@
+# DO NOT EDIT MANUALLY
+# Genereras av .github/scripts/pr-preview-resources.py
+# PR 193 - https://plan-pr-193.simonbrundin.com
+
+# Rättigheter för agenten i previewen.
+#
+#   plan-agent-worker  - används av jobb-poderna. Har inga rättigheter
+#                         alls; jobbet ska bara kunna arbeta i sin pod.
+#   plan-agent-api     - används av agent-API:t för att skapa och läsa
+#                         Jobb. Får bara Jobb-rättigheter i namespace.
+#
+# Samma modell som i produktion (environments/base/agent-job.yaml), men
+# i previewens namespace - inga rättigheter läcker mellan miljöerna.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: plan-agent-worker
+  labels:
+    preview: "true"
+# Jobbet ska inte kunna prata med Kubernetes-API:t.
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: plan-agent-api
+  labels:
+    preview: "true"
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: plan-agent-job-controller
+  labels:
+    preview: "true"
+rules:
+  # Jobb får skapas, läsas och rensas bort - inget annat.
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  # Loggar läses för att visa vad som hände i en körning.
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: plan-agent-job-controller
+  labels:
+    preview: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: plan-agent-job-controller
+subjects:
+  - kind: ServiceAccount
+    name: plan-agent-api
+    namespace: plan-pr-193
