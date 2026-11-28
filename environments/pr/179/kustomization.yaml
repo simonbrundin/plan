@@ -26,6 +26,8 @@ resources:
   - routes.yaml
   - db-cluster.yaml
   - atlas-schema.yaml
+  # Applicerar schemat när databasen är klar - se kommentaren i filen.
+  - schema-job.yaml
   # Kopieras in av skriptet från environments/base/db/schema.yaml.
   - schema-configmap.yaml
   # Registry-uppgifter för GHCR. Kopieras in av skriptet (krypterad) och

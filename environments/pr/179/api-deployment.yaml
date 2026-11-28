@@ -27,7 +27,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: api
-          image: ghcr.io/simonbrundin/rust-api/pr-preview:179-53b1697b103be122ca8544c9fe385303fd813840
+          image: ghcr.io/simonbrundin/rust-api/pr-preview:179-406eaa3aaf5ec0df900706fa94ad7169496b8a2e
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
