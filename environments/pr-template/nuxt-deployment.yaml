@@ -40,6 +40,15 @@ spec:
                 secretKeyRef:
                   name: plan-pr-session
                   key: NUXT_SESSION_PASSWORD
+            # Agent-API:t i samma preview - chatt och godkännanden.
+            - name: NUXT_AGENT_API_INTERNAL_URL
+              value: "http://plan-pr-agent-service.NAMESPACE_PLACEHOLDER.svc.cluster.local:8080/api/v1"
+            # Nyckeln skickas server-side, aldrig till webbläsaren.
+            - name: NUXT_AGENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: plan-agent-api-key
+                  key: AGENT_API_KEY
           resources:
             requests:
               memory: "64Mi"

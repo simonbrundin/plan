@@ -78,6 +78,21 @@ jobs:
             arch: arm64
             context: src
             file: src/rust/Dockerfile
+          # Agenten byggs ur repo-roten - samma kontext som i prod.
+          - image: agent
+            repo: rust-agent/pr-preview
+            runner: ubuntu-latest
+            platform: linux/amd64
+            arch: amd64
+            context: .
+            file: src/rust/Dockerfile.agent
+          - image: agent
+            repo: rust-agent/pr-preview
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            arch: arm64
+            context: .
+            file: src/rust/Dockerfile.agent
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -159,6 +174,8 @@ jobs:
           NUXT_ARM64="$(cat digests/nuxt-arm64)"
           API_AMD64="$(cat digests/api-amd64)"
           API_ARM64="$(cat digests/api-arm64)"
+          AGENT_AMD64="$(cat digests/agent-amd64)"
+          AGENT_ARM64="$(cat digests/agent-arm64)"
 
           docker buildx imagetools create \
             -t "${REGISTRY}/plan/pr-preview:${IMAGE_TAG}" \
@@ -169,6 +186,11 @@ jobs:
             -t "${REGISTRY}/rust-api/pr-preview:${IMAGE_TAG}" \
             "${REGISTRY}/rust-api/pr-preview@${API_AMD64}" \
             "${REGISTRY}/rust-api/pr-preview@${API_ARM64}"
+
+          docker buildx imagetools create \
+            -t "${REGISTRY}/rust-agent/pr-preview:${IMAGE_TAG}" \
+            "${REGISTRY}/rust-agent/pr-preview@${AGENT_AMD64}" \
+            "${REGISTRY}/rust-agent/pr-preview@${AGENT_ARM64}"
 
       - name: Sätt upp Python för Git operationer
         uses: actions/setup-python@v5
@@ -182,6 +204,11 @@ jobs:
         env:
           NUXT_IMAGE: ${{ env.REGISTRY }}/plan/pr-preview:${{ env.IMAGE_TAG }}
           API_IMAGE: ${{ env.REGISTRY }}/rust-api/pr-preview:${{ env.IMAGE_TAG }}
+          AGENT_IMAGE: ${{ env.REGISTRY }}/rust-agent/pr-preview:${{ env.IMAGE_TAG }}
+          # Agenten jobbar mot PR:ens egen kod. Är PR:en från en fork
+          # används forken - annars huvudrepoet.
+          PR_HEAD_REPO_URL: ${{ github.event.pull_request.head.repo.clone_url }}
+          PR_HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
           python3 .github/scripts/pr-preview-resources.py
 
