@@ -48,6 +48,18 @@ ordning, och vyn bestämmer.
 - Skrivbordswidgeten läser samma endpoint men har ingen toggle - den visar
   alltså alltid den manuella ordningen.
 
+## Deploy
+
+Ändringen pushades till `main` (commit `cd2e38a`). CI bygger nuxt-imagen och
+öppnar PR:t "chore: update plan-app image" - en bot mergar det, Flux synkar och
+rollar ut podden. Verifierat i dev (localhost:3100): knappen syns, `aria-pressed`
+går från `false` till `true` och första raden byter från det manuellt sorterade
+målet till målet med närmaste deadline.
+
+Notera: dev-klustret kör CI-imagen från `main` (Flux sköter deploymenten), så
+en lokal Tilt-build syns inte förrän PR:t mergats - Flux skriver tillbaka en
+lokal `kubectl set image`.
+
 ## Verktyg
 
 - `go build` och `cargo` behöver `GOTMPDIR`/`TMPDIR` peka på en katalog i $HOME -
